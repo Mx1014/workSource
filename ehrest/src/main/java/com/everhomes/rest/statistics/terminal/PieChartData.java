@@ -1,6 +1,7 @@
 package com.everhomes.rest.statistics.terminal;
 
 
+import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
@@ -40,5 +41,10 @@ public class PieChartData {
 
 	public void setAmount(Long amount) {
 		this.amount = amount;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

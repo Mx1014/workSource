@@ -232,4 +232,5 @@ public interface EnterpriseCustomerProvider {
     void createCustomerEvent(CustomerEvent event);
 
     CustomerTalent findPotentialCustomerById(Long sourceId);
+    List<CustomerAdminRecord> listEnterpriseCustomerAdminRecordsByToken(Long id, String adminToken);
 }

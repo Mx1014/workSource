@@ -692,17 +692,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
-                                if("addressId".equals(column.getFieldName()) ) {
-                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
-                                    if(address != null) {
-                                        column.setValue(address.getId().toString());
-                                    }
-                                }
                                 if("buildingId".equals(column.getFieldName()) ) {
                                     buildingName = column.getValue();
                                     Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
                                     if(building != null) {
                                         column.setValue(building.getId().toString());
+                                    }else {
+                                        break;
+                                    }
+                                }
+                                if("addressId".equals(column.getFieldName()) ) {
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+                                    if(address != null) {
+                                        column.setValue(address.getId().toString());
+                                    }else {
+                                        break;
                                     }
                                 }
                                 try {
@@ -935,7 +939,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     for (String buildingNameString : buildingNames) {
                         String buildingName = buildingNameString.split("/")[0];
                         String apartmentName = buildingNameString.split("/")[1];
-                        Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                        //issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
+                        //Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                        Address address = addressProvider.findActiveAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
                         Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
                         if (address == null || building == null) {
                             Map<String, String> dataMap = new LinkedHashMap<>();

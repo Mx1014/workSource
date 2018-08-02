@@ -397,6 +397,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+			cmd.setMinQuantity(post.getMinQuantity());
             //comment by tt, 已经在preProcess里面处理过了
 //            if(cmd.getCategoryId() == null) {
 //            	cmd.setCategoryId(0L);

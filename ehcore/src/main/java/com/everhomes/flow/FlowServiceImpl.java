@@ -1,6 +1,45 @@
 // @formatter:off
 package com.everhomes.flow;
 
+import java.io.BufferedReader;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
@@ -30,7 +69,11 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.gogs.*;
+import com.everhomes.gogs.GogsCommit;
+import com.everhomes.gogs.GogsRawFileParam;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsRepoType;
+import com.everhomes.gogs.GogsService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -55,7 +98,13 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -74,38 +123,19 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.MD5Utils;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.ValidatorUtil;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class FlowServiceImpl implements FlowService {
@@ -3673,7 +3703,7 @@ public class FlowServiceImpl implements FlowService {
                     flowEventLogProvider.createFlowEventLogs(flowCaseState.getLogs());
                     flowEventLogProvider.updateFlowEventLogs(flowCaseState.getUpdateLogs());
 
-                    flowEvaluateProvider.createFlowEvaluate(ctx.getFlowEvas());
+                    flowEvaluateProvider.createFlowEvaluate(flowCaseState.getFlowEvas());
                 } else if (ctx.getStepType() != FlowStepType.NO_STEP) {
                     throw new FlowStepBusyException("already step by others, flowCaseId = " + flowCase.getId());
                 } else {

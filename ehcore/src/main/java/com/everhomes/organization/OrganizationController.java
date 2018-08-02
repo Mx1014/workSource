@@ -12,11 +12,7 @@ import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
-import com.everhomes.rest.enterprise.GetAdminTypeCommand;
-import com.everhomes.rest.enterprise.GetAdminTypeResponse;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.incubator.ApplyType;
@@ -1067,9 +1063,9 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
      * <b>URL: /org/listOrganizationContacts</b>
-     * <p>通讯录</p>
+     * <p>通讯录（停用 at 2018/04/06）</p>
      */
     @RequestMapping("listOrganizationContacts")
     @RestReturn(value = ListOrganizationContactCommandResponse.class)
@@ -1612,22 +1608,57 @@ public class OrganizationController extends ControllerBase {
      * @param cmd
      * @return
      */
-    @RequestMapping(value = "/org/getAdminType")
+    @RequestMapping("getAdminType")
     @RestReturn(value = GetAdminTypeResponse.class)
     public RestResponse getAdminType(GetAdminTypeCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
         adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
         try {
+            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
             adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);    
         } catch(Exception ex) {
+            //nothing
             
         }
-        
+        RestResponse response = new RestResponse(adminType);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/getAuthOrgByProjectIdAndAppId</b>
+     * <p>根据项目id和应用Id，查询管理公司</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getAuthOrgByProjectIdAndAppId")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd) {
+
+        OrganizationDTO dto = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /org/listUserOrganizations</b>
+     * <p>通过项目id，获取当前项目用户认证的企业列表，</p>
+     */
+    @RequestMapping("listUserOrganizations")
+    @RestReturn(value = ListUserOrganizationsResponse.class)
+    public RestResponse listUserOrganizations(ListUserOrganizationsCommand cmd){
+
+        ListUserOrganizationsResponse res = organizationService.listUserOrganizations(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
 

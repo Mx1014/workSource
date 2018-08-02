@@ -1,6 +1,5 @@
 // @formatter:off
 package com.everhomes.organization.pm;
-
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
@@ -78,6 +77,7 @@ import com.everhomes.pushmessage.PushMessageResultProvider;
 import com.everhomes.pushmessage.PushMessageStatus;
 import com.everhomes.pushmessage.PushMessageTargetType;
 import com.everhomes.pushmessage.PushMessageType;
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -138,6 +138,7 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.AccountType;
+import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -319,6 +320,7 @@ import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -349,7 +351,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
@@ -568,6 +572,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
+   	@Autowired
+   	private PushMessageLogService pushMessageLogService;
 
     private String queueName = "property-mgr-push";
 
@@ -586,6 +593,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if(!isRunning) {
 				workerPoolFactory.getWorkerPool().addQueue(queueName);
 				isRunning = true;
+				LOGGER.info("WorkerPool addQueue queueName ={}",queueName);
 			}
 		}
         
@@ -1428,7 +1436,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void sendNotice(SendNoticeCommand cmd) {
 
-        this.checkCommunityIdIsNull(cmd.getCommunityId());
+       // this.checkCommunityIdIsNull(cmd.getCommunityId()); 
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1461,9 +1469,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}*/
 
         LOGGER.debug("push message task scheduling, cmd = {}", cmd);
-
+        //创建消息记录
+        Long logId = pushMessageLogService.createfromSendNotice(cmd, PushMessageTypeCode.APP.getCode());
+        cmd.setLogId(logId);
+        LOGGER.info("create pushMessageLog and set status waitting  .");
         // 调度执行一键推送
-        Job job = new Job(
+        /*Job job = new Job(
                 SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
                 String.valueOf(UserContext.currentUserId()),
@@ -1471,7 +1482,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
-        jesqueClientFactory.getClientPool().enqueue(queueName, job);
+               
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);*/
+
+        //更换推送方式 add by huangliangming 20180723
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("cmd", StringHelper.toJsonString(cmd));
+        paramMap.put("namespaceId", cmd.getNamespaceId());
+        paramMap.put("operatorUid", String.valueOf(UserContext.currentUserId()));
+        paramMap.put("schema", UserContext.current().getScheme());
+        String triggerName = queueName + System.currentTimeMillis();
+        String jobName = queueName + System.currentTimeMillis();
+        Long time = System.currentTimeMillis()+2*1000;
+        CronDateUtils.getCron(new Timestamp(time));
+        String cronExpression = CronDateUtils.getCron(new Timestamp(time));
+        LOGGER.info("triggerName:[" + triggerName+"];jobName:["+jobName+"];cronExpression:["+cronExpression+"];params:["+paramMap+"].");
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, SendNoticeNewAction.class, paramMap);
+
     }
 
     @Override
@@ -1486,7 +1513,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
             sendNoticeToNamespaceUser(cmd);
-        } else {
+        } 
+         //添加按项目推送的维度 20180712
+        else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
+        	sendNoticeToCommunitsUser(cmd);
+        	
+        }
+        //按号码推送
+        else if(sendNoticeMode == SendNoticeMode.MOBILE){
+        	sendNoticeByPhone(cmd, operator);
+        }
+        //此代码目前暂时无用，但后续应该有借鉴之用，暂时不删，前面有很多坑要靠这段代码来填
+        else {
             // 八百年前的代码，看都不想看
             Community community = this.checkCommunity(cmd.getCommunityId());
 
@@ -1508,6 +1546,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             List<User> users = userProvider.listUserByNamespace(null, cmd.getNamespaceId(), locator, 200);
             for (User u : users) {
                 sendNoticeToUserById(u.getId(), messageBody, cmd.getMessageBodyType());
+            }
+        } while (locator.getAnchor() != null);
+    }
+    
+    /**
+     * 按项目推送
+     * @param cmd
+     */
+    private void sendNoticeToCommunitsUser(SendNoticeCommand cmd) {
+        String messageBody = processMessage(cmd.getMessage(), cmd.getMessageBodyType(),
+                cmd.getImgUri(), EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+        List<Integer> status = new ArrayList<Integer>();
+        status.add(AuthFlag.PENDING_AUTHENTICATION.getCode());
+        status.add(AuthFlag.AUTHENTICATED.getCode());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        do {
+            List<UserOrganizations> users = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),
+            							cmd.getCommunityIds(), status, locator, 200);
+            for (UserOrganizations u : users) {
+                sendNoticeToUserById(u.getUserId(), messageBody, cmd.getMessageBodyType());
             }
         } while (locator.getAnchor() != null);
     }
@@ -1758,6 +1817,34 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             smsProvider.sendSms(user.getNamespaceId(), phoneArray, templateScope, templateId, user.getLocale(), variables);
         }
     }
+    /**
+     * 按号码发送
+     * @param cmd
+     * @param user
+     */
+    private void sendNoticeByPhone(SendNoticeCommand cmd, User user) {
+    	List<String> phones = cmd.getMobilePhones();
+    	Integer namespaceId = user.getNamespaceId();
+    	 //按电话号码发送
+        if (phones != null && phones.size() > 0) {
+            List<OrganizationMember> members = new ArrayList<>();
+            for (String phone : phones) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+                OrganizationMember member = new OrganizationMember();
+                member.setContactToken(phone);
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                if (null != userIdentifier) {
+                    member.setTargetId(userIdentifier.getOwnerUid());
+                    member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                }
+                members.add(member);
+            }
+            if (members.size() > 0) {
+                this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
+            }
+        }
+    }
+
 
     private void sendNoticeToCommunityPmOwner(SendNoticeCommand cmd, User user) {
 
@@ -5124,7 +5211,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
 //                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
+                    getIntoFamily(address, cmd.getCustomerExtraTels(), cmd.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -5256,7 +5343,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
 //                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
+                    getIntoFamily(address, cmd.getCustomerExtraTels(), cmd.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -5425,7 +5512,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 propertyMgrProvider.createPropOwner(owner);
                 pmOwnerSearcher.feedDoc(owner);
                 //jiarujiating
-                getIntoFamily(address, cmd.getContactToken(), namespaceId);
+                getIntoFamily(address, Collections.singletonList(cmd.getContactToken()), namespaceId);
 
                 return null;
             });
@@ -5436,14 +5523,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     }
 
-    private void getIntoFamily(Address address, String contactToken, Integer namespaceId) {
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
-        if (null != userIdentifier) {
-            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-            if (null != user) {
-                address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-                familyService.getOrCreatefamily(address, user);
-            }
+    private void getIntoFamily(Address address, List<String> contactToken, Integer namespaceId) {
+        if(contactToken!=null && contactToken.size()>0){
+            contactToken.forEach((c)->{
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, c);
+                if (null != userIdentifier) {
+                    User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                    if (null != user) {
+                        address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                        familyService.getOrCreatefamily(address, user);
+                    }
+                }
+            });
         }
     }
 
@@ -5488,7 +5579,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         Address address = addressProvider.findAddressById(ownerAddress.getAddressId());
                         if (address != null) {
                             //jiarujiating
-                            getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+                            getIntoFamily(address, Collections.singletonList(identifier.getIdentifierToken()), identifier.getNamespaceId());
                         }
                     }
                 }
@@ -6223,7 +6314,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
         if (pmOwner != null) {
-            getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+            getIntoFamily(address, (List<String>)StringHelper.fromJsonString(pmOwner.getContactExtraTels(),ArrayList.class), pmOwner.getNamespaceId());
 //            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
@@ -6247,7 +6338,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(orgOwnerId);
         if (pmOwner != null) {
-            getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+            getIntoFamily(address, (List<String>)StringHelper.fromJsonString(pmOwner.getContactExtraTels(), ArrayList.class), pmOwner.getNamespaceId());
         }
     }
 
@@ -7182,7 +7273,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
-        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+    	//issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
+//    	Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+//                StringUtils.trimAllWhitespace(apartment));
+    	Address address = addressProvider.findActiveAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
                 StringUtils.trimAllWhitespace(apartment));
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);

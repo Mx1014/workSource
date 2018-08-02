@@ -31,7 +31,8 @@ import java.util.List;
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>rent: 合同总金额</li>
- * <li>categoryId: 合同类型categoryId，用于多入口</li>
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>ContractTemplates
+ * <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
  * </ul>
  */
 public class ContractDTO {
@@ -105,6 +106,18 @@ public class ContractDTO {
 	private String namespaceContractToken;
 
 	private Byte paymentFlag;
+	
+	@ItemType(ContractTemplateDTO.class)
+    private ContractTemplateDTO contractTemplate;
+
+
+	public ContractTemplateDTO getContractTemplate() {
+		return contractTemplate;
+	}
+
+	public void setContractTemplate(ContractTemplateDTO contractTemplate) {
+		this.contractTemplate = contractTemplate;
+	}
 
 	public Long getCategoryItemId() {
 		return categoryItemId;
@@ -313,12 +326,7 @@ public class ContractDTO {
 	public void setContractTypeName(String contractTypeName) {
 		this.contractTypeName = contractTypeName;
 	}
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -326,4 +334,10 @@ public class ContractDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 }

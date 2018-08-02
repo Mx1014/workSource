@@ -97,7 +97,10 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@10.1.120.99:13324/ehcore?characterEncoding=UTF-8&encrypted=0
+
+db.master: jdbc:mysql://ehcore:ehcore@10.1.120.99:13318/ehcore?characterEncoding=UTF-8&encrypted=0
+#db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
+
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -112,6 +115,7 @@ elastic:
         hosts: elasticsearch
         ports: 9300
         httpports: 9200
+cluster.name: elasticsearch37
 
 #
 # for API code generation

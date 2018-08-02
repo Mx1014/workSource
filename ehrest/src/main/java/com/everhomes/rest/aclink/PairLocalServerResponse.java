@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>listDoorAccessDtos:门禁列表{@link com.everhomes.rest.aclink.listDoorAccessDtos}</li>
  * <li>aclinkServerDto:服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
  * <li>serverKey:服务器aes公钥(暂时不用){@link com.everhomes.rest.aclink.AesServerKeyDTO}</li>
+ * <li>borderIp:borderServer地址,例:ws://10.1.140.27:9090/aclink 或: wss://border-1.zuolin.com/aclink</li>
  * </ul>
  *
  */
@@ -24,6 +25,14 @@ public class PairLocalServerResponse {
 	private List<DoorAccessDTO> listDoorAccessDtos;
 	private AclinkServerDTO aclinkServerDto;
 	private AesServerKeyDTO serverKey;
+	private String borderIp;
+	
+	public String getBorderIp() {
+		return borderIp;
+	}
+	public void setBorderIp(String borderIp) {
+		this.borderIp = borderIp;
+	}
 	public List<AclinkIPadDTO> getListIpadDtos() {
 		return listIpadDtos;
 	}

@@ -170,7 +170,7 @@ public class ForumServiceImpl implements ForumService {
     private ContentServerService contentServerService;
     
     @Autowired
-    private PostSearcher postSearcher; 
+    private PostSearcher postSearcher;
     
     @Autowired
     private LocaleStringService localeStringService;
@@ -228,6 +228,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private LinkProvider linkProvider;
+
+    @Autowired
+    private ActivitySignupTimeoutService activitySignupTimeoutService;
 
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -522,7 +525,7 @@ public class ForumServiceImpl implements ForumService {
     private Integer getSendMessage(List changeList, Map map, Activity activity){
         Integer code = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (activity.getAllDayFlag() == (byte)1) {
+        if (activity.getAllDayFlag() != null && activity.getAllDayFlag() == (byte)1) {
             sdf = new SimpleDateFormat("yyyy-MM-dd");
         }
         switch (changeList.size()) {
@@ -766,6 +769,12 @@ public class ForumServiceImpl implements ForumService {
         // 发活动的时候判断要不要设置定时任务
         if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
 			setActivitySchedule(post.getEmbeddedId());
+			//对真身贴或者正常贴且设置了最低人数的帖子设置定时任务
+			if (PostCloneFlag.NORMAL.getCode().equals(post.getCloneFlag()) || PostCloneFlag.REAL.getCode().equals(post.getCloneFlag())) {
+                if (PostStatus.ACTIVE.getCode() == post.getStatus() && post.getMinQuantity() != null && post.getMinQuantity() >0) {
+                    this.activitySignupTimeoutService.pushTimeout(post);
+                }
+            }
 		}
 
 		//公告模块要
@@ -1038,7 +1047,7 @@ public class ForumServiceImpl implements ForumService {
             // 如果是活动，返回活动内容的链接，add by tt, 20161013
             if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
-			}
+            }
             
             return postDto;
 //            post = this.forumProvider.findPostById(postId);
@@ -3549,7 +3558,12 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
-        
+        if (post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+            LOGGER.error("Forum post is deleted, operatorId=" + operatorId + ", forumId=" + forumId
+                    + ", postId=" + postId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post is deleted");
+        }
         return post;
     }
     
@@ -4006,6 +4020,7 @@ public class ForumServiceImpl implements ForumService {
         
         //添加人数限制，add by tt, 20161012
         post.setMaxQuantity(cmd.getMaxQuantity());
+        post.setMinQuantity(cmd.getMinQuantity());
         
         //添加活动状态，用于暂存或者立刻发布，不传默认2是立刻发布 add by yanjun 20170510
         if(cmd.getStatus() != null){
@@ -5004,7 +5019,19 @@ public class ForumServiceImpl implements ForumService {
         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
         String creatorNickName = post.getCreatorNickName();
         String creatorAvatar = post.getCreatorAvatar();
-        
+
+        // 无昵称时直接使用USER表中的信息作为发帖人的信息
+        User creator = userProvider.findUserById(post.getCreatorUid());
+        if(creator != null) {
+            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                creatorNickName = creator.getNickName();
+            }
+            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                creatorAvatar = creator.getAvatar();
+            }
+        }
+
         Long forumId = post.getForumId();
         if(forumId != null) {
             // 普通圈使用圈成员的信息
@@ -5022,18 +5049,6 @@ public class ForumServiceImpl implements ForumService {
                         creatorAvatar = member.getMemberAvatar();
                     }
                 }
-            }
-        }
-        
-        // 无昵称时直接使用USER表中的信息作为发帖人的信息
-        User creator = userProvider.findUserById(post.getCreatorUid());
-        if(creator != null) {
-            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                creatorNickName = creator.getNickName();
-            }
-            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                creatorAvatar = creator.getAvatar();
             }
         }
 
@@ -5251,12 +5266,12 @@ public class ForumServiceImpl implements ForumService {
     
     private ForumEmbeddedHandler getForumEmbeddedHandler(Long embededAppId) {
         ForumEmbeddedHandler handler = null;
-        
+
         if(embededAppId != null && embededAppId.longValue() > 0) {
             String handlerPrefix = ForumEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX;
             handler = PlatformContext.getComponent(handlerPrefix + embededAppId);
         }
-        
+
         return handler;
     }
 
@@ -7051,7 +7066,11 @@ public class ForumServiceImpl implements ForumService {
 			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
 	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
 		}
-
+		//对设置了最低人数限制的帖子设置定时任务 add by yanlong.liang 20180713
+        if (post.getEmbeddedAppId() != null && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId()
+                && post.getMinQuantity() != null && post.getMinQuantity() >0) {
+		    this.activitySignupTimeoutService.pushTimeout(post);
+        }
         this.dbProvider.execute((status) -> {
 
 		    //把真身帖子和克隆帖一块发布   edit by yanjun 20170830

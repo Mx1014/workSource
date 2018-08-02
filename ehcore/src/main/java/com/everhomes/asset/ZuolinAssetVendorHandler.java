@@ -14,13 +14,17 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
@@ -125,7 +129,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private UserService userService;
-
+    
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
@@ -640,7 +644,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+    	PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
             cmd.setPageSize(20);
         }
@@ -651,12 +655,21 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         //先查看任务
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
-        	//change by tangcen
         	response.setGenerated((byte)0);
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
-        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
+        
+        Contract contract = contractProvider.findContractById(cmd.getContractId());
+        for (PaymentExpectancyDTO dto : dtos) {
+        	//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+			Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			//显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
+			String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(contract.getCommunityId(),contract.getNamespaceId(),assetCategoryId,dto.getChargingItemId());
+			dto.setChargingItemName(projectChargingItemName);
+		}
+        
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
             response.setNextPageOffset(null);
@@ -664,10 +677,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
-        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
+        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
-        //add by tangcen
         response.setGenerated((byte)1);
         return response;
     }
@@ -842,6 +854,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
+	            .and(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.greaterThan(BigDecimal.ZERO))//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的
 	            .fetchInto(PaymentBills.class);
         	Iterator<PaymentBills> iter = paymentBills.iterator();  
         	while (iter.hasNext()) {
@@ -1123,6 +1136,24 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             headList.add(dto.getBillItemName()+"(元)");
             cur++;
             mandatoryIndex.add(1);//收费项为必填
+            //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+            if(assetService.isShowEnergy(cmd.getNamespaceId(), cmd.getCommunityId(), ServiceModuleConstants.ASSET_MODULE)) {//判断该域空间下是否显示用量
+            	if(dto.getBillItemId() != null) {
+                	if(dto.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                		headList.add("用量（吨）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+                	}else if (dto.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		headList.add("用量（度）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+    				}
+                }
+            }
         }
         headList.add("楼栋/门牌");
         cur++;
@@ -1168,12 +1199,13 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         "4、带有星号（*）的红色字段为必填项。\n" +
                         "5、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
                         "6、企业客户需填写与系统内客户管理一致的企业名称，个人客户需填写与系统内个人客户资料一致的楼栋门牌，否则会导致无法定位客户。\n" +
-                        "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12", (short)13, (short)2500)
+                        "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12。\n" +
+                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。", (short)13, (short)2500)
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
     }
-
+    
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
         BatchImportBillsResponse response = new BatchImportBillsResponse();
@@ -1457,17 +1489,17 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     cmd.setNoticeTel(data[j]);
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
-                    if(itemPojo == null){
+                	if(itemPojo == null){
                         log.setErrorLog("没有找到收费项目");
                         log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
                         datas.add(log);
                         continue bill;
                     }
-                    BigDecimal amountReceivable = null;
+                	BigDecimal amountReceivable = null;
                     if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("收费项目:"+headers[j]+"必填");
                         log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
-                        datas.add(log);
+                        datas.add(log); 
                         continue bill;
                     }try{
                         amountReceivable = new BigDecimal(data[j]);
@@ -1483,7 +1515,18 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);
-                    billItemDTOList.add(item);
+                    //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                    if(assetService.isShowEnergy(namespaceId, ownerId, ServiceModuleConstants.ASSET_MODULE)) {
+                    	//判断该域空间下是否显示用量  
+                    	//如果费项是属于自用水电费、公摊水电费，那么会有用量
+                    	if(itemPojo.getId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                        		|| itemPojo.getId().equals(AssetEnergyType.personElectricItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicWaterItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                    		item.setEnergyConsume(data[++j]);
+                        }
+                    }
+                	billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
                     try{
@@ -1954,4 +1997,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	//支付模块回调接口，通知支付结果
     	assetPayService.payNotify(cmd, handler);
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	return assetProvider.showCreateBillSubItemList(cmd);
+    }
+    
 }

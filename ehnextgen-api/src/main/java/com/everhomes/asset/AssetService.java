@@ -213,8 +213,8 @@ public interface AssetService {
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
-    
-    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
+
+	ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
@@ -225,5 +225,17 @@ public interface AssetService {
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-    
+	
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+
+	void testLateFine(TestLateFineCommand cmd);
+
+	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
+
+	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
+
+	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
+
 }

@@ -651,7 +651,7 @@ public class PortalServiceImpl implements PortalService {
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.createPortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
-				createContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), cmd.getScopes());
+				createContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), portalItem.getVersionId(), cmd.getScopes());
 			}
 			return null;
 		});
@@ -682,7 +682,7 @@ public class PortalServiceImpl implements PortalService {
 			portalItemProvider.updatePortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
 				portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
-				createContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), cmd.getScopes());
+				createContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), portalItem.getVersionId(), cmd.getScopes());
 			}
 			return null;
 		});
@@ -782,7 +782,7 @@ public class PortalServiceImpl implements PortalService {
 		return portalItem;
 	}
 
-	private void createContentScopes(String contentType, Long contentId, List<PortalScope> portalScopes){
+	private void createContentScopes(String contentType, Long contentId, Long versionId, List<PortalScope> portalScopes){
 		User user = UserContext.current().getUser();
 		List<PortalContentScope> scopes = new ArrayList<>();
 		for (PortalScope scope: portalScopes) {
@@ -795,6 +795,7 @@ public class PortalServiceImpl implements PortalService {
 					contentScope.setCreatorUid(user.getId());
 					contentScope.setScopeType(scope.getScopeType());
 					contentScope.setScopeId(scopeId);
+					contentScope.setVersionId(versionId);
 					scopes.add(contentScope);
 				}
 			}
@@ -975,7 +976,7 @@ public class PortalServiceImpl implements PortalService {
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
-				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), cmd.getScopes());
+				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), portalItemCategory.getVersionId(), cmd.getScopes());
 			}
 			return null;
 		});
@@ -992,7 +993,7 @@ public class PortalServiceImpl implements PortalService {
 			portalItemCategoryProvider.updatePortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
 				portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId());
-				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), cmd.getScopes());
+				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), portalItemCategory.getVersionId(), cmd.getScopes());
 			}
 			return null;
 		});
@@ -1373,6 +1374,9 @@ public class PortalServiceImpl implements PortalService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
 
+		checkPublishParam(cmd);
+
+
 		//生成版本发布log
 		PortalPublishLog portalPublishLog = createNewPortalPublishLog(cmd.getNamespaceId(), user, cmd.getVersionId());
 
@@ -1384,7 +1388,8 @@ public class PortalServiceImpl implements PortalService {
 					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
 					// 二楼：sb事务 + 1
-					sequenceService.syncSequence();
+					// 三楼：大师好样的，事务好了。
+					//sequenceService.syncSequence();
 
 					UserContext.setCurrentUser(user);
 					//同步和发布的时候不用预览账号
@@ -1466,6 +1471,24 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
 
+
+	private void checkPublishParam(PublishCommand cmd){
+		if(cmd.getVersionId() == null){
+			LOGGER.error("invalid parameter, please refresh page and try again. cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameter, please refresh page and try again.");
+		}
+
+		PortalVersion portalVersion = portalVersionProvider.findPortalVersionById(cmd.getVersionId());
+
+		if(portalVersion == null || !portalVersion.getNamespaceId().equals(cmd.getNamespaceId())){
+			LOGGER.error("invalid parameter, please refresh page and try again. cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameter, please refresh page and try again.");
+		}
+
+
+	}
 
 	private PortalPublishLog createNewPortalPublishLog(Integer namespaceId, User user, Long versionId){
 		PortalPublishLog portalPublishLog = new PortalPublishLog();
@@ -1762,6 +1785,7 @@ public class PortalServiceImpl implements PortalService {
 				mapping.setPortalContentId(layout.getId());
 				mapping.setCreatorUid(user.getId());
 				mapping.setLaunchPadContentId(launchPadLayout.getId());
+				mapping.setVersionId(layout.getVersionId());
 				portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 			}
 		}
@@ -1991,6 +2015,7 @@ public class PortalServiceImpl implements PortalService {
 					mapping.setPortalContentId(portalItem.getId());
 					mapping.setLaunchPadContentId(item.getId());
 					mapping.setCreatorUid(user.getId());
+					mapping.setVersionId(portalItem.getVersionId());
 					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 				}
 			}
@@ -2181,6 +2206,7 @@ public class PortalServiceImpl implements PortalService {
 						mapping.setPortalContentId(category.getId());
 						mapping.setLaunchPadContentId(itemCategory.getId());
 						mapping.setCreatorUid(user.getId());
+						mapping.setVersionId(category.getVersionId());
 						portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 					}
 				}
@@ -2205,7 +2231,9 @@ public class PortalServiceImpl implements PortalService {
 
 		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
-		sequenceService.syncSequence();
+
+		// 大师好样的，事务好了。
+		//sequenceService.syncSequence();
 
 		//同步和发布的时候不用预览账号
 		UserContext.current().setPreviewPortalVersionId(null);
@@ -2428,12 +2456,19 @@ public class PortalServiceImpl implements PortalService {
 			layout.setCreateTime(createTimestamp);
 			layout.setUpdateTime(createTimestamp);
 		}
+
 		portalLayoutProvider.createPortalLayouts(portalLayouts);
 
 		//9、生成ContentScopes
+		for (PortalContentScope scope: portalContentScopes){
+			scope.setVersionId(newVersionId);
+		}
 		portalContentScopeProvider.createPortalContentScopes(portalContentScopes);
 
 		//10、生成LaunchPadMappings
+		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings){
+			mapping.setVersionId(newVersionId);
+		}
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
 
 		//此时发生了一个很伤心的事情，指向门户的item的actionData的内容中指定的layoutId还是旧的，指向应用的也是旧的。
@@ -2564,8 +2599,14 @@ public class PortalServiceImpl implements PortalService {
 			portalItemGroupProvider.createPortalItemGroups(portalitemGroups);
 		}
 
+		for (PortalContentScope scope: portalContentScopes){
+			scope.setVersionId(newVersionId);
+		}
 		portalContentScopeProvider.createPortalContentScopes(portalContentScopes);
 
+		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings){
+			mapping.setVersionId(newVersionId);
+		}
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
 	}
 
@@ -2606,8 +2647,14 @@ public class PortalServiceImpl implements PortalService {
 			portalItemCategoryProvider.createPortalItemCategories(portalItemCategories);
 		}
 
+		for (PortalContentScope scope: portalContentScopes){
+			scope.setVersionId(newVersionId);
+		}
 		portalContentScopeProvider.createPortalContentScopes(portalContentScopes);
 
+		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings){
+			mapping.setVersionId(newVersionId);
+		}
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
 		return true;
 	}
@@ -2641,8 +2688,14 @@ public class PortalServiceImpl implements PortalService {
 		}
 		portalItemProvider.createPortalItems(portalItems);
 
+		for (PortalContentScope scope: portalContentScopes){
+			scope.setVersionId(newVersionId);
+		}
 		portalContentScopeProvider.createPortalContentScopes(portalContentScopes);
 
+		for (PortalLaunchPadMapping mapping: portalLaunchPadMappings){
+			mapping.setVersionId(newVersionId);
+		}
 		portalLaunchPadMappingProvider.createPortalLaunchPadMappings(portalLaunchPadMappings);
 	}
 
@@ -2822,6 +2875,7 @@ public class PortalServiceImpl implements PortalService {
 			mapping.setPortalContentId(layout.getId());
 			mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
 			mapping.setCreatorUid(user.getId());
+			mapping.setVersionId(layout.getVersionId());
 			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 		}
 		return layout;
@@ -2849,6 +2903,7 @@ public class PortalServiceImpl implements PortalService {
 			mapping.setPortalContentId(portalItemCategory.getId());
 			mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
 			mapping.setCreatorUid(user.getId());
+			mapping.setVersionId(portalItemCategory.getVersionId());
 			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 		}
 	}
@@ -2928,6 +2983,7 @@ public class PortalServiceImpl implements PortalService {
 			mapping.setPortalContentId(item.getId());
 			mapping.setContentType(EntityType.PORTAL_ITEM.getCode());
 			mapping.setCreatorUid(user.getId());
+			mapping.setVersionId(item.getVersionId());
 			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 
 		}

@@ -1535,5 +1535,90 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyBillSubItem</b>
+     */
+    @RequestMapping("batchModifyBillSubItem")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+        assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     * @throws ParseException 
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd){
+    	assetService.testLateFine(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>仅用于手动测试能耗数据</p>
+     * <b>URL: /asset/testEnergy</b>
+     */
+    @RequestMapping("testEnergy")
+    @RestReturn(value = String.class)
+    public RestResponse testEnergy(PaymentExpectanciesCommand cmd) {
+        assetService.paymentExpectanciesCalculate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>未出账单一键转成已出账单功能</p>
+     * <b>URL: /asset/batchUpdateBillsToSettled</b>
+     */
+    @RequestMapping("batchUpdateBillsToSettled")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+        assetService.batchUpdateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>增加批量将账单转换为已缴的功能</p>
+     * <b>URL: /asset/batchUpdateBillsToPaid</b>
+     */
+    @RequestMapping("batchUpdateBillsToPaid")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+        assetService.batchUpdateBillsToPaid(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 
