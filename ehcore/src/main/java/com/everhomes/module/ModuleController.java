@@ -59,6 +59,24 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
+
+
+    /**
+     * <b>URL: /module/listServiceModules</b>
+     * <p>
+     * 业务模块列表
+     * </p>
+     */
+    @RequestMapping("listServiceModules")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulesByAppType(@Valid ListServiceModulesByAppTypeCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulesByAppType(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /module/treeServiceModules</b>
      * <p>
@@ -313,6 +331,21 @@ public class ModuleController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd) {
         serviceModuleService.updateServiceModuleEntries(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/updateServiceModuleEntry</b>
+     * 更新模块入口
+     */
+    @RequestMapping("updateServiceModuleEntry")
+    @RestReturn(value = String.class)
+    public RestResponse updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
+        serviceModuleService.updateServiceModuleEntry(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

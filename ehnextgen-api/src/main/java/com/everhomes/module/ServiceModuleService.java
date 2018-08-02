@@ -56,4 +56,8 @@ public interface ServiceModuleService {
 	ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd);
 
 	void updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd);
+
+    List<ServiceModuleDTO> listServiceModulesByAppType(ListServiceModulesByAppTypeCommand cmd);
+
+	void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd);
 }

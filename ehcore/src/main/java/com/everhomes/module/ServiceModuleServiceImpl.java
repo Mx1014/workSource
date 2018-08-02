@@ -199,6 +199,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             dto.setUpdateTime(module.getUpdateTime().getTime());
         User operator = userProvider.findUserById(module.getOperatorUid());
         if(null != operator) dto.setOperatorUName(operator.getNickName());
+
+        if(module.getIconUri != null){
+            String url = contentServerService.parserUri(module.getIconUri(), module.getClass().getSimpleName(), module.getId());
+            dto.setIconUrl(url);
+        }
         return dto;
     }
 
@@ -832,6 +837,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         module.setName(cmd.getName());
         module.setInstanceConfig(cmd.getInstanceConfig());
         module.setOperatorUid(user.getId());
+        module.setIconUri(cmd.getIconUri());
         serviceModuleProvider.updateServiceModule(module);
         return processServiceModuleDTO(module);
     }
@@ -1390,6 +1396,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return null;
         });
 
+
+    }
+
+
+    @Override
+    public List<ServiceModuleDTO> listServiceModulesByAppType(ListServiceModulesByAppTypeCommand cmd) {
+
+        List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModules(cmd.getAppType(), cmd.getKeyWord());
+
+
+        if(serviceModules == null){
+            return null;
+        }
+
+        List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> processServiceModuleDTO(r)).collect(Collectors.toList());
+        return dtos;
+    }
+
+
+    @Override
+    public void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
 
     }
 }
