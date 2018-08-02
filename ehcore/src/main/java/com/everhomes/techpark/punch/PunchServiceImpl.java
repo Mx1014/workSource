@@ -12368,12 +12368,12 @@ public class PunchServiceImpl implements PunchService {
         GetUserPunchRuleInfoResponse response =  ConvertHelper.convert(pr, GetUserPunchRuleInfoResponse.class);
         response.setGroupName(pr.getName());
         //打卡时间
-        response.setTimeRules(processPunchTimeRuleDTOs(pr.getPunchOrganizationId(), pr.getStatus()));
+        response.setTimeRules(processPunchTimeRuleDTOs(pr.getPunchOrganizationId(), PunchRuleStatus.ACTIVE.getCode()));
         //打卡地点和WiFi
         response.setPunchGeoPoints(processPunchGeoPointDTOs(pr.getPunchOrganizationId()));
         response.setWifis(processPunchWiFiDTOs(pr.getPunchOrganizationId()));
         //加班时长
-        response.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(),pr.getStatus()));
+        response.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(), PunchRuleStatus.ACTIVE.getCode()));
         PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, new Date(cmd.getPunchDate()), UserContext.currentUserId());
         if (null != ptr) {
             response.setCurrentTimeRuleName(ptr.getName());
