@@ -3915,7 +3915,17 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return relatedMembers;
+        // remove duplicated members
+        return removeDuplicatedMembers(relatedMembers);
+    }
+
+    private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
+        Map<Long, OrganizationMemberDTO> map = new HashMap<>();
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach(r -> map.putIfAbsent(r.getTargetId(), r));
+            return new ArrayList<>(map.values());
+        }
+        return new ArrayList<>();
     }
 
     private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
@@ -3928,6 +3938,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                dto.setOrganizationId(s.getOrganizationId());
                 users.add(dto);
             });
         }
@@ -3946,6 +3957,7 @@ public class CustomerServiceImpl implements CustomerService {
                     dto.setContactName(r.getContactName());
                     dto.setGender(r.getGender());
                     dto.setContactToken(r.getIdentifierToken());
+                    dto.setOrganizationId(r.getOwnerId());
                     users.add(dto);
                 }
             });
