@@ -1,27 +1,30 @@
+//@formatter:off
 package com.everhomes.rest.contract;
 
-import java.util.List;
-
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class DurationParamDTO {
-	
+/**
+ *<ul>
+ * <li>chargingItemName:收费项目</li>
+ * <li>startTime:开始时间</li>
+ * <li>endTimeByPeriod:结束时间按周期</li>
+ * <li>endTimeByDay:结束时间按天</li>
+ *</ul>
+ */
+public class ChargingItemVariables {
+	private String chargingItemName;
 	private String startTime;
 	private String endTimeByPeriod;
 	private String endTimeByDay;
-	
-	@ItemType(ChargingItemVariables.class)
-    private List<ChargingItemVariables> chargingPaymentTypeVariables;
-	
-    public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
-		return chargingPaymentTypeVariables;
+
+    public String getChargingItemName() {
+		return chargingItemName;
 	}
 
-	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
-		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
+	public void setChargingItemName(String chargingItemName) {
+		this.chargingItemName = chargingItemName;
 	}
-	
+
 	public String getStartTime() {
 		return startTime;
 	}
@@ -47,8 +50,11 @@ public class DurationParamDTO {
 	}
 
 	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
+	public ChargingItemVariables() {
+
+    }
 }

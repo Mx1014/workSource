@@ -155,7 +155,18 @@ public class ContractDetailDTO {
 	private String endTimeByPeriod;
 	private String endTimeByDay;
 	
-    public String getEndTimeByPeriod() {
+	@ItemType(ChargingItemVariables.class)
+    private List<ChargingItemVariables> chargingPaymentTypeVariables;
+	
+    public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
+		return chargingPaymentTypeVariables;
+	}
+
+	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
+		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
+	}
+
+	public String getEndTimeByPeriod() {
 		return endTimeByPeriod;
 	}
 

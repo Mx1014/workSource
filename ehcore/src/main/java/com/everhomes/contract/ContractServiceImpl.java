@@ -114,6 +114,7 @@ import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeType;
+import com.everhomes.rest.contract.ChargingItemVariables;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
 import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractApplicationScene;
@@ -2300,14 +2301,32 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(parentContract.getId());
 			if (chargingItems!=null && chargingItems.size()>0) {
-				ContractChargingItem chargingItem = chargingItems.get(0);
-				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+				for (int i = 0; i < chargingItems.size(); i++) {
+					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
+					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+					Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+					String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,chargingItems.get(i).getChargingItemId());
+					if(chargingItems.get(i).getChargingStartTime() != null){
+						String endTimeByDay = "";
+						String endTimeByPeriod = "";
+						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
+							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId());
+						}else {
+							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId());
+						}
+						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+					}
+					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
 			}
-			String endTimeStr = yyyyMMdd.format(contract.getContractStartDate());
-			dto.setEndTimeByDay(endTimeStr);
-			
-			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,parentContract.getId());
-			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
 		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
@@ -2315,13 +2334,32 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
 			if (chargingItems!=null && chargingItems.size()>0) {
-				ContractChargingItem chargingItem = chargingItems.get(0);
-				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+				for (int i = 0; i < chargingItems.size(); i++) {
+					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
+					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+					Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+					String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,chargingItems.get(i).getChargingItemId());
+					if(chargingItems.get(i).getChargingStartTime() != null){
+						String endTimeByDay = "";
+						String endTimeByPeriod = "";
+						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
+							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId());
+						}else {
+							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId());
+						}
+						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+					}
+					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
 			}
-			String endTimeStr = yyyyMMdd.format(contract.getDenunciationTime());
-			dto.setEndTimeByDay(endTimeStr);
-			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
-			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
 		processContractApartments(dto);
@@ -2788,20 +2826,45 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		cmd.setCategoryId(1022L);
+		cmd.setCommunityId(240111044332061479L);
+		cmd.setNamespaceId((int) 11L);
+		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
+
 		DurationParamDTO dto = new DurationParamDTO();
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
-		if (chargingItems!=null && chargingItems.size()>0) {
-			ContractChargingItem chargingItem = chargingItems.get(0);
-			dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+		if (chargingItems != null && chargingItems.size() > 0) {
+			List<ChargingItemVariables> chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+			for (int i = 0; i < chargingItems.size(); i++) {
+				// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+				ChargingItemVariables chargingPaymentTypeVariable = new ChargingItemVariables();
+				// 根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(cmd.getCommunityId(), cmd.getNamespaceId(), assetCategoryId,
+						chargingItems.get(i).getChargingItemId());
+
+				if (chargingItems.get(i).getChargingStartTime() != null) {
+					String endTimeByDay = "";
+					String endTimeByPeriod = "";
+					chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+					chargingPaymentTypeVariable
+							.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+					if (EndTimeByDayTimestamp.after(chargingItems.get(i).getChargingExpiredTime())) {
+						endTimeByDay = yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId());
+					} else {
+						endTimeByDay = yyyyMMdd.format(EndTimeByDayTimestamp);
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId());
+					}
+					chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+					chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+					chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+				}
+
+				dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+			}
 		}
-		if (cmd.getEndTimeByDay()!=null) {
-			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
-		}
-		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
-		String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,cmd.getContractId());
-		dto.setEndTimeByPeriod(endTimeByPeriod);
-		
 		return dto;
 	}
 
