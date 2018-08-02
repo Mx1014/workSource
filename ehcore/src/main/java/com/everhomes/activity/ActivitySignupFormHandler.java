@@ -52,39 +52,6 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
-        return null;
-    }
-
-    @Override
-    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        if (StringUtils.isBlank(cmd.getSourceType())) {
-            cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-        }
-        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
-        GeneralFormDTO dto = new GeneralFormDTO();
-        if (!CollectionUtils.isEmpty(forms)) {
-            dto = ConvertHelper.convert(forms.get(0), GeneralFormDTO.class);
-        }else {
-            dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
-        }
-        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
-        if (cmd.getOwnerId() != null) {
-            GeneralFormFieldDTO generalFormFieldDTO = new GeneralFormFieldDTO();
-            generalFormFieldDTO.setFieldName("ACTIVITY_ID");
-            generalFormFieldDTO.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-            generalFormFieldDTO.setRequiredFlag(TrueOrFalseFlag.TRUE.getCode());
-            generalFormFieldDTO.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-            generalFormFieldDTO.setFieldDisplayName("活动ID");
-            generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
-            generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-            fieldDTOs.add(generalFormFieldDTO);
-        }
-        dto.setFormFields(fieldDTOs);
-        return dto;
-    }
-
-    @Override
-    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         if (StringUtils.isBlank(cmd.getSourceType())) {
             cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
         }
@@ -123,6 +90,39 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         items.add(item);
         dto.setValues(items);
         return dto;
+    }
+
+    @Override
+    public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+        if (StringUtils.isBlank(cmd.getSourceType())) {
+            cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+        }
+        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
+        GeneralFormDTO dto = new GeneralFormDTO();
+        if (!CollectionUtils.isEmpty(forms)) {
+            dto = ConvertHelper.convert(forms.get(0), GeneralFormDTO.class);
+        }else {
+            dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
+        }
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
+        if (cmd.getOwnerId() != null) {
+            GeneralFormFieldDTO generalFormFieldDTO = new GeneralFormFieldDTO();
+            generalFormFieldDTO.setFieldName("ACTIVITY_ID");
+            generalFormFieldDTO.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+            generalFormFieldDTO.setRequiredFlag(TrueOrFalseFlag.TRUE.getCode());
+            generalFormFieldDTO.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+            generalFormFieldDTO.setFieldDisplayName("活动ID");
+            generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
+            generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+            fieldDTOs.add(generalFormFieldDTO);
+        }
+        dto.setFormFields(fieldDTOs);
+        return dto;
+    }
+
+    @Override
+    public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
+        return null;
     }
 
 
