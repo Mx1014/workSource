@@ -40,7 +40,7 @@ public class PunchOpenController extends ControllerBase {
 	 * <b>URL: /openapi/getOrgCheckInData</b>
 	 * <p>同步数据</p>
 	 */
-	@SuppressDiscover
+//	@SuppressDiscover
 	@RequireAuthentication(false)
 	@RequestMapping("getOrgCheckInData")
 	@RestReturn(value = GetOrgCheckInDataResponse.class)
