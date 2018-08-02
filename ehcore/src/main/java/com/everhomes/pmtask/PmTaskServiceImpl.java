@@ -61,6 +61,7 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.*;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
@@ -3573,7 +3574,7 @@ public class PmTaskServiceImpl implements PmTaskService {
             }
             if(null != order.getBizOrderNum()){
                 preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
-                ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS"+UserContext.getCurrentNamespaceId(),
+                ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
                         cmd.getClientAppName());
                 List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
                 if (paymentMethods != null)
@@ -3586,7 +3587,7 @@ public class PmTaskServiceImpl implements PmTaskService {
             }
             //1、检查买方（付款方）是否有会员，无则创建
             User userById = userProvider.findUserById(UserContext.currentUserId());
-            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), namespaceId);
             String userIdenify = null;
             if(userIdentifier != null) {
                 userIdenify = userIdentifier.getIdentifierToken();
@@ -3714,6 +3715,12 @@ public class PmTaskServiceImpl implements PmTaskService {
             LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
 	}
+
+//	@Override
+//	public List<PayOrderDTO> listBills(ListBillsCommand cmd) {
+//		List<OrderDTO> orders = payService.listPayOrderByIds(cmd.getIds());
+//		return orders.stream().map(r->ConvertHelper.convert(r,PayOrderDTO.class)).collect(Collectors.toList());
+//	}
 
 	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){
 	    List<PmTaskStatSubDTO> datalist = this.getStatByCategory(cmd);
@@ -4031,6 +4038,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void saveOrderRecord(Long orderId, OrderCommandResponse orderCommandResponse) {
 		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(orderId);
 		record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
+		record.setPayOrderId(orderCommandResponse.getOrderId());
 		record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
 		record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
 		record.setOrderCommitToken(orderCommandResponse.getOrderCommitToken());
