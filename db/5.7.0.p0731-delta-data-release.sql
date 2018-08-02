@@ -2,16 +2,17 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR: 黄鹏宇
+-- AUTHOR: 黄鹏宇 20180731
 -- REMARK:客户字段无法满足并导入，新增字段见详情
 -- 购买/租赁
 set @eecid=(select max(id)+1 from `eh_var_fields`);
 set @preId=(select max(id) from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
-INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'buyOrLease', '购买/租赁', 'Byte', 11, '/1/11/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
-INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @preId, '租赁', 1, 2, 1, sysdate(), NULL, NULL, NULL);
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES (@eecid, 'enterprise_customer', 'buyOrLease', '购买/租赁', 'Byte', 11, '/1/11/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '租赁', 1, 2, 1, sysdate(), NULL, NULL, NULL);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
-INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @preId, '购买', 2, 2, 1, sysdate(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '购买', 2, 2, 1, sysdate(), NULL, NULL, NULL);
 
 
 -- 办公地址
@@ -68,9 +69,9 @@ set @eecid=(select max(id)+1 from `eh_var_fields`);
 set @preId=(select max(id) from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'financingDemand', '融资需求', 'Byte', 11, '/1/11/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
-INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @preId, '无', 1, 2, 1, sysdate(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '无', 1, 2, 1, sysdate(), NULL, NULL, NULL);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
-INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @preId, '有', 2, 2, 1, sysdate(), NULL, NULL, NULL);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '有', 2, 2, 1, sysdate(), NULL, NULL, NULL);
 
 
 -- 预留字段
@@ -210,5 +211,20 @@ set @preId=(select max(id) from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'dropBox9', '预留下拉框9', 'Byte', 12, '/1/12/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
 
+-- END
+
+-- AUTHOR: 黄鹏宇 20180801
+-- REMARK:20180731新增字段插入数据修改
+-- 购买/租赁
+
+update `eh_var_field_items` set field_id = 12079 where field_id = 12078 and display_name in ('租赁','购买');
+update `eh_var_fields` set name = 'buyOrLeaseItemId' where id = 12079;
+
+update `eh_var_field_items` set field_id = 12087 where field_id = 12086 and display_name in ('有','无');
+update `eh_var_fields` set name = 'financingDemandItemId' where id = 12087;
+
+UPDATE `eh_var_fields` set field_type = 'Long' where field_id in (12079,12087,12104,12105,12106,12107,12108,12109,12110,12111,12112);
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
+
 

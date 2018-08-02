@@ -177,6 +177,7 @@ public class CreateEnterpriseCustomerCommand {
 
 
     //新增的客户字段
+    private Long buyOrLeaseItemId;
     private String bizAddress;
     private String bizLife;
     private String customerIntentionLevel;
@@ -184,7 +185,7 @@ public class CreateEnterpriseCustomerCommand {
     private String controllerName;
     private String controllerSunBirth;
     private String controllerLunarBirth;
-    private Byte financingDemandItemId;
+    private Long financingDemandItemId;
     private String stringTag1;
     private String stringTag2;
     private String stringTag3;
@@ -201,15 +202,15 @@ public class CreateEnterpriseCustomerCommand {
     private String stringTag14;
     private String stringTag15;
     private String stringTag16;
-    private Byte dropBox1;
-    private Byte dropBox2;
-    private Byte dropBox3;
-    private Byte dropBox4;
-    private Byte dropBox5;
-    private Byte dropBox6;
-    private Byte dropBox7;
-    private Byte dropBox8;
-    private Byte dropBox9;
+    private Long dropBox1;
+    private Long dropBox2;
+    private Long dropBox3;
+    private Long dropBox4;
+    private Long dropBox5;
+    private Long dropBox6;
+    private Long dropBox7;
+    private Long dropBox8;
+    private Long dropBox9;
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -962,13 +963,7 @@ public class CreateEnterpriseCustomerCommand {
         this.controllerLunarBirth = controllerLunarBirth;
     }
 
-    public Byte getFinancingDemandItemId() {
-        return financingDemandItemId;
-    }
 
-    public void setFinancingDemandItemId(Byte financingDemandItemId) {
-        this.financingDemandItemId = financingDemandItemId;
-    }
 
     public String getStringTag1() {
         return stringTag1;
@@ -1098,75 +1093,91 @@ public class CreateEnterpriseCustomerCommand {
         this.stringTag16 = stringTag16;
     }
 
-    public Byte getDropBox1() {
+    public Long getBuyOrLeaseItemId() {
+        return buyOrLeaseItemId;
+    }
+
+    public void setBuyOrLeaseItemId(Long buyOrLeaseItemId) {
+        this.buyOrLeaseItemId = buyOrLeaseItemId;
+    }
+
+    public Long getFinancingDemandItemId() {
+        return financingDemandItemId;
+    }
+
+    public void setFinancingDemandItemId(Long financingDemandItemId) {
+        this.financingDemandItemId = financingDemandItemId;
+    }
+
+    public Long getDropBox1() {
         return dropBox1;
     }
 
-    public void setDropBox1(Byte dropBox1) {
+    public void setDropBox1(Long dropBox1) {
         this.dropBox1 = dropBox1;
     }
 
-    public Byte getDropBox2() {
+    public Long getDropBox2() {
         return dropBox2;
     }
 
-    public void setDropBox2(Byte dropBox2) {
+    public void setDropBox2(Long dropBox2) {
         this.dropBox2 = dropBox2;
     }
 
-    public Byte getDropBox3() {
+    public Long getDropBox3() {
         return dropBox3;
     }
 
-    public void setDropBox3(Byte dropBox3) {
+    public void setDropBox3(Long dropBox3) {
         this.dropBox3 = dropBox3;
     }
 
-    public Byte getDropBox4() {
+    public Long getDropBox4() {
         return dropBox4;
     }
 
-    public void setDropBox4(Byte dropBox4) {
+    public void setDropBox4(Long dropBox4) {
         this.dropBox4 = dropBox4;
     }
 
-    public Byte getDropBox5() {
+    public Long getDropBox5() {
         return dropBox5;
     }
 
-    public void setDropBox5(Byte dropBox5) {
+    public void setDropBox5(Long dropBox5) {
         this.dropBox5 = dropBox5;
     }
 
-    public Byte getDropBox6() {
+    public Long getDropBox6() {
         return dropBox6;
     }
 
-    public void setDropBox6(Byte dropBox6) {
+    public void setDropBox6(Long dropBox6) {
         this.dropBox6 = dropBox6;
     }
 
-    public Byte getDropBox7() {
+    public Long getDropBox7() {
         return dropBox7;
     }
 
-    public void setDropBox7(Byte dropBox7) {
+    public void setDropBox7(Long dropBox7) {
         this.dropBox7 = dropBox7;
     }
 
-    public Byte getDropBox8() {
+    public Long getDropBox8() {
         return dropBox8;
     }
 
-    public void setDropBox8(Byte dropBox8) {
+    public void setDropBox8(Long dropBox8) {
         this.dropBox8 = dropBox8;
     }
 
-    public Byte getDropBox9() {
+    public Long getDropBox9() {
         return dropBox9;
     }
 
-    public void setDropBox9(Byte dropBox9) {
+    public void setDropBox9(Long dropBox9) {
         this.dropBox9 = dropBox9;
     }
 
