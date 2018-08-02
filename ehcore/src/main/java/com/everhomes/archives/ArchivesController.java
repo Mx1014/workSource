@@ -451,7 +451,7 @@ public class ArchivesController extends ControllerBase{
      * <p>12-2.获取原提醒设置</p>
      */
     @RequestMapping("getArchivesNotification")
-    @RestReturn(value = String.class)
+    @RestReturn(value = ArchivesNotificationDTO.class)
     public RestResponse getArchivesNotification(ArchivesNotificationCommand cmd){
         ArchivesNotificationDTO res = archivesService.getArchivesNotification(cmd);
         RestResponse response = new RestResponse(res);
