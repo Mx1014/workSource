@@ -981,7 +981,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040300L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -1452,6 +1452,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setAreaSearchFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setConsultFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setBuildingIntroduceFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setHideAddressFlag(LeasePromotionFlag.DISABLED.getCode());
 		String[] defaultNames = {"项目介绍","房源招租"};
 		String[] defaultOrders = {"1","2"};
 		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
@@ -1470,6 +1471,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					case AREA_SEARCH_FLAG: dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case CONSULT_FLAG: dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
 					case BUILDING_INTRODUCE_FLAG: dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case HIDE_ADDRESS_FLAG: dto.setHideAddressFlag(Byte.valueOf(c.getConfigValue()));break;
 					case DISPLAY_NAME_STR:
 						String displayNameStr = c.getConfigValue();
 						String[] names = displayNameStr.split(",");

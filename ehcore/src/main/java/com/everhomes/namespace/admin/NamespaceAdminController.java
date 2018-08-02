@@ -1,5 +1,7 @@
 package com.everhomes.namespace.admin;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.namespace.admin.ListNamespaceByModuleIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +17,8 @@ import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.namespace.admin.UpdateNamespaceCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
+import java.util.List;
 
 @RestDoc(value="namespace admin controller", site="core")
 @RestController
@@ -62,5 +66,23 @@ public class NamespaceAdminController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		return new RestResponse(namespacesService.updateNamespace(cmd));
 	}
-	
+
+	/**
+	 *
+	 * <b>URL: /admin/namespace/listNamespaceByModuleId</b>
+	 * <p>根据模块id，查询有该模块应用的域空间</p>
+	 */
+	@RequestMapping("listNamespaceByModuleId")
+	@RestReturn(value=NamespaceInfoDTO.class, collection=true)
+	public RestResponse listNamespaceByModuleId(ListNamespaceByModuleIdCommand cmd){
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		List<NamespaceInfoDTO> dtos = namespacesService.listNamespaceByModuleId(cmd);
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

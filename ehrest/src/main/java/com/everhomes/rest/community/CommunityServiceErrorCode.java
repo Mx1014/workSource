@@ -3,8 +3,6 @@ package com.everhomes.rest.community;
 public interface CommunityServiceErrorCode {
     static final String SCOPE = "community";
     
-    
-    
     static final int ERROR_COMMUNITY_NOT_EXIST = 10001; //小区不存在
     static final int ERROR_COMMUNITY_GEOPOIN_NOT_EXIST = 10002; //小区经纬不存在
     static final int ERROR_COMMUNITY_CITY_NOT_EXIST = 10003; //小区城市信息不存在
@@ -24,11 +22,21 @@ public interface CommunityServiceErrorCode {
     static final int ERROR_CITY_NAME = 10018; //市填写格式错误
     static final int ERROR_AREA_NAME = 10019; //区填写格式错误
     
+    static final int ERROR_COMMUNITY_LONGITUDE_EMPTY = 10101;//经度不能为空
+	static final int ERROR_LONGITUDE_FORMAT = 10102;//经度填写格式错误
+	static final int ERROR_LONGITUDE_RANGE = 10103;//经度不在中国经度范围内
+
+	static final int ERROR_COMMUNITY_LATITUDE_EMPTY = 10104;//纬度不能为空
+	static final int ERROR_LATITUDE_FORMAT = 10105;//纬度填写格式错误
+	static final int ERROR_LATITUDE_RANGE = 10106;//纬度不在中国纬度范围内
+
+	static final int ERROR_COMMUNITY_TYPE = 10107;//园区分类不能为空
+	static final int ERROR_COMMUNITY_TYPE_CONTENT = 10108;//园区分类内容填写错误
+	
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;
     int ERROR_CONTACTOR_EMPTY = 20003;
     int ERROR_PHONE_EMPTY = 20004;
     int ERROR_LATITUDE_LONGITUDE = 20005;
     int ERROR_AREASIZE_FORMAT = 20006;
-
 }

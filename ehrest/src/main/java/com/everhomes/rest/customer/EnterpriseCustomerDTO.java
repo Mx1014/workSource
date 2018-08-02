@@ -87,7 +87,9 @@ import java.util.List;
  */
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
+    private Long enterpriseId;
     private Long organizationId;
+    private Long communityId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -187,10 +189,24 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private List<AttachmentDescriptor> banner;
     private String postUri;
     private String postUrl;
+    private Long sourceId;
+    private String sourceType;
     @ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> enterpriseAdmins;
     @ItemType(CustomerEntryInfoDTO.class)
     private  List<CustomerEntryInfoDTO> entryInfos;
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -982,6 +998,38 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setSignedUpCount(Integer signedUpCount) {
         this.signedUpCount = signedUpCount;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

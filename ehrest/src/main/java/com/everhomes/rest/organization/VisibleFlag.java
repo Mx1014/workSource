@@ -3,8 +3,9 @@ package com.everhomes.rest.organization;
 
 /**
  * <ul>是否隐藏
- * <li>SHOW(0): 显示</li>
- * <li>HIDE(1): 隐藏</li>
+ * <li>SHOW(0): 显示(去除隐藏)</li>
+ * <li>HIDE(1): 隐藏(去除显示)</li>
+ * <li>ALL(3): 所有</li>
  * </ul>
  */
 public enum VisibleFlag {
@@ -13,7 +14,7 @@ public enum VisibleFlag {
 
     private byte code;
 
-    private VisibleFlag(byte code) {
+    VisibleFlag(byte code) {
         this.code = code;
     }
     
@@ -24,12 +25,11 @@ public enum VisibleFlag {
     public static VisibleFlag fromCode(Byte code) {
         if(code != null){
         	for (VisibleFlag flag : VisibleFlag.values()) {
-				if (flag.getCode() == code.byteValue()) {
+				if (flag.getCode() == code) {
 					return flag;
 				}
 			}
         }
-        
         return null;
     }
 }

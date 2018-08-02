@@ -42,6 +42,13 @@ import com.everhomes.util.StringHelper;
  * <li>organizationUid: 代发人ID</li>
  * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * <li>organizationName: 公司名称</li>
+ *
+ * <li>enterpriseId: 企业id（app场景获取）</li>
+ * <li>enterpriseName: 企业名称</li>
+ * <li>enterpriseAddress: 楼栋门牌</li>
+ *
+ * <li>amount: 费用金额</li>
+ * <li>feeModel: 是否开启费用清单</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -56,7 +63,7 @@ public class PmTaskDTO {
 	private String address;
 	private String content;
 	private Byte status;
-	private Byte star;
+	private String star;
 	private Timestamp unprocessedTime;
 	private Timestamp processingTime;
 	private Timestamp processedTime;
@@ -92,6 +99,15 @@ public class PmTaskDTO {
 	private List<PmTaskLogDTO> taskLogs;
 	
 	private String organizationName;
+
+	private Long enterpriseId;
+	private String enterpriseName;
+	private String enterpriseAddress;
+
+	private Long amount;
+
+	private String feeModel;
+
 	public Long getId() {
 		return id;
 	}
@@ -142,10 +158,10 @@ public class PmTaskDTO {
 		this.status = status;
 	}
 	
-	public Byte getStar() {
+	public String getStar() {
 		return star;
 	}
-	public void setStar(Byte star) {
+	public void setStar(String star) {
 		this.star = star;
 	}
 	public Timestamp getUnprocessedTime() {
@@ -326,6 +342,47 @@ public class PmTaskDTO {
 	}
 	public void setOrganizationName(String organizationName) {
 		this.organizationName = organizationName;
+	}
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+	public String getEnterpriseAddress() {
+		return enterpriseAddress;
+	}
+
+	public void setEnterpriseAddress(String enterpriseAddress) {
+		this.enterpriseAddress = enterpriseAddress;
+	}
+
+	public Long getAmount() {
+		return amount;
+	}
+
+	public void setAmount(Long amount) {
+		this.amount = amount;
+	}
+
+	public String getFeeModel() {
+		return feeModel;
+	}
+
+	public void setFeeModel(String feeModel) {
+		this.feeModel = feeModel;
 	}
 
 	@Override

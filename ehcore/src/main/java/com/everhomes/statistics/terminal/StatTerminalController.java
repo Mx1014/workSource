@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * <ul>
@@ -35,7 +36,12 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("executeStatTask")
     @RestReturn(value=TerminalStatisticsTaskDTO.class, collection = true)
     public RestResponse executeStatTask(@Valid ExecuteTaskCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.executeStatTask(cmd.getNamespaceId(), cmd.getStartDate(), cmd.getEndDate()));
+
+        LocalDate startDate = LocalDate.parse(cmd.getStartDate(), DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDate endDate = LocalDate.parse(cmd.getEndDate(), DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        RestResponse response = new RestResponse(
+                statTerminalService.executeStatTask(cmd.getNamespaceId(), startDate, endDate));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -46,10 +52,11 @@ public class StatTerminalController extends ControllerBase {
      * <p>執行用户同步任务</p>
      */
     @RequestMapping("executeUserSyncTask")
-    @RestReturn(value=Long.class, collection = true)
+    @RestReturn(String.class)
     public RestResponse executeUserSyncTask(@Valid ExecuteSyncUserTaskCommand cmd) {
-        List<Long> userIdList = statTerminalService.executeUserSyncTask(cmd.getNamespaceId());
-        RestResponse response = new RestResponse(userIdList);
+        statTerminalService.executeUserSyncTask(
+                cmd.getNamespaceId(), cmd.getGenData() == 1, cmd.getStart(), cmd.getEnd());
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -102,7 +109,9 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalHourCUNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalHourCUNLineChart(@Valid TerminalStatisticsChartCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalHourLineChart(cmd.getDates(), TerminalStatisticsType.CUMULATIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalHourLineChart(
+                        cmd.getDates(), TerminalStatisticsType.CUMULATIVE_ACTIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -115,7 +124,9 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalHourAUNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalHourAUNLineChart(@Valid TerminalStatisticsChartCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalHourLineChart(cmd.getDates(), TerminalStatisticsType.ACTIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalHourLineChart(
+                        cmd.getDates(), TerminalStatisticsType.ACTIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -141,7 +152,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalDayNUNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalDayNUNLineChart(@Valid ListTerminalStatisticsByDateCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.NEW_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.NEW_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -154,7 +166,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalDaySNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalDaySNLineChart(@Valid ListTerminalStatisticsByDateCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.START));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.START));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -167,7 +180,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalDayCUNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalDayCUNLineChart(@Valid ListTerminalStatisticsByDateCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.CUMULATIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.CUMULATIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -180,7 +194,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalDayAUNLineChart")
     @RestReturn(value=LineChart.class)
     public RestResponse getTerminalDayAUNLineChart(@Valid ListTerminalStatisticsByDateCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.ACTIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalDayLineChart(cmd.getStartDate(), cmd.getEndDate(), TerminalStatisticsType.ACTIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -194,7 +209,8 @@ public class StatTerminalController extends ControllerBase {
     @RestReturn(value=TerminalDayStatisticsDTO.class, collection = true)
     public RestResponse listTerminalDayStatisticsByDate(@Valid ListTerminalStatisticsByDateCommand cmd) {
         Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
-        RestResponse response = new RestResponse(statTerminalService.listTerminalDayStatisticsByDate(cmd.getStartDate(), cmd.getEndDate(), namespaceId));
+        RestResponse response = new RestResponse(
+                statTerminalService.listTerminalDayStatisticsByDate(cmd.getStartDate(), cmd.getEndDate(), namespaceId));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -207,7 +223,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalAppVersionCUNPieChart")
     @RestReturn(value=PieChart.class)
     public RestResponse getTerminalAppVersionCUNPieChart(@Valid ListTerminalStatisticsByDayCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.CUMULATIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.CUMULATIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -220,7 +237,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("getTerminalAppVersionAUNPieChart")
     @RestReturn(value=PieChart.class)
     public RestResponse getTerminalAppVersionAUNPieChart(@Valid ListTerminalStatisticsByDayCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.ACTIVE_USER));
+        RestResponse response = new RestResponse(
+                statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.ACTIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -231,10 +249,12 @@ public class StatTerminalController extends ControllerBase {
      * <p>获取终端app版本统计数据列表</p>
      */
     @RequestMapping("listTerminalAppVersionStatisticsByDay")
-    @RestReturn(value=TerminalAppVersionStatisticsDTO.class)
+    @RestReturn(value=TerminalAppVersionStatisticsDTO.class, collection = true)
     public RestResponse listTerminalAppVersionStatisticsByDay(@Valid ListTerminalStatisticsByDayCommand cmd) {
         Integer namespaceId = cmd.getNamespaceId() != null ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId();
-        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate(), namespaceId));
+        String date = cmd.getDate() != null ? cmd.getDate() : cmd.getStartDate();
+        RestResponse response = new RestResponse(
+                statTerminalService.listTerminalAppVersionStatistics(date, namespaceId));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

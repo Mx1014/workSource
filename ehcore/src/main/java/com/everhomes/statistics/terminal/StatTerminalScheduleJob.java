@@ -3,7 +3,6 @@ package com.everhomes.statistics.terminal;
 import com.everhomes.rest.statistics.terminal.TerminalStatisticsTaskDTO;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.util.StringHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.List;
 
@@ -45,8 +45,11 @@ public class StatTerminalScheduleJob extends QuartzJobBean {
         LOGGER.debug("start schedele job, excute task date = {}", calendar.getTime());
 
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+
+            LocalDate yesterday = LocalDate.now().minusDays(1);
             //执行任务区
-            List<TerminalStatisticsTaskDTO> tasks = statTerminalService.executeStatTask(null, DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH), DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
+            List<TerminalStatisticsTaskDTO> tasks = statTerminalService.executeStatTask(null, yesterday, yesterday);
+
             LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(tasks));
         }
     }

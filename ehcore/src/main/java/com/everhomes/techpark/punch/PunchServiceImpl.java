@@ -2325,7 +2325,7 @@ public class PunchServiceImpl implements PunchService {
 //		}
         orgCmd.setKeywords(cmd.getKeyword());
         orgCmd.setPageSize(100000);
-        ListOrganizationMemberCommandResponse resp = organizationService.listOrganizationPersonnels(orgCmd, false);
+        ListOrganizationMemberCommandResponse resp = organizationService.listOrganizationPersonnelsWithDownStream(orgCmd);
         List<OrganizationMemberDTO> members = resp.getMembers();
         List<Long> userIds = new ArrayList<Long>();
         if (null != members) {

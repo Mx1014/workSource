@@ -79,6 +79,8 @@ public class EquipmentStandardRelationDTO {
 	private Timestamp reviewTime;
 
 	private Long   order;
+
+	private String customNumber;
 	
 	public Long getId() {
 		return id;
@@ -271,6 +273,14 @@ public class EquipmentStandardRelationDTO {
 
 	public void setTaskId(Long taskId) {
 		this.taskId = taskId;
+	}
+
+	public String getCustomNumber() {
+		return customNumber;
+	}
+
+	public void setCustomNumber(String customNumber) {
+		this.customNumber = customNumber;
 	}
 
 	@Override

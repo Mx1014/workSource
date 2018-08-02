@@ -1,5 +1,7 @@
 package com.everhomes.archives;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import org.jooq.Condition;
 
 import java.sql.Date;
@@ -35,12 +37,6 @@ public interface ArchivesProvider {
 
     List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
 
-    void createArchivesForm(ArchivesFroms form);
-
-    void updateArchivesForm(ArchivesFroms form);
-
-    ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
-
     void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
     void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType);
@@ -57,8 +53,6 @@ public interface ArchivesProvider {
 
     void createOperationalLog(ArchivesOperationalLog log);
 
-//    void createArchivesLogs(ArchivesLogs log);
-
     List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
 
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
@@ -69,8 +63,17 @@ public interface ArchivesProvider {
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
 
-    List<ArchivesLogs> listAllArchivesLogs();
+    /* 同步数据接口 start */
+    List<OrganizationMemberDetails> listDetailsWithoutCheckInTime();
 
-    List<ArchivesConfigurations> listAllPendingConfigs();
+    OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId);
+
+    List<Long> listDismissalDetailIds();
+
+    List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds);
+
+    OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId);
+
+    /* 同步数据接口 end */
 
 }

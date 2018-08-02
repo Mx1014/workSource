@@ -1,4 +1,4 @@
-var javaService = Java.type("com.everhomes.flow.NashornConfigService");
+var javaService = Java.type("com.everhomes.flow.FlowNashornConfigService");
 
 function Config(ownerType, ownerId) {
     this.ownerType = ownerType;
