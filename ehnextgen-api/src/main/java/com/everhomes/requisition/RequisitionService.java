@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.flow.Flow;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.requisition.*;
 
@@ -32,4 +33,6 @@ public interface RequisitionService {
      * @return
      */
     GeneralFormDTO getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd);
+
+    Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd);
 }

@@ -257,5 +257,9 @@ public class RequisitionServiceImpl implements RequisitionService{
 
     }
 
+    @Override
+    public Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd){
+        return flowService.getEnabledFlow(cmd.getNamespaceId(),cmd.getModuleId(),cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType()).getId();
+    }
 
 }

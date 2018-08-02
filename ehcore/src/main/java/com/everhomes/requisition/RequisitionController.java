@@ -4,6 +4,7 @@ package com.everhomes.requisition;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.Flow;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.requisition.*;
@@ -157,6 +158,19 @@ public class RequisitionController extends ControllerBase {
         return response;
     }
 
-
-
+    /**
+     * <b>URL: /requisition/getRunningRequisitionFlow</b>
+     * <p> 前端传入模块ID，后台查找启用的审批流程并根据启用流程查找启用的表单，并返回  </p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getRunningRequisitionFlow")
+    @RestReturn(value=Long.class)
+    public RestResponse getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd) {
+        Long flowId = requisitionService.getRunningRequisitionFlow(cmd);
+        RestResponse response = new RestResponse(flowId);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
