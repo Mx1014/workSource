@@ -26,11 +26,13 @@ import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
@@ -459,6 +461,21 @@ public class ContractController extends ControllerBase {
 	}
 	
 	//查看合同日志  by tangcen
+	/**
+	 * <b>URL: /contract/getDuration</b>
+	 * <p>查找合同截断时的账单时间段</p>
+	 */
+	@RequestMapping("getDuration")
+	@RestReturn(value = DurationParamDTO.class)
+	public RestResponse getDuration(GetDurationParamCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		DurationParamDTO res = contractService.getDuration(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /contract/listContractEvents</b>
 	 * <p>查看合同日志</p>

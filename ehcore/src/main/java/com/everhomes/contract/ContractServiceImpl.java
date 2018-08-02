@@ -4,6 +4,7 @@ package com.everhomes.contract;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.nio.charset.Charset;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,6 +47,9 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBills;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -83,6 +87,7 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -140,12 +145,14 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GenerateContractNumberRule;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
@@ -214,6 +221,8 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.apache.axis.types.Duration;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -717,8 +726,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 		//获取规则
-		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
-		if (communityExist != null && contractNumberRulejsonStr == null) {
+		//String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
+		
+		if (communityExist == null || communityExist.getContractNumberRulejson() == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
@@ -732,7 +742,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
 			}
 		}
-		
+		//获取规则
+		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
 		
 		String Sparefield = contractNumberRulejson.getSparefield();
@@ -802,6 +813,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(contract.getCreateTime());
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
+		
 		//添加合同日志add by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_ADD,contract,null);
 		//如果是变更或续约合同，需在父合同添加日志
@@ -812,6 +824,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			Contract parentContract = checkContract(contract.getParentId());
 			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
 		}
+		
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -837,7 +850,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
-		//add by tangcen
 		command.setCommunityId(contract.getCommunityId());
 		command.setNamespaceId(contract.getNamespaceId());
 		command.setCategoryId(contract.getCategoryId());
@@ -1590,6 +1602,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
 					"contractNumber is already exist");
 		}
+		
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
@@ -1628,12 +1641,24 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		contractProvider.updateContract(contract);
+		
+		//add by tangcen
+		//将父合同中关联的未出账单记为无效账单
+		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
+		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))){
+			contract.setCostGenerationMethod(null);
+			Contract parentContract = checkContract(contract.getParentId());
+			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+			contractProvider.updateContract(parentContract);
+//			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
+//				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+//			}
+		}
+
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
 		dealContractChargingItems(contract, cmd.getChargingItems());
-		//dealContractAttachments(contract.getId(), cmd.getAttachments())
-		//change by tangcen
 		dealContractAttachments(contract, cmd.getAttachments());
 		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
@@ -1690,13 +1715,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
+		contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
 		contractSearcher.feedDoc(contract);
-//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
-//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
+		
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}else {
@@ -1812,7 +1837,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 
-				}
+				}				
+				//add by tangcen 变更合同发起审批后，要对父合同的未出账单进行处理
+//				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+//					Contract parentContract = checkContract(contract.getParentId());
+//					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+//				}
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
 				}else {
@@ -1895,9 +1925,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
-				parentContract.setStatus(ContractStatus.HISTORY.getCode());
-				contractProvider.updateContract(parentContract);
-				contractSearcher.feedDoc(parentContract);
+				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
+				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId());
+					parentContract.setRent(totalAmount);
+				}
 
 				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
 					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
@@ -1934,7 +1967,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 				}
-				
+				parentContract.setStatus(ContractStatus.HISTORY.getCode());
+				contractProvider.updateContract(parentContract);
+				contractSearcher.feedDoc(parentContract);
 			}
 		}
 	}
@@ -2164,15 +2199,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
 				dto.setCreatorName(creator.getNickName());
-			}
-
+			}	
 		}
 
 		if(dto.getDenunciationUid() != null) {
 			User denunciactionName = userProvider.findUserById(dto.getDenunciationUid());
-			if(denunciactionName != null) {
-				dto.setDenunciationName(denunciactionName.getNickName());
+			if (denunciactionName!=null) {
+				OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(denunciactionName.getId());
+				if(organizationMember != null) {
+					dto.setDenunciationName(organizationMember.getContactName());
+				}else{
+					dto.setDenunciationName(denunciactionName.getNickName());
+				}
 			}
+			
 		}
 
 		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
@@ -2182,7 +2222,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					dto.setPartyAName(organization.getName());
 				}
 			}
-
 		}
 
 		if(contract.getApplicationId() != null) {
@@ -2216,7 +2255,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if(owner != null) {
 				dto.setCustomerName(owner.getContactName());
 			}
-
 		}
 
 		if(contract.getParentId() != null) {
@@ -2225,6 +2263,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				dto.setParentContractNumber(parentContract.getContractNumber());
 			}
 		}
+		
 		if(contract.getRootParentId() != null) {
 			Contract rootContract = contractProvider.findContractById(contract.getRootParentId());
 			if(rootContract != null) {
@@ -2244,6 +2283,37 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if(contractTemplateParent != null) {
 				dto.setTemplateName(contractTemplateParent.getName());
 			}
+		}
+		
+		if (ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			dto.setCostGenerationMethod(parentContract.getCostGenerationMethod());
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(parentContract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				ContractChargingItem chargingItem = chargingItems.get(0);
+				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+			}
+			String endTimeStr = yyyyMMdd.format(contract.getContractStartDate());
+			dto.setEndTimeByDay(endTimeStr);
+			
+			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,parentContract.getId());
+			dto.setEndTimeByPeriod(endTimeByPeriod);
+		}
+		
+		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				ContractChargingItem chargingItem = chargingItems.get(0);
+				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+			}
+			String endTimeStr = yyyyMMdd.format(contract.getDenunciationTime());
+			dto.setEndTimeByDay(endTimeStr);
+			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
+			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
 		processContractApartments(dto);
@@ -2706,6 +2776,25 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		DurationParamDTO dto = new DurationParamDTO();
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
+		if (chargingItems!=null && chargingItems.size()>0) {
+			ContractChargingItem chargingItem = chargingItems.get(0);
+			dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+		}
+		if (cmd.getEndTimeByDay()!=null) {
+			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
+		}
+		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
+		String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,cmd.getContractId());
+		dto.setEndTimeByPeriod(endTimeByPeriod);
+		
+		return dto;
 	}
 
 	@Override

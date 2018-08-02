@@ -324,18 +324,13 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
-
     Long findCategoryIdFromBillGroup(Long billGroupId);
 
     void insertAssetCategory(EhAssetAppCategories c);
-
-
+  
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
  
-    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
-
     boolean checkBillByCategory(Long billId, Long categoryId);
-    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
 	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
 	
@@ -346,7 +341,24 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
-
+	
+	void deleteUnsettledBillsOnContractId(Long contractId, List<Long> billIds);
+	
+	PaymentBills getFirstUnsettledBill(Long id);
+	
+	List<PaymentBillItems> findBillItemsByBillId(Long billId);
+	
+	void updatePaymentBills(PaymentBills bill);
+	
+	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
+	
+	void deleteUnsettledBills(Long contractId, String endTimeStr);
+	
+	PaymentBills findLastBill(Long contractId);
+	
+	String findEndTimeByPeriod(String endTimeStr, Long contractId);
+    
+    PaymentLateFine findLastedFine(Long id);
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
@@ -357,8 +369,6 @@ public interface AssetProvider {
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
 	void transferOrderPaymentType();
-
-    PaymentLateFine findLastedFine(Long id);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
@@ -395,4 +405,7 @@ public interface AssetProvider {
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
 	
 	List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId);
+    PaymentBillItems findFirstBillItemToDelete(Long contractId, String endTimeStr);
+	PaymentBills findBillById(Long billId);
+	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 }

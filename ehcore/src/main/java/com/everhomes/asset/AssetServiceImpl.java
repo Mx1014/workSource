@@ -4639,6 +4639,108 @@ public class AssetServiceImpl implements AssetService {
 		return judgeAppShowPayResponse;
 	}
 	
+	//add by tangcen 2018年6月21日17:02:54
+	/**
+	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+	 * contractId:要处理的合同id
+	 * endTime:合同实际结束时间
+	 */
+	@Override
+	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		String endTimeStr = yyyyMMdd.format(endTime);
+		
+		if (costGenerationMethod == (byte)0) {//按计费周期
+			PaymentBills bill = assetProvider.findLastBill(contractId);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
+			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
+			if (firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+			}
+		}else if (costGenerationMethod == (byte)1) {//按实际天数
+			PaymentBills bill = assetProvider.findLastBill(contractId);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
+			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
+			if (firstBillItemToDelete != null && firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+				PaymentBills lastBill = assetProvider.findLastBill(contractId);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(lastBill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				lastBill.setAmountReceivable(new BigDecimal(0));
+				lastBill.setAmountReceived(new BigDecimal(0));
+				lastBill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					lastBill.setAmountReceivable(lastBill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					lastBill.setAmountReceived(lastBill.getAmountReceived().add(billItem.getAmountReceived()));
+					lastBill.setAmountOwed(lastBill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(lastBill);
+			}
+		}
+	}
+	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
+	private void dealUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		for (PaymentBillItems billItem : billItems) {
+			try {
+				Date dateBegin = yyyyMMdd.parse(billItem.getDateStrBegin());
+				Date dateEnd = yyyyMMdd.parse(billItem.getDateStrEnd());
+				if (dateEnd.getTime() >= endTime.getTime()) {
+					int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+					int actualPeriod = daysBetween_date(dateBegin,endTime);
+					billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
+					billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
+					billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
+					String actualDateStrEnd = yyyyMMdd.format(endTime);
+					billItem.setDateStrEnd(actualDateStrEnd);
+				}
+			} catch (ParseException e) {
+				if(LOGGER.isDebugEnabled()) {
+		            LOGGER.error("parse date error!");
+		        }
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "parse date error once");
+			}
+		}
+	}
+	//add by tangcen 2018年6月12日
+	private BigDecimal calculateFee(int agreedPeriod, int actualPeriod, BigDecimal amount) {
+		BigDecimal factor1 = new BigDecimal(actualPeriod);
+		BigDecimal factor2 = new BigDecimal(agreedPeriod);
+		BigDecimal factor = factor1.divide(factor2,4,BigDecimal.ROUND_FLOOR);
+		return amount.multiply(factor).setScale(2, BigDecimal.ROUND_FLOOR);
+	}
+
 	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
