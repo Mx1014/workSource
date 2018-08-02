@@ -756,7 +756,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}
 
 		ListAppCommunityConfigsResponse response = new ListAppCommunityConfigsResponse();
-		response.setDtos(dtos);
+		//response.setDtos(dtos);
 		return response;
 	}
 

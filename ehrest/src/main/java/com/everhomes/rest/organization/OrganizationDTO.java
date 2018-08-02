@@ -523,4 +523,12 @@ public class OrganizationDTO {
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
+
+	public Byte getProjectManageFlag() {
+		return projectManageFlag;
+	}
+
+	public void setProjectManageFlag(Byte projectManageFlag) {
+		this.projectManageFlag = projectManageFlag;
+	}
 }
