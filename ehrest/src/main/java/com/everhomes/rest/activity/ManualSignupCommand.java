@@ -12,6 +12,7 @@ import java.util.List;
  * <li>activityId: 活动id</li>
  * <li>phone: 手机</li>
  * <li>formOriginId: 表单formOriginId</li>
+ * <li>communityName: 园区名称</li>
  * <li>values: 报名中，每项对应的值{@link PostApprovalFormItem} </li>
  * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  * </ul>
@@ -20,10 +21,18 @@ public class ManualSignupCommand {
 	private Long activityId;
 	private String phone;
 	private Long formOriginId;
-
+	private String communityName;
 	@ItemType(PostApprovalFormItem.class)
 	List<PostApprovalFormItem> values;
     private String payFlag;
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
 
 	public Long getActivityId() {
 		return activityId;

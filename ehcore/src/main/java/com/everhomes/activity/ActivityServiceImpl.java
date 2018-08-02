@@ -1544,6 +1544,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setPhone(cmd.getPhone());
         roster.setRealName(user.getNickName());
         roster.setGender(user.getGender());
+        roster.setCommunityName(cmd.getCommunityName());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
 
