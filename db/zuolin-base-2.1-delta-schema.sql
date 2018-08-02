@@ -9,7 +9,7 @@ ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DE
 
 
 
-CREATE TABLE `eh_service_module_categories` (
+CREATE TABLE `eh_app_categories` (
   `id` bigint(22) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `parent_id` bigint(22) NOT NULL DEFAULT '0',
