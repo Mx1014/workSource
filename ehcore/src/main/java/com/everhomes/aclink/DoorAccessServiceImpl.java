@@ -5185,4 +5185,41 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		da.setDoorType(doorType);
 		doorAccessProvider.updateDoorAccess(da);
 	}
+
+	@Override
+	public ListZLDoorAccessResponse listDoorAccessMacByApp() {
+		List<String> listMac = new ArrayList<String>();
+		ListZLDoorAccessResponse rsp = new ListZLDoorAccessResponse();
+		//上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		Long ownerId = 500000125L;
+		
+		List<DoorAccess> das = doorAccessProvider.listDoorAccessByOwnerId(new CrossShardListingLocator(), ownerId, DoorAccessOwnerType.ENTERPRISE, 0);
+		if(das != null && das.size() != 0){
+			for(DoorAccess da : das){
+				listMac.add(da.getHardwareId());
+			}
+			rsp.setListMac(listMac);
+		}
+		return rsp;
+	}
+
+	@Override
+	public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd) {
+		DoorAccess da = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getMacAddress());
+		if(da == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+		}
+		List<AclinkAppUserKeyDTO> userKeys = new ArrayList<AclinkAppUserKeyDTO>();
+		for(Long userId: cmd.getUserIds()){
+			AclinkAppUserKeyDTO userKey =new AclinkAppUserKeyDTO();
+			userKey.setKeySecret(AclinkUtils.packAesUserKey(da.getAesIv(), userId, 0, System.currentTimeMillis() + KEY_TICK_7_DAY));
+			userKey.setMac(cmd.getMacAddress());
+			userKey.setUserId(userId);
+			userKeys.add(userKey);
+		}
+		GetZLAesUserKeyResponse rsp = new GetZLAesUserKeyResponse();
+		rsp.setUserKeys(userKeys);
+		
+		return rsp;
+	}
 }
