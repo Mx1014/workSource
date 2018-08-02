@@ -626,23 +626,23 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					flowService.processAutoStep(dto);
 				}
 			} else if ("CONFIRMFEE".equals(btnNodeType)){
-// TODO: 2018/7/11 支付
-				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-				task.setAmount(order.getAmount());
-				pmTaskProvider.updateTask(task);
-				pmTaskSearch.feedDoc(task);
-
-				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
-				FlowAutoStepDTO dto = new FlowAutoStepDTO();
-				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-				dto.setFlowCaseId(flowCase.getId());
-				dto.setFlowMainId(flowCase.getFlowMainId());
-				dto.setFlowNodeId(flowCase.getCurrentNodeId());
-				dto.setFlowVersion(flowCase.getFlowVersion());
-				dto.setStepCount(flowCase.getStepCount());
-				flowService.processAutoStep(dto);
+// 费用确认客户端调用业务接口
+//				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+//				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+//				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+//				task.setAmount(order.getAmount());
+//				pmTaskProvider.updateTask(task);
+//				pmTaskSearch.feedDoc(task);
+//
+//				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+//				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+//				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//				dto.setFlowCaseId(flowCase.getId());
+//				dto.setFlowMainId(flowCase.getFlowMainId());
+//				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+//				dto.setFlowVersion(flowCase.getFlowVersion());
+//				dto.setStepCount(flowCase.getStepCount());
+//				flowService.processAutoStep(dto);
 			} else if ("NEEDFEE".equals(btnNodeType)){
 				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 				FlowAutoStepDTO dto = new FlowAutoStepDTO();

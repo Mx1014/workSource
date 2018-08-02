@@ -3564,6 +3564,13 @@ public class PmTaskServiceImpl implements PmTaskService {
         FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
         flowCase = tree.getLeafNodes().get(0).getFlowCase();
         PreOrderDTO preOrderDTO = null;
+
+//      费用确认修改报修单状态
+		task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+		task.setAmount(order.getAmount());
+		pmTaskProvider.updateTask(task);
+		pmTaskSearch.feedDoc(task);
+
         Long taskCategoryId;
         if(flowCase.getModuleType().equals(FlowModuleType.NO_MODULE.getCode())){
             if(999983 == namespaceId){
