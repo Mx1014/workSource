@@ -18,3 +18,6 @@ CREATE TABLE `eh_app_categories` (
   `leaf_flag` tinyint(4) DEFAULT NULL COMMENT 'is leaf category, 0-no, 1-yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `eh_service_module_entries` CHANGE COLUMN `second_app_type` `app_category_id`  bigint(22) NOT NULL DEFAULT 0;
