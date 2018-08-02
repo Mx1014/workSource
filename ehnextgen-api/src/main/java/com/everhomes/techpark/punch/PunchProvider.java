@@ -350,7 +350,7 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
 
-	List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
+	List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, String punchMonth);
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
 

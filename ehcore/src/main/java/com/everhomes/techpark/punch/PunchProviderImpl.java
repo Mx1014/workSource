@@ -3010,32 +3010,47 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record2<String, Integer>> query = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE, Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
-        Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
-        if (null != dayStart && null != dayEnd)
-            condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
-                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
-                    .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
-                            .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
-                    .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd)
-                            .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
-        if (null != userId)
-            condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
-        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
+    public List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, String punchMonth) {
+        if (userId == null || userId == 0) {
+            return null;
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date dayStart;
+        try {
+            dayStart = new Date(dateFormat.parse(punchMonth + "01").getTime());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(dayStart);
+            calendar.add(Calendar.MONTH, 1);
+            Date dayEnd = new Date(calendar.getTimeInMillis());
+            DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+            SelectJoinStep<Record2<String, Integer>> query = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE, Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+            Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+            if (null != dayStart && null != dayEnd)
+                condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(new Timestamp(dayEnd.getTime()))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(new Timestamp(dayStart.getTime()))))
+                        .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(new Timestamp(dayEnd.getTime()))
+                                .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(new Timestamp(dayStart.getTime()))))
+                        .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(new Timestamp(dayEnd.getTime()))
+                                .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(new Timestamp(dayStart.getTime())))));
+            if (null != userId)
+                condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+            condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
 
 
-        List<PunchExceptionRequestStatisticsItemDTO> result = query.where(condition)
-                .groupBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE).fetch()
-                .map(record2 -> {
-                    PunchExceptionRequestStatisticsItemDTO dto = new PunchExceptionRequestStatisticsItemDTO();
-                    dto.setItemName(record2.value1());
-                    dto.setNum(record2.value2());
-                    return dto;
-                });
+            List<PunchExceptionRequestStatisticsItemDTO> result = query.where(condition)
+                    .groupBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE).fetch()
+                    .map(record2 -> {
+                        PunchExceptionRequestStatisticsItemDTO dto = new PunchExceptionRequestStatisticsItemDTO();
+                        dto.setItemName(record2.value1());
+                        dto.setNum(record2.value2());
+                        return dto;
+                    });
 
-        return result;
+            return result;
+        } catch (ParseException e) {
+            LOGGER.error("punchMonth invalid", e);
+            return null;
+        }
     }
 
     @Override
