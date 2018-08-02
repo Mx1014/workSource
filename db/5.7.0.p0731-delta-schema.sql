@@ -53,5 +53,19 @@ ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box7` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` BIGINT;
 -- end
+
+-- AUTHOR: 黄鹏宇 20180802
+-- REMARK:修复导入导出不能使用的问题
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box1` `drop_box1_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box2` `drop_box2_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box3` `drop_box3_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box4` `drop_box4_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box5` `drop_box5_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box6` `drop_box6_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box7` `drop_box7_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box8` `drop_box8_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` CHANGE `drop_box9` `drop_box9_item_id` BIGINT;
+
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 

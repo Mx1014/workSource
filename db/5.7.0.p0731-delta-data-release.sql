@@ -225,6 +225,21 @@ update `eh_var_fields` set name = 'financingDemandItemId' where id = 12087;
 
 UPDATE `eh_var_fields` set field_type = 'Long' where id in (12079,12087,12104,12105,12106,12107,12108,12109,12110,12111,12112);
 -- END
+
+-- AUTHOR: 黄鹏宇 20180802
+-- REMARK:修复导入导出不能使用的问题
+UPDATE `eh_var_fields` SET NAME='dropBox1ItemId' where name = 'dropBox1';
+UPDATE `eh_var_fields` SET NAME='dropBox1ItemId' where name = 'dropBox1';
+UPDATE `eh_var_fields` SET NAME='dropBox2ItemId' where name = 'dropBox2';
+UPDATE `eh_var_fields` SET NAME='dropBox3ItemId' where name = 'dropBox3';
+UPDATE `eh_var_fields` SET NAME='dropBox4ItemId' where name = 'dropBox4';
+UPDATE `eh_var_fields` SET NAME='dropBox5ItemId' where name = 'dropBox5';
+UPDATE `eh_var_fields` SET NAME='dropBox6ItemId' where name = 'dropBox6';
+UPDATE `eh_var_fields` SET NAME='dropBox7ItemId' where name = 'dropBox7';
+UPDATE `eh_var_fields` SET NAME='dropBox8ItemId' where name = 'dropBox8';
+UPDATE `eh_var_fields` SET NAME='dropBox9ItemId' where name = 'dropBox9';
+
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

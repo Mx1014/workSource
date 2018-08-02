@@ -594,13 +594,88 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getDropBox1ItemId()) {
-            ScopeFieldItem dropBox2Item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
-            if (null != dropBox2Item) {
-                dto.setFinancingDemandItemName(dropBox2Item.getItemDisplayName());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox1ItemName(dropBoxItem.getItemDisplayName());
             } else {
-                dto.setSerialEntrepreneurName(null);
+                dto.setDropBox1ItemName(null);
             }
         }
+
+        if (null != dto.getDropBox2ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox2ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox2ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox2ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox3ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox3ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox3ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox3ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox4ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox4ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox4ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox4ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox5ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox5ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox5ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox5ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox6ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox6ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox6ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox6ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox7ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox7ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox7ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox7ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox8ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox8ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox8ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox8ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
+            }
+        }
+
+
+
 
 
 

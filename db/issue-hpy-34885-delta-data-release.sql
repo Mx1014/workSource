@@ -17,9 +17,8 @@ UPDATE `eh_var_fields` set field_type = 'Long' where name in ('buyOrLeaseItemId'
 
 --end
 
--- AUTHOR: 黄鹏宇 20180801
--- REMARK:数据导入导出使用
--- 购买/租赁
+-- AUTHOR: 黄鹏宇 20180802
+-- REMARK:修复导入导出不能使用的问题
 UPDATE `eh_var_fields` SET NAME='dropBox1ItemId' where name = 'dropBox1';
 UPDATE `eh_var_fields` SET NAME='dropBox1ItemId' where name = 'dropBox1';
 UPDATE `eh_var_fields` SET NAME='dropBox2ItemId' where name = 'dropBox2';
