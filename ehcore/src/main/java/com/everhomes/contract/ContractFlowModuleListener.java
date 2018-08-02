@@ -15,6 +15,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -181,7 +182,16 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             	//add by tangcen 退约合同审批通过后，对该合同未出的账单进行处理
         		if (contract.getCostGenerationMethod()!=null) {
         			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
-        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+        			
+        			if(contract.getCategoryId() == null){
+        				contract.setCategoryId(0l);
+			        }else {
+			        	// 转换
+			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			            contract.setCategoryId(assetCategoryId);
+					}
+        			
+        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
         			contract.setRent(totalAmount);
         			contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
