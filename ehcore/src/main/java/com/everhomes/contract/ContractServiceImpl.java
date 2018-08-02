@@ -1928,7 +1928,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId());
+					
+					if(cmd.getCategoryId() == null){
+			            cmd.setCategoryId(0l);
+			        }else {
+			        	// 转换
+			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			            cmd.setCategoryId(assetCategoryId);
+					}
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), cmd.getCategoryId(), cmd.getNamespaceId());
 					parentContract.setRent(totalAmount);
 				}
 
