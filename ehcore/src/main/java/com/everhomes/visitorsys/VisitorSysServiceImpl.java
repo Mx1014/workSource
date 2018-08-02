@@ -423,18 +423,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 if(null != meta && meta.size() > 0) {
                     messageDto.getMeta().putAll(meta);
                 }
-                if(ownerType == VisitorsysOwnerType.ENTERPRISE){
-                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                            receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                }
-                else {
-                    boolean hasPrivilege = userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, appId, null, cmd.getOwnerId());
-                    if (hasPrivilege) {
-                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                                receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                }
+//                else {
+//                    boolean hasPrivilege = userPrivilegeMgr.checkUserPrivilege(receiver.getCreatorUid(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, appId, null, cmd.getOwnerId());
+//                    if (hasPrivilege) {
+//                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//                            receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 
-                    }
-                }
+//                    }
+//                }
             } catch (Exception e) {
                 LOGGER.error("visitorsys {} send message error", receiver, e);
             }
