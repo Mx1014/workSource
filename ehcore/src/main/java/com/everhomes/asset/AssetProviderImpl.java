@@ -512,6 +512,8 @@ public class AssetProviderImpl implements AssetProvider {
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号               
         Long targetIdForEnt = cmd.getTargetIdForEnt();//对公转账是根据企业id来查询相关的所有账单，如果是对公转账则不能为空
+        Long dueDayCountStart = cmd.getDueDayCountStart();//欠费天数开始范围
+        Long dueDayCountEnd = cmd.getDueDayCountEnd();//欠费天数结束范围
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList< >();
@@ -522,7 +524,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
-        		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"));
+        		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
+        		t.DUE_DAY_COUNT);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -532,7 +535,15 @@ public class AssetProviderImpl implements AssetProvider {
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
+        
+        //增加欠费天数查询条件
+        if(!org.springframework.util.StringUtils.isEmpty(dueDayCountStart)) {
+        	query.addConditions(t.DUE_DAY_COUNT.greaterOrEqual(dueDayCountStart));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dueDayCountEnd)) {
+        	query.addConditions(t.DUE_DAY_COUNT.lessThan(dueDayCountEnd));
+        }
+        
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
@@ -619,6 +630,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
             //增加客户手机号
             dto.setCustomerTel(r.getValue(t.CUSTOMER_TEL));
+            //增加欠费天数
+            dto.setDueDayCount(r.getValue(t.DUE_DAY_COUNT));
             list.add(dto);
             return null;});
         return list;
