@@ -43,7 +43,6 @@ ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box9` TINYINT null defaul
 -- REMARK:修复客户下拉框字段类型
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `buy_or_lease_item_id` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` BIGINT;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box1` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box2` BIGINT;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box3` BIGINT;
