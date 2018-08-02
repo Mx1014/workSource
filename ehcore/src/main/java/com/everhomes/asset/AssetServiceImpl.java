@@ -5303,5 +5303,27 @@ public class AssetServiceImpl implements AssetService {
         	return false;
         }
     }
+	
+	/**
+	 * 定时任务：每天晚上12点定时计算一下欠费天数并更新！(账单组的最晚还款日（eh_payment_bills ： due_day_deadline）)
+	 */
+	@Scheduled(cron = "0 0 0 * * ?")
+    public void updateBillDueDayCountOnTime() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+                /*List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
+                //获取当前时间，如果是5号，则将之前的账单的switch装为1
+                for (int i = 0; i < list.size(); i++) {
+                    PaymentBillGroup paymentBillGroup = list.get(i);
+                    Calendar c = newClearedCalendar();
+                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                        String billDateStr = sdf.format(c.getTime());
+                        assetProvider.updateBillSwitchOnTime(billDateStr);
+                    }
+                }*/
+            });
+        }
+    }
 
 }
