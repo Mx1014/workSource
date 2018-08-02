@@ -35,6 +35,7 @@ SELECT 'punch.status' AS scope,18 AS code,'zh_CN' AS locale,'迟到且缺卡' AS
 SELECT 'punch.status' AS scope,19 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
 SELECT 'punch.status' AS scope,-1 AS code,'zh_CN' AS locale,'未设置规则' AS text UNION ALL
 SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text UNION ALL
+SELECT 'punch.status' AS scope,-3 AS code,'zh_CN' AS locale,'未打卡' AS text UNION ALL
 
 SELECT 'PunchStatusStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'未到' AS text UNION ALL
 SELECT 'PunchStatusStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'迟到' AS text UNION ALL
@@ -54,3 +55,12 @@ SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,4 AS code,'zh_CN' AS l
 SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,5 AS code,'zh_CN' AS locale,'打卡异常' AS text
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
+
+-- 对新增的detail_id进行旧数据初始化
+UPDATE eh_punch_day_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+SET l.detail_id=d.id
+WHERE d.target_id>0 AND l.detail_id IS NULL;
+
+UPDATE eh_punch_day_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+SET l.detail_id=d.id
+WHERE d.target_id>0 AND l.detail_id IS NULL;

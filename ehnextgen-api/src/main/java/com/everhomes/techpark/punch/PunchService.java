@@ -135,6 +135,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -281,7 +282,7 @@ public interface PunchService {
 
 	List<String> getTimeIntervalApprovalAttribute();
 
-	String statusToString(Byte status);
+	String statusToString(Timestamp splitDate, Byte status);
  
 
 	public void updatePunchPoint(UpdatePunchPointCommand cmd);

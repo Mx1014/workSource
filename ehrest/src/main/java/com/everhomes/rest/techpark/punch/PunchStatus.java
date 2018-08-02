@@ -2,6 +2,7 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>打卡的状态
+ * <li>UN_PUNCH_CHECKING((byte) -3): 未打卡，分界点之前的UP_PUNCH状态显示未打卡</li>
  * <li>NO_ASSIGN_PUNCH_SCHEDULED((byte) -2): 未安排班次</li>
  * <li>NO_ASSIGN_PUNCH_RULE((byte) -1): 未设置规则</li>
  *<li>NOTWORKDAY(17): 非工作日无需打卡</li>
@@ -20,6 +21,7 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
+    UN_PUNCH_CHECKING((byte) -3),
     NO_ASSIGN_PUNCH_SCHEDULED((byte) -2),
     NO_ASSIGN_PUNCH_RULE((byte) -1),
     FORGOT_OFF_DUTY((byte) 19),

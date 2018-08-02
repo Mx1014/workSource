@@ -1,18 +1,5 @@
 package com.everhomes.approval;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
@@ -49,6 +36,18 @@ import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -383,7 +382,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
 		map.put("punchLog",processPunchDetail(pdl,content)) ;
 //		if(null == content || content.getPunchIntervalNo().equals(PunchIntervalNo.ALL_DAY.getCode()))
-			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
+		map.put("punchStatus", punchService.statusToString(pdl.getSplitDateTime(), pdl.getStatus()));
 //		else if(content.getPunchIntervalNo().equals(PunchIntervalNo.MORNING.getCode()))
 //			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus()) );
 //		else if(content.getPunchIntervalNo().equals(PunchIntervalNo.AFTERNOON.getCode()))

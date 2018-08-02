@@ -470,6 +470,7 @@ public class PunchServiceImpl implements PunchService {
 
     /**
      * <ul>审批后的状态
+     * <li></li>
      * <li>HALFOUTWORK(13):  半天公出</li>
      * <li>HALFEXCHANGE(12):  半天调休</li>
      * <li>HALFABSENCE(11):  半天病假</li>
@@ -487,16 +488,18 @@ public class PunchServiceImpl implements PunchService {
      * </ul>
      */
     @Override
-    public String statusToString(Byte status) {
+    public String statusToString(Timestamp splitDate, Byte status) {
         if (null == status) {
             return "";
         }
-        LocaleString localeString = localeStringProvider.find(PunchConstants.PUNCH_STATUS_SCOPE, status.toString(),
-                PunchConstants.locale);
+        String code = status.toString();
+        if (PunchStatus.UNPUNCH == PunchStatus.fromCode(status) && splitDate != null && splitDate.getTime() > System.currentTimeMillis()) {
+            code = String.valueOf(PunchStatus.UN_PUNCH_CHECKING.getCode());
+        }
+        LocaleString localeString = localeStringProvider.find(PunchConstants.PUNCH_STATUS_SCOPE, code, PunchConstants.locale);
         if (null == localeString)
             return "";
         return localeString.getText();
-
     }
 
     /**
@@ -1206,7 +1209,7 @@ public class PunchServiceImpl implements PunchService {
             return processRestDayPunchDayLogs(userId, companyId, pdl, punchDayLog, ptr, punchDate, punchLogs, pr);
         }
 
-        punchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + ONE_DAY_MS + (ptr.getDaySplitTimeLong() != null ? ptr.getDaySplitTimeLong() : PunchConstants.DEFAULT_SPLIT_TIME)));
+        punchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + (ptr.getDaySplitTimeLong() != null ? ptr.getDaySplitTimeLong() : ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME)));
         punchDayLog.setTimeRuleName(ptr.getName());
         punchDayLog.setTimeRuleId(ptr.getId());
 
@@ -1479,6 +1482,7 @@ public class PunchServiceImpl implements PunchService {
         pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
         pdl.setExceptionStatus(null);
         punchDayLog.setTimeRuleId(null);
+        punchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME));
         // 获取加班申请等
         Timestamp dayStart = new Timestamp(punchDate.getTime());
         Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
@@ -3266,7 +3270,7 @@ public class PunchServiceImpl implements PunchService {
                 }
                 DayStatusDTO dayStatusDTO = new DayStatusDTO();
                 dayStatusDTO.setDate(dayStatusSF.get().format(dayLog.getPunchDate()));
-                dayStatusDTO.setStatus(processStatus(dayLog.getStatusList(), dayLog.getApprovalStatusList()));
+                dayStatusDTO.setStatus(processStatus(dayLog.getSplitDateTime(), dayLog.getStatusList(), dayLog.getApprovalStatusList()));
                 dayStatusDTOList.add(dayStatusDTO);
             }
             statistic.setStatusList(StringHelper.toJsonString(dayStatusDTOList));
@@ -3902,11 +3906,11 @@ public class PunchServiceImpl implements PunchService {
             row.createCell(++i).setCellValue("WiFi :" + log.getWifiInfo());
         }
         if (PunchStatus.LEAVEEARLY == PunchStatus.fromCode(log.getStatus())) {
-            row.createCell(++i).setCellValue(statusToString(log.getStatus()) + getLeaveEarlyString(log));
+            row.createCell(++i).setCellValue(statusToString(null, log.getStatus()) + getLeaveEarlyString(log));
         } else if (PunchStatus.BELATE == PunchStatus.fromCode(log.getStatus())) {
-            row.createCell(++i).setCellValue(statusToString(log.getStatus()) + getBelateString(log));
+            row.createCell(++i).setCellValue(statusToString(null, log.getStatus()) + getBelateString(log));
         } else {
-            row.createCell(++i).setCellValue(statusToString(log.getStatus()));
+            row.createCell(++i).setCellValue(statusToString(null, log.getStatus()));
         }
         row.createCell(++i).setCellValue(log.getIdentification());
         row.createCell(++i).setCellValue(NormalFlag.YES == NormalFlag.fromCode(log.getDeviceChangeFlag()) ? "异常" : "正常");
@@ -5708,7 +5712,7 @@ public class PunchServiceImpl implements PunchService {
                         pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
                         pdl.setMorningPunchStatus(dayLog.getMorningStatus());
                         //TODO: 对于请假
-                        pdl.setStatuString(processStatus(dayLog.getStatusList(), null));
+                        pdl.setStatuString(processStatus(dayLog.getSplitDateTime(), dayLog.getStatusList(), null));
                         userMonthLogsDTO.getPunchLogsDayList().add(pdl);
                         if (dayLog.getExceptionStatus() != null && ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))) {
                             exceptionStatus = ExceptionStatus.EXCEPTION;
@@ -6015,7 +6019,7 @@ public class PunchServiceImpl implements PunchService {
 		return orgs;
 	}
 
-	String processStatus(String statuList, String approvalStatusList) {
+    String processStatus(Timestamp splitDate, String statuList, String approvalStatusList) {
         if (StringUtils.isEmpty(statuList) && StringUtils.isEmpty(approvalStatusList)) {
             return "";
         }
@@ -6040,16 +6044,16 @@ public class PunchServiceImpl implements PunchService {
                     }
                 }
                 if (i == 0) {
-                    result = statusToString(statusByte);
+                    result = statusToString(splitDate, statusByte);
                 } else {
-                    result = result + PunchConstants.STATUS_SEPARATOR + statusToString(statusByte);
+                    result = result + PunchConstants.STATUS_SEPARATOR + statusToString(splitDate, statusByte);
                 }
             }
         } else {
             if (null != approvalStatusList && !StringUtils.isEmpty(approvalStatusList)) {
-                result = statusToString(Byte.valueOf(approvalStatusList));
+                result = statusToString(splitDate, Byte.valueOf(approvalStatusList));
             } else {
-                result = statusToString(Byte.valueOf(statuList));
+                result = statusToString(splitDate, Byte.valueOf(statuList));
             }
         }
         return result;
@@ -6065,8 +6069,8 @@ public class PunchServiceImpl implements PunchService {
                 dto.setPunchOrgName(org.getName());
             }
         }
-        dto.setStatuString(processStatus(r.getStatusList(), null));
-        dto.setApprovalStatuString(processStatus(r.getStatusList(), r.getApprovalStatusList()));
+        dto.setStatuString(processStatus(r.getSplitDateTime(), r.getStatusList(), null));
+        dto.setApprovalStatuString(processStatus(r.getSplitDateTime(), r.getStatusList(), r.getApprovalStatusList()));
         if (null != r.getPunchOrganizationId()) {
             Organization punchGroup = getOrganizationFromLocalCache(cacheOrganizationMap, r.getPunchOrganizationId());
             if (null != punchGroup)
@@ -6817,6 +6821,7 @@ public class PunchServiceImpl implements PunchService {
         }
         punchDayLog.setCreatorUid(0L);
         punchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        punchDayLog.setSplitDateTime(new Timestamp(punchDayLog.getPunchDate().getTime() + ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME));
         punchProvider.createPunchDayLog(punchDayLog);
     }
 
