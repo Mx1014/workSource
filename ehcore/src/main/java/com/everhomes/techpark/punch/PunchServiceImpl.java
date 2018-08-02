@@ -12239,13 +12239,15 @@ public class PunchServiceImpl implements PunchService {
         java.sql.Date endDay = socialSecurityService.getTheLastDate(cmd.getStatisticsMonth());
 
         List<PunchDayLog> pdls = punchProvider.listPunchDayLogsByItemTypeAndDeptIds(cmd.getOrganizationId(), userId, startDay, endDay, itemType);
-        response.setDetails(pdls.stream().map(r->{
-            PunchStatusItemDetailDTO dto = new PunchStatusItemDetailDTO();
-            dto.setPunchDate(r.getPunchDate().getTime());
-            SimpleDateFormat sf = new SimpleDateFormat("dd日 EEE", Locale.SIMPLIFIED_CHINESE);
-            dto.setDescription(sf.format(r.getPunchDate()) + "(" + getPunchStatisticCountByItemType(r, itemType) + "次)");
-            return dto;
-        }).collect(Collectors.toList()));
+        if(null != pdls) {
+            response.setDetails(pdls.stream().map(r -> {
+                PunchStatusItemDetailDTO dto = new PunchStatusItemDetailDTO();
+                dto.setPunchDate(r.getPunchDate().getTime());
+                SimpleDateFormat sf = new SimpleDateFormat("dd日 EEE", Locale.SIMPLIFIED_CHINESE);
+                dto.setDescription(sf.format(r.getPunchDate()) + "(" + getPunchStatisticCountByItemType(r, itemType) + "次)");
+                return dto;
+            }).collect(Collectors.toList()));
+        }
         return response;
     }
 
@@ -12297,14 +12299,20 @@ public class PunchServiceImpl implements PunchService {
                 dto.setDescription(result);
                 break;
             case OVERTIME:
-            case GO_OUT:
-            case BUSINESS_TRIP:
                 if (r.getDurationDay() != null && r.getDurationDay().compareTo(BigDecimal.ZERO) > 0) {
                     dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
                 } else {
                     dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayString(r.getDurationMinute() * 6 * 1000, dayUnit, hourUnit));
                 }
-                map = getExceptionBeginEndTimeMap(r); 
+                map = getExceptionBeginEndTimeMap(r);
+                result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
+                        PunchConstants.GO_OUT_TEMPLATE_CONTENT, RentalNotificationTemplateCode.locale, map, "");
+                dto.setDescription(result);
+                break;
+            case GO_OUT:
+            case BUSINESS_TRIP:
+                dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
+                map = getExceptionBeginEndTimeMap(r);
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
                         PunchConstants.GO_OUT_TEMPLATE_CONTENT, RentalNotificationTemplateCode.locale, map, "");
                 dto.setDescription(result);
