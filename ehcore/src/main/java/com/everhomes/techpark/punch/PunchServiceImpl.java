@@ -11737,9 +11737,13 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(pdl.getDeptId());
             dto.setDepartmentName(dpt.getName());
         }
-        PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), pdl.getEnterpriseId(), pdl.getDetailId());
-        if(pr != null){
-        	dto.setRuleId(pr.getId());
+        try{
+            PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), pdl.getEnterpriseId(), pdl.getDetailId());
+            if(pr != null){
+                dto.setRuleId(pr.getId());
+            }
+        }catch (Exception e ){
+            LOGGER.error("get punch rule error ownerId" + pdl.getEnterpriseId() + " detailID" + pdl.getDetailId(), e);
         }
         return dto;
     }
@@ -11901,9 +11905,13 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(statistic.getDeptId());
             dto.setDepartmentName(dpt.getName());
         }
-        PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getDetailId());
-        if(pr != null){
-        	dto.setRuleId(pr.getId());
+        try {
+            PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getDetailId());
+            if (pr != null) {
+                dto.setRuleId(pr.getId());
+            }
+        }catch (Exception e ){
+            LOGGER.error("get punch rule error ownerId" + statistic.getOwnerId() + " detailID" + statistic.getDetailId(), e);
         }
         return dto;
     }
