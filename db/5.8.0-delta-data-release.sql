@@ -24,6 +24,22 @@ INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 VALUES( 'activity.notification', 20, 'zh_CN', '活动报名人数不足最低限制人数，活动取消', '您发起的活动「${subject}」由于未达到最低人数，已被自动取消。');
 INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('activity',28,'zh_CN','活动取消通知');
 UPDATE eh_locale_strings SET text = '来晚啦，活动已删除' WHERE scope = 'forum' and code = 10006;
+-- AUTHOR: 梁燕龙
+-- REMARK: 活动消息推送文案修改。
+UPDATE eh_locale_templates SET text = '${userName}报名参加了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
+UPDATE eh_locale_templates SET text = '${userName}取消了您发起的活动「${postName}」报名' WHERE scope = 'activity.notification' and code = 2;
+UPDATE eh_locale_templates SET text = '您报名参加的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
+UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${tag} 丨 ${title}」因故取消。
+更多活动敬请继续关注。' WHERE scope = 'activity.notification' and code = 5;
+UPDATE eh_locale_templates SET text = '您报名的活动 「${tag} 丨 ${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
+UPDATE eh_locale_templates SET text = '「${userName}」报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的主题已被发起方改成「${newPostName}」。' WHERE scope = 'activity.notification' and code = 11;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的时间已被发起方改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 12;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的地点已被发起方改成「${address}」。' WHERE scope = 'activity.notification' and code = 13;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 14;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 15;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 16;
+UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 17;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
