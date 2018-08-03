@@ -11783,7 +11783,7 @@ public class PunchServiceImpl implements PunchService {
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         List<PunchMemberDTO> results = new ArrayList<>();
         //有月查询参数就按月查询,没有就按日查询 
-        if (null != cmd.getQueryByMonth()) {
+        if (!StringUtils.isEmpty(cmd.getQueryByMonth())) {
             MonthlyPunchStatusStatisticsRecordMapper mapper = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
             items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
             //按月查询查statistics表
@@ -11833,7 +11833,7 @@ public class PunchServiceImpl implements PunchService {
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
     	List<PunchMemberDTO> results = new ArrayList<>(); 
         //有月查询参数就按月查询,没有就按日查询 有日查询参数就按参数查询,没有就查当天
-		if(null != cmd.getQueryByMonth()){
+		if(!StringUtils.isEmpty(cmd.getQueryByMonth())){
 			//按月查询查statistics表 
 			results = listMonthPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), null, pageOffset, pageSize + 1);
 		}else if(null != cmd.getQueryByDate()){
@@ -11983,7 +11983,7 @@ public class PunchServiceImpl implements PunchService {
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         List<PunchMemberDTO> results = new ArrayList<>();
         //有月查询参数就按月查询,没有就按日查询 有日查询参数就按参数查询,没有就查当天
-        if(null != cmd.getQueryByMonth()){
+        if(!StringUtils.isEmpty(cmd.getQueryByMonth())){
         	PunchExceptionRequestStatisticsRecordMapper mapper = punchProvider.monthlyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
 			items = mapper.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
             results = listMonthExceptionPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), itemType, pageOffset, pageSize + 1);

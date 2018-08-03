@@ -96,7 +96,9 @@ import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecord
 import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -3788,8 +3790,15 @@ public class PunchProviderImpl implements PunchProvider {
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
         			break;
                 case UN_ARRIVED:
-        		case ABSENT:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			break;
+        		case ABSENT:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()))
+        				.and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        			break;
+        		case CHECKING:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()))
+        				.and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.gt(new Timestamp(DateHelper.currentGMTTime().getTime())));
         			break;
                 case FORGOT_PUNCH:
                     condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
