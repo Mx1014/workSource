@@ -732,8 +732,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             return fieldNames;
         }else{
             LOGGER.error("this form not filter");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, GeneralApprovalServiceErrorCode.ERROR_NO_RESULT,
-                    "this form not filter.");
+            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            GeneralFormDTO dto = ConvertHelper.convert(request, GeneralFormDTO.class);
+            return dto.getFormFields().stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
+
         }
 
 
