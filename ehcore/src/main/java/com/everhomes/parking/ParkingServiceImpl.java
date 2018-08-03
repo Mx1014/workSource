@@ -295,24 +295,24 @@ public class ParkingServiceImpl implements ParkingService {
 				dto.setVipParkingUrl(homeUrl + detailUrl);
 			}
 
-			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
-					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
-			//当没有设置工作流的时候，表示是禁用模式
-			if(null == flow) {
-				dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
-
-			}else {
-
-				String tag1 = flow.getStringTag1();
-				Integer flowMode = Integer.valueOf(tag1);
-				dto.setFlowMode(flowMode);
-				dto.setFlowId(flow.getId());
-				LOGGER.info("parking enabled flow, flow={}", flow);
-				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
-				LOGGER.info("parking main flow, flow={}", mainFlow);
-				//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
-				if (null != mainFlow) {
-					if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+			dto.setFlowId(null);
+			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+			if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
+				Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+						FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
+				//当没有设置工作流的时候，表示是禁用模式
+				if (flow!=null){
+					//模式由发布的时候决定，这里不根据工作流的名称和stringTag1字段决定。
+					// 如果没有工作流或者工作流主版本不匹配，则不启用月卡申请模式
+//					String tag1 = flow.getStringTag1();
+//					Integer flowMode = Integer.valueOf(tag1);
+					dto.setFlowMode(r.getFlowMode());
+					dto.setFlowId(flow.getId());
+					LOGGER.info("parking enabled flow, flow={}", flow);
+					Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+					LOGGER.info("parking main flow, flow={}", mainFlow);
+					//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
+					if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
 						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 						dto.setFlowId(null);
 					}
@@ -3305,25 +3305,26 @@ public class ParkingServiceImpl implements ParkingService {
 			dto.setVipParkingUrl(homeUrl + detailUrl);
 		}
 
-		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
-				FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
-		//当没有设置工作流的时候，表示是禁用模式
-		if(null == flow) {
-			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
-
-		}else {
-
-			String tag1 = flow.getStringTag1();
-			Integer flowMode = Integer.valueOf(tag1);
-			dto.setFlowMode(flowMode);
-
-			LOGGER.info("parking enabled flow, flow={}", flow);
-			Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
-			LOGGER.info("parking main flow, flow={}", mainFlow);
-			//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
-			if (null != mainFlow) {
-				if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+		dto.setFlowId(null);
+		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+		if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
+			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
+			//当没有设置工作流的时候，表示是禁用模式
+			if (flow!=null){
+				//模式由发布的时候决定，这里不根据工作流的名称和stringTag1字段决定。
+				// 如果没有工作流或者工作流主版本不匹配，则不启用月卡申请模式
+//					String tag1 = flow.getStringTag1();
+//					Integer flowMode = Integer.valueOf(tag1);
+				dto.setFlowMode(r.getFlowMode());
+				dto.setFlowId(flow.getId());
+				LOGGER.info("parking enabled flow, flow={}", flow);
+				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+				LOGGER.info("parking main flow, flow={}", mainFlow);
+				//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
+				if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
 					dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+					dto.setFlowId(null);
 				}
 			}
 		}
