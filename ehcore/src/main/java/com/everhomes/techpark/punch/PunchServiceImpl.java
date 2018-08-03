@@ -12228,7 +12228,7 @@ public class PunchServiceImpl implements PunchService {
         java.sql.Date startDay = socialSecurityService.getTheFirstDate(cmd.getStatisticsMonth());
         java.sql.Date endDay = socialSecurityService.getTheLastDate(cmd.getStatisticsMonth());
 
-        List<PunchDayLog> pdls = punchProvider.listPunchDayLogsByItemTypeAndDeptIds(cmd.getOrganizationId(), userId, startDay, endDay, itemType);
+        List<PunchDayLog> pdls = punchProvider.listPunchDayLogsByItemTypeAndUserId(cmd.getOrganizationId(), userId, startDay, endDay, itemType);
         if(null != pdls) {
             response.setDetails(pdls.stream().map(r -> {
                 PunchStatusItemDetailDTO dto = new PunchStatusItemDetailDTO();

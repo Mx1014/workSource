@@ -440,7 +440,7 @@ public interface PunchProvider {
 
 	List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize);
 
-	List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType);
+	List<PunchDayLog> listPunchDayLogsByItemTypeAndUserId(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType);
 
 	List<PunchExceptionRequest> listExceptionRequestsByItemTypeAndDate(Long userId, Long organizationId, Date startDay, Date endDay, GeneralApprovalAttribute approvalAttribute);
 }

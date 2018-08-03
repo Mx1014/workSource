@@ -4144,14 +4144,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
+    public List<PunchDayLog> listPunchDayLogsByItemTypeAndUserId(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS) 
         		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID))
         		.and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(0));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (userId != null)
-            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.eq(userId));
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
         if (null != startDay && null != endDay) {
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDay).and(endDay));
         }
@@ -4182,6 +4182,8 @@ public class PunchProviderImpl implements PunchProvider {
         if(null != userId)
             condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
         condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
+
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(approvalAttribute.getCode()));
 
         List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
                 .orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
