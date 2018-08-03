@@ -4058,7 +4058,7 @@ public class PunchProviderImpl implements PunchProvider {
     public List<PunchDayLog> listPunchDayLogsByApprovalAttributeAndDeptIds(Long organizationId, List<Long> deptIds,
                                                                            Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS)
+        SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS)
         		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (deptIds != null)
@@ -4103,7 +4103,7 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS)
+        SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_STATISTICS.fields()).from(Tables.EH_PUNCH_STATISTICS)
         		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_STATISTICS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
         if (deptIds != null)
@@ -4149,7 +4149,7 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS) 
+        SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS) 
         		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (userId != null)
