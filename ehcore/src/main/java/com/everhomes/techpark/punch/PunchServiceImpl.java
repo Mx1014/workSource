@@ -1749,16 +1749,16 @@ public class PunchServiceImpl implements PunchService {
                     if (isTimeIntervalFullCovered(offDutyLog.getPunchTime(), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
+                        return;
                     }
-                    return;
                 }
                 // 午休期间打下班卡
                 if (offDutyLog.getPunchTime().getTime() >= offDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()) {
                     if (isTimeIntervalFullCovered(new Date(offDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
+                        return;
                     }
-                    return;
                 }
                 // 上班之后，午休之前打下班卡
                 if (!isTimeIntervalFullCovered(new Date(Math.max(latestOnDutyTimeLong, offDutyLog.getPunchTime().getTime())), new Date(offDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
@@ -1767,19 +1767,26 @@ public class PunchServiceImpl implements PunchService {
                 if (isTimeIntervalFullCovered(new Date(offDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
+                    return;
                 }
-                return;
+
             }
             if (isTimeIntervalFullCovered(new Date(Math.max(latestOnDutyTimeLong, offDutyLog.getPunchTime().getTime())), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                 updateSmartAlignment(offDutyLog);
+                return;
             }
+            offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+            updateSmartAlignment(offDutyLog);
             return;
         }
         Byte onDutyStatus = onDutyLog.getApprovalStatus() == null ? onDutyLog.getStatus() : onDutyLog.getApprovalStatus();
         if (PunchStatus.NORMAL != PunchStatus.fromCode(onDutyStatus)) {
             if (isTimeIntervalCoveredEndTime(new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
+                updateSmartAlignment(offDutyLog);
+            } else {
+                offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
                 updateSmartAlignment(offDutyLog);
             }
             return;
@@ -1797,6 +1804,9 @@ public class PunchServiceImpl implements PunchService {
             if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                 updateSmartAlignment(offDutyLog);
+            } else {
+                offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+                updateSmartAlignment(offDutyLog);
             }
             return;
         }
@@ -1805,8 +1815,8 @@ public class PunchServiceImpl implements PunchService {
             if (isTimeIntervalFullCovered(new Date(Math.max(onDutyLog.getPunchTime().getTime(), latestOnDutyTimeLong)), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                 updateSmartAlignment(offDutyLog);
+                return;
             }
-            return;
         }
         // 不满足以上情况的就是早退
         offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
@@ -1858,16 +1868,16 @@ public class PunchServiceImpl implements PunchService {
                     if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), onDutyLog.getPunchTime(), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
+                        return;
                     }
-                    return;
                 }
                 // 在午休期间打卡
                 if (onDutyLog.getPunchTime().getTime() <= onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()) {
                     if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(onDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
+                        return;
                     }
-                    return;
                 }
                 // 午休之后打上班卡，那么请假需要覆盖早上的区间同时覆盖下午打卡前的区间
                 if (!isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(onDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
@@ -1876,14 +1886,17 @@ public class PunchServiceImpl implements PunchService {
                 if (isTimeIntervalFullCovered(new Date(onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
+                    return;
                 }
-                return;
             }
             // 无中午休息的场景
             if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
                 onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                 updateSmartAlignment(onDutyLog);
+                return;
             }
+            onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
+            updateSmartAlignment(onDutyLog);
             return;
         }
         // 上班未打卡,(没有上班卡就不存在下班卡，申请只要覆盖上班打卡时间校正为正常)
@@ -3251,6 +3264,9 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private int calculateWorkDayCountThisMonth(OrganizationMemberDetails detail, List<PunchDayLog> punchDayLogs, Calendar startDayOfThisMonth, PunchRule punchRule) {
+        if ("钟爱丽".equals(detail.getContactName())) {
+            System.out.println();
+        }
         int workDayCount = 0;
         Set<Long> punchDayLongSet = new HashSet<>();
         for (PunchDayLog pdl : punchDayLogs) {
@@ -3278,8 +3294,8 @@ public class PunchServiceImpl implements PunchService {
             if ((detail.getCheckInTime() != null && detail.getCheckInTime().compareTo(dayOfMonth.getTime()) < 0) &&
                     (detail.getDismissTime() == null || detail.getDismissTime().compareTo(dayOfMonth.getTime()) > 0)) {
                 // 当前时间是入职状态才去计算是否有排班
-                PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(punchRule, dayOfMonth.getTime(), detail.getTargetId());
-                if (ptr != null) {
+                PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDateUseDetailId(punchRule, dayOfMonth.getTime(), detail.getId());
+                if (ptr != null && ptr.getId() != null && ptr.getId() != 0) {
                     workDayCount++;
                 }
             }
@@ -6560,25 +6576,13 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public void testDayRefreshLogs(Long runDate) {
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.set(2018, 6, 2);
-//        refreshDayLogAndMonthStat(505393L, 1045660L, calendar);
-//        Calendar calendar1 = Calendar.getInstance();
-//        calendar1.set(2018, 6, 7);
-//        refreshDayLogAndMonthStat(505393L, 1045660L, calendar1);
-//        Calendar calendar2 = Calendar.getInstance();
-//        calendar2.set(2018, 6, 4);
-//        refreshDayLogAndMonthStat(505393L, 1045660L, calendar2);
-//        Calendar calendar3 = Calendar.getInstance();
-//        calendar3.set(2018, 6, 5);
-//        refreshDayLogAndMonthStat(505393L, 1045660L, calendar3);
         Calendar calendar4 = Calendar.getInstance();
-        calendar4.set(2018, 6, 22);
-        OrganizationMemberDetails details = findOrganizationMemberDetailByCacheDetailId(39946L);
+        calendar4.set(2018, 7, 2);
+        OrganizationMemberDetails details = findOrganizationMemberDetailByCacheDetailId(39990L);
         refreshDayLogAndMonthStat(details, 1045660L, calendar4);
 //        dayRefreshLogScheduled(new Date(runDate));
     }
-
+    @Deprecated
     public void dayRefreshLogScheduled(Date runDate) {
 
         coordinationProvider.getNamedLock(
@@ -6710,15 +6714,11 @@ public class PunchServiceImpl implements PunchService {
         Integer currentVersion = getPunchGroupCurrentVersion(pr.getOwnerId());
         List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), currentVersion);
         if (null != members && members.size() > 0) {
-
             for (UniongroupMemberDetail member : members) {
-                if (member != null 
-//                		&& member.getTargetType() != null && member.getTargetType().equals("USER")
-                		) {
-                	OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                if (member != null) {
+                    OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
                     refreshDayLogAndMonthStat(memberDetail, pr.getOwnerId(), yesterday);
                     punchRuleCacheByUserId.get().put(pr.getOwnerId() + "-" + member.getTargetId(), pr);
-
                 }
             }
         }
@@ -8665,12 +8665,10 @@ public class PunchServiceImpl implements PunchService {
             for (Long detaliId : scheMap.keySet()) {
                 PunchSchedulingEmployeeDTO employeeDTO = new PunchSchedulingEmployeeDTO();
                 employeeDTO.setDaySchedulings(new ArrayList<>());
-                Organization organization = organizationProvider.findOrganizationById(pr.getOwnerId());
                 employeeDTO.setUserId(detaliId);
                 OrganizationMemberDetails memberDetail = findOrganizationMemberDetailByCacheDetailId(detaliId);
                 if (null != memberDetail)
                     employeeDTO.setContactName(memberDetail.getContactName());
-
                 //循环每个人这个月每一天
                 Calendar start = Calendar.getInstance();
                 start.setTime(startDate);
