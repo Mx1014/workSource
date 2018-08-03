@@ -270,4 +270,15 @@ public class RequisitionServiceImpl implements RequisitionService{
         }
     }
 
+    @Override
+    public GeneralApprovalDTO getApprovalRunningForm(GetApprovalRunningFormCommond cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if(approval != null){
+            return ConvertHelper.convert(approval,GeneralApprovalDTO.class);
+        }else{
+            LOGGER.error("the approval can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the approval can not find");
+        }
+    }
 }

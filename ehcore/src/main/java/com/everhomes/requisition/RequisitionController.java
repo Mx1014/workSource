@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.Flow;
+import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.requisition.*;
@@ -173,4 +174,21 @@ public class RequisitionController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /requisition/getApprovalRunningForm</b>
+     * <p> 前端传入模块ID，后台查找启用的审批流程并根据启用流程查找启用的表单，并返回  </p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getApprovalRunningForm")
+    @RestReturn(value=GeneralApprovalDTO.class)
+    public RestResponse getApprovalRunningForm(GetApprovalRunningFormCommond cmd) {
+        GeneralApprovalDTO dto = requisitionService.getApprovalRunningForm(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
