@@ -3566,10 +3566,10 @@ public class PmTaskServiceImpl implements PmTaskService {
         PreOrderDTO preOrderDTO = null;
 
 //      费用确认修改报修单状态
-		task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-		task.setAmount(order.getAmount());
-		pmTaskProvider.updateTask(task);
-		pmTaskSearch.feedDoc(task);
+//		task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+//		task.setAmount(order.getAmount());
+//		pmTaskProvider.updateTask(task);
+//		pmTaskSearch.feedDoc(task);
 
         Long taskCategoryId;
         if(flowCase.getModuleType().equals(FlowModuleType.NO_MODULE.getCode())){
