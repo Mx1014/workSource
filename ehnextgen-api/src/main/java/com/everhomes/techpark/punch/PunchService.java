@@ -264,11 +264,7 @@ public interface PunchService {
 
 	PunchRule getPunchRule(String ownerType, Long ownerId, Long userId);
 
-
-//	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
-
-//	boolean isWorkTime(Time time, PunchRule punchRule);
- 
+	PunchRule getPunchRule(OrganizationMemberDetails memberDetail);
 
 	boolean isSameDay(Date date1, Date date2);
 
