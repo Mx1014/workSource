@@ -59,7 +59,6 @@ public class ListBillsDTO {
     private String payStatus;
     // introduce invoice num for bill display. by wentian 2018/4/16 on earth
     private String invoiceNum;
-    // introduce paymentType for bill display by steve 2018/5/16 on earth
     private Integer paymentType;
 
     private String dateStrBegin;

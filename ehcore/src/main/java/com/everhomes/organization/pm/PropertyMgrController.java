@@ -2242,7 +2242,7 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
 		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
 	}
-	
+
 	/**
 	 * <p>list all reservations given addresses</p>
 	 * <b>URL: /pm/listReservations</b>
@@ -2282,7 +2282,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <p>delete an reservation</p>
 	 * <b>URL: /pm/deleteReservation</b>

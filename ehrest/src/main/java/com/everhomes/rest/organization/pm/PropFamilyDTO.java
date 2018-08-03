@@ -25,7 +25,70 @@ public class PropFamilyDTO {
     private Byte livingStatus;
     private String enterpriseName;
     private Double areaSize;
+    private Double rentArea;
+    private Double freeArea;
+    private Double chargeArea;
     private Byte reservationInvolved;
+    private Long relatedContractEndDate;
+    private Long relatedAddressArrangementBeginDate;
+    private Byte isFutureApartment;
+    private Byte arrangementInvolved;
+    
+	public Byte getArrangementInvolved() {
+		return arrangementInvolved;
+	}
+
+	public void setArrangementInvolved(Byte arrangementInvolved) {
+		this.arrangementInvolved = arrangementInvolved;
+	}
+
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Long getRelatedContractEndDate() {
+		return relatedContractEndDate;
+	}
+
+	public void setRelatedContractEndDate(Long relatedContractEndDate) {
+		this.relatedContractEndDate = relatedContractEndDate;
+	}
+
+	public Byte getIsFutureApartment() {
+		return isFutureApartment;
+	}
+
+	public void setIsFutureApartment(Byte isFutureApartment) {
+		this.isFutureApartment = isFutureApartment;
+	}
+
+	public Long getRelatedAddressArrangementBeginDate() {
+		return relatedAddressArrangementBeginDate;
+	}
+
+	public void setRelatedAddressArrangementBeginDate(Long relatedAddressArrangementBeginDate) {
+		this.relatedAddressArrangementBeginDate = relatedAddressArrangementBeginDate;
+	}
 
 	public Byte getReservationInvolved() {
 		return reservationInvolved;
@@ -56,7 +119,6 @@ public class PropFamilyDTO {
 		this.owed = owed;
 	}
 
-
 	public Long getId() {
         return id;
     }
@@ -73,7 +135,6 @@ public class PropFamilyDTO {
         this.name = name;
     }
 
-  
     public Long getMemberCount() {
 		return memberCount;
 	}
@@ -89,8 +150,6 @@ public class PropFamilyDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
-
 
 	public Long getAddressId() {
 		return addressId;
@@ -108,8 +167,6 @@ public class PropFamilyDTO {
 		this.livingStatus = livingStatus;
 	}
 	
-	
-
 	public String getEnterpriseName() {
 		return enterpriseName;
 	}

@@ -21,11 +21,15 @@ import com.everhomes.util.StringHelper;
  * <li>chargeArea: 收费面积</li>
  * <li>buildArea: 建筑面积</li>
  * <li>rentArea: 出租面积</li>
+ * <li>freeArea: 可招租面积</li>
  * <li>categoryItemId: 资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他...</li>
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
  * <li>apartmentFloor: 楼层名称</li>
+ * <li>arrangementOperationType:房源的拆分/合并计划（0：无,1：拆分,2：合并）</li>
+ * <li>relatedContractEndDate:与该房源关联的合同的结束日期</li>
+ * <li>freeArea: 可招租面积</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -47,6 +51,51 @@ public class GetApartmentDetailResponse {
 	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
+	private Byte arrangementOperationType;
+	private Long relatedContractEndDate;
+	private Double freeArea;
+	private Byte isPassiveApartment;
+	private Byte reservationInvolved;
+	
+	public Byte getReservationInvolved() {
+		return reservationInvolved;
+	}
+
+	public void setReservationInvolved(Byte reservationInvolved) {
+		this.reservationInvolved = reservationInvolved;
+	}
+
+	public Byte getIsPassiveApartment() {
+		return isPassiveApartment;
+	}
+
+	public void setIsPassiveApartment(Byte isPassiveApartment) {
+		this.isPassiveApartment = isPassiveApartment;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Long getRelatedContractEndDate() {
+		return relatedContractEndDate;
+	}
+
+	public void setRelatedContractEndDate(Long relatedContractEndDate) {
+		this.relatedContractEndDate = relatedContractEndDate;
+	}
+
+	public Byte getArrangementOperationType() {
+		return arrangementOperationType;
+	}
+
+	public void setArrangementOperationType(Byte arrangementOperationType) {
+		this.arrangementOperationType = arrangementOperationType;
+	}
 
 	public String getApartmentFloor() {
 		return apartmentFloor;

@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,10 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhAddressArrangement;
 import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
@@ -110,6 +112,24 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null); 
         long endTime = System.currentTimeMillis();
 		LOGGER.info("successed insert one record.time=" + (endTime - startTime));
+    }
+    
+    @Override
+    public long createAddress3(Address address) {
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhAddresses.class);
+
+        address.setId(id); 
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
+        address.setUuid(UUID.randomUUID().toString());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id)); 
+
+        EhAddressesDao dao = new EhAddressesDao(context.configuration()); 
+        dao.insert(address); 
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null); 
+        
+        return address.getId();
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
@@ -455,8 +475,8 @@ public class AddressProviderImpl implements AddressProvider {
             query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
                     , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
             query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
-                    .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
-                            .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
+                 .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
+                 .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
             //数据重复问题，by-djm
             query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID));
         }
@@ -477,6 +497,7 @@ public class AddressProviderImpl implements AddressProvider {
             dto.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
             dto.setName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
             dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+            dto.setIsFutureApartment(r.getValue(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT));
             addresses.add(dto);
             return null;
         });
@@ -819,4 +840,137 @@ public class AddressProviderImpl implements AddressProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public void createAddressArrangement(AddressArrangement arrangement) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(AddressArrangement.class));
+
+		arrangement.setId(id);
+		arrangement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createAddressArrangement: " + arrangement);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class, id));
+        EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
+        dao.insert(arrangement);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, AddressArrangement.class, id);
+	}
+
+	@Override
+	public AddressArrangement findActiveAddressArrangementByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchOneInto(AddressArrangement.class);
+	}
+
+	@Override
+	public void deleteAddressArrangement(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ADDRESS_ARRANGEMENT)
+				.set(Tables.EH_ADDRESS_ARRANGEMENT.STATUS,AddressArrangementStatus.INACTIVE.getCode())
+				.where(Tables.EH_ADDRESS_ARRANGEMENT.ID.eq(id))
+				.execute();
+	}
+
+	@Override
+	public AddressArrangement findAddressArrangementById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class));
+        EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
+        EhAddressArrangement record = dao.findById(id);
+        if (record != null) {
+			return ConvertHelper.convert(record, AddressArrangement.class);
+		}
+        return null;
+	}
+
+	@Override
+	public AddressArrangement findActiveAddressArrangementByTargetId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.TARGET_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchOneInto(AddressArrangement.class);
+	}
+
+	@Override
+	public String findApartmentNameById(long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String apartmentName = context.select(Tables.EH_ADDRESSES.APARTMENT_NAME)
+					                .from(Tables.EH_ADDRESSES)
+					                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+					                .fetchOne(Tables.EH_ADDRESSES.APARTMENT_NAME);
+		return apartmentName;
+	}
+
+	@Override
+	public Byte findArrangementOperationTypeByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte operationType = context.select(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE)
+					                .from(Tables.EH_ADDRESS_ARRANGEMENT)
+					                .where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
+					                .and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					                .fetchOne(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE);
+		return operationType;
+	}
+
+	@Override
+	public List<AddressArrangement> listActiveAddressArrangementToday(Timestamp today) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<AddressArrangement> result = new ArrayList<>();
+		context.select()
+				.from(Tables.EH_ADDRESS_ARRANGEMENT)
+				.where(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.equal(AddressArrangementStatus.ACTIVE.getCode()))
+				.and(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_FLAG.eq((byte) 0))
+				.and(Tables.EH_ADDRESS_ARRANGEMENT.DATE_BEGIN.eq(today))
+				.fetch()
+				.map(r->{
+					AddressArrangement convert = ConvertHelper.convert(r, AddressArrangement.class);
+					result.add(convert);
+					return null;
+				});
+		return result;
+	}
+
+//	@Override
+//	public AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//		return context.select()
+//					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+//					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
+//					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+//					.fetchOneInto(AddressArrangement.class);
+//	}
+
+	@Override
+	public void updateAddressArrangement(AddressArrangement arrangement) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class));
+        EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
+        dao.update(arrangement);
+	}
+
+	@Override
+	public List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchInto(AddressArrangement.class);
+	}
+
+	@Override
+	public List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.TARGET_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchInto(AddressArrangement.class);
+	}
+
 }

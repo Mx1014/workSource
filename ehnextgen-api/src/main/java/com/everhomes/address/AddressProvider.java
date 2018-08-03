@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -85,8 +87,22 @@ public interface AddressProvider {
     int changeAddressLivingStatus(Long addressId, Byte status);
 
   //Byte getAddressLivingStatus(Long addressId);
+
     Byte getAddressLivingStatus(Long addressId,String addressName);
 	int changeAddressLivingStatus(Long id, String address, byte code);
 	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
 			String apartmentName);
+	long createAddress3(Address address);
+	void createAddressArrangement(AddressArrangement arrangement);
+	AddressArrangement findActiveAddressArrangementByAddressId(Long addressId);
+	void deleteAddressArrangement(Long id);
+	AddressArrangement findAddressArrangementById(Long id);
+	AddressArrangement findActiveAddressArrangementByTargetId(Long addressId);
+	String findApartmentNameById(long addressId);
+	Byte findArrangementOperationTypeByAddressId(Long addressId);
+	List<AddressArrangement> listActiveAddressArrangementToday(Timestamp today);
+//	AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId);
+	void updateAddressArrangement(AddressArrangement arrangement);
+	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
+	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
 }

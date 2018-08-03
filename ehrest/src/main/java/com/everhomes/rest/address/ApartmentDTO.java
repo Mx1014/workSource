@@ -24,10 +24,37 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
     private String address;
     private Byte livingStatus;
     private Double areaSize;
+    private Double rentArea;
+    private Double freeArea;
+    private Double chargeArea;
     private String enterpriseName;
     private String apartmentFloor;
     
-    public String getBusinessApartmentName() {
+    public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public String getBusinessApartmentName() {
 		return businessApartmentName;
 	}
 
