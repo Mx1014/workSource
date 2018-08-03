@@ -8,6 +8,8 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
 
@@ -71,4 +73,6 @@ public interface ServiceModuleService {
 	void reorderAppCategory(ReorderAppCategoryCommand cmd);
 
 	void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd);
+
+	void exportServiceModuleEntries(HttpServletResponse response);
 }

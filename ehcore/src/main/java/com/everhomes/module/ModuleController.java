@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -438,6 +439,22 @@ public class ModuleController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+
+    /**
+     *
+     * <p>导出模块入口信息</p>
+     * <b>URL: /module/exportServiceModuleEntries</b>
+     */
+    @RequestMapping("exportServiceModuleEntries")
+    @RestReturn(value=String.class)
+    public RestResponse exportServiceModuleEntries(HttpServletResponse response) {
+        serviceModuleService.exportServiceModuleEntries(response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 
 }
