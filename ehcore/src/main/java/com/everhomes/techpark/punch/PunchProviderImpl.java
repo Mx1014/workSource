@@ -93,7 +93,9 @@ import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentToda
 import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchDayLogRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchStatisticRecordMapper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -4059,7 +4061,8 @@ public class PunchProviderImpl implements PunchProvider {
                                                                            Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS)
-        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID))
+        		.and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(0));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
@@ -4089,12 +4092,9 @@ public class PunchProviderImpl implements PunchProvider {
 
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
         step.limit(offset, pageSize);
-        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
-        step.where(condition)
-                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(),Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, PunchDayLog.class));
-            return null;
-        });
+        List<PunchDayLog> result = step.where(condition)
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map(new PunchDayLogRecordMapper());
+         
         if (result == null || result.isEmpty())
             return null;
         return result;
@@ -4104,7 +4104,8 @@ public class PunchProviderImpl implements PunchProvider {
     public List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_STATISTICS.fields()).from(Tables.EH_PUNCH_STATISTICS)
-        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_STATISTICS.DETAIL_ID));
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_STATISTICS.DETAIL_ID))
+        		.and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(0));
         Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));
@@ -4135,12 +4136,8 @@ public class PunchProviderImpl implements PunchProvider {
 
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
         step.limit(offset, pageSize);
-        List<PunchStatistic> result = new ArrayList<>();
-        step.where(condition)
-                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_STATISTICS.DEPT_ID.desc()).fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, PunchStatistic.class));
-            return null;
-        });
+         List<PunchStatistic> result = step.where(condition)
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_STATISTICS.DEPT_ID.desc()).fetch().map(new PunchStatisticRecordMapper());
         if (result == null || result.isEmpty())
             return null;
         return result;
@@ -4150,7 +4147,8 @@ public class PunchProviderImpl implements PunchProvider {
     public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step =context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS) 
-        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID))
+        		.and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(0));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (userId != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.eq(userId));
@@ -4159,12 +4157,8 @@ public class PunchProviderImpl implements PunchProvider {
         }
         condition = getPDLStatusItemTypeCondition(itemType, condition);
 
-        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
-        step.where(condition)
-                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, PunchDayLog.class));
-            return null;
-        });
+        List<PunchDayLog> result = step.where(condition)
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map(new PunchDayLogRecordMapper());
         if (result == null || result.isEmpty())
             return null;
         return result;
