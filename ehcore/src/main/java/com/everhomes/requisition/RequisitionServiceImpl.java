@@ -212,7 +212,8 @@ public class RequisitionServiceImpl implements RequisitionService{
         if(cmd.getFormOriginId() != null && cmd.getFormOriginId() >= 0l && cmd.getFormVersion() >= 0 && cmd.getFormVersion() != null) {
             approval.setFormOriginId(cmd.getFormOriginId());
             approval.setFormVersion(cmd.getFormVersion());
-            Long formOriginId = generalApprovalProvider.updateGeneralApproval(approval);
+            GeneralApproval obj = generalApprovalProvider.updateGeneralApproval(approval);
+            Long formOriginId = obj.getFormOriginId();
             return formOriginId;
         }else {
             LOGGER.error("form origin id or form version param cannot null. form_origin_id : " + cmd.getFormOriginId() + ", form_version : " + cmd.getFormVersion());

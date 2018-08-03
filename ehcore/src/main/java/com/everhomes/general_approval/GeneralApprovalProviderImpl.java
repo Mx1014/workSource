@@ -53,12 +53,12 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     }
 
     @Override
-    public Long updateGeneralApproval(GeneralApproval obj) {
+    public GeneralApproval updateGeneralApproval(GeneralApproval obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
         obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
         dao.update(obj);
-        return obj.getFormOriginId();
+        return obj;
     }
 
     @Override
