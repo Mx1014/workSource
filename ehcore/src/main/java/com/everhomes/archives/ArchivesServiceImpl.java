@@ -79,9 +79,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
-    private ImportFileService importFileService;
-
-    @Autowired
     private ContentServerService contentServerService;
 
     @Autowired
@@ -278,11 +275,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         // 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
+        final Integer stickCount = cmd.getPageSize();  //  置顶数跟随页码大小变化 at 31/07/2018
 
-        List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
+        //  保存置顶人员
+        List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);
         if (!StringUtils.isEmpty(cmd.getKeywords()) || detailIds == null) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
             List<ArchivesContactDTO> contacts = new ArrayList<>(listArchivesContacts(cmd, response, null));
@@ -290,7 +288,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         } else {
             if (StringUtils.isEmpty(cmd.getPageAnchor())) {
                 List<ArchivesContactDTO> contacts = new ArrayList<>();
-                //  读取置顶人员
+                //  先获取置顶人员信息
                 for (Long detailId : detailIds) {
                     ArchivesContactDTO stickDTO = getArchivesStickyContactInfo(detailId);
                     if (stickDTO != null)
@@ -360,12 +358,18 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getTargetTypes() != null)
             orgCommand.setTargetTypes(cmd.getTargetTypes());
 
-        //modified by lei.lv
-        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
-
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-        if (members != null && members.getMembers() != null) {
-            members.getMembers().forEach(r -> {
+        ListOrganizationMemberCommandResponse res;
+        //  1.置顶个数超过页总数
+        if (orgCommand.getPageSize() == 0) {
+            orgCommand.setPageSize(1);
+            res = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+            response.setNextPageAnchor(res.getMembers().get(0).getDetailId());
+        } else {
+            //  2.置顶个数未超过页总数
+            res = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+            if (res.getMembers() == null)
+                return null;
+            res.getMembers().forEach(r -> {
                 ArchivesContactDTO dto = new ArchivesContactDTO();
                 dto.setDetailId(r.getDetailId());
                 dto.setOrganizationId(r.getOrganizationId());
@@ -385,7 +389,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setStick("0");
                 contacts.add(dto);
             });
-            response.setNextPageAnchor(members.getNextPageAnchor());
+            response.setNextPageAnchor(res.getNextPageAnchor());
         }
         return contacts;
     }

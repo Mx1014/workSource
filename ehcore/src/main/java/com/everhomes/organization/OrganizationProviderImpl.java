@@ -5391,7 +5391,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
 
         if (null != locator && null != locator.getAnchor())
-            condition = condition.and(t1.field("detail_id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("detail_id").le(locator.getAnchor()));
 
         Organization org = findOrganizationById(listCommand.getOrganizationId());
 
@@ -5479,8 +5479,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(null);
 
         if (result.size() >= pageSize) {
-            result.remove(result.size() - 1);
             locator.setAnchor(result.get(result.size() - 1).getDetailId());
+            result.remove(result.size() - 1);
         }
         return result;
     }
