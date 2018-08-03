@@ -3600,11 +3600,25 @@ public class PmTaskServiceImpl implements PmTaskService {
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             flowService.processAutoStep(stepDTO);
         }else{
+
+			PayUserDTO payUser = null;
             if(null == pmTaskConfig.getPaymentAccount() || 0 == pmTaskConfig.getPaymentAccount()){
                 LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
                         "暂未绑定收款账户");
-            }
+            } else {
+				List<Long> payUserIds = new ArrayList<>();
+				payUserIds.add(pmTaskConfig.getPaymentAccount());
+				List<PayUserDTO> payUsers = payService.listPayUsersByIds(payUserIds);
+				if(null != payUsers && payUsers.size() > 0){
+					payUser = payUsers.get(0);
+					if(0 == payUser.getRegisterStatus().intValue()){
+						LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
+						throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+								"暂未绑定收款账户");
+					}
+				}
+			}
             if(null != order.getBizOrderNum()){
                 preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
                 ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
@@ -3633,8 +3647,6 @@ public class PmTaskServiceImpl implements PmTaskService {
                 throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
                         "payerUserId no find");
             }
-//			Long userById = 470544L;
-//			String userIdentifier = "13693339995";
 
             //2、收款方是否有会员，无则报错
             Long payeeUserId = pmTaskConfig.getPaymentAccount();
