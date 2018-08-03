@@ -224,7 +224,7 @@ public class DecorationSMSProcessor {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("name", request.getDecoratorName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
         smsProvider.addToTupleList(variables, "operatorName", operatorName);
-        smsProvider.addToTupleList(variables, "operatorName", operatorPhone);
+        smsProvider.addToTupleList(variables, "operatorPhone", operatorPhone);
         int templateId = SmsTemplateCode.DECORATION_CANCEL;
         String templateLocale = RentalNotificationTemplateCode.locale;
 
@@ -237,7 +237,7 @@ public class DecorationSMSProcessor {
         variables = smsProvider.toTupleList("name", request.getApplyName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
         smsProvider.addToTupleList(variables, "operatorName", operatorName);
-        smsProvider.addToTupleList(variables, "operatorName", operatorPhone);
+        smsProvider.addToTupleList(variables, "operatorPhone", operatorPhone);
         try {
             smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
         }catch (RuntimeException e){

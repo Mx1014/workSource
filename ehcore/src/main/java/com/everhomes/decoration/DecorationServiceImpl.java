@@ -752,7 +752,7 @@ public class DecorationServiceImpl implements  DecorationService {
         request.setCancelFlag((byte)2);
         request.setCancelReason(cmd.getReason());
         this.decorationProvider.updateDecorationRequest(request);
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(UserContext.currentUserId(), IdentifierType.MOBILE.getCode());;
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(UserContext.currentUserId(), IdentifierType.MOBILE.getCode());
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(),cmd.getOrganizationId());
         if (member != null){
             decorationSMSProcessor.decorationCancel(request,member.getContactName(),userIdentifier.getIdentifierToken());
