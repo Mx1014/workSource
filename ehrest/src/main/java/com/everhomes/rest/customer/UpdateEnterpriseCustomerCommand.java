@@ -162,6 +162,55 @@ public class UpdateEnterpriseCustomerCommand {
     private BigDecimal riskInvestmentAmount;
     private Byte deviceType;
 
+    //新增的客户字段
+    private Long buyOrLeaseItemId;
+    private String buyOrLeaseItemName;
+    private String bizAddress;
+    private String bizLife;
+    private String customerIntentionLevel;
+    private String enterDevGoal;
+    private String controllerName;
+    private String controllerSunBirth;
+    private String controllerLunarBirth;
+    private Long financingDemandItemId;
+    private String financingDemandItemName;
+    private String stringTag1;
+    private String stringTag2;
+    private String stringTag3;
+    private String stringTag4;
+    private String stringTag5;
+    private String stringTag6;
+    private String stringTag7;
+    private String stringTag8;
+    private String stringTag9;
+    private String stringTag10;
+    private String stringTag11;
+    private String stringTag12;
+    private String stringTag13;
+    private String stringTag14;
+    private String stringTag15;
+    private String stringTag16;
+    private Long dropBox1ItemId;
+    private Long dropBox2ItemId;
+    private Long dropBox3ItemId;
+    private Long dropBox4ItemId;
+    private Long dropBox5ItemId;
+    private Long dropBox6ItemId;
+    private Long dropBox7ItemId;
+    private Long dropBox8ItemId;
+    private Long dropBox9ItemId;
+
+    private String dropBox1ItemName;
+    private String dropBox2ItemName;
+    private String dropBox3ItemName;
+    private String dropBox4ItemName;
+    private String dropBox5ItemName;
+    private String dropBox6ItemName;
+    private String dropBox7ItemName;
+    private String dropBox8ItemName;
+    private String dropBox9ItemName;
+
+
 
     private String unifiedSocialCreditCode;
     private String postUri;
@@ -860,6 +909,366 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setAttachments(List<CustomerAttachmentDTO> attachments) {
         this.attachments = attachments;
+    }
+
+    public Long getBuyOrLeaseItemId() {
+        return buyOrLeaseItemId;
+    }
+
+    public void setBuyOrLeaseItemId(Long buyOrLeaseItemId) {
+        this.buyOrLeaseItemId = buyOrLeaseItemId;
+    }
+
+    public String getBizAddress() {
+        return bizAddress;
+    }
+
+    public void setBizAddress(String bizAddress) {
+        this.bizAddress = bizAddress;
+    }
+
+    public String getBizLife() {
+        return bizLife;
+    }
+
+    public void setBizLife(String bizLife) {
+        this.bizLife = bizLife;
+    }
+
+    public String getCustomerIntentionLevel() {
+        return customerIntentionLevel;
+    }
+
+    public void setCustomerIntentionLevel(String customerIntentionLevel) {
+        this.customerIntentionLevel = customerIntentionLevel;
+    }
+
+    public String getEnterDevGoal() {
+        return enterDevGoal;
+    }
+
+    public void setEnterDevGoal(String enterDevGoal) {
+        this.enterDevGoal = enterDevGoal;
+    }
+
+    public String getControllerName() {
+        return controllerName;
+    }
+
+    public void setControllerName(String controllerName) {
+        this.controllerName = controllerName;
+    }
+
+    public String getControllerSunBirth() {
+        return controllerSunBirth;
+    }
+
+    public void setControllerSunBirth(String controllerSunBirth) {
+        this.controllerSunBirth = controllerSunBirth;
+    }
+
+    public String getControllerLunarBirth() {
+        return controllerLunarBirth;
+    }
+
+    public void setControllerLunarBirth(String controllerLunarBirth) {
+        this.controllerLunarBirth = controllerLunarBirth;
+    }
+
+    public Long getFinancingDemandItemId() {
+        return financingDemandItemId;
+    }
+
+    public void setFinancingDemandItemId(Long financingDemandItemId) {
+        this.financingDemandItemId = financingDemandItemId;
+    }
+
+    public String getStringTag1() {
+        return stringTag1;
+    }
+
+    public void setStringTag1(String stringTag1) {
+        this.stringTag1 = stringTag1;
+    }
+
+    public String getStringTag2() {
+        return stringTag2;
+    }
+
+    public void setStringTag2(String stringTag2) {
+        this.stringTag2 = stringTag2;
+    }
+
+    public String getStringTag3() {
+        return stringTag3;
+    }
+
+    public void setStringTag3(String stringTag3) {
+        this.stringTag3 = stringTag3;
+    }
+
+    public String getStringTag4() {
+        return stringTag4;
+    }
+
+    public void setStringTag4(String stringTag4) {
+        this.stringTag4 = stringTag4;
+    }
+
+    public String getStringTag5() {
+        return stringTag5;
+    }
+
+    public void setStringTag5(String stringTag5) {
+        this.stringTag5 = stringTag5;
+    }
+
+    public String getStringTag6() {
+        return stringTag6;
+    }
+
+    public void setStringTag6(String stringTag6) {
+        this.stringTag6 = stringTag6;
+    }
+
+    public String getStringTag7() {
+        return stringTag7;
+    }
+
+    public void setStringTag7(String stringTag7) {
+        this.stringTag7 = stringTag7;
+    }
+
+    public String getStringTag8() {
+        return stringTag8;
+    }
+
+    public void setStringTag8(String stringTag8) {
+        this.stringTag8 = stringTag8;
+    }
+
+    public String getStringTag9() {
+        return stringTag9;
+    }
+
+    public void setStringTag9(String stringTag9) {
+        this.stringTag9 = stringTag9;
+    }
+
+    public String getStringTag10() {
+        return stringTag10;
+    }
+
+    public void setStringTag10(String stringTag10) {
+        this.stringTag10 = stringTag10;
+    }
+
+    public String getStringTag11() {
+        return stringTag11;
+    }
+
+    public void setStringTag11(String stringTag11) {
+        this.stringTag11 = stringTag11;
+    }
+
+    public String getStringTag12() {
+        return stringTag12;
+    }
+
+    public void setStringTag12(String stringTag12) {
+        this.stringTag12 = stringTag12;
+    }
+
+    public String getStringTag13() {
+        return stringTag13;
+    }
+
+    public void setStringTag13(String stringTag13) {
+        this.stringTag13 = stringTag13;
+    }
+
+    public String getStringTag14() {
+        return stringTag14;
+    }
+
+    public void setStringTag14(String stringTag14) {
+        this.stringTag14 = stringTag14;
+    }
+
+    public String getStringTag15() {
+        return stringTag15;
+    }
+
+    public void setStringTag15(String stringTag15) {
+        this.stringTag15 = stringTag15;
+    }
+
+    public String getStringTag16() {
+        return stringTag16;
+    }
+
+    public void setStringTag16(String stringTag16) {
+        this.stringTag16 = stringTag16;
+    }
+
+    public String getBuyOrLeaseItemName() {
+        return buyOrLeaseItemName;
+    }
+
+    public void setBuyOrLeaseItemName(String buyOrLeaseItemName) {
+        this.buyOrLeaseItemName = buyOrLeaseItemName;
+    }
+
+    public String getFinancingDemandItemName() {
+        return financingDemandItemName;
+    }
+
+    public void setFinancingDemandItemName(String financingDemandItemName) {
+        this.financingDemandItemName = financingDemandItemName;
+    }
+
+    public Long getDropBox1ItemId() {
+        return dropBox1ItemId;
+    }
+
+    public void setDropBox1ItemId(Long dropBox1ItemId) {
+        this.dropBox1ItemId = dropBox1ItemId;
+    }
+
+    public Long getDropBox2ItemId() {
+        return dropBox2ItemId;
+    }
+
+    public void setDropBox2ItemId(Long dropBox2ItemId) {
+        this.dropBox2ItemId = dropBox2ItemId;
+    }
+
+    public Long getDropBox3ItemId() {
+        return dropBox3ItemId;
+    }
+
+    public void setDropBox3ItemId(Long dropBox3ItemId) {
+        this.dropBox3ItemId = dropBox3ItemId;
+    }
+
+    public Long getDropBox4ItemId() {
+        return dropBox4ItemId;
+    }
+
+    public void setDropBox4ItemId(Long dropBox4ItemId) {
+        this.dropBox4ItemId = dropBox4ItemId;
+    }
+
+    public Long getDropBox5ItemId() {
+        return dropBox5ItemId;
+    }
+
+    public void setDropBox5ItemId(Long dropBox5ItemId) {
+        this.dropBox5ItemId = dropBox5ItemId;
+    }
+
+    public Long getDropBox6ItemId() {
+        return dropBox6ItemId;
+    }
+
+    public void setDropBox6ItemId(Long dropBox6ItemId) {
+        this.dropBox6ItemId = dropBox6ItemId;
+    }
+
+    public Long getDropBox7ItemId() {
+        return dropBox7ItemId;
+    }
+
+    public void setDropBox7ItemId(Long dropBox7ItemId) {
+        this.dropBox7ItemId = dropBox7ItemId;
+    }
+
+    public Long getDropBox8ItemId() {
+        return dropBox8ItemId;
+    }
+
+    public void setDropBox8ItemId(Long dropBox8ItemId) {
+        this.dropBox8ItemId = dropBox8ItemId;
+    }
+
+    public Long getDropBox9ItemId() {
+        return dropBox9ItemId;
+    }
+
+    public void setDropBox9ItemId(Long dropBox9ItemId) {
+        this.dropBox9ItemId = dropBox9ItemId;
+    }
+
+    public String getDropBox1ItemName() {
+        return dropBox1ItemName;
+    }
+
+    public void setDropBox1ItemName(String dropBox1ItemName) {
+        this.dropBox1ItemName = dropBox1ItemName;
+    }
+
+    public String getDropBox2ItemName() {
+        return dropBox2ItemName;
+    }
+
+    public void setDropBox2ItemName(String dropBox2ItemName) {
+        this.dropBox2ItemName = dropBox2ItemName;
+    }
+
+    public String getDropBox3ItemName() {
+        return dropBox3ItemName;
+    }
+
+    public void setDropBox3ItemName(String dropBox3ItemName) {
+        this.dropBox3ItemName = dropBox3ItemName;
+    }
+
+    public String getDropBox4ItemName() {
+        return dropBox4ItemName;
+    }
+
+    public void setDropBox4ItemName(String dropBox4ItemName) {
+        this.dropBox4ItemName = dropBox4ItemName;
+    }
+
+    public String getDropBox5ItemName() {
+        return dropBox5ItemName;
+    }
+
+    public void setDropBox5ItemName(String dropBox5ItemName) {
+        this.dropBox5ItemName = dropBox5ItemName;
+    }
+
+    public String getDropBox6ItemName() {
+        return dropBox6ItemName;
+    }
+
+    public void setDropBox6ItemName(String dropBox6ItemName) {
+        this.dropBox6ItemName = dropBox6ItemName;
+    }
+
+    public String getDropBox7ItemName() {
+        return dropBox7ItemName;
+    }
+
+    public void setDropBox7ItemName(String dropBox7ItemName) {
+        this.dropBox7ItemName = dropBox7ItemName;
+    }
+
+    public String getDropBox8ItemName() {
+        return dropBox8ItemName;
+    }
+
+    public void setDropBox8ItemName(String dropBox8ItemName) {
+        this.dropBox8ItemName = dropBox8ItemName;
+    }
+
+    public String getDropBox9ItemName() {
+        return dropBox9ItemName;
+    }
+
+    public void setDropBox9ItemName(String dropBox9ItemName) {
+        this.dropBox9ItemName = dropBox9ItemName;
     }
 
     @Override
