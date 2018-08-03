@@ -153,4 +153,6 @@ public interface CommunityService {
 
 	void updateCommunity(UpdateCommunityNewCommand cmd);
 
+	BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd);
+
 }
