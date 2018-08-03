@@ -151,7 +151,7 @@ public interface CommunityService {
 
 	CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd);
 
-	void updateCommunity(UpdateCommunityNewCommand cmd);
+	void updateCommunityAndCategory(UpdateCommunityNewCommand cmd);
 
 	BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd);
 

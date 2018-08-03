@@ -4711,7 +4711,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public void updateCommunity(UpdateCommunityNewCommand cmd) {
+	public void updateCommunityAndCategory(UpdateCommunityNewCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -1,7 +1,11 @@
 package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * 	<li>buildingId: 楼栋id</li>
+ * </ul>
+ */
 public class GetBuildingStatisticsCommand {
 	
 	private Long buildingId;

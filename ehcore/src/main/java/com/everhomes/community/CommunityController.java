@@ -486,13 +486,13 @@ public class CommunityController extends ControllerBase {
     
     //（新增接口，添加一些字段，在租面积之类的，同时处理园区的分类问题）
     /**
-     * <b>URL: /community/updateCommunity</b>
+     * <b>URL: /community/updateCommunityAndCategory</b>
      * <p>修改园区信息</p>
      */
-    @RequestMapping("updateCommunity")
+    @RequestMapping("updateCommunityAndCategory")
     @RestReturn(value=String.class)
-    public RestResponse updateCommunity(UpdateCommunityNewCommand cmd) {
-    	this.communityService.updateCommunity(cmd);
+    public RestResponse updateCommunityAndCategory(UpdateCommunityNewCommand cmd) {
+    	this.communityService.updateCommunityAndCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

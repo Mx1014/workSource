@@ -1,7 +1,22 @@
 package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ *     <li>buildingId: 楼栋id</li>
+ *     <li>buildingName: 楼栋名称</li>
+ *     <li>address: 地址</li>
+ *     <li>apartmentNumber: 园区下的门牌数量</li>
+ *     <li>areaSize: 建筑面积</li>
+ *     <li>rentArea: 在租面积</li>
+ *     <li>freeArea: 可招租面积</li>
+ *     <li>chargeArea: 收费面积</li>
+ *     <li>relatedContractNumber: 在租合同数</li>
+ *     <li>areaAveragePrice: 在租实时均价（元/平方米）</li>
+ *     <li>relatedEnterpriseCustomerNumber: 入驻企业数</li>
+ *     <li>relatedOrganizationOwnerNumber: 入驻用户数</li>
+ * </ul>
+ */
 public class BuildingStatisticsDTO {
 	
 	private Long buildingId;
