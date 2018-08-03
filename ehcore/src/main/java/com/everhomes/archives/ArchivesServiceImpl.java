@@ -1790,10 +1790,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (date.equals(employee.getIdExpiryDate()))
                 idExpiry.append(employee.getContactName()).append("，");
             if (ArchivesUtil.getMonthAndDay(date).equals(employee.getCheckInTimeIndex())) {
+                Integer count = date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear();
+                if(count == 0)
+                    continue;
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
-                map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
+                map.put("year", count);
                 anniversary.append(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, ""));
             }
             if (ArchivesUtil.getMonthAndDay(date).equals(employee.getBirthdayIndex())) {
