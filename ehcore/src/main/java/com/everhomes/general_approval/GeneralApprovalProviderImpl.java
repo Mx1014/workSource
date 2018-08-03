@@ -58,7 +58,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
         dao.update(obj);
-        return obj.getId();
+        return obj.getFormOriginId();
     }
 
     @Override
