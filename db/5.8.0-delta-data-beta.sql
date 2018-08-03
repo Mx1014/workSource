@@ -18,6 +18,10 @@ SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0); -- APP
 INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
 VALUES (@id := @id + 1, 999951, NULL, 1, 'ENERGY', NULL, NULL, NULL, NULL, NULL, NULL);
 
+
+-- AUTHOR: 黄良铭
+-- REMARK: 修改logo_url字段长度由128改为512
+ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(512) ;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
