@@ -3230,6 +3230,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
@@ -3253,6 +3254,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
