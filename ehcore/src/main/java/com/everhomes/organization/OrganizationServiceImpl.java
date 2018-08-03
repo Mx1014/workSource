@@ -5816,7 +5816,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setEmployeeNo(cmd.getEmployeeNo());
             member.setContactDescription(cmd.getContactDescription());
             // organizationProvider.createOrganizationMember(member);
-
+            member.setStringTag3(cmd.getEmail());
             member.setCreatorUid(user.getId());
             member.setNickName(user.getNickName());
             member.setAvatar(user.getAvatar());
@@ -5912,6 +5912,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void approveForEnterpriseContact(ApproveContactCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
+        User user = this.userProvider.findUserById(cmd.getUserId());
         // 如果有人先把申请拒绝了，那就找不到此人了，此时也让它成功以便客户端不报错 by lqs 20160415
         // OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "approveForEnterpriseContact");
         List<OrganizationMember> members = new ArrayList<>();
@@ -5959,10 +5960,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
-                        //人事信息中添加入职日期
+                        //人事信息中添加其他信息
                         OrganizationMemberDetails detail = organizationProvider
                         		.findOrganizationMemberDetailsByOrganizationIdAndContactToken(member.getOrganizationId(), member.getContactToken());
                         if( detail != null ){
+                            UserIdentifier identifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),user.getNamespaceId());
+                            if (identifier != null) {
+                                detail.setRegionCode(identifier.getRegionCode().toString());
+                            }
+                            detail.setEmail(member.getStringTag3());
                         	Date date = new Date();
                         	detail.setCheckInTime(new java.sql.Date(date.getTime()));
                         	organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
@@ -11833,6 +11839,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd2.setTargetId(userId);
         cmd2.setContactDescription(cmd.getContactDescription());
         cmd2.setContactName(cmd.getContactName());
+        cmd2.setEmail(cmd.getEmail());
         applyForEnterpriseContact(cmd2);
         //目前写死30分钟
         dto.setEndTime(DateHelper.currentGMTTime().getTime() + 30 * 60 * 1000L);
