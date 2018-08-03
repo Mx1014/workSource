@@ -230,9 +230,13 @@ public class RequisitionServiceImpl implements RequisitionService{
             approval.setStatus(cmd.getStatus());
             if(cmd.getStatus().equals(GeneralApprovalStatus.RUNNING.getCode())){
                 GeneralApproval oldRunning = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
-                oldRunning.setStatus(GeneralApprovalStatus.INVALID.getCode());
+                if(oldRunning != null){
+                    oldRunning.setStatus(GeneralApprovalStatus.INVALID.getCode());
+                }
                 this.dbProvider.execute((status) -> {
-                    generalApprovalProvider.updateGeneralApproval(oldRunning);
+                    if(oldRunning != null){
+                        generalApprovalProvider.updateGeneralApproval(oldRunning);
+                    }
                     generalApprovalProvider.updateGeneralApproval(approval);
                     return null;
                 });
