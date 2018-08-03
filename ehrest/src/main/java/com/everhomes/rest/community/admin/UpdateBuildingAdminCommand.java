@@ -85,6 +85,43 @@ public class UpdateBuildingAdminCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+	
+	private Double rentArea;
+	private Double freeArea;
+	private Double chargeArea;
+	private Integer floorNumber;
+	
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Integer getFloorNumber() {
+		return floorNumber;
+	}
+
+	public void setFloorNumber(Integer floorNumber) {
+		this.floorNumber = floorNumber;
+	}
 
 	public Double getHeight() {
 		return height;

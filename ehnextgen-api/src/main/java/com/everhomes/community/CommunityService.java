@@ -145,4 +145,12 @@ public interface CommunityService {
 	//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
 
+	ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd);
+
+	CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd);
+
+	CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd);
+
+	void updateCommunity(UpdateCommunityNewCommand cmd);
+
 }

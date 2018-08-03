@@ -76,9 +76,11 @@ import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatus;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
+import com.everhomes.rest.community.CommunityDetailDTO;
 import com.everhomes.rest.community.CommunityGeoPointDTO;
 import com.everhomes.rest.community.CommunityNotificationTemplateCode;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.CommunityStatisticsDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CreateChildProjectCommand;
 import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
@@ -90,12 +92,16 @@ import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.community.GetCommunityByUuidCommand;
+import com.everhomes.rest.community.GetCommunityDetailCommand;
+import com.everhomes.rest.community.GetCommunityStatisticsCommand;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.community.ImportCommunityDataDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.ListBuildingsByKeywordsCommand;
+import com.everhomes.rest.community.ListBuildingsByKeywordsResponse;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
@@ -112,6 +118,7 @@ import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.community.UpdateBuildingOrderCommand;
 import com.everhomes.rest.community.UpdateChildProjectCommand;
 import com.everhomes.rest.community.UpdateCommunityAuthPopupConfigCommand;
+import com.everhomes.rest.community.UpdateCommunityNewCommand;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
@@ -3609,7 +3616,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
-		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -4678,6 +4684,34 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		return list;
+	}
+
+
+	@Override
+	public ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void updateCommunity(UpdateCommunityNewCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -10,6 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 组织id</li>
  * <li>buildingName: 楼栋号</li>
  * <li>keyword: 查询关键字</li>
+ * <li>apartmentFloor: 楼层</li>
+ * <li>areaSizeFrom: 建筑面积起点（查询条件）</li>
+ * <li>areaSizeTo: 建筑面积终点（查询条件）</li>
  * </ul>
  */
 public class ListPropApartmentsByKeywordCommand {
@@ -28,6 +31,26 @@ public class ListPropApartmentsByKeywordCommand {
     private Integer namespaceId;
 
     private Byte livingStatus;
+    
+    private Double areaSizeFrom;
+    
+    private Double areaSizeTo;
+    
+	public Double getAreaSizeFrom() {
+		return areaSizeFrom;
+	}
+
+	public void setAreaSizeFrom(Double areaSizeFrom) {
+		this.areaSizeFrom = areaSizeFrom;
+	}
+
+	public Double getAreaSizeTo() {
+		return areaSizeTo;
+	}
+
+	public void setAreaSizeTo(Double areaSizeTo) {
+		this.areaSizeTo = areaSizeTo;
+	}
 
 	public Byte getLivingStatus() {
 		return livingStatus;
