@@ -3406,13 +3406,18 @@ public class ParkingServiceImpl implements ParkingService {
 		if(lot.getFuncList()!=null && lot.getFuncList().contains("[")){
 			JSONArray array = JSONObject.parseArray(lot.getFuncList());
 			for (Object o : array) {
+				//暂时如此
+				if(ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())){
+					continue;
+				}
 				ParkingFuncDTO dto = new ParkingFuncDTO();
 				dto.setCode(o.toString());
+				dto.setEnableFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 				try {
 					Method method = ParkingLot.class.getMethod("get"+o.toString().substring(0,1).toUpperCase()+o.toString().substring(1) + "Flag");
 					Byte enbaleFlag = (Byte)method.invoke(lot);
 					dto.setEnableFlag(enbaleFlag);
-				} catch (NoSuchMethodException e) {
+				} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 					ParkingBusinessType parkingBusinessType = ParkingBusinessType.fromCode(o.toString());
 					ParkingCurrentInfoType parkingCurrentInfoType = ParkingCurrentInfoType.fromCode(lot.getCurrentInfoType());
 					if(parkingBusinessType == ParkingBusinessType.CAR_NUM && parkingCurrentInfoType == ParkingCurrentInfoType.CAR_NUM){
@@ -3425,12 +3430,6 @@ public class ParkingServiceImpl implements ParkingService {
 						flowModeList.add(Byte.valueOf(ParkingRequestFlowType.INTELLIGENT.getCode()+""));
 						break;
 					}
-				} catch (IllegalAccessException e) {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"IllegalAccessException e",e);
-				} catch (InvocationTargetException e) {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"InvocationTargetException e",e);
 				}
 				dockingFuncLists.add(dto);
 			}

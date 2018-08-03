@@ -51,7 +51,10 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
         if(parkingInstanceConfig.getParkingLotFuncConfigs()!=null) {
             for (ParkingLotFuncConfig parkingLotFuncConfig : parkingInstanceConfig.getParkingLotFuncConfigs()) {
                 ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotFuncConfig.getParkingLotId());
-                ParkingLotConfig config = (ParkingLotConfig) StringHelper.fromJsonString(instanceConfig, ParkingLotConfig.class);
+                if(parkingLot==null || parkingLot.getConfigJson()==null){
+                    continue;
+                }
+                ParkingLotConfig config = (ParkingLotConfig) StringHelper.fromJsonString(parkingLot.getConfigJson(), ParkingLotConfig.class);
                 if (parkingLot.getFuncList() != null) {
                     setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()), parkingLotFuncConfig.getDockingFuncLists());
                     setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()), parkingLotFuncConfig.getFuncLists());
@@ -63,6 +66,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
             }
         }
 
+        parkingInstanceConfig.setParkingLotFuncConfigs(null);
         return StringHelper.toJsonString(parkingInstanceConfig);
     }
 
