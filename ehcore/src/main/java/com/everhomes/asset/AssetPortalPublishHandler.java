@@ -32,7 +32,7 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     // zhang jiang gao ke holds a different uri because in this namespace, the older asset UI is still in use
    @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
-        if(instanceConfig == null){
+        if(instanceConfig == null || !instanceConfig.contains("categoryId")){
             // new pushlish app
             JSONObject config = new JSONObject();
             String urlKey = "url";
