@@ -4058,7 +4058,8 @@ public class PunchProviderImpl implements PunchProvider {
     public List<PunchDayLog> listPunchDayLogsByApprovalAttributeAndDeptIds(Long organizationId, List<Long> deptIds,
                                                                            Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS)
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
@@ -4090,7 +4091,7 @@ public class PunchProviderImpl implements PunchProvider {
         step.limit(offset, pageSize);
         List<PunchDayLog> result = new ArrayList<PunchDayLog>();
         step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(),Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchDayLog.class));
             return null;
         });
@@ -4102,7 +4103,8 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS);
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS)
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_STATISTICS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));
@@ -4135,7 +4137,7 @@ public class PunchProviderImpl implements PunchProvider {
         step.limit(offset, pageSize);
         List<PunchStatistic> result = new ArrayList<>();
         step.where(condition)
-                .orderBy(Tables.EH_PUNCH_STATISTICS.USER_ID.desc()).fetch().map((r) -> {
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_STATISTICS.DEPT_ID.desc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchStatistic.class));
             return null;
         });
@@ -4147,7 +4149,8 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS) 
+        		.leftOuterJoin(Tables.EH_UNIONGROUP_MEMBER_DETAILS).on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID));
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (userId != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.eq(userId));
@@ -4158,7 +4161,7 @@ public class PunchProviderImpl implements PunchProvider {
 
         List<PunchDayLog> result = new ArrayList<PunchDayLog>();
         step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchDayLog.class));
             return null;
         });

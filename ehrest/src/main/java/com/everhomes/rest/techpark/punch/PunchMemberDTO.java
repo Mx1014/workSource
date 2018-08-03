@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>userId: 用户id</li>
+ * <li>userId: 用户id - id为0或者null就是未激活</li>
  * <li>detailId: 员工档案id</li>
  * <li>contractName: 员工姓名</li>
  * <li>contactAvatar: 员工头像</li>
@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>departmentName: 部门名称</li>
  * <li>punchOrganizationId: 查询日期时所属考勤组</li>
  * <li>statisticsCount: 查询统计项的统计值</li>
+ * <li>ruleId: 打卡规则id 如果为空就是未设置规则</li>
  * </ul>
  */
 public class PunchMemberDTO {
@@ -25,7 +26,7 @@ public class PunchMemberDTO {
     private String departmentName;
     private Long punchOrganizationId;
     private Integer statisticsCount;
-
+    private Long ruleId;
     public Long getUserId() {
         return userId;
     }
@@ -102,4 +103,12 @@ public class PunchMemberDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getRuleId() {
+		return ruleId;
+	}
+
+	public void setRuleId(Long ruleId) {
+		this.ruleId = ruleId;
+	}
 }

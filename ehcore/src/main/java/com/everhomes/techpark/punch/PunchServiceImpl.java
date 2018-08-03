@@ -11761,6 +11761,10 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(pdl.getDeptId());
             dto.setDepartmentName(dpt.getName());
         }
+        PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), pdl.getEnterpriseId(), pdl.getDetailId());
+        if(pr != null){
+        	dto.setRuleId(pr.getId());
+        }
         return dto;
     }
 
@@ -11920,6 +11924,10 @@ public class PunchServiceImpl implements PunchService {
         if(null != statistic.getDeptId()){
             Organization dpt = checkOrganization(statistic.getDeptId());
             dto.setDepartmentName(dpt.getName());
+        }
+        PunchRule pr = getPunchRuleByDetailId(UserContext.getCurrentNamespaceId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getDetailId());
+        if(pr != null){
+        	dto.setRuleId(pr.getId());
         }
         return dto;
     }
