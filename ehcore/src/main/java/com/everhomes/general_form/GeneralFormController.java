@@ -182,7 +182,7 @@ public class GeneralFormController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("listGeneralFormFilter")
-	@RestReturn(value=String.class)
+	@RestReturn(value=String.class, collection = true)
 	public RestResponse listGeneralFormFilter(GetGeneralFormFilterCommand cmd) {
 		List<String> fieldNames = generalFormService.listGeneralFormFilter(cmd);
 		RestResponse response = new RestResponse(fieldNames);

@@ -177,7 +177,7 @@ public class RequisitionController extends ControllerBase {
 
     /**
      * <b>URL: /requisition/getApprovalRunningForm</b>
-     * <p> 前端传入模块ID，后台查找启用的审批流程并根据启用流程查找启用的表单，并返回  </p>
+     * <p>根据传入的approvalid查找approvaldto 从而获取formoriginid和formversion </p>
      * @param cmd
      * @return
      */
