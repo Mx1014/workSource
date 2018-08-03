@@ -613,18 +613,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //			处理人
 //			ctx.getOperator().getId();
 			if ("MOTIFYFEE".equals(btnNodeType)) {
-				FlowGraphEvent evt = ctx.getCurrentEvent();
-				if (FlowUserType.APPLIER.equals(evt.getUserType())){
-					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
-					FlowAutoStepDTO dto = new FlowAutoStepDTO();
-					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-					dto.setFlowCaseId(flowCase.getId());
-					dto.setFlowMainId(flowCase.getFlowMainId());
-					dto.setFlowNodeId(flowCase.getCurrentNodeId());
-					dto.setFlowVersion(flowCase.getFlowVersion());
-					dto.setStepCount(flowCase.getStepCount());
-					flowService.processAutoStep(dto);
-				}
+//				FlowGraphEvent evt = ctx.getCurrentEvent();
+//				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+//					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+//					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+//					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//					dto.setFlowCaseId(flowCase.getId());
+//					dto.setFlowMainId(flowCase.getFlowMainId());
+//					dto.setFlowNodeId(flowCase.getCurrentNodeId());
+//					dto.setFlowVersion(flowCase.getFlowVersion());
+//					dto.setStepCount(flowCase.getStepCount());
+//					flowService.processAutoStep(dto);
+//				}
 			} else if ("CONFIRMFEE".equals(btnNodeType)){
 // 费用确认客户端调用业务接口
 //				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
