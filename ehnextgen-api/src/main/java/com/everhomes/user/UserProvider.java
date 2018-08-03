@@ -208,8 +208,6 @@ public interface UserProvider {
     String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId);
     String findUserTokenOfUser(Long userId);
 
-    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
-            String identifierToken, Integer namespaceId);
 
     Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
