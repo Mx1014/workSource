@@ -143,5 +143,19 @@ public class AddressAdminController extends ControllerBase {
         return response;
     }
     
-
+    //TODO 下载房源信息
+    /**
+     * <b>URL: /admin/address/exportApartment</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="exportApartment", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse exportApartment(@RequestParam(value = "attachment") MultipartFile[] files) {
+    	//addressService.exportApartment(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

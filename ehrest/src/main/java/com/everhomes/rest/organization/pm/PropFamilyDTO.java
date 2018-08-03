@@ -5,14 +5,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 家庭Id</li>
- * <li>name: 家庭名称</li>
- * <li>memberCount: 家庭成员数</li>
- * <li>address: 家庭所在地址详情</li>
- * <li>addressId: 地址信息</li>
- * <li>livingStatus: 地址状态, 详见{@link com.everhomes.rest.organization.pm.PmMemberStatus}</li>
- * <li>owed: 是否欠费 , 详见{@link com.everhomes.rest.organization.pm.OwedType}</li>
- * <li>reservationInvolved: 是否被预定业务占用</li>
+ * 	<li>id: 家庭Id</li>
+ * 	<li>name: 家庭名称</li>
+ * 	<li>memberCount: 家庭成员数</li>
+ * 	<li>address: 家庭所在地址详情</li>
+ * 	<li>addressId: 地址信息</li>
+ * 	<li>livingStatus: 地址状态, 详见{@link com.everhomes.rest.organization.pm.PmMemberStatus}</li>
+ * 	<li>owed: 是否欠费 , 详见{@link com.everhomes.rest.organization.pm.OwedType}</li>
+ * 	<li>reservationInvolved: 是否被预定业务占用</li>
+ * 	<li>buildingName: 楼栋名称</li>
+ * 	<li>communityName: 项目名称</li>
  * </ul>
  */
 public class PropFamilyDTO {
@@ -33,7 +35,25 @@ public class PropFamilyDTO {
     private Long relatedAddressArrangementBeginDate;
     private Byte isFutureApartment;
     private Byte arrangementInvolved;
+    private String buildingName;
+    private String communityName;
     
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
 	public Byte getArrangementInvolved() {
 		return arrangementInvolved;
 	}

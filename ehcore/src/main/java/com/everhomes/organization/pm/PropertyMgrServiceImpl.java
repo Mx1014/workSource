@@ -139,6 +139,7 @@ import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.ArrangementOperationFlag;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
@@ -146,6 +147,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -7917,4 +7919,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             dto.setApartments(addressDtos);
         }
     }
+
+	@Override
+	public List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

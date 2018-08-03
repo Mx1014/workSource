@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityName: 园区名称</li>
  *     <li>address: 地址</li>
  *     <li>buildingNumber: 园区下的楼栋数量</li>
+ *     <li>apartmentNumber: 园区下的门牌数量</li>
  *     <li>areaSize: 建筑面积</li>
  *     <li>rentArea: 在租面积</li>
  *     <li>freeArea: 可招租面积</li>
@@ -22,6 +23,7 @@ public class CommunityStatisticsDTO {
 	private String communityName;
 	private String address;
 	private Integer buildingNumber;
+	private Integer apartmentNumber;
 	private Double areaSize;
 	private Double rentArea;
 	private Double freeArea;
@@ -29,6 +31,12 @@ public class CommunityStatisticsDTO {
 	private Integer relatedContractNumber;
 	private Double areaAveragePrice;
 	
+	public Integer getApartmentNumber() {
+		return apartmentNumber;
+	}
+	public void setApartmentNumber(Integer apartmentNumber) {
+		this.apartmentNumber = apartmentNumber;
+	}
 	public Integer getRelatedContractNumber() {
 		return relatedContractNumber;
 	}

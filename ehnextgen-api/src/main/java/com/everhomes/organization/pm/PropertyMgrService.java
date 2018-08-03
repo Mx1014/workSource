@@ -2,11 +2,13 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -613,7 +615,9 @@ public interface PropertyMgrService {
     ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
 
     void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
+    
     DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    
     List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 
     void createReservation(CreateReservationCommand cmd);
@@ -625,4 +629,6 @@ public interface PropertyMgrService {
     void deleteReservation(DeleteReservationCommand cmd);
 
     void cancelReservation(CancelReservationCommand cmd);
+
+	List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd);
 }

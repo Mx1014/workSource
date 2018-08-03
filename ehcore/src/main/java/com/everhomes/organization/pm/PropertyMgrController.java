@@ -8,11 +8,13 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -2308,4 +2310,20 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	//展示房源日志：pm/listApartmentEvents（新增接口）
+	/**
+	 * <p>展示房源日志</p>
+	 * <b>URL: /pm/listApartmentEvents</b>
+	 */
+	@RequestMapping("listApartmentEvents")
+	@RestReturn(value = ApartmentEventDTO.class, collection = true)
+	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
+	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

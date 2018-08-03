@@ -30,6 +30,8 @@ import com.everhomes.util.StringHelper;
  * <li>arrangementOperationType:房源的拆分/合并计划（0：无,1：拆分,2：合并）</li>
  * <li>relatedContractEndDate:与该房源关联的合同的结束日期</li>
  * <li>freeArea: 可招租面积</li>
+ * <li>isPassiveApartment: 在参与房源合并计划时，该房源是否是被合并的房源（0：否,1：是）</li>
+ * <li>reservationInvolved: 该房源是否关联预定计划（0：否,1：是）</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {

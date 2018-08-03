@@ -74,6 +74,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
+import com.everhomes.rest.community.BuildingStatisticsDTO;
 import com.everhomes.rest.community.BuildingStatus;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityDetailDTO;
@@ -87,6 +88,7 @@ import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.community.DeleteChildProjectCommand;
 import com.everhomes.rest.community.GetBuildingCommand;
+import com.everhomes.rest.community.GetBuildingStatisticsCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
@@ -4712,6 +4714,13 @@ public class CommunityServiceImpl implements CommunityService {
 	public void updateCommunity(UpdateCommunityNewCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+
+	@Override
+	public BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 
