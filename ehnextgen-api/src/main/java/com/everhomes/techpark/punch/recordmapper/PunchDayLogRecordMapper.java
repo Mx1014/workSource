@@ -49,9 +49,9 @@ public class PunchDayLogRecordMapper implements RecordMapper<Record, PunchDayLog
     	result.setSmartAlignment(r.getValue((Field<String>)r.field("smart_alignment")));
     	result.setBelateTimeTotal(r.getValue((Field<Long>)r.field("belate_time_total")));
     	result.setLeaveEarlyTimeTotal(r.getValue((Field<Long>)r.field("leave_early_time_total")));
-    	result.setOvertimeTotalWorkday(r.getValue((Field<Long>)r.field("overtime_count_workday")));
-    	result.setOvertimeTotalRestday(r.getValue((Field<Long>)r.field("overtime_count_restday")));
-    	result.setOvertimeTotalLegalHoliday(r.getValue((Field<Long>)r.field("overtime_count_legal_holiday")));
+//    	result.setOvertimeTotalWorkday(r.getValue((Field<Long>)r.field("overtime_count_workday")));
+//    	result.setOvertimeTotalRestday(r.getValue((Field<Long>)r.field("overtime_count_restday")));
+//    	result.setOvertimeTotalLegalHoliday(r.getValue((Field<Long>)r.field("overtime_count_legal_holiday")));
     	result.setRestFlag(r.getValue((Field<Byte>)r.field("rest_flag")));
     	result.setAbsentFlag(r.getValue((Field<Byte>)r.field("absent_flag")));
     	result.setNormalFlag(r.getValue((Field<Byte>)r.field("normal_flag")));
