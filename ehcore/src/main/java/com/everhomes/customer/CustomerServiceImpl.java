@@ -768,6 +768,105 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if (null != dto.getBuyOrLeaseItemId()) {
+            ScopeFieldItem buyOrLeaseItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getBuyOrLeaseItemId());
+            if (null != buyOrLeaseItem) {
+                dto.setBuyOrLeaseItemName(buyOrLeaseItem.getItemDisplayName());
+            } else {
+                dto.setBuyOrLeaseItemName(null);
+            }
+        }
+
+        if (null != dto.getFinancingDemandItemId()) {
+            ScopeFieldItem financingDemandItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getFinancingDemandItemId());
+            if (null != financingDemandItem) {
+                dto.setFinancingDemandItemName(financingDemandItem.getItemDisplayName());
+            } else {
+                dto.setSerialEntrepreneurName(null);
+            }
+        }
+
+        if (null != dto.getDropBox1ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox1ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox1ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox2ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox2ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox2ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox2ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox3ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox3ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox3ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox3ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox4ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox4ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox4ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox4ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox5ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox5ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox5ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox5ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox6ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox6ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox6ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox6ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox7ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox7ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox7ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox7ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox8ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox8ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox8ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox8ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
+            }
+        }
+
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if (!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
