@@ -17,6 +17,7 @@ import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -5805,5 +5806,13 @@ public class AssetProviderImpl implements AssetProvider {
         }
 	    return isConfigSubtraction;
 	}
-    
+	
+	@Override
+    public Double getApartmentInfo(Long addressId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select(Tables.EH_ADDRESSES.CHARGE_AREA)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(0,Double.class);
+    }
 }

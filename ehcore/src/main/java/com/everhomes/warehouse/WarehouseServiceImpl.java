@@ -1968,10 +1968,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 			List<WarehouseStockExportDetailDTO> data = stockDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
 			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                     "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+                    "2、请在表格里面逐行录入数据，若连续10行内容为空，录入数据不再被识别。建议一次最多导入400条信息。\n" +
                     "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
                     "4、带有星号（*）的红色字段为必填项。\n" +
-                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "5、请注意：\n" +
+                    "		1）填写的物品信息与物品分类需要匹配，若不匹配会导致导入不成功。\n" +
+                    "		2）一次导入物品编码不可重复，如果导入时一个编码导入多条，数量则会累加。\n" +
+                    "		3）必填信息如果不导入，则该条数据导入失败。\n" +
+                    "		4）物品编号与名称、分类编码、所属仓库等需要为系统中存在的，如果在系统不存在，则该条信息导入失败。\n" +
+                    "		5）导入操作为刷新物品库存而非增加，导入后会新增一条入库记录。（限制导入的库存数必须大于等于现有库存，否则导入不成功）\n" +
                     "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
 			String[] propertyNames = {"materialNumber", "materialName", "categoryName", "amount", "unitName", "supplierName", "warehouseName", "updateTime"};
 			String[] titleNames = {"物品编号", "物品名称", "物品分类", "库存", "单位", "供应商", "仓库名称", "更新时间"};
