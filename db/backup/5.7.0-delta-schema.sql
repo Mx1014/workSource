@@ -37,7 +37,7 @@ CREATE TABLE `eh_customer_attachments` (
   `creator_uid` BIGINT(20) NOT NULL DEFAULT 0,
   `create_time` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业管理1.0 附件表';
 -- end
 
 
@@ -328,6 +328,15 @@ ALTER TABLE `eh_aclink_servers` DROP INDEX `u_eh_aclink_servers_uuid`;
 -- REMARK issue-33610 服务联盟 服务表字段过短导致前端解析出错
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `service_url` `service_url` VARCHAR(512) NULL DEFAULT NULL;
 -- end
+
+-- 通用脚本
+-- AUTHOR： jiarui  20180725
+-- REMARK: issue-33088 增加索引
+ALTER TABLE eh_var_field_scopes ADD INDEX `i_eh_filed_scope`(`module_name`,`status`,`namespace_id`);
+ALTER TABLE eh_var_field_item_scopes ADD INDEX `i_eh_field_item_scope`(`module_name`,`status`,`namespace_id`);
+ALTER TABLE eh_var_field_group_scopes ADD INDEX `i_eh_field_group_scope`(`module_name`,`status`,`namespace_id`);
+ALTER TABLE eh_var_field_item_scopes ADD INDEX `i_eh_item_scope_item_id`(`module_name`,`status`,`namespace_id`);
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

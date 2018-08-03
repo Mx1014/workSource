@@ -468,17 +468,19 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    public Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
         com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
         final Integer[] count = {0};
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
                 (DSLContext context, Object reducingContext)-> {
+                    Condition appUser = t.NAMESPACE_USER_TYPE.isNull().and(t.NAMESPACE_USER_TOKEN.eq(""));
+                    Condition weiXinUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode());
+
                     SelectQuery<Record1<Integer>> query = context
                             .selectCount().from(t)
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
-                            .and(t.NAMESPACE_USER_TYPE.isNull())
-                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
+                            .and(appUser.or(weiXinUser))
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {
@@ -497,17 +499,19 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
-    public List<User> listUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+    public List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
         com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
         final List<User> users = new ArrayList<>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
                 (DSLContext context, Object reducingContext)-> {
+                    Condition appUser = t.NAMESPACE_USER_TYPE.isNull().and(t.NAMESPACE_USER_TOKEN.eq(""));
+                    Condition weiXinUser = t.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode());
+
                     SelectQuery<EhUsersRecord> query = context
                             .selectFrom(t)
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
-                            .and(t.NAMESPACE_USER_TYPE.isNull())
-                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
+                            .and(appUser.or(weiXinUser))
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {

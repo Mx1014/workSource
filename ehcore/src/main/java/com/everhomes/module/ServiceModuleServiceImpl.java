@@ -1071,8 +1071,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             if (null == scopes || scopes.size() == 0) {
                 scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
             }
-            if (scopes.size() != 0)
+            if (scopes.size() != 0) {
+            	//临时解决办法，未来应该使用应用来逻辑闭环 by janson
+            	ServiceModuleScope s1 = new ServiceModuleScope();
+            	s1.setId(200l);
+            	s1.setModuleId(200l);
+            	s1.setNamespaceId(namespaceId);
+            	s1.setApplyPolicy(ServiceModuleScopeApplyPolicy.REVERT.getCode());
+            	scopes.add(s1);
                 list = filterList(list, scopes);
+            }
         }
 
         List<ServiceModuleDTO> temp = list.stream().map(r -> {

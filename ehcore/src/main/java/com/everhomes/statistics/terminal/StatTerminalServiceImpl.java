@@ -274,7 +274,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
                     // step 5
                     List<Long> uids = statTerminalProvider.listUserIdByInterval(namespace.getId(), null, null);
-                    List<User> users = userProvider.listUserByCreateTime(namespace.getId(), null, null, uids);
+                    List<User> users = userProvider.listAppAndWeiXinUserByCreateTime(namespace.getId(), null, null, uids);
 
                     for (User user : users) {
                         UserActivity activity = new UserActivity();
@@ -711,7 +711,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             stat.setStartNumber(hourMap.get("startupNumber").longValue());
 
             // 这次是查询真正的新增用户
-            Integer totalNewUserNumber = userProvider.countUserByCreateTime(namespaceId, dateTime, dateTime.plusHours(1), null);
+            Integer totalNewUserNumber = userProvider.countAppAndWeiXinUserByCreateTime(namespaceId, dateTime, dateTime.plusHours(1), null);
             stat.setNewUserNumber(totalNewUserNumber.longValue());
 
             // 时段累计日活
@@ -719,7 +719,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             stat.setCumulativeActiveUserNumber(dayMap.get("activeUserNumber").longValue());
 
             // 总用户数
-            Integer cumulativeUserNumber = userProvider.countUserByCreateTime(namespaceId, null, dateTime.plusHours(1), null);
+            Integer cumulativeUserNumber = userProvider.countAppAndWeiXinUserByCreateTime(namespaceId, null, dateTime.plusHours(1), null);
             stat.setCumulativeUserNumber(cumulativeUserNumber.longValue());
 
             if (stat.getCumulativeUserNumber() == 0L) {
@@ -753,7 +753,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         }
 
         List<Long> uids = statTerminalProvider.listUserIdByInterval(namespaceId, startOfDay, endOfDay);
-        List<User> notInUserActivityUsers = userProvider.listUserByCreateTime(namespaceId, startOfDay, endOfDay, uids);
+        List<User> notInUserActivityUsers = userProvider.listAppAndWeiXinUserByCreateTime(namespaceId, startOfDay, endOfDay, uids);
 
         List<UserActivity> activityList = new ArrayList<>(notInUserActivityUsers.size());
         for (User user : notInUserActivityUsers) {

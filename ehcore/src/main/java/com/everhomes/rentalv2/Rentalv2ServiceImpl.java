@@ -1229,20 +1229,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		for (RentalResource rentalSite : rentalSites) {
 			//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, null, true);
-			//帮客户端处理一下 颠倒按月按周预约规则的位置
-			List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
-			int i = 0;
-			for (;i<sitePriceRules.size();i++)
-				if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
-					break;
-			int j = 0;
-			for (;j<sitePriceRules.size();j++)
-				if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
-					break;
-			if (i<sitePriceRules.size() && j<sitePriceRules.size()){
-				sitePriceRules.add(sitePriceRules.get(i));
-				sitePriceRules.remove(i);
-			}
+
 			response.getRentalSites().add(rSiteDTO);
 		}
 
@@ -1374,6 +1361,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setOwnerName(ownerCom.getName());
 				rSiteDTO.getOwners().add(dto);
 			}
+		}
+
+		//帮客户端处理一下 颠倒按月按周预约规则的位置
+		List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
+		int i = 0;
+		for (;i<sitePriceRules.size();i++)
+			if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
+				break;
+		int j = 0;
+		for (;j<sitePriceRules.size();j++)
+			if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
+				break;
+		if (i<sitePriceRules.size() && j<sitePriceRules.size()){
+			sitePriceRules.add(sitePriceRules.get(i));
+			sitePriceRules.remove(i);
 		}
 
 		if (setShowPriceFlag) {
@@ -4896,7 +4898,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							.append(parseTimeInterval(halfDayIntervals.get(0).getEndTime())).append(separate);
 					builder.append("下午:").append(parseTimeInterval(halfDayIntervals.get(1).getBeginTime())).append("-")
 							.append(parseTimeInterval(halfDayIntervals.get(1).getEndTime())).append(separate);
-					if (rentalType.equals(RentalType.THREETIMEADAY.getCode()) && halfDayIntervals.size()>2)
+					if (halfDayIntervals.size()>2)
 						builder.append("晚上:").append(parseTimeInterval(halfDayIntervals.get(2).getBeginTime())).append("-")
 								.append(parseTimeInterval(halfDayIntervals.get(2).getEndTime())).append(separate);
 					builder.deleteCharAt(builder.length()-1);
@@ -9035,12 +9037,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
-        Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
+        collect.sort(Comparator.comparing(EhRentalv2Cells::getId));
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
 		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
-		result.replaceAll("-","~");//弱智需求。。
+		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
+		    result = result.replaceAll("-","~");//弱智需求。。
 		return result;
 	}
 }

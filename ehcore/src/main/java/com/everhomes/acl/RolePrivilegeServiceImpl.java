@@ -1,11 +1,16 @@
 package com.everhomes.acl;
 
-import com.everhomes.community.*;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.community.ResourceCategory;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerAdminRecord;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
@@ -15,9 +20,20 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.module.*;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleAssignment;
+import com.everhomes.module.ServiceModulePrivilege;
+import com.everhomes.module.ServiceModulePrivilegeType;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.portal.AuthorizationsAppControl;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -34,11 +50,35 @@ import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ResourceCategoryType;
-import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.module.*;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.module.ControlTarget;
+import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
+import com.everhomes.rest.module.ListServiceModulesResponse;
+import com.everhomes.rest.module.Project;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
+import com.everhomes.rest.organization.CreateOrganizationCommand;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
 import com.everhomes.rest.organization.pm.PmMemberTargetType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.user.IdentifierType;
@@ -47,6 +87,8 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -54,7 +96,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CopyUtils;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -72,11 +118,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -1504,6 +1557,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	@Deprecated
 	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
+		//由于前端没有对手机号作校验，可能会存 在有空格的情况，故在此进行去空格。add by huangliangming
+		if(cmd != null && cmd.getContactToken() != null){
+			cmd.setContactToken(cmd.getContactToken().trim());
+		}
 //        OrganizationContactDTO contactDTO = dbProvider.execute(
 //                r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN));
 //		if(contactDTO != null) {
@@ -1677,8 +1734,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		//sync to customer admin record
 		EnterpriseCustomer customer = customerProvider.findByOrganizationId(organizationId);
-		if(customer!=null)
-		customerProvider.createEnterpriseCustomerAdminRecord(customer.getId(), contactName, member.getTargetType(), contactToken,customer.getNamespaceId());
+		if (customer != null) {
+			List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecordsByToken(customer.getId(), contactToken);
+			if (records == null || records.size() == 0) {
+				customerProvider.createEnterpriseCustomerAdminRecord(customer.getId(), contactName, member.getTargetType(), contactToken, customer.getNamespaceId());
+			}
+		}
 
 		return processOrganizationContactDTO(member);
 	}
