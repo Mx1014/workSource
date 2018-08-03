@@ -1,5 +1,7 @@
 package com.everhomes.customer;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.locale.LocaleStringService;
@@ -8,16 +10,23 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.common.SyncDataResultLog;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
+import com.everhomes.rest.customer.SyncDataResult;
+import com.everhomes.rest.customer.SyncDataTaskStatus;
+import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.customer.SyncResultViewedFlag;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -45,6 +54,12 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     @Autowired
     private CommunityProvider communityProvider;
 
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private static final Long EXPIRE_TIME_DURATION = 1800000L;
+
+
     @Override
     public SyncDataTask executeTask(ExecuteSyncTaskCallback callback, SyncDataTask task) {
         task.setStatus(SyncDataTaskStatus.EXECUTING.getCode());
@@ -53,25 +68,71 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     LOGGER.debug("SyncDataTask RUN");
                     UserContext.setCurrentUser(user);
-//                    SyncDataResponse response = callback.syncData();
-                    callback.syncData();
+                    // this code used to ensure that only one thread executing at the same time
+                    Boolean runningFlag = true;
+                    if (StringUtils.isNotBlank(task.getLockKey())) {
+                        runningFlag = requireSyncDataLock(task.getLockKey());
+                    }
+                    if (runningFlag) {
+                        callback.syncData();
+                    }
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());
                     task.setResult("同步成功");
-                }catch (Exception e){
+                } catch (Exception e) {
                     LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(SyncDataTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
-                }finally {
+                } finally {
                     LOGGER.debug("SyncDataTask task: {}", StringHelper.toJsonString(task));
                     syncDataTaskProvider.updateSyncDataTask(task);
+                    if(StringUtils.isNotBlank(task.getLockKey())) {
+                        releaseSyncLock(task.getLockKey());
+                    }
                 }
 
             }
         });
         return task;
+    }
+
+    @Override
+    public void releaseSyncLock(String lockKey) {
+        Accessor accessor = bigCollectionProvider.getMapAccessor(lockKey, "");
+        RedisTemplate redisTemplate = accessor.getTemplate(new StringRedisSerializer());
+        redisTemplate.delete(lockKey);
+    }
+
+    private StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    @Override
+    public Boolean requireSyncDataLock(String lockKey) {
+        // may occur exception when setting expire time which may cause deadLock,spring data redis 2.1X can resolve this
+        Accessor accessor = bigCollectionProvider.getMapAccessor(lockKey, "");
+        RedisTemplate redisTemplate = accessor.getTemplate(new StringRedisSerializer());
+        Boolean absent = redisTemplate.opsForValue().setIfAbsent(lockKey, String.valueOf(System.currentTimeMillis() + EXPIRE_TIME_DURATION));
+        if (absent) {
+            return true;
+        } else {
+            String lockValue = (String) redisTemplate.opsForValue().get(lockKey);
+            if (StringUtils.isNotBlank(lockValue) && Long.parseLong(lockValue) < System.currentTimeMillis()) {
+                String periodLockValue = (String) redisTemplate.opsForValue().getAndSet(lockKey, String.valueOf(System.currentTimeMillis() + EXPIRE_TIME_DURATION));
+                if (periodLockValue.equals(lockValue) && StringUtils.isNotBlank(periodLockValue)) {
+                    return true;
+                }
+            }
+        }
+//        Expiration expiration = Expiration.from(3, TimeUnit.HOURS);
+//        redisTemplate.execute(redisConnection -> {
+//            redisConnection.set(stringRedisSerializer.serialize(lockKey), stringRedisSerializer.serialize("executing"), expiration, RedisStringCommands.SetOption.ifAbsent());
+//            return null;
+//        },true);
+//
+//        return true;
+//      redisConnection.execute("set", lockKey.getBytes(),"executing".getBytes(),"EX".getBytes(),"100".getBytes()), true,true);
+        return false;
     }
 
     @Override
@@ -82,10 +143,10 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
         SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
 
-        if(null != task){
-            if(SyncDataTaskStatus.FINISH == SyncDataTaskStatus.fromCode(task.getStatus())){
-                response =  (SyncDataResponse)StringHelper.fromJsonString(task.getResult(), SyncDataResponse.class);
-                List<SyncDataResultLog> logs =  response.getLogs();
+        if (null != task) {
+            if (SyncDataTaskStatus.FINISH == SyncDataTaskStatus.fromCode(task.getStatus())) {
+                response = (SyncDataResponse) StringHelper.fromJsonString(task.getResult(), SyncDataResponse.class);
+                List<SyncDataResultLog> logs = response.getLogs();
                 if (logs != null) {
                     for (SyncDataResultLog log : logs) {
                         log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
@@ -101,7 +162,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     @Override
     public String syncHasViewed(Long communityId, String syncType) {
         Integer notViewedCount = syncDataTaskProvider.countNotViewedSyncResult(communityId, syncType);
-        if(notViewedCount == 0) {
+        if (notViewedCount == 0) {
             return String.valueOf(SyncResultViewedFlag.VIEWED.getCode());
         }
         return String.valueOf(SyncResultViewedFlag.NOT_VIEWED.getCode());
@@ -110,30 +171,30 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     @Override
     public ListCommunitySyncResultResponse listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor) {
         Community community = communityProvider.findCommunityById(communityId);
-        if(community == null) {
+        if (community == null) {
             return null;
         }
         ListCommunitySyncResultResponse response = new ListCommunitySyncResultResponse();
         List<SyncDataTask> tasks = syncDataTaskProvider.listCommunitySyncResult(communityId, syncType, pageSize + 1, pageAnchor);
-        if(tasks != null && tasks.size() > 0) {
+        if (tasks != null && tasks.size() > 0) {
             List<SyncDataResult> results = new ArrayList<>();
             for (SyncDataTask task : tasks) {
                 SyncDataResult result = new SyncDataResult();
                 result.setStartTime(task.getCreateTime());
                 result.setEndTime(task.getUpdateTime());
                 result.setStatus(task.getStatus());
-                if(SyncDataTaskStatus.FINISH.equals(SyncDataTaskStatus.fromCode(task.getStatus()))
+                if (SyncDataTaskStatus.FINISH.equals(SyncDataTaskStatus.fromCode(task.getStatus()))
                         || SyncDataTaskStatus.EXCEPTION.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
                     result.setEndTime(task.getUpdateTime());
                     result.setResult(task.getResult());
-                } else if(SyncDataTaskStatus.EXECUTING.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
+                } else if (SyncDataTaskStatus.EXECUTING.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
                     result.setRateOfProgress(calculateProgress(community, syncType));
                 }
 
-                if(task.getCreatorUid() == null || task.getCreatorUid() == 0L) {
-                    result.setManualFlag((byte)0);
+                if (task.getCreatorUid() == null || task.getCreatorUid() == 0L) {
+                    result.setManualFlag((byte) 0);
                 } else {
-                    result.setManualFlag((byte)1);
+                    result.setManualFlag((byte) 1);
 
                 }
                 results.add(result);
@@ -142,7 +203,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                 syncDataTaskProvider.updateSyncDataTask(task, false);
             }
 
-            if(tasks.size() > pageSize) {
+            if (tasks.size() > pageSize) {
                 results.remove(results.size() - 1);
                 response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
             }
@@ -153,26 +214,26 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
     private Double calculateProgress(Community community, String syncType) {
         Byte dataType = (byte) 0;
-        if(SyncDataTaskType.CONTRACT.getCode().equals(syncType)) {
+        if (SyncDataTaskType.CONTRACT.getCode().equals(syncType)) {
             dataType = DataType.CONTRACT.getCode();
-        } else if(SyncDataTaskType.CUSTOMER.getCode().equals(syncType)) {
+        } else if (SyncDataTaskType.CUSTOMER.getCode().equals(syncType)) {
             dataType = DataType.ENTERPRISE.getCode();
-        } else if(SyncDataTaskType.INDIVIDUAL.getCode().equals(syncType)) {
+        } else if (SyncDataTaskType.INDIVIDUAL.getCode().equals(syncType)) {
             dataType = DataType.INDIVIDUAL.getCode();
         }
         List<ZjSyncdataBackup> backups = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(community.getNamespaceId(),
                 community.getNamespaceCommunityToken(), dataType);
-        if(backups != null && backups.size() > 0) {
+        if (backups != null && backups.size() > 0) {
             int i = 0;
             for (ZjSyncdataBackup backup : backups) {
-                if(backup.getStatus() == CommonStatus.INACTIVE.getCode()) {
+                if (backup.getStatus() == CommonStatus.INACTIVE.getCode()) {
                     i++;
                 }
             }
-            if(i == 0) {
-                return 0.5 - ((double)1 / ((double)backups.size()*2));
+            if (i == 0) {
+                return 0.5 - ((double) 1 / ((double) backups.size() * 2));
             }
-            return 0.5 + ((double)i / ((double)backups.size()*2));
+            return 0.5 + ((double) i / ((double) backups.size() * 2));
         }
 
         return 1.0;
