@@ -11,8 +11,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -24,6 +22,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -733,13 +734,16 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }else{
             LOGGER.error("this form not filter");
             GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
-            GeneralFormDTO dto = ConvertHelper.convert(request, GeneralFormDTO.class);
-            return dto.getFormFields().stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
-
+            if(request != null){
+                Gson gson = new Gson();
+                List<GeneralFormFieldDTO> formFields = gson.fromJson(request.getTemplateText(), new TypeToken<List<GeneralFormFieldDTO>>(){}.getType()); 
+                return formFields.stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
+            }else{
+                LOGGER.error("can not find running approval." + cmd.getNamespaceId() + cmd.getModuleId());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+                        "listGeneralFormFilter false: can not find running approval.");
+            }
         }
-
-
-
     }
 
     @Override
@@ -768,11 +772,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
 
     }
-
-
-
-
-
 
 }
 
