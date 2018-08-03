@@ -2872,7 +2872,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		if (arrangement != null) {
 			response.setArrangementOperationType(arrangement.getOperationType());
 			if (AddressArrangementType.MERGE.getCode() == arrangement.getOperationType()) {
-				if (arrangement.getAddressId() == cmd.getId()) {
+				if (arrangement.getAddressId().equals(cmd.getId())) {
 					response.setIsPassiveApartment((byte)0);
 				}else {
 					response.setIsPassiveApartment((byte)1);
