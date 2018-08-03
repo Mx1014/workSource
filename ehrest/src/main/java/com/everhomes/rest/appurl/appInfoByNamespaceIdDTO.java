@@ -16,20 +16,16 @@ import com.everhomes.util.StringHelper;
  * </ul>
  *
  */
-public class CreateAppInfoCommand {
+public class appInfoByNamespaceIdDTO {
 	
 	@NotNull
-	private Integer namespaceId;	
+	private Integer namespaceId;
 	private String name;
 	private String logoUrl;
 	private String description;
 	private List<AppUrlDeviceDTO> dtos ;
 	
-	public CreateAppInfoCommand() {
-		super();
-	}
 
-	
 	public List<AppUrlDeviceDTO> getDtos() {
 		return dtos;
 	}
