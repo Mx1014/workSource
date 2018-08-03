@@ -3845,9 +3845,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd) {
 		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
 		order.setPayTotalMoney(changePayAmount(cmd.getAmount()));
-		rentalv2Provider.updateRentalBill(order);
-		//删除记录方便重新下单
-		payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()));
+		//删除记录
+        //rentalv2AccountProvider.deleteOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+        //重新生成订单号 防止支付那边重复
+        order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+        rentalv2Provider.updateRentalBill(order);
+		//payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()));
 		Map<String, String> map = new HashMap<>();
 		map.put("resourceName", order.getResourceName());
 		map.put("startTime", order.getUseDetail());
