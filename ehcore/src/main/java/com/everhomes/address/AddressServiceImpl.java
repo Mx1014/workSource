@@ -22,6 +22,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
@@ -2884,26 +2885,32 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	//需要显示的是所有房源关联的企业客户，个人客户，和合同信息
 	private void generateApartmentRelatedInfo(AddressArrangementDTO dto,List<ArrangementApartmentDTO> apartments){
+		List<EnterpriseCustomerDTO> enterpriseCustomersList = new ArrayList<>();
+	    List<OrganizationOwnerDTO> individualCustomersList = new ArrayList<>();
+	    List<ContractDTO> contractsList = new ArrayList<>();
 		for(ArrangementApartmentDTO apartment:apartments){
 			//企业客户
 			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
 			listApartmentEnterpriseCustomersCommand.setAddressId(apartment.getAddressId());
 			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
-			dto.setEnterpriseCustomers(enterpriseCustomers);
+			enterpriseCustomersList.addAll(enterpriseCustomers);
 			//个人客户
 			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
 			listOrganizationOwnersByAddressCommand.setAddressId(apartment.getAddressId());
 			listOrganizationOwnersByAddressCommand.setOrganizationId(dto.getOrganizationId());
 			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
-			dto.setIndividualCustomers(individualCustomers);
+			individualCustomersList.addAll(individualCustomers);
 			//合同信息
 			List<Contract> contracts = contractProvider.listContractsByAddressId(apartment.getAddressId());
 			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
 				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
 				return contractDTO;
 			}).collect(Collectors.toList());
-			dto.setContracts(contractDTOs);
+			contractsList.addAll(contractDTOs);
 		}
+		dto.setEnterpriseCustomers(enterpriseCustomersList);
+		dto.setIndividualCustomers(individualCustomersList);
+		dto.setContracts(contractsList);
 	}
 
 	@Override
