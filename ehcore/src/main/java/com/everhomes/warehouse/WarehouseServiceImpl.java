@@ -595,6 +595,21 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
+		// 增加必要的参数校验
+		if (cmd.getStocks() != null) {
+			for (WarehouseMaterialStock stock : cmd.getStocks()) {
+				if (stock.getAmount() == null) {
+					LOGGER.error("Amount cannot be empty.");
+					throw errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_AMOUNT_EMPTY,
+							"Amount cannot be empty.");
+				}
+				if (stock.getWarehouseId() == null) {
+					LOGGER.error("WarehouseName cannot be empty.");
+					throw errorWith(WarehouseServiceErrorCode.SCOPE,
+							WarehouseServiceErrorCode.ERROR_WAREHOUSENAME_EMPTY, "WarehouseName cannot be empty.");
+				}
+			}
+		}
         if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_INSTOCK, cmd.getOwnerId()); } else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
