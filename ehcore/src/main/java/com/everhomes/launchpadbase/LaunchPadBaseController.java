@@ -75,11 +75,26 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /launchpadbase/updateUserLaunchPadApps</b>
+     * <p>编辑用户首页数据</p>
+     */
+    @RequestMapping("updateUserLaunchPadApps")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
+        serviceModuleAppService.updateUserLaunchPadApps(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
      * <b>URL: /launchpadbase/listAllLaunchPadApps</b>
      * <p>广场根据组件获取全部应用</p>
      */
     @RequestMapping("listAllLaunchPadApps")
-    @RestReturn(value=ListLaunchPadAppsResponse.class)
+    @RestReturn(value=ListAllLaunchPadAppsResponse.class)
     @RequireAuthentication(false)
     public RestResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd) {
         ListAllLaunchPadAppsResponse res = serviceModuleAppService.listAllLaunchPadApps(cmd);

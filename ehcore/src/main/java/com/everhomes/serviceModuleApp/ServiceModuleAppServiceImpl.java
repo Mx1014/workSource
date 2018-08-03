@@ -901,4 +901,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	public ListAllLaunchPadAppsResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd) {
 		return null;
 	}
+
+	@Override
+	public void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
+
+	}
 }
