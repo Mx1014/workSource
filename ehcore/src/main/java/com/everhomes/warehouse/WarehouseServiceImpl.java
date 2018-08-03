@@ -2092,7 +2092,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 		if (StringUtils.isNotEmpty(data.getMaterialNumber())) {
 			//查询物品
 			SearchWarehouseMaterialsCommand searchWarehouseMaterialsDTO = ConvertHelper.convert(cmd, SearchWarehouseMaterialsCommand.class);
-			searchWarehouseMaterialsDTO.setName(data.getMaterialNumber());
+			searchWarehouseMaterialsDTO.setMaterialNumber(data.getMaterialNumber());
 			searchWarehouseMaterialsDTO.setNamespaceId((long)cmd.getNamespaceId());
 			SearchWarehouseMaterialsResponse materialsResponse = warehouseMaterialSearcher.query(searchWarehouseMaterialsDTO);
 			List<WarehouseMaterialDTO> materials = materialsResponse.getMaterialDTOs();

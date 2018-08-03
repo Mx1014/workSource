@@ -251,7 +251,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
 			apartments.append(apartment.getBuildingName() + "/" + apartment.getApartmentName() + "  面积："
-					+ apartment.getChargeArea() + " ");
+					+ apartment.getChargeArea() + " "); 
 		}
 		e.setValue(apartments.toString());
 		entities.add(e);
@@ -263,7 +263,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
 		e.setKey("计价条款");
 		StringBuffer chargingItems = new StringBuffer();
 		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
