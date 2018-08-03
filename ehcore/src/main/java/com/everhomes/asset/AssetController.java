@@ -1620,5 +1620,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>仅用于测试手动测试欠费天数</p>
+     * <b>URL: /asset/testUpdateBillDueDayCountOnTime</b>
+     */
+    @RequestMapping("testUpdateBillDueDayCountOnTime")
+    @RestReturn(value = String.class)
+    public RestResponse testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+        assetService.testUpdateBillDueDayCountOnTime(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 

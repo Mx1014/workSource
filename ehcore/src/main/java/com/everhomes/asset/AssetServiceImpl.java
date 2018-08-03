@@ -5322,8 +5322,23 @@ public class AssetServiceImpl implements AssetService {
                         assetProvider.updateBillSwitchOnTime(billDateStr);
                     }
                 }*/
+            	
+            	
+            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+            	
+            	
+            	
             });
         }
     }
+	
+	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+		//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+		
+		
+		
+    }
+	
+	
 
 }

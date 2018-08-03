@@ -238,4 +238,6 @@ public interface AssetService {
 
 	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
 
+	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+
 }
