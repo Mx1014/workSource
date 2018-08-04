@@ -381,6 +381,20 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return result;
 	}
 
+	
+	@Override 
+	public void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion){
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhGeneralFormFilterUserMap.class));
+        EhGeneralFormFilterUserMapDao dao = new EhGeneralFormFilterUserMapDao(context.configuration());
+        context.delete(Tables.EH_GENERAL_FORM_FILTER_USER_MAP)
+        .where(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.NAMESPACE_ID.eq(namespaceId))
+        .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_VERSION.eq(formVersion))
+        .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_ID.eq(ownerId))
+        .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.MODULE_ID.eq(moduleId))
+        .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_ORIGIN_ID.eq(formOriginId))
+        .execute();
+	}
 
 	@Override
 	public void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion, String fieldName){
@@ -392,13 +406,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
         this.dbProvider.execute((status) -> {
 
-			context.delete(Tables.EH_GENERAL_FORM_FILTER_USER_MAP)
-					.where(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_VERSION.eq(formVersion))
-					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_ID.eq(ownerId))
-					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.MODULE_ID.eq(moduleId))
-					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_ORIGIN_ID.eq(formOriginId))
-					.execute();
+			
 
 			Long id = this.sequenceProvider.getNextSequence(NameMapper
 					.getSequenceDomainFromTablePojo(EhGeneralFormFilterUserMap.class));

@@ -747,11 +747,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd){
+    public List<String> saveGeneralFormFilter(PostGeneralFormFilterCommand cmd){
         String UserUuid = UserContext.current().getUser().getUuid();
         if(cmd.getNamespaceId() != null && cmd.getFormFields().size() > 0 && cmd.getFormOriginId() != null && cmd.getFormVersion() != null
                 && cmd.getModuleId() != null && cmd.getOwnerId() != null) {
             dbProvider.execute(status -> {
+                generalFormProvider.deleteGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                                UserUuid, cmd.getFormOriginId(), cmd.getFormVersion());
 
                 for(GeneralFormFieldDTO dto: cmd.getFormFields()){
                     if(StringUtils.isNotBlank(dto.getFieldName())) {
@@ -763,6 +765,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 }
                 return null;
             });
+            return cmd.getFormFields().stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
 
         }else{
             LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerId: " + cmd.getOwnerId() + ", FormFields size: " + cmd.getFormFields().size() +

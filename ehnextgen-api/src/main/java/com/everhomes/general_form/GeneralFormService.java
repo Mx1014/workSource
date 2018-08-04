@@ -73,6 +73,6 @@ public interface GeneralFormService {
 
 	List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd);
 
-	void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
+	List<String> saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
 
 }

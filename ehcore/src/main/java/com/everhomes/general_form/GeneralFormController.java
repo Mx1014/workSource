@@ -166,10 +166,10 @@ public class GeneralFormController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("saveGeneralFormFilter")
-	@RestReturn(value=String.class)
+	@RestReturn(value=String.class, collection = true)
 	public RestResponse saveGeneralFormFilter(PostGeneralFormFilterCommand cmd) {
-		generalFormService.saveGeneralFormFilter(cmd);
-		RestResponse response = new RestResponse();
+		List<String> fieldNames = generalFormService.saveGeneralFormFilter(cmd);
+		RestResponse response = new RestResponse(fieldNames);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
