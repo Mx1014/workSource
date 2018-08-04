@@ -3448,6 +3448,7 @@ public class PunchProviderImpl implements PunchProvider {
     	context.insertInto(Tables.EH_PUNCH_DAY_LOG_FILES,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.ID,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.USER_ID,
+                Tables.EH_PUNCH_DAY_LOG_FILES.DETAIL_ID,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.ENTERPRISE_ID,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.PUNCH_DATE,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.ARRIVE_TIME,
@@ -3492,6 +3493,7 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_DAY_LOG_FILES.DEPT_ID)
     	.select(context.select(Tables.EH_PUNCH_DAY_LOGS.ID,
     		    Tables.EH_PUNCH_DAY_LOGS.USER_ID,
+                Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID,
     		    Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID,
     		    Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,
     		    Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME,
@@ -3599,6 +3601,13 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_RESTDAY,
                 Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_LEGAL_HOLIDAY,
+                Tables.EH_PUNCH_STATISTIC_FILES.REST_DAY_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.FULL_NORMAL_FLAG,
+                Tables.EH_PUNCH_STATISTIC_FILES.ASK_FOR_LEAVE_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.GO_OUT_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.BUSINESS_TRIP_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.PUNCH_EXCEPTION_REQUEST_COUNT,
     		    Tables.EH_PUNCH_STATISTIC_FILES.STATUS_LIST )
     	.select(context.select(Tables.EH_PUNCH_STATISTICS.ID,
     		    Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH,
@@ -3640,6 +3649,13 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_RESTDAY,
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_LEGAL_HOLIDAY,
+                Tables.EH_PUNCH_STATISTICS.REST_DAY_COUNT,
+                Tables.EH_PUNCH_STATISTICS.FULL_NORMAL_FLAG,
+                Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTICS.BUSINESS_TRIP_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTICS.OVERTIME_REQUEST_COUNT,
+                Tables.EH_PUNCH_STATISTICS.PUNCH_EXCEPTION_REQUEST_COUNT,
     		    Tables.EH_PUNCH_STATISTICS.STATUS_LIST).from(Tables.EH_PUNCH_STATISTICS)
     			.where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId)
 				.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth))))
