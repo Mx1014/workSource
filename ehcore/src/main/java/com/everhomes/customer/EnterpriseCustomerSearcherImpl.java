@@ -11,6 +11,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
@@ -240,8 +241,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
-        /*if()
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlag", cmd.getAptitudeFlag()));*/
+        //是否为资质客户增加筛选
+        /*if(cmd.getAptitudeFlag() != null && cmd.getAptitudeFlag() == 1) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlag", CustomerAptitudeFlag.APTITUDE.getCode()));
+        }*/
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(addressId);

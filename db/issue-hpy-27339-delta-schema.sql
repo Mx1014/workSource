@@ -38,6 +38,14 @@ create table `eh_general_form_filter_user_map`
 alter table eh_enterprise_customers add aptitude_flag TINYINT null comment '0-无资质，1-有资质' default 0;
 alter table eh_contract_categories add aptitude_flag TINYINT null comment '0-不过滤，1-过滤' default 0;
 
-
+create table `eh_enterprise_customer_aptitude_flag`
+(
+   `id`                   bigint not null,
+   `value`             		TINYINT not null comment '是否筛选，1-筛选，0-不筛选' default 0,
+	 `owner_id`           	bigint not null comment 'communityId',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_customer_aptitude_flag in dev mode';
 
 -- --------------------- SECTION END ---------------------------------------------------------

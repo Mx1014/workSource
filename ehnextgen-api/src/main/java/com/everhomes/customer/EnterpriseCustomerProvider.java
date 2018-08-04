@@ -235,4 +235,6 @@ public interface EnterpriseCustomerProvider {
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecordsByToken(Long id, String adminToken);
 
     void updateCustomerAptitudeFlag(Long id, Byte approvalStatus);
+
+    Byte getConfigAptitudeSwitch();
 }
