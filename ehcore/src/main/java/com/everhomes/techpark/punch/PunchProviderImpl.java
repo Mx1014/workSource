@@ -100,7 +100,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -2580,11 +2579,7 @@ public class PunchProviderImpl implements PunchProvider {
                                               Time workTime, Byte exceptionStatus, Integer pageOffset, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
-//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
-
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(ownerId));
-//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
         if (CollectionUtils.isNotEmpty(userIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
         if (null != detailIds) {
@@ -2621,13 +2616,10 @@ public class PunchProviderImpl implements PunchProvider {
             }
         }
 
-
-//		Integer offset = pageOffset == null ? 0 : (pageOffset - 1 ) * pageSize;
         if (null != pageOffset && null != pageSize)
             step.limit(pageOffset, pageSize);
         List<PunchDayLog> result = new ArrayList<PunchDayLog>();
-        step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+        step.where(condition).orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchDayLog.class));
             return null;
         });

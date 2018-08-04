@@ -14,6 +14,14 @@ public class ExtDTO {
     private String timeCount;
     private String timeCountDisplay;
 
+    public ExtDTO() {
+    }
+
+    public ExtDTO(String name, String timeCount) {
+        this.name = name;
+        this.timeCount = timeCount;
+    }
+
     public String getName() {
         return name;
     }

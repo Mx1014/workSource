@@ -146,49 +146,35 @@ public interface PunchService {
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(ListYearPunchLogsCommand cmd);
 
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd);
-	
-//	public void createPunchRule(AddPunchRuleCommand cmd);
-//	public void updatePunchRule(UpdatePunchRuleCommand cmd);
-//	public void deletePunchRule(DeletePunchRuleCommand cmd);
-//	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd);
- 
+
 	ListYearPunchLogsCommandResponse getlistPunchLogsBetweenTwoCalendar(
 			ListYearPunchLogsCommandResponse pyl, long CompanyId, Calendar start,
 			Calendar end);
 
-//	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd);
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(ListPunchExceptionRequestCommand cmd);
-//	void approvePropFamilyMember(PunchExceptionRequest cmd);
-//	void rejectPropFamilyMember(PunchExceptionRequest cmd);
 
-	public ListPunchExceptionRequestCommandResponse listExceptionApprovals(
-			ListPunchExceptionApprovalCommand cmd);
+	public ListPunchExceptionRequestCommandResponse listExceptionApprovals(ListPunchExceptionApprovalCommand cmd);
 
 	public void punchExceptionApproval(ApprovalPunchExceptionCommand cmd);
- 
-	
+
+
 	public ListPunchStatisticsCommandResponse listPunchStatistics(ListPunchStatisticsCommand cmd);
 
-	public GetPunchNewExceptionCommandResponse getPunchNewException( GetPunchNewExceptionCommand cmd);
+	public GetPunchNewExceptionCommandResponse getPunchNewException(GetPunchNewExceptionCommand cmd);
 
 	PunchDayLog refreshPunchDayLog(OrganizationMemberDetails memberDetail, Calendar logDay) throws ParseException;
 
-	public PunchLogsDay makePunchLogsDayListInfo(Long userId, Long companyId,
-												 Calendar logDay) throws ParseException;
+	public PunchLogsDay makePunchLogsDayListInfo(Long userId, Long companyId, Calendar logDay) throws ParseException;
 
 	public PunchLogsDay getDayPunchLogs(GetDayPunchLogsCommand cmd);
 
 	public ListPunchCountCommandResponse listPunchCount(ListPunchCountCommand cmd);
 
-	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
-			ListMonthPunchLogsCommand cmd);
+	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(ListMonthPunchLogsCommand cmd);
 
 	List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt);
 
-	public HttpServletResponse exportPunchDetails(
-			ListPunchDetailsCommand cmd,
-			 
-			  HttpServletResponse response );
+	public HttpServletResponse exportPunchDetails(ListPunchDetailsCommand cmd, HttpServletResponse response);
 
 	public void addPunchTimeRule(AddPunchTimeRuleCommand cmd);
 
