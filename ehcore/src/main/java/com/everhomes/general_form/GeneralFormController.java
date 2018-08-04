@@ -149,10 +149,10 @@ public class GeneralFormController extends ControllerBase {
 	 * <p> 只是保存,区别于 postGeneralForm</p>
 	 */
 	@RequestMapping("saveGeneralFormVal")
-	@RestReturn(value=String.class)
+	@RestReturn(value=Long.class)
 	public RestResponse saveGeneralFormVal(PostGeneralFormValCommand cmd) {
-		generalFormService.saveGeneralForm(cmd);
-		RestResponse response = new RestResponse();
+		Long sourceId = generalFormService.saveGeneralForm(cmd);
+		RestResponse response = new RestResponse(sourceId);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

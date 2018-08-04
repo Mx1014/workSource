@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -15,8 +16,8 @@ import java.util.List;
 public class ListGeneralFormValResponse {
     private Long nextPageAnchor;
 
-    @ItemType(GeneralFormValList.class)
-    private List<GeneralFormValList> fieldVals;
+    private List<Map<String , Object>> valList;
+    
 
     public ListGeneralFormValResponse() {
 
@@ -29,13 +30,15 @@ public class ListGeneralFormValResponse {
     public void setNextPageAnchor(Long nextPageAnchor) {
         this.nextPageAnchor = nextPageAnchor;
     }
-
-    public List<GeneralFormValList> getFieldVals() {
-        return fieldVals;
+    
+    
+    
+    public List<Map<String, Object>> getValList() {
+        return valList;
     }
 
-    public void setFieldVals(List<GeneralFormValList> fieldVals) {
-        this.fieldVals = fieldVals;
+    public void setValList(List<Map<String, Object>> valList) {
+        this.valList = valList;
     }
 
     @Override

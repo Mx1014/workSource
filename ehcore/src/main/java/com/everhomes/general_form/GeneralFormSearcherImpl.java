@@ -8,6 +8,9 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -32,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 @Service
@@ -103,9 +107,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fb = FilterBuilders.termFilter("formOriginId", cmd.getFormOriginId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", namespaceId));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 
@@ -121,7 +125,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         //     fb = FilterBuilders.notFilter(nfb);
         // }
 
-        if(cmd.getConditionFields().size() > 0){
+        if(cmd.getConditionFields() != null && cmd.getConditionFields().size() > 0){
             for(SearchGeneralFormItem item : cmd.getConditionFields()){
                 if(StringUtils.isNotBlank(item.getFieldValue())) {
                     GeneralFormFieldType type = GeneralFormFieldType.fromCode(item.getFieldValue());
@@ -169,8 +173,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             ids.remove(ids.size() - 1);
         }
 
-        List<GeneralFormValDTO> dtos = new ArrayList<>();
+        
 
+        List<Map<String, Object>> fieldVals = new ArrayList<>();
         for (SearchHit hit : rsp.getHits().getHits()) {
             Object sourceIdObj = hit.getSource().get("sourceId");
             Object ownerIdObj = hit.getSource().get("ownerId");
@@ -181,11 +186,34 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 Long moduleId = Long.valueOf(moduleIdObj.toString());
                 Long ownerId = Long.valueOf(ownerIdObj.toString());
                 List<GeneralFormVal> vals = generalFormProvider.getGeneralFormVal(namespaceId, sourceId, moduleId, ownerId);
-
+                Map<String, Object> returnMap = new HashMap<>();
                 for (GeneralFormVal val : vals) {
-                    GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+                    
+                    GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);     
+                    String fieldValue = dto.getFieldValue();
+                    ObjectMapper mapper = new ObjectMapper(); 
+                    JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+                    Map<String,String> urMap;
+                    try {
+                        urMap = mapper.readValue(fieldValue, jvt);
+                        for (Entry<String, String> entry : urMap.entrySet()) {
+                            fieldValue  = entry.getValue();
+                            if (StringUtils.isNotBlank(fieldValue)) {
+                                break;
+                            }
+                        }
+                        returnMap.put(dto.getFieldName(), fieldValue);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
                 }
+                GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(sourceId);
+                if(request != null)
+                    returnMap.put("approvalStatus",request.getApprovalStatus());
+                returnMap.put("sourceId", sourceId);
+                fieldVals.add(returnMap);
             }
         }
         // for(GeneralFormVal val : vals) {
@@ -194,6 +222,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
         // response.setFieldVals(dtos);
 
+        response.setValList(fieldVals);
 
         return response;
     }

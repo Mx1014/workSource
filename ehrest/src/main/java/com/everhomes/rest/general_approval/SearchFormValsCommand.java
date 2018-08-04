@@ -20,7 +20,7 @@ public class SearchFormValsCommand {
     private Long formOriginId;
     private Long formVersion;
     private Long ownerId;
-    private Long ownerType;
+    private String ownerType;
     private List<SearchGeneralFormItem> filteredFields;
     private List<SearchGeneralFormItem> displayFields;
     private List<SearchGeneralFormItem> conditionFields;
@@ -51,11 +51,11 @@ public class SearchFormValsCommand {
         this.ownerId = ownerId;
     }
 
-    public Long getOwnerType() {
+    public String getOwnerType() {
         return ownerType;
     }
 
-    public void setOwnerType(Long ownerType) {
+    public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
 

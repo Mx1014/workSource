@@ -312,16 +312,24 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public GeneralFormValRequest getGeneralFormValRequest(Integer namespaceId, Long sourceId, Long ownerId){
+	public List<GeneralFormValRequest> listGeneralFormValRequest(Integer namespaceId, Long sourceId, Long ownerId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
 
 		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);
 		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.SOURCE_ID.eq(sourceId));
 		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.OWNER_ID.eq(ownerId));
-		return (GeneralFormValRequest)query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormValRequest.class));
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormValRequest.class));
 	}
 
+	@Override
+	public GeneralFormValRequest getGeneralFormValRequest(Long id){
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
+
+        return ConvertHelper.convert( dao.findById(id), GeneralFormValRequest.class);
+	}
+	
 	@Override
 	public List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids){
 
