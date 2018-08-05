@@ -5315,33 +5315,68 @@ public class AssetServiceImpl implements AssetService {
 	@Scheduled(cron = "0 0 0 * * ?")
     public void updateBillDueDayCountOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
-                /*List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
-                //获取当前时间，如果是5号，则将之前的账单的switch装为1
-                for (int i = 0; i < list.size(); i++) {
-                    PaymentBillGroup paymentBillGroup = list.get(i);
-                    Calendar c = newClearedCalendar();
-                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-                        String billDateStr = sdf.format(c.getTime());
-                        assetProvider.updateBillSwitchOnTime(billDateStr);
-                    }
-                }*/
-            	
-            	
             	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
-            	
-            	
-            	
+            	Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+                            if(dueDayCount.compareTo(0l) < 0) {
+                            	dueDayCount = 0l;
+                            }
+                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                }
             });
         }
     }
 	
 	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
-		//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
-		
-		
-		
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				Date today = yyyyMMdd.parse(cmd.getDate());
+				coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+	            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+	            	Long nextPageAnchor = 0l;
+	                while(nextPageAnchor != null){
+	                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+	                    List<PaymentBills> bills = res.getBills();
+	                    //更新账单
+	                    for(PaymentBills bill : bills){
+	                        String dueDayDeadline = bill.getDueDayDeadline();
+	                        try{
+	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+	                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+	                            if(dueDayCount.compareTo(0l) < 0) {
+	                            	dueDayCount = 0l;
+	                            }
+	                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+	                        } catch (Exception e){ continue; };
+	                    }
+	                    nextPageAnchor = res.getNextPageAnchor();
+	                }
+	            });
+			} catch (ParseException e1) {
+				LOGGER.error("please input yyyy-MM-dd");
+			}
+        }
     }
 	
 	

@@ -6063,5 +6063,14 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return ret;
     }
+
+	public void updateBillDueDayCount(Long billId, Long dueDayCount) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+		dslContext.update(bill)
+	        .set(bill.DUE_DAY_COUNT,dueDayCount)
+	        .where(bill.ID.eq(billId))
+	        .execute();
+	}
 	
 }

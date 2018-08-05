@@ -398,4 +398,6 @@ public interface AssetProvider {
 	List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId);
 	
 	Map<Long, String> getGroupNames(ArrayList<Long> groupIds);
+	
+	void updateBillDueDayCount(Long billId, Long dueDayCount);
 }
