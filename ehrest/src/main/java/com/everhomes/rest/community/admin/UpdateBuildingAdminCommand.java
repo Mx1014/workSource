@@ -27,6 +27,10 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  *  <li>entryDate: 入驻时间</li>
  *  <li>height: 楼高</li>
  *  <li>buildingNumber: 楼栋编号</li>
+ *  <li>rentArea: 在租面积</li>
+ *  <li>freeArea: 可招租面积</li>
+ *  <li>chargeArea: 收费面积</li>
+ *  <li>floorNumber: 楼栋的楼层数目</li>
  * </ul>
  *
  */

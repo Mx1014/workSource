@@ -33,17 +33,21 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import ch.hsr.geohash.GeoHash;
+
+import com.everhomes.address.Address;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -891,7 +895,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
 //		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
-
+		//查询“未删除”状态的楼栋  by tangcen 2018年8月5日15:40:02
+		query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
+		
         LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
         LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Building.class);
@@ -1842,6 +1848,72 @@ public class CommunityProviderImpl implements CommunityProvider {
         LOGGER.debug("findCommunityByNumber, sql={}", query.getSQL());
         LOGGER.debug("findCommunityByNumber, bindValues={}", query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Community.class);
+	}
+
+	@Override
+	public Integer countActiveBuildingsByCommunityId(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				.from(Tables.EH_BUILDINGS)
+				.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_BUILDINGS.STATUS.eq((byte)2))
+				.fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public Integer countActiveApartmentsByCommunityId(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				.from(Tables.EH_ADDRESSES)
+				.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_ADDRESSES.STATUS.eq((byte)2))
+				.fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public List<Building> listBuildingsByKeywords(Integer namespaceId, Long communityId, Long buildingId,
+			String keyWords, CrossShardListingLocator locator, int pageSize) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
+		List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+ 
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (null != communityId) {
+            query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        }
+        if (null != buildingId) {
+            query.addConditions(Tables.EH_BUILDINGS.ID.eq(buildingId));
+        }
+        if (!StringUtils.isBlank(keyWords)) {
+            query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyWords + "%")
+            					.or(Tables.EH_BUILDINGS.MANAGER_NAME.like("%" + keyWords + "%"))
+            					.or(Tables.EH_BUILDINGS.CONTACT.like("%" + keyWords + "%")));
+        }
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
+        }
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
+        query.addLimit(pageSize);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBuildingsByKeywords, sql=" + query.getSQL());
+            LOGGER.debug("listBuildingsByKeywords, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhBuildingsRecord record) -> {
+        	buildings.add(ConvertHelper.convert(record, Building.class));
+        	return null;
+        });
+
+        if(buildings.size() > 0) {
+            locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
+        }
+
+		return buildings;
 	}
 
 }

@@ -439,7 +439,6 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-
     }
     
     /**

@@ -62,6 +62,7 @@ import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
@@ -71,8 +72,10 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
+import com.everhomes.rest.community.BuildingInfoDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatisticsDTO;
 import com.everhomes.rest.community.BuildingStatus;
@@ -249,6 +252,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1160,8 +1164,11 @@ public class CommunityServiceImpl implements CommunityService {
 						propertyMgrService.deleteApartment(command);
 					});
 				}
-				this.communityProvider.deleteBuilding(building);
 				customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
+				//删除楼栋时，用置状态的方式代替直接删除楼栋的方式(影响较大) by tangcen 2018年8月5日15:14:43
+				//this.communityProvider.deleteBuilding(building);
+				building.setStatus(BuildingAdminStatus.INACTIVE.getCode());
+				this.communityProvider.updateBuilding(building);
 			}
 			return null;
 		});
@@ -1338,6 +1345,47 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
+/*	原楼栋导入方法	
+ * @Override
+	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(communityId);
+			task.setType(ImportFileTaskType.BUILDING.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportBuildingDataDTO> datas = handleImportBuildingData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportBuildingDataDTO>> results = importBuildingData(datas, userId, communityId);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+	*/
+
 	@Override
 	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
 		Long userId = UserContext.current().getUser().getId();
@@ -1376,9 +1424,8 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
-
-	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,
-			Long userId, Long communityId) {
+	
+	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,Long userId, Long communityId) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
 		Community community = communityProvider.findCommunityById(communityId);
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
@@ -1397,7 +1444,6 @@ public class CommunityServiceImpl implements CommunityService {
 				continue;
 			}
 			
-			
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
 			if (building == null) {
 				building = new Building();
@@ -1406,8 +1452,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setAddress(data.getAddress());
 				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
-				if (StringUtils.isNotBlank(data.getAreaSize())) {
-					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				if (StringUtils.isNotBlank(data.getFloorNumber())) {
+					building.setFloorNumber(Integer.valueOf(data.getFloorNumber()));
 				}
 				String contactToken = data.getPhone();
 				if(ct.get(contactToken) != null) {
@@ -1428,7 +1474,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				
 				building.setNamespaceId(community.getNamespaceId());
-				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				building.setStatus(BuildingAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.createBuilding(userId, building);
 			}else {
@@ -1436,8 +1482,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setAddress(data.getAddress());
 				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
-				if (StringUtils.isNotBlank(data.getAreaSize())) {
-					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				if (StringUtils.isNotBlank(data.getFloorNumber())) {
+					building.setFloorNumber(Integer.valueOf(data.getFloorNumber()));
 				}
 				String contactToken = data.getPhone();
 				if(ct.get(contactToken) != null) {
@@ -1452,7 +1498,6 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getTrafficDescription())) {
 					building.setTrafficDescription(data.getTrafficDescription());
 				}
-				
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1482,6 +1527,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
 		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		//必填项校检
 		if (StringUtils.isEmpty(data.getName())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
 			log.setData(data);
@@ -1517,16 +1563,15 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 		//正则校验数字
-		if (StringUtils.isNotEmpty(data.getAreaSize())) {
+		if (StringUtils.isNotEmpty(data.getFloorNumber())) {
 			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
-			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find()){
-				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+			if(!Pattern.compile(reg).matcher(data.getFloorNumber()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
 				log.setData(data);
-				log.setErrorLog("AreaSize format is error");
+				log.setErrorLog("FloorNumber format is error");
 				return log;
 			}
 		}
-		
 		return null;
 	}
 
@@ -1541,14 +1586,13 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setName(trim(r.getA()));
 				data.setBuildingNumber(trim(r.getB()));
 				data.setAliasName(trim(r.getC()));
-				data.setAddress(trim(r.getD()));
-				data.setLongitudeLatitude(trim(r.getE()));
-				data.setTrafficDescription(trim(r.getF()));
+				data.setFloorNumber(trim(r.getD()));
+				data.setAddress(trim(r.getE()));
+				data.setLongitudeLatitude(trim(r.getF()));
 				data.setContactor(trim(r.getG()));
 				data.setPhone(trim(r.getH()));
-				data.setAreaSize(trim(r.getI()));
-				data.setDescription(trim(r.getJ()));
-				
+				data.setDescription(trim(r.getI()));
+				data.setTrafficDescription(trim(r.getJ()));
 				//加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
 				//data.setNamespaceBuildingType(trim(r.getK()));
 				//data.setNamespaceBuildingToken(trim(r.getL()));
@@ -4691,31 +4735,104 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		
+        List<Building> buildings = communityProvider.listBuildingsByKeywords(cmd.getNamespaceId(),cmd.getCommunityId(),
+        																	cmd.getBuildingId(),cmd.getKeyWords(),locator,pageSize);
+        Long nextPageAnchor = null;
+        if(buildings.size() > pageSize) {
+        	buildings.remove(buildings.size() - 1);
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
+        }
+
+        List<BuildingInfoDTO> dtoList = buildings.stream().map((r) -> {
+        	BuildingInfoDTO dto = ConvertHelper.convert(r, BuildingInfoDTO.class);
+        	dto.setBuildingId(r.getId());
+        	dto.setBuildingName(r.getName());
+        	//TODO 需要确认什么是在租合同数
+//    		private Integer relatedContractNumber;
+//    		private Double areaAveragePrice;
+        	return dto;
+        }).collect(Collectors.toList());
+		
+        ListBuildingsByKeywordsResponse response = new ListBuildingsByKeywordsResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setBuildings(dtoList);
+        
+        return response;
 	}
 
 
 	@Override
 	public CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		
+		CommunityStatisticsDTO dto = ConvertHelper.convert(community, CommunityStatisticsDTO.class);
+		dto.setCommunityId(community.getId());
+		dto.setCommunityName(community.getName());
+		
+		Integer buildingNumber = communityProvider.countActiveBuildingsByCommunityId(community.getId());
+		dto.setBuildingNumber(buildingNumber);
+		Integer apartmentNumber = communityProvider.countActiveApartmentsByCommunityId(community.getId());
+		dto.setApartmentNumber(apartmentNumber);
+		//TODO 需要确认什么是在租合同数
+//		private Integer relatedContractNumber;
+//		private Double areaAveragePrice;
+		return dto;
 	}
 
 
 	@Override
 	public CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		
+		CommunityDetailDTO dto = ConvertHelper.convert(community, CommunityDetailDTO.class);
+		dto.setCommunityId(community.getId());
+		dto.setCommunityName(community.getName());
+		
+		ResourceCategoryAssignment assignment = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(),cmd.getProjectType(),cmd.getNamespaceId());
+		if (assignment != null) {
+			ResourceCategory category = communityProvider.findResourceCategoryById(assignment.getResourceCategryId());
+			checkResourceCategoryIsNull(category);
+			dto.setCategoryId(category.getId());
+			dto.setCategoryName(category.getName());
+		}
+		return dto;
 	}
 
 
 	@Override
 	public void updateCommunityAndCategory(UpdateCommunityNewCommand cmd) {
-		// TODO Auto-generated method stub
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		
+		community.setName(cmd.getCommunityName());
+		community.setAliasName(cmd.getAliasName());
+		community.setCityId(cmd.getCityId());
+		community.setCityName(cmd.getCityName());
+		community.setAreaId(cmd.getAreaId());
+		community.setAreaName(cmd.getAreaName());
+		community.setAddress(cmd.getAddress());
+		community.setAreaSize(cmd.getAreaSize());
+		community.setRentArea(cmd.getRentArea());
+		community.setFreeArea(cmd.getFreeArea());
+		community.setChargeArea(cmd.getChargeArea());
+		
+		communityProvider.updateCommunity(community);
+		//更新园区项目分类
+		ResourceCategoryAssignment assignment = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(),cmd.getProjectType(),cmd.getNamespaceId());
+		if (assignment != null) {
+			if (!assignment.getResourceCategryId().equals(cmd.getCategoryId())) {
+				CreateResourceCategoryAssignmentCommand command = new CreateResourceCategoryAssignmentCommand();
+				command.setResourceType(cmd.getProjectType());
+				command.setResourceId(cmd.getCommunityId());
+				command.setResourceCategoryId(cmd.getCategoryId());
+				command.setNamespaceId(cmd.getNamespaceId());
+				createResourceCategoryAssignment(command);
+			}
+		}
 	}
-
 
 	@Override
 	public BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd) {

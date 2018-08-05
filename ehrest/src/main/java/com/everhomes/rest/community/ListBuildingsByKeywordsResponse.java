@@ -8,15 +8,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>nextPageAnchor: 下页的锚点</li>
- *     <li>pageSize: 每页显示的数量</li>
  *     <li>buildings: 楼栋集合 {@link com.everhomes.rest.community.BuildingInfoDTO}</li>
  * </ul>
  */
 public class ListBuildingsByKeywordsResponse {
 	
 	private Long nextPageAnchor;
-	
-	private Integer pageSize;
 	
 	@ItemType(BuildingInfoDTO.class)
 	private List<BuildingInfoDTO> buildings;
@@ -27,14 +24,6 @@ public class ListBuildingsByKeywordsResponse {
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
 	}
 
 	public List<BuildingInfoDTO> getBuildings() {

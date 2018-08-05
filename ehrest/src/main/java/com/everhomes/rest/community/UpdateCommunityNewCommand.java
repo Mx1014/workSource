@@ -18,8 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargeArea: 收费面积</li>
  *     <li>categoryName: 分类名称</li>
  *     <li>categoryId: 分类id</li>
- *     <li>resourceType: 资源实体类型 小区园区：EhCommunities</li>
- *     <li>resourceId: 资源实体id</li>
+ *     <li>projectType: 资源实体类型 小区园区：EhCommunities</li>
  *     <li>namespaceId: 域空间id</li>
  * </ul>
  */
@@ -39,8 +38,7 @@ public class UpdateCommunityNewCommand {
 	private Double chargeArea;
     private String categoryName;
     private Long categoryId;
-    private String resourceType;
-    private Long resourceId;
+    private String projectType;
     private Integer namespaceId;
     
 	public Long getCommunityId() {
@@ -127,17 +125,11 @@ public class UpdateCommunityNewCommand {
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-	public String getResourceType() {
-		return resourceType;
+	public String getProjectType() {
+		return projectType;
 	}
-	public void setResourceType(String resourceType) {
-		this.resourceType = resourceType;
-	}
-	public Long getResourceId() {
-		return resourceId;
-	}
-	public void setResourceId(Long resourceId) {
-		this.resourceId = resourceId;
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
 	}
 	public Integer getNamespaceId() {
 		return namespaceId;

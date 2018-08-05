@@ -11,9 +11,10 @@ import com.everhomes.util.StringHelper;
  *     <li>freeArea: 可招租面积</li>
  *     <li>chargeArea: 收费面积</li>
  *     <li>areaAveragePrice: 在租实时均价（元/平方米）</li>
+ *     <li>relatedContractNumber: 在租合同数</li>
  *     <li>address: 地址</li>
- *     <li>contactName: 联系人</li>
- *     <li>contactNumber: 联系电话</li>
+ *     <li>managerName: 联系人</li>
+ *     <li>contact: 联系电话</li>
  * </ul>
  */
 public class BuildingInfoDTO {
@@ -25,11 +26,21 @@ public class BuildingInfoDTO {
 	private Double freeArea;
 	private Double chargeArea;
 	private Double areaAveragePrice;
+	private Integer relatedContractNumber;
 	private String address;
-	private String contactName;
-	private String contactNumber;
+	private String managerName;
+	private String contact;
 	
-	
+	public Integer getRelatedContractNumber() {
+		return relatedContractNumber;
+	}
+
+
+	public void setRelatedContractNumber(Integer relatedContractNumber) {
+		this.relatedContractNumber = relatedContractNumber;
+	}
+
+
 	public Long getBuildingId() {
 		return buildingId;
 	}
@@ -110,23 +121,23 @@ public class BuildingInfoDTO {
 	}
 
 
-	public String getContactName() {
-		return contactName;
+	public String getManagerName() {
+		return managerName;
 	}
 
 
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
 	}
 
 
-	public String getContactNumber() {
-		return contactNumber;
+	public String getContact() {
+		return contact;
 	}
 
 
-	public void setContactNumber(String contactNumber) {
-		this.contactNumber = contactNumber;
+	public void setContact(String contact) {
+		this.contact = contact;
 	}
 
 

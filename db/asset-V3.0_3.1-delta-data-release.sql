@@ -1,0 +1,10 @@
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: 唐岑 2018年8月5日15:50:45
+-- REMARK: 
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '20007', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+
+
+------------------------ SECTION END ---------------------------------------------------------
