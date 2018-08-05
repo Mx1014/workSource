@@ -682,7 +682,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
-        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
+        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(),assetCategoryId,cmd.getNamespaceId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
         response.setGenerated((byte)1);
