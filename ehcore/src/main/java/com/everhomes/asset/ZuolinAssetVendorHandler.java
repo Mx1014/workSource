@@ -662,12 +662,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
-        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
+        //根据合同应用的categoryId去查找对应的缴费应用的categoryId
+		Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),assetCategoryId,cmd.getNamespaceId());
         
         Contract contract = contractProvider.findContractById(cmd.getContractId());
         for (PaymentExpectancyDTO dto : dtos) {
         	//根据合同应用的categoryId去查找对应的缴费应用的categoryId
-			Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
 			//显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
 			String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(contract.getCommunityId(),contract.getNamespaceId(),assetCategoryId,dto.getChargingItemId());
 			dto.setChargingItemName(projectChargingItemName);
