@@ -4177,19 +4177,22 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-        List<PaymentChargingItemScope> scopes = context.select(t1.fields())
-                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1, Tables.EH_PAYMENT_BILL_GROUPS)
-                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
-                .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID))
-                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
-                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
-                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                // add category filter by wentian sama
-                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .and(t1.CHARGING_ITEM_ID.notEqual(AssetPaymentConstants.LATE_FINE_ID))
-                .fetchInto(PaymentChargingItemScope.class);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t1.fields());
+        query.addFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1, Tables.EH_PAYMENT_BILL_GROUPS);
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()));
+        query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()));
+        query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
+        query.addConditions(t1.CATEGORY_ID.eq(cmd.getCategoryId()));// add category filter by wentian sama
+        query.addConditions(t1.CHARGING_ITEM_ID.notEqual(AssetPaymentConstants.LATE_FINE_ID));
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getBillGroupId())) {
+        	query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(cmd.getBillGroupId()));//物业缴费V6.3：新增、修改计价条款时，均需先选账单组，再选收费项目
+        }
+        List<PaymentChargingItemScope> scopes = query.fetchInto(PaymentChargingItemScope.class);
         for(int j = 0; j < scopes.size(); j ++){
             ListChargingItemsDTO dto = new ListChargingItemsDTO();
             PaymentChargingItemScope scope = scopes.get(j);
