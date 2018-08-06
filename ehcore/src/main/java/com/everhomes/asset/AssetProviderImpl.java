@@ -2663,7 +2663,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
+    public List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId, Long billGroupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         List<PaymentBillGroupRule> rules = context.select()
@@ -2671,18 +2671,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
                 .and(t.OWNERTYPE.eq(ownerType))
                 .and(t.OWNERID.eq(ownerId))
+                .and(t.BILL_GROUP_ID.eq(billGroupId))//物业缴费V6.3 签合同选择计价条款前，先选择账单组
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-//        if(rules.size() > 1){
-//            List<PaymentBillGroupRule> rules2 = context.select()
-//                    .from(t)
-//                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-//                    .and(t.OWNERTYPE.eq(ownerType))
-//                    .and(t.OWNERID.eq(ownerId))
-//                    .fetch()
-//                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
-//            return rules2.get(0);
-//        }
         return rules;
     }
 

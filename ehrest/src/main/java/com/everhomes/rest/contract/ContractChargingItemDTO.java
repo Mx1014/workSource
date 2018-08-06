@@ -21,6 +21,7 @@ import java.util.List;
  *     <li>chargingStartTime: 起记日期</li>
  *     <li>chargingExpiredTime: 截止日期</li>
  *     <li>apartments: 计价条款适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
+ *     <li>billGroupId : 账单组id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -42,6 +43,7 @@ public class ContractChargingItemDTO {
     private Long chargingExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 
     public String getLateFeeformula() {
         return lateFeeformula;
@@ -170,6 +172,14 @@ public class ContractChargingItemDTO {
     public void setChargingVariables(String chargingVariables) {
         this.chargingVariables = chargingVariables;
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
     
     
 }

@@ -108,7 +108,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
+    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId, Long billGroupId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 

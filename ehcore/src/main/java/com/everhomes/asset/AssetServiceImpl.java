@@ -1036,21 +1036,33 @@ public class AssetServiceImpl implements AssetService {
                     //获得standard时间设置, reference enum BillingCycle.java
                     Byte billingCycle = standard.getBillingCycle();
                     //获得groupRule的时间设置, this time stands for the timing of charging items to be generated
+//                    /**
+//                     * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
+//                     */
+//                    PaymentBillGroupRule groupRule = null;
+//                    PaymentBillGroup group = null;
+//                    List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
+//                            ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+//                    //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
+//                    for(PaymentBillGroupRule pgr : groupRules){
+//                        group = assetProvider.getBillGroupById(pgr.getBillGroupId());
+//                        if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
+//                            groupRule = pgr;
+//                            break;
+//                        }
+//                    }
                     /**
-                     * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
+                     * 将一个费项只能进入一个账单组的限制去掉，因为存在一种场景，一个园区下签的租金合同，部分客户是按月收，部分客户按季收。需建多个租金账单组，将2种计价条款的产生的租金费用分别进入2个组内。
                      */
                     PaymentBillGroupRule groupRule = null;
                     PaymentBillGroup group = null;
                     List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
-                            ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-                    //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
-                    for(PaymentBillGroupRule pgr : groupRules){
-                        group = assetProvider.getBillGroupById(pgr.getBillGroupId());
-                        if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
-                            groupRule = pgr;
-                            break;
-                        }
+                    		,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId(),rule.getBillGroupId());
+                    if(groupRules != null && groupRules.size() !=0) {
+                    	groupRule = groupRules.get(0);
                     }
+                    group = assetProvider.getBillGroupById(rule.getBillGroupId());
+                    
                     if(group == null || groupRule == null){
                         throw new RuntimeException("bill group or grouprule is null");
                     }
@@ -1572,13 +1584,19 @@ public class AssetServiceImpl implements AssetService {
             a.setTime(d.getTime());
         }
 
-        //拆卸调组的包裹
+        //拆卸调租的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){
             outter:for(int i = 0; i < rentAdjusts.size(); i ++){
                 RentAdjust rent = rentAdjusts.get(i);
-                //是否对应一个资源和收费项，不对应则不进行调组
+                //是否对应一个资源和收费项，不对应则不进行调租
                 List<ContractProperty> rentProperties = rent.getProperties();
+                //是否对应同一个账单组ID，不对应不进行调租(物业缴费V6.3 签合同选择计价条款前，先选择账单组)
+                Long rentBillGroupId = rent.getBillGroupId();
+                Long feeBillGroupId = rule.getBillGroupId();
+                if(!rentBillGroupId.equals(feeBillGroupId)){
+                	continue outter;
+                }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){
@@ -1592,8 +1610,8 @@ public class AssetServiceImpl implements AssetService {
                         continue outter;
                     }
                 }
-                //进行调组
-                //调组的时间区间,收费项的计费时间区间为
+                //进行调租
+                //调租的时间区间,收费项的计费时间区间为
                 Calendar start = newClearedCalendar();
                 start.setTime(rent.getStart());
                 Calendar end = newClearedCalendar();
@@ -1680,6 +1698,12 @@ public class AssetServiceImpl implements AssetService {
             outter:for(int i = 0; i < rentFrees.size(); i ++){
                 RentFree rent = rentFrees.get(i);
                 List<ContractProperty> rentProperties = rent.getProperties();
+                //是否对应同一个账单组ID，不对应不进行调租(物业缴费V6.3 签合同选择计价条款前，先选择账单组)
+                Long rentBillGroupId = rent.getBillGroupId();
+                Long feeBillGroupId = rule.getBillGroupId();
+                if(!rentBillGroupId.equals(feeBillGroupId)){
+                	continue outter;
+                }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){

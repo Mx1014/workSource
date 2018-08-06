@@ -1022,6 +1022,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
 		adjusts.forEach(adjust -> {
 			RentAdjust rentAdjust = new RentAdjust();
+			rentAdjust.setBillGroupId(adjust.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			rentAdjust.setStart(new Date(adjust.getChangeStartTime()));
 			rentAdjust.setEnd(new Date(adjust.getChangeExpiredTime()));
 			rentAdjust.setAdjustType(adjust.getChangeMethod());
@@ -1056,6 +1057,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<RentFree> rentFrees = new ArrayList<>();
 		frees.forEach(free -> {
 			RentFree rentFree = new RentFree();
+			rentFree.setBillGroupId(free.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			rentFree.setChargingItemId(free.getChargingItemId());
 			rentFree.setStartDate(new Date(free.getChangeStartTime()));
 			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
@@ -1081,6 +1083,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
 			FeeRules feeRule = new FeeRules();
+			feeRule.setBillGroupId(chargingItem.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
 			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
