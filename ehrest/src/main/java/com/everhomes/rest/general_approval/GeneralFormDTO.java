@@ -26,6 +26,7 @@ import java.util.List;
  *
  */
 public class GeneralFormDTO {
+	private Long 	id;
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
@@ -48,6 +49,14 @@ public class GeneralFormDTO {
 
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;
