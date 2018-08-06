@@ -3247,7 +3247,12 @@ public class CustomerServiceImpl implements CustomerService {
             if (syncCount > 0) {
                 return "1";
             }
-            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            String version;
+            if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
+                version = "0";
+            }else{
+                version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            }
             CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
             if (customerHandle != null) {
                 SyncDataTask task = new SyncDataTask();
