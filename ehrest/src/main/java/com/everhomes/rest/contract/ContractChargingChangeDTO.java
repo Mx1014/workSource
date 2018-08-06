@@ -22,6 +22,7 @@ import java.util.List;
  *     <li>apartments: 计划适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
  *     <li>changeDurationDays: 调整的天数</li>
  *     <li>billGroupId : 账单组id</li>
+ *     <li>billGroupName : 账单组名称</li>
  * </ul>
  * Created by ying.xiong on 2017/10/10.
  */
@@ -43,6 +44,7 @@ public class ContractChargingChangeDTO {
     // 增加免租天数
     private Integer changeDurationDays;
     private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
+    private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
 
     public Integer getChangeDurationDays() {
         return changeDurationDays;
@@ -166,5 +168,13 @@ public class ContractChargingChangeDTO {
 
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
 	}
 }

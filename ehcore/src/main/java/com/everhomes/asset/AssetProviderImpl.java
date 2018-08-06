@@ -2753,6 +2753,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        EhPaymentBillGroups billGroup = Tables.EH_PAYMENT_BILL_GROUPS.as("billGroup");
         Set<PaymentExpectancyDTO> set = new LinkedHashSet<>();
 
         List<Long> fetch = context.select(bill.ID)
@@ -2761,16 +2762,16 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
-                .from(t,t1)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,billGroup.NAME)
+                .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch))
+                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.NAME,t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
@@ -2780,6 +2781,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
+                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
                     set.add(dto);
                     return null;
                 });
@@ -2790,9 +2792,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.NAMESPACE_ID.eq(namespaceId))//解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
-                .from(t,t1)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,billGroup.NAME)
+        		.from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch1))
+                .and(t.BILL_GROUP_ID.eq(billGroup.ID))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.NAME,t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
@@ -2808,6 +2811,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
+                    dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
                     set.add(dto);
                     return null;
                 });

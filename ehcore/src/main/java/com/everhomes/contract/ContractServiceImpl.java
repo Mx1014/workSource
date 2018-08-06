@@ -8,6 +8,7 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -2431,7 +2432,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					changeDTO.setChangeExpiredTime(change.getChangeExpiredTime().getTime());
 				}
 				processContractChargingChangeAddresses(changeDTO);
-
+				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+				if(changeDTO.getBillGroupId() != null) {
+					PaymentBillGroup group = assetProvider.getBillGroupById(changeDTO.getBillGroupId());
+					if(group != null) {
+						changeDTO.setBillGroupName(group.getName());
+					}
+				}
 				if(ChangeType.ADJUST.equals(ChangeType.fromStatus(change.getChangeType()))) {
 					adjusts.add(changeDTO);
 				} else if(ChangeType.FREE.equals(ChangeType.fromStatus(change.getChangeType()))) {
@@ -2503,6 +2510,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				itemDto.setLateFeeStandardName(lateFeeStandardName);
 				String lateFeeformula = assetProvider.findFormulaByChargingStandardId(itemDto.getLateFeeStandardId());
 				itemDto.setLateFeeformula(lateFeeformula);
+				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+				if(itemDto.getBillGroupId() != null) {
+					PaymentBillGroup group = assetProvider.getBillGroupById(itemDto.getBillGroupId());
+					if(group != null) {
+						itemDto.setBillGroupName(group.getName());
+					}
+				}
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;
