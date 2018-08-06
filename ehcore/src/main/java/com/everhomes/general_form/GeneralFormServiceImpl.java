@@ -27,6 +27,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -669,12 +670,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
         generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
         boolean isNewFile = false;
-        String lastCommit = "";
         GeneralFormPrintTemplate oldTemplate = generalFormProvider.getGeneralFormPrintTemplateById(cmd.getId());
         if (!oldTemplate.getName().equals(cmd.getName())) {
             isNewFile = true;
-        }else {
-            lastCommit = oldTemplate.getLastCommit();
         }
         //使用gogs存储合同内容
         //1.建仓库 不同应用建立不同仓库
@@ -690,14 +688,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 generalFormProvider.createGeneralFormPrintTemplate(generalFormPrintTemplate);
             }else {
                 GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
-                //2.提交脚本
-                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), lastCommit, cmd.getContents(), isNewFile);
-                //3.存储提交脚本返回的id
-                generalFormPrintTemplate.setLastCommit(commit.getId());
                 //如果改了名称，在版本仓库里必须删掉原来的，在创建新的
                 if (isNewFile) {
-                    gogsDeleteScript(repo,generalFormPrintTemplate.gogsPath(),lastCommit);
+                    gogsDeleteScript(repo,oldTemplate.gogsPath(),oldTemplate.getLastCommit());
                 }
+                //2.提交脚本
+                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), oldTemplate.getLastCommit(), cmd.getContents(), isNewFile);
+                //3.存储提交脚本返回的id
+                generalFormPrintTemplate.setLastCommit(commit.getId());
                 generalFormProvider.updateGeneralFormPrintTemplate(generalFormPrintTemplate);
             }
         } catch (GogsConflictException e) {
@@ -734,6 +732,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         String contents = gogsGet(repo,generalFormPrintTemplate.gogsPath(),generalFormPrintTemplate.getLastCommit());
         GeneralFormPrintTemplateDTO generalFormPrintTemplateDTO = ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
         generalFormPrintTemplateDTO.setContents(contents);
+        UserInfo user  = this.userService.getUserInfo(generalFormPrintTemplate.getCreatorUid());
+        generalFormPrintTemplateDTO.setCreatorName(user.getNickName());
         return generalFormPrintTemplateDTO;
     }
 

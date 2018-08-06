@@ -17,6 +17,7 @@ import com.everhomes.server.schema.tables.records.EhGeneralFormPrintTemplatesRec
 import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -245,7 +247,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec
 				.readWriteWith(EhGeneralFormPrintTemplates.class));
 		generalFormPrintTemplate.setId(id);
-
+		generalFormPrintTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		generalFormPrintTemplate.setCreatorUid(UserContext.currentUserId());
 		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
 		dao.insert(generalFormPrintTemplate);
 		return id;
@@ -255,6 +258,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec
 				.readWriteWith(EhGeneralFormPrintTemplates.class));
+		generalFormPrintTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		generalFormPrintTemplate.setUpdateUid(UserContext.currentUserId());
 		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
 		dao.update(generalFormPrintTemplate);
 	}
