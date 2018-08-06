@@ -47,6 +47,10 @@
 -- AUTHOR: huangmingbo 20180720
 -- REMARK: 执行 /yellowPage/transferTime 参数：201233
 
+-- AUTHOR: 马世亨 20180726
+-- REMARK: 执行 /pmtask/syncOrderDetails
+-- REMARK: ALL SECTION相关脚本update eh_pm_tasks t , eh_pm_task_orders o set t.amount = o.amount where t.status in (4,7) and t.id = o.task_id;
+-- REMARK: 上述脚本请在该接口调用后执行。
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -392,7 +396,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15020000', '用户管理', '16020000', NULL, 'user-management', '1', '2', '/16000000/16020000/15020000', 'zuolin', '10', '34000', '2', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030100', '社区管理公司管理', '15030000', NULL, NULL, '0', '2', '/15000000/15300000/15030100', 'zuolin', '1', NULL, '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030200', '物业管理公司', '15030000', NULL, NULL, '0', '2', '/15000000/15300000/15030200', 'zuolin', '2', NULL, '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030300', '企业信息', '23010000', NULL, 'customer-management', '1', '2', '/23000000/23010000/15030300', 'zuolin', '100', '21400', '3', 'system', 'module', NULL);
+
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16000000', '园区运营业务', '0', 'operation-business', NULL, '1', '2', '/16000000', 'zuolin', '30', NULL, '1', 'system', 'classify', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16010000', '基础数据管理', '16000000', NULL, NULL, '1', '2', '/16000000/16010000', 'zuolin', '30', NULL, '2', 'system', 'classify', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16010100', '楼宇资产管理', '16010000', NULL, 'asset-management', '1', '2', '/16000000/16010000/16010100', 'zuolin', '100', '59000', '3', 'system', 'module', NULL);
@@ -567,7 +571,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48010000', '组织架构', '48000000', NULL, 'organization-structure', '1', '2', '/40000010/48000000/48010000', 'park', '10', '50100', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48020000', '职级管理', '48000000', NULL, 'level-management', '1', '2', '/40000010/48000000/48020000', 'park', '20', '50300', '3', 'system', 'module', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48030000', '员工认证', '48000000', NULL, 'employee-identification', '1', '2', '/40000010/48000000/48030000', 'park', '30', '50500', '3', 'system', 'module', '2');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业后台', '72000000', NULL, 'customer-info', '1', '2', '/70000010/72000000/48035000', 'organization', '30', '21400', '3', 'system', 'module', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业信息', '72000000', NULL, 'customer-info', '1', '2', '/70000010/72000000/48035000', 'organization', '30', '21400', '3', 'system', 'module', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48040000', '人事档案', '48000000', NULL, 'employee-record', '1', '2', '/40000010/48000000/48040000', 'park', '40', '50400', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48050000', '打卡考勤', '48000000', NULL, 'attendance-management', '1', '2', '/40000010/48000000/48050000', 'park', '50', '50600', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48052100', '企业访客', '53000000', NULL, 'visitor-enterprise', '1', '2', '/40000010/53000000/48052100', 'park', '70', '52100', '3', 'system', 'module', NULL);
@@ -657,12 +661,22 @@ UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021
 update eh_service_module_apps set module_control_type = 'unlimit_control' where module_id = 41300;
 UPDATE eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
 
+
+UPDATE eh_web_menus SET path = '/40000020' WHERE id = 40000020;
+UPDATE eh_web_menus SET path = '/40000030' WHERE id = 40000030;
+UPDATE eh_web_menus SET path = '/40000040' WHERE id = 40000040;
+UPDATE eh_web_menus SET path = '/40000050' WHERE id = 40000050;
+UPDATE eh_web_menus SET path = '/40000060' WHERE id = 40000060;
+
+UPDATE eh_web_menus SET path = '/40000030/47000000' WHERE id = 47000000;
+
+UPDATE eh_web_menus set path = '/40000010/53000000/50010000' WHERE id = 50010000;
+UPDATE eh_web_menus set path = '/40000010/53000000/52000000' WHERE id = 52000000;
+
 -- end
 
 -- AUTHOR:jiarui 20180625
--- REMARK:增加企业后台菜单及动态表单附件
-DELETE  FROM  eh_web_menus WHERE  module_id = 21400;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业信息', '72000000', NULL, 'customer-info', '1', '2', '/72000000/48035000', 'organization', '3', '21400', '2', 'system', 'module', '2');
+-- REMARK:增加动态表单附件
 SET  @id  = (SELECT max(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'attachments', '附件', 'List<ContractAttachmentDTO>', '11', '/1/11', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"file\", \"length\": 9}');
 UPDATE  eh_var_fields SET field_param = '{"fieldParamType": "text", "length": 6}' WHERE name LIKE 'corpEmployeeAmount%';
