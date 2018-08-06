@@ -303,4 +303,17 @@ public class NewsProviderImpl implements NewsProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public Long createNewPreview(News news) {
+//		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPrew.class));
+//		news.setId(id);
+//		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		if (news.getPublishTime() == null) {
+//			news.setPublishTime(news.getCreateTime());
+//		}
+//		getReadWriteDao().insert(news);
+//		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
+//		return  id;
+	}
 }
