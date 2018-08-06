@@ -1,10 +1,9 @@
 package com.everhomes.rest.community;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 
 /**
@@ -19,9 +18,6 @@ public class ListBuildingCommandResponse {
 	
 	@ItemType(BuildingDTO.class)
 	private List<BuildingDTO> buildings;
-	
-	public ListBuildingCommandResponse() {
-    }
     
     public ListBuildingCommandResponse(Long nextPageAnchor, List<BuildingDTO> buildings) {
         this.nextPageAnchor = nextPageAnchor;

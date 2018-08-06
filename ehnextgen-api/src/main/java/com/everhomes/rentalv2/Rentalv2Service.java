@@ -4,66 +4,7 @@ import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommandResponse;
-import com.everhomes.rest.rentalv2.AddRentalBillItemV2Response;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoCommand;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoResponse;
-import com.everhomes.rest.rentalv2.AddRentalOrderUsingInfoV2Response;
-import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
-import com.everhomes.rest.rentalv2.ChangeRentalBillPayInfoCommand;
-import com.everhomes.rest.rentalv2.CompleteRentalOrderCommand;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusByWeekResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteYearStatusResponse;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteByIdCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusByWeekCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteYearStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
-import com.everhomes.rest.rentalv2.GetCancelOrderTipCommand;
-import com.everhomes.rest.rentalv2.GetCancelOrderTipResponse;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoCommand;
-import com.everhomes.rest.rentalv2.GetRenewRentalOrderInfoResponse;
-import com.everhomes.rest.rentalv2.GetRentalBillPayInfoCommand;
-import com.everhomes.rest.rentalv2.GetRentalOrderDetailCommand;
-import com.everhomes.rest.rentalv2.GetResourceRuleV2Command;
-import com.everhomes.rest.rentalv2.GetResourceRuleV2Response;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalOrdersCommand;
-import com.everhomes.rest.rentalv2.ListRentalOrdersResponse;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommand;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommandResponse;
-import com.everhomes.rest.rentalv2.RenewRentalOrderCommand;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
-import com.everhomes.rest.rentalv2.RentalOrderDTO;
-import com.everhomes.rest.rentalv2.RentalSiteDTO;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -88,7 +29,7 @@ public interface Rentalv2Service {
 
 	void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd);
 
-	void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsoredFlow);
+	void cancelRentalBill(CancelRentalBillCommand cmd);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
 
@@ -113,15 +54,6 @@ public interface Rentalv2Service {
 	FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(
 			FindRentalSiteWeekStatusCommand cmd);
 
-//	RentalBillDTO completeBill(CompleteBillCommand cmd);
-//
-//	RentalBillDTO incompleteBill(IncompleteBillCommand cmd);
-
-//	BatchCompleteBillCommandResponse batchIncompleteBill(
-//			BatchIncompleteBillCommand cmd);
-//
-//	BatchCompleteBillCommandResponse batchCompleteBill(
-//			BatchCompleteBillCommand cmd);
 
 	void exportRentalBills(ListRentalBillsCommand cmd,HttpServletResponse response);
 	void exportRentalBills(SearchRentalOrdersCommand cmd,HttpServletResponse response);
@@ -158,15 +90,7 @@ public interface Rentalv2Service {
 	ResourceTypeDTO getResourceType(
 			GetResourceTypeCommand cmd);
 
-//	void createResourceType(CreateResourceTypeCommand cmd);
-//
-//	void deleteResourceType(DeleteResourceTypeCommand cmd);
-//
-//	void updateResourceType(UpdateResourceTypeCommand cmd);
-//
-//	void closeResourceType(CloseResourceTypeCommand cmd);
-//
-//	void openResourceType(OpenResourceTypeCommand cmd);
+
 
 	FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd);
@@ -184,9 +108,6 @@ public interface Rentalv2Service {
 	void cancelOrderSendMessage(RentalOrder rentalBill);
 
 
-//	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
-//			RentalOrder order);
-
 
 	QueryDefaultRuleAdminResponse getResourceRule(
 			GetResourceRuleAdminCommand cmd);
@@ -199,16 +120,11 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd);
 
 
-//	void addCheckOperator(AddCheckOperatorCommand cmd);
-//
-//
-//	void deleteCheckOperator(AddCheckOperatorCommand cmd);
-
 
 	void onOrderSuccess(RentalOrder bill);
 
 
-	void onOrderCancel(RentalOrder order,boolean ifAbsordFlow);
+	void onOrderCancel(RentalOrder order);
 
 
 	void updateRentalDate(UpdateRentalDateCommand cmd);
@@ -294,8 +210,11 @@ public interface Rentalv2Service {
 
 	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
 
+	List<Long> getHolidayCloseDates(GetHolidayCloseDatesCommand cmd);
+
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
+	GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd);
 
 	void test();
 

@@ -14,9 +14,11 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.wx.GetContentServerUriCommand;
 import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -104,19 +106,34 @@ public class WeChatServiceImpl implements WeChatService {
         String appId = this.getAppIdByNamespaceId(namespaceId);
         resp.setAppId(appId);
 
-		resp.setTicket(ticket);
+        //ticket是服务器和微信之间的票据，安全原因不能传给客户端 edit by yanjun 20180711
+		//resp.setTicket(ticket);
 		return resp;
 	}
 
 	@Override
 	public String getContentServerUrl(GetContentServerUrlCommand cmd) {
-		String accessToken = getAccessToken();
-		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + cmd.getMediaId();
-
-		CloseableHttpClient httpclient = null;
-        
-        CloseableHttpResponse response = null;
+        CsFileLocationDTO csFileLocationDTO = commonGetContentServerResponse(cmd.getMediaId());
         String result = null;
+        if (csFileLocationDTO != null) {
+            result = csFileLocationDTO.getUrl();
+        }
+        return result;
+	}
+
+    @Override
+    public CsFileLocationDTO getContentServerUri(GetContentServerUriCommand cmd) {
+        return commonGetContentServerResponse(cmd.getMediaId());
+    }
+
+    private CsFileLocationDTO commonGetContentServerResponse(String mediaId) {
+        String accessToken = getAccessToken();
+        String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + mediaId;
+
+        CloseableHttpClient httpclient = null;
+
+        CloseableHttpResponse response = null;
+        CsFileLocationDTO result = null;
         try {
             httpclient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(url);
@@ -125,26 +142,26 @@ public class WeChatServiceImpl implements WeChatService {
             int status = response.getStatusLine().getStatusCode();
             if(status != 200){
                 LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                         "Failed to get the http result");
             } else {
-            	HttpEntity entity =  response.getEntity();
-            	InputStream is = entity.getContent();
-                 
-            	String fileName = getFileName(response.getLastHeader("Content-Type").getValue());
-        		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
-        		if(fileResp.getErrorCode() == 0) {
-        			result = fileResp.getResponse().getUrl();
-        			
+                HttpEntity entity =  response.getEntity();
+                InputStream is = entity.getContent();
+
+                String fileName = getFileName(response.getLastHeader("Content-Type").getValue());
+                String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+                UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
+                if(fileResp.getErrorCode() == 0) {
+                    result = fileResp.getResponse();
+
                     if(LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Get http result, url={}, fileUrl={}", url, result);
                     }
 
-        		}
+                }
 
             }
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to get the http result, url={}", url, e);
         } finally {
@@ -155,7 +172,7 @@ public class WeChatServiceImpl implements WeChatService {
                     e.printStackTrace();
                 }
             }
-            
+
             if(httpclient != null) {
                 try {
                     httpclient.close();
@@ -164,11 +181,11 @@ public class WeChatServiceImpl implements WeChatService {
                 }
             }
         }
-		
-		return result;
-	}
-	
-	public static String getFileName(String contentType) {
+
+        return result;
+    }
+
+    public static String getFileName(String contentType) {
 	    LOGGER.info(" WeChatService contentType : " + contentType);
 	    if(!StringUtils.isEmpty(contentType)) {
 	    	String[] str = contentType.split("/");
@@ -321,27 +338,98 @@ public class WeChatServiceImpl implements WeChatService {
     
     
     private String restCall(String cmd, Object params, String url) {
-        try {
-            ListenableFuture<ResponseEntity<String>> future = this.restCall(cmd, params, url, null);
-            return future.get().getBody();
-        } catch (UnsupportedEncodingException | InterruptedException | ExecutionException e) {
-            LOGGER.error("request error", e);
-            return "";
-        }
-        
+//            ListenableFuture<ResponseEntity<String>> future = this.restCall(cmd, params, url, null);
+//            return future.get().getBody();
+//
+        String httpUrl = getRestUri(cmd) + url;
+        String s = httpGet(httpUrl, "");
+
+
+        return s;
     }
 
 
-//    /**
-//     * 想测试上面的restCall方法啊，但是它是private方法
-//     * @param cmd
-//     * @param params
-//     * @param url
-//     */
-//    @Override
-//    public String testRestCall(String cmd, Object params, String url){
-//        return restCall(cmd, params, url);
-//    }
+    @Override
+    public String httpGet(String url, String safeUrl) {
+        CloseableHttpClient httpclient = null;
+
+        CloseableHttpResponse response = null;
+        String result = null;
+        try {
+            httpclient = HttpClients.createDefault();
+
+            HttpGet httpGet = new HttpGet(url);
+
+            //与微信交互需要使用ip白名单。测试环境没有固定ip需要代理访问。方法是从有外网ip的服务器访问微信，从而实现固定id   add by yanjun 20180711
+            String wechatProxyHost = configurationProvider.getValue("wechat.proxy.host", null);
+            int wechatProxyPort = configurationProvider.getIntValue("wechat.proxy.port", 0);
+            if(wechatProxyHost != null && wechatProxyPort != 0){
+                HttpHost proxy = new HttpHost(wechatProxyHost, wechatProxyPort);
+                RequestConfig requestConfig = RequestConfig.custom().setProxy(proxy).build();
+                httpGet.setConfig(requestConfig);
+            }
+
+            response = httpclient.execute(httpGet);
+
+            int status = response.getStatusLine().getStatusCode();
+            if(status != 200){
+                LOGGER.error("Failed to get the http result, url={}, status={}", safeUrl, response.getStatusLine());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get the http result");
+            } else {
+                HttpEntity resEntity = response.getEntity();
+                String charset = getContentCharSet(resEntity);
+                result = EntityUtils.toString(resEntity, charset);
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Get http result, charset={}, url={}, result={}", charset, safeUrl, result);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to get the http result, url={}", safeUrl, e);
+        } finally {
+            if(response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(httpclient != null) {
+                try {
+                    httpclient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    public static String getContentCharSet(final HttpEntity entity) throws ParseException {
+        if (entity == null) {
+            throw new IllegalArgumentException("HTTP entity may not be null");
+        }
+        String charset = null;
+        if (entity.getContentType() != null) {
+            HeaderElement values[] = entity.getContentType().getElements();
+            if (values.length > 0) {
+                NameValuePair param = values[0].getParameterByName("charset" );
+                if (param != null) {
+                    charset = param.getValue();
+                }
+            }
+        }
+
+        if(charset == null || charset.length() == 0){
+            charset = "UTF-8";
+        }
+
+        return charset;
+    }
+
 
     public static Map<String, String> sign(String jsapi_ticket, String url) {
         Map<String, String> ret = new HashMap<String, String>();

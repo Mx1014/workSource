@@ -128,10 +128,34 @@ public class FlowEvaluateProviderImpl implements FlowEvaluateProvider {
 				query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_VERSION.eq(flowVersion));
 				return query;
 			}
-    		
+
     	});
     }
-    
+
+    @Override
+    public List<FlowEvaluate> findEvaluatesByFlowMainId(Long flowMainId, Integer flowVersion, Long beginTime , Long endTime) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluates.class));
+        SelectQuery<EhFlowEvaluatesRecord> query = context.selectQuery(Tables.EH_FLOW_EVALUATES);
+        if(null != flowMainId)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_MAIN_ID.eq(flowMainId));
+        if(null != flowVersion)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_VERSION.eq(flowVersion));
+        if(null != beginTime)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.CREATE_TIME.gt(new Timestamp(beginTime)));
+        if(null != endTime)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.CREATE_TIME.lt(new Timestamp(endTime)));
+        return query.fetch().map(record -> ConvertHelper.convert(record,FlowEvaluate.class));
+    }
+
+    @Override
+    public List<FlowEvaluate> findEvaluatesByCaseId(Long flowcaseId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluates.class));
+        SelectQuery<EhFlowEvaluatesRecord> query = context.selectQuery(Tables.EH_FLOW_EVALUATES);
+        if(null != flowcaseId)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_CASE_ID.eq(flowcaseId));
+        return query.fetch().map(record -> ConvertHelper.convert(record,FlowEvaluate.class));
+    }
+
     @Override
     public void createFlowEvaluate(List<FlowEvaluate> objs) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluates.class));

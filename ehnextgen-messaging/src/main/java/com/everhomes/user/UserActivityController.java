@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -197,6 +198,15 @@ public class UserActivityController extends ControllerBase {
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
+    }
+
+    /**
+     * <b>URL: /user/exportFeedbacks</b>
+     * <p>导出举报数据</p>
+     */
+    @RequestMapping("exportFeedbacks")
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        this.userActivityService.exportFeedbacks(cmd);
     }
     
     /**

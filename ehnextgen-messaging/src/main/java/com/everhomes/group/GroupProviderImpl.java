@@ -77,8 +77,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroups.class, null);
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-            @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -93,8 +92,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGroups.class, group.getId());
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-        @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
         @CacheEvict(value="listGroupMessageMembers", allEntries=true),
         @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -118,7 +116,6 @@ public class GroupProviderImpl implements GroupProvider {
     /**
      * Also used by Enterprise
      */
-    @Cacheable(value = "Group", key="#id", unless="#result == null")
     @Override
     public Group findGroupById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, id));

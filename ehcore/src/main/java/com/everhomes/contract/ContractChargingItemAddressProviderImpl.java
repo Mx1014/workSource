@@ -135,6 +135,14 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
                 query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
                         Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
                 query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("公摊电费"));
+            }else if(EnergyMeterType.ADVERTISEMENT.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("广告费"));
+            }else if(EnergyMeterType.AIR_CONDITIONER.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("空调费"));
             }
         }
 

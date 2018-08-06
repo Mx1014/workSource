@@ -455,7 +455,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
 			cmd.setOrganizationId( Long.valueOf(range));
 			cmd.setPageSize(10000000);//这里需要查询全部的人员
-			ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnels(cmd, false);
+			ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnelsWithDownStream(cmd);
 			if(response == null || response.getMembers() == null){
 				return new ArrayList<>();
 			}
