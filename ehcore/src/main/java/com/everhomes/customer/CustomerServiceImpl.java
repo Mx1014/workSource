@@ -236,6 +236,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -3982,7 +3983,8 @@ public class CustomerServiceImpl implements CustomerService {
                     ListOrganizationContactCommand memberCommand = new ListOrganizationContactCommand();
                     memberCommand.setOrganizationId(p.getTargetId());
                     memberCommand.setNamespaceId(cmd.getNamespaceId());
-                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
+                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
+                    memberCommand.setTargetTypes(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
                     memberCommand.setPageSize(Integer.MAX_VALUE-1);
                     ListOrganizationMemberCommandResponse membersResponse = organizationService.listOrganizationPersonnelsWithDownStream(memberCommand);
                     if (membersResponse.getMembers() != null && membersResponse.getMembers().size() > 0) {

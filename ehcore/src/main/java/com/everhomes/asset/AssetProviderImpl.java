@@ -5057,7 +5057,7 @@ public class AssetProviderImpl implements AssetProvider {
         dao.insert(c);
     }
 
-    private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
+    public Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {
         Map<Long,String> map = new HashMap<>();
         EhPaymentBillGroups group = Tables.EH_PAYMENT_BILL_GROUPS.as("group");
         for(int i = 0 ; i < groupIds.size(); i++ ){
