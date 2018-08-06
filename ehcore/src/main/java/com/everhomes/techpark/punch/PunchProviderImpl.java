@@ -4205,26 +4205,5 @@ public class PunchProviderImpl implements PunchProvider {
         }
         return new ArrayList<>(result);
     }
-
-    @Override
-    public PunchStatistic getPunchStatisticByMonthAndUser(Long organizationId, Long userId, String statisticsMonth) {
-        try {
-            PunchStatistic[] result = new PunchStatistic[1];
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-
-            result[0] = context.select().from(Tables.EH_PUNCH_STATISTICS)
-                    .where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId))
-                    .and(Tables.EH_PUNCH_STATISTICS.USER_ID.eq(userId))
-                    .and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(statisticsMonth))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, PunchStatistic.class);
-                    });
-
-            return result[0];
-        } catch (Exception ex) {
-            //fetchAny() maybe return null
-            return null;
-        }
-    }
 }
 

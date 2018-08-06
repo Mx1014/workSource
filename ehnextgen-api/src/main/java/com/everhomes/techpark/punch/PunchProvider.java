@@ -443,6 +443,4 @@ public interface PunchProvider {
 	List<PunchDayLog> listPunchDayLogsByItemTypeAndUserId(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType);
 
 	List<PunchExceptionRequest> listExceptionRequestsByItemTypeAndDate(Long userId, Long organizationId, Date startDay, Date endDay, GeneralApprovalAttribute approvalAttribute);
-
-	PunchStatistic getPunchStatisticByMonthAndUser(Long organizationId, Long userId, String statisticsMonth);
 }
