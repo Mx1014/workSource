@@ -5808,11 +5808,12 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 	
 	@Override
-    public Double getApartmentInfo(Long addressId) {
+    public Double getApartmentInfo(Long addressId, Long contractId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        return context.select(Tables.EH_ADDRESSES.CHARGE_AREA)
-                .from(Tables.EH_ADDRESSES)
-                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+        return context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.AREA_SIZE)
+                .from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+                .where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
                 .fetchOne(0,Double.class);
     }
 }

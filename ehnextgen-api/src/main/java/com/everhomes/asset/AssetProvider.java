@@ -392,5 +392,5 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
-	Double getApartmentInfo(Long addressId);
+	Double getApartmentInfo(Long addressId, Long contractId);
 }
