@@ -13,5 +13,7 @@ CREATE TABLE `eh_general_form_print_templates`(
   `delete_uid` BIGINT COMMENT 'record deleter user id',
   `delete_time` DATETIME COMMENT '删除时间',
   `update_uid` BIGINT COMMENT 'record update user id',
-  `update_time` DATETIME COMMENT '更新时间'
+  `update_time` DATETIME COMMENT '更新时间',
+
+  PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '通用表单打印模板表';
