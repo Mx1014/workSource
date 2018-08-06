@@ -643,7 +643,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         //1.建仓库 不同应用建立不同仓库
         try {
             String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
-            GogsRepo repo = gogsRepo(UserContext.getCurrentNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+            GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
             //2.提交脚本
             GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), "", cmd.getContents(), true);
             //3.存储提交脚本返回的id
@@ -680,24 +680,28 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         //1.建仓库 不同应用建立不同仓库
         try {
             String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
-            GogsRepo repo = gogsRepo(UserContext.getCurrentNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
-            //2.提交脚本
-            GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), lastCommit, cmd.getContents(), isNewFile);
-            //3.存储提交脚本返回的id
-            generalFormPrintTemplate.setLastCommit(commit.getId());
-
-            //如果改了名称，在版本仓库里必须删掉原来的，在创建新的
-            if (isNewFile) {
-                gogsDeleteScript(repo,generalFormPrintTemplate.gogsPath(),lastCommit);
-            }
             //如果表单ID不一致，则新增一条数据，以免旧模板的commit被冲掉
             if (!oldTemplate.getOwnerId().equals(generalFormPrintTemplate.getOwnerId())) {
+                GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+                //2.提交脚本
+                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), "", cmd.getContents(), true);
+                //3.存储提交脚本返回的id
+                generalFormPrintTemplate.setLastCommit(commit.getId());
                 generalFormProvider.createGeneralFormPrintTemplate(generalFormPrintTemplate);
             }else {
+                GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+                //2.提交脚本
+                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), lastCommit, cmd.getContents(), isNewFile);
+                //3.存储提交脚本返回的id
+                generalFormPrintTemplate.setLastCommit(commit.getId());
+                //如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+                if (isNewFile) {
+                    gogsDeleteScript(repo,generalFormPrintTemplate.gogsPath(),lastCommit);
+                }
                 generalFormProvider.updateGeneralFormPrintTemplate(generalFormPrintTemplate);
             }
         } catch (GogsConflictException e) {
-            LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), UserContext.getCurrentNamespaceId());
+            LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
                     "generalFormPrintTemplate is already exist");
         } catch (GogsFileNotExistException e) {
@@ -718,10 +722,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
                     "generalForm is null");
         }
-        GeneralFormPrintTemplate generalFormPrintTemplate = this.generalFormProvider.getGeneralFormPrintTemplate(UserContext.getCurrentNamespaceId(),
+        GeneralFormPrintTemplate generalFormPrintTemplate = this.generalFormProvider.getGeneralFormPrintTemplate(cmd.getNamespaceId(),
                 generalForm.getId(),FORM_PRINT_TEMPLATE_OWNER_TYPE);
         if (generalFormPrintTemplate == null) {
-            LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), UserContext.getCurrentNamespaceId());
+            LOGGER.error("generalFormPrintTemplate in namespace {} not exist!", UserContext.getCurrentNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
         }
