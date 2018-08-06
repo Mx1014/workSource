@@ -34,4 +34,11 @@ public interface GeneralFormProvider {
 	GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId);
 
 	GeneralForm getGeneralFormByTag1(Integer namespaceId, String moduleType, Long moduleId, String stringTag1);
+
+	Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id);
+	GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType);
 }

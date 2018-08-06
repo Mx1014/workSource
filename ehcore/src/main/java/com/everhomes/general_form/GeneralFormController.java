@@ -81,4 +81,49 @@ public class GeneralFormController extends ControllerBase {
         return response;
     }
 
+	/**
+	 * <b>URL: /general_form/createGeneralFromPrintTemplate</b>
+	 * <p> 新增表单打印模板 </p>
+	 */
+	@RequestMapping("createGeneralFromPrintTemplate")
+	@RestReturn(value=GeneralFormPrintTemplateDTO.class)
+	public RestResponse createGeneralFromPrintTemplate(AddGeneralFormPrintTemplateCommand cmd) {
+		GeneralFormPrintTemplateDTO dto = generalFormService.createGeneralFormPrintTemplate(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+    /**
+     * <b>URL: /general_form/updateGeneralFromPrintTemplate</b>
+     * <p> 更新表单打印模板 </p>
+     */
+    @RequestMapping("updateGeneralFromPrintTemplate")
+    @RestReturn(value=GeneralFormPrintTemplateDTO.class)
+    public RestResponse updateGeneralFromPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd) {
+        GeneralFormPrintTemplateDTO dto = generalFormService.updateGeneralFormPrintTemplate(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /general_form/getGeneralFromPrintTemplate</b>
+     * <p> 获取表单打印模板 </p>
+     */
+    @RequestMapping("getGeneralFromPrintTemplate")
+    @RestReturn(value=GeneralFormPrintTemplateDTO.class)
+    public RestResponse getGeneralFromPrintTemplate(GetGeneralFormPrintTemplateCommand cmd) {
+        GeneralFormPrintTemplateDTO dto = generalFormService.getGeneralFormPrintTemplate(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
 }

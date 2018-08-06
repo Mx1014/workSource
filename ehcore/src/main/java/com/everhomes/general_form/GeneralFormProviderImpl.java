@@ -8,8 +8,12 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormPrintTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormPrintTemplates;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
+import com.everhomes.server.schema.tables.records.EhGeneralFormPrintTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
@@ -233,4 +237,48 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return results.get(0);
 		return null;
     }
+
+	@Override
+	public Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormPrintTemplatesRecord.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormPrintTemplates.class));
+		generalFormPrintTemplate.setId(id);
+
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		dao.insert(generalFormPrintTemplate);
+		return id;
+	}
+
+	@Override
+	public void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormPrintTemplates.class));
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		dao.update(generalFormPrintTemplate);
+	}
+
+	@Override
+	public GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), GeneralFormPrintTemplate.class);
+	}
+
+	@Override
+	public GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhGeneralFormPrintTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.OWNER_TYPE.eq(ownerType));
+		List<GeneralFormPrintTemplate> results = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormPrintTemplate.class);
+		});
+		if (results != null && results.size() > 0)
+			return results.get(0);
+		return null;
+	}
 }

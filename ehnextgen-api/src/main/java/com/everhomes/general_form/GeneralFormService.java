@@ -50,4 +50,13 @@ public interface GeneralFormService {
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
+
+    /**
+     * 表单打印模板接口
+     */
+    GeneralFormPrintTemplateDTO createGeneralFormPrintTemplate(AddGeneralFormPrintTemplateCommand cmd);
+
+    GeneralFormPrintTemplateDTO updateGeneralFormPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd);
+
+    GeneralFormPrintTemplateDTO getGeneralFormPrintTemplate(GetGeneralFormPrintTemplateCommand cmd);
 }
