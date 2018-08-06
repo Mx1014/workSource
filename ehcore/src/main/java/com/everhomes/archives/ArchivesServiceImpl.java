@@ -636,17 +636,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         else
             employee.setContractPartyId(cmd.getOrganizationId());
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-        //  3-2.配置转正
+        //  3-2.增加入职记录
+        addCheckInLogs(detailId, cmd);
+        //  3-3.配置转正
         EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
         command.setDetailIds(Collections.singletonList(employee.getId()));
         command.setOrganizationId(employee.getOrganizationId());
         command.setEmploymentTime(format.format(employee.getEmploymentTime().toLocalDate()));
         command.setEmploymentEvaluation("");
         employArchivesEmployeesConfig(command);
-        //  3-3.查询若存在于离职列表则删除
+        //  3-4.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
-        //  3-4.增加入职记录
-        addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
