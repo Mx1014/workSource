@@ -1261,7 +1261,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long detailId, Long companyId, String startDay, String endDay) {
+    public List<PunchDayLog> listPunchDayLogsIncludeEndDay(Long detailId, Long companyId, String startDay, String endDay) {
         // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);

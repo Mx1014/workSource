@@ -174,6 +174,7 @@ import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRe
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.PunchStatisticsParser;
+import com.everhomes.techpark.punch.utils.PunchDateUtils;
 import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import com.everhomes.uniongroup.UniongroupConfigureProvider;
 import com.everhomes.uniongroup.UniongroupConfigures;
@@ -3183,33 +3184,31 @@ public class PunchServiceImpl implements PunchService {
         return 0;
     }
 
-    private void addPunchStatistics(OrganizationMemberDetails detail, Long orgId, Calendar startCalendar, Calendar endCalendar) {
-        PunchStatistic statistic = new PunchStatistic();
-
-        statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                .getTime()));
-        statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
-        statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
-        statistic.setOwnerId(ownerId);
-        statistic.setUserId(detail.getTargetId());
-        statistic.setDetailId(detail.getId());
-        statistic.setUserName(detail.getContactName());
-        Map<Long, String> dptMap = archivesService.getEmployeeDepartment(detail.getId());
-        if (null != dptMap) {
-            statistic.setDeptId(dptMap.keySet().iterator().next());
-            String depName = archivesService.convertToOrgNames(dptMap);
-            statistic.setDeptName(depName);
-        }
-
-        //2018年5月17日 by wh 删除statistics提前到这里
-        List<Long> orgIds = new ArrayList<>();
-        orgIds.add(ownerId);
-        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getDetailId());
-
+    private void addPunchStatistics(OrganizationMemberDetails detail, Long orgId, String punchMonth) {
         try {
-            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getId(), ownerId, dateSF.get().format(startCalendar.getTime()),
-                    dateSF.get().format(endCalendar.getTime()));
+            String startDay = PunchDateUtils.getTheFirstMonthDate(punchMonth, null);
+            String endDay = PunchDateUtils.getTheLastMonthDate(punchMonth, null);
+
+            PunchStatistic statistic = new PunchStatistic();
+            statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            statistic.setPunchMonth(punchMonth);
+            statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+            Long ownerId = getTopEnterpriseId(detail.getOrganizationId());
+            statistic.setOwnerId(ownerId);
+            statistic.setUserId(detail.getTargetId());
+            statistic.setDetailId(detail.getId());
+            statistic.setUserName(detail.getContactName());
+            Map<Long, String> dptMap = archivesService.getEmployeeDepartment(detail.getId());
+            if (null != dptMap) {
+                statistic.setDeptId(dptMap.keySet().iterator().next());
+                String depName = archivesService.convertToOrgNames(dptMap);
+                statistic.setDeptName(depName);
+            }
+
+            //2018年5月17日 by wh 删除statistics提前到这里
+            this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), Collections.singletonList(ownerId), statistic.getPunchMonth(), statistic.getDetailId());
+
+            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsIncludeEndDay(detail.getId(), ownerId, startDay, endDay);
 
             //找到每一个打卡日期的异常申请修改审批后状态
             //既然轮询了顺便就统计一下 设备异常次数
@@ -3231,23 +3230,16 @@ public class PunchServiceImpl implements PunchService {
             processPunchListCount(dayLogList, statistic);
             // 计算本月的应出勤天数
             Calendar startDayOfThisMonth = Calendar.getInstance();
-            startDayOfThisMonth.setTime(startCalendar.getTime());
+            startDayOfThisMonth.setTime(dateSF.get().parse(startDay));
             PunchRule pr = this.getPunchRule(detail);
             statistic.setWorkDayCount(calculateWorkDayCountThisMonth(detail, dayLogList, startDayOfThisMonth, pr));
-
-        } catch (Exception e) {
-            LOGGER.error("#####refresh month log error!! userid:[" + detail.getTargetId()
-                    + "] organization id :[" + orgId + "] ", e);
-        } finally {
             this.punchProvider.createPunchStatistic(statistic);
+        } catch (Exception e) {
+            LOGGER.error("#####refresh month log error!! detailId:[" + detail.getId() + "] organization id :[" + orgId + "] ", e);
         }
-
     }
 
     private int calculateWorkDayCountThisMonth(OrganizationMemberDetails detail, List<PunchDayLog> punchDayLogs, Calendar startDayOfThisMonth, PunchRule punchRule) {
-        if ("钟爱丽".equals(detail.getContactName())) {
-            System.out.println();
-        }
         int workDayCount = 0;
         Set<Long> punchDayLongSet = new HashSet<>();
         for (PunchDayLog pdl : punchDayLogs) {
@@ -3410,7 +3402,9 @@ public class PunchServiceImpl implements PunchService {
                     statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
                     statistic.setExceptionDayCount(statistic.getExceptionDayCount() + 1);
                 }
-                if (NormalFlag.fromCode(isAbsence) == NormalFlag.YES) {
+                // 还没过分界点的UN_PUNCH状态不计入旷工
+                if (NormalFlag.fromCode(isAbsence) == NormalFlag.YES
+                        && (pdl.getSplitDateTime() == null || new Timestamp(System.currentTimeMillis()).compareTo(pdl.getSplitDateTime()) >= 0)) {
                     statistic.setAbsenceCount(statistic.getAbsenceCount() + 1);
                 }
             }
@@ -10038,7 +10032,7 @@ public class PunchServiceImpl implements PunchService {
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTime(startCalendar.getTime());
         endCalendar.add(Calendar.MONTH, 1);
-        List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getId(), cmd.getEnterpriseId(),
+        List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsIncludeEndDay(detail.getId(), cmd.getEnterpriseId(),
                 dateSF.get().format(startCalendar.getTime()), dateSF.get().format(endCalendar.getTime()));
         for (; startCalendar.before(endCalendar); startCalendar.add(Calendar.DAY_OF_MONTH, 1)) {
             PunchDayLog log = findPunchDayLogByDate(startCalendar.getTime(), dayLogList);
@@ -11028,7 +11022,7 @@ public class PunchServiceImpl implements PunchService {
     public void refreshMonthReport(String month) {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PUNCH_MONTH_REPORT.getCode()).enter(() -> {
-                List<Long> enterpriseIds = punchProvider.listPunchLogEnterprise(null, null);
+                List<Long> enterpriseIds = uniongroupConfigureProvider.distinctEnterpriseIdsFromUniongroupMemberDetails();
                 if(null != enterpriseIds) {
                     for (Long enterpriseId : enterpriseIds) {
                     	try{
@@ -11118,36 +11112,21 @@ public class PunchServiceImpl implements PunchService {
             return tuple;
         }).first().first();
 
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
-        try {
-            start.setTime(monthSF.get().parse(report.getPunchMonth()));
-        } catch (ParseException e) {
-            LOGGER.error("punch month is not YYYYMM",e);
-            setReportStatusAfterUpdate(report);
-            punchMonthReportProvider.updatePunchMonthReport(report);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "report id error : punch month is not YYYYMM");
-        }
-        setCalendarMonthBegin(start);
-        end.setTime(start.getTime());
-        end.add(Calendar.MONTH, 1);
         monthReportExecutorPool.execute(() -> {
             try {
             	this.dbProvider.execute((TransactionStatus status) -> {
 	                List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
 	                setMonthReportProcess(report, 5);
-	                for (int i = 0; i < members.size(); i++) { 
-	                    try{
-	                    	addPunchStatistics(members.get(i), cmd.getOwnerId(), start, end);
-	                    }catch(Exception e){
-	                    	LOGGER.error("update punch month report error ",e);
-	                    }
-	                    if (i % 10 == 0) {
-	                        setMonthReportProcess(report, 5 + (int) (i / (Double.valueOf(members.size()) / 94.00)));
-	                    }
-	                }
+                    for (int i = 0; i < members.size(); i++) {
+                        try {
+                            addPunchStatistics(members.get(i), cmd.getOwnerId(), report.getPunchMonth());
+                        } catch (Exception e) {
+                            LOGGER.error("update punch month report error ", e);
+                        }
+                        if (i % 10 == 0) {
+                            setMonthReportProcess(report, 5 + (int) (i / (Double.valueOf(members.size()) / 94.00)));
+                        }
+                    }
 	                return null;
                 });
             } catch (Exception e) {
@@ -11524,9 +11503,6 @@ public class PunchServiceImpl implements PunchService {
         if (pdl == null) {
             return;
         }
-        pdl.setRestFlag(NormalFlag.NO.getCode());
-        pdl.setAbsentFlag(NormalFlag.NO.getCode());
-        pdl.setNormalFlag(NormalFlag.YES.getCode());
         String[] statusList = null;
         if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
             statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
@@ -11539,14 +11515,15 @@ public class PunchServiceImpl implements PunchService {
                 }
             }
         } else {
-            if (pdl.getStatusList().equals(String.valueOf(PunchStatus.NOTWORKDAY.getCode()))) {
-                pdl.setRestFlag(NormalFlag.YES.getCode());
-            } else {
-                statusList = new String[]{pdl.getStatusList()};
-                if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
-                    statusList[0] = pdl.getApprovalStatusList();
-                }
+            statusList = new String[]{pdl.getStatusList()};
+            if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
+                statusList[0] = pdl.getApprovalStatusList();
             }
+        }
+        if (pdl.getTimeRuleId() == null && pdl.getTimeRuleId() == 0) {
+            pdl.setRestFlag(NormalFlag.YES.getCode());
+        } else {
+            pdl.setRestFlag(NormalFlag.NO.getCode());
         }
         pdl.setAbsentFlag(isAbsence(statusList));
         pdl.setNormalFlag(isFullNormal(statusList));
@@ -12400,10 +12377,11 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
-        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", null, Integer.MAX_VALUE);
+        List<Organization> children = findSubDepartments(parentDepartment);
         List<Long> deptIds = new ArrayList<>();
+        deptIds.add(parentDepartment.getId());
         if (CollectionUtils.isEmpty(children)) {
-            deptIds.add(parentDepartment.getId());
+            return deptIds;
         }
         children.forEach(d -> {
             deptIds.add(d.getId());
