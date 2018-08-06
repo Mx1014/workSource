@@ -601,7 +601,7 @@ public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cm
     return response;
 }
 
-// this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改，一个账单组不能重复收费项目id       4
+// this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改 
 /**
  * <p>为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改</p>
  * <b>URL: /asset/addOrModifyRuleForBillGroup</b>
