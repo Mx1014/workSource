@@ -100,4 +100,24 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleEntries.class, id);
     }
+
+    @Override
+    public ServiceModuleEntry findById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhServiceModuleEntriesDao dao = new EhServiceModuleEntriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceModuleEntry.class);
+    }
+
+
+    @Override
+    public void udpate(ServiceModuleEntry serviceModuleEntry) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleEntries.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleEntries.class, id));
+        EhServiceModuleEntriesDao dao = new EhServiceModuleEntriesDao(context.configuration());
+        dao.update(serviceModuleEntry);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleEntries.class, id);
+    }
+
 }

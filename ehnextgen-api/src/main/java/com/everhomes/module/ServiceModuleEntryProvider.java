@@ -17,4 +17,8 @@ public interface ServiceModuleEntryProvider {
     void delete(Long id);
 
     void create(ServiceModuleEntry serviceModuleEntry);
+
+    ServiceModuleEntry findById(Long id);
+
+    void udpate(ServiceModuleEntry serviceModuleEntry);
 }

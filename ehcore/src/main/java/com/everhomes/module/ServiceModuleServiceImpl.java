@@ -17,6 +17,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -126,6 +127,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private ContentServerService contentServerService;
+
+
+    @Autowired
+    private AppCategoryProvider appCategoryProvider;
 
 
     @Override
@@ -1424,22 +1429,109 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
 
+        if(cmd.getId() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        ServiceModuleEntry serviceModuleEntry = serviceModuleEntryProvider.findById(cmd.getId());
+        if(serviceModuleEntry == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        serviceModuleEntry.setEntryName(cmd.getEntryName());
+        serviceModuleEntry.setIconUri(cmd.getIconUri());
+
+        serviceModuleEntryProvider.udpate(serviceModuleEntry);
+
     }
 
     @Override
     public ListAppCategoryResponse listAppCategory(ListAppCategoryCommand cmd) {
-        return null;
+
+
+        if(cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        if(cmd.getParentId() == null){
+            cmd.setParentId(0L);
+        }
+
+        ListAppCategoryResponse response = new ListAppCategoryResponse();
+        List<AppCategoryDTO> treeDto = getTreeDto(cmd.getLocationType(), cmd.getParentId());
+        response.setDtos(treeDto);
+
+        return response;
+    }
+
+
+    private List<AppCategoryDTO> getTreeDto(Byte locationType, Long parentId){
+        List<AppCategory> appCategories = appCategoryProvider.listAppCategories(locationType, parentId);
+        if(appCategories == null || appCategories.size() == 0){
+            return null;
+        }
+
+        List<AppCategoryDTO> dtos = new ArrayList<>();
+        for(AppCategory appCategory: appCategories){
+            AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+            List<AppCategoryDTO> subTree = getTreeDto(dto.getLocationType(), dto.getId());
+            dto.setDtos(subTree);
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 
     @Override
     public void updateAppCategory(UpdateAppCategoryCommand cmd) {
 
+        if(cmd.getId() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getId());
+        if(appCategory == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        appCategory.setName(cmd.getName());
+        appCategoryProvider.udpate(appCategory);
     }
 
 
     @Override
     public AppCategoryDTO createAppCategory(CreateAppCategoryCommand cmd) {
-        return null;
+
+        if(cmd.getParentId() == null){
+            cmd.setParentId(0L);
+        }else if(cmd.getParentId() != 0L){
+            AppCategory appCategory = appCategoryProvider.findById(cmd.getParentId());
+            if(appCategory == null || TrueOrFalseFlag.fromCode(appCategory.getLeafFlag()) == TrueOrFalseFlag.TRUE ){
+
+            }
+        }
+
+
+
+
+        AppCategory appCategory = ConvertHelper.convert(cmd, AppCategory.class);
+
+        Long maxDefaultOrder = appCategoryProvider.findMaxDefaultOrder(cmd.getLocationType(), cmd.getParentId());
+        if(maxDefaultOrder == null){
+            maxDefaultOrder = 0L;
+        }
+        maxDefaultOrder = maxDefaultOrder + 1;
+        appCategory.setDefaultOrder(maxDefaultOrder);
+
+        appCategoryProvider.create(appCategory);
+        AppCategoryDTO dto = toAppCategoryDTO(appCategory);
+
+        return dto;
     }
 
     @Override
@@ -1460,5 +1552,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void exportServiceModuleEntries(HttpServletResponse response) {
 
+    }
+
+    private AppCategoryDTO toAppCategoryDTO(AppCategory appCategory){
+        AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+        return dto;
     }
 }

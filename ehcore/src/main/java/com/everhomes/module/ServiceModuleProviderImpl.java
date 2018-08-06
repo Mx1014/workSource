@@ -344,7 +344,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 
         if(!org.springframework.util.StringUtils.isEmpty(keyword)){
             Condition condition = Tables.EH_SERVICE_MODULES.NAME.like("%" + keyword.trim() + "%");
-            condition.or(Tables.EH_SERVICE_MODULES.ID.like("%" + keyword.trim() + "%"));
+            condition = condition.or(Tables.EH_SERVICE_MODULES.ID.like("%" + keyword.trim() + "%"));
 
             query.addConditions(condition);
         }

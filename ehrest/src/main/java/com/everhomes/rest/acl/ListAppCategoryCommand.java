@@ -5,19 +5,29 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>appType: appType，参考{@link com.everhomes.rest.module.ServiceModuleAppType}</li>
+ *     <li>locationType: 分类位置，参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
+ *     <li>parentId: parentId</li>
  * </ul>
  */
 public class ListAppCategoryCommand {
 
-    private Byte appType;
+    private Byte locationType;
+    private Long parentId;
 
-    public Byte getAppType() {
-        return appType;
+    public Byte getLocationType() {
+        return locationType;
     }
 
-    public void setAppType(Byte appType) {
-        this.appType = appType;
+    public void setLocationType(Byte locationType) {
+        this.locationType = locationType;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     @Override

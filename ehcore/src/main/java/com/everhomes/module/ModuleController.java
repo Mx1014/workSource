@@ -63,12 +63,12 @@ public class ModuleController extends ControllerBase {
 
 
     /**
-     * <b>URL: /module/listServiceModules</b>
+     * <b>URL: /module/listServiceModulesByAppType</b>
      * <p>
      * 业务模块列表
      * </p>
      */
-    @RequestMapping("listServiceModules")
+    @RequestMapping("listServiceModulesByAppType")
     @RestReturn(value = ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModulesByAppType(@Valid ListServiceModulesByAppTypeCommand cmd) {
         List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulesByAppType(cmd);

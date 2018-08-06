@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 模块id</li>
- *     <li>name: 模块名称</li>
+ *     <li>id: 应用分类id</li>
+ *     <li>name: 应用分类名称</li>
  *     <li>parentId: 父级id</li>
  *     <li>locationType: 分类位置，参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
  *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link com.everhomes.rest.module.ServiceModuleAppType}</li>
