@@ -1210,6 +1210,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.PROVIDENT_FUND_NUMBER, employee.getProvidentFundNumber());
         valueMap.put(ArchivesParameter.REG_RESIDENCE_TYPE, employee.getRegResidenceType());
         valueMap.put(ArchivesParameter.REG_RESIDENCE, employee.getRegResidence());
+        valueMap.put(ArchivesParameter.ID_PHOTO, employee.getIdPhoto());
+        valueMap.put(ArchivesParameter.VISA_PHOTO, employee.getVisaPhoto());
+        valueMap.put(ArchivesParameter.LIFE_PHOTO, employee.getLifePhoto());
+        valueMap.put(ArchivesParameter.ENTRY_FORM, employee.getEntryForm());
+        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, employee.getGraduationCertificate());
+        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, employee.getDegreeCertificate());
+        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, employee.getContractCertificate());
         if (employee.getBirthday() != null)
             valueMap.put(ArchivesParameter.BIRTHDAY, String.valueOf(employee.getBirthday()));
         if (employee.getProcreative() != null)
@@ -1896,6 +1903,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void cleanRedundantArchivesDetails() {
         List<Long> detailIds = archivesProvider.listDismissalDetailIds();
+        if(detailIds.size() == 0)
+            detailIds = Collections.singletonList(0L);
         List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus(detailIds);
         if (details == null)
             return;
