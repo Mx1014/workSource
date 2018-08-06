@@ -2166,7 +2166,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if(creator != null) {
 				dto.setCreatorName(creator.getNickName());
 			}
-
 		}
 
 		if(dto.getDenunciationUid() != null) {
