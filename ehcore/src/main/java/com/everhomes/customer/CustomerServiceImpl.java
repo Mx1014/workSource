@@ -225,17 +225,7 @@ import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -3972,10 +3962,20 @@ public class CustomerServiceImpl implements CustomerService {
                         relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
-                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
-                    if (members != null && members.size() > 0) {
-                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+//                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
+                    // organization manager module has their children apartment concept
+                    ListOrganizationContactCommand memberCommand = new ListOrganizationContactCommand();
+                    memberCommand.setOrganizationId(p.getTargetId());
+                    memberCommand.setNamespaceId(cmd.getNamespaceId());
+                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
+                    memberCommand.setTargetTypes(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                    memberCommand.setPageSize(Integer.MAX_VALUE-1);
+                    ListOrganizationMemberCommandResponse membersResponse = organizationService.listOrganizationPersonnelsWithDownStream(memberCommand);
+                    if (membersResponse.getMembers() != null && membersResponse.getMembers().size() > 0) {
+//                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                        relatedMembers.addAll(membersResponse.getMembers());
                     }
+
                 }
             });
         });
@@ -4003,7 +4003,21 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return relatedMembers;
+        // remove duplicated members
+        return removeDuplicatedMembers(relatedMembers);
+    }
+
+    private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
+        Map<Long, OrganizationMemberDTO> map = new HashMap<>();
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach(r ->{
+                if(r.getTargetId() != 0) {
+                    map.putIfAbsent(r.getTargetId(), r);
+                }
+            });
+            return new ArrayList<>(map.values());
+        }
+        return new ArrayList<>();
     }
 
     private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
