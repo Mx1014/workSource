@@ -1583,6 +1583,35 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
 
+
+        if(cmd.getAppCategoryId() == null || cmd.getEntryIds() == null || cmd.getEntryIds().size() == 0){
+            LOGGER.error("error invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "error invalid parameter cmd =  " + cmd);
+        }
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getAppCategoryId());
+        if(appCategory == null){
+            LOGGER.error("appCategory not found id = {}", cmd.getAppCategoryId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appCategory not found id = " + cmd.getAppCategoryId());
+        }
+
+        dbProvider.execute((status) ->{
+
+            for (Long id: cmd.getEntryIds()){
+                ServiceModuleEntry entry = serviceModuleEntryProvider.findById(id);
+                if(entry == null){
+                    LOGGER.error("ServiceModuleEntry not found id = {}", id);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleEntry not found id = " + id);
+                }
+
+                entry.setAppCategoryId(cmd.getAppCategoryId());
+
+                serviceModuleEntryProvider.udpate(entry);
+            }
+
+            return null;
+        });
+
     }
 
     @Override

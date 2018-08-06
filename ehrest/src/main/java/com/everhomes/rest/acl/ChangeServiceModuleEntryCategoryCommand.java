@@ -13,15 +13,15 @@ import java.util.List;
  */
 public class ChangeServiceModuleEntryCategoryCommand {
 
-    private Byte appCategoryId;
+    private Long appCategoryId;
 
     private List<Long> entryIds;
 
-    public Byte getAppCategoryId() {
+    public Long getAppCategoryId() {
         return appCategoryId;
     }
 
-    public void setAppCategoryId(Byte appCategoryId) {
+    public void setAppCategoryId(Long appCategoryId) {
         this.appCategoryId = appCategoryId;
     }
 
