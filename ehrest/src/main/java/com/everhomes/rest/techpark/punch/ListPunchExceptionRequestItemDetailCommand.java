@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 总公司ID,必填</li>
  * <li>userId: 用户uid，空值时默认当前用户</li>
  * <li>punchExceptionRequestStatisticsItemType: 查询的考勤异常申请统计类型，参考{@link com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType}</li>
+ * <li>itemNum: 统计数目</li>
  * <li>statisticsMonth: 查询的统计月份，格式yyyyMM</li>
  * </ul>
  */
@@ -14,6 +15,7 @@ public class ListPunchExceptionRequestItemDetailCommand {
     private Long organizationId;
     private Long userId;
     private Byte punchExceptionRequestStatisticsItemType;
+    private Integer itemNum;
     private String statisticsMonth;
 
     public Long getOrganizationId() {
@@ -51,5 +53,13 @@ public class ListPunchExceptionRequestItemDetailCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getItemNum() {
+        return itemNum;
+    }
+
+    public void setItemNum(Integer itemNum) {
+        this.itemNum = itemNum;
     }
 }

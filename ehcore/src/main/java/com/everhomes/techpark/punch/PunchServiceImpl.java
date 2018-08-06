@@ -12173,9 +12173,12 @@ public class PunchServiceImpl implements PunchService {
             userId = cmd.getUserId();
         }
         PunchStatusStatisticsItemType itemType = PunchStatusStatisticsItemType.fromCode(cmd.getPunchStatusStatisticsItemType());
+        //月初到月末(如果月末超过昨天,就取昨天)
         java.sql.Date startDay = socialSecurityService.getTheFirstDate(cmd.getStatisticsMonth());
         java.sql.Date endDay = socialSecurityService.getTheLastDate(cmd.getStatisticsMonth());
-
+        Calendar yesterDay = Calendar.getInstance();
+        yesterDay.add(Calendar.DAY_OF_MONTH, -1);
+        endDay = theEarlyDay(endDay, new java.sql.Date(yesterDay.getTime().getTime()));
         List<PunchDayLog> pdls = punchProvider.listPunchDayLogsByItemTypeAndUserId(cmd.getOrganizationId(), userId, startDay, endDay, itemType);
         if(null != pdls) {
             response.setDetails(pdls.stream().map(r -> {
@@ -12189,6 +12192,9 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 
+    private java.sql.Date theEarlyDay(java.sql.Date endDay, java.sql.Date date) {
+        return endDay.before(date) ? endDay : date;
+    }
     @Override
     public ListPunchExceptionRequestItemDetailResponse listItemDetailsOfAPunchExceptionRequest(ListPunchExceptionRequestItemDetailCommand cmd) {
         ListPunchExceptionRequestItemDetailResponse response = new ListPunchExceptionRequestItemDetailResponse();
@@ -12209,7 +12215,37 @@ public class PunchServiceImpl implements PunchService {
             PunchExceptionRequestItemDetailDTO dto = getPunchExceptionRequestItemDetailDTO(approvalAttribute, r);
             return dto;
         }).collect(Collectors.toList()));
+        Integer itemNum = response.getDetails() == null ? 0 : response.getDetails().size();
+        response.setItemNum(itemNum);
+        if (null != cmd.getItemNum() && cmd.getItemNum().equals(itemNum)) {
+            PunchStatistic ps = punchProvider.getPunchStatisticByMonthAndUser(cmd.getOrganizationId(), cmd.getUserId(), cmd.getStatisticsMonth());
+            setPunchStatisticExceptionCount(ps, itemNum, cmd.getPunchExceptionRequestStatisticsItemType());
+            punchProvider.updatePunchStatistic(ps);
+        }
         return response;
+    }
+
+    private void setPunchStatisticExceptionCount(PunchStatistic ps, Integer itemNum, Byte punchExceptionRequestStatisticsItemType) {
+        switch(PunchExceptionRequestStatisticsItemType.fromCode(punchExceptionRequestStatisticsItemType)){
+            case PUNCH_EXCEPTION:
+                ps.setPunchExceptionRequestCount(itemNum);
+                break;
+            case ASK_FOR_LEAVE:
+                ps.setAskForLeaveRequestCount(itemNum);
+                break;
+            case GO_OUT:
+                ps.setGoOutRequestCount(itemNum);
+                break;
+            case BUSINESS_TRIP:
+                ps.setBusinessTripRequestCount(itemNum);
+                break;
+            case OVERTIME:
+                ps.setOvertimeRequestCount(itemNum);
+                break;
+            default:
+                break;
+        }
+
     }
 
     private PunchExceptionRequestItemDetailDTO getPunchExceptionRequestItemDetailDTO(GeneralApprovalAttribute approvalAttribute, PunchExceptionRequest r) {
