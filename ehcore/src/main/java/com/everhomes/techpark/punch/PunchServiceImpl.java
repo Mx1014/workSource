@@ -3761,6 +3761,7 @@ public class PunchServiceImpl implements PunchService {
             cmd1.setStartDay(socialSecurityService.getTheFirstDate(report.getPunchMonth()).getTime());
             cmd1.setEndDay(socialSecurityService.getTheLastDate(report.getPunchMonth()).getTime());
         }
+        cmd1.setMonthReportId(cmd.getMonthReportId());
         cmd1.setOwnerId(cmd.getOwnerId());
         cmd1.setOwnerType(cmd.getOwnerType());
         cmd1.setUserName(cmd.getUserName());
