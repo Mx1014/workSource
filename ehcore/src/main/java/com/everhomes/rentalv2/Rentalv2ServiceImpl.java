@@ -6642,6 +6642,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				rentalSiteDTO.setRefundTip(content);
 			}
 		}
+		//帮客户端处理一下 颠倒按月按周预约规则的位置
+		List<SitePriceRuleDTO> sitePriceRules = rentalSiteDTO.getSitePriceRules();
+		int i = 0;
+		for (;i<sitePriceRules.size();i++)
+			if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
+				break;
+		int j = 0;
+		for (;j<sitePriceRules.size();j++)
+			if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
+				break;
+		if (i<sitePriceRules.size() && j<sitePriceRules.size()){
+			sitePriceRules.add(sitePriceRules.get(i));
+			sitePriceRules.remove(i);
+		}
 		return rentalSiteDTO;
 	}
 

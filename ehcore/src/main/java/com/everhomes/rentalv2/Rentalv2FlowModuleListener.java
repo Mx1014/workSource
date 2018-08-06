@@ -247,6 +247,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				e.setValue("认证用户");
 			if (sceneType == SceneType.PARK_TOURIST)
 				e.setValue("非认证用户");
+            entities.add(e);
 		}
 
 		//资源名
