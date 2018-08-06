@@ -57,7 +57,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId);
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId,Long orgId,Boolean allScope);
 
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
@@ -76,7 +76,7 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId,Long orgId,Boolean allScope);
 
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
 

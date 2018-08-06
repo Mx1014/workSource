@@ -11,9 +11,15 @@ ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  
 -- end
 
 -- 合同参数配置增加owner
-ALTER TABLE  eh_contract_params add COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
-ALTER TABLE  eh_contract_params add COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
--- ALTER TABLE  eh_contract_templates add COLUMN  `org_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_params ADD COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_params ADD COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
+-- move to this create expression ALTER TABLE  eh_contract_templates ADD COLUMN  `org_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+
+
+-- 缴费收费项增加orgId
+ALTER  TABLE  eh_payment_charging_item_scopes ADD  COLUMN  `org_id` BIGINT(20) NOT NULL   DEFAULT 0;
+ALTER  TABLE  eh_payment_charging_standards_scopes ADD  COLUMN  `org_id` BIGINT(20) NOT NULL  NULL  DEFAULT 0;
+ALTER  TABLE  eh_payment_bill_groups ADD  COLUMN  `org_id` BIGINT(20) NOT NULL  NULL  DEFAULT 0;
 
 
 -- 通用脚本

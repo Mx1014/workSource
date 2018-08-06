@@ -1,19 +1,74 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.everhomes.asset.zjgkVOs.*;
+import com.everhomes.asset.zjgkVOs.BillCountResponse;
+import com.everhomes.asset.zjgkVOs.BillDetailResponse;
+import com.everhomes.asset.zjgkVOs.CommunityAddressDTO;
+import com.everhomes.asset.zjgkVOs.ContractBillResponse;
+import com.everhomes.asset.zjgkVOs.ContractBillsDTO;
+import com.everhomes.asset.zjgkVOs.ContractBillsStatDTO;
+import com.everhomes.asset.zjgkVOs.ContractDTO;
+import com.everhomes.asset.zjgkVOs.ContractDetailResponse;
+import com.everhomes.asset.zjgkVOs.ContractListResponse;
+import com.everhomes.asset.zjgkVOs.PaymentStatus;
+import com.everhomes.asset.zjgkVOs.SearchBillsResponse;
+import com.everhomes.asset.zjgkVOs.SearchEnterpriseBillsDTO;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
@@ -31,7 +86,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
 
@@ -57,6 +118,9 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     private UserProvider userProvider;
     @Autowired
     private AssetPayService assetPayService;
+
+    @Autowired
+    private EquipmentService equipmentService;
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
@@ -883,7 +947,12 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId());
+        Long orgId = 0L;
+        // asset zuolin base
+        OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(ownerId, cmd.getNamespaceId(), PrivilegeConstants.ASSET_MODULE_ID);
+        if(organization!=null)
+            orgId = organization.getId();
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId(), orgId, false);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
@@ -1220,7 +1289,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             throw new RuntimeException(fieldName+":"+fieldValue+"为必填，不能为空");
         }
     }
-    
+
     public void payNotify(OrderPaymentNotificationCommand cmd) {
     	PaymentCallBackHandler handler = PlatformContext.getComponent(
     			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.ZJGK_RENTAL_CODE);

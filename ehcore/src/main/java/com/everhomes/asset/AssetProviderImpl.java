@@ -136,8 +136,8 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
         	
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_ASSET_BILLS.ID.eq(id));
@@ -185,8 +185,8 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillTemplateFieldsRecord> query = context.selectQuery(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS);
 
-        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TARGET_TYPE.eq(targetType));
 
@@ -245,12 +245,12 @@ public class AssetProviderImpl implements AssetProvider {
 
         query.addConditions(Tables.EH_ASSET_BILLS.STATUS.ne(AssetBillStatus.INACTIVE.getCode()));
 
-        if(ownerId != null) {
-            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        }
-        if(ownerType != null) {
-            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
-        }
+//        if(ownerId != null) {
+//            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+//        }
+//        if(ownerType != null) {
+//            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+//        }
         if(targetId != null) {
             query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         }
@@ -305,8 +305,8 @@ public class AssetProviderImpl implements AssetProvider {
                                                           Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
 
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
@@ -343,8 +343,8 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
 
 
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILLS.STATUS.eq(AssetBillStatus.UNPAID.getCode()));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
@@ -370,8 +370,8 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillNotifyRecordsRecord> query = context.selectQuery(Tables.EH_ASSET_BILL_NOTIFY_RECORDS);
 
-        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_TYPE.eq(targetType));
 
@@ -449,12 +449,12 @@ public class AssetProviderImpl implements AssetProvider {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
-        if(ownerId != null) {
-            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        }
-        if(ownerType != null) {
-            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
-        }
+//        if(ownerId != null) {
+//            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+//        }
+//        if(ownerType != null) {
+//            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+//        }
         if(targetId != null) {
             query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         }
@@ -961,7 +961,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId) {
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long orgId, Boolean allScope) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         List<Long> userIds = new ArrayList<Long>();
         ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
@@ -975,6 +975,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
+        if(allScope){
+            query.addConditions(t.ORG_ID.eq(orgId));
         }
         query.addOrderBy(t.DEFAULT_ORDER);
         query.fetch().map(r -> {
@@ -1912,7 +1915,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId) {
+    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId,Long orgId,Boolean allScope) {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
@@ -1920,11 +1923,14 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentChargingItem> items = context.selectFrom(t)
                 .fetchInto(PaymentChargingItem.class);
 
-        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+        SelectConditionStep<EhPaymentChargingItemScopesRecord> step = context.selectFrom(t1)
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
-                .and(t1.CATEGORY_ID.eq(categoryId))
-                .fetchInto(PaymentChargingItemScope.class);
+                .and(t1.CATEGORY_ID.eq(categoryId));
+        if (allScope) {
+            step.and(t1.ORG_ID.eq(orgId));
+        }
+        List<PaymentChargingItemScope> scopes = step.fetchInto(PaymentChargingItemScope.class);
 
         Byte isSelected = 0;
         for(int i = 0; i < items.size(); i ++){
@@ -3422,6 +3428,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
         query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
         query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        if(cmd.getAllScope()){
+            query.addConditions(t1.ORG_ID.eq(cmd.getOrgId()));
+        }
         //add category constraint
         query.addConditions(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
         query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
