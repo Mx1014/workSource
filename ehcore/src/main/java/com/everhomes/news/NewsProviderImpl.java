@@ -306,14 +306,23 @@ public class NewsProviderImpl implements NewsProvider {
 
 	@Override
 	public Long createNewPreview(News news) {
-//		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPrew.class));
-//		news.setId(id);
-//		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//		if (news.getPublishTime() == null) {
-//			news.setPublishTime(news.getCreateTime());
-//		}
-//		getReadWriteDao().insert(news);
-//		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
-//		return  id;
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPreview.class));
+		news.setId(id);
+		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if (news.getPublishTime() == null) {
+			news.setPublishTime(news.getCreateTime());
+		}
+		DSLContext context = getReadWriteContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		dao.insert(ConvertHelper.convert(news,EhNewPreview.class));
+		return id;
+	}
+
+	@Override
+	public News findNewPreview(Long id) {
+		DSLContext context = getReadOnlyContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		EhNewPreview result = dao.findById(id);
+		return ConvertHelper.convert(result,News.class);
 	}
 }
