@@ -1358,7 +1358,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd) {
         ListServiceModuleEntriesResponse response = new ListServiceModuleEntriesResponse();
-        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null, null);
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), cmd.getAppCategoryId(), null, null, null);
 
         List<ServiceModuleEntryDTO> dtos = new ArrayList<>();
         if(entries != null){
@@ -1537,10 +1537,46 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void deleteAppCategory(DeleteAppCategoryCommand cmd) {
 
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getId());
+        if(appCategory == null){
+            LOGGER.error("appCategory not found, id={}", cmd.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory not found, id=" + cmd.getId());
+        }
+
+        List<AppCategory> appCategories = appCategoryProvider.listAppCategories(appCategory.getLocationType(), appCategory.getId());
+        if(appCategories != null && appCategories.size() > 0){
+            LOGGER.error("it has sub AppCategory, delete denied, id={}", cmd.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "it has sub AppCategory, delete denied, id=" + cmd.getId());
+        }
+
+        appCategoryProvider.delete(cmd.getId());
     }
 
     @Override
     public void reorderAppCategory(ReorderAppCategoryCommand cmd) {
+
+        if(cmd.getIds() == null || cmd.getIds().size() == 0 || cmd.getParentId() == null  || cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+
+        }
+
+        dbProvider.execute((status) -> {
+            Long order = 1L;
+            for (Long id: cmd.getIds()){
+                AppCategory appCategory = appCategoryProvider.findById(id);
+
+                if(appCategory == null || !cmd.getLocationType().equals(appCategory.getLocationType()) || !cmd.getParentId().equals(appCategory.getParentId())){
+                    LOGGER.error("appCategory parameter and cmd parameter exception, id={}", id);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory parameter and cmd parameter exception, id=" + id);
+                }
+
+                appCategory.setDefaultOrder(order);
+                appCategoryProvider.udpate(appCategory);
+                order = order + 1;
+            }
+            return null;
+        });
 
     }
 

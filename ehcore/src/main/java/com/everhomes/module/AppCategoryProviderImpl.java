@@ -47,6 +47,7 @@ public class AppCategoryProviderImpl implements AppCategoryProvider {
             query.addConditions(Tables.EH_APP_CATEGORIES.PARENT_ID.eq(parentId));
         }
 
+        query.addOrderBy(Tables.EH_APP_CATEGORIES.DEFAULT_ORDER.asc());
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, AppCategory.class));
             return null;

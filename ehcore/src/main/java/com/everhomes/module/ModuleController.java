@@ -10,6 +10,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,6 +244,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("createServiceModule")
     @RestReturn(value = String.class)
     public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         return new RestResponse(serviceModuleService.createServiceModule(cmd));
     }
 
@@ -255,6 +258,9 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModule")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         return new RestResponse(serviceModuleService.updateServiceModule(cmd));
     }
 
@@ -267,6 +273,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteServiceModule")
     @RestReturn(value = String.class)
     public RestResponse deleteServiceModule(@Valid DeleteServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         serviceModuleService.deleteServiceModule(cmd);
         return new RestResponse();
     }
@@ -331,6 +339,9 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModuleEntries")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.updateServiceModuleEntries(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -346,6 +357,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModuleEntry")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.updateServiceModuleEntry(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -376,6 +391,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("createAppCategory")
     @RestReturn(value = AppCategoryDTO.class)
     public RestResponse createAppCategory(CreateAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         AppCategoryDTO dto = serviceModuleService.createAppCategory(cmd);
         RestResponse response =  new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -391,6 +410,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateAppCategory")
     @RestReturn(value = String.class)
     public RestResponse updateAppCategory(UpdateAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.updateAppCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -405,6 +428,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteAppCategory")
     @RestReturn(value = String.class)
     public RestResponse deleteAppCategory(DeleteAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.deleteAppCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -420,6 +447,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("reorderAppCategory")
     @RestReturn(value = String.class)
     public RestResponse reorderAppCategory(ReorderAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.reorderAppCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -434,6 +465,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("changeServiceModuleEntryCategory")
     @RestReturn(value = String.class)
     public RestResponse changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.changeServiceModuleEntryCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -450,6 +485,10 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("exportServiceModuleEntries")
     @RestReturn(value=String.class)
     public RestResponse exportServiceModuleEntries(HttpServletResponse response) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleService.exportServiceModuleEntries(response);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
