@@ -443,4 +443,8 @@ public interface PunchProvider {
 	List<PunchDayLog> listPunchDayLogsByItemTypeAndUserId(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType);
 
 	List<PunchExceptionRequest> listExceptionRequestsByItemTypeAndDate(Long userId, Long organizationId, Date startDay, Date endDay, GeneralApprovalAttribute approvalAttribute);
+
+	void setPunchTimeRuleStatus(Long prId, Byte targetStatus);
+
+	void setPunchSchedulingsStatus(Long prId, Byte targetStatus);
 }

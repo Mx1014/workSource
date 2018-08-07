@@ -7805,6 +7805,8 @@ public class PunchServiceImpl implements PunchService {
             pr.setOperatorUid(UserContext.current().getUser().getId());
             pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             punchProvider.updatePunchRule(pr);
+            punchProvider.setPunchTimeRuleStatus(pr.getId(), PunchRuleStatus.DELETING.getCode());
+            punchProvider.setPunchSchedulingsStatus(pr.getId(), PunchRuleStatus.DELETING.getCode());
 //            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
 //            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
 //            this.organizationProvider.deleteOrganization(organization);

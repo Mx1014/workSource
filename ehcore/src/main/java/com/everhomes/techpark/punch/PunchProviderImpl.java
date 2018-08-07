@@ -15,20 +15,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.punch.ClockCode;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
-import com.everhomes.rest.techpark.punch.TimeCompareFlag;
-import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
-import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
@@ -67,24 +54,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkdayRules;
-import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchHolidaysRecord;
-import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchOvertimeRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
-import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
-import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchTimeIntervalsRecord;
-import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
-import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
-import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsHistoryRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsTodayRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
@@ -102,25 +72,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record10;
-import org.jooq.Record13;
-import org.jooq.Record17;
-import org.jooq.Record2;
-import org.jooq.Record3;
-import org.jooq.Record5;
-import org.jooq.Record7;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectHavingStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -4204,6 +4156,29 @@ public class PunchProviderImpl implements PunchProvider {
             return new ArrayList<>();
         }
         return new ArrayList<>(result);
+    }
+
+    @Override
+    public void setPunchTimeRuleStatus(Long prId, Byte targetStatus) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
+
+        UpdateConditionStep<EhPunchTimeRulesRecord> step = context.update(Tables.EH_PUNCH_TIME_RULES)
+                .set(Tables.EH_PUNCH_TIME_RULES.STATUS, targetStatus).where(Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(prId))
+                .and(Tables.EH_PUNCH_TIME_RULES.STATUS.eq(PunchRuleStatus.ACTIVE.getCode()));
+        step.execute();
+    }
+
+    @Override
+    public void setPunchSchedulingsStatus(Long prId, Byte targetStatus) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
+
+        UpdateConditionStep<EhPunchSchedulingsRecord> step = context.update(Tables.EH_PUNCH_SCHEDULINGS)
+                .set(Tables.EH_PUNCH_SCHEDULINGS.STATUS, targetStatus).where(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(prId))
+                .and(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(PunchRuleStatus.ACTIVE.getCode()));
+        step.execute();
+
     }
 }
 
