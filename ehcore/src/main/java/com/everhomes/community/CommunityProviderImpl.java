@@ -1927,4 +1927,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 				.fetchOneInto(Integer.class);
 	}
 
+	@Override
+	public List<Community> findCommunitiesByNamespaceId(Integer nameSpaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		return context.select()
+					.from(Tables.EH_COMMUNITIES)
+					.where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(nameSpaceId))
+					.fetchInto(Community.class);
+	}
+
 }

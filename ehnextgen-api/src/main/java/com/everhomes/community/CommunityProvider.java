@@ -153,5 +153,6 @@ public interface CommunityProvider {
 	List<Building> listBuildingsByKeywords(Integer namespaceId, Long communityId, Long buildingId, String keyWords,
 			CrossShardListingLocator locator, int pageSize);
 	Integer countRelatedContractNumberInCommunity(Long communityId);
+	List<Community> findCommunitiesByNamespaceId(Integer nameSpaceId);
 	
 }

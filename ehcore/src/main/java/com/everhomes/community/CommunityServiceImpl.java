@@ -4770,7 +4770,40 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd) {
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		CommunityStatisticsDTO result =  new CommunityStatisticsDTO();
+		if (cmd.getCommunityId() != null) {
+			initializeCommunityStatisticsDTO(result);
+			List<Community> communities = communityProvider.findCommunitiesByNamespaceId(cmd.getNameSpaceId());
+			for (Community community : communities) {
+				CommunityStatisticsDTO dto = generateCommunityStatistics(community.getId());
+				result.setApartmentNumber(result.getApartmentNumber() + dto.getApartmentNumber());
+				result.setAreaSize(result.getAreaSize() + dto.getAreaSize());
+				result.setRentArea(result.getRentArea() + dto.getRentArea());
+				result.setFreeArea(result.getFreeArea() + dto.getFreeArea());
+				result.setChargeArea(result.getChargeArea() + dto.getChargeArea());
+				result.setTotalRent(result.getTotalRent() + dto.getTotalRent());
+				result.setRelatedContractNumber(result.getRelatedContractNumber() + dto.getRelatedContractNumber());
+			}
+			Double areaAveragePrice = result.getTotalRent()/result.getRentArea();
+			result.setAreaAveragePrice(areaAveragePrice);
+		}else {
+			result = generateCommunityStatistics(cmd.getCommunityId());
+		}
+		return result;
+	}
+	
+	private void initializeCommunityStatisticsDTO(CommunityStatisticsDTO dto){
+		dto.setApartmentNumber(0);
+		dto.setAreaSize(0.0);
+		dto.setRentArea(0.0);
+		dto.setFreeArea(0.0);
+		dto.setChargeArea(0.0);
+		dto.setTotalRent(0.0);
+		dto.setRelatedContractNumber(0);
+	}
+	
+	private CommunityStatisticsDTO generateCommunityStatistics(Long communityId){
+		Community community = communityProvider.findCommunityById(communityId);
 		
 		CommunityStatisticsDTO dto = ConvertHelper.convert(community, CommunityStatisticsDTO.class);
 		dto.setCommunityId(community.getId());
@@ -4785,12 +4818,12 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRelatedContractNumber(relatedContractNumber);
 		//在租实时均价
 		Double totalRent = contractProvider.getTotalRentInCommunity(community.getId()); 
+		dto.setTotalRent(totalRent);
 		Double areaAveragePrice = totalRent/community.getRentArea();
 		dto.setAreaAveragePrice(areaAveragePrice);
 		
 		return dto;
-	}
-
+	} 
 
 	@Override
 	public CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd) {

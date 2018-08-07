@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargeArea: 收费面积</li>
  *     <li>relatedContractNumber: 在租合同数</li>
  *     <li>areaAveragePrice: 在租实时均价（元/平方米）</li>
+ *     <li>totalRent: 在租合同总金额</li>
  * </ul>
  */
 public class CommunityStatisticsDTO {
@@ -30,7 +31,14 @@ public class CommunityStatisticsDTO {
 	private Double chargeArea;
 	private Integer relatedContractNumber;
 	private Double areaAveragePrice;
+	private Double totalRent;
 	
+	public Double getTotalRent() {
+		return totalRent;
+	}
+	public void setTotalRent(Double totalRent) {
+		this.totalRent = totalRent;
+	}
 	public Integer getApartmentNumber() {
 		return apartmentNumber;
 	}
