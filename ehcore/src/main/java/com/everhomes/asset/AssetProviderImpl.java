@@ -5191,6 +5191,7 @@ public class AssetProviderImpl implements AssetProvider {
         Integer paymentType = cmd.getPaymentType();
         Long billId = cmd.getBillId();
         Long categoryId = cmd.getCategoryId();//增加多入口查询条件
+        String paymentOrderNum = cmd.getPaymentOrderNum();//订单编号
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -5250,6 +5251,9 @@ public class AssetProviderImpl implements AssetProvider {
             }else if(paymentType.equals(2)){//对公转账
             	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
             }
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
+        	query.addConditions(t3.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
         query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t3.CREATE_TIME.desc());
