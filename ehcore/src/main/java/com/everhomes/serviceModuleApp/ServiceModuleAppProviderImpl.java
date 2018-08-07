@@ -448,16 +448,16 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus) {
+	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-	   Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
-      List<Field<?>> fields = new ArrayList<Field<?>>();
-      fields.addAll(Arrays.asList(fieldArr));
-      
-      if(locationType != null || sceneType != null){
-          fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
-      }
-      
+		Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
+		List<Field<?>> fields = new ArrayList<Field<?>>();
+		fields.addAll(Arrays.asList(fieldArr));
+
+		if(locationType != null || sceneType != null){
+		  fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		}
+
 		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
@@ -466,8 +466,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
 		}
 
+
+
 		//入口类型
-		if(locationType != null || sceneType != null){
+		if(locationType != null || sceneType != null || appCategoryId != null){
 			query.addJoin(Tables.EH_SERVICE_MODULE_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID));
 			query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
 			if(locationType != null){
@@ -477,7 +479,12 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			if(sceneType != null){
 				query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
 			}
+
+			if(appCategoryId != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.APP_CATEGORY_ID.eq(appCategoryId));
+			}
 		}
+
 
 		//安装信息
 		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
@@ -488,21 +495,23 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 
+
+
 		query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
 
 		List<ServiceModuleApp> apps = query.fetch().map((r) -> {
-		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
+			ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
 
-		    try {
-		        String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
-	            if(locationType != null || sceneType != null && !StringUtils.isEmpty(name)) {
-	                ap.setName(name);   
-	            }      
-		    } catch (IllegalArgumentException ex) {
-		        //Ignore this exception
-		    }          
-            
-         return ap;
+			try {
+				String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+				if(locationType != null || sceneType != null && !StringUtils.isEmpty(name)) {
+					ap.setName(name);
+				}
+			} catch (IllegalArgumentException ex) {
+				//Ignore this exception
+			}
+
+		 return ap;
 		});
 		return apps;
 	}

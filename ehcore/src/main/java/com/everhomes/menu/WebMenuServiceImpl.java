@@ -167,7 +167,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//OA类型的要查询安装的应用
 		//List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
-		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, ServiceModuleAppType.OA.getCode(), null, OrganizationAppStatus.ENABLE.getCode());
+		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, ServiceModuleAppType.OA.getCode(), null, OrganizationAppStatus.ENABLE.getCode(), null);
 
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 		

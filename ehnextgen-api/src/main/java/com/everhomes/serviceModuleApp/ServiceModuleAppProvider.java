@@ -42,7 +42,7 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listManageServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType);
 
-	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus);
+	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus, Long appCategoryId);
 
     List<ServiceModuleApp> listSystemApps(Long versionId);
 
