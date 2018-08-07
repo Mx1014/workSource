@@ -9359,7 +9359,7 @@ public class PunchServiceImpl implements PunchService {
             throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
                     PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
                     "公司没有设置打卡规则");
-        result.setPunchOrgnizationId(pr.getId());
+        result.setPunchOrgnizationId(pr.getPunchOrganizationId());
         PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, punchDate, userId);
         result.setPunchDayType(ptr.getPunchDayType().getCode());
         if(PunchDayType.WORKDAY != ptr.getPunchDayType()){
@@ -11392,14 +11392,15 @@ public class PunchServiceImpl implements PunchService {
         Map<Long, OrganizationMemberDetails> memberDetailMap = new HashMap<>();
         Map<Long, String> dptMap = new HashMap<>();
         Map<String, PunchRule> punchRuleMap = new HashMap<>();
+        Map<Long,String> ruleMap = new HashMap<>();
         response.setPunchLogs(results.stream().map(r->{
-        	return processPunchLogDTO(r,memberDetailMap,punchRuleMap,dptMap);
+            return processPunchLogDTO(r,memberDetailMap,punchRuleMap,dptMap, ruleMap);
         }).collect(Collectors.toList()));
         
 		return response;
 	}
 
-    private PunchLogDTO processPunchLogDTO(PunchLog log, Map<Long, OrganizationMemberDetails> memberDetailMap, Map<String, PunchRule> punchRuleMap, Map<Long, String> dptMap) {
+    private PunchLogDTO processPunchLogDTO(PunchLog log, Map<Long, OrganizationMemberDetails> memberDetailMap, Map<String, PunchRule> punchRuleMap, Map<Long, String> dptMap, Map<Long, String> ruleMap) {
         PunchLogDTO dto = convertPunchLog2DTO(log);
         OrganizationMemberDetails detail = findOrganizationMemberDetailByCacheUserId(log.getEnterpriseId(), log.getUserId(), memberDetailMap);
         if (null != detail) {
@@ -11409,10 +11410,10 @@ public class PunchServiceImpl implements PunchService {
         if (null != depName) {
             dto.setDeptName(depName);
         }
-        PunchRule pr = findPunchRuleByCache("organization", log.getEnterpriseId(), log.getUserId(), punchRuleMap);
-        if (null != pr) {
-            dto.setRuleName(pr.getName());
-        }
+//        PunchRule pr = findPunchRuleByCache("organization", log.getEnterpriseId(), log.getUserId(), punchRuleMap);
+//        if (null != pr) {
+        dto.setRuleName(findPunchOrganizationName(ruleMap, log.getPunchOrganizationId()));
+//        }
         if (null == log.getLocationInfo()) {
             dto.setLocationInfo(log.getWifiInfo());
         }
