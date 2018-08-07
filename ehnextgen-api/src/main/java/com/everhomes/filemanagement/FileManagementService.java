@@ -28,3 +28,10 @@ public interface FileManagementService {
 
     ListFileContentResponse listFileContents(ListFileContentCommand cmd);
 }
+
+	public void moveFileContent(MoveFileContentCommand cmd);
+
+
+	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd);
+
+}

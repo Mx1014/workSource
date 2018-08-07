@@ -11,6 +11,7 @@ import java.sql.Timestamp;
  * <li>name: 内容全称</li>
  * <li>size: 大小</li>
  * <li>parentId: 父级id</li>
+ * <li>locationName: 所在位置</li>
  * <li>contentType: 内容类型，file-文件,folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
  * <li>contentName: 内容名称</li>
  * <li>contentSuffix: 后缀名称</li>
@@ -31,6 +32,8 @@ public class FileContentDTO {
     private Integer size;
 
     private Long parentId;
+    
+    private Long locationName;
 
     private String contentType;
 
@@ -149,4 +152,12 @@ public class FileContentDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getLocationName() {
+		return locationName;
+	}
+
+	public void setLocationName(Long locationName) {
+		this.locationName = locationName;
+	}
 }

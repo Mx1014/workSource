@@ -529,3 +529,16 @@ public class FileManagementServiceImpl implements  FileManagementService{
         return dto;
     }
 }
+	@Override
+	public void moveFileContent(MoveFileContentCommand cmd) {
+	
+
+	}
+
+	@Override
+	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
+	
+		return new GetFileIconResponse();
+	}
+
+}
