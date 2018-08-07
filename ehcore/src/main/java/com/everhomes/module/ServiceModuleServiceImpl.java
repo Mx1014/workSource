@@ -41,6 +41,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -50,6 +51,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang.StringUtils;
@@ -1616,8 +1618,82 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public void exportServiceModuleEntries(HttpServletResponse response) {
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(null, null, null, null, null);
 
+        List<ServiceModuleEntryExportDTO> dtos = new ArrayList<>();
+        Integer order = 1;
+        for (ServiceModuleEntry entry: serviceModuleEntries){
+            ServiceModuleEntryExportDTO exportDto = getExportDto(entry);
+            exportDto.setOrder(order);
+            order = order + 1;
+            dtos.add(exportDto);
+        }
+
+        String fileName = String.format("应用入口信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
+        List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "moduleName", "appTypeName", "terminalTypeName", "locationTypeName", "sceneTypeName", "entryName", "appCategoryName", "defaultOrder"));
+        List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "功能模块名称", "功能分类", "应用入口终端", "应用入口位置", "应用入口属性", "应用入口名称", "应用入口分类", "分类排序"));
+
+        List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 20, 20, 20, 20, 10));
+
+        excelUtils.setNeedSequenceColumn(false);
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
     }
+
+    private ServiceModuleEntryExportDTO getExportDto(ServiceModuleEntry entry){
+
+        ServiceModuleEntryExportDTO dto = ConvertHelper.convert(entry, ServiceModuleEntryExportDTO.class);
+        if(entry.getModuleId() != null && entry.getModuleId() != 0){
+            ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(entry.getModuleId());
+            if(serviceModule != null){
+                dto.setModuleName(serviceModule.getName());
+                if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.OA){
+                    dto.setAppTypeName("企业应用");
+                }else if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.COMMUNITY){
+                    dto.setAppTypeName("园区应用");
+                }else if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.SERVICE){
+                    dto.setAppTypeName("服务应用");
+                }
+            }
+        }
+
+        if(TerminalType.fromCode(dto.getTerminalType()) == TerminalType.MOBILE){
+            dto.setTerminalTypeName("移动端");
+        }else if(TerminalType.fromCode(dto.getTerminalType()) == TerminalType.PC){
+            dto.setTerminalTypeName("PC端");
+        }
+
+        if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.MOBILE_COMMUNITY){
+            dto.setLocationTypeName("移动端广场");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.MOBILE_WORKPLATFORM){
+            dto.setLocationTypeName("移动端工作台");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_INDIVIDUAL){
+            dto.setLocationTypeName("PC门户");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_MANAGEMENT){
+            dto.setLocationTypeName("PC管理后台");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_WORKPLATFORM){
+            dto.setLocationTypeName("PC工作台");
+        }
+
+
+        if(ServiceModuleSceneType.fromCode(dto.getSceneType()) == ServiceModuleSceneType.MANAGEMENT){
+            dto.setSceneTypeName("管理端");
+        }else if(ServiceModuleSceneType.fromCode(dto.getSceneType()) == ServiceModuleSceneType.CLIENT){
+            dto.setSceneTypeName("用户端");
+        }
+
+
+        if(dto.getAppCategoryId() != null){
+            AppCategory appCategory = appCategoryProvider.findById(dto.getAppCategoryId());
+            if(appCategory != null){
+                dto.setAppCategoryName(appCategory.getName());
+            }
+        }
+        return dto;
+    }
+
+
+
 
     private AppCategoryDTO toAppCategoryDTO(AppCategory appCategory){
         AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);

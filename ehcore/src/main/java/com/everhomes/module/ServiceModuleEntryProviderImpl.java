@@ -71,6 +71,10 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
             query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
         }
 
+        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID);
+
+        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER);
+
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModuleEntry.class));
             return null;

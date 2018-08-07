@@ -25,7 +25,7 @@ public enum ServiceModuleLocationType {
     public static ServiceModuleLocationType fromCode(Byte code) {
         if (code != null) {
             for (ServiceModuleLocationType value : ServiceModuleLocationType.values()) {
-                if (value.equals(code)) {
+                if (code.equals(value.code)) {
                     return value;
                 }
             }

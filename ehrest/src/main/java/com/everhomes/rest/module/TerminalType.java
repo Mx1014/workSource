@@ -22,7 +22,7 @@ public enum TerminalType {
     public static TerminalType fromCode(Byte code) {
         if (code != null) {
             for (TerminalType value : TerminalType.values()) {
-                if (value.equals(code)) {
+                if (code.equals(value.code)) {
                     return value;
                 }
             }
