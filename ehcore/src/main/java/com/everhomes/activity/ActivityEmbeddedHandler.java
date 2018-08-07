@@ -391,7 +391,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
         try{
             ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                     ActivityPostCommand.class);
@@ -409,7 +409,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             	activityService.updatePost(cmd, post.getId());
             }
             else{
-            	activityService.createPost(cmd, post.getId()); 
+            	activityService.createPost(cmd, post.getId(),communityId);
             }
 
             //if 与 try 防止tag保存Elastic异常导致发布活动的失败   add by yanjun

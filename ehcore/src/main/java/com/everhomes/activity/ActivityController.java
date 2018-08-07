@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -951,6 +952,22 @@ public class ActivityController extends ControllerBase {
     public RestResponse listApprovalForms(@Valid ListGeneralFormsCommand cmd) {
         ListGeneralFormResponse result = activityService.listActivitySignupGeneralForms(cmd);
         RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/updateActivityForm</b>
+     * <p> 修改 活动的表单    </p>
+     * @return
+     */
+    @RequestMapping("updateActivityForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse updateActivityForm(@Valid UpdateActivityFormCommand cmd) {
+        GeneralFormDTO generalFormDTO = activityService.updateGeneralForm(cmd);
+        RestResponse response = new RestResponse(generalFormDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 

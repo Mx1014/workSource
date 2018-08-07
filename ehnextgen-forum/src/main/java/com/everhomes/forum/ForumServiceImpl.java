@@ -717,7 +717,7 @@ public class ForumServiceImpl implements ForumService {
         if(handler != null) {
             handler.preProcessEmbeddedObject(post);
             forumProvider.createPost(post);
-            handler.postProcessEmbeddedObject(post);
+            handler.postProcessEmbeddedObject(post, cmd.getCommunityId());
         } else {
             forumProvider.createPost(post);
 

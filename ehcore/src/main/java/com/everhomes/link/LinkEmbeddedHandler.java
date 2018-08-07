@@ -100,7 +100,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
     	if(post != null){
     		Link link = linkProvider.findLinkById(post.getEmbeddedId());
     		if(link != null){

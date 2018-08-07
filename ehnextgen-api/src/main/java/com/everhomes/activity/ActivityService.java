@@ -3,6 +3,7 @@ package com.everhomes.activity;
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -29,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ActivityService {
 
-    void createPost(ActivityPostCommand cmd, Long postId);
+    void createPost(ActivityPostCommand cmd, Long postId, Long communityId);
 
     ActivityDTO signup(ActivitySignupCommand cmd);
 
@@ -238,5 +239,8 @@ public interface ActivityService {
     OutputStream getActivitySignupExportStream(ExportSignupInfoCommand cmd, Long taskId);
 
     ListGeneralFormResponse listActivitySignupGeneralForms(ListGeneralFormsCommand cmd);
+
+	GeneralFormDTO updateGeneralForm(UpdateActivityFormCommand cmd);
+    void deleteActivityFormById(ActivityFormIdCommand cmd);
 }
 

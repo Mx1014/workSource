@@ -5,7 +5,12 @@ import ch.hsr.geohash.GeoHash;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community_form.CommunityFormProvider;
+import com.everhomes.community_form.CommunityFormType;
+import com.everhomes.community_form.CommunityGeneralForm;
+import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
@@ -77,6 +82,7 @@ import com.everhomes.rest.activity.ActivityChargeFlag;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityFormIdCommand;
 import com.everhomes.rest.activity.ActivityGoodsDTO;
 import com.everhomes.rest.activity.ActivityListCommand;
 import com.everhomes.rest.activity.ActivityListResponse;
@@ -176,6 +182,7 @@ import com.everhomes.rest.activity.StatisticsSummaryResponse;
 import com.everhomes.rest.activity.StatisticsTagCommand;
 import com.everhomes.rest.activity.StatisticsTagDTO;
 import com.everhomes.rest.activity.StatisticsTagResponse;
+import com.everhomes.rest.activity.UpdateActivityFormCommand;
 import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
 import com.everhomes.rest.activity.UpdateSignupInfoCommand;
 import com.everhomes.rest.activity.UserAuthFlag;
@@ -196,6 +203,7 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.ActivityEnrollDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community_form.CommunityFormErrorCode;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
@@ -215,13 +223,16 @@ import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -529,6 +540,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     private ActivitySignupFormHandler activitySignupFormHandler;
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private CommunityFormProvider communityFormProvider;
+
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -544,7 +564,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     }
 
     @Override
-    public void createPost(ActivityPostCommand cmd, Long postId) {
+    public void createPost(ActivityPostCommand cmd, Long postId, Long communityId) {
         User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
         activity.setId(cmd.getId());
@@ -638,7 +658,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
-        
+        CommunityGeneralForm communityGeneralForm = this.communityFormProvider.findCommunityGeneralForm(communityId, CommunityFormType.ACTIVITY_SIGNUP);
+        if (communityGeneralForm != null) {
+            roster.setFormId(communityGeneralForm.getFormId());
+            GeneralForm form = this.generalFormProvider.getGeneralFormById(communityGeneralForm.getFormId());
+            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                generalFormProvider.updateGeneralForm(form);
+            }
+        }
         activityProvider.createActivityRoster(roster);
 //        // 注册成功事件 add by jiarui
 //        LocalEventBus.publish(event -> {
@@ -6975,6 +7003,39 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         list.addAll(response.getForms());
         response.setForms(list);
         return response;
+    }
+
+    @Override
+    public GeneralFormDTO updateGeneralForm(UpdateActivityFormCommand cmd) {
+        UpdateApprovalFormCommand updateApprovalFormCommand = ConvertHelper.convert(cmd, UpdateApprovalFormCommand.class);
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+
+        GeneralFormDTO generalFormDTO = this.generalFormService.updateGeneralForm(updateApprovalFormCommand);
+        if (!form.getId().equals(generalFormDTO.getId())) {
+            List<CommunityGeneralForm> list = this.communityFormProvider.listCommunityGeneralFormByFormId(form.getId());
+            if (!CollectionUtils.isEmpty(list)) {
+                for(CommunityGeneralForm communityGeneralForm : list) {
+                    communityGeneralForm.setFormId(generalFormDTO.getId());
+                    this.communityFormProvider.updateCommunityGeneralForm(communityGeneralForm);
+                }
+            }
+        }
+        return generalFormDTO;
+    }
+
+    @Override
+    public void deleteActivityFormById(ActivityFormIdCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+        List<CommunityGeneralForm> list = this.communityFormProvider.listCommunityGeneralFormByFormId(form.getId());
+        if (!CollectionUtils.isEmpty(list)) {
+            LOGGER.error("cann't delete this form");
+            throw RuntimeErrorException.errorWith(CommunityFormErrorCode.SCOPE,
+                    CommunityFormErrorCode.ERROR_CANNOT_DELETE, "cannot delete this form, formId = " + form.getId());
+        }
+        ApprovalFormIdCommand approvalFormIdCommand = ConvertHelper.convert(cmd,ApprovalFormIdCommand.class);
+        generalApprovalService.deleteApprovalFormById(approvalFormIdCommand);
     }
 
     private XSSFWorkbook exportActivitySignupFiles(List<String> title, List<ExportActivitySignupDTO> value) {
