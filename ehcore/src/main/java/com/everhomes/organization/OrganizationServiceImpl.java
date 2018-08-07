@@ -101,19 +101,7 @@ import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.NamespaceCustomerType;
-import com.everhomes.rest.enterprise.ApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchRejectContactCommand;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
-import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.RejectContactCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactDTO;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
@@ -7634,6 +7622,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             member.setContactName(contactName);
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+            if (null != userIdentifier) {
+                member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                member.setTargetId(userIdentifier.getOwnerUid());
+                sendMsgFlag = true;
+            } else {
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                member.setTargetId(0L);
+            }
             if (OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())) {
                 //把正在申请加入公司状态的 记录改成正常
                 member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -12921,5 +12917,114 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
     }
+
+
+    @Override
+    public OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd) {
+
+        OrganizationDTO dto = null;
+
+        if(UserContext.getCurrentNamespaceId() == 2){
+            //标准版
+
+
+
+        }else {
+            //定制版
+
+            List<OrganizationCommunityDTO> organizationCommunities = organizationProvider.findOrganizationCommunityByCommunityId(cmd.getProjectId());
+
+            if(organizationCommunities != null && organizationCommunities.size() > 0){
+                Organization organization = organizationProvider.findOrganizationById(organizationCommunities.get(0).getOrganizationId());
+                dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+            }
+        }
+
+        return dto;
+    }
+
+
+
+    @Override
+    public ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd) {
+
+        Long userId = cmd.getUserId();
+        if(userId == null){
+            userId = UserContext.currentUserId();
+        }
+
+        if(userId == null){
+            return null;
+        }
+
+        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        if(orgMembers == null || orgMembers.size() == 0){
+            return null;
+        }
+
+
+        //查找项目的管理公司  add by yanjun 20180801
+        GetAuthOrgByProjectIdAndAppIdCommand authCmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+        authCmd.setProjectId(cmd.getProjectId());
+        authCmd.setAppId(cmd.getAppId());
+        OrganizationDTO authOrg = getAuthOrgByProjectIdAndAppId(authCmd);
+
+
+        List<OrganizationDTO> dtos = new ArrayList<>();
+        for (OrganizationMember member : orgMembers) {
+            // 如果机构不存在，则丢弃该成员对应的机构
+            Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+            if (org == null) {
+                LOGGER.error("The member is ignored for organization not found, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId());
+                continue;
+            }
+
+            if (OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
+                LOGGER.error("The member is ignored for organization group type not matched, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId());
+                continue;
+            }
+
+            OrganizationCommunityRequest request = organizationProvider.findOrganizationCommunityRequestByOrganizationId(cmd.getProjectId(), org.getId());
+            if (request == null) {
+                //不是该项目的，跳过
+                continue;
+            }
+
+
+            //Filter out the inactive organization add by sfyan 20130430
+            OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if (orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() + ", orgStatus" + orgStatus);
+                continue;
+            }
+
+            //Filter out the child organization add by lei.lv 20171124
+            Long parentId = org.getParentId();
+            if (parentId != 0L) {
+                LOGGER.error("The member's organization is child-enterprise, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() + ", orgStatus" + orgStatus);
+                continue;
+            }
+
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+
+            if(authOrg != null && authOrg.getId().equals(dto.getId())){
+                dto.setProjectManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            }else {
+                dto.setProjectManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+            }
+
+            dtos.add(dto);
+        }
+
+        ListUserOrganizationsResponse response = new ListUserOrganizationsResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
 }
 

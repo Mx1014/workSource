@@ -224,14 +224,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         } else {
             qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
-                    .field("contactName")
-                    .field("contactAddress")
-                    .field("contactMobile")
-                    .field("trackingName");
+                    .field("contactName",5.0f)
+                    .field("contactAddress",4.0f)
+                    .field("contactPhone",3.0f)
+                    .field("trackingName",4.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile")
+            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactPhone")
             		.addHighlightedField("trackingName");
         }
 
@@ -445,7 +445,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setLevelItemName(null);
         }
         if (null != dto.getCorpIndustryItemId()) {
-            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
+            ScopeFieldItem corpIndustryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
             if (null != corpIndustryItem) {
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
             } else {
@@ -453,7 +453,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getSourceItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
             if (null != item) {
                 dto.setSourceItemName(item.getItemDisplayName());
             } else {
@@ -461,7 +461,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpPurposeItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpPurposeItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpPurposeItemId());
             if (null != item) {
                 dto.setCorpPurposeItemName(item.getItemDisplayName());
             } else {
@@ -469,7 +469,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpNatureItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpNatureItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpNatureItemId());
             if (null != item) {
                 dto.setCorpNatureItemName(item.getItemDisplayName());
             } else {
@@ -477,7 +477,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getContactGenderItemId()) {
-            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
+            ScopeFieldItem contactGenderItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
             if (null != contactGenderItem) {
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
             } else {
@@ -488,7 +488,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setTrackingName(dto.getTrackingName());
         }
         if (null != dto.getPropertyType()) {
-            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
+            ScopeFieldItem propertyTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
             if (null != propertyTypeItem) {
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
             } else {
@@ -496,7 +496,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpProductCategoryItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpProductCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpProductCategoryItemId());
             if (null != item) {
                 dto.setCorpProductCategoryItemName(item.getItemDisplayName());
             } else {
@@ -504,7 +504,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpQualificationItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpQualificationItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpQualificationItemId());
             if (null != item) {
                 dto.setCorpQualificationItemName(item.getItemDisplayName());
             } else {
@@ -513,7 +513,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getRegistrationTypeId()) {
-            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
+            ScopeFieldItem registrationTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
             if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
             } else {
@@ -522,7 +522,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getTechnicalFieldId()) {
-            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
+            ScopeFieldItem technicalFieldItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
             if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
             } else {
@@ -531,7 +531,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getTaxpayerTypeId()) {
-            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
+            ScopeFieldItem taxpayerTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
             if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
             } else {
@@ -540,7 +540,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getRelationWillingId()) {
-            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
+            ScopeFieldItem relationWillingItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
             if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
             } else {
@@ -549,7 +549,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getHighAndNewTechId()) {
-            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
+            ScopeFieldItem highAndNewTechItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
             if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
             } else {
@@ -558,7 +558,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getEntrepreneurialCharacteristicsId()) {
-            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
             if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
             } else {
@@ -567,13 +567,117 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getSerialEntrepreneurId()) {
-            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            ScopeFieldItem serialEntrepreneurItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
             if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
             } else {
                 dto.setSerialEntrepreneurName(null);
             }
         }
+
+        if (null != dto.getBuyOrLeaseItemId()) {
+            ScopeFieldItem buyOrLeaseItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getBuyOrLeaseItemId());
+            if (null != buyOrLeaseItem) {
+                dto.setBuyOrLeaseItemName(buyOrLeaseItem.getItemDisplayName());
+            } else {
+                dto.setBuyOrLeaseItemName(null);
+            }
+        }
+
+        if (null != dto.getFinancingDemandItemId()) {
+            ScopeFieldItem financingDemandItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getFinancingDemandItemId());
+            if (null != financingDemandItem) {
+                dto.setFinancingDemandItemName(financingDemandItem.getItemDisplayName());
+            } else {
+                dto.setSerialEntrepreneurName(null);
+            }
+        }
+
+        if (null != dto.getDropBox1ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox1ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox1ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox2ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox2ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox2ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox2ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox3ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox3ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox3ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox3ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox4ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox4ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox4ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox4ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox5ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox5ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox5ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox5ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox6ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox6ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox6ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox6ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox7ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox7ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox7ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox7ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox8ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox8ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox8ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox8ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
+            }
+        }
+
+
+
+
+
 
         LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
 

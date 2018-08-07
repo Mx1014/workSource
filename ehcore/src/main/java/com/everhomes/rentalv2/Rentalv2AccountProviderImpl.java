@@ -151,4 +151,15 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
             return null;
         return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
     }
+
+    @Override
+    public void deleteOrderRecordByOrderNo(Long orderNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DeleteWhereStep<EhRentalv2OrderRecordsRecord> step = context
+                .delete(Tables.EH_RENTALV2_ORDER_RECORDS);
+        Condition condition = Tables.EH_RENTALV2_ORDER_RECORDS.ORDER_NO
+                .equal(orderNo);
+        step.where(condition);
+        step.execute();
+    }
 }

@@ -767,7 +767,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             activityList.add(activity);
         }
-        userActivityProvider.addActivities(activityList);
+        if (activityList.size() > 0) {
+            userActivityProvider.addActivities(activityList);
+        }
 
         ListingLocator locator = new ListingLocator();
         do {

@@ -226,13 +226,17 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -762,6 +766,105 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
             }else {
                 dto.setSerialEntrepreneurName(null);
+            }
+        }
+
+        if (null != dto.getBuyOrLeaseItemId()) {
+            ScopeFieldItem buyOrLeaseItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getBuyOrLeaseItemId());
+            if (null != buyOrLeaseItem) {
+                dto.setBuyOrLeaseItemName(buyOrLeaseItem.getItemDisplayName());
+            } else {
+                dto.setBuyOrLeaseItemName(null);
+            }
+        }
+
+        if (null != dto.getFinancingDemandItemId()) {
+            ScopeFieldItem financingDemandItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getFinancingDemandItemId());
+            if (null != financingDemandItem) {
+                dto.setFinancingDemandItemName(financingDemandItem.getItemDisplayName());
+            } else {
+                dto.setSerialEntrepreneurName(null);
+            }
+        }
+
+        if (null != dto.getDropBox1ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox1ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox1ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox2ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox2ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox2ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox2ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox3ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox3ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox3ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox3ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox4ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox4ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox4ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox4ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox5ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox5ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox5ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox5ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox6ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox6ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox6ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox6ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox7ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox7ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox7ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox7ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox8ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox8ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox8ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox8ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
             }
         }
 
@@ -3128,6 +3231,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
@@ -3151,6 +3255,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
@@ -3873,9 +3978,18 @@ public class CustomerServiceImpl implements CustomerService {
                         relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
-                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
-                    if (members != null && members.size() > 0) {
-                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+//                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
+                    // organization manager module has their children apartment concept
+                    ListOrganizationContactCommand memberCommand = new ListOrganizationContactCommand();
+                    memberCommand.setOrganizationId(p.getTargetId());
+                    memberCommand.setNamespaceId(cmd.getNamespaceId());
+                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
+                    memberCommand.setTargetTypes(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                    memberCommand.setPageSize(Integer.MAX_VALUE-1);
+                    ListOrganizationMemberCommandResponse membersResponse = organizationService.listOrganizationPersonnelsWithDownStream(memberCommand);
+                    if (membersResponse.getMembers() != null && membersResponse.getMembers().size() > 0) {
+//                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                        relatedMembers.addAll(membersResponse.getMembers());
                     }
                 }
             });
@@ -3904,7 +4018,17 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return relatedMembers;
+        // remove duplicated members
+        return removeDuplicatedMembers(relatedMembers);
+    }
+
+    private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
+        Map<Long, OrganizationMemberDTO> map = new HashMap<>();
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach(r -> map.putIfAbsent(r.getTargetId(), r));
+            return new ArrayList<>(map.values());
+        }
+        return new ArrayList<>();
     }
 
     private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
@@ -3917,6 +4041,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                dto.setOrganizationId(s.getOrganizationId());
                 users.add(dto);
             });
         }
@@ -3935,6 +4060,7 @@ public class CustomerServiceImpl implements CustomerService {
                     dto.setContactName(r.getContactName());
                     dto.setGender(r.getGender());
                     dto.setContactToken(r.getIdentifierToken());
+                    dto.setOrganizationId(r.getOwnerId());
                     users.add(dto);
                 }
             });
