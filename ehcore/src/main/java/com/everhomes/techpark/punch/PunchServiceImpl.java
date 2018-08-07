@@ -1281,7 +1281,10 @@ public class PunchServiceImpl implements PunchService {
                 latestOnDutyTimeLong += flexTimeLong;
                 if (HommizationType.LATEARRIVE == ht) {
                     Long punchLaterTime = onDutyLog.getPunchTime().getTime() - punchDate.getTime() - onDutyLog.getRuleTime();
-                    earliestOffDutyTimeLong += Math.min(punchLaterTime, flexTimeLong);  // 晚到的时间不能超出设置的最晚时间
+                    // 晚到才需要计算晚走的时间
+                    if (punchLaterTime > 0) {
+                        earliestOffDutyTimeLong += Math.min(punchLaterTime, flexTimeLong);  // 晚到的时间不能超出设置的最晚时间
+                    }
                 } else if (HommizationType.FLEX == ht) {
                     earliestOffDutyTimeLong -= flexTimeLong;
                 }
@@ -1383,7 +1386,10 @@ public class PunchServiceImpl implements PunchService {
             Long earliestOffDutyTimeLong2 = punchDate.getTime() + offDutyLog.getRuleTime();
             if (PunchStatus.UNPUNCH != PunchStatus.fromCode(onDutyLog.getStatus())) {
                 if (HommizationType.LATEARRIVE == HommizationType.fromCode(ptr.getHommizationType())) {
-                    earliestOffDutyTimeLong2 += Math.min(laterTime, flexTimeLong);
+                    // 晚到才需要计算晚走的时间
+                    if (laterTime > 0) {
+                        earliestOffDutyTimeLong2 += Math.min(laterTime, flexTimeLong);
+                    }
                 } else if (HommizationType.FLEX == HommizationType.fromCode(ptr.getHommizationType())) {
                     earliestOffDutyTimeLong2 -= flexTimeLong;
                 }
@@ -1441,7 +1447,10 @@ public class PunchServiceImpl implements PunchService {
                     if (PunchStatus.UNPUNCH != PunchStatus.fromCode(onDutyLog.getStatus())) {
                         if (HommizationType.LATEARRIVE == HommizationType.fromCode(ptr.getHommizationType())) {
                             Long laterTime = (firstOnDutyLog.getPunchTime().getTime() - punchDate.getTime() - firstOnDutyLog.getRuleTime());
-                            earliestOffDutyTimeLong += Math.min(laterTime, ptr.getFlexTimeLong());
+                            // 晚到才需要计算晚走的时间
+                            if (laterTime > 0) {
+                                earliestOffDutyTimeLong += Math.min(laterTime, ptr.getFlexTimeLong());
+                            }
                         } else if (HommizationType.FLEX == HommizationType.fromCode(ptr.getHommizationType())) {
                             earliestOffDutyTimeLong -= ptr.getFlexTimeLong();
                         }
