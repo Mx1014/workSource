@@ -11140,6 +11140,7 @@ public class PunchServiceImpl implements PunchService {
                         "当前状态不可更新");
             }
             report1.setProcess(0);
+            setMonthReportProcess(report1, 0);
             report1.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
             report1.setStatus(PunchMonthReportStatus.UPDATING.getCode());
             punchMonthReportProvider.updatePunchMonthReport(report1);
