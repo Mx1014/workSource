@@ -3,6 +3,8 @@ package com.everhomes.address;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -91,4 +93,5 @@ public interface AddressService {
 	List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd);
 	void excuteAddressArrangementOnTime();
 	void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd);
+	void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse);
 }

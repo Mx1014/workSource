@@ -60,6 +60,7 @@ import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractDTO;
@@ -89,6 +90,7 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
@@ -114,6 +116,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -123,6 +126,7 @@ import java.util.*;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
@@ -721,11 +725,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
-                    SelectConditionStep<Record8<Long, String, Double, Double,Double, Double,String, Byte>> selectSql =
+                    SelectConditionStep<Record11<Long, String, Double, Double,Double, Double,String, Byte, String, String, String>> selectSql =
                             context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.APARTMENT_NAME,
                             						Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.FREE_AREA,
                             						Tables.EH_ADDRESSES.CHARGE_AREA,Tables.EH_ADDRESSES.RENT_AREA,
-                            						Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS)
+                            						Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS,
+                            						Tables.EH_ADDRESSES.ORIENTATION,Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN,
+                            						Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE
+                            						)
                                     .from(Tables.EH_ADDRESSES)
                                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                                             .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -756,6 +763,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                         apartment.setFreeArea(r.getValue(Tables.EH_ADDRESSES.FREE_AREA));
                         apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
                         apartment.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+                        apartment.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+                        apartment.setNamespaceAddressToken(r.getValue(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN));
+                        apartment.setNamespaceAddressType(r.getValue(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE));
                         results.add(apartment);
                         return null;
                     });
@@ -1828,7 +1838,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
 
 			if(null == resultList || resultList.isEmpty()){
-				LOGGER.error("File content is empty。userId="+userId);
+				LOGGER.error("File content is empty.userId="+userId);
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
 						"File content is empty");
 			}
@@ -1982,20 +1992,21 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         return null;
     }
 
-    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
-			Long userId, ImportAddressCommand cmd) {
+    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 
 		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>(); 
 		for (ImportApartmentDataDTO data : datas) {
 			ImportFileResultLog<ImportApartmentDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
-			if (StringUtils.isEmpty(data.getBuildingName())) {
-				log.setData(data);
-				log.setErrorLog("building name is null");
-				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
-				errorLogs.add(log);
-				continue;
-			}
+			//校验excel填写内容
+//			if (StringUtils.isEmpty(data.getBuildingName())) {
+//				log.setData(data);
+//				log.setErrorLog("building name is null");
+//				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+//				errorLogs.add(log);
+//				continue;
+//			}
 			
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);
@@ -2012,8 +2023,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				continue;
 			}
 			
-			
-
 			if (StringUtils.isNotEmpty(data.getStatus())) {
 				Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
 				if (livingStatus==-1) {
@@ -2097,6 +2106,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     continue;
                 }
             }
+            
             if (StringUtils.isNotEmpty(data.getOrientation()) && (data.getOrientation()).length()>20) {
             	log.setData(data);
 				log.setErrorLog("orientation lenth error");
@@ -2104,35 +2114,44 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
             }
-            //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
             
-			importApartment(community, data, areaSize, chargeArea, rentArea, freeArea);
+            //正则校验数字
+        	if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
+    			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+    			if(!Pattern.compile(reg).matcher(data.getApartmentFloor()).find()){
+    				log.setData(data);
+    				log.setErrorLog("FloorNumber format is error");
+    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
+    				errorLogs.add(log);
+    				continue;
+    			}
+    		}
+            //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
+			importApartment(community, building, data, areaSize, chargeArea, rentArea, freeArea);
 		}
         updateCommunityAptCount(community);
         
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double freeArea) {
+	private void importApartment(Community community, Building building, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double freeArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
-        Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
-
-        if (null == building) {
-            building = new Building();
-            // 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
-            building.setNamespaceId(community.getNamespaceId());
-            building.setCommunityId(community.getId());
-            building.setName(data.getBuildingName());
-            building.setOperatorUid(UserContext.current().getUser().getId());
-            building = communityProvider.createBuilding(building.getOperatorUid(), building);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
-            }
-        }
+//        if (null == building) {
+//            building = new Building();
+//            // 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
+//            building.setNamespaceId(community.getNamespaceId());
+//            building.setCommunityId(community.getId());
+//            building.setName(data.getBuildingName());
+//            building.setOperatorUid(UserContext.current().getUser().getId());
+//            building = communityProvider.createBuilding(building.getOperatorUid(), building);
+//            if(LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
+//            }
+//        }
 
         //Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
-        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), building.getName(), data.getApartmentName());
 
         if (address == null) {
         	address = new Address();
@@ -2157,7 +2176,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setIsFutureApartment((byte)0);
         	addressProvider.createAddress(address);
 		}else {
-//            address.setBuildArea(buildArea);
+            //address.setBuildArea(buildArea);
             address.setAreaSize(areaSize);
             //address.setSharedArea(shareArea);
             address.setFreeArea(freeArea);
@@ -2171,7 +2190,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			}
             addressProvider.updateAddress(address);
 		}
-
         Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
         insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
 	}
@@ -2182,15 +2200,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
-				data.setBuildingName(trim(r.getA()));
-				data.setApartmentName(trim(r.getB()));
-				data.setStatus(trim(r.getC()));
-                //产品变更模板
-//                data.setBuildArea(trim(r.getD()));
+				data.setApartmentName(trim(r.getA()));
+				data.setStatus(trim(r.getB()));
+				data.setApartmentFloor(trim(r.getC()));
                 data.setAreaSize(trim(r.getD()));
-                data.setChargeArea(trim(r.getE()));
+                data.setRentArea(trim(r.getE()));
                 data.setFreeArea(trim(r.getF()));
-                data.setRentArea(trim(r.getG()));
+                data.setChargeArea(trim(r.getG()));
                 data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
                 data.setNamespaceAddressType(trim(r.getI()));
@@ -2219,7 +2235,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
     public void importAddressData(MultipartFile[] files) {
 
         if (org.springframework.util.StringUtils.isEmpty(files) || files.length == 0) {
-            LOGGER.error("File content is empty。");
+            LOGGER.error("File content is empty.");
             throw new RuntimeErrorException("File content is empty。");
         }
 
@@ -3194,6 +3210,30 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setIsFutureApartment((byte) 0);
 			addressProvider.updateAddress(address);
 			addBuildingAndCommunityArea(address);
+		}
+	}
+
+	@Override
+	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse response) {
+		List<ApartmentDTO> aptList = this.listApartmentsByKeyword(cmd).second();
+		if (aptList != null && aptList.size()>0) {
+			String fileName = String.format("房源信息_%s", cmd.getBuildingName());
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+
+			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
+				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
+				Byte livingStatus = addressProvider.getAddressLivingStatus(r.getAddressId(), r.getAddress());
+				dto.setStatus(livingStatus); 
+				return dto;
+			}).collect(Collectors.toList());
+			
+			String[] propertyNames = {"apartmentName", "status", "apartmentFloor", "areaSize", "rentArea", "freeArea", "chargeArea", "orientation", "namespaceAddressType", "namespaceAddressToken"};
+			String[] titleNames = {"*房源", "*状态", "楼层", "建筑面积", "在租面积", "可招租面积", "收费面积", "朝向","第三方来源", "第三方标识"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
 		}
 	}
 }

@@ -45,6 +45,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -971,6 +972,50 @@ public class AddressProviderImpl implements AddressProvider {
 					.where(Tables.EH_ADDRESS_ARRANGEMENT.TARGET_ID.like(DSL.concat("%", addressId.toString(), "%")))
 					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					.fetchInto(AddressArrangement.class);
+	}
+
+	@Override
+	public Integer countApartmentNumberByBuildingName(Long communityId, String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				.from(Tables.EH_ADDRESSES)
+				.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+				.and(Tables.EH_ADDRESSES.STATUS.eq((BuildingAdminStatus.ACTIVE.getCode())))
+				.fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public Integer countRelatedEnterpriseCustomerNumber(Long buildingId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		//SELECT count(DISTINCT(customer_id)) from eh_customer_entry_infos WHERE building_id in (1973266,1973267);
+		List<Long> customerIdList = context.selectDistinct(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID)
+											.where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(buildingId))
+											.fetchInto(Long.class);
+		
+		if (customerIdList != null && customerIdList.size() > 0) {
+			return customerIdList.size();
+		}
+		return 0;
+	}
+
+	@Override
+	public Integer countRelatedOrganizationOwnerNumber(Long communityId, String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> addressIds = context.select(Tables.EH_ADDRESSES.ID)
+										.from(Tables.EH_ADDRESSES)
+										.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+										.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_ADDRESSES.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		List<Long> organizationOwnerIds = context.selectDistinct(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID)
+										.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+										.fetchInto(Long.class);
+		
+		if (organizationOwnerIds != null && organizationOwnerIds.size() > 0) {
+			return organizationOwnerIds.size();
+		}
+		return 0;
 	}
 
 }

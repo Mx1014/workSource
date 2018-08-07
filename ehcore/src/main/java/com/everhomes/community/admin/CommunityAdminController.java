@@ -677,4 +677,18 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/exportBuildingByKeywords</b>
+     * <p>后台管理 楼栋列表</p>
+     */
+    @RequestMapping("exportBuildingByKeywords")
+    @RestReturn(value = String.class)
+    public RestResponse exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse httpServletResponse) {
+    	communityService.exportBuildingByKeywords(cmd, httpServletResponse);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

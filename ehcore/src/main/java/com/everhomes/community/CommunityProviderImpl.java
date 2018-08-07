@@ -49,6 +49,7 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ResourceCategoryStatus;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -1856,7 +1857,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		return  context.selectCount()
 				.from(Tables.EH_BUILDINGS)
 				.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
-				.and(Tables.EH_BUILDINGS.STATUS.eq((byte)2))
+				.and(Tables.EH_BUILDINGS.STATUS.eq((BuildingAdminStatus.ACTIVE.getCode())))
 				.fetchOneInto(Integer.class);
 	}
 
@@ -1914,6 +1915,16 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
 
 		return buildings;
+	}
+
+	@Override
+	public Integer countRelatedContractNumberInCommunity(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				.fetchOneInto(Integer.class);
 	}
 
 }

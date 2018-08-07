@@ -155,4 +155,6 @@ public interface CommunityService {
 
 	BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd);
 
+	void exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse httpServletResponse);
+
 }

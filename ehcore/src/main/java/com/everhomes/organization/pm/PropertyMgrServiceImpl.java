@@ -2590,6 +2590,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setChargeArea(cmd.getChargeArea());
             address.setSharedArea(cmd.getSharedArea());
             address.setFreeArea(cmd.getFreeArea());
+            //房源所在楼层
+            address.setApartmentFloor(cmd.getApartmentFloor().toString());
             address.setIsFutureApartment((byte)0);
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
@@ -2622,6 +2624,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setChargeArea(cmd.getChargeArea());
             address.setSharedArea(cmd.getSharedArea());
             address.setFreeArea(cmd.getFreeArea());
+            //房源所在楼层
+            address.setApartmentFloor(cmd.getApartmentFloor().toString());
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
@@ -2639,7 +2643,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     address.setSourceItemName(item.getItemDisplayName());
                 }
             }
-
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
@@ -3169,13 +3172,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		List<PropFamilyDTO>  filterEdResult = new ArrayList<>();
 		for(PropFamilyDTO dto : resultList){
 		    filterEdResult.add(dto);
-		    
-			if(cmd.getLivingStatus() != null){
-                Byte livingStatus = cmd.getLivingStatus();
-                if(dto.getLivingStatus() != livingStatus){
-                    filterEdResult.remove(dto);
-                    continue;
-                }
+		    //按状态筛选
+			if(cmd.getLivingStatus() != null && dto.getLivingStatus() != cmd.getLivingStatus()){
+                filterEdResult.remove(dto);
+                continue;
+			}
+			//按楼层筛选
+			if (cmd.getApartmentFloor() != null && !dto.getApartmentFloor().equals(cmd.getApartmentFloor())) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			//按面积筛选
+			if (cmd.getAreaSizeFrom() != null && dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			if (cmd.getAreaSizeTo() != null && dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
 			}
 			
 			dto.setReservationInvolved((byte)0);
@@ -3199,7 +3213,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				dto.setArrangementInvolved((byte)1);
 			}
 		}
-		
 		response.setResultList(filterEdResult);
 
 		return response;

@@ -43,7 +43,6 @@ import com.everhomes.discover.ItemType;
  *  <li>chargeArea:收费面积</li>
  *  <li>floorNumber:楼层数量</li>
  * </ul>
- *
  */
 public class BuildingDTO {
 

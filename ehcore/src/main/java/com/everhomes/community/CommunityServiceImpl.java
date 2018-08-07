@@ -74,6 +74,7 @@ import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingExportDataDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingInfoDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
@@ -928,8 +929,7 @@ public class CommunityServiceImpl implements CommunityService {
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 		if(building != null) {
             if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
-            	
-        		LOGGER.error("Building already deleted");
+        		LOGGER.error("Building is already deleted");
         		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
         				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
@@ -4735,7 +4735,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd) {
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 		
@@ -4751,9 +4751,13 @@ public class CommunityServiceImpl implements CommunityService {
         	BuildingInfoDTO dto = ConvertHelper.convert(r, BuildingInfoDTO.class);
         	dto.setBuildingId(r.getId());
         	dto.setBuildingName(r.getName());
-        	//TODO 需要确认什么是在租合同数
-//    		private Integer relatedContractNumber;
-//    		private Double areaAveragePrice;
+        	//在租合同数
+        	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName());
+        	dto.setRelatedContractNumber(relatedContractNumber);
+        	
+        	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName()); 
+    		Double areaAveragePrice = totalRent/r.getRentArea();
+    		dto.setAreaAveragePrice(areaAveragePrice);
         	return dto;
         }).collect(Collectors.toList());
 		
@@ -4777,9 +4781,14 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setBuildingNumber(buildingNumber);
 		Integer apartmentNumber = communityProvider.countActiveApartmentsByCommunityId(community.getId());
 		dto.setApartmentNumber(apartmentNumber);
-		//TODO 需要确认什么是在租合同数
-//		private Integer relatedContractNumber;
-//		private Double areaAveragePrice;
+		//在租合同数
+		Integer relatedContractNumber = communityProvider.countRelatedContractNumberInCommunity(community.getId());
+		dto.setRelatedContractNumber(relatedContractNumber);
+		//在租实时均价
+		Double totalRent = contractProvider.getTotalRentInCommunity(community.getId()); 
+		Double areaAveragePrice = totalRent/community.getRentArea();
+		dto.setAreaAveragePrice(areaAveragePrice);
+		
 		return dto;
 	}
 
@@ -4836,8 +4845,70 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+		BuildingStatisticsDTO dto = ConvertHelper.convert(building, BuildingStatisticsDTO.class);
+		dto.setBuildingId(building.getId());
+		dto.setBuildingName(building.getName());	
+		Integer apartmentNumber = addressProvider.countApartmentNumberByBuildingName(building.getCommunityId(), building.getName());
+		dto.setApartmentNumber(apartmentNumber);
+		//在租合同数
+		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName());
+    	dto.setRelatedContractNumber(relatedContractNumber);
+    	//在租实时均价
+    	Double totalRent = contractProvider.getTotalRentInBuilding(building.getName()); 
+		Double areaAveragePrice = totalRent/building.getRentArea();
+		dto.setAreaAveragePrice(areaAveragePrice);
+		
+		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getId());
+		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
+		
+		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
+		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
+		
+		return dto;
+	}
+
+
+	@Override
+	public void exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse response) {
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
+        
+        int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 10000;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<Building> buildings = communityProvider.listBuildingsByKeywords(cmd.getNamespaceId(),cmd.getCommunityId(),
+        																	cmd.getBuildingId(),cmd.getKeyWords(),locator,pageSize);
+        if (buildings != null && buildings.size() > 0) {
+			String fileName = String.format("楼栋信息导出_%s", community.getName());
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
+
+			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
+					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);			
+					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
+					return dto;
+				}
+			).collect(Collectors.toList());
+			//设置excel提示
+//			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+//                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+//                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+//                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+//                    "4、带有星号（*）的红色字段为必填项。\n" +
+//                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+//                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "areaSize", "rentArea", "freeArea", "chargeArea", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription"};
+			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
 	}
 }
 

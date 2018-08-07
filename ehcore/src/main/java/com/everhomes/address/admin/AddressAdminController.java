@@ -1,5 +1,6 @@
 package com.everhomes.address.admin;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CorrectAddressCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -143,16 +145,16 @@ public class AddressAdminController extends ControllerBase {
         return response;
     }
     
-    //TODO 下载房源信息
+    //下载楼栋下的房源信息
     /**
-     * <b>URL: /admin/address/exportApartment</b>
+     * <b>URL: /admin/address/exportApartmentsInBuilding</b>
      * @param files 上传的文件
      * @return 上传的结果
      */
-    @RequestMapping(value="exportApartment", method = RequestMethod.POST)
+    @RequestMapping(value="exportApartmentsInBuilding", method = RequestMethod.POST)
     @RestReturn(value=String.class)
-    public RestResponse exportApartment(@RequestParam(value = "attachment") MultipartFile[] files) {
-    	//addressService.exportApartment(files);
+    public RestResponse exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse) {
+    	addressService.exportApartmentsInBuilding(cmd,httpServletResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

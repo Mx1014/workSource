@@ -29,8 +29,35 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
     private Double chargeArea;
     private String enterpriseName;
     private String apartmentFloor;
+    private String orientation;
+	private String namespaceAddressType;
+	private String namespaceAddressToken;
     
-    public Double getRentArea() {
+    public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public String getNamespaceAddressType() {
+		return namespaceAddressType;
+	}
+
+	public void setNamespaceAddressType(String namespaceAddressType) {
+		this.namespaceAddressType = namespaceAddressType;
+	}
+
+	public String getNamespaceAddressToken() {
+		return namespaceAddressToken;
+	}
+
+	public void setNamespaceAddressToken(String namespaceAddressToken) {
+		this.namespaceAddressToken = namespaceAddressToken;
+	}
+
+	public Double getRentArea() {
 		return rentArea;
 	}
 

@@ -152,5 +152,6 @@ public interface CommunityProvider {
 	Integer countActiveApartmentsByCommunityId(Long communityId);
 	List<Building> listBuildingsByKeywords(Integer namespaceId, Long communityId, Long buildingId, String keyWords,
 			CrossShardListingLocator locator, int pageSize);
+	Integer countRelatedContractNumberInCommunity(Long communityId);
 	
 }

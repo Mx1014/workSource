@@ -105,4 +105,7 @@ public interface AddressProvider {
 	void updateAddressArrangement(AddressArrangement arrangement);
 	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
 	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
+	Integer countApartmentNumberByBuildingName(Long communityId, String buildingName);
+	Integer countRelatedEnterpriseCustomerNumber(Long buildingId);
+	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
 }

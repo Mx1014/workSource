@@ -1318,4 +1318,48 @@ public class ContractProviderImpl implements ContractProvider {
 		return true;
 	}
 
+	@Override
+	public Double getTotalRentInCommunity(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Double> rentList = context.select(Tables.EH_CONTRACTS.RENT)
+										.from(Tables.EH_CONTRACTS)
+										.where(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Double.class);
+		Double result = 0.0;
+		for (Double rent : rentList) {
+			result += (rent != null ? rent : 0.0);
+		}
+		return result;
+	}
+
+	@Override
+	public Integer countRelatedContractNumberInBuilding(String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectCount()
+						.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+						.leftOuterJoin(Tables.EH_CONTRACTS)
+						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+						.fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public Double getTotalRentInBuilding(String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Double> rentList =  context.select(Tables.EH_CONTRACTS.RENT)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.leftOuterJoin(Tables.EH_CONTRACTS)
+										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Double.class);
+		Double result = 0.0;
+		for (Double rent : rentList) {
+			result += (rent != null ? rent : 0.0);
+		}
+		return result;
+	}
+
 }
