@@ -240,15 +240,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
-        if (cmd.getAddressId() != null) {
-            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
-            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
-        }
-        if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
-            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+        if(cmd.getAbnormalFlag() != null && cmd.getAbnormalFlag() == 1){
+           fb = FilterBuilders.andFilter(fb, FilterBuilders.missingFilter("addressId"));
+           String str = " 1231 123123";
+           str = str.trim();
+        }else {
+            if (cmd.getAddressId() != null) {
+                MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+                qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+            }
+            if (cmd.getBuildingId() != null) {
+                MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+                qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+            }
         }
 
         if(cmd.getCustomerCategoryId() != null)
@@ -262,7 +268,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
-        
+
         /*//查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){

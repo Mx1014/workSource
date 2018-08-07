@@ -27,6 +27,7 @@ import java.util.List;
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
  *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
+ *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -84,6 +85,8 @@ public class SearchEnterpriseCustomerCommand {
     private Long sourceItemId;
 
     private String sourceType;
+
+    private Byte abnormalFlag;
 
     public Long getOwnerId() {
         return ownerId;
@@ -293,6 +296,14 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
+    }
+
+    public Byte getAbnormalFlag() {
+        return abnormalFlag;
+    }
+
+    public void setAbnormalFlag(Byte abnormalFlag) {
+        this.abnormalFlag = abnormalFlag;
     }
 
     @Override
