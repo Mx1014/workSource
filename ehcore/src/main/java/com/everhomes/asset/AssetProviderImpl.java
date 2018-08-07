@@ -1384,7 +1384,9 @@ public class AssetProviderImpl implements AssetProvider {
                     amountOwed = amountOwed.add(var1);
                     amountReceivableWithoutTax = amountReceivableWithoutTax.add(var2);//增加应收（不含税）
                     amountOwedWithoutTax = amountOwedWithoutTax.add(var2);//增加应收（不含税）
-                    taxAmount = taxAmount.add(dto.getTaxAmount());//增加税额
+                    if(dto.getTaxAmount() != null) {
+                    	taxAmount = taxAmount.add(dto.getTaxAmount());//增加税额
+                    }
                 }
             }
             
