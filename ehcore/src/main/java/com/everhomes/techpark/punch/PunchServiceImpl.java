@@ -1194,6 +1194,9 @@ public class PunchServiceImpl implements PunchService {
         PunchRule pr = findPunchRuleByCache(PunchOwnerType.ORGANIZATION.getCode(), companyId, userId);
         if (null == pr) {
             LOGGER.error("userId={} have no punch rule", userId);
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+                    "have no punch rule");
         }
 
         punchDayLog.setRuleType(pr.getRuleType());

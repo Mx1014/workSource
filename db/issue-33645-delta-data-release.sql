@@ -64,3 +64,8 @@ WHERE d.target_id>0 AND l.detail_id IS NULL;
 UPDATE eh_punch_day_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
 SET l.detail_id=d.id
 WHERE d.target_id>0 AND l.detail_id IS NULL;
+
+-- 从每日统计eh_punch_day_logs表中追溯当日的考勤规则，更新到eh_punch_logs表中
+UPDATE eh_punch_logs l INNER JOIN eh_punch_day_logs pdl ON l.user_id=pdl.user_id AND l.enterprise_id=pdl.enterprise_id AND l.punch_date=pdl.punch_date
+SET l.punch_organization_id=pdl.punch_organization_id
+WHERE l.punch_organization_id IS NULL;
