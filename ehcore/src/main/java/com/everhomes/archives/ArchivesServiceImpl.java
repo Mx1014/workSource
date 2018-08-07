@@ -283,8 +283,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);
         if (!StringUtils.isEmpty(cmd.getKeywords()) || detailIds == null) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
-            List<ArchivesContactDTO> contacts = new ArrayList<>(listArchivesContacts(cmd, response, null));
-            response.setContacts(contacts);
+            response.setContacts(listArchivesContacts(cmd, response, null));
         } else {
             if (StringUtils.isEmpty(cmd.getPageAnchor())) {
                 List<ArchivesContactDTO> contacts = new ArrayList<>();
@@ -368,7 +367,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  2.置顶个数未超过页总数
             res = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
             if (res.getMembers() == null)
-                return null;
+                return contacts;
             res.getMembers().forEach(r -> {
                 ArchivesContactDTO dto = new ArchivesContactDTO();
                 dto.setDetailId(r.getDetailId());
