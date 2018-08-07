@@ -26,8 +26,7 @@ public interface FileManagementService {
 
     FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd);
 
-    ListFileContentResponse listFileContents(ListFileContentCommand cmd);
-}
+    ListFileContentResponse listFileContents(ListFileContentCommand cmd); 
 
 	public void moveFileContent(MoveFileContentCommand cmd);
 

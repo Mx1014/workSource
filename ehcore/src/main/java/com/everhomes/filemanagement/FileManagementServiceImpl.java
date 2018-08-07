@@ -528,7 +528,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         return dto;
     }
-}
+    
 	@Override
 	public void moveFileContent(MoveFileContentCommand cmd) {
 	
