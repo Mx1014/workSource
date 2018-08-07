@@ -10118,22 +10118,22 @@ public class PunchServiceImpl implements PunchService {
 //					}
 //				}
             } else {
-                //当天没有打卡也么有计算规则
-                dto.setPunchDate(startCalendar.getTime().getTime());
-                PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
-                if (null == pr)
-                    continue;
-                dto.setRuleType(pr.getRuleType());
-                //获取当天的排班
-                PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
-                if (ptr != null) {
-                    dto.setTimeRuleId(ptr.getId());
-                    if (ptr.getId() == null || ptr.getId() == 0) {
-                        dto.setTimeRuleName("休息");
-                    } else {
-                        dto.setTimeRuleName(ptr.getName());
-                    }
-                }
+//                //当天没有打卡也么有计算规则
+//                dto.setPunchDate(startCalendar.getTime().getTime());
+//                PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+//                if (null == pr)
+//                    continue;
+//                dto.setRuleType(pr.getRuleType());
+//                //获取当天的排班
+//                PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
+//                if (ptr != null) {
+//                    dto.setTimeRuleId(ptr.getId());
+//                    if (ptr.getId() == null || ptr.getId() == 0) {
+//                        dto.setTimeRuleName("休息");
+//                    } else {
+//                        dto.setTimeRuleName(ptr.getName());
+//                    }
+//                }
             }
             response.getDayStatus().add(dto);
         }
@@ -11582,7 +11582,7 @@ public class PunchServiceImpl implements PunchService {
                 statusList[0] = pdl.getApprovalStatusList();
             }
         }
-        if (pdl.getTimeRuleId() == null && pdl.getTimeRuleId() == 0) {
+        if (pdl.getTimeRuleId() == null || pdl.getTimeRuleId() == 0) {
             pdl.setRestFlag(NormalFlag.YES.getCode());
         } else {
             pdl.setRestFlag(NormalFlag.NO.getCode());
@@ -12279,7 +12279,7 @@ public class PunchServiceImpl implements PunchService {
                 if (r.getDurationDay() != null && r.getDurationDay().compareTo(BigDecimal.ZERO) > 0) {
                     dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
                 } else {
-                    dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayString(r.getDurationMinute() * 6 * 1000, dayUnit, hourUnit));
+                    dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayString(r.getDurationMinute() * 60 * 1000, dayUnit, hourUnit));
                 }
                 map = getExceptionBeginEndTimeMap(r);
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
