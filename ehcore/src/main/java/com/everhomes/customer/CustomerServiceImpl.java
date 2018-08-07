@@ -1120,7 +1120,7 @@ public class CustomerServiceImpl implements CustomerService {
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if (deleteCustomer) {
+        if (deleteCustomer && originalTrackingUid != null) {
             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
             return;
         }
@@ -1215,7 +1215,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationService.deleteEnterpriseById(command, false);
             }
         }
-        routeMsgForTrackingChanged(null, null, null, null
+        routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
                 , customer.getName(), null, true, cmd.getOrgId());
 
     }
