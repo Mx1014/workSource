@@ -66,7 +66,7 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
             return new FlowConditionStringVariable(overTime.getEndTime());
         } else if ("加班时长".equals(variable)) {
             if (overTime.getDurationInMinute() != null) {
-                return new FlowConditionStringVariable(PunchDayParseUtils.parseHourMinuteDisplayString(overTime.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
+                return new FlowConditionStringVariable(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(overTime.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
             } else {
                 return new FlowConditionStringVariable(overTime.getDuration() + "天");
             }

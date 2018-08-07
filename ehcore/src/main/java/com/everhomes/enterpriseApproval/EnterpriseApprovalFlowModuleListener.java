@@ -285,7 +285,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.OVERTIME_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         if (overTimeValue.getDurationInMinute() != null) {
-            e.setValue(PunchDayParseUtils.parseHourMinuteDisplayString(overTimeValue.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
+            e.setValue(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(overTimeValue.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
         } else {
             e.setValue(overTimeValue.getDuration() + "天");
         }

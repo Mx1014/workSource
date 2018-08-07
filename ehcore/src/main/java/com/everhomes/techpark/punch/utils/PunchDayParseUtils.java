@@ -10,13 +10,24 @@ public final class PunchDayParseUtils {
     private PunchDayParseUtils() {
     }
 
-    public static String parseHourMinuteDisplayString(Double dayCount, String hourUnit, String minuteUnit) {
-        Long milliSecond = new BigDecimal(String.valueOf(dayCount)).multiply(new BigDecimal(MILLISECOND_OF_ONE_DAY)).setScale(0).longValue();
-        return parseHourMinuteDisplayString(milliSecond, hourUnit, minuteUnit);
+    public static String parseHourMinuteDisplayStringZeroWithUnit(Long milliSecond, String hourUnit, String minuteUnit) {
+        if (milliSecond == null || milliSecond <= 0) {
+            return "0" + minuteUnit;
+        }
+        long h = Math.abs(milliSecond) / MILLISECOND_OF_ONE_HOUR;
+        long m = (Math.abs(milliSecond) % MILLISECOND_OF_ONE_HOUR) / MILLISECOND_OF_ONE_MINUTE;
+        StringBuffer s = new StringBuffer();
+        if (h > 0) {
+            s.append(h).append(hourUnit);
+        }
+        if (m > 0 || s.length() == 0) {
+            s.append(m).append(minuteUnit);
+        }
+        return s.toString();
     }
 
-    public static String parseHourMinuteDisplayString(Long milliSecond, String hourUnit, String minuteUnit) {
-        if (milliSecond == null) {
+    public static String parseHourMinuteDisplayStringZeroWithoutUnit(Long milliSecond, String hourUnit, String minuteUnit) {
+        if (milliSecond == null || milliSecond <= 0) {
             return "0";
         }
         long h = Math.abs(milliSecond) / MILLISECOND_OF_ONE_HOUR;

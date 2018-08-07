@@ -5372,14 +5372,14 @@ public class PunchServiceImpl implements PunchService {
                     dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 }
                 if (null != statistic.getBelateTime()) {
-                    dto.setBelateTime(PunchDayParseUtils.parseHourMinuteDisplayString(statistic.getBelateTime(), hourUnit, minuteUnit));
+                    dto.setBelateTime(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(statistic.getBelateTime(), hourUnit, minuteUnit));
                 }
                 if (null != statistic.getLeaveEarlyTime()) {
-                    dto.setLeaveEarlyTime(PunchDayParseUtils.parseHourMinuteDisplayString(statistic.getLeaveEarlyTime(), hourUnit, minuteUnit));
+                    dto.setLeaveEarlyTime(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(statistic.getLeaveEarlyTime(), hourUnit, minuteUnit));
                 }
-                dto.setOvertimeTotalWorkdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(statistic.getOvertimeTotalWorkday(), hourUnit, minuteUnit));
-                dto.setOvertimeTotalRestdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(statistic.getOvertimeTotalRestday(), hourUnit, minuteUnit));
-                dto.setOvertimeTotalLegalHolidayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(statistic.getOvertimeTotalLegalHoliday(), hourUnit, minuteUnit));
+                dto.setOvertimeTotalWorkdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(statistic.getOvertimeTotalWorkday(), hourUnit, minuteUnit));
+                dto.setOvertimeTotalRestdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(statistic.getOvertimeTotalRestday(), hourUnit, minuteUnit));
+                dto.setOvertimeTotalLegalHolidayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(statistic.getOvertimeTotalLegalHoliday(), hourUnit, minuteUnit));
 
                 punchCountDTOList.add(dto);
                 List<ExtDTO> extDTOs = new ArrayList<>();
@@ -6111,9 +6111,9 @@ public class PunchServiceImpl implements PunchService {
         String locale = UserContext.current().getUser() == null ? PunchConstants.locale : UserContext.current().getUser().getLocale();
         String hourUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_HOUR), locale, "小时");
         String minuteUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_MINUTE), locale, "分钟");
-        dto.setOvertimeTotalWorkdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(dto.getOvertimeTotalWorkday(), hourUnit, minuteUnit));
-        dto.setOvertimeTotalRestdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(dto.getOvertimeTotalRestday(), hourUnit, minuteUnit));
-        dto.setOvertimeTotalLegalHolidayDisplay(PunchDayParseUtils.parseHourMinuteDisplayString(dto.getOvertimeTotalLegalHoliday(), hourUnit, minuteUnit));
+        dto.setOvertimeTotalWorkdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(dto.getOvertimeTotalWorkday(), hourUnit, minuteUnit));
+        dto.setOvertimeTotalRestdayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(dto.getOvertimeTotalRestday(), hourUnit, minuteUnit));
+        dto.setOvertimeTotalLegalHolidayDisplay(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithoutUnit(dto.getOvertimeTotalLegalHoliday(), hourUnit, minuteUnit));
         return dto;
     }
 
@@ -7867,7 +7867,11 @@ public class PunchServiceImpl implements PunchService {
             pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             punchProvider.updatePunchRule(pr);
             punchProvider.setPunchTimeRuleStatus(pr.getId(), PunchRuleStatus.DELETING.getCode());
-            punchProvider.setPunchSchedulingsStatus(pr.getId(), PunchRuleStatus.DELETING.getCode());
+
+            Calendar tomorrowCalendar = Calendar.getInstance();
+            tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
+            java.sql.Date tomorrow = new java.sql.Date(tomorrowCalendar.getTimeInMillis());
+            punchProvider.setPunchSchedulingsStatus(pr.getId(), PunchRuleStatus.DELETING.getCode(), tomorrow);
 //            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
 //            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
 //            this.organizationProvider.deleteOrganization(organization);
@@ -12268,6 +12272,7 @@ public class PunchServiceImpl implements PunchService {
                 com.everhomes.rest.approval.ApprovalStatus.AGREEMENT ? NormalFlag.NO.getCode() : NormalFlag.YES.getCode());
         String dayUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_DAY), PunchConstants.locale, "天");
         String hourUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_HOUR), PunchConstants.locale, "小时");
+        String minuteUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_MINUTE), PunchConstants.locale, "分钟");
         String dateUnit = localeStringService.getLocalizedString("time.unit", "date", PunchConstants.locale, "日");
         
         Map<String, String> map = null;
@@ -12288,7 +12293,7 @@ public class PunchServiceImpl implements PunchService {
                 if (r.getDurationDay() != null && r.getDurationDay().compareTo(BigDecimal.ZERO) > 0) {
                     dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
                 } else {
-                    dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayString(r.getDurationMinute() * 60 * 1000, dayUnit, hourUnit));
+                    dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(r.getDurationMinute() * 60 * 1000, hourUnit, minuteUnit));
                 }
                 map = getExceptionBeginEndTimeMap(r);
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,

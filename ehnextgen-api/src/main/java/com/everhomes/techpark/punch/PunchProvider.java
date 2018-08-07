@@ -446,5 +446,5 @@ public interface PunchProvider {
 
 	void setPunchTimeRuleStatus(Long prId, Byte targetStatus);
 
-	void setPunchSchedulingsStatus(Long prId, Byte targetStatus);
+	void setPunchSchedulingsStatus(Long prId, Byte targetStatus, Date beginDate);
 }

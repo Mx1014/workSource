@@ -4170,13 +4170,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public void setPunchSchedulingsStatus(Long prId, Byte targetStatus) {
+    public void setPunchSchedulingsStatus(Long prId, Byte targetStatus, Date beginDate) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
 
         UpdateConditionStep<EhPunchSchedulingsRecord> step = context.update(Tables.EH_PUNCH_SCHEDULINGS)
                 .set(Tables.EH_PUNCH_SCHEDULINGS.STATUS, targetStatus).where(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(prId))
-                .and(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(PunchRuleStatus.ACTIVE.getCode()));
+                .and(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(PunchRuleStatus.ACTIVE.getCode()))
+                .and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(beginDate));
         step.execute();
 
     }
