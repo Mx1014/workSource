@@ -596,7 +596,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
 		// 增加必要的参数校验
-		if (cmd.getStocks() != null) {
+    	if (cmd.getStocks() == null) {
+    		LOGGER.error("Amount cannot be empty.");
+			throw errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST,
+					"WarehouseMaterial cannot be empty.");
+		} else {
 			for (WarehouseMaterialStock stock : cmd.getStocks()) {
 				if (stock.getAmount() == null) {
 					LOGGER.error("Amount cannot be empty.");
@@ -1966,7 +1970,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 			String fileName = String.format("库存信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "库存信息");
 			List<WarehouseStockExportDetailDTO> data = stockDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
-			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+			/*excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                     "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
                     "2、请在表格里面逐行录入数据，若连续10行内容为空，录入数据不再被识别。建议一次最多导入400条信息。\n" +
                     "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
@@ -1977,7 +1981,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     "		3）必填信息如果不导入，则该条数据导入失败。\n" +
                     "		4）物品编号与名称、分类编码、所属仓库等需要为系统中存在的，如果在系统不存在，则该条信息导入失败。\n" +
                     "		5）导入操作为刷新物品库存而非增加，导入后会新增一条入库记录。（限制导入的库存数必须大于等于现有库存，否则导入不成功）\n" +
-                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
+                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);*/
 			String[] propertyNames = {"materialNumber", "materialName", "categoryName", "amount", "unitName", "supplierName", "warehouseName", "updateTime"};
 			String[] titleNames = {"物品编号", "物品名称", "物品分类", "库存", "单位", "供应商", "仓库名称", "更新时间"};
 			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20};
@@ -2093,20 +2097,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 			log.setErrorLog("WarehouseName cannot be empty");
 			return log;
 		}
-		//校验仓库是否存在
-		if (StringUtils.isNotEmpty(data.getWarehouseName())) {
-			//查询仓库
-			SearchWarehousesCommand searchWarehousesDTO = ConvertHelper.convert(cmd, SearchWarehousesCommand.class);
-			searchWarehousesDTO.setName(data.getWarehouseName());
-			SearchWarehousesResponse warehousesResponse = warehouseSearcher.query(searchWarehousesDTO);
-			List<WarehouseDTO> warehouses = warehousesResponse.getWarehouseDTOs();
-			if (warehouses.size()<1) {
-				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST);
+		//正则校验数字
+		if (StringUtils.isNotEmpty(data.getAmount())) {
+			String reg = "^\\+?[1-9][0-9]*$";
+			if(!Pattern.compile(reg).matcher(data.getAmount()).find()){
+				log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_FORMAT);
 				log.setData(data);
-				log.setErrorLog("WarehouseName not exist");
+				log.setErrorLog("Amount format is error");
 				return log;
 			}
-			data.setWarehouse(warehouses.get(0));
 		}
 		//校验物品信息是否存在
 		if (StringUtils.isNotEmpty(data.getMaterialNumber())) {
@@ -2133,16 +2132,20 @@ public class WarehouseServiceImpl implements WarehouseService {
 			
 			data.setMaterial(materials.get(0));
 		}
-		
-		//正则校验数字
-		if (StringUtils.isNotEmpty(data.getAmount())) {
-			String reg = "^\\+?[1-9][0-9]*$";
-			if(!Pattern.compile(reg).matcher(data.getAmount()).find()){
-				log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_FORMAT);
+		//校验仓库是否存在
+		if (StringUtils.isNotEmpty(data.getWarehouseName())) {
+			//查询仓库
+			SearchWarehousesCommand searchWarehousesDTO = ConvertHelper.convert(cmd, SearchWarehousesCommand.class);
+			searchWarehousesDTO.setName(data.getWarehouseName());
+			SearchWarehousesResponse warehousesResponse = warehouseSearcher.query(searchWarehousesDTO);
+			List<WarehouseDTO> warehouses = warehousesResponse.getWarehouseDTOs();
+			if (warehouses.size()<1) {
+				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST);
 				log.setData(data);
-				log.setErrorLog("Amount format is error");
+				log.setErrorLog("WarehouseName not exist");
 				return log;
 			}
+			data.setWarehouse(warehouses.get(0));
 		}
 		
 		return null;
@@ -2160,7 +2163,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 				data.setCategoryName(trim(r.getC()));
 				data.setAmount(trim(r.getD()));
 				data.setWarehouseName(trim(r.getE()));
-				data.setSupplierName(trim(r.getF()));
+				//data.setSupplierName(trim(r.getF()));
 				list.add(data);
 			}
 		}

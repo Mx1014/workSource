@@ -34,7 +34,7 @@ public class ImportStocksDataDTO {
 	private String categoryName;
 	private String amount;
 	private String warehouseName;
-	private String supplierName;
+	//private String supplierName;
 	@ItemType(WarehouseDTO.class)
     private WarehouseDTO warehouse;
 	
@@ -107,14 +107,6 @@ public class ImportStocksDataDTO {
 
 	public void setWarehouseName(String warehouseName) {
 		this.warehouseName = warehouseName;
-	}
-
-	public String getSupplierName() {
-		return supplierName;
-	}
-
-	public void setSupplierName(String supplierName) {
-		this.supplierName = supplierName;
 	}
 
 	@Override

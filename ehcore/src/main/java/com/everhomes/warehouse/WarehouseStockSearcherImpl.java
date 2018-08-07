@@ -136,6 +136,18 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             builder.addHighlightedField("name");
 
         }
+        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getMaterialName())
+                    .field("name", 5.0f)
+                    .field("name.pinyin_prefix", 2.0f)
+                    .field("name.pinyin_gram", 1.0f);
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("name");
+
+        }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
