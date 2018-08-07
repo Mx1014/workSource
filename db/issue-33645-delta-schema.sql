@@ -265,3 +265,6 @@ ALTER TABLE eh_punch_day_logs DROP INDEX i_eh_enterprise_user_punch_date;
 ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date_user_id(`enterprise_id`,`punch_date`,`user_id`);
 ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date_detail_id(`enterprise_id`,`punch_date`,`detail_id`);
 ALTER TABLE eh_uniongroup_member_details ADD INDEX i_eh_namespace_detail_id_version_code(`namespace_id`,`group_type`,`detail_id`,`version_code`);
+
+-- 新增字段，记录打卡当天设置的考勤规则
+ALTER TABLE eh_punch_logs ADD COLUMN `punch_organization_id` BIGINT AFTER punch_date;
