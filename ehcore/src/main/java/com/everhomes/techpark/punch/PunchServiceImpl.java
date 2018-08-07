@@ -2238,6 +2238,7 @@ public class PunchServiceImpl implements PunchService {
 
         PunchLogDTO punchType = getPunchType(userId, cmd.getEnterpriseId(), punchLog.getPunchTime(), punchLog.getPunchDate());
         response.setClockStatus(punchType.getClockStatus());
+        punchLog.setPunchOrganizationId(punchType.getPunchOrgnizationId());
         punchLog.setRuleTime(punchType.getRuleTime());
         punchLog.setShouldPunchTime(punchType.getShouldPunchTime());
         punchLog.setStatus(punchType.getClockStatus());
@@ -3836,12 +3837,11 @@ public class PunchServiceImpl implements PunchService {
         if (null != dto) {
             row.createCell(++i).setCellValue(dto.getUserName());
             row.createCell(++i).setCellValue(dto.getDeptName());
-            row.createCell(++i).setCellValue(dto.getPunchOrgName());
         } else {
             row.createCell(++i).setCellValue(log.getUserId());
             row.createCell(++i).setCellValue("");
-            row.createCell(++i).setCellValue("");
         }
+        row.createCell(++i).setCellValue(findPunchOrganizationName(ruleMap, log.getPunchOrganizationId()));
         row.createCell(++i).setCellValue(PunchType.fromCode(log.getPunchType()).toString());
         if (null != log.getPunchTime()) {
             row.createCell(++i).setCellValue(timeSF.get().format(log.getPunchTime()));
@@ -3862,6 +3862,23 @@ public class PunchServiceImpl implements PunchService {
         }
         row.createCell(++i).setCellValue(log.getIdentification());
         row.createCell(++i).setCellValue(NormalFlag.YES == NormalFlag.fromCode(log.getDeviceChangeFlag()) ? "异常" : "正常");
+    }
+
+    private String findPunchOrganizationName(Map<Long, String> ruleMap, Long punchOrganizationId) {
+        if (null == punchOrganizationId) {
+            return "";
+        }
+        String name = ruleMap.get(punchOrganizationId);
+        if (null == name) {
+            Organization org = organizationProvider.findOrganizationById(punchOrganizationId);
+            if (null != org) {
+                name = org.getName();
+            } else {
+                name = "";
+            }
+            ruleMap.put(punchOrganizationId, name);
+        }
+        return name;
     }
 
     private String getLeaveEarlyString(PunchLog log) {
@@ -9342,6 +9359,7 @@ public class PunchServiceImpl implements PunchService {
             throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
                     PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
                     "公司没有设置打卡规则");
+        result.setPunchOrgnizationId(pr.getId());
         PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, punchDate, userId);
         result.setPunchDayType(ptr.getPunchDayType().getCode());
         if(PunchDayType.WORKDAY != ptr.getPunchDayType()){

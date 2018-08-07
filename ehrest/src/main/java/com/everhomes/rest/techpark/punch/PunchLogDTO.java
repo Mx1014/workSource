@@ -55,6 +55,7 @@ public class PunchLogDTO {
     private String wifiInfo;
 
     private Byte deviceChangeFlag;
+	private Long punchOrgnizationId;
     
     @Override
     public String toString() {
@@ -247,5 +248,14 @@ public class PunchLogDTO {
 
 	public void setWifiInfo(String wifiInfo) {
 		this.wifiInfo = wifiInfo;
+	}
+
+
+	public Long getPunchOrgnizationId() {
+		return punchOrgnizationId;
+	}
+
+	public void setPunchOrgnizationId(Long punchOrgnizationId) {
+		this.punchOrgnizationId = punchOrgnizationId;
 	}
 }
