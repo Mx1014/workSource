@@ -3128,7 +3128,7 @@ public class PunchProviderImpl implements PunchProvider {
                     .where(Tables.EH_APPROVAL_CATEGORIES.ID.in(approvalCategoryIdNames.keySet()))
                     .groupBy(Tables.EH_APPROVAL_CATEGORIES.CATEGORY_NAME);
 
-            result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID).fetch().map((r) -> {
+            result = step.orderBy(Tables.EH_APPROVAL_CATEGORIES.DEFAULT_ORDER).fetch().map((r) -> {
                 ExtDTO dto = new ExtDTO();
                 dto.setName(r.value1());
                 if (r.value2() == null)

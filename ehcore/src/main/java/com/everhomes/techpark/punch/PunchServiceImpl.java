@@ -5355,7 +5355,8 @@ public class PunchServiceImpl implements PunchService {
                 List<ExtDTO> extDTOs = new ArrayList<>();
                 if (statistic.getUserId() != null && statistic.getUserId() > 0) {
                     extDTOs = punchProvider.listAskForLeaveExtDTOs(statistic.getUserId(), statistic.getOwnerType(), statistic.getOwnerId(), statistic.getPunchMonth(), getApprovalCategoryIdNameMap(categories));
-                } else if (categories != null) {
+                }
+                if (categories != null && CollectionUtils.isEmpty(extDTOs)) {
                     for (ApprovalCategoryDTO category : categories) {
                         extDTOs.add(new ExtDTO(category.getCategoryName(), "0"));
                     }
@@ -6504,7 +6505,7 @@ public class PunchServiceImpl implements PunchService {
                 continue;
             }
             for (OrganizationMemberDetails detail : memberDetails) {
-                refreshDayLogAndMonthStat(detail, organizationId, punCalendar);
+                punchDayLogInitialize(detail, organizationId, punCalendar);
             }
         }
     }
@@ -6514,7 +6515,7 @@ public class PunchServiceImpl implements PunchService {
         Calendar calendar4 = Calendar.getInstance();
         calendar4.set(2018, 7, 2);
         OrganizationMemberDetails details = findOrganizationMemberDetailByCacheDetailId(39990L);
-        refreshDayLogAndMonthStat(details, 1045660L, calendar4);
+        punchDayLogInitialize(details, 1045660L, calendar4);
 //        dayRefreshLogScheduled(new Date(runDate));
     }
     @Deprecated
@@ -6604,7 +6605,7 @@ public class PunchServiceImpl implements PunchService {
                                     for (PunchScheduling punchScheduling : punchSchedulings) {
                                         OrganizationMemberDetails memberDetail = findOrganizationMemberDetailByCacheDetailId(punchScheduling.getTargetId());
                                         if (null != memberDetail)
-                                            refreshDayLogAndMonthStat(memberDetail , pr.getOwnerId(), schedulingCalendar);
+                                            punchDayLogInitialize(memberDetail , pr.getOwnerId(), schedulingCalendar);
                                     }
                                 }
                             }
@@ -6652,7 +6653,7 @@ public class PunchServiceImpl implements PunchService {
             for (UniongroupMemberDetail member : members) {
                 if (member != null) {
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
-                    refreshDayLogAndMonthStat(memberDetail, pr.getOwnerId(), yesterday);
+                    punchDayLogInitialize(memberDetail, pr.getOwnerId(), yesterday);
                     punchRuleCacheByUserId.get().put(pr.getOwnerId() + "-" + member.getTargetId(), pr);
                 }
             }
@@ -6665,7 +6666,11 @@ public class PunchServiceImpl implements PunchService {
         }
     };
 
-    private void refreshDayLogAndMonthStat(OrganizationMemberDetails memberDetail, Long ownerId, Calendar punCalendar) {
+    /**
+     * 初始化pdl，对已经存在的pdl数据不做更新操作
+     * 主要用于定时任务每天初始化
+     */
+    private void punchDayLogInitialize(OrganizationMemberDetails memberDetail, Long ownerId, Calendar punCalendar) {
         if (memberDetail == null) {
             return;
         }
@@ -6678,6 +6683,32 @@ public class PunchServiceImpl implements PunchService {
             PunchRule pr = getPunchRuleByDetailId(memberDetail.getNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), ownerId, memberDetail.getId());
             if (memberDetail.getTargetId() == null || memberDetail.getTargetId().equals(0L) || pr == null) {
                 // 用户未激活和没有设置考勤规则，因此不存在打卡记录和请假等申请记录，所以日报统计只有一些基础数据
+                initPunchDayLog4UntrackOrUnPunchRuleOrganizationMember(memberDetail, ownerId, pr, punchDate);
+            } else {
+                this.refreshPunchDayLog(memberDetail, punCalendar);
+            }
+        } catch (Exception e) {
+            LOGGER.error("refresh day log and month stat Wrong [{}] detailId is {} owner id is {}", memberDetail.getContactName(), memberDetail.getId(), ownerId, e);
+        }
+    }
+
+    /**
+     * 初始化pdl数据，对已经存在的pdl数据进行重新计算
+     * 主要用于考勤5.0,6.0,7.0上线用于批量更新数据的一次性操作
+     */
+    private void punchDayLogRefresh(OrganizationMemberDetails memberDetail, Long ownerId, Calendar punCalendar) {
+        if (memberDetail == null) {
+            return;
+        }
+        try {
+            String punchDate = dateSF.get().format(punCalendar.getTime());
+            PunchRule pr = getPunchRuleByDetailId(memberDetail.getNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), ownerId, memberDetail.getId());
+            if (memberDetail.getTargetId() == null || memberDetail.getTargetId().equals(0L) || pr == null) {
+                // 用户未激活和没有设置考勤规则，因此不存在打卡记录和请假等申请记录，所以日报统计只有一些基础数据
+                PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndDetailId(memberDetail.getId(), ownerId, punchDate);
+                if (punchDayLog != null) {
+                    return;
+                }
                 initPunchDayLog4UntrackOrUnPunchRuleOrganizationMember(memberDetail, ownerId, pr, punchDate);
             } else {
                 this.refreshPunchDayLog(memberDetail, punCalendar);
@@ -6743,7 +6774,7 @@ public class PunchServiceImpl implements PunchService {
 //     *
 //     * @throws ParseException
 //     */
-//    private void refreshDayLogAndMonthStat(OrganizationMemberDetails member, Long orgId,
+//    private void punchDayLogInitialize(OrganizationMemberDetails member, Long orgId,
 //                                           Calendar punCalendar, Calendar startCalendar) throws ParseException {
 //        
 //        //刷月报
@@ -12357,32 +12388,43 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-    public void punchDayLogInitializeByMonth(String initMonth) {
+    public void punchDayLogInitializeByMonth(String initMonth) throws ParseException {
+        // 通过UniongroupMemberDetails来查询有在使用考勤功能的公司 ( 即没有使用考勤功能的不进行初始化 )
+        List<Long> organizationIds = uniongroupConfigureProvider.distinctEnterpriseIdsFromUniongroupMemberDetails();
+        if (CollectionUtils.isEmpty(organizationIds)) {
+            return;
+        }
         Calendar monthBegin = Calendar.getInstance();
         Calendar monthEnd = Calendar.getInstance();
-        try {
-            monthBegin.setTime(monthSF.get().parse(initMonth));
-            //月初
-            monthBegin.set(Calendar.DAY_OF_MONTH, 1);
-            if (!monthSF.get().format(monthEnd.getTime()).equals(initMonth)) {
-                monthEnd.setTime(monthSF.get().parse(initMonth));
-                //月末
-                monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        monthBegin.setTime(monthSF.get().parse(initMonth));
+        //月初
+        monthBegin.set(Calendar.DAY_OF_MONTH, 1);
+        if (!monthSF.get().format(monthEnd.getTime()).equals(initMonth)) {
+            monthEnd.setTime(monthSF.get().parse(initMonth));
+            //月末
+            monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }
+
+        for (Long organizationId : organizationIds) {
+            List<OrganizationMemberDetails> memberDetails = listMembers(organizationId, null, initMonth, Integer.MAX_VALUE - 1, null, null);
+            if (CollectionUtils.isEmpty(memberDetails)) {
+                continue;
             }
-            PunchDayLogInitializeCommand cmd = new PunchDayLogInitializeCommand();
-            while (true) {
-                cmd.setInitialDateTime(monthBegin.getTimeInMillis());
-                punchDayLogInitialize(cmd);
-                monthBegin.add(Calendar.DAY_OF_MONTH, 1);
-                if (monthBegin.after(monthEnd)) {
-                    return;
+            for (OrganizationMemberDetails detail : memberDetails) {
+                while (true) {
+                    Calendar punCalendar = Calendar.getInstance();
+                    punCalendar.setTimeInMillis(monthBegin.getTimeInMillis());
+                    try {
+                        punchDayLogInitialize(detail, organizationId, punCalendar);
+                    } catch (Exception e) {
+                        LOGGER.error("punchDayLogInitializeByMonth error,detailId = {},punchDate = {}", detail.getId(), punCalendar.getTime(), e);
+                    }
+                    monthBegin.add(Calendar.DAY_OF_MONTH, 1);
+                    if (monthBegin.after(monthEnd)) {
+                        break;
+                    }
                 }
             }
-        } catch (ParseException e) {
-            throw RuntimeErrorException
-                    .errorWith(PunchServiceErrorCode.SCOPE,
-                            PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
-                            "there is something wrong with queryYear,please check again ");
         }
     }
 }

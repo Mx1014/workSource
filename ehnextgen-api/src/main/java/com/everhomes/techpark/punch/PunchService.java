@@ -437,6 +437,9 @@ public interface PunchService {
 
 	String getAdjustRuleUrl();
 
-	void punchDayLogInitializeByMonth(String initMonth);
+	/**
+	 * 用于上线时进行手动初始化操作
+	 */
+	void punchDayLogInitializeByMonth(String initMonth) throws ParseException;
 
 }

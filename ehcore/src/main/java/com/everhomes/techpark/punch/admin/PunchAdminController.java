@@ -63,6 +63,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.text.ParseException;
 
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
@@ -1232,7 +1233,7 @@ public class PunchAdminController extends ControllerBase {
      */
     @RequestMapping("punchDayLogInitializeByMonth")
     @RestReturn(value = String.class)
-    public RestResponse punchDayLogInitializeByMonth(@Valid PunchDayLogInitializeMonthlyCommand cmd) {
+    public RestResponse punchDayLogInitializeByMonth(@Valid PunchDayLogInitializeMonthlyCommand cmd) throws ParseException {
         punchService.punchDayLogInitializeByMonth(cmd.getInitialMonth());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
