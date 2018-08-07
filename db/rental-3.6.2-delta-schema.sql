@@ -2,6 +2,11 @@ ALTER TABLE `eh_rentalv2_default_rules`
 ADD COLUMN `remark_flag`  tinyint(4) NULL COMMENT '备注是否必填 0否 1是' AFTER `overtime_strategy`,
 ADD COLUMN `remark`  varchar(255) NULL COMMENT '备注显示文案' AFTER `remark_flag`;
 
+ALTER TABLE `eh_rentalv2_time_interval`
+ADD COLUMN `amorpm`  tinyint(4) NULL AFTER `time_step`,
+ADD COLUMN `name`  varchar(10) NULL AFTER `amorpm`;
+
+
 CREATE TABLE `eh_rentalv2_refund_tips` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int NOT NULL ,
