@@ -16,7 +16,7 @@ import java.util.List;
  *     <li>lineSpacing: lineSpacing</li>
  *     <li>columnSpacing: columnSpacing</li>
  *     <li>backgroundColor: backgroundColor</li>
- *     <li>allAppFlag: allAppFlag</li>
+ *     <li>allAppFlag: 全部标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class Navigator {
