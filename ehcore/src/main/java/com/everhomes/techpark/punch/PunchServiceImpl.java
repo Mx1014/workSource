@@ -6364,6 +6364,7 @@ public class PunchServiceImpl implements PunchService {
                 List<Byte> statusList = new ArrayList<>();
                 statusList.add(PunchRuleStatus.MODIFYED.getCode());
                 statusList.add(PunchRuleStatus.NEW.getCode());
+                statusList.add(PunchRuleStatus.DELETING.getCode());
                 List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
                 if (null != punchRules)
                     for (PunchRule pr : punchRules) {
