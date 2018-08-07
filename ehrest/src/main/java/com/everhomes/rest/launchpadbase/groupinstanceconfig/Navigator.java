@@ -16,6 +16,7 @@ import java.util.List;
  *     <li>lineSpacing: lineSpacing</li>
  *     <li>columnSpacing: columnSpacing</li>
  *     <li>backgroundColor: backgroundColor</li>
+ *     <li>allAppFlag: allAppFlag</li>
  * </ul>
  */
 public class Navigator {
@@ -29,6 +30,7 @@ public class Navigator {
     private Integer lineSpacing;
     private Integer columnSpacing;
     private String backgroundColor;
+    private Byte allAppFlag;
 
     public Integer getCssStyleFlag() {
         return cssStyleFlag;
@@ -100,6 +102,14 @@ public class Navigator {
 
     public void setBackgroundColor(String backgroundColor) {
         this.backgroundColor = backgroundColor;
+    }
+
+    public Byte getAllAppFlag() {
+        return allAppFlag;
+    }
+
+    public void setAllAppFlag(Byte allAppFlag) {
+        this.allAppFlag = allAppFlag;
     }
 
     @Override
