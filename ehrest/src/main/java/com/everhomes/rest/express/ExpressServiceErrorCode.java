@@ -10,6 +10,7 @@ public interface ExpressServiceErrorCode {
 	int NOT_SIGNED_USER_ERROR = 10002;  //您没有相关权限
 	int EMPTY_WORK_FLOW = 180806;  //没有启用工作流
 	int ERROR_CREATE_FLOWCASE = 180807;  //创建工作流失败
+	int ERROR_CREATE_USER_ACCOUNT = 180808;  //创建个人付款方失败
 
 	public static final String PAYSERVER_URL ="guomao.payserver.url";
 	public static final String OFFICIAL_ACCOUNTS_PAYSERVER_URL ="guomao.official.accounts.payserver.url";//公众号支付

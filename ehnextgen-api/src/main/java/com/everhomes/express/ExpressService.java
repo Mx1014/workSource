@@ -1,12 +1,14 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.util.List;
 import java.util.Map;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 
@@ -107,4 +109,10 @@ public interface ExpressService {
 	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd);
 
     void notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+
+	List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd);
+
+	void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
+
+	BusinessPayeeAccountDTO getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
 }
