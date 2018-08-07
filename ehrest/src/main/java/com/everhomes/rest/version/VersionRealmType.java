@@ -225,7 +225,9 @@ public enum VersionRealmType {
     ANDROID_XINGFUNUODE("Android_XingFuNuoDe"),
     IOS_XINGFUNUODE("iOS_XingFuNuoDe"),
     ANDROID_ZHENZHIHUI("Android_ZhenZhiHui"),
-    IOS_ZHENZHIHUI("iOS_ZhenZhiHui")
+    IOS_ZHENZHIHUI("iOS_ZhenZhiHui"),
+    ANDROID_ZHENJIASU("Android_ZhenJiaSu"),
+    IOS_ZHENJIASU("iOS_ZhenJiaSu")
     ;
 
     private String code;
