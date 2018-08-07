@@ -57,6 +57,9 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -807,6 +810,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
      */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+
         checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
 //        //查询合同，用来聚类
@@ -845,38 +849,24 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        	EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-        	paymentBills = context.selectFrom(Tables.EH_PAYMENT_BILLS)
-	            .where(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(cmd.getTargetType()))
-	            .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))//账单的状态，0:未出账单;1:已出账单
-	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
-	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
-	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
-	            .and(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.greaterThan(BigDecimal.ZERO))//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的
-	            .fetchInto(PaymentBills.class);
-        	Iterator<PaymentBills> iter = paymentBills.iterator();  
-        	while (iter.hasNext()) {
-        		PaymentBills paymentBillsDTO = iter.next();
-        	   //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-                //List<Long> queryAddressIds = new ArrayList<>();
-        		List<String> queryAddressList = new ArrayList<>();
-            	context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
-            		.from(t2)
-            		.where(t2.BILL_ID.eq(paymentBillsDTO.getId()))
-            		.fetch()
-                	.forEach(r2 ->{
-                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
-                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
-                });
-            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressList.containsAll(queryAddressList)) {
-            		iter.remove();
-            	}
-//            	if(!addressIds.containsAll(queryAddressIds)) {
-//            		iter.remove();
-//            	}
-        	}
+            SelectQuery<Record> query = context.selectQuery();
+            query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
+                    t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL);
+            query.addFrom(t, t2);
+            query.addConditions(t.ID.eq(t2.BILL_ID));
+            query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
+            query.addConditions(t.SWITCH.eq((byte)1));//账单的状态，0:未出账单;1:已出账单
+            query.addConditions(t.STATUS.eq((byte)0));//账单状态，0:待缴;1:已缴
+            query.addConditions(t.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
+            query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addConditions(t.AMOUNT_OWED.greaterThan(BigDecimal.ZERO));//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的       
+            query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addGroupBy(t.ID);
+            paymentBills = query.fetchInto(PaymentBills.class);
         }
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
@@ -1069,33 +1059,48 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        	ArrayList<Long> groupIds = new ArrayList<>();
+        	EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-            listAllBillsForClientDTOs = assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),
-        			cmd.getTargetType(), null, status, cmd.getBillGroupId());
-            Iterator<ListAllBillsForClientDTO> iter = listAllBillsForClientDTOs.iterator();  
-        	while (iter.hasNext()) {
-        		ListAllBillsForClientDTO ListAllBillsForClientDTO = iter.next();
-        	    //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-        		//List<Long> queryAddressIds = new ArrayList<>();
-        		List<String> queryAddressList = new ArrayList<>();
-        		context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
-            		.from(t2)
-            		.where(t2.BILL_ID.eq(Long.parseLong(ListAllBillsForClientDTO.getBillId())))
-            		.fetch()
-                	.forEach(r2 ->{
-                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
-                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
-                });
-            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressList.containsAll(queryAddressList)) {
-            		iter.remove();
-            	}
-//            	if(!addressIds.containsAll(queryAddressIds)) {
-//            		iter.remove();
-//            	}
-        	}
-            
+            SelectQuery<Record> query = context.selectQuery();
+            query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
+                    t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
+            		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"));
+            query.addFrom(t, t2);
+            query.addConditions(t.ID.eq(t2.BILL_ID));
+            query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
+            query.addConditions(t.SWITCH.eq((byte)1));//账单的状态，0:未出账单;1:已出账单
+            if(status != null){
+                query.addConditions(t.STATUS.eq(status));
+            }
+            if(cmd.getBillGroupId() != null){
+                query.addConditions(t.BILL_GROUP_ID.eq(cmd.getBillGroupId()));
+            }
+            query.addConditions(t.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
+            query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addGroupBy(t.ID);
+            query.addOrderBy(t.DATE_STR.desc());
+            List<ListAllBillsForClientDTO> list = new ArrayList<>();
+            query.fetch().map(r -> {
+                ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
+                groupIds.add(r.getValue(t.BILL_GROUP_ID));
+                dto.setAmountOwed(r.getValue(t.AMOUNT_OWED).toString());
+                dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE).toString());
+                dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                dto.setChargeStatus(r.getValue(t.STATUS));
+                dto.setBillId(String.valueOf(r.getValue(t.ID)));
+                list.add(dto);
+                return null;
+            });
+		    Map<Long,String> groupNames = assetProvider.getGroupNames(groupIds);
+		    for(int i = 0 ; i < list.size(); i ++){
+		    	list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
+		    }
+		    listAllBillsForClientDTOs = list;
         }
         return listAllBillsForClientDTOs;
     }
