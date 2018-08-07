@@ -12354,8 +12354,11 @@ public class PunchServiceImpl implements PunchService {
         response.setWifis(processPunchWiFiDTOs(pr.getPunchOrganizationId()));
         //加班时长
         response.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(), PunchRuleStatus.ACTIVE.getCode()));
-        PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, new Date(cmd.getPunchDate()), UserContext.currentUserId());
+        PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, new Date(cmd.getPunchDate()), UserContext.currentUserId());
         if (null != ptr) {
+            if(ptr.getId().equals(0)){
+                response.setCurrentTimeRuleName("休息");
+            }
             response.setCurrentTimeRuleName(ptr.getName());
         }
 		return response;
