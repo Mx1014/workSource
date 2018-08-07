@@ -9366,6 +9366,7 @@ public class PunchServiceImpl implements PunchService {
             result.setPunchIntervalNo(0);
             return result;
         }else{
+            result.setClockStatus(PunchStatus.NORMAL.getCode());
     		//加班规则开启的
             List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId, enterpriseId, dateSF.get().format(punchDate),
                     ClockCode.SUCESS.getCode());
