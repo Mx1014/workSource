@@ -4118,7 +4118,7 @@ public class PunchProviderImpl implements PunchProvider {
         condition = getPDLStatusItemTypeCondition(itemType, condition);
 
         List<PunchDayLog> result = step.where(condition)
-                .orderBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map(new PunchDayLogRecordMapper());
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map(new PunchDayLogRecordMapper());
         if (result == null || result.isEmpty())
             return null;
         return result;
