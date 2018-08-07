@@ -430,7 +430,7 @@ public class NewsController extends ControllerBase {
 	/**
 	 * <b>URL: /news/getNewsPreview</b>
 	 * <p>
-	 * 返回预览二维码
+	 * 返回预览内容
 	 * </p>
 	 */
 	@RequestMapping("getNewsPreview")
