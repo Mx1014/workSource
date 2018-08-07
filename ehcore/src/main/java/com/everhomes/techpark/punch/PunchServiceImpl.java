@@ -8998,7 +8998,7 @@ public class PunchServiceImpl implements PunchService {
                 //2018年4月11日 修改: 之前punCalendar就没用了,所以没有赋值为计算出来的打卡日,但是现在使用了punCalendar作为后面计算所以要赋值
                 punCalendar.setTime(punchTime);
             }
-            //前段有用这个punchDate做分割今天还是明天,所以没有pr也要返回一个
+            //前段有用这个punchDate做分割今天还是明天,所以没有pr也要返回一个今天给客户端
             response.setPunchDate(pDate.getTime());
 
         } else {
