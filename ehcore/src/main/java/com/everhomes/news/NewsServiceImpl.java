@@ -2293,4 +2293,15 @@ public class NewsServiceImpl implements NewsService {
 
 		return url;
 	}
+
+	@Override
+	public GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd) {
+		Long userId = UserContext.currentUserId();
+		Long newsId = WebTokenGenerator.getInstance().fromWebToken(cmd.getNewsToken(),Long.class);
+		News news = this.newsProvider.findNewPreview(newsId);
+		String content = news.getContent();
+		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
+		response.setContent(content);
+		return response;
+	}
 }
