@@ -4,6 +4,9 @@
 -- AUTHOR: 杨崇鑫  20180720
 -- REMARK: content图片程序升级，① 从本版中的content二进制更新到正式环境中  ② 把allowOriginToGet = * 加到 config.ini 配置文件中的 system 区域下
 
+-- AUTHOR: ryan  20180807
+-- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
