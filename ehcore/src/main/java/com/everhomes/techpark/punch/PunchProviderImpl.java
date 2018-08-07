@@ -4135,8 +4135,8 @@ public class PunchProviderImpl implements PunchProvider {
                 condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate, endDate));
                 break;
             default:
-                condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(new Timestamp(endDate.getTime())))
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.gt(new Timestamp(startDate.getTime())));
+                condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(new Timestamp(endDate.getTime())))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(new Timestamp(startDate.getTime())));
                 break;
         }
         if(null != userId)
