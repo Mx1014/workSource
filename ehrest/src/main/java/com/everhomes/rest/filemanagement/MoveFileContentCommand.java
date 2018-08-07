@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型,填organization</li>
  * <li>ownerId: 公司id</li>
- * <li>contentIds: List<long>要移动的文件/文件夹id</li>
+ * <li>contentIds: id列表 要移动的文件/文件夹id</li>
  * <li>targetCatalogId: 目标目录id</li>
  * <li>targetParentId: 目标文件夹id 直接放在目录下则为空</li>
  * </ul>
