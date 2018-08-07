@@ -12305,8 +12305,8 @@ public class PunchServiceImpl implements PunchService {
                 break;
             case ABNORMAL_PUNCH:
             	SimpleDateFormat dayDF = new SimpleDateFormat("dd");
-            	SimpleDateFormat weekDF = new SimpleDateFormat("EEE");
-            	dto.setTitle(dayDF.format(r.getPunchDate()) + dateUnit + weekDF.format(r.getPunchDate()));
+                SimpleDateFormat weekDF = new SimpleDateFormat("EEE", Locale.SIMPLIFIED_CHINESE);
+                dto.setTitle(dayDF.format(r.getPunchDate()) + dateUnit + weekDF.format(r.getPunchDate()));
             	PunchLog pLog = punchProvider.findPunchLog(r.getEnterpriseId(), r.getUserId(), r.getPunchDate(), r.getPunchType(), r.getPunchIntervalNo());
             	if(null != pLog){
             		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
