@@ -2193,6 +2193,55 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
         Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
         insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
+        //导入房源后，需要更新相应楼宇和园区的面积
+        updateAreaInBuildingAndCommunity(community, building, address);
+	}
+	
+	private void updateAreaInBuildingAndCommunity(Community community, Building building, Address address){
+		if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize + address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize + address.getAreaSize());
+        }
+        if (address.getRentArea() != null) {
+            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+            building.setRentArea(buildingRentArea + address.getRentArea());
+
+            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+            community.setRentArea(communityRentArea + address.getRentArea());
+        }
+        if (address.getSharedArea() != null) {
+            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+            building.setSharedArea(buildingSharedArea + address.getSharedArea());
+
+            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+            community.setSharedArea(communitySharedArea + address.getSharedArea());
+        }
+        if (address.getBuildArea() != null) {
+            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+            building.setBuildArea(buildingBuildArea + address.getBuildArea());
+
+            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+            community.setBuildArea(communityBuildArea + address.getBuildArea());
+        }
+        if (address.getChargeArea() != null) {
+            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+            building.setChargeArea(buildingChargeArea + address.getChargeArea());
+
+            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+            community.setChargeArea(communityChargeArea + address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea + address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea + address.getFreeArea());
+        }
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
 	}
 
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {

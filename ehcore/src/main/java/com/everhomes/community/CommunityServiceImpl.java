@@ -4871,7 +4871,7 @@ public class CommunityServiceImpl implements CommunityService {
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
 		CreateResourceCategoryAssignmentCommand command = new CreateResourceCategoryAssignmentCommand();
-		command.setResourceType(cmd.getProjectType());
+		command.setResourceType(cmd.getResourceType());
 		command.setResourceId(cmd.getCommunityId());
 		command.setResourceCategoryId(cmd.getCategoryId());
 		command.setNamespaceId(cmd.getNamespaceId());
