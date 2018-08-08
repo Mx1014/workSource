@@ -13,6 +13,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserApps;
 import com.everhomes.server.schema.tables.records.EhUserAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,11 +74,21 @@ public class UserAppProviderImpl implements UserAppProvider {
 	}
 
 	@Override
-	public void deleteUserApp(Long id) {
+	public void delete(Long id) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));
 		EhUserAppsDao dao = new EhUserAppsDao(context.configuration());
 		dao.deleteById(id);
+	}
 
+
+	@Override
+	public void deleteByUserId(Long userId, Byte locationType, Long locationTargetId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));
+		DeleteQuery<EhUserAppsRecord> query = context.deleteQuery(Tables.EH_USER_APPS);
+		query.addConditions(Tables.EH_USER_APPS.USER_ID.eq(userId));
+		query.addConditions(Tables.EH_USER_APPS.LOCATION_TYPE.eq(locationType));
+		query.addConditions(Tables.EH_USER_APPS.LOCATION_TARGET_ID.eq(locationTargetId));
+		query.execute();
 	}
 }

@@ -17,6 +17,22 @@ public class UpdateUserLaunchPadAppsCommand {
 
     private List<Long> appIds;
 
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public List<Long> getAppIds() {
+        return appIds;
+    }
+
+    public void setAppIds(List<Long> appIds) {
+        this.appIds = appIds;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -123,6 +123,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Autowired
 	private AppCategoryProvider appCategoryProvider;
 
+
+	@Autowired
+	private UserAppProvider userAppProvider;
+
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -1029,6 +1033,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
+
+		Long userId = UserContext.currentUserId();
+
+		userAppProvider.deleteByUserId(userId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), cmd.getCommunityId());
+
+		for (Long appId: cmd.getAppIds()){
+
+		}
+
 
 	}
 }
