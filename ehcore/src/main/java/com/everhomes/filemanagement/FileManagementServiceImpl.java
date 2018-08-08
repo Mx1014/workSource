@@ -24,6 +24,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -531,11 +532,85 @@ public class FileManagementServiceImpl implements  FileManagementService{
     
 	@Override
 	public void moveFileContent(MoveFileContentCommand cmd) {
-	
+        this.dbProvider.execute((TransactionStatus status) -> {
+            Map<String, Long> map = checkFilePath(cmd.getTargetPath(), cmd.getOwnerId());
+            Long catalogId = map.get("catalogId");
+            Long parentId = map.get("parentId");
 
+            for (Long contentId : cmd.getContentIds()) {
+                FileContent content = fileManagementProvider.findFileContentById(contentId);
+                if (null == content) {
+                    throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
+                            "content can not be null.");
+                }
+                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+                    content.setStatus(FileManagementStatus.VALID.getCode());
+                    fileManagementProvider.updateFileContent(content);
+                }
+                content.setParentId(parentId);
+                if (parentId != null) {
+                    FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
+                    content.setPath(parentContent.getPath() + "/" + contentId);
+                } else {
+                    content.setPath("/" + catalogId);
+                }
+                fileManagementProvider.updateFileContent(content);
+            }
+            return null;
+        });
 	}
 
-	@Override
+    private Map checkFilePath(String targetPath, Long ownerId) {
+        if (null == targetPath) {
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
+                    "target path can not be null.");
+        }
+        String[] pathArray = null;
+        if (targetPath.contains("/")) {
+            pathArray = targetPath.split("/");
+        }else{
+            pathArray = new String[]{targetPath};
+        }
+
+        return checkFilePath(pathArray, ownerId);
+
+    }
+
+    private Map checkFilePath(String[] pathArray, Long ownerId) {
+        Map<String, Long> result = new HashMap<>();
+        FileCatalog catalog = fileManagementProvider.findAllStatusFileCatalogByName(UserContext.getCurrentNamespaceId(), ownerId, pathArray[0]);
+        if (catalog.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+            catalog.setStatus(FileManagementStatus.VALID.getCode());
+            fileManagementProvider.updateFileCatalog(catalog);
+        }
+        result.put("catalogId", catalog.getId());
+        if (pathArray.length == 1) {
+            return null;
+        }
+        Long parentId = null;
+        for(int i = 1;i< pathArray.length;i++) {
+            FileContent content = fileManagementProvider.findAllStatusFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId, pathArray[i], null);
+            if (null != content) {
+                parentId = content.getId();
+                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+                    content.setStatus(FileManagementStatus.VALID.getCode());
+                    fileManagementProvider.updateFileContent(content);
+                }
+            }else{
+                AddFileContentCommand cmd = new AddFileContentCommand();
+                cmd.setCatalogId(catalog.getId());
+                cmd.setContentName(pathArray[i]);
+                cmd.setContentType(FileContentType.FOLDER.getCode());
+                cmd.setParentId(parentId);
+                FileContentDTO dto = addFileContent(cmd);
+                parentId = dto.getId();
+            }
+        }
+        result.put("parentId", parentId);
+        return result;
+    }
+
+    @Override
 	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
 	
 		return new GetFileIconResponse();
