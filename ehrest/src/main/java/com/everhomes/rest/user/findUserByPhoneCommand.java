@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *         <li>phone:手机号</li>
  *         </ul>
  */
-public class findUserByPhonesCommand {
+public class findUserByPhoneCommand {
     private Integer namespaceId;
     private String phone ;
     
