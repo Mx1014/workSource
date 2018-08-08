@@ -28,7 +28,7 @@ CREATE TABLE `eh_user_apps` (
   `user_id` bigint(20) NOT NULL,
   `app_id` bigint(20) NOT NULL,
   `location_type` tinyint(4) DEFAULT NULL COMMENT '位置信息，参考枚举ServiceModuleLocationType',
-  `location_target_id` int(11) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
+  `location_target_id` bigint(20) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
   `order` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `u_eh_user_app_user_id` (`user_id`)

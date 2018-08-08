@@ -10,9 +10,9 @@ public interface UserAppProvider {
 
 	void updateUserApp(UserApp userApp);
 
-	ServiceModuleApp findUserAppById(Long id);
+	UserApp findUserAppById(Long id);
 
-	List<ServiceModuleApp> listUserApps(Integer namespaceId, Long versionId, Long moduleId);
+	List<UserApp> listUserApps(Long userId, Byte locationType, Long locationTargetId);
 
 	void deleteUserApp(Long id);
 }
