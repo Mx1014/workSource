@@ -37,13 +37,13 @@ public class CreateApartmentCommand {
 	private Byte decorateStatus;
 	private String orientation;
 	private Double freeArea;
-	private Integer apartmentFloor;
+	private String apartmentFloor;
 	
-	public Integer getApartmentFloor() {
+	public String getApartmentFloor() {
 		return apartmentFloor;
 	}
 
-	public void setApartmentFloor(Integer apartmentFloor) {
+	public void setApartmentFloor(String apartmentFloor) {
 		this.apartmentFloor = apartmentFloor;
 	}
 

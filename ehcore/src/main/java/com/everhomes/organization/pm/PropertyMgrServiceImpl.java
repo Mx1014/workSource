@@ -3202,12 +3202,39 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				filterEdResult.remove(dto);
                 continue;
 			}
-			//按面积筛选
+			//按建筑面积筛选
 			if (cmd.getAreaSizeFrom() != null && dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
 				filterEdResult.remove(dto);
                 continue;
 			}
 			if (cmd.getAreaSizeTo() != null && dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			//按在租面积筛选
+			if (cmd.getRentAreaFrom() != null && dto.getRentArea().doubleValue() < cmd.getRentAreaFrom().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			if (cmd.getRentAreaTo() != null && dto.getRentArea().doubleValue() > cmd.getRentAreaTo().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			//按收费面积筛选
+			if (cmd.getChargeAreaFrom() != null && dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			if (cmd.getChargeAreaTo() != null && dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			//按可招租面积筛选
+			if (cmd.getFreeAreaFrom() != null && dto.getFreeArea().doubleValue() < cmd.getFreeAreaFrom().doubleValue()) {
+				filterEdResult.remove(dto);
+                continue;
+			}
+			if (cmd.getFreeAreaTo() != null && dto.getFreeArea().doubleValue() > cmd.getFreeAreaTo().doubleValue()) {
 				filterEdResult.remove(dto);
                 continue;
 			}

@@ -3263,6 +3263,33 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				filterData.remove(dto);
                 continue;
 			}
+			//按在租面积筛选
+			if (cmd.getRentAreaFrom() != null && dto.getRentArea().doubleValue() < cmd.getRentAreaFrom().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			if (cmd.getRentAreaTo() != null && dto.getRentArea().doubleValue() > cmd.getRentAreaTo().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			//按收费面积筛选
+			if (cmd.getChargeAreaFrom() != null && dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			if (cmd.getChargeAreaTo() != null && dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			//按可招租面积筛选
+			if (cmd.getFreeAreaFrom() != null && dto.getFreeArea().doubleValue() < cmd.getFreeAreaFrom().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			if (cmd.getFreeAreaTo() != null && dto.getFreeArea().doubleValue() > cmd.getFreeAreaTo().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
 		}
 		return filterData;
 	}	

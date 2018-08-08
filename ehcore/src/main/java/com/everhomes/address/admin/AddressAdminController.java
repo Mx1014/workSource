@@ -151,7 +151,7 @@ public class AddressAdminController extends ControllerBase {
      * @param files 上传的文件
      * @return 上传的结果
      */
-    @RequestMapping(value="exportApartmentsInBuilding", method = RequestMethod.POST)
+    @RequestMapping(value="exportApartmentsInBuilding")
     @RestReturn(value=String.class)
     public RestResponse exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse) {
     	addressService.exportApartmentsInBuilding(cmd,httpServletResponse);
