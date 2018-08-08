@@ -43,6 +43,8 @@ import com.everhomes.util.StringHelper;
  * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
  * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
  * <li>siteItems: 付费物资</li>
+ * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
+ * <li>remark: 备注显示文案</li>
  * </ul>
  */
 public class AddDefaultRuleAdminCommand {
@@ -58,11 +60,7 @@ public class AddDefaultRuleAdminCommand {
 
 	@NotNull
 	private Long resourceTypeId;
-	//	private Byte exclusiveFlag;
-//	private Double unit;
-//	private Byte autoAssign;
-//	private Byte multiUnit;
-//	private Double siteCounts;
+
 
 	private Byte needPay;
 	private Byte multiTimeInterval;
@@ -70,7 +68,6 @@ public class AddDefaultRuleAdminCommand {
 	private List<AttachmentConfigDTO> attachments;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	//	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
@@ -80,9 +77,7 @@ public class AddDefaultRuleAdminCommand {
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
-//	@ItemType(SiteNumberDTO.class)
-//	private List<SiteNumberDTO> siteNumbers;
-	//	private Long cancelTime;
+
 	private Byte refundFlag;
 	private Integer refundRatio;
 
@@ -118,6 +113,9 @@ public class AddDefaultRuleAdminCommand {
 	private List<RentalOrderRuleDTO> overtimeStrategies;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+
+	private Byte remarkFlag;
+	private String remark;
 
 	@Override
 	public String toString() {
@@ -394,5 +392,21 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
 		this.openTimes = openTimes;
+	}
+
+	public Byte getRemarkFlag() {
+		return remarkFlag;
+	}
+
+	public void setRemarkFlag(Byte remarkFlag) {
+		this.remarkFlag = remarkFlag;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 }

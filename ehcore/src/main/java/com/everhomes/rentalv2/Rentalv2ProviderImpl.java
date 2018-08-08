@@ -1304,16 +1304,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Orders.class,
 				bill.getId());
 	}
-//	@Override
-//	public void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap) {
-//		assert (ordeMap.getId() == null);
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-//		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
-//
-//		dao.update(ordeMap);
-//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
-//				ordeMap.getId());
-//	}
+
 
 	@Override
 	public Long createRentalBillAttachment(RentalOrderAttachment rba) {
@@ -2668,5 +2659,48 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (record == null)
 			return  null;
 		return record.getValue("close_date",String.class);
+	}
+
+	@Override
+	public void createRefundTip(RentalRefundTip tip) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2RefundTips.class));
+		tip.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2RefundTipsRecord record = ConvertHelper.convert(tip,
+				EhRentalv2RefundTipsRecord.class);
+		InsertQuery<EhRentalv2RefundTipsRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_REFUND_TIPS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2RefundTips.class,
+				null);
+	}
+
+	@Override
+	public void deleteRefundTip(String resourceType, String sourceType, Long sourceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		context.delete(Tables.EH_RENTALV2_REFUND_TIPS)
+				.where(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_TYPE.eq(sourceType))
+				.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_ID.eq(sourceId))
+				.and(Tables.EH_RENTALV2_ORDER_RULES.RESOURCE_TYPE.eq(resourceType))
+				.execute();
+	}
+
+	@Override
+	public List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId, Byte refundStrategy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_REFUND_TIPS);
+		Condition condition = Tables.EH_RENTALV2_REFUND_TIPS.RESOURCE_TYPE.eq(resourceType);
+		if (!StringUtils.isBlank(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_ID.eq(sourceId));
+		if (refundStrategy != null)
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.REFUND_STRATEGY.eq(refundStrategy));
+		step.where(condition);
+
+		return step.fetch().map(r-> ConvertHelper.convert(r,RentalRefundTip.class));
 	}
 }

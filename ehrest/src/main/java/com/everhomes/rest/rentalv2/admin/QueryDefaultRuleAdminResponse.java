@@ -53,6 +53,8 @@ import javax.validation.constraints.NotNull;
  * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
  * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
  * <li>siteItems: 付费物资</li>
+ * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
+ * <li>remark: 备注显示文案</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminResponse {
@@ -114,29 +116,6 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(PricePackageDTO.class)
 	private List<PricePackageDTO> pricePackages;
 
-//	@Deprecated
-//	private Byte rentalType;
-//	@Deprecated
-//	private BigDecimal workdayPrice;
-//	@Deprecated
-//	private BigDecimal weekendPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWeekendPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWeekendPrice;
-//	@Deprecated
-//	private Byte discountType;
-//	@Deprecated
-//	private java.math.BigDecimal fullPrice;
-//	@Deprecated
-//	private java.math.BigDecimal cutPrice;
-//	@Deprecated
-//    private Double discountRatio;
-
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 	private Byte refundStrategy;
@@ -147,6 +126,9 @@ public class QueryDefaultRuleAdminResponse {
 	private List<RentalOrderRuleDTO> overtimeStrategies;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+
+	private Byte remarkFlag;
+	private String remark;
 
 
 	@Override
@@ -408,5 +390,21 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
 		this.openTimes = openTimes;
+	}
+
+	public Byte getRemarkFlag() {
+		return remarkFlag;
+	}
+
+	public void setRemarkFlag(Byte remarkFlag) {
+		this.remarkFlag = remarkFlag;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 }

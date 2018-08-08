@@ -247,4 +247,12 @@ public interface Rentalv2Provider {
 	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
 															 Long startTime, Long endTime,Integer order);
 	String getHolidayCloseDate (Byte holidayType);
+
+	void createRefundTip(RentalRefundTip tip);
+
+	void deleteRefundTip(String resourceType, String sourceType, Long sourceId);
+
+	List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId,Byte refundStrategy);
+
+
 }

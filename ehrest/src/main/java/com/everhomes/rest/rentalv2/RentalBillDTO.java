@@ -125,6 +125,8 @@ public class RentalBillDTO {
 	private List<Long> specialCloseDate;
 	private String refundTip;
 	private String openTime;
+	private Byte remarkFlag;
+	private String remark;
 	private Long appId;
 
 	@Override
@@ -589,5 +591,21 @@ public class RentalBillDTO {
 
 	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
 		this.fileUris = fileUris;
+	}
+
+	public Byte getRemarkFlag() {
+		return remarkFlag;
+	}
+
+	public void setRemarkFlag(Byte remarkFlag) {
+		this.remarkFlag = remarkFlag;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 }
