@@ -10,8 +10,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  * */
 public class ListGeneralApprovalResponse {
+
 	@ItemType(GeneralApprovalDTO.class)
-	List<GeneralApprovalDTO> dtos;
+	private List<GeneralApprovalDTO> dtos;
 
 	public List<GeneralApprovalDTO> getDtos() {
 		return dtos;

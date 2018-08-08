@@ -14,7 +14,10 @@ import com.everhomes.util.StringHelper;
  * <li>userId: 用户id</li>   
  * <li>description: 备注 </li>   
  * <li>defaultOrder: 排序字段</li>   
- * <li>avatar: 头像</li>   
+ * <li>avatar: 头像</li> 
+ * <li>currentPMId: 当前管理公司ID</li>
+ * <li>currentProjectId: 当前选中项目Id</li>
+ * <li>appId: 应用id</li>  
  * </ul>
  */
 public class AddHotlineCommand { 
@@ -27,6 +30,9 @@ public class AddHotlineCommand {
     private Long userId;
     private String description;
     private Integer defaultOrder;
+	private Long currentPMId;
+	private Long currentProjectId;
+	private Long appId;
 
 	@Override
     public String toString() {
@@ -86,6 +92,30 @@ public class AddHotlineCommand {
 	}
 	public void setDefaultOrder(Integer defaultOrder) {
 		this.defaultOrder = defaultOrder;
+	}
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
+	public Long getCurrentProjectId() {
+		return currentProjectId;
+	}
+
+	public void setCurrentProjectId(Long currentProjectId) {
+		this.currentProjectId = currentProjectId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	} 
     
     

@@ -9,21 +9,21 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>flowCaseId: 预先申请的flowCaseId, 可以使用flowService#getNextFlowCaseId申请，推荐设置这个值</li>
- *     <li>flowMainId: enabled flow id</li>
+ *     <li>flowMainId: enabled flow main id</li>
  *     <li>flowVersion: flow 版本</li>
  *     <li>applyUserId: 申请人id</li>
  *     <li>referId: 业务对象id</li>
  *     <li>referType: 业务对象类型, 各业务唯一, 推荐使用{@link com.everhomes.rest.common.EntityType}</li>
  *     <li>projectId: 小区id</li>
  *     <li>projectType: 小区类型 {@link com.everhomes.rest.common.EntityType#COMMUNITY}</li>
- *     <li>projectIdA: 拓展项目类型 id</li>
- *     <li>projectTypeA: 拓展项目类型 type</li>
+ *     <li>projectIdA: 拓展项目类型 id, 如子项目id, 非必填</li>
+ *     <li>projectTypeA: 拓展项目类型 type, 如子项目类型, 非必填</li>
  *     <li>content: 列表展示内容</li>
  *     <li>title: 标题</li>
  *     <li>currentOrganizationId: 用户当前场景下的公司id,推荐传这个值，要不然就无法设置工作流的某些功能</li>
- *     <li>serviceType: 业务类型</li>
- *     <li>routeUri: 路由</li>
- *     <li>additionalFieldDTO: additionalFieldDTO {@link com.everhomes.rest.flow.FlowCaseAdditionalFieldDTO}</li>
+ *     <li>serviceType: 业务类型, 在App上搜索的时候会用到的</li>
+ *     <li>routeUri: 路由, 如果在任务列表需要自定义跳转的话,设置此路由,如果不需要就不用设置</li>
+ *     <li>additionalFieldDTO: 额外字段,更加特殊的情况需要用到这个,一般不需要 {@link com.everhomes.rest.flow.FlowCaseAdditionalFieldDTO}</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {

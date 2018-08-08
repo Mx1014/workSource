@@ -152,25 +152,12 @@ public class WorkReportProviderImpl implements WorkReportProvider {
 
     @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#reportId")})
     @Override
-    public void deleteOddWorkReportDetailScope(Integer namespaceId, Long reportId, List<Long> sourceIds) {
+    public void deleteOddWorkReportScope(Integer namespaceId, Long reportId, String sourceType, List<Long> sourceIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportScopeMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType .MEMBERDETAIL.getCode()));
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.notIn(sourceIds));
-        query.execute();
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
-    }
-
-    @Caching(evict = {@CacheEvict(value = "listWorkReportScopesMap", key = "#reportId")})
-    @Override
-    public void deleteOddWorkReportOrganizationScope(Integer namespaceId, Long reportId, List<Long> sourceIds){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        DeleteQuery<EhWorkReportScopeMapRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_TYPE.eq(UniongroupTargetType .ORGANIZATION.getCode()));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_TYPE.eq(sourceType));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.notIn(sourceIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);

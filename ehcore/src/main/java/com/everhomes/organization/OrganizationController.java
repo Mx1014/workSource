@@ -7,14 +7,19 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
+import com.everhomes.rest.enterprise.GetAdminTypeCommand;
+import com.everhomes.rest.enterprise.GetAdminTypeResponse;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
+import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -24,9 +29,11 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -231,6 +239,7 @@ public class OrganizationController extends ControllerBase {
     //checked
     @RequestMapping("queryOrgTopicsByCategory")
     @RestReturn(value = ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
 
 		/*是PM_ADMIN的场景下*/
@@ -508,6 +517,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("getOrgTopic")
     @RestReturn(value = PostDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getOrgTopic(GetTopicCommand cmd) {
         PostDTO postDto = organizationService.getTopic(cmd);
 
@@ -864,6 +874,20 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/applyForEnterpriseContactNew</b>
+     * <p>新申请加入企业</p>
+     */
+    @RequestMapping("applyForEnterpriseContactNew")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse applyForEnterpriseContactNew(@Valid ApplyForEnterpriseContactNewCommand cmd) {
+        OrganizationDTO dto = organizationService.applyForEnterpriseContactNew(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/verifyEnterpriseContact</b>
      * <p>通过点击邮箱认证通过认证申请</p>
      *
@@ -951,6 +975,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listOrganizationTopics")
     @RestReturn(value = ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
         RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1042,9 +1067,9 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
      * <b>URL: /org/listOrganizationContacts</b>
-     * <p>通讯录</p>
+     * <p>通讯录（停用 at 2018/04/06）</p>
      */
     @RequestMapping("listOrganizationContacts")
     @RestReturn(value = ListOrganizationContactCommandResponse.class)
@@ -1573,10 +1598,38 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listPMOrganizations")
     @RestReturn(value = ListPMOrganizationsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
         RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/getAdminType</b>
+     * <p>更改超级管理员(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getAdminType")
+    @RestReturn(value = GetAdminTypeResponse.class)
+    public RestResponse getAdminType(GetAdminTypeCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
+        adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+        try {
+            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+            adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        } catch(Exception ex) {
+            //nothing
+            
+        }
+        RestResponse response = new RestResponse(adminType);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
 }

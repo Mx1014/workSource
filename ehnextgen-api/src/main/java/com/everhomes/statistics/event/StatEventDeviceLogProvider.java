@@ -13,4 +13,6 @@ public interface StatEventDeviceLogProvider {
 
 	// List<StatEventDeviceLog> listStatEventDeviceLog();
 
+	Long findUidByDeviceId(String deviceId);
+
 }

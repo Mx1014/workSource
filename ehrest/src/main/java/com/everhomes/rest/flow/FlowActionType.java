@@ -8,7 +8,7 @@ package com.everhomes.rest.flow;
  * <li>tick_message: 定时发多次消息的动作</li>
  * <li>tick_sms: 定时发多次短信的动作</li>
  * <li>track: 跟踪动作</li>
- * <li>enter_script: 前置脚本</li>
+ * <li>enter_script: 脚本</li>
  * <li></li>
  * <li></li>
  *

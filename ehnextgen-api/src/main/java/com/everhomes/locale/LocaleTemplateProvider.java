@@ -29,4 +29,6 @@ public interface LocaleTemplateProvider {
 	List<LocaleTemplate> listLocaleTemplatesByScope(ListingLocator locator,
 			Integer namespaceId, String scope, String locale, String keyword,
 			int count);
+
+    List<LocaleTemplate> findLocaleTemplateByCode(String ... scopes);
 }

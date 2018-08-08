@@ -1,5 +1,7 @@
 package com.everhomes.archives;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import org.jooq.Condition;
 
 import java.sql.Date;
@@ -12,6 +14,8 @@ public interface ArchivesProvider {
     void updateArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
 
     void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
+
+    void deleteArchivesStickyContactsByDetailIds(Integer namespaceId, List<Long> detailIds);
 
     ArchivesStickyContacts findArchivesStickyContactsById(Long id);
 
@@ -33,21 +37,23 @@ public interface ArchivesProvider {
 
     List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
 
-    void createArchivesForm(ArchivesFroms form);
+    void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    void updateArchivesForm(ArchivesFroms form);
+    void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType);
 
-    ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
+    void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    void createArchivesConfigurations(ArchivesConfigurations configuration);
+    ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
 
-    void updateArchivesConfigurations(ArchivesConfigurations configuration);
+    ArchivesOperationalConfiguration findPendingConfigurationByDetailId(Integer namespaceId, Long detailId, Byte operationType);
 
-    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+    List<ArchivesOperationalConfiguration> listPendingConfigurationsInDetailIds(Integer namespaceId, List<Long> detailIds, Byte operationType);
 
-    void createArchivesLogs(ArchivesLogs log);
+    List<ArchivesOperationalConfiguration> listPendingConfigurations(Date date);
 
-    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
+    void createOperationalLog(ArchivesOperationalLog log);
+
+    List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
 
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
 
@@ -56,4 +62,18 @@ public interface ArchivesProvider {
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
+
+    /* 同步数据接口 start */
+    List<OrganizationMemberDetails> listDetailsWithoutCheckInTime();
+
+    OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId);
+
+    List<Long> listDismissalDetailIds();
+
+    List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds);
+
+    OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId);
+
+    /* 同步数据接口 end */
+
 }

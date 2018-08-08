@@ -15,22 +15,25 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
-import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
+import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
+import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
+import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
-import com.everhomes.rest.pmsy.PmsyBillsResponse;
-import com.everhomes.rest.pmsy.AddressDTO;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.ListResourceCommand;
-import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
+import com.everhomes.util.RequireAuthentication;
 
 @RestController
 @RequestMapping("/pmsy")
@@ -89,7 +92,7 @@ public class PmsyController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmsy/findMonthlyPmBill</b>
+	 * <b>URL: /pmsy/getPmsyBills</b>
 	 * <p>查询单月物业缴费单</p>
 	 */
 	@RequestMapping(value="getPmsyBills")
@@ -147,6 +150,22 @@ public class PmsyController extends ControllerBase {
 	}
     
     /**
+     * <b>URL: /pmsy/createPmBillOrderV2</b>
+     * <p>创建订单</p>
+     */
+    @RequestMapping("createPmBillOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createPmBillOrderV2(@Valid CreatePmsyBillOrderCommand cmd) {
+        PreOrderDTO dto = pmsyService.createPmBillOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    
+    
+    /**
      * <b>URL: /pmsy/setPmProperty</b>
      * <p>设置提示信息和手机号</p>
      */
@@ -175,4 +194,18 @@ public class PmsyController extends ControllerBase {
 		return response;
 	}
 
+    /**
+	 * <b>URL: /pmsy/payNotify</b>
+	 * <p>支付模块回调接口，通知支付结果</p>
+	 */
+	@RequestMapping("payNotify")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+		pmsyService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

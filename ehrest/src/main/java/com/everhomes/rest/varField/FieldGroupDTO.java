@@ -13,7 +13,8 @@ import java.util.List;
  *     <li>moduleName: 组所属的模块类型名</li>
  *     <li>groupId: 在系统组里的id</li>
  *     <li>groupPath: 在系统组里的path</li>
- *     <li>groupDisplayName: 组名</li>
+ *     <li>groupDisplayName: 组显示名</li>
+ *     <li>name: 组名</li>
  *     <li>childrenGroup: 子字段组 参考{@link FieldGroupDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
@@ -34,6 +35,8 @@ public class FieldGroupDTO {
     private String groupDisplayName;
 
     private Integer defaultOrder;
+
+    private String name;
 
     @ItemType(FieldGroupDTO.class)
     private List<FieldGroupDTO> childrenGroup;
@@ -108,6 +111,15 @@ public class FieldGroupDTO {
 
     public void setChildrenGroup(List<FieldGroupDTO> childrenGroup) {
         this.childrenGroup = childrenGroup;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

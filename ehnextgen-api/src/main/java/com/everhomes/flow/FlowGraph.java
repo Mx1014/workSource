@@ -63,10 +63,8 @@ public class FlowGraph implements Serializable {
             if (btn.getSms() != null) {
                 idToAction.put(btn.getSms().getFlowAction().getId(), btn.getSms());
             }
-            if (btn.getScripts() != null) {
-                for (FlowGraphAction action : btn.getScripts()) {
-                    idToAction.put(action.getFlowAction().getId(), action);
-                }
+            if (btn.getScript() != null) {
+                idToAction.put(btn.getScript().getFlowAction().getId(), btn.getScript());
             }
 
             idToButton.put(btn.getFlowButton().getId(), btn);

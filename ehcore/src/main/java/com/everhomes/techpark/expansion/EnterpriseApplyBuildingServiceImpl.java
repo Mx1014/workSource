@@ -355,6 +355,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}).collect(Collectors.toList());
 
 		enterpriseApplyBuildingProvider.createLeaseBuildings(leaseBuildings);
+
+		leaseBuildings = existLeaseBuildings.stream().filter(r->
+		buildings.stream().noneMatch(e->e.getId().equals(r.getBuildingId()))).collect(Collectors.toList());
+		if (leaseBuildings != null)
+			for (LeaseBuilding leaseBuilding:leaseBuildings){
+				leaseBuilding.setStatus(LeaseBulidingStatus.INACTIVE.getCode());
+				enterpriseApplyBuildingProvider.updateLeaseBuilding(leaseBuilding);
+			}
 	}
 
 	@Override

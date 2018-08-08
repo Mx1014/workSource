@@ -46,4 +46,6 @@ public interface FlowCaseProvider {
     Integer countApplierFlowCases(SearchFlowCaseCommand cmd);
 
     Integer countAdminFlowCases(SearchFlowCaseCommand cmd);
+
+    List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId);
 }

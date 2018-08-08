@@ -1,12 +1,9 @@
 package com.everhomes.servicehotline;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,16 +18,10 @@ import com.everhomes.util.RequireAuthentication;
 @RestController
 @RequestMapping("/hotline")
 public class ServiceHotlineController extends ControllerBase {
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ServiceHotlineController.class);
 
-	private static final String DEFAULT_SORT = "default_order";
 
 	@Autowired
 	private HotlineService hotlineService;
-	@Autowired
-	private UserService userService;
- 
 
 	/**
 	 * <b>URL: /hotline/getHotlineTopic</b>
@@ -60,6 +51,23 @@ public class ServiceHotlineController extends ControllerBase {
 	@RestReturn(value = GetHotlineListResponse.class)
 	public RestResponse getHotlineList(@Valid GetHotlineListCommand cmd) {
 		GetHotlineListResponse res =hotlineService.getHotlineList(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	/**
+	 * <b>URL: /hotline/getHotlineListAdmin</b>
+	 * <p>
+	 * 获取热线列表(后台)
+	 * </p>
+	 */
+	@RequestMapping("getHotlineListAdmin")
+	@RestReturn(value = GetHotlineListResponse.class)
+	public RestResponse getHotlineListAdmin(@Valid GetHotlineListCommand cmd) {
+		GetHotlineListResponse res =hotlineService.getHotlineListAdmin(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -171,4 +179,59 @@ public class ServiceHotlineController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /hotline/getChatGroupList</b>
+     * <p>获取所有会话列表</p>
+     * <p>根据条件获取会话列表。 相同的两个人的会话定义为一个会话。</p>
+     * <p>例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话</p>
+	 * <p>客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话</p>
+	 * <p>客服A与用户C的无聊天记录，不属于会话。</p>
+	 */
+	@RequestMapping("getChatGroupList")
+	@RestReturn(value=GetChatGroupListResponse.class)
+	public RestResponse getChatGroupList(@Valid GetChatGroupListCommand cmd) {
+		GetChatGroupListResponse chatGroup = this.hotlineService.getChatGroupList(cmd);
+		RestResponse response =  new RestResponse(chatGroup);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /hotline/getChatRecordList</b>
+     * <p>获取客服与用户的聊天记录</p>
+	 */
+	@RequestMapping("getChatRecordList")
+	@RestReturn(value=GetChatRecordListResponse.class)
+	public RestResponse getChatRecordList(@Valid GetChatRecordListCommand cmd) {
+		GetChatRecordListResponse chatRecordList = this.hotlineService.getChatRecordList(cmd);
+		RestResponse response =  new RestResponse(chatRecordList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	/**
+	 * <b>URL: /hotline/exportChatRecordList</b>
+     * <p>导出客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportChatRecordList")
+    @RestReturn(value = String.class)
+    public RestResponse exportChatRecordList(GetChatRecordListCommand cmd,  HttpServletResponse httpResponse){
+    	hotlineService.exportChatRecordList(cmd, httpResponse);
+    	 return new RestResponse();
+    }
+    
+	/**
+	 * <b>URL: /hotline/exportMultiChatRecordList</b>
+     * <p>导出客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportMultiChatRecordList")
+    @RestReturn(value = String.class)
+    public RestResponse exportMultiChatRecordList(GetChatGroupListCommand cmd,  HttpServletResponse httpResponse){
+    	hotlineService.exportMultiChatRecordList(cmd, httpResponse);
+   	 return new RestResponse();
+    }
 }

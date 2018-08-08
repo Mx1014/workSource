@@ -14,35 +14,16 @@ import java.util.stream.Collectors;
  * 所有任务节点的当前处理人
  */
 @Component("flow-variable-hidden-button-msg-all-current-processors")
-public class FlowVarsHiddenUserRemindAllCurrProcessors implements FlowVariableUserResolver {
+public class FlowVarsHiddenUserRemindAllCurrProcessors extends FlowVarsButtonMsgCurrentProcessors {
 
-	@Autowired
-	FlowEventLogProvider flowEventLogProvider;
-	
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx,
 			Map<String, Long> processedEntities, FlowEntityType fromEntity,
 			Long entityId, FlowUserSelection userSelection, int loopCnt) {
 
-        List<Long> users = new ArrayList<Long>();
-
+        List<Long> users = new ArrayList<>();
         for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
-            if (ctx.getCurrentNode() == null) {
-                continue;
-            }
-            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
-                    flowCaseState.getCurrentNode().getFlowNode().getId(),
-                    flowCaseState.getFlowCase().getId(),
-                    flowCaseState.getFlowCase().getStepCount()
-            );
-
-            if(logs != null && logs.size() > 0) {
-                for(FlowEventLog log : logs) {
-                    if(log.getFlowUserId() != null && log.getFlowUserId() > 0 && log.getStepCount() > -1) {
-                        users.add(log.getFlowUserId());
-                    }
-                }
-            }
+            users.addAll(super.variableUserResolve(flowCaseState, processedEntities, fromEntity, entityId, userSelection, loopCnt));
         }
 		return users.stream().distinct().collect(Collectors.toList());
 	}

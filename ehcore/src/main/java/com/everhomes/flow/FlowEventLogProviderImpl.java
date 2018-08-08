@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class FlowEventLogProviderImpl implements FlowEventLogProvider {
@@ -189,9 +190,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
-            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(
-                    FlowCaseStatus.PROCESS.getCode())
-            );
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
+                    FlowCaseStatus.PROCESS.getCode(), FlowCaseStatus.SUSPEND.getCode()));
             cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)) //step_cout must equal the same
@@ -201,6 +201,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
                     FlowCaseStatus.PROCESS.getCode(),
                     FlowCaseStatus.FINISHED.getCode(),
+                    FlowCaseStatus.SUSPEND.getCode(),
                     FlowCaseStatus.ABSORTED.getCode())
             );
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
@@ -209,6 +210,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
             cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
             cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(
+                    FlowCaseStatus.SUSPEND.getCode(),
                     FlowCaseStatus.PROCESS.getCode(),
                     FlowCaseStatus.FINISHED.getCode(),
                     FlowCaseStatus.ABSORTED.getCode())
@@ -412,7 +414,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
      *  节点的具体日志跟踪信息
      */
     @Override
-    public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes) {
+    public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, Set<FlowUserType> flowUserTypes) {
     	return this.queryFlowEventLogs(new ListingLocator(), 100, (locator, query) -> {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
@@ -434,9 +436,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                         userTypeCondition = userTypeCondition.or(FlowEventCustomField.TRACKER_PROCESSOR.getField().eq(1L));
                     }
                 }
-                if (userTypeCondition != null) {
-                    query.addConditions(userTypeCondition);
-                }
+            }
+            if (userTypeCondition != null) {
+                query.addConditions(userTypeCondition);
             }
             return query;
         });
@@ -555,7 +557,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
-				
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 				return query;
 			}
     	});    	

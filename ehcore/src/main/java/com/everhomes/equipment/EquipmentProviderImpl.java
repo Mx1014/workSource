@@ -127,7 +127,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -170,8 +169,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Autowired
     EquipmentStandardMapSearcher equipmentStandardMapSearcher;
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         //  String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 */5 * * * ?");
@@ -187,7 +188,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             }
         }
     }
-
+    // 因为@Cacheable会生成Spring cglib 代理导致多次执行   by jiarui 20180612
+    /*@Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }*/
+    
     @Cacheable(value = "findEquipmentByIdAndOwner", key = "{#id, #ownerType, #ownerId}", unless = "#result == null")
     @Override
     public EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId) {
@@ -2258,8 +2266,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             mapPlans.put(plan.getId(), plan);
         }
 
-        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, planIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, planIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhEquipmentInspectionPlanGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP);
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_PLAN_GROUP_MAP.PLAN_ID.in(planIds));
             query.fetch().map((EhEquipmentInspectionPlanGroupMapRecord record) -> {
@@ -2504,7 +2515,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (inspectionCategoryId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(offset));
 
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
@@ -2544,8 +2554,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         // 只显示离创建时间三个月的任务
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
-        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.asc());
-        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(offset));
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+        // now just require inactive and waitingExcecute status by jiarui 20180630
+//        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.asc());
+//        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
         query.addLimit(pageSize);
 
         if (LOGGER.isDebugEnabled()) {
@@ -2631,12 +2644,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
                 .eq(EquipmentTaskStatus.CLOSE.getCode());
+
+        Condition completeInspectionTask = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS
+                .in(EquipmentTaskStatus.CLOSE.getCode(),EquipmentTaskStatus.QUALIFIED.getCode());
         final Field<Byte> completeInspectionWaitingForApproval = DSL.decode()
                 .when(completeWaitingForApprovalCondition, EquipmentTaskStatus.CLOSE.getCode());
+        final Field<Byte> completeInspectionTasks = DSL.decode()
+                .when(completeInspectionTask, EquipmentTaskStatus.CLOSE.getCode());
 
         final Field<?>[] fields = {DSL.count().as("total"),
                 DSL.count(waitingForExecuting).as("waitingForExecuting"),
                 DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
+                DSL.count(completeInspectionTasks).as("completeInspectionTasks"),
                 DSL.count(delayInpsectionTasks).as("delayInpsectionTasks"),
                 DSL.count(reviewDelay).as("reviewDelay")};
 
@@ -2670,6 +2689,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.fetchAny().map((r) -> {
             resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
             resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+            resp.setCompleteInspectionTasks(r.getValue("completeInspectionTasks", Long.class));
             resp.setTotalTasks(r.getValue("total", Long.class));
             resp.setDelayInspection(r.getValue("delayInpsectionTasks", Long.class));
             resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));

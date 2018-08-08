@@ -48,11 +48,17 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
 //        }
         Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
-        Byte angetSwitch = pmTaskInstanceConfig.getAgentSwitch();
-        if(0 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
-        } else if (1 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+        Byte agentSwitch = pmTaskInstanceConfig.getAgentSwitch();
+        Byte feeModel = pmTaskInstanceConfig.getFeeModel();
+        if(null != taskCategoryId && null != agentSwitch){
+            if(0 == agentSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+            } else if (1 == agentSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+            }
+        }
+        if(null != taskCategoryId && null != feeModel){
+            configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
@@ -104,10 +110,10 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig){
 
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
-            JSONObject json = JSONObject.parseObject(instanceConfig);
-            String value = json.getString("taskCategoryId");
-            if(!StringUtils.isEmpty(value)){
-                return value;
+            PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
+            Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
+            if(null != taskCategoryId){
+                return String.valueOf(taskCategoryId);
             }
 //            else{
 //                String str = json.getString("url");
@@ -121,7 +127,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //            }
         }
 
-        return instanceConfig;
+        //edit by 马世亨
+        return null;
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){

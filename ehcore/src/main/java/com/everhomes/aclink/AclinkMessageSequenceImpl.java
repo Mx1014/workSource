@@ -5,6 +5,8 @@ import javax.annotation.PostConstruct;
 import net.greghaines.jesque.Job;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -13,7 +15,7 @@ import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.sequence.SequenceProvider;
 
 @Component
-public class AclinkMessageSequenceImpl implements AclinkMessageSequence {
+public class AclinkMessageSequenceImpl implements AclinkMessageSequence, ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private SequenceProvider sequenceProvider;
     
@@ -25,11 +27,20 @@ public class AclinkMessageSequenceImpl implements AclinkMessageSequence {
     
     private String queueName = "alcinkmessage";
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
     @Override
     public void pendingMessage(DoorMessage msg) {
         if(msg.getSeq() <= 0) {

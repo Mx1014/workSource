@@ -101,7 +101,9 @@ public class ForumProviderImpl implements ForumProvider {
     
     @Override
     public void createForum(Forum forum) {
-        long id = this.shardingProvider.allocShardableContentId(EhForums.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhForums.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhForums.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForums.class, id));
         
         EhForumsDao dao = new EhForumsDao(context.configuration());
@@ -207,18 +209,19 @@ public class ForumProviderImpl implements ForumProvider {
     public void createPost(Post post) {
         long startTime = System.currentTimeMillis();
         assert(post.getForumId() != null);
-        
-        long id = this.shardingProvider.allocShardableContentId(EhForumPosts.class).second();
+
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhForumPosts.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhForumPosts.class).second();
         long seq = sequenceProvider.getNextSequence(Constants.FORUM_MODIFY_SEQUENCE_DOMAIN_NAME);
         
         post.setId(id);
         post.setUuid(UUID.randomUUID().toString());
         post.setModifySeq(seq);
-        
-        if(post.getCreateTime() == null) {
-            Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
-            post.setCreateTime(ts);
-        }
+
+        //编辑后发布需要重新设置创建时间.
+        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+        post.setCreateTime(ts);
         if(post.getUpdateTime() == null) {
             post.setUpdateTime(post.getCreateTime());
         }
@@ -834,8 +837,11 @@ public class ForumProviderImpl implements ForumProvider {
             mapPosts.put(post.getId(), post);
         }
         
-        List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, postIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, postIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhForumAttachmentsRecord> query = context.selectQuery(Tables.EH_FORUM_ATTACHMENTS);
             query.addConditions(Tables.EH_FORUM_ATTACHMENTS.POST_ID.in(postIds));
             query.fetch().map((EhForumAttachmentsRecord record) -> {
@@ -1195,4 +1201,25 @@ public class ForumProviderImpl implements ForumProvider {
 
     }
 
- }
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#post.id"),
+            @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
+    @Override
+    public void updatePostAfterPublish(Post post) {
+        assert(post.getId() != 0);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, post.getId()));
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(post);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumAttachmentList", key="#postId")})
+    @Override
+    public void deleteAttachments(Long postId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_FORUM_ATTACHMENTS).where(Tables.EH_FORUM_ATTACHMENTS.POST_ID.eq(postId)).execute();
+    }
+
+}

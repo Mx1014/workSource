@@ -15,6 +15,8 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,6 +63,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     FlowCaseProvider flowCaseProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    UserService userService;
 
     void setCardStatus(ParkingLot parkingLot, long expireTime, ParkingCardDTO parkingCardDTO) {
         long now = System.currentTimeMillis();
@@ -282,7 +286,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
@@ -348,29 +352,45 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
             tempRow.createCell(3).setCellValue(order.getPayerPhone());
             tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
-            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
-                    order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
-                tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
-                tempRow.createCell(6).setCellValue(datetimeSF.format(order.getEndPeriod()));
-            }else{
-                tempRow.createCell(5).setCellValue("");
-                tempRow.createCell(6).setCellValue("");
+            tempRow.createCell(5).setCellValue("");
+            tempRow.createCell(6).setCellValue("");
+            if (order.getRechargeType()!=null &&
+                    order.getRechargeType().byteValue()==ParkingRechargeType.MONTHLY.getCode()) {
+                if(order.getStartPeriod()!=null) {
+                    tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                }
+                if(order.getEndPeriod()!=null) {
+                    tempRow.createCell(6).setCellValue(datetimeSF.format(order.getEndPeriod()));
+                }
             }
             tempRow.createCell(7).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
-            if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode()) &&
-                    order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
-                tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));
-                tempRow.createCell(9).setCellValue(datetimeSF.format(order.getEndPeriod()));
-                tempRow.createCell(10).setCellValue(order.getParkingTime());
-            }else{
-                tempRow.createCell(8).setCellValue("");
-                tempRow.createCell(9).setCellValue("");
-                tempRow.createCell(10).setCellValue("");
+            tempRow.createCell(8).setCellValue("");
+            tempRow.createCell(9).setCellValue("");
+            tempRow.createCell(10).setCellValue("");
+            if (order.getRechargeType()!=null &&
+                    order.getRechargeType().byteValue()==ParkingRechargeType.TEMPORARY.getCode()) {
+                if(order.getStartPeriod()!=null) {
+                    tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));
+                }
+                if(order.getEndPeriod()!=null) {
+                    tempRow.createCell(9).setCellValue(datetimeSF.format(order.getEndPeriod()));
+                }
+                if(order.getParkingTime()!=null) {
+                    tempRow.createCell(10).setCellValue(order.getParkingTime());
+                }
             }
             tempRow.createCell(11).setCellValue(String.valueOf(order.getPrice().doubleValue()));
+            tempRow.createCell(12).setCellValue(order.getOriginalPrice()==null?
+                    String.valueOf(order.getPrice().doubleValue())
+                    :String.valueOf(order.getOriginalPrice().doubleValue()));
             VendorType type = VendorType.fromCode(order.getPaidType());
-            tempRow.createCell(12).setCellValue(null==type?"":type.getDescribe());
-            tempRow.createCell(13).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+            tempRow.createCell(13).setCellValue(null==type?"":type.getDescribe());
+            ParkingRechargeType parkingRechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
+            tempRow.createCell(14).setCellValue(parkingRechargeType==null?"":parkingRechargeType.getDescribe());
+            ParkingRechargeOrderStatus orderStatus = ParkingRechargeOrderStatus.fromCode(order.getStatus());
+            tempRow.createCell(15).setCellValue(orderStatus==null?"":orderStatus.getDescription());
+            ParkingPaySourceType sourceType = ParkingPaySourceType.fromCode(order.getPaySource());
+            tempRow.createCell(16).setCellValue(sourceType==null?"":sourceType.getDesc());
         }
     }
     @Override

@@ -162,10 +162,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (EnterpriseNoticeContentType.fromCode(cmd.getContentType()) == null) {
             cmd.setContentType(EnterpriseNoticeContentType.TEXT.getCode());
         }
-        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
-        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
-        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
-        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH, true));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH, false));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE, true));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH, true));
         EnterpriseNotice sendEnterpriseNotice = dbProvider.execute((TransactionStatus status) -> {
             Integer namespaceId = UserContext.getCurrentNamespaceId();
             if (namespaceId == null) {
@@ -276,10 +276,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             }
             return null;
         }
-        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
-        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
-        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
-        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH, true));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH, false));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE, true));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH, true));
         dbProvider.execute((TransactionStatus status) -> {
             updateEnterpriseNotice.setTitle(cmd.getTitle());
             updateEnterpriseNotice.setSummary(cmd.getSummary());
@@ -327,6 +327,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         //  set the route
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
+        actionData.setOrganizationId(notice.getOwnerId());
         actionData.setBulletinId(notice.getId());
         actionData.setBulletinTitle(notice.getTitle());
         actionData.setShowType(EnterpriseNoticeShowType.SHOW.getCode());
@@ -416,7 +417,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         ListEnterpriseNoticeResponse response = new ListEnterpriseNoticeResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), namespaceId, offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(cmd.getOrganizationId()), namespaceId, offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -435,8 +436,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     /**
      * 发给自己的、发给本部门的或者发给上级部门的公告本人均可见
      */
-    private List<EnterpriseNoticeReceiver> parseCurrentReceivers() {
-        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+    private List<EnterpriseNoticeReceiver> parseCurrentReceivers(Long organizationId) {
+        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId(), organizationId);
         if (details == null || details.getId() == null) {
             return Collections.emptyList();
         }
@@ -504,8 +505,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     }
 
     @Override
-    public boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId) {
-        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers();
+    public boolean isNoticeSendToCurrentUser(Long organizationId, Long enterpriseNoticeId) {
+        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers(organizationId);
         if (CollectionUtils.isEmpty(currentReceivers)) {
             return false;
         }
@@ -529,11 +530,11 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     }
 
     // 当字符串超过最大限制时，将此截取到最大长度
-    private String splitLongString(String original, int maxLength) {
+    private String splitLongString(String original, int maxLength, boolean trim) {
         if (!StringUtils.hasText(original)) {
             return null;
         }
-        String newString = original.trim();
+        String newString = trim ? original.trim() : original;
         if (newString.length() <= maxLength) {
             return newString;
         }

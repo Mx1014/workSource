@@ -1,11 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.flow;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * <ul>
@@ -30,7 +28,7 @@ import java.util.List;
  *     <li>pushMessage: 发消息动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>pushSms: 发短信动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>tracker: 跟踪日志 {@link com.everhomes.rest.flow.FlowActionDTO}</li>
- *     <li>enterScripts: 内置脚本列表{@link com.everhomes.rest.flow.FlowActionDTO}</li>
+ *     <li>script: 脚本{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  * </ul>
  */
 public class FlowButtonDetailDTO {
@@ -58,9 +56,7 @@ public class FlowButtonDetailDTO {
     private FlowActionDTO pushMessage;
     private FlowActionDTO pushSms;
     private FlowActionDTO tracker;
-
-    @ItemType(FlowActionDTO.class)
-    private List<FlowActionDTO> enterScripts;
+    private FlowActionDTO script;
 
     public Byte getStatus() {
         return status;
@@ -88,6 +84,14 @@ public class FlowButtonDetailDTO {
 
     public Long getFlowMainId() {
         return flowMainId;
+    }
+
+    public FlowActionDTO getScript() {
+        return script;
+    }
+
+    public void setScript(FlowActionDTO script) {
+        this.script = script;
     }
 
     public void setFlowMainId(Long flowMainId) {
@@ -164,14 +168,6 @@ public class FlowButtonDetailDTO {
 
     public void setPushSms(FlowActionDTO pushSms) {
         this.pushSms = pushSms;
-    }
-
-    public List<FlowActionDTO> getEnterScripts() {
-        return enterScripts;
-    }
-
-    public void setEnterScripts(List<FlowActionDTO> enterScripts) {
-        this.enterScripts = enterScripts;
     }
 
     public Byte getNeedProcessor() {

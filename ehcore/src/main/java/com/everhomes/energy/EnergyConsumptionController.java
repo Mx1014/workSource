@@ -809,12 +809,22 @@ public class EnergyConsumptionController extends ControllerBase {
 
     /**
      * <p>测试远程读数</p>
-     * <b>URL: /energy/testAutoReadMeters</b>
+     * <b>URL: /energy/simulatingAutoReadMeters</b>
      */
     @RestReturn(String.class)
-    @RequestMapping("testAutoReadMeters")
-    public RestResponse testAutoReadMeters() {
-        energyConsumptionService.testAutoReading();
+    @RequestMapping("simulatingAutoReadMeters")
+    public RestResponse simulatingAutoReadMeters() {
+        energyConsumptionService.meterAutoReading(true);
+        return success();
+    }
+    /**
+     * <p>表记补充到月底时间差工单</p>
+     * <b>URL: /energy/addMeterPeriodTaskById</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("addMeterPeriodTaskById")
+    public RestResponse addMeterPeriodTaskById(UpdateEnergyMeterCommand cmd) {
+        energyConsumptionService.addMeterPeriodTaskById(cmd.getMeterId());
         return success();
     }
 }

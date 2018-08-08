@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>message: message</li>
  *     <li>sms: sms</li>
  *     <li>tracker: tracker</li>
- *     <li>scripts: scripts</li>
+ *     <li>script: script</li>
  * </ul>
  */
 public class FlowGraphButton implements Serializable {
@@ -22,45 +22,23 @@ public class FlowGraphButton implements Serializable {
     private FlowGraphAction message;
     private FlowGraphAction sms;
     private FlowGraphAction tracker;
-    private List<FlowGraphAction> scripts;
+    private FlowGraphAction script;
 
-    public void fireActions(FlowCaseState ctx) {
-        if (null != this.getMessage()) {
-            FlowActionStatus status = FlowActionStatus.fromCode(this.getMessage().getFlowAction().getStatus());
-            if (status == FlowActionStatus.ENABLED) {
-                this.getMessage().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (null != this.getRemindMsg()) {
-            FlowActionStatus status = FlowActionStatus.fromCode(this.getRemindMsg().getFlowAction().getStatus());
-            if (status == FlowActionStatus.ENABLED) {
-                this.getRemindMsg().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (null != this.getSms()) {
-            FlowActionStatus status = FlowActionStatus.fromCode(this.getSms().getFlowAction().getStatus());
-            if (status == FlowActionStatus.ENABLED) {
-                this.getSms().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (null != this.getTracker()) {
-            FlowActionStatus status = FlowActionStatus.fromCode(this.getTracker().getFlowAction().getStatus());
-            if (status == FlowActionStatus.ENABLED) {
-                this.getTracker().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (null != this.getScripts()) {
-            for (FlowGraphAction action : this.getScripts()) {
-                FlowActionStatus status = FlowActionStatus.fromCode(action.getFlowAction().getStatus());
-                if (status == FlowActionStatus.ENABLED) {
-                    action.fireAction(ctx, ctx.getCurrentEvent());
-                }
-            }
-        }
+    public void fireAction(FlowCaseState ctx) {
+        fireAction(ctx, this.getMessage());
+        fireAction(ctx, this.getRemindMsg());
+        fireAction(ctx, this.getSms());
+        fireAction(ctx, this.getTracker());
+        fireAction(ctx, this.getScript());
     }
 
-    public FlowGraphButton() {
-        scripts = new ArrayList<>();
+    private void fireAction(FlowCaseState ctx, FlowGraphAction action) {
+        if (action != null) {
+            Byte status = action.getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                action.fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
     }
 
     public FlowGraphAction getMessage() {
@@ -79,12 +57,12 @@ public class FlowGraphButton implements Serializable {
         this.sms = sms;
     }
 
-    public List<FlowGraphAction> getScripts() {
-        return scripts;
+    public FlowGraphAction getScript() {
+        return script;
     }
 
-    public void setScripts(List<FlowGraphAction> scripts) {
-        this.scripts = scripts;
+    public void setScript(FlowGraphAction script) {
+        this.script = script;
     }
 
     public FlowGraphAction getTracker() {

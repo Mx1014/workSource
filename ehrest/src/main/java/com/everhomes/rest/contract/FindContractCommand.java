@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: 合同id</li>
@@ -23,8 +25,18 @@ public class FindContractCommand {
     private Long partyAId;
 
     private Long organizationId;
+    
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
 
-    public FindContractCommand() {
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public FindContractCommand() {
     }
 
     public FindContractCommand(Long id, String contractNumber, Integer namespaceId, Long communityId, Long partyAId) {
@@ -81,5 +93,10 @@ public class FindContractCommand {
 
     public void setPartyAId(Long partyAId) {
         this.partyAId = partyAId;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

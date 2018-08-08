@@ -453,9 +453,12 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         	enterpriseIds.add(enterprise.getId());
         	mapEnterprises.put(enterprise.getId(), enterprise);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhEnterpriseAttachmentsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ATTACHMENTS);
             query.addConditions(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.in(enterpriseIds));
             query.fetch().map((EhEnterpriseAttachmentsRecord record) -> {
@@ -496,10 +499,12 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         	enterpriseIds.add(enterprise.getId());
         	mapEnterprises.put(enterprise.getId(), enterprise);
         }
-        
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
             query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.in(enterpriseIds));
             query.fetch().map((EhEnterpriseAddressesRecord record) -> {

@@ -15,6 +15,8 @@ import net.greghaines.jesque.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -65,7 +67,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
 @Component
-public class PromotionServiceImpl implements PromotionService, LocalBusSubscriber {
+public class PromotionServiceImpl implements PromotionService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddressMessageRoutingHandler.class);
     
     @Autowired
@@ -109,7 +111,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     
     private String queueName = "promotion-push";
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     void setup() {
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhOpPromotionActivities.class, null);
         localBus.subscribe(subcribeKey, this);
@@ -117,6 +121,13 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         
         workerPoolFactory.getWorkerPool().addQueue(queueName);
      }
+  
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
     
     @Override
     public void createPromotion(CreateOpPromotionCommand cmd) {

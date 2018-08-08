@@ -455,5 +455,57 @@ public class PunchController extends ControllerBase {
         return response;
     }
 
-    
+     
+	/**
+	 * <p>查看月报列表</p>
+	 * <b>URL: /techpark/punch/listPunchMonthReports</b>
+	 */
+	@RequestMapping("listPunchMonthReports")
+	@RestReturn(ListPunchMonthReportsResponse.class)
+	public RestResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd){
+		return new RestResponse(punchService.listPunchMonthReports(cmd));
+	}
+
+	/**
+	 * <p>刷新月报</p>
+	 * <b>URL: /techpark/punch/updateMonthReport</b>
+	 */
+	@RequestMapping("updateMonthReport")
+	@RestReturn(String.class)
+	public RestResponse updateMonthReport(UpdateMonthReportCommand cmd){
+		punchService.updateMonthReport(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>获取月报进度</p>
+	 * <b>URL: /techpark/punch/getMonthReportProcess</b>
+	 */
+	@RequestMapping("getMonthReportProcess")
+	@RestReturn(GetMonthReportProcessResponse.class)
+	public RestResponse getMonthReportProcess(GetMonthReportProcessCommand cmd){
+		return new RestResponse(punchService.getMonthReportProcess(cmd));
+	}
+
+	/**
+	 * <p>归档月报</p>
+	 * <b>URL: /techpark/punch/fileMonthReport</b>
+	 */
+	@RequestMapping("fileMonthReport")
+	@RestReturn(String.class)
+	public RestResponse fileMonthReport(FileMonthReportCommand cmd){
+		punchService.fileMonthReport(cmd);
+		return new RestResponse();
+	}
+	/**
+	 * <p>刷新月报-每月1日的模拟</p>
+	 * <b>URL: /techpark/punch/refreshMonthReport</b>
+	 */
+	@RequestMapping("refreshMonthReport")
+	@RestReturn(String.class)
+	public RestResponse refreshMonthReport(RefreshMonthReportCommand cmd){
+		punchService.refreshMonthReport(cmd.getMonth());
+		return new RestResponse();
+	}
+
 }

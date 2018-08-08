@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.DbProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
@@ -62,6 +63,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
 	@Autowired
 	private ActivityProivider activityProivider;
+	
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -240,7 +244,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Override
     public Post preProcessEmbeddedObject(Post post) {
-        Long id=shardingProvider.allocShardableContentId(EhActivities.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        Long id = this.dbProvider.allocPojoRecordId(EhActivities.class);
+        //Long id=shardingProvider.allocShardableContentId(EhActivities.class).second();
         post.setEmbeddedId(id);
         
         ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
@@ -259,7 +265,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
         
-        if(cmd.getTag() != null) {
+        if(StringUtils.isBlank(post.getTag()) && cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
 
@@ -350,7 +356,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
 		//产品要求：去除“官方活动”这个条件，对所有活动适应    add by yanjun 20170629
-        try {
+		//去除创建时间为开始时间之前一天这个设置 add by yanlong.liang 20180614
+/*        try {
         	if(null != cmd.getStartTime()){
         		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         		Date startTime= f.parse(cmd.getStartTime());
@@ -360,8 +367,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         	}
         	
         } catch (ParseException e) {
-        	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        }
+        }*/
+		post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         //发布活动的时候没有选择是否支持微信，则选择改与空间默认的， add by yanjun 20170627
         if(cmd.getWechatSignup() == null){

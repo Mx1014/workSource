@@ -20,6 +20,7 @@ public class OrganizationOwnerAddressDTO {
     private Long   addressId;
     private String livingStatus;
     private String authType;
+    private String livingDate;
 
     private Byte apartmentLivingStatus;
 
@@ -97,6 +98,14 @@ public class OrganizationOwnerAddressDTO {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getLivingDate() {
+        return livingDate;
+    }
+
+    public void setLivingDate(String livingDate) {
+        this.livingDate = livingDate;
     }
 
     @Override

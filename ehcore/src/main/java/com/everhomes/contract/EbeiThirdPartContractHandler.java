@@ -12,22 +12,37 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.SyncDataTask;
 import com.everhomes.customer.SyncDataTaskProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.openapi.*;
-import com.everhomes.organization.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ZjSyncdataBackup;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
-import com.everhomes.rest.contract.*;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.EbeiContract;
+import com.everhomes.rest.contract.EbeiContractRoomInfo;
+import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EbeiApartment;
+import com.everhomes.rest.customer.EbeiJsonEntity;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
@@ -40,7 +55,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -52,12 +66,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -302,7 +318,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
 
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
-
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
             return ;
@@ -367,15 +382,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
                 namespaceId, myContractList.size(), mergeContractList.size());
-        dbProvider.execute(s->{
-            syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
-            return true;
-        });
+        syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
 
-        if(mergeContractList != null && mergeContractList.size() > 0) {
-            List<String> ownerIdList = mergeContractList.stream().map(contract -> {
-                return contract.getOwnerId();
-            }).collect(Collectors.toList());
+        if (mergeContractList.size() > 0) {
+            List<String> ownerIdList = mergeContractList.stream().map(EbeiContract::getOwnerId).collect(Collectors.toList());
             String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
             getOwnerStatus(communityIdentifier, ownerIds);
         }
@@ -386,12 +396,15 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private void syncAllContracts(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList) {
         if (theirContractList != null) {
             for (EbeiContract ebeiContract : theirContractList) {
-                if("0".equals(ebeiContract.getState())) {
+                if ("0".equals(ebeiContract.getState())) {
                     if (myContractList != null) {
                         for (Contract contract : myContractList) {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
-                                deleteContract(contract);
+//                                dbProvider.execute((s) -> {
+                                    deleteContract(contract);
+//                                    return true;
+//                                });
                             }
                         }
                     }
@@ -402,20 +415,28 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
                                 notdeal = false;
-                                updateContract(contract, communityId, ebeiContract);
+//                                dbProvider.execute((s) -> {
+                                    updateContract(contract, communityId, ebeiContract);
+//                                    return true;
+//                                });
                             }
                         }
                     }
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber());
+                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber(), null);
                         if (contract == null) {
-                            insertContract(NAMESPACE_ID, communityId, ebeiContract);
+//                            dbProvider.execute((s) -> {
+                                insertContract(NAMESPACE_ID, communityId, ebeiContract);
+//                                return true;
+//                            });
                         }else {
+//                            dbProvider.execute((s) -> {
                             updateContract(contract, communityId, ebeiContract);
+//                                return true;
+//                            });
                         }
                     }
-
                 }
             }
         }
@@ -521,9 +542,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
             insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
@@ -534,9 +552,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contractProvider.createContract(contract);
         dealContractApartments(contract, ebeiContract.getHouseInfoList());
         contractSearcher.feedDoc(contract);
-
-
-
 
     }
 
@@ -652,9 +667,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
+
             customer.setContactAddress(ebeiContract.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
             insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
@@ -722,6 +735,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         }
 
         organizationProvider.createOrganizationAddress(organizationAddress);
+        // add sync to customer entry info  20180523
+        organizationService.updateCustomerEntryInfo(customer, organizationAddress);
     }
 
     private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
@@ -730,6 +745,11 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             organizationAddress.setOperatorUid(1L);
             organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationProvider.updateOrganizationAddress(organizationAddress);
+            //sync to customer entry info 20180523 by jiarui
+            EnterpriseCustomer customer =  customerProvider.findByOrganizationId(organizationAddress.getOrganizationId());
+            if (customer != null) {
+                customerProvider.deleteCustomerEntryInfoByCustomerIdAndAddressId(customer.getId(), organizationAddress.getAddressId());
+            }
         }
     }
 

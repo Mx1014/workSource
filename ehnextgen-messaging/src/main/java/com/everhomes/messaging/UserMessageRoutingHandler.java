@@ -6,6 +6,9 @@ import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -16,8 +19,10 @@ import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.Name;
 import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
@@ -26,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,6 +46,7 @@ import java.util.List;
 @Name("user")
 public class UserMessageRoutingHandler implements MessageRoutingHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
+    private final static String MESSAGE_INDEX_ID = "indexId";
     
     @Autowired
     private UserService userService;
@@ -55,6 +62,28 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     
     @Autowired
     private PusherService pusherService;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+//    @Autowired
+//    private TaskScheduler taskScheduler;
+//
+//    @Autowired
+//    private MessagePersistWorker messagePersistWorker;
+
+//    private ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
+
+//    @PostConstruct
+//    public void setup(){
+//        taskScheduler.scheduleAtFixedRate(()-> {
+//            while (!queue.isEmpty()){
+//                MessageRecordDto record = queue.poll();
+//                this.messagePersistWorker.handleMessagePersist(record);
+//            }
+//        }, 5*1000);
+//    }
+
     
     @Override
     public boolean allowToRoute(UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
@@ -67,6 +96,27 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     @Override
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
+
+        //把消息添加到队列里
+        MessageRecordDto record = new MessageRecordDto();
+        record.setAppId(appId);
+        record.setNamespaceId(senderLogin.getNamespaceId());
+        record.setMessageSeq(0L);
+        record.setSenderUid(senderLogin.getUserId());
+        record.setSenderTag(MessageRecordSenderTag.ROUTE_MESSAGE.getCode());
+        MessageChannel messageChannel = message.getChannels().get(0);
+        record.setDstChannelType(messageChannel.getChannelType());
+        record.setDstChannelToken(messageChannel.getChannelToken());
+        record.setChannelsInfo(messageChannel.toString());
+        record.setBodyType(message.getBodyType());
+        record.setBody(message.getBody());
+        record.setDeliveryOption(deliveryOption);
+        record.setStatus(MessageRecordStatus.CORE_HANDLE.getCode());
+        record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ?Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+        record.setMeta(message.getMeta());
+        record.setCreateTime(new Timestamp(message.getCreateTime() != null ? message.getCreateTime() : System.currentTimeMillis()));
+        MessagePersistWorker.getQueue().offer(record);
+
         long uid = Long.parseLong(dstChannelToken);
         
         if(uid == 0) {
@@ -200,6 +250,26 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         this.messageBoxProvider.putMessage(boxKey, msgId);
 
         boolean onlineDelivered = false;
+
+        //把消息添加到队列里
+        MessageRecordDto record = new MessageRecordDto();
+        record.setAppId(appId);
+        record.setNamespaceId(senderLogin.getNamespaceId());
+        record.setMessageSeq(message.getStoreSequence());
+        record.setSenderUid(senderLogin.getUserId());
+        record.setSenderTag(MessageRecordSenderTag.ROUTE_STORE_MESSAGE.getCode());
+        record.setDstChannelType(mainChannel.getChannelType());
+        record.setDstChannelToken(mainChannel.getChannelToken());
+        record.setChannelsInfo(mainChannel.toString());
+        record.setBodyType(message.getBodyType());
+        record.setBody(message.getBody());
+        record.setDeliveryOption(deliveryOption);
+        record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+        record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+        record.setMeta(message.getMeta());
+        record.setCreateTime(new Timestamp(message.getCreateTime() != null ? message.getCreateTime() : System.currentTimeMillis()));
+        MessagePersistWorker.getQueue().offer(record);
+
         //If not push only, send it by border server
         if((MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode() != deliveryOption) && (destLogin.getLoginBorderId() != null)) {
             BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
@@ -208,13 +278,13 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
                 try {
                     borderConnection.sendMessage(null, forwardPdu);
-                    onlineDelivered = true;
+                    onlineDelivered = true; // 为苹果设备做冗余，即苹果设备在线，也要发推送
                 } catch(IOException e) {
                     LOGGER.warn("Failed to deliver message to border", e);
                 }
             }
         }
-        
+
         if((deliveryOption & MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode()) != 0) {
             if(onlineDelivered) {
                 this.pusherService.checkAndPush(senderLogin, destLogin, msgId, msg);
@@ -249,6 +319,25 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
                 
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
                 try {
+                    //把消息添加到队列里
+                    MessageRecordDto record = new MessageRecordDto();
+                    record.setAppId(appId);
+                    record.setNamespaceId(senderLogin.getNamespaceId());
+                    record.setMessageSeq(0L);
+                    record.setSenderUid(senderLogin.getUserId());
+                    record.setSenderTag(MessageRecordSenderTag.ROUTE_REALTIME_MESSAGE.getCode());
+                    record.setDstChannelType(mainChannel.getChannelType());
+                    record.setDstChannelToken(mainChannel.getChannelToken());
+                    record.setChannelsInfo(mainChannel.toString());
+                    record.setBodyType(message.getBodyType());
+                    record.setBody(message.getBody());
+                    record.setDeliveryOption(deliveryOption);
+                    record.setStatus(MessageRecordStatus.CORE_ROUTE.getCode());
+                    record.setIndexId(message.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(message.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                    record.setMeta(message.getMeta());
+                    record.setCreateTime(new Timestamp(message.getCreateTime() != null ? message.getCreateTime() : System.currentTimeMillis()));
+                    MessagePersistWorker.getQueue().offer(record);
+
                     borderConnection.sendMessage(null, forwardPdu);
                 } catch(IOException e) {
                     LOGGER.warn("Failed to deliver message to border", e);

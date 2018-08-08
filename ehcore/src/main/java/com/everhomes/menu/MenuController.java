@@ -10,8 +10,10 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.rest.me_menu.ListMeWebMenusCommand;
 import com.everhomes.rest.menu.*;
 
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,5 +87,39 @@ public class MenuController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /menu/listMenuForPcEntry</b>
+     * <p>获取pc门户菜单</p>
+     */
+    @RequestMapping("listMenuForPcEntry")
+    @RestReturn(value=ListMenuForPcEntryResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd) {
+        ListMenuForPcEntryResponse res = webMenuService.listMenuForPcEntry(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /menu/listMenuForPcEntryServices</b>
+     * <p>获取pc门户聚焦服务菜单</p>
+     */
+    @RequestMapping("listMenuForPcEntryServices")
+    @RestReturn(value=ListMenuForPcEntryServicesResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listMenuForPcEntryServices(ListMenuForPcEntryServicesCommand cmd) {
+        ListMenuForPcEntryServicesResponse res = webMenuService.listMenuForPcEntryServices(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
 
 }

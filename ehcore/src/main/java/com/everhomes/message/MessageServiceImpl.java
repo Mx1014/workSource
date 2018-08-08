@@ -12,20 +12,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.messaging.SearchMessageRecordCommand;
+import com.everhomes.rest.messaging.SearchMessageRecordResponse;
+import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
+import com.everhomes.rest.pushmessagelog.PushStatusCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.search.MessageRecordSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -37,10 +38,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	
+
 	@Autowired
 	private SmsProvider smsProvider;
 	
@@ -49,7 +47,16 @@ public class MessageServiceImpl implements MessageService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+
+	@Autowired
+	private MessageProvider messageProvider;
+
+	@Autowired
+	private MessageRecordSearcher messageRecordSearcher;
 	
+	@Autowired
+   	private PushMessageLogService pushMessageLogService;
+
 	@Override
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd) {
 		if (cmd.getCommunityId() == null 
@@ -58,10 +65,15 @@ public class MessageServiceImpl implements MessageService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters, cmd=" + cmd);
 		}
-		
+		//创建消息记录
+        Long logId = pushMessageLogService.createfromSendNotice(cmd, new Byte(PushMessageTypeCode.SMS.getCode()));
+        cmd.setLogId(logId);
+        LOGGER.info("create pushMessageLog and set status waitting  .");
+        
 		// 1.找到这个园区所有的公司
 		List<OrganizationCommunityRequest> organizationCommunityRequestList = organizationProvider.listOrganizationCommunityRequests(cmd.getCommunityId());
 		if (organizationCommunityRequestList == null || organizationCommunityRequestList.isEmpty()) {
+			
 			return;
 		}
 		// 因为这个表里面入驻的企业会有重复的，应该是数据错误，所以要去重
@@ -108,9 +120,45 @@ public class MessageServiceImpl implements MessageService {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("send message parameters are: namespaceId="+namespaceId+", phoneNumbers="+Arrays.toString(phoneNumbers)+", templateScope="+templateScope+", code="+templateId);
 		}
-		
-		smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, null);
+		//更新推送记录状态
+        pushMessageLogService.updatePushStatus(cmd.getLogId(), PushStatusCode.PUSHING.getCode());
+        LOGGER.info("update pushMessageLog status pushing .");
+        try{
+        	smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, null);
+        }catch (Exception e){
+        	
+        	//在有异常的情况下也要更新推送记录状态为完成
+            pushMessageLogService.updatePushStatus(cmd.getLogId(), PushStatusCode.FINISH.getCode());
+            LOGGER.error("update pushMessageLog status finish,e={}",e);
+            throw e ;
+        }
 
+	}
+
+	@Override
+	public void persistMessage(List<MessageRecord> records) {
+		this.messageProvider.createMessageRecords(records);
+	}
+
+	@Override
+	public SearchMessageRecordResponse searchMessageRecord(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessage(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
+	}
+
+	@Override
+	public SearchMessageRecordResponse searchMessageRecordByIndexId(SearchMessageRecordCommand cmd) {
+		SearchMessageRecordResponse response = new SearchMessageRecordResponse();
+		response.setDtos(messageRecordSearcher.queryMessageByIndex(cmd));
+		response.setNextPageAnchor(cmd.getPageAnchor());
+		return response;
+	}
+
+	@Override
+	public void syncMessageRecord() {
+		messageRecordSearcher.syncMessageRecordIndexs();
 	}
 
 }

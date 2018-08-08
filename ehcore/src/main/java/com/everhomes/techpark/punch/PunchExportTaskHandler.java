@@ -59,6 +59,10 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         if (params.get("ownerId") != null) {
             ownerId = Long.valueOf(String.valueOf(params.get("ownerId")));
         }
+        Long monthReportId = null;
+        if (params.get("monthReportId") != null) {
+        	monthReportId = Long.valueOf(String.valueOf(params.get("monthReportId")));
+        }
         Long startDay = null;
         if (params.get("startDay") != null) {
             startDay = Long.valueOf(String.valueOf(params.get("startDay")));
@@ -95,7 +99,7 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream = null;
         if (reportType.equals("exportPunchStatistics")) {
-            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId);
+            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, monthReportId);
         } else if (reportType.equals("exportPunchDetails")) {
             outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, userId);
         } else if (reportType.equals("exportPunchScheduling")) {
@@ -103,7 +107,8 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         }else if (reportType.equals("exportVacationBalances")) {
             outputStream = punchService.getVacationBalanceOutputStream(ownerId, taskId);
         }
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        taskService.updateTaskProcess(taskId, 99);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

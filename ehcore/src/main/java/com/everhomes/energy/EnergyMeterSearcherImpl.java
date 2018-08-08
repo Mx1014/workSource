@@ -122,17 +122,19 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             builder.field("createTime", meter.getCreateTime().getTime());
 
             List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-            StringBuffer addressString = new StringBuffer();
-            StringBuffer buildingString = new StringBuffer();
-            if(existAddress!=null && existAddress.size()>0){
-                existAddress.forEach((r)->{
-                    addressString.append(r.getAddressId().toString()).append("|");
-                    buildingString.append(r.getBuildingId().toString()).append("|");
+            List<String> addressList = new ArrayList<>();
+            List<String> buildingList = new ArrayList<>();
+            if (existAddress != null && existAddress.size() > 0) {
+                existAddress.forEach((r) -> {
+                    addressList.add(r.getAddressId().toString());
+                    buildingList.add(r.getBuildingId().toString());
                 });
-            }
-            if(existAddress != null && existAddress.size() > 0) {
-                builder.field("buildingId", buildingString);
-                builder.field("addressId", addressString);
+                if (!buildingList.isEmpty()) {
+                    builder.field("buildingId", String.join("|", buildingList));
+                }
+                if (!addressList.isEmpty()) {
+                    builder.field("addressId", String.join("|", addressList));
+                }
             }
 
             EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(meter.getNamespaceId(), meter.getId());

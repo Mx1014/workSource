@@ -880,7 +880,7 @@ public class FixedAssetServiceImpl implements FixedAssetService {
             if (titles.get(i).equals(temp.get(i).trim()))
                 continue;
             else {
-                return ImportFileErrorType.TITLE_ERROE.getCode();
+                return ImportFileErrorType.TITLE_ERROR.getCode();
             }
         }
         return null;

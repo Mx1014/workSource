@@ -7,7 +7,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rentalv2.utils.RentalUtils;
@@ -63,8 +62,6 @@ public class RentalCommonServiceImpl {
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Autowired
-    private PayService payService;
-    @Autowired
     private OnlinePayService onlinePayService;
     @Autowired
     private LocaleStringService localeStringService;
@@ -72,6 +69,8 @@ public class RentalCommonServiceImpl {
     private UserProvider userProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private Rentalv2PayService  rentalv2PayService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -245,20 +244,8 @@ public class RentalCommonServiceImpl {
 
         if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
             //新支付退款
-            Long amount = payService.changePayAmount(orderAmount);
-            CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),
-                    Long.valueOf(order.getOrderNo()), refundOrderNo, amount);
-
-            if(refundResponse != null || refundResponse.getErrorCode() != null
-                    && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-            } else{
-                LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", refundOrderNo, order,
-                        refundResponse);
-                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-                        RentalServiceErrorCode.ERROR_REFUND_ERROR,
-                        "bill refund error");
-            }
+            Long amount = changePayAmount(orderAmount);
+            rentalv2PayService.refundOrder(order,amount);
         } else {
             refundParkingOrderV1(order, timestamp, refundOrderNo, orderAmount);
         }
@@ -272,7 +259,7 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setResourceType(order.getResourceType());
 
         rentalRefundOrder.setAmount(orderAmount);
-        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
         rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if (UserContext.current().getUser()!=null)
              rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
@@ -281,6 +268,14 @@ public class RentalCommonServiceImpl {
             rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
 
         this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+    }
+
+    public Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
     }
 
     private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {
@@ -377,29 +372,59 @@ public class RentalCommonServiceImpl {
             }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
                 return order.getPaidMoney();
             }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-                processOrderNotRefundTip(order);
+                order.setTip(processOrderNotRefundTip());
             }
         }
 
-        processOrderNotRefundTip(order);
+        order.setTip(processOrderNotRefundTip());
 
         return order.getPaidMoney();
     }
 
 
-    public void processOrderNotRefundTip(RentalOrder order) {
+    public String processOrderNotRefundTip() {
 
         String locale = UserContext.current().getUser().getLocale();
 
         String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
                 String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP), locale, "");
 
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
-//        sb.append("\r\n");
-//        sb.append("\r\n");
-//        sb.append("确认要取消订单吗？");
-        order.setTip(content);
+        return content;
+    }
+
+    public String processResourceCustomRefundTip(RentalDefaultRule rule){
+        List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(rule.getResourceType(), rule.getSourceType(),
+                rule.getId(), RentalOrderHandleType.REFUND.getCode());
+
+        List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
+                .collect(Collectors.toList());
+        List<RentalOrderRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
+                .collect(Collectors.toList());
+        StringBuilder sb = new StringBuilder();
+        sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
+        sb.append("\r\n");
+        int i = 0;
+        for (int  size = outerRules.size(); i < size; i++) {
+            sb.append(i+1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(outerRules.get(i).getDuration());
+            sb.append("小时外取消，退还");
+            sb.append(outerRules.get(i).getFactor().intValue());
+            sb.append("%订单金额;");
+            sb.append("\r\n");
+        }
+
+        for (int j=0, size = innerRules.size(); j < size; j++) {
+            sb.append(i+j+1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(innerRules.get(j).getDuration());
+            sb.append("小时内取消，退还");
+            sb.append(innerRules.get(j).getFactor().intValue());
+            sb.append("%订单金额。");
+        }
+        return sb.toString();
     }
 
     public void processOrderCustomRefundTip(RentalOrder order, List<RentalOrderRule> outerRules, List<RentalOrderRule> innerRules,
@@ -443,7 +468,7 @@ public class RentalCommonServiceImpl {
             sb.append("请在确认后联系客服线下退款:");
             RentalResource rs = getRentalResource(order.getResourceType(),order.getRentalResourceId());
             if (rs.getOfflinePayeeUid()!=null){
-                OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
+                OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
                 if(null!=member){
                     sb.append(member.getContactName());
                     UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());

@@ -67,6 +67,12 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private EnergyMeterTaskProvider taskProvider;
+
+    @Autowired
+    private EnergyMeterReadingLogProvider energyMeterReadingLogProvider;
+
     // @Autowired
     // private EnergyMeterChangeLogProvider changeLogProvider;
 
@@ -122,17 +128,19 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("meterNumber", meter.getMeterNumber());
 
                 List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-                StringBuffer addressString = new StringBuffer();
-                StringBuffer buildingString = new StringBuffer();
+                List<String> addressList = new ArrayList<>();
+                List<String> buildingList = new ArrayList<>();
                 if(existAddress!=null && existAddress.size()>0){
                     existAddress.forEach((r)->{
-                        addressString.append(r.getAddressId().toString()).append("|");
-                        buildingString.append(r.getBuildingId().toString()).append("|");
+                        addressList.add(r.getAddressId().toString());
+                        buildingList.add(r.getBuildingId().toString());
                     });
-                }
-                if(existAddress != null && existAddress.size() > 0) {
-                    builder.field("buildingId", buildingString);
-                    builder.field("addressId", addressString);
+                    if (!buildingList.isEmpty()) {
+                        builder.field("buildingId", String.join("|", buildingList));
+                    }
+                    if (!addressList.isEmpty()) {
+                        builder.field("addressId", String.join("|", addressList));
+                    }
                 }
             }
 
@@ -284,7 +292,14 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setMeterNumber((String)source.get("meterNumber"));
             List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(Long.valueOf(source.get("meterId").toString()));
             dto.setMeterAddress(addressDTOS);
-
+            EnergyMeterReadingLog log = energyMeterReadingLogProvider.getEnergyMeterReadingLogById(dto.getId());
+            if (log != null) {
+                EnergyMeterTask task = taskProvider.findEnergyMeterTaskById(log.getTaskId());
+                if (task != null) {
+                    dto.setLastReading(task.getLastTaskReading());
+                    dto.setValueDifference(dto.getReading().subtract(dto.getLastReading()));
+                }
+            }
             dtoList.add(dto);
         }
         return dtoList;

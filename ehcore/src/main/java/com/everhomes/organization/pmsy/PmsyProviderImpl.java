@@ -55,10 +55,15 @@ public class PmsyProviderImpl implements PmsyProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyPayers.class));
 		SelectWhereStep<EhPmsyPayersRecord> select = context.selectFrom(Tables.EH_PMSY_PAYERS);
 		
-		Result<EhPmsyPayersRecord> result = select.where(Tables.EH_PMSY_PAYERS.STATUS.eq(PmsyPayerStatus.ACTIVE.getCode()))
+		/*Result<EhPmsyPayersRecord> result = select.where(Tables.EH_PMSY_PAYERS.STATUS.eq(PmsyPayerStatus.ACTIVE.getCode()))
 			  .and(Tables.EH_PMSY_PAYERS.CREATOR_UID.eq(id))
 			  .and(Tables.EH_PMSY_PAYERS.NAMESPACE_ID.eq(namespaceId)).orderBy(Tables.EH_PMSY_PAYERS.CREATE_TIME.desc())
-			  .fetch();
+			  .fetch();*/
+		//由于历史原因，海岸馨服务的namespaceId已经不是0，所以匹配namespaceId不可能匹配上，在此不做namespaceId校验（杨崇鑫）
+		Result<EhPmsyPayersRecord> result = select.where(Tables.EH_PMSY_PAYERS.STATUS.eq(PmsyPayerStatus.ACTIVE.getCode()))
+				  .and(Tables.EH_PMSY_PAYERS.CREATOR_UID.eq(id))
+				  .orderBy(Tables.EH_PMSY_PAYERS.CREATE_TIME.desc())
+				  .fetch();
 		
 		return result.map(r -> ConvertHelper.convert(r, PmsyPayer.class));
 	}

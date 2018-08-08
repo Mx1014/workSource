@@ -5,9 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>organizationId: 机构id</li>
+ * <li>organizationId: 机构id(从customer中的organizationId拿)</li>
  * <li>contactToken: 手机号</li>
  * <li>contactName:  用户姓名</li>
+ * <li>customerId:  customer organization之间的映射关系</li>
+ * <li>ownerId:  当前操作的公司id  用于权限校验</li>
+ * <li>communityId:  当前操作的小区id  用于权限校验</li>
+ * <li>namespaceId:  namespaceId</li>
+ * <li>userId:  用户id</li>
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
@@ -21,6 +26,14 @@ public class CreateOrganizationAdminCommand {
 	private String contactToken;
 	
 	private String contactName;
+
+	private Long customerId;
+
+	private Long communityId;
+
+	private Integer namespaceId;
+
+	private Long userId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -62,9 +75,40 @@ public class CreateOrganizationAdminCommand {
 		this.contactName = contactName;
 	}
 
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }

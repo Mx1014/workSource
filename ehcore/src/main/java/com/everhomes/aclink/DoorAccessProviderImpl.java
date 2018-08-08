@@ -29,6 +29,8 @@ import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.records.EhDoorAccessRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -43,12 +45,17 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private AclinkServerProvider aclinkServerProvider;
 
     @Override
     public Long createDoorAccess(DoorAccess obj) {
         // 主表的ID不能使用getSequence的方式 by lqs 20160430
         //long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAccess.class));
-        long id = this.shardingProvider.allocShardableContentId(EhDoorAccess.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhDoorAccess.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhDoorAccess.class).second();
         obj.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getId()));
         obj.setId(id);
@@ -60,16 +67,31 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
     @Override
     public void updateDoorAccess(DoorAccess obj) {
+    	User user = UserContext.current().getUser();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getId()));
         EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
         dao.update(obj);
+        
+        AclinkServer server = aclinkServerProvider.findServerById(obj.getLocalServerId());
+        if(server != null){
+        	server.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        	server.setOperatorUid(user.getId());
+			aclinkServerProvider.updateLocalServer(server);
+        }
     }
 
     @Override
     public void deleteDoorAccess(DoorAccess obj) {
+    	User user = UserContext.current().getUser();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getId()));
         EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
         dao.deleteById(obj.getId());
+        AclinkServer server = aclinkServerProvider.findServerById(obj.getLocalServerId());
+        if(server != null){
+        	server.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        	server.setOperatorUid(user.getId());
+			aclinkServerProvider.updateLocalServer(server);
+        }
     }
 
     @Override
@@ -117,17 +139,20 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                 queryBuilderCallback.buildCondition(locator, query);
 
             if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_DOOR_ACCESS.ID.gt(locator.getAnchor()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
             query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
-            query.addLimit(count - objs.size());
-
+            //if count == 0 ,list all, by liuyilin 20180408 
+            if(count >0){
+            	query.addLimit(count + 1);
+            }
             query.fetch().map((r) -> {
                 objs.add(ConvertHelper.convert(r, DoorAccess.class));
                 return null;
             });
 
-            if(objs.size() >= count) {
+            if(count>0 && objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
                 return AfterAction.done;
             } else {
                 locator.setAnchor(null);
@@ -255,4 +280,33 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         
         return das;        
     }
+
+	@Override
+	public List<DoorAccess> listDoorAccessByServerId(Long id, Integer count) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<DoorAccess> das = queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
+
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.eq(id));
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+                query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.desc());
+                if(count > 0){
+                	query.addLimit(count);
+                }
+                if(locator != null && locator.getAnchor() !=null){
+                	query.addConditions(Tables.EH_DOOR_ACCESS.ID.lt(locator.getAnchor()));
+                }
+                return query;
+            }
+        });
+        
+        if(das == null || das.size() == 0) {
+            return null;
+        }
+        
+        return das;
+	}
+
+
 }

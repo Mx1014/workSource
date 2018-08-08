@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
@@ -6,7 +7,27 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
-public class AesUserKeyDTO {
+/**
+ * <ul>
+ * <li>status：1有效 0失效 {@link com.everhomes.rest.aclink.AesUserKeyStatus}</li>
+ * <li>keyId: 钥匙id</li>
+ * <li>createTimeMs：创建时间</li>
+ * <li>creatorUid：创建者id</li>
+ * <li>keyType：普通((byte)0), 临时((byte)1), 管理员((byte)2) {@link com.everhomes.rest.aclink.AesUserKeyType}</li>
+ * <li>userId：用户id</li>
+ * <li>secret</li>
+ * <li>expireTimeMs：有效时间</li>
+ * <li>doorId：门禁id</li>
+ * <li>id</li>
+ * <li>hardwareId：mac地址</li>
+ * <li>doorName：门禁名称</li>
+ * <li>authId：授权id</li>
+ * <li>macCopy</li>
+ * <li>rightRemote:远程开门权限 1有 0无</li>
+ * <li>rightFaceOpen:扫脸开门权限 1有0无</li>
+ * </ul>
+ */
+public class AesUserKeyDTO implements Comparable<AesUserKeyDTO>{
     private Byte     status;
     private Byte     keyId;
     private Long     createTimeMs;
@@ -20,6 +41,9 @@ public class AesUserKeyDTO {
     private String hardwareId;
     private String doorName;
     private Long authId;
+    private String macCopy;
+    private Byte rightRemote;
+    private Byte rightFaceOpen;
 
     
 
@@ -179,8 +203,54 @@ public class AesUserKeyDTO {
 
 
 
-    @Override
+    public String getMacCopy() {
+		return macCopy;
+	}
+
+
+
+	public void setMacCopy(String macCopy) {
+		this.macCopy = macCopy;
+	}
+
+
+
+	public Byte getRightRemote() {
+		return rightRemote;
+	}
+
+
+
+	public void setRightRemote(Byte rightRemote) {
+		this.rightRemote = rightRemote;
+	}
+
+
+
+	public Byte getRightFaceOpen() {
+		return rightFaceOpen;
+	}
+
+
+
+	public void setRightFaceOpen(Byte rightFaceOpen) {
+		this.rightFaceOpen = rightFaceOpen;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	@Override
+	public int compareTo(AesUserKeyDTO o) {
+		if(this.authId < o.getAuthId()){
+			return 1;
+		}
+		return -1;
+	}
 }

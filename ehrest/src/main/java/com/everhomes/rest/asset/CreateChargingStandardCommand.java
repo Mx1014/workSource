@@ -17,13 +17,14 @@ import java.util.List;
  * <li>chargingItemId:收费项目id</li>
  * <li>chargingStandardName:收费标准名称</li>
  * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化(斜面);4:斜率在不同变量区间取值不同（阶梯）（楼梯）;</li>
- * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
- * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
+ * <li>billingCycle:计费周期,参考{@link com.everhomes.rest.asset.BillingCycle}</li>
  * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
  * <li>instruction:说明</li>
  * <li>suggestUnitPrice:建议单价</li>
  * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
+ * <li>categoryId: genious creation</li>
+ * <li>useUnitPrice: 是否启用填单价，1：启用；0：不启用</li>
  *</ul>
  */
 public class CreateChargingStandardCommand {
@@ -41,8 +42,6 @@ public class CreateChargingStandardCommand {
     private Byte formulaType;
     @NotNull
     private Byte billingCycle;
-    @NotNull
-    private Byte priceUnitType;
     private String formula;
     @NotNull
     private String formulaJson;
@@ -54,8 +53,25 @@ public class CreateChargingStandardCommand {
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
     private Long chargingStandardId;
+    private Long categoryId;
 
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+    private Byte useUnitPrice;
+
+    public Byte getUseUnitPrice() {
+        return useUnitPrice;
+    }
+
+    public void setUseUnitPrice(Byte useUnitPrice) {
+        this.useUnitPrice = useUnitPrice;
+    }
 
     public BigDecimal getSuggestUnitPrice() {
         return suggestUnitPrice;
@@ -149,14 +165,6 @@ public class CreateChargingStandardCommand {
 
     public void setBillingCycle(Byte billingCycle) {
         this.billingCycle = billingCycle;
-    }
-
-    public Byte getPriceUnitType() {
-        return priceUnitType;
-    }
-
-    public void setPriceUnitType(Byte priceUnitType) {
-        this.priceUnitType = priceUnitType;
     }
 
     public String getFormulaJson() {

@@ -2,6 +2,7 @@ package com.everhomes.general_approval;
 
 import java.util.List;
 
+import com.everhomes.enterpriseApproval.EnterpriseApprovalTemplate;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
@@ -18,11 +19,8 @@ public interface GeneralApprovalProvider {
 	List<GeneralApproval> queryGeneralApprovals(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId);
-
     GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName);
 
-    GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
 	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
 
@@ -36,9 +34,7 @@ public interface GeneralApprovalProvider {
 
 	void deleteApprovalScopeMapByApprovalId(Long approvalId);
 
-    void deleteOddGeneralApprovalDetailScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
-
-    void deleteOddGeneralApprovalOrganizationScope(Integer namespaceId, Long approvalId, List<Long> detailIds);
+    void deleteOddGeneralApprovalScope(Integer namespaceId, Long approvalId, String sourceType, List<Long> detailIds);
 
 	List<GeneralApprovalScopeMap> listGeneralApprovalScopes(Integer namespaceId, Long approvalId);
 }

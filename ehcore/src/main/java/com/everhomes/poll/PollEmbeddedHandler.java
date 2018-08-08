@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.DbProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
@@ -47,6 +48,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Autowired
     private PollProvider pollProvider;
+    
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -71,7 +75,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post preProcessEmbeddedObject(Post post) {
-        Long id = shardingProvider.allocShardableContentId(EhPolls.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        Long id = this.dbProvider.allocPojoRecordId(EhPolls.class);    
+        //Long id = shardingProvider.allocShardableContentId(EhPolls.class).second();
         post.setEmbeddedId(id);
         PollPostCommand cmd = (PollPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
             PollPostCommand.class);

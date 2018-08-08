@@ -28,6 +28,8 @@ import com.everhomes.rest.remind.CreateOrUpdateRemindCategoryCommand;
 import com.everhomes.rest.remind.CreateOrUpdateRemindCommand;
 import com.everhomes.rest.remind.DeleteRemindCategoryCommand;
 import com.everhomes.rest.remind.DeleteRemindCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdResponse;
 import com.everhomes.rest.remind.GetRemindCategoryColorsResponse;
 import com.everhomes.rest.remind.GetRemindCategoryCommand;
 import com.everhomes.rest.remind.GetRemindCommand;
@@ -71,10 +73,11 @@ import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -95,7 +98,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
-public class RemindServiceImpl implements RemindService {
+public class RemindServiceImpl implements RemindService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
     private static final String DEFAULT_CATEGORY_NAME = "默认分类";
     private static final int FETCH_SIZE = 2000;
@@ -123,9 +126,10 @@ public class RemindServiceImpl implements RemindService {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
-        // 现网是集群部署，这个判断是为了防止定时任务在多台机器执行
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             String triggerName = CalendarRemindScheduleJob.CALENDAR_REMIND_SCHEDULE + System.currentTimeMillis();
             String jobName = triggerName;
@@ -135,6 +139,13 @@ public class RemindServiceImpl implements RemindService {
         }
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
     @Override
     public GetRemindCategoryColorsResponse getRemindCategoryColors() {
         String colours = configurationProvider.getValue(ConfigConstants.REMIND_COLOUR_LIST, "");
@@ -484,7 +495,7 @@ public class RemindServiceImpl implements RemindService {
         cmd.setUserId(cmd.getUserId() != null ? cmd.getUserId() : UserContext.currentUserId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOwnerId());
 
         ListSharingPersonsResponse response = new ListSharingPersonsResponse();
         if (member == null || member.getDetailId() == null) {
@@ -503,7 +514,9 @@ public class RemindServiceImpl implements RemindService {
         if (cmd.getRepeatType() == null) {
             cmd.setRepeatType(RemindRepeatType.NONE.getCode());
         }
-
+        if (cmd.getPlanDate() != null && cmd.getPlanDate() <= 0) {
+            cmd.setPlanDate(null);
+        }
         if (cmd.getId() == null) {
             return createRemind(cmd);
         }
@@ -843,7 +856,7 @@ public class RemindServiceImpl implements RemindService {
         QueryShareRemindsCondition queryRequest = ConvertHelper.convert(cmd, QueryShareRemindsCondition.class);
         queryRequest.setNamespaceId(UserContext.getCurrentNamespaceId());
         queryRequest.setShareUserId(cmd.getShareUserId());
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
         if (member != null) {
             queryRequest.setCurrentUserDetailId(member.getDetailId());
         }
@@ -936,7 +949,7 @@ public class RemindServiceImpl implements RemindService {
                                     UserContext.current().getUser().getLocale(),
                                     "The remind is not exist"));
         }
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
 
         if (!remindProvider.checkRemindShareToUser(member.getDetailId(), remind.getId())) {
             throw RuntimeErrorException
@@ -983,6 +996,20 @@ public class RemindServiceImpl implements RemindService {
     }
 
     @Override
+    public GetCurrentUserDetailIdResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (detail == null) {
+            return null;
+        }
+        GetCurrentUserDetailIdResponse response = new GetCurrentUserDetailIdResponse();
+        response.setUserId(detail.getTargetId());
+        response.setDetailId(detail.getId());
+        response.setContactName(detail.getContactName());
+        response.setContactToken(detail.getContactToken());
+        return response;
+    }
+
+    @Override
     public void remindSchedule() {
         this.coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode()).tryEnter(() -> {
             LOGGER.info("remindSchedule begin");
@@ -1012,7 +1039,7 @@ public class RemindServiceImpl implements RemindService {
     }
 
     private String getContractNameByUserId(Long userId, Long organizationId) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
         if (member != null) {
             return member.getContactName();
         }
@@ -1310,11 +1337,13 @@ public class RemindServiceImpl implements RemindService {
             String url = null;
             if (remind.getTrackRemindId() != null && remind.getTrackRemindId() > 0) {
                 TrackRemindDetailActionData actionData = new TrackRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getTrackRemindId());
                 actionData.setRemindUserId(remind.getTrackRemindUserId());
                 url = RouterBuilder.build(Router.SHARED_CALENDAR_REMIND_DETAIL, actionData);
             } else {
                 SelfRemindDetailActionData actionData = new SelfRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getId());
                 url = RouterBuilder.build(Router.SELF_CALENDAR_REMIND_DETAIL, actionData);
             }

@@ -51,7 +51,7 @@ public class FixedAssetExportTaskHandler implements FileDownloadTaskHandler {
         ListFixedAssetCommand cmd = JSON.parseObject(cmdJson, ListFixedAssetCommand.class);
         OutputStream outputStream = this.createFixedAssetExportOutputStream(cmd, taskId);
 
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

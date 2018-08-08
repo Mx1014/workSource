@@ -10,6 +10,34 @@ import java.util.List;
  * Created by Wentian Wang on 2017/9/28.
  */
 
+/**
+ * @author change by yangcx
+ * @date 2018年5月19日----下午8:18:48
+ */
+/**
+ *<ul>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 显示数量</li>
+ * <li>dateStrBegin: 账期开始时间</li>
+ * <li>dateStrEnd: 账期结束时间</li>
+ * <li>startPayTime: 缴费开始时间</li>
+ * <li>endPayTime: 缴费结束时间</li>
+ * <li>paymentStatus:订单状态：1：已完成，0：订单异常</li>
+ * <li>paymentType:支付方式，0:微信，1：支付宝，2：对公转账</li>
+ * <li>addressId: 楼栋门牌id</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
+ * <li>userType:用户类型，如：EhOrganizations</li>
+ * <li>userId:用户ID</li>
+ * <li>namespaceId:域空间</li>
+ * <li>communityId:园区ID</li>
+ * <li>organizationId:客户id，客户类型为企业时，organizationId为企业id</li>
+ * <li>orderType:账单类型，如：wuyeCode</li>
+ * <li>targetName:客户名称</li>
+ * <li>paymentOrderNum:订单编号，如：954650447962984448，订单编号为缴费中交易明细与电商系统中交易明细串联起来的唯一标识。</li>
+ * <li>billId:账单id</li>
+ *</ul>
+*/
 public class ListPaymentBillCmd {
     private Long pageAnchor;
     private Long pageSize;
@@ -19,6 +47,7 @@ public class ListPaymentBillCmd {
     private Integer namespaceId;
     private Long communityId;
     private Long organizationId;
+    private Long categoryId;
 
     private List<Long> orderIds;
 
@@ -54,12 +83,12 @@ public class ListPaymentBillCmd {
     private String paymentOrderNum;
     //支付类型
     private Integer paymentType;
-    //交易类型
+    //交易类型，如：手续费/充值/提现/退款等
     private Integer transactionType;
     @ItemType(Integer.class)
     private List<Integer> transactionTypes;
     private Integer paymentStatus;
-    //结算状态
+    //结算状态：已结算/待结算
     private Integer settlementStatus;
     private Boolean distributionRemarkIsNull;
     //账单类型
@@ -70,9 +99,29 @@ public class ListPaymentBillCmd {
     private Long userId;
     @ItemType(ReSortCmd.class)
     private List<ReSortCmd> sorts;
+    
+    //客户名称
+    private String targetName;
+    //账单id
+    private Long billId;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private Long addressId;
+    private String buildingName;
+    private String apartmentName;
+    private Long targetId;
+    private Long ownerId;
 
     public Long getPageAnchor() {
         return pageAnchor;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public void setPageAnchor(Long pageAnchor) {
@@ -195,4 +244,76 @@ public class ListPaymentBillCmd {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
+	}
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
 }

@@ -56,6 +56,8 @@ package com.everhomes.rest.launchpad;
  * <li>INCUBATORAPPLY((byte)71): 入孵申请</li>
  * <li>FIXED_ASSET((byte) 72): 固定资产管理</li>
  * <li>CALENDAR_REMIND((byte) 73):  日程</li>
+ * <li>PAYSLIP((byte) 74):  薪酬-工资条</li>
+ * <li>MEETING_OA((byte)75): 企业会议室管理</li>
  * </ul>
  */
 public enum ActionType {
@@ -75,7 +77,8 @@ public enum ActionType {
       ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55), FLOW_TASKS( (byte)56 ), PARKING_CLEARANCE((byte) 57), PARKING_CLEARANCE_TASK((byte) 58),
       CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63),
       ACTIVITY_DETAIL((byte)64),GENERAL_APPROVAL((byte)65), ACTIVITY_ENROLL_DETAIL((byte)65),SWITCH_SCENE((byte)66),
-    COMMUNITY_MAP((byte)67),WORK_REPORT((byte)68),FILE_MANAGEMENT((byte)69),NOTICE((byte)70), INCUBATORAPPLY((byte) 71), FIXED_ASSET((byte) 72), CALENDAR_REMIND((byte) 73);
+    COMMUNITY_MAP((byte)67),WORK_REPORT((byte)68),FILE_MANAGEMENT((byte)69),NOTICE((byte)70), INCUBATORAPPLY((byte) 71), FIXED_ASSET((byte) 72), CALENDAR_REMIND((byte) 73),
+    PAYSLIP((byte) 74), MEETING_OA((byte) 75), PARK_BUS((byte) 77);
 
     private byte code;
     private String url;

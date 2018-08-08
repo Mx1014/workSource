@@ -24,14 +24,12 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
     private FlowEventLogProvider flowEventLogProvider;
     private UserService userService;
     private FlowService flowService;
-    // private FlowCaseProvider flowCaseProvider;
     private FlowStateProcessor flowStateProcessor;
 
     public FlowGraphButtonEvent() {
         flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
         userService = PlatformContext.getComponent(UserService.class);
         flowService = PlatformContext.getComponent(FlowService.class);
-        // flowCaseProvider = PlatformContext.getComponent(FlowCaseProvider.class);
         flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
     }
 
@@ -68,7 +66,7 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
         buttonFireEventContentMap.put("buttonName", btn.getFlowButton().getButtonName());
 
         //button actions
-        btn.fireActions(ctx);
+        btn.fireAction(ctx);
 
         switch(stepType) {
             case NO_STEP:
@@ -100,7 +98,8 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                     FlowGraphBranch thisBranch = flowGraph.getBranchByOriginalAndConvNode(flowCase.getStartNodeId(), next.getFlowNode().getId());
                     // 先把当前分支判断是否完成
                     if (thisBranch != null) {
-                        flowCase.setCurrentNodeId(next.getFlowNode().getId());
+                        flowCase.flushCurrentNode(next.getFlowNode());
+
                         List<FlowCase> siblingFlowCase = ctx.getSiblingFlowCase();
                         boolean allFinish = siblingFlowCase.stream().allMatch(
                                 r -> Objects.equals(r.getCurrentNodeId(), tempNext.getFlowNode().getId()));
@@ -166,10 +165,6 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 flowService.fixupUserInfoInContext(ctx, firedUser);
                 templateMap.put("processorName", firedUser.getNickName());
 
-                // tracker = new FlowEventLog();
-                // tracker.setLogContent(flowService.getFireButtonTemplate(stepType, templateMap));
-                // tracker.setStepCount(ctx.getFlowCase().getStepCount());
-
                 flowStateProcessor.rejectToNode(ctx, gotoLevel, currentNode);
                 // next = ctx.getNextNode();
 
@@ -201,10 +196,6 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 }
                 ctx.getLogs().add(rejectLog);
 
-                // if (subject == null) {
-                //     subject = new FlowSubject();
-                // }
-
                 flowCase.setRejectNodeId(currentNode.getFlowNode().getId());
                 flowCase.setRejectCount(flowCase.getRejectCount() + 1);
                 flowCase.setStepCount(flowCase.getStepCount() + 1);
@@ -219,11 +210,6 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 if (currentNode.getTrackTransferLeave() != null) {
                     currentNode.getTrackTransferLeave().fireAction(ctx, ctx.getCurrentEvent());
                 }
-                // else {
-                    // tracker = new FlowEventLog();
-                    // tracker.setLogContent(flowService.getFireButtonTemplate(stepType, templateMap));
-                    // tracker.setStepCount(ctx.getFlowCase().getStepCount());
-                // }
 
                 log = new FlowEventLog();
                 log.setId(flowEventLogProvider.getNextId());
@@ -284,28 +270,13 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
 
                 break;
             case ABSORT_STEP:
-                // tracker = new FlowEventLog();
-                // if (ctx.getOperator() != null) {
-                //     templateMap.put("applierName", ctx.getOperator().getNickName());
-                // }
-
                 next = flowGraph.getEndNode();
-
-                // tracker.setLogContent(flowService.getStepMessageTemplate(stepType, next.getExpectStatus(), ctx.getCurrentEvent(), templateMap));
-                // tracker.setStepCount(ctx.getFlowCase().getStepCount());
-                // if (subject == null) {
-                //     //显示任务跟踪语句
-                //     subject = new FlowSubject();
-                // }
 
                 for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
                     flowCaseState.setNextNode(next);
                     flowCaseState.setStepType(stepType);
                     flowCaseState.getFlowCase().setStepCount(flowCaseState.getFlowCase().getStepCount() + 1);
                 }
-
-                // ctx.setNextNode(next);
-                // flowCase.setStepCount(flowCase.getStepCount() + 1L);
                 break;
             case REMINDER_STEP:
                 next = currentNode;
@@ -363,78 +334,42 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
 
                 break;
             case EVALUATE_STEP:
-                /*Map<Long, FlowEvaluateItemStar> evaMap = new HashMap<>();
-                FlowPostEvaluateCommand eval = cmd.getEvaluate();
-                if (eval != null && eval.getStars().size() > 0) {
-                    eval.getStars().forEach(ev -> evaMap.put(ev.getItemId(), ev));
-                }
+                break;
+            case SUSPEND_STEP:
+                next = currentNode;
+                ctx.setNextNode(next);
 
-                if (flowGraph.getEvaluateItems().size() == 0) {
-                    throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
-                            "evaluate item empty");
-                }
-
-                for (FlowEvaluateItem item : flowGraph.getEvaluateItems()) {
-                    FlowEvaluate eva = new FlowEvaluate();
-                    eva.setEvaluateItemId(item.getId());
-                    eva.setFlowCaseId(cmd.getFlowCaseId());
-                    eva.setFlowMainId(flowCase.getFlowMainId());
-                    eva.setFlowVersion(flowCase.getFlowVersion());
-                    eva.setFlowNodeId(flowCase.getCurrentNodeId());
-                    eva.setModuleId(flowCase.getModuleId());
-                    eva.setModuleType(flowCase.getModuleType());
-                    eva.setProjectId(flowCase.getProjectId());
-                    eva.setProjectType(flowCase.getProjectType());
-                    eva.setNamespaceId(flowCase.getNamespaceId());
-                    eva.setOwnerId(flowCase.getOwnerId());
-                    eva.setOwnerType(flowCase.getOwnerType());
-                    eva.setUserId(UserContext.current().getUser().getId());
-                    FlowEvaluateItemStar star = evaMap.get(item.getId());
-                    eva.setStar(star.getStat());
-                    // 如果配置项为允许输入评论内容，则接收评论内容
-                    if (TrueOrFalseFlag.fromCode(item.getInputFlag()) == TrueOrFalseFlag.TRUE) {
-                        eva.setContent(star.getContent());
-                    }
-                    ctx.getFlowEvas().add(eva);
-                }
-
-                templateMap = new HashMap<>();
-                // 如果评价内容只有1条则显示分数和评价内容，如果有多条，则显示:"用户已评价，查看详情"
-                if (ctx.getFlowEvas().size() == 1) {
-                    FlowEvaluate evaluate = ctx.getFlowEvas().get(0);
-                    templateMap.put("score", String.valueOf(evaluate.getStar()));
-                    // 如果有评价内容，则把评价内容也加上
-                    if (evaluate.getContent() != null && evaluate.getContent().trim().length() > 0) {
-                        templateMap.put("content", evaluate.getContent().trim());
-                    }
-                }
-
-                if (subject == null) {
-                    subject = new FlowSubject();
-                }
                 tracker = new FlowEventLog();
-                tracker.setLogContent(flowService.getFireButtonTemplate(FlowStepType.EVALUATE_STEP, templateMap));
+                tracker.setStepCount(ctx.getFlowCase().getStepCount());
 
-                if (flowGraph.getEvaluateItems().size() > 0) {
-                    tracker.setSubjectId(1L);
+                for (FlowCase aCase : ctx.getAllFlowCases()) {
+                    aCase.setStatus(FlowCaseStatus.SUSPEND.getCode());
                 }
-                tracker.setTrackerApplier(1L);
-                tracker.setTrackerProcessor(1L);
+                break;
+            case ABORT_SUSPEND_STEP:
+                next = currentNode;
+                ctx.setNextNode(next);
 
-                if (FlowStepType.APPROVE_STEP.getCode().equals(btn.getFlowButton().getEvaluateStep())
-                        && flowCase.getStatus().equals(FlowCaseStatus.PROCESS.getCode())) {
-                    FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-                    stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-                    stepDTO.setFlowCaseId(flowCase.getId());
-                    stepDTO.setFlowMainId(flowCase.getFlowMainId());
-                    stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-                    stepDTO.setFlowVersion(flowCase.getFlowVersion());
-                    if (cmd.getStepCount() == null) {
-                        cmd.setStepCount(flowCase.getStepCount());
+                tracker = new FlowEventLog();
+                tracker.setStepCount(ctx.getFlowCase().getStepCount());
+
+                for (FlowCase aCase : ctx.getAllFlowCases()) {
+                    aCase.setStatus(FlowCaseStatus.PROCESS.getCode());
+                }
+                // 重启定时消息及短信
+                if (currentNode.getTickMessageAction() != null) {
+                    FlowActionStatus status = FlowActionStatus.fromCode(currentNode.getTickMessageAction().getFlowAction().getStatus());
+                    if (status == FlowActionStatus.ENABLED) {
+                        currentNode.getTickMessageAction().fireAction(ctx, this);
                     }
-                    stepDTO.setStepCount(cmd.getStepCount());
-                    flowService.processAutoStep(stepDTO); //fire next step
-                }*/
+                }
+                if (currentNode.getTickSMSAction() != null) {
+                    FlowActionStatus status = FlowActionStatus.fromCode(currentNode.getTickSMSAction().getFlowAction().getStatus());
+                    if (status == FlowActionStatus.ENABLED) {
+                        currentNode.getTickSMSAction().fireAction(ctx, this);
+                    }
+                }
+                flowStateProcessor.createStepTimeout(ctx, next.getFlowNode());
                 break;
             default:
                 break;
@@ -509,10 +444,11 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
     }
 
     private void stepParentState(FlowCaseState ctx, FlowGraphNode nextNode) {
+        FlowGraph flowGraph = ctx.getFlowGraph();
         FlowCaseState parentState = ctx.getParentState();
-        if (parentState != null && parentState.getFlowCase().getEndNodeId().equals(nextNode.getFlowNode().getId())) {
-            parentState.getFlowCase().setCurrentNodeId(nextNode.getFlowNode().getId());
-            parentState.getFlowCase().setCurrentLaneId(nextNode.getFlowNode().getFlowLaneId());
+        if (parentState != null && parentState.getFlowCase().getEndNodeId().equals(nextNode.getFlowNodeId())) {
+            parentState.flushCurrentNode(nextNode);
+            parentState.flushCurrentLane(flowGraph.getGraphLane(nextNode.getFlowLaneId()));
             stepParentState(parentState, nextNode);
         }
     }

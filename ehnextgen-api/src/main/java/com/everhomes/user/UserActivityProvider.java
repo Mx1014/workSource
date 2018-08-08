@@ -2,6 +2,7 @@ package com.everhomes.user;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import org.jooq.Condition;
 
@@ -37,13 +38,13 @@ public interface UserActivityProvider {
 
     List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens);
 
-    List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator);
-
     void addUserProfile(UserProfile userProfile);
 
     List<UserProfile> findProfileByUid(Long uid);
 
     List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize,  Byte CommunityType, Byte userSourceType, String keywords);
+
+    List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType, Byte userSourceType, String keywords, Long startTime, Long endTime);
 
     void updateUserProfile(UserProfile userProfile);
 
@@ -58,7 +59,9 @@ public interface UserActivityProvider {
     void addFeedback(Feedback feedback,Long uid);
     
     List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte targetType, Byte status, int pageSize);
-    
+
+    List<Feedback> ListFeedbacksByNamespaceId(Integer namespaceId);
+
     void updateFeedback(Feedback feedback);
     
     void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType);
@@ -113,9 +116,15 @@ public interface UserActivityProvider {
 
 	void createStatActiveUser(StatActiveUser stat);
 
+    List<UserActivity> listUserActivetys(ListingLocator locator, Integer count, ListingQueryBuilderCallback callback);
+
     List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
 
     UserActivity findLastUserActivity(Long uid);
 
     List<User> listNotInUserActivityUsers(Integer namespaceId);
+
+    void addActivities(List<UserActivity> activityList);
+
+    void deleteUserActivity(UserActivity activity);
 }

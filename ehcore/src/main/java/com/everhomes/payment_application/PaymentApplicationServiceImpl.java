@@ -23,8 +23,6 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.payment_application.*;
-import com.everhomes.rest.requisition.GetRequisitionDetailCommand;
-import com.everhomes.rest.requisition.GetRequisitionDetailResponse;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -33,18 +31,14 @@ import com.everhomes.supplier.WarehouseSupplier;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
-import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -174,7 +168,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             }
         }
 
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(application.getApplicantUid(), application.getApplicantOrgId());
         if(member != null) {
             dto.setApplicantName(member.getContactName());
         }

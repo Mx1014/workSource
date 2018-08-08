@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>formOriginId: 表单id</li>
+ * <li>namespaceId: 域空间id</li>
  * <li>organizationId: 公司id</li>
  * <li>detailId: 员工id</li>
  * <li>isExport: 0-no 1-yes</li>
@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetArchivesEmployeeCommand {
 
-    private Long formOriginId;
+    private Integer namespaceId;
 
     private Long organizationId;
 
@@ -23,19 +23,18 @@ public class GetArchivesEmployeeCommand {
     public GetArchivesEmployeeCommand() {
     }
 
-    public GetArchivesEmployeeCommand(Long formOriginId, Long organizationId, Long detailId, Integer isExport) {
-        this.formOriginId = formOriginId;
+    public GetArchivesEmployeeCommand(Long organizationId, Long detailId, Integer isExport) {
         this.organizationId = organizationId;
         this.detailId = detailId;
         this.isExport = isExport;
     }
 
-    public Long getFormOriginId() {
-        return formOriginId;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {

@@ -19,6 +19,7 @@ public class RequestRelocationCommand {
     private String requestorName;
     private String contactPhone;
     private Long relocationDate;
+    private String orgOwnerType;
 
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
@@ -93,6 +94,14 @@ public class RequestRelocationCommand {
 
     public void setRelocationDate(Long relocationDate) {
         this.relocationDate = relocationDate;
+    }
+
+    public String getOrgOwnerType() {
+        return orgOwnerType;
+    }
+
+    public void setOrgOwnerType(String orgOwnerType) {
+        this.orgOwnerType = orgOwnerType;
     }
 
     public List<RelocationRequestItemDTO> getItems() {

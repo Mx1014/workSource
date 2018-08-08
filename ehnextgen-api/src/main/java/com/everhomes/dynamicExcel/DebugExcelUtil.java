@@ -18,6 +18,10 @@ public class DebugExcelUtil {
     ) throws Exception {
         // 生成一个表格
         Sheet sheet = workbook.createSheet();
+        // add by jiarui 2018/6/22 format all cell to text
+        CellStyle style =  workbook.createCellStyle();
+        DataFormat format =  workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("@"));
         workbook.setSheetName(sheetNum, sheetName);
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 30);
@@ -42,9 +46,10 @@ public class DebugExcelUtil {
         style_m.setWrapText(true);
         //sheet的样式
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
-        sheet.addMergedRegion(cra);
+        int initIndex = 0;
         //说明是否添加
         if(!StringUtils.isEmpty(intro)){
+            sheet.addMergedRegion(cra);
             CellStyle introStyle = workbook.createCellStyle();
             introStyle.setWrapText(true);
             introStyle.setAlignment(HorizontalAlignment.LEFT);
@@ -60,10 +65,11 @@ public class DebugExcelUtil {
             introCell.setCellStyle(introStyle);
             introCell.setCellValue(intro);
             introCell.setCellType(CellType.STRING);
+            initIndex = 1;
         }
 
         // 标题构建
-        Row row = sheet.createRow(1);
+        Row row = sheet.createRow(initIndex);
         for (int i = 0; i < fields.size(); i++) {
             Cell cell = row.createCell((short) i);
             DynamicField f = fields.get(i);
@@ -76,9 +82,10 @@ public class DebugExcelUtil {
         }
         // 遍历集合数据，产生数据行
         if (data != null && data.size() > 0) {
-            int index = 1;
+            int index = initIndex;
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
+                row.setRowStyle(style);
                 int cellIndex = 0;
                 for (int i = 0; i < fields.size(); i++) {
                     String cellContent = rowContent.get(i);

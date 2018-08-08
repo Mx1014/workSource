@@ -2,12 +2,17 @@
 package com.everhomes.sms;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.Tuple;
+import com.everhomes.whitelist.WhiteListProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
  * @author Kelven Yang
  */
 @Component
+@DependsOn
 public class SmsProviderImpl implements SmsProvider {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
@@ -56,6 +62,12 @@ public class SmsProviderImpl implements SmsProvider {
 
     @Autowired
     private SmsLogProvider smsLogProvider;
+
+    @Autowired
+    private WhiteListProvider whiteListProvider;
+
+    @Autowired
+    protected LocaleTemplateService localeTemplateService;
 
     @Autowired
     public void setHandlers(Map<String, SmsHandlerResolver> resolverMap) {
@@ -101,6 +113,9 @@ public class SmsProviderImpl implements SmsProvider {
                                        int templateId, String templateLocale,
                                        List<Tuple<String, Object>> variables, int retryTimes) {
         Map<SmsHandler, String[]> handlersMap;
+
+        //白名单过滤 add by yanlong.liang
+        phoneNumbers = whiteListFilter(handlerName,namespaceId, phoneNumbers, templateScope, templateId, templateLocale);
 
         phoneNumbers = normalize(phoneNumbers);
         // validate(phoneNumbers);
@@ -262,5 +277,42 @@ public class SmsProviderImpl implements SmsProvider {
 
     private void publishEvent(SmsCallback callback) {
         applicationEventPublisher.publishEvent(new SendSmsEvent(callback));
+    }
+
+    private String[] whiteListFilter(String handleName, Integer namespaceId,
+                                     String[] phoneNumbers, String templateScope,
+                                     int templateId, String templateLocale) {
+        if (phoneNumbers == null) {
+            throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
+        }
+        //只有在测试环境中才启用短信白名单
+        if ("true".equals(configurationProvider.getValue("sms.whitelist.test",""))) {
+            List<String> whiteListPhones = new ArrayList<>();
+            List<String> allPhoneNumbers = whiteListProvider.listAllWhiteList(namespaceId);
+            for (String phoneNumber : phoneNumbers) {
+                if (allPhoneNumbers.contains(phoneNumber)) {
+                    whiteListPhones.add(phoneNumber);
+                }else {
+                    String signScope = SmsTemplateCode.SCOPE + ".sign";
+                    LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(
+                            namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
+                    SmsLog smsLog = new SmsLog();
+                    smsLog.setHandler("not_in_whitelist");
+                    smsLog.setMobile(phoneNumber);
+                    smsLog.setNamespaceId(namespaceId);
+                    smsLog.setScope(templateScope);
+                    smsLog.setCode(templateId);
+                    smsLog.setLocale(templateLocale);
+                    smsLog.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+                    smsLog.setResult("手机号码不在白名单中");
+                    if (sign != null) {
+                        smsLog.setText(sign.getText());
+                    }
+                    smsLogProvider.createSmsLog(smsLog);
+                }
+            }
+            return whiteListPhones.toArray(new String[whiteListPhones.size()]);
+        }
+        return phoneNumbers;
     }
 }

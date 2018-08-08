@@ -5,6 +5,7 @@ import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.message.MessageProvider;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
@@ -46,10 +47,8 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRuleFlowMap;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
-import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
-import com.everhomes.server.schema.tables.pojos.EhArchivesLogs;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
@@ -206,7 +205,6 @@ import com.everhomes.server.schema.tables.pojos.EhForumServiceTypes;
 import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
-import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.pojos.EhGroupMemberLogs;
@@ -583,6 +581,9 @@ public class SequenceServiceImpl implements SequenceService {
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
 
+    @Autowired
+    private MessageProvider messageProvider;
+
     private final Schema[] schemas = new Schema[] {
             com.everhomes.schema.Ehcore.EHCORE,
             com.everhomes.server.schema.Ehcore.EHCORE
@@ -670,6 +671,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
         syncUserAccountName();
+
+        syncActiveAppId();
+
+        syncMessageIndexId();
 
         syncAuthorizationControlId();
 
@@ -2495,23 +2500,9 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.max()).from(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhGeneralFormGroups.class, Tables.EH_GENERAL_FORM_GROUPS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_GENERAL_FORM_GROUPS.ID.max()).from(Tables.EH_GENERAL_FORM_GROUPS).fetchOne().value1();
-        });
-
         syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
         });
-
-        syncTableSequence(null, EhArchivesConfigurations.class, Tables.EH_ARCHIVES_CONFIGURATIONS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_CONFIGURATIONS.ID.max()).from(Tables.EH_ARCHIVES_CONFIGURATIONS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesLogs.class, Tables.EH_ARCHIVES_LOGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_LOGS.ID.max()).from(Tables.EH_ARCHIVES_LOGS).fetchOne().value1();
-        });
-
-
 
         syncTableSequence(null, EhPaymentChargingStandards.class, Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.max())
@@ -2798,6 +2789,22 @@ public class SequenceServiceImpl implements SequenceService {
             long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("maxSyncActiveAppId sequence, key=" + key + ", newSequence=" + (maxSyncActiveAppId + 1)
+                        + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
+        }
+    }
+
+    private void syncMessageIndexId() {
+        long maxMessageIndexId = 0;
+        maxMessageIndexId = this.messageProvider.getMaxMessageIndexId();
+
+        if (maxMessageIndexId > 0) {
+            String key = "messageIndexId";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxMessageIndexId + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("syncMessageIndexId sequence, key=" + key + ", newSequence=" + (maxMessageIndexId + 1)
                         + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }

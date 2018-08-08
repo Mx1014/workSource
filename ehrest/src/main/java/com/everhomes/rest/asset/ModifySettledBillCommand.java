@@ -10,11 +10,13 @@ import com.everhomes.discover.ItemType;
  *<ul>
  * <li>billId:账单id</li>
  * <li>invoiceNum:发票编号</li>
+ * <li>noticeTel:催缴联系号码</li>
  *</ul>
  */
 public class ModifySettledBillCommand {
     private Long billId;
     private String invoiceNum;
+    private String noticeTel;
 
     public Long getBillId() {
         return billId;
@@ -31,4 +33,12 @@ public class ModifySettledBillCommand {
     public void setInvoiceNum(String invoiceNum) {
         this.invoiceNum = invoiceNum;
     }
+
+	public String getNoticeTel() {
+		return noticeTel;
+	}
+
+	public void setNoticeTel(String noticeTel) {
+		this.noticeTel = noticeTel;
+	}
 }

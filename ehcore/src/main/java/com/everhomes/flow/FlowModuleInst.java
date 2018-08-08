@@ -1,8 +1,9 @@
 package com.everhomes.flow;
 
 public class FlowModuleInst implements Comparable<FlowModuleInst> {
+
 	private FlowModuleInfo info;
-	private FlowModuleListener listener;
+	private FlowModuleListener moduleListener;
 
 	public FlowModuleInfo getInfo() {
 		return info;
@@ -12,15 +13,15 @@ public class FlowModuleInst implements Comparable<FlowModuleInst> {
 		this.info = info;
 	}
 
-	public FlowModuleListener getListener() {
-		return listener;
-	}
+    public FlowModuleListener getModuleListener() {
+        return moduleListener;
+    }
 
-	public void setListener(FlowModuleListener listener) {
-		this.listener = listener;
-	}
+    public void setModuleListener(FlowModuleListener moduleListener) {
+        this.moduleListener = moduleListener;
+    }
 
-	@Override
+    @Override
 	public int compareTo(FlowModuleInst o) {
 		return getInfo().compareTo(o.getInfo());
 	}

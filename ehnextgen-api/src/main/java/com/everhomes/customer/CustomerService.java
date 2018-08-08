@@ -1,5 +1,9 @@
 package com.everhomes.customer;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
@@ -20,14 +24,18 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTalentDTO;
@@ -87,6 +95,8 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.ListCustomerEventsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
 import com.everhomes.rest.customer.ListCustomerTaxesCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
@@ -98,7 +108,9 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.SyncResultViewedCommand;
 import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
 import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
@@ -115,13 +127,12 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -335,6 +346,8 @@ public interface CustomerService {
 
     void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
 
+    void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId);
+
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
     void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member);
@@ -347,4 +360,30 @@ public interface CustomerService {
 
     String syncResultViewed(SyncResultViewedCommand cmd);
     Byte checkCustomerCurrentUserAdmin(ListCommnutyRelatedMembersCommand cmd);
+
+    void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+
+    void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
+
+    List<OrganizationContactDTO> listOrganizationAdmin(ListServiceModuleAdministratorsCommand cmd);
+
+    void syncOrganizationToCustomer(SyncCustomerDataCommand cmd);
+
+    HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse);
+
+    EnterpriseCustomerDTO getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd);
+
+    void deletePotentialCustomer(DeleteEnterpriseCommand cmd);
+
+    CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd);
+
+    void setSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerConfigurationDTO> listSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerExpandItemDTO> listExpandItems(CustomerConfigurationCommand cmd);
+
+    List<CustomerTalentDTO> listPotentialTalent(DeleteEnterpriseCommand cmd);
+
+    void updatePotentialCustomer(DeleteEnterpriseCommand cmd);
 }

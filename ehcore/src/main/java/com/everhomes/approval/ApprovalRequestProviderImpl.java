@@ -1,18 +1,23 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.ApprovalRequestCondition;
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
+import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ListUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -25,22 +30,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.ApprovalQueryType;
-import com.everhomes.rest.approval.ApprovalRequestCondition;
-import com.everhomes.rest.approval.ApprovalStatus;
-import com.everhomes.rest.approval.ApprovalType;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
-import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.ListUtils;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component

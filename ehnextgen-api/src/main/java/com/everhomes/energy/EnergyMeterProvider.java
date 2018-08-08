@@ -51,4 +51,6 @@ public interface EnergyMeterProvider {
     EnergyMeter findByNumber(Long communityId, String number);
 
     List<EnergyMeter> listAutoReadingMeters();
+
+    List<EnergyMeter> listAutoReadingMetersByCommunityId(Long communityId);
 }

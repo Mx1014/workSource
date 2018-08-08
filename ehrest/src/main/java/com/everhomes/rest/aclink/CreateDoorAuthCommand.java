@@ -43,6 +43,8 @@ public class CreateDoorAuthCommand {
     private Integer namespaceId;
     private String phone;
     private String authMethod;
+
+    private String keyU;
     
     
     public Long getUserId() {
@@ -138,6 +140,15 @@ public class CreateDoorAuthCommand {
     public void setOperatorOrgId(Long operatorOrgId) {
         this.operatorOrgId = operatorOrgId;
     }
+
+    public String getKeyU() {
+        return keyU;
+    }
+
+    public void setKeyU(String keyU) {
+        this.keyU = keyU;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

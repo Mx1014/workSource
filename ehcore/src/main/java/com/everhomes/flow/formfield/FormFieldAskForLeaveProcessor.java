@@ -1,12 +1,9 @@
 package com.everhomes.flow.formfield;
 
 import com.alibaba.fastjson.JSON;
-import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowConditionVariable;
 import com.everhomes.flow.FormFieldProcessor;
-import com.everhomes.flow.conditionvariable.FlowConditionDateVariable;
 import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
@@ -14,19 +11,13 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormAskForLeaveValue;
+import com.everhomes.rest.enterpriseApproval.ComponentAskForLeaveValue;
 import com.everhomes.techpark.punch.PunchService;
-import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,7 +76,7 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormAskForLeaveValue askForLeave = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAskForLeaveValue.class);
+        ComponentAskForLeaveValue askForLeave = JSON.parseObject(fieldDTO.getFieldValue(), ComponentAskForLeaveValue.class);
         if ("请假类型".equals(variable)) {
             return new FlowConditionStringVariable(askForLeave.getRestName());
         } else if ("开始时间".equals(variable)) {

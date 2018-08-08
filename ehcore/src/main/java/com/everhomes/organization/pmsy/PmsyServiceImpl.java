@@ -1,34 +1,45 @@
 package com.everhomes.organization.pmsy;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-
 import java.util.stream.Collectors;
 
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetPayService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
@@ -36,18 +47,19 @@ import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
 import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.PmBillsOrdersDTO;
+import com.everhomes.rest.pmsy.PmsyBillItemDTO;
 import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
-import com.everhomes.rest.pmsy.PmsyBillItemDTO;
+import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
-import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyPayerStatus;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
-import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -68,6 +80,12 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private AssetPayService assetPayService;
+	
+	@Autowired
+    private DbProvider dbProvider;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -231,18 +249,18 @@ public class PmsyServiceImpl implements PmsyService{
 			newMonthlyBill.setRequests(newRequests);
 			requests.add(newMonthlyBill);
 		}
-		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
 		if(pmsyCommunity == null){
 			LOGGER.error("pmsyCommunity relation is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"pmsyCommunity relation is not exist.");
-		}
-		response.setContact(pmsyCommunity.getContact());
+		}*/
+		//response.setContact(pmsyCommunity.getContact());
 		response.setCustomerId(cmd.getCustomerId());
 		response.setMonthCount(calculateMonthSet.size());
 		response.setPayerId(cmd.getPayerId());
 		response.setResourceId(cmd.getResourceId());
-		response.setBillTip(pmsyCommunity.getBillTip());
+		//response.setBillTip(pmsyCommunity.getBillTip());
 		response.setTotalAmount(totalAmount);
 		response.setProjectId(cmd.getProjectId());
 		//按时间排序
@@ -263,44 +281,75 @@ public class PmsyServiceImpl implements PmsyService{
 		if(monthlyDebtAmount == null)
 			monthlyDebtAmount = new BigDecimal(0);
 		
-		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
-				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");
-		Gson gson = new Gson();
-		Map map = gson.fromJson(json, Map.class);
-		List list = (List) map.get("UserRev_GetFeeList");
-		Map map2 = (Map) list.get(0);
-		List list2 = (List) map2.get("Syswin");
+		String url = configProvider.getValue("haian.siyuan", "");
 		
-		for(Object o:list2){
-			Map map3 = (Map) o;
-			if(!cmd.getResourceId().equals((String)map3.get("ResID")))
-				continue;
-			Long billDateStr = StringToTime((String)map3.get("RepYears"));
-			if(cmd.getBillDateStr().longValue() != billDateStr.longValue())
-				continue;
-			PmsyBillItemDTO dto = new PmsyBillItemDTO();
-			dto.setCustomerId(cmd.getCustomerId());
-			dto.setBillId((String)map3.get("ID"));
+		/*String json = PmsyHttpUtil.post(url,"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
+				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");*/
+		
+		Map<String, String> params = new HashMap<String, String>();
+		try {
+			params.put("strToken", "syswin");
+			params.put("p0", "UserRev_GetFeeList");
+			params.put("p1", cmd.getCustomerId());
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("siyuan->/pmsy/getPmsyBills->getMonthlyPmBill()-TimeToString(), billDateStr={}, TimeToString={}",
+    					cmd.getBillDateStr(), cmd.getBillDateStr());
+    		}
+			params.put("p2", cmd.getBillDateStr());
+			params.put("p3", cmd.getBillDateStr());
+			params.put("p4", cmd.getProjectId());
+			params.put("p5", "01");
+			params.put("p6", "");
+			params.put("p7", "");
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Request to siyuan, url={}, param={}", url, params);
+    		}
+			String result = HttpUtils.post(url, params, 600, false);
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Response from siyuan, result={}", result);
+    		}
+			String json = result.substring(result.indexOf(">{")+1, result.indexOf("</string>"));
+			if(LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Response from siyuan, result->substring={}", json);
+    		}
+			Gson gson = new Gson();
+			Map map = gson.fromJson(json, Map.class);
+			List list = (List) map.get("UserRev_GetFeeList");
+			Map map2 = (Map) list.get(0);
+			List list2 = (List) map2.get("Syswin");
+			for(Object o:list2){
+				Map map3 = (Map) o;
+				if(!cmd.getResourceId().equals((String)map3.get("ResID")))
+					continue;
+				Long billDateStr = StringToTime((String)map3.get("RepYears"));
+				if(!cmd.getBillDateStr().equals((String)map3.get("RepYears")))
+					continue;
+				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setCustomerId(cmd.getCustomerId());
+				dto.setBillId((String)map3.get("ID"));
+					
+				dto.setBillDateStr(billDateStr);
+				dto.setItemName((String)map3.get("IpItemName"));
+				BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
+				BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
+				BigDecimal receivableAmount = priRev.add(lFRev);
+				dto.setReceivableAmount(receivableAmount);
+				BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
+				BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
+				BigDecimal debtAmount = priFailures.add(lFFailures);
+				dto.setDebtAmount(debtAmount);
 				
-			dto.setBillDateStr(billDateStr);
-			dto.setItemName((String)map3.get("IpItemName"));
-			BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
-			BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
-			BigDecimal receivableAmount = priRev.add(lFRev);
-			dto.setReceivableAmount(receivableAmount);
-			BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
-			BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
-			BigDecimal debtAmount = priFailures.add(lFFailures);
-			dto.setDebtAmount(debtAmount);
-			
-			requests.add(dto);
-			monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
-			monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
-			
-			mb.setBillDateStr(billDateStr);
+				requests.add(dto);
+				monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+				monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+				
+				mb.setBillDateStr(billDateStr);
+			}
+			mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+			mb.setMonthlyDebtAmount(monthlyDebtAmount);
+		} catch (Exception e) {
+			LOGGER.debug("getMonthlyPmBill from siyuan, url={}, param={}, exception={}", url, params, e);
 		}
-		mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
-		mb.setMonthlyDebtAmount(monthlyDebtAmount);
 		return mb;
 	}
 	
@@ -387,23 +436,77 @@ public class PmsyServiceImpl implements PmsyService{
 	@Override
 	public CommonOrderDTO createPmBillOrder(CreatePmsyBillOrderCommand cmd){
 		
+		PmsyOrder order = createPmsyOrder(cmd);
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(order.getUserName());
+		orderCmd.setOrderNo(order.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		orderCmd.setSubject("物业缴费订单简要描述");
+		orderCmd.setTotalFee(order.getOrderAmount());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+	}
+	
+	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
+		PmsyOrder order = createPmsyOrder(cmd);
+		
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		preOrderCommand.setOrderId(order.getId());
+		Long amount = changePayAmount(order.getOrderAmount());
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(UserContext.currentUserId());
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+		//preOrderCommand.setNamespaceId(999993);//杨崇鑫用于测试
+		//preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+		
+		//通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
+        query.addFrom(t);
+        query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
+        query.fetch().map(r -> {
+            preOrderCommand.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));
+            preOrderCommand.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));
+            return null;
+        });
+		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
+		return callBack;
+	}
+	
+	private PmsyOrder createPmsyOrder(CreatePmsyBillOrderCommand cmd){
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.current().getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = user.getId();
 		
-		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
 		if(pmsyCommunity == null){
 			LOGGER.error("pmsyCommunity relation is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"pmsyCommunity relation is not exist.");
-		}
+		}*/
 		PmsyPayer payer = pmsyProvider.findPmPayersById(cmd.getPmPayerId());
 		
 		PmsyOrder order = new PmsyOrder();
 		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		order.setCreatorUid(userId);
 		order.setNamespaceId(namespaceId);
-		order.setOwnerId(pmsyCommunity.getCommunityId());
+		//order.setOwnerId(pmsyCommunity.getCommunityId());
 		order.setOwnerType(cmd.getOwnerType());
 		order.setStatus(PmsyOrderStatus.UNPAID.getCode());
 		order.setUserContact(payer.getUserContact());
@@ -445,23 +548,7 @@ public class PmsyServiceImpl implements PmsyService{
 			
 		}
 		pmsyProvider.createPmsyOrderItem(pmsyOrderItemList);
-		
-		//调用统一处理订单接口，返回统一订单格式
-		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(order.getUserName());
-		orderCmd.setOrderNo(order.getId().toString());
-		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
-		orderCmd.setSubject("物业缴费订单简要描述");
-		orderCmd.setTotalFee(order.getOrderAmount());
-		CommonOrderDTO dto = null;
-		try {
-			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-		} catch (Exception e) {
-			LOGGER.error("convertToCommonOrder is fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"convertToCommonOrder is fail.");
-		}
-		return dto;
+		return order;
 	}
 	
 	@Override
@@ -493,4 +580,27 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		return null;
 	}
+	
+	private Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
+	private BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+    }
+	
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	PaymentCallBackHandler handler = PlatformContext.getComponent(
+    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PM_SIYUAN_CODE);
+    	//支付模块回调接口，通知支付结果
+    	assetPayService.payNotify(cmd, handler);
+    }
 }

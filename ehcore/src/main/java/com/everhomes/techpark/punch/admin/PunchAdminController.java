@@ -1144,5 +1144,16 @@ public class PunchAdminController extends ControllerBase {
         ImportFileTaskDTO dto = punchService.importVacationBalances(files, cmd);
         return new RestResponse(dto);
     }
+    
+    /**
+     * <p>刷新punchLog的应打卡时间</p>
+     * <b>URL: /punch/addPunchLogShouldPunchTime</b>
+     */
+    @RequestMapping("addPunchLogShouldPunchTime")
+    @RestReturn(String.class)
+    public RestResponse addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd) {
+        punchService.addPunchLogShouldPunchTime( cmd);
+        return new RestResponse();
+    }
 
 }

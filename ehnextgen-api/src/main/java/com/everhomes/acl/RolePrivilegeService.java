@@ -165,6 +165,7 @@ public interface RolePrivilegeService {
 	 * 创建业务模块管理员
 	 * @param cmd
      */
+   @Deprecated
 	void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
 
 
@@ -405,6 +406,7 @@ public interface RolePrivilegeService {
 	AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(
 			ListPrivilegesByRoleIdCommand cmd);
 
+   @Deprecated
 	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
 
 	void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd);
@@ -429,4 +431,20 @@ public interface RolePrivilegeService {
 
 	// 获取所有应用管理员的targetIds
 	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
+
+//	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
+
+	OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
+
+	GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd);
+
+	ListOrganizationContectDTOResponse listOrganizationSystemAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd);
+
+	void updateTopAdminstrator(CreateOrganizationAdminCommand cmd);
+
+	String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd);
+
+	boolean checkIsSystemOrAppAdmin(Long orgId, Long userId);
 }

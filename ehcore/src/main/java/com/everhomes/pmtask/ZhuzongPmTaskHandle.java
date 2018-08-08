@@ -34,6 +34,8 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
@@ -51,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ZHUZONG)
-public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
+public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuzongPmTaskHandle.class);
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     private static final String GET_ADDRESSES = "/phoneServer/QueryHouseByPhoneNumber";
@@ -65,10 +67,21 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle {
     private UserProvider userProvider;
     @Autowired
     BigCollectionProvider bigCollectionProvider;
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         httpclient = HttpClients.createDefault();
     }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+    
     @Override
     public Object getThirdAddress(HttpServletRequest req) {
         JSONObject params = new JSONObject();

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ import com.everhomes.rest.comment.AttachmentDTO;
 import com.everhomes.rest.comment.AttachmentDescriptor;
 import com.everhomes.rest.comment.CommentDTO;
 import com.everhomes.rest.comment.DeleteCommonCommentCommand;
+import com.everhomes.rest.comment.GetCommentCommand;
+import com.everhomes.rest.comment.GetCommentsResponse;
 import com.everhomes.rest.comment.ListCommentsCommand;
 import com.everhomes.rest.comment.ListCommentsResponse;
 import com.everhomes.rest.comment.OwnerTokenDTO;
@@ -233,4 +236,42 @@ public class ServiceAllianceCommentHandler implements CommentHandler {
 		//这里其实是更新状态。
 		this.commentProvider.deleteServiceAllianceComment(comment);
 	}
+	
+	
+	@Override
+	public GetCommentsResponse getComment(GetCommentCommand cmd) {
+
+		ServiceAllianceComment comment = commentProvider.findServiceAllianceCommentById(cmd.getCommentId());
+		if (null == comment) {
+			return new GetCommentsResponse();
+		}
+
+		// 评论附件
+		List<ServiceAllianceComment> comments = new ArrayList<>(1);
+		comments.add(comment);
+		List<Long> commentIds = comments.stream().map(r -> r.getId()).collect(Collectors.toList());
+		List<ServiceAllianceCommentAttachment> attachments = commentAttachmentProvider
+				.listServiceAllianceCommentAttachment(UserContext.getCurrentNamespaceId(), commentIds);
+
+		OwnerTokenDTO ownerTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(),
+				OwnerTokenDTO.class);
+		String key = String.valueOf(ownerTokenDto.getId());
+		Map<String, Integer> countmap = commentProvider.listServiceAllianceCommentCountByOwner(
+				UserContext.getCurrentNamespaceId(), ServiceAllianceOwnerType.SERVICE_ALLIANCE.getCode(),
+				new ArrayList<Long>(Arrays.asList(new Long[] { ownerTokenDto.getId() })));
+		// 评论数量
+		Long commentCount = Long.valueOf(countmap.get(key) == null ? 0 : countmap.get(key));
+
+		// 进行转换
+		List<CommentDTO> dtos = processDtos(comments, attachments, cmd.getOwnerToken());
+		if (CollectionUtils.isEmpty(dtos)) {
+			return new GetCommentsResponse();
+		}
+
+		GetCommentsResponse resp = new GetCommentsResponse();
+		resp.setCommentCount(commentCount);
+		resp.setComment(dtos.get(0));
+		return resp;
+	}
+	
 }

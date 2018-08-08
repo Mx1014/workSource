@@ -22,7 +22,7 @@ public class EnergyAutoReadingJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         LOGGER.info("start energy auto Reading task......");
-        energyConsumptionService.testAutoReading();
+        energyConsumptionService.meterAutoReading(true);
         LOGGER.info("finish  energy auto Reading task......");
 
     }

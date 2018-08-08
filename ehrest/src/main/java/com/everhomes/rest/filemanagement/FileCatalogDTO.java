@@ -1,13 +1,16 @@
 package com.everhomes.rest.filemanagement;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
  * <li>id: 目录id</li>
  * <li>name: 目录名称</li>
+ * <li>scopes: 可见范围列表 参考{@link com.everhomes.rest.filemanagement.FileCatalogScopeDTO}</li>
  * <li>downloadPermission: 下载权限 0-拒绝下载 1-允许下载</li>
  * <li>iconUrl: 图标url</li>
  * <li>createTime: 创建时间</li>
@@ -18,6 +21,9 @@ public class FileCatalogDTO {
     private Long id;
 
     private String name;
+
+    @ItemType(FileCatalogScopeDTO.class)
+    private List<FileCatalogScopeDTO> scopes;
 
     private Byte downloadPermission;
 
@@ -42,6 +48,14 @@ public class FileCatalogDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<FileCatalogScopeDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<FileCatalogScopeDTO> scopes) {
+        this.scopes = scopes;
     }
 
     public Byte getDownloadPermission() {

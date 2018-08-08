@@ -39,6 +39,8 @@ import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.community.CommunityProvider;
@@ -58,7 +60,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
-public class QuestionnaireServiceImpl implements QuestionnaireService {
+public class QuestionnaireServiceImpl implements QuestionnaireService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionnaireServiceImpl.class);
 
 	@Autowired
@@ -106,8 +108,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Autowired
 	private QuestionnaireAsynSendMessageService questionnaireAsynSendMessageService;
-
-	@PostConstruct
+	
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup(){
 		//启动定时任务
 		String triggerName = "questionnarieSendMessage";
@@ -122,6 +126,14 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
 		}
 	}
+	
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+	
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
 //		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());

@@ -8,7 +8,12 @@ public interface FeedbackHandler {
 
     String FEEDBACKHANDLER = "FeedbackHandler-";
     String POST = "1";
+    
     String NEWS = "4";
+    String NEWS_COMMENT = "41";  //园区快讯评论
+    
+    String ALLIANCE = "5"; //占位，暂不用
+    String ALLIANCE_COMMENT = "51";
 
     /**
      * 举报前置方法

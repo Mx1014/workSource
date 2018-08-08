@@ -37,6 +37,8 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.app.App;
@@ -136,7 +138,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class RentalServiceImpl implements RentalService {
+public class RentalServiceImpl implements RentalService, ApplicationListener<ContextRefreshedEvent> {
 	final String downloadDir ="\\download\\";
 
 	private static final Logger LOGGER = LoggerFactory
@@ -151,9 +153,18 @@ public class RentalServiceImpl implements RentalService {
     @Autowired
     WorkerPoolFactory workerPoolFactory;
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
 	// N分钟后取消

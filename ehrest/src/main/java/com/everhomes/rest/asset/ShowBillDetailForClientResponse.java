@@ -14,6 +14,7 @@ import java.util.List;
  * <li>amountOwed:待缴金额</li>
  * <li>datestr:账期</li>
  * <li>showBillDetailForClientDTOList:账单列表，参考{@link com.everhomes.rest.asset.ShowBillDetailForClientDTO}</li>
+ * <li>isUploadCertificate:是否上传了缴费凭证（0：否，1：是）</li>
  *</ul>
  */
 public class ShowBillDetailForClientResponse {
@@ -22,7 +23,18 @@ public class ShowBillDetailForClientResponse {
     private String datestr;
     @ItemType(ShowBillDetailForClientDTO.class)
     private List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList;
-    @Override
+    //添加是否上传了缴费凭证的字段
+    private  Byte isUploadCertificate;
+    
+    public Byte getIsUploadCertificate() {
+		return isUploadCertificate;
+	}
+
+	public void setIsUploadCertificate(Byte isUploadCertificate) {
+		this.isUploadCertificate = isUploadCertificate;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

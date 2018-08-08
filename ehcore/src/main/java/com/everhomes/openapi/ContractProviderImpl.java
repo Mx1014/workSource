@@ -1,62 +1,91 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.contract.ContractAttachment;
+import com.everhomes.contract.ContractCategory;
+import com.everhomes.contract.ContractChargingChange;
+import com.everhomes.contract.ContractChargingItem;
+import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.server.schema.tables.*;
-import com.everhomes.server.schema.tables.EhContractAttachments;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhContractEvents;
+import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhContractsDao;
+import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
-
-import org.jooq.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhContractsDao;
-import com.everhomes.util.ConvertHelper;
-import org.springframework.util.StringUtils;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldItem;
+import com.everhomes.varField.FieldParams;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -67,7 +96,22 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
-
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private FieldService fieldService;
+	
+	@Autowired
+	private FieldProvider fieldProvider;
+	
+	@Autowired
+	private AssetProvider assetProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
 	@Override
 	public void createContract(Contract contract) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContracts.class));
@@ -128,14 +172,26 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers) {
-		Result<Record> result = getReadOnlyContext().select()
-			.from(Tables.EH_CONTRACTS)
-			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
-			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
-			.fetch();
+	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers, Long categoryId) {
+		Result<Record> result = null;
+		if(categoryId == null || categoryId.longValue() <= 0L) {
+		    result = getReadOnlyContext().select()
+		            .from(Tables.EH_CONTRACTS)
+		            .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		            .and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+		            .and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+		            .orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+		            .fetch();
+		} else {
+    		result = getReadOnlyContext().select()
+    			.from(Tables.EH_CONTRACTS)
+    			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+    			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+    			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+    			.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+    			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+    			.fetch();
+		}
 		
 		if (result != null) {
 			return result.map(r->ConvertHelper.convert(r, Contract.class));
@@ -145,14 +201,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber) {
-		Record result = getReadOnlyContext().select()
+	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 //				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
-				.fetchAny();
-
+				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		
+		Record result = query.fetchAny();
 		if (result != null) {
 			return ConvertHelper.convert(result, Contract.class);
 		}
@@ -208,13 +268,40 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize) {
+	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize, Long categoryId) {
+	    Result<Record> result = null;
+	    if(categoryId == null || categoryId.longValue() >= 0L) {
+    		result = getReadOnlyContext().select()
+    				.from(Tables.EH_CONTRACTS)
+    				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+    				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+    				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+    				.limit(from, pageSize)
+    				.fetch();
+	    } else {
+	        result = getReadOnlyContext().select()
+                    .from(Tables.EH_CONTRACTS)
+                    .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                    .and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+                    .orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+                    .limit(from, pageSize)
+                    .fetch();
+	    }
+			
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
+	
+	@Override
+	public List<Contract> listContractByNamespaceId(Integer namespaceId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
-				.limit(from, pageSize)
 				.fetch();
 			
 		if (result != null) {
@@ -225,11 +312,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 	
 	@Override
-	public List<Contract> listContractByOrganizationId(Long organizationId) {
+	public List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc()) 
 				.fetch();
 			
@@ -314,7 +402,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status) {
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
@@ -328,6 +416,9 @@ public class ContractProviderImpl implements ContractProvider {
 		} else {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
 		}
+		/*if(categoryId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -401,11 +492,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId) {
+	public List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId) {
 		return getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
 				.fetch()
 				.map(r->ConvertHelper.convert(r, Contract.class));
 	}
@@ -479,13 +571,15 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public String findContractIdByThirdPartyId(String contractId, String code) {
 		DSLContext context = getReadOnlyContext();
-		Long zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
+		List<Long> zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(contractId))
 				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(code))
-				.fetchOne(Tables.EH_CONTRACTS.ID);
-		if(zuolinContractId == null) return null;
-		return String.valueOf(zuolinContractId);
+				.fetch(Tables.EH_CONTRACTS.ID);
+		if(zuolinContractId.size() > 0) {
+			return String.valueOf(zuolinContractId.get(0));
+		}
+		return null;
 	}
 
 	@Override
@@ -545,11 +639,19 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId) {
-
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
 		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
+		if(payorreceiveContractType != null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.PAYORRECEIVE_CONTRACT_TYPE.eq(payorreceiveContractType));
+		}
+		if(categoryId != null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.eq(categoryId));
+		}
+		if (categoryId == null) {
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.CATEGORY_ID.isNull());
+		}
 		if(communityId != null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
 		}
@@ -649,6 +751,534 @@ public class ContractProviderImpl implements ContractProvider {
 		return result;
 	}
 
+	@Override
+	public void createContractCategory(ContractCategory contractCategory) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractCategories.class));
+		contractCategory.setId(id);
+		contractCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class, id));
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
+		dao.insert(contractCategory);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractCategories.class, id);
+	}
+	
+	@Override
+	public ContractCategory findContractCategoryById(Long categoryId) { 
+		assert(categoryId != null);
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(getReadOnlyContext().configuration());
+		return ConvertHelper.convert(dao.findById(categoryId), ContractCategory.class);
+	}
+	@Override
+	public void updateContractCategory(ContractCategory contractCategory) {
+		new EhContractCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(contractCategory);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
+	}
+	
+	//显示合同日志
+	@Override
+	public List<ContractEvents> listContractEvents(Long contractId) {
+		List<ContractEvents> result = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class));
+        context.select()
+        	   .from(Tables.EH_CONTRACT_EVENTS)
+        	   .where(Tables.EH_CONTRACT_EVENTS.CONTRACT_ID.eq(contractId))
+        	   .orderBy(Tables.EH_CONTRACT_EVENTS.OPEARTE_TIME.desc())
+        	   .fetch()
+        	   .map(r->{
+        		   ContractEvents contractEvents = ConvertHelper.convert(r, ContractEvents.class);
+        		   result.add(contractEvents);
+        		   return null;
+        	   });
+		return result;
+	}
+	
+	//记录合同修改日志 by tangcen
+	@Override
+	public void saveContractEvent(int opearteType, Contract contract, Contract comparedContract) {	
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
+		String content = null;
+		Map<String,Object> map = new HashMap<String,Object>();
+		switch(opearteType){
+			case ContractTrackingTemplateCode.CONTRACT_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_UPDATE:
+				content = compareContract(contract,comparedContract);
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_RENEW:
+				map.put("contractName", comparedContract.getName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_RENEW , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_CHANGE:
+				map.put("contractName", comparedContract.getName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			if (opearteType==ContractTrackingTemplateCode.CONTRACT_RENEW||opearteType==ContractTrackingTemplateCode.CONTRACT_CHANGE) {
+				event.setOpearteTime(comparedContract.getUpdateTime());
+				//如果是续约合同或者是变更合同，则归为合同修改操作
+				opearteType=ContractTrackingTemplateCode.CONTRACT_UPDATE;
+			}else {
+				event.setOpearteTime(contract.getUpdateTime());
+			}
+			event.setOpearteType((byte)opearteType);
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        insertContractEvents(event);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutApartments(int opearteType, Contract contract, ContractBuildingMapping mapping) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		String content = null;
+		HashMap<String, String> dataMap = new HashMap<>();
+		switch(opearteType){
+			case ContractTrackingTemplateCode.APARTMENT_ADD : 
+				dataMap.put("apartmentName", mapping.getApartmentName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.APARTMENT_DELETE :
+				dataMap.put("apartmentName", mapping.getApartmentName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOpearteTime(contract.getUpdateTime());
+			//因为关联资产的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			event.setOpearteType((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE);
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        insertContractEvents(event);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		String content = null;
+		HashMap<String, String> dataMap = new HashMap<>();
+		switch(opearteType){
+		case ContractTrackingTemplateCode.APARTMENT_ADD : 
+			dataMap.put("apartmentName", newApartmnets.substring(1,newApartmnets.length()-1));
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+			break;
+		case ContractTrackingTemplateCode.APARTMENT_UPDATE :
+			dataMap.put("oldApartmnets", oldApartmnets.substring(1,oldApartmnets.length()-1));
+			dataMap.put("newApartmnets", newApartmnets.substring(1,newApartmnets.length()-1));
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+			break;
+		default :
+			break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOpearteTime(contract.getUpdateTime());
+			//因为关联资产的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			event.setOpearteType((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE);
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        insertContractEvents(event);
+		}
+	}
+	
+
+	@Override
+	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:UPDATE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String chargingItemName = assetProvider.findChargingItemNameById(contractChargingItem.getChargingItemId());
+		dataMap.put("chargingItemName", chargingItemName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.CHARGING_ITEM_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.CHARGING_ITEM_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为计价条款的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutAttachment(int opearteType, Contract contract, ContractAttachment contractAttachment){
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String attachmentName = contractAttachment.getName();
+		dataMap.put("attachmentName", attachmentName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.ATTACHMENT_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ATTACHMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.ATTACHMENT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ATTACHMENT_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为合同附件的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutChargingChange(int opearteType, Contract contract,ContractChargingChange contractChargingChange){
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String chargingChangeName = assetProvider.findChargingItemNameById(contractChargingChange.getChargingItemId());
+		dataMap.put("chargingChangeName", chargingChangeName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.ADJUST_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.ADJUST_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.ADJUST_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;	
+			case ContractTrackingTemplateCode.FREE_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.FREE_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.FREE_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为合同附件的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void insertContractEvents(ContractEvents event){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class, event.getId()));
+		EhContractEvents t = Tables.EH_CONTRACT_EVENTS;
+        context
+        	.insertInto(t, t.ID, t.NAMESPACE_ID, t.CONTRACT_ID, t.OPERATOR_UID, t.OPEARTE_TIME, t.OPEARTE_TYPE, t.CONTENT)
+        	.values(event.getId(),event.getNamespaceId(),
+        			event.getContractId(),event.getOperatorUid(),
+        			event.getOpearteTime(),event.getOpearteType(),
+        			event.getContent())
+        	.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractEvents.class, null);
+	}
+	
+	//保存合同日志 by tangcen
+	private void saveGeneralContractEvent(Byte opearteType,String content,Contract contract){
+		ContractEvents event = new ContractEvents(); 
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+		event.setId(id);
+		event.setContent(content);
+		event.setNamespaceId(UserContext.getCurrentNamespaceId());
+		event.setContractId(contract.getId());	
+		event.setOperatorUid(UserContext.currentUserId());
+		event.setOpearteTime(contract.getUpdateTime());
+		event.setOpearteType(opearteType);
+        LOGGER.info("saveContractEventWithInsert: " + event);
+        insertContractEvents(event);
+	}
+	
+	//比较已存在的contract和待修改的contract的区别 by tangcen
+	private String compareContract(Contract contract, Contract exist) {
+		//查出模板配置的参数
+		ListFieldCommand command = new ListFieldCommand();
+		command.setNamespaceId(contract.getNamespaceId());
+		command.setModuleName(ContractTrackingTemplateCode.MODULE_NAME);
+		command.setGroupPath(ContractTrackingTemplateCode.GROUP_PATH);
+		command.setCommunityId(contract.getCommunityId());
+		command.setCategoryId(contract.getCategoryId());
+		List<FieldDTO> fields = fieldService.listFields(command);
+		String  getPrefix = "get";
+		StringBuffer buffer = new StringBuffer();
+		if(null != fields && fields.size() > 0){
+			for(FieldDTO field : fields){
+				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
+				Method methodNew = ReflectionUtils.findMethod(contract.getClass(), getter);
+				Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+                String fieldType = field.getFieldType();
+				Object objNew = null;
+				Object objOld = null;
+				try {
+					if(null != methodNew && null != exist){
+						objNew = methodNew.invoke(contract, new Object[] {});
+						objOld = methodOld.invoke(exist, new Object[] {});
+					}
+				} catch (Exception e) {
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_TRACKING_NOT_EXIST,
+		                    "reflect exception");
+				}
+				
+				//处理 首付总额、押金 字段
+				if(null != objNew || null != objOld){
+					//解决前端传过来的数值和后端获取的数值不等的问题（比如前端传1000，后端获取的是1000.00,如不处理则会判断为不相等）
+					if(null != objNew && null != objOld){
+						if ("downpayment".equals(field.getFieldName()) || "deposit".equals(field.getFieldName())) {
+							BigDecimal newDigit = (BigDecimal)objNew;
+							BigDecimal oldDigit = (BigDecimal)objOld;
+							if (newDigit.compareTo(oldDigit)==0) {
+								continue;
+							}
+						}
+					}
+					
+					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
+						String  content = "";
+						String  newData = objNew == null ? "空" : objNew.toString();
+						String  oldData = objOld == null ? "空" : objOld.toString();
+                        LOGGER.debug("compareContract FieldName: {}; newData: {}; oldData: {}",
+                                field.getFieldName(), newData, oldData);
+						
+                        if(field.getFieldName().lastIndexOf("ItemId") > -1){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
+						//处理 合同状态 字段
+						if("status".equals(field.getFieldName())){
+							FieldItem fieldItemsNew = fieldProvider.findFieldItemByBusinessValue(field.getFieldId(),(Byte)objNew);
+							if(fieldItemsNew != null) {
+					        	newData = fieldItemsNew.getDisplayName();
+					        }
+							FieldItem fieldItemsOld = fieldProvider.findFieldItemByBusinessValue(field.getFieldId(),(Byte)objOld);
+							if(fieldItemsOld != null) {
+					        	oldData = fieldItemsOld.getDisplayName();
+					        }
+						}
+						//处理 退约经办人 字段
+						if("denunciationUid".equals(field.getFieldName())){
+							//用户可能不在组织架构中 所以用nickname
+				            if (objNew!=null) {
+				            	User userNew = userProvider.findUserById((Long)objNew);
+				            	if(userNew != null) {
+					            	newData = userNew.getNickName();
+					            }
+							}
+				            if (objOld!=null) {
+				            	User userOld = userProvider.findUserById((Long)objOld);
+					            if(userOld != null) {
+					            	oldData = userOld.getNickName();
+					            }
+							}
+						}
+						//templateId
+						if("templateId".equals(field.getFieldName())){
+							//获取模板的名字
+				            if (objNew!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objNew);
+				            	if(contractTemplateParent != null) {
+					            	newData = contractTemplateParent.getName();
+					            }
+							}
+				            if (objOld!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objOld);
+					            if(contractTemplateParent != null) {
+					            	oldData = contractTemplateParent.getName();
+					            }
+							}
+						}
+                        FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
+                        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            if(levelItemNew != null) {
+                                newData = levelItemNew.getItemDisplayName();
+                            }
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            if(levelItemOld != null) {
+                                oldData = levelItemOld.getItemDisplayName();
+                            }
+                        }
+                        if((params.getFieldParamType().equals("datetime"))){
+                            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            if (objNew != null) {
+                            	newData = sdf.format((Timestamp)objNew); 
+							}
+                            if (objOld != null) {
+                            	oldData = sdf.format((Timestamp)objOld);
+							} 
+                        }
+						Map<String,Object> map = new HashMap<String,Object>();
+						map.put("display", field.getFieldDisplayName());
+						map.put("oldData", oldData);
+						map.put("newData", newData);
+						content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_UPDATE, UserContext.current().getUser().getLocale(), map, "");
+						buffer.append(content);
+						buffer.append(";");
+					}
+				}
+			}
+		}
+		//去除最后一个分号
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+	}
+	
+
+	@Override
+	public boolean isNormal(Long cid) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ID.eq(cid))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			return false;
+		}
+		if(cids.size() == 1){
+            Byte aByte = cids.get(0);
+            if(aByte != 7 && aByte != 8 && aByte != 9 && aByte != 10){
+                return true;
+            }
+        }
+		return false;
+	}
+
+	@Override
+	public Long findContractCategoryIdByContractId(Long contractId) {
+		DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
+                .from(Tables.EH_CONTRACTS)
+                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
+                .fetchOne(Tables.EH_CONTRACTS.CATEGORY_ID);
+	}
+	
+	@Override
+	public void createContractTemplate(ContractTemplate contractTemplate) {
+        long id = this.dbProvider.allocPojoRecordId(EhContractTemplates.class);
+        contractTemplate.setId(id);
+        contractTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        contractTemplate.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        contractTemplate.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.insert(contractTemplate);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractTemplates.class, null);
+	}
+
+	@Override
+	public ContractTemplate findContractTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ContractTemplate.class);
+	}
+
+	@Override
+	public void updateContractTemplate(ContractTemplate contractTemplate) {
+		assert(contractTemplate.getId() != null);
+		contractTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractTemplate.setUpdateUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.update(contractTemplate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
+	}
+
+	@Override
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
+			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
+        EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
+        EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
+        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
+        
+		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
+		}
+		if(null != name && !"".equals(name)){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
+		}
+		if(null != categoryId){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
+		}
+		//取到最大的versionid
+		if (null != ownerId && ownerId != -1) {
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+		}else {
+			//查询所有的通用模板
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
+		}
+		
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
+
+		return contracttemplates;
+	}
+
+	@Override
+	public void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
+			Long ownerId, Long templateId) {
+		getReadWriteContext().update(Tables.EH_CONTRACTS)
+		.set(Tables.EH_CONTRACTS.TEMPLATE_ID, templateId)
+		.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_CONTRACTS.ID.eq(contractId))
+		.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+		.execute();
+	}
+
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
@@ -672,4 +1302,20 @@ public class ContractProviderImpl implements ContractProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public Boolean getContractTemplateById(Long id) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.TEMPLATE_ID.eq(id))
+				.and(Tables.EH_CONTRACTS.STATUS.notEqual(ContractTemplateStatus.INACTIVE.getCode()))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			//模板没有关联合同
+			return false;
+		}
+		
+		return true;
+	}
+
 }

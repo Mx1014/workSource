@@ -1,75 +1,84 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
- *     <li>communityId: 客户所属园区id</li>
- *     <li>customerNumber: 客户编码</li>
- *     <li>name: 客户名称</li>
- *     <li>nickName: 客户昵称</li>
- *     <li>categoryItemId: 客户类型id</li>
- *     <li>categoryItemName: 客户类型名</li>
- *     <li>levelItemId: 客户级别id</li>
- *     <li>levelItemName: 客户级别名</li>
- *     <li>sourceItemId: 来源途径id</li>
- *     <li>sourceItemName: 来源途径名</li>
- *     <li>contactAvatarUri: 联系人头像</li>
- *     <li>contactName: 联系人名称</li>
- *     <li>contactGenderItemId: 联系人性别id</li>
- *     <li>contactGenderItemName: 联系人性别名</li>
- *     <li>contactMobile: 联系人手机号码</li>
- *     <li>contactPhone: 联系人座机号码</li>
- *     <li>contactOffficePhone: 办公电话</li>
- *     <li>contactFamilyPhone: 家庭电话</li>
- *     <li>contactEmail: 电子邮件</li>
- *     <li>contactFax: 传真</li>
- *     <li>contactAddressId: 地址id</li>
- *     <li>contactAddress: 地址</li>
- *     <li>corpEmail: 企业邮箱</li>
- *     <li>corpWebsite: 企业网址</li>
- *     <li>corpRegAddress: 企业注册地址</li>
- *     <li>corpOpAddress: 企业运营地址</li>
- *     <li>corpLegalPerson: 法人代表</li>
- *     <li>corpRegCapital: 注册资金(万元)</li>
- *     <li>corpNatureItemId: 企业性质id</li>
- *     <li>corpNatureItemName: 企业性质</li>
- *     <li>corpScale: 企业规模</li>
- *     <li>corpIndustryItemId: 行业类型id</li>
- *     <li>corpIndustryItemName: 行业类型</li>
- *     <li>corpPurposeItemId: 企业定位id</li>
- *     <li>corpPurposeItemName: 企业定位</li>
- *     <li>corpAnnualTurnover: 年营业额（万元）</li>
- *     <li>corpBusinessScope: 营业范围</li>
- *     <li>corpBusinessLicense: 营业执照号</li>
- *     <li>corpSiteArea: 场地面积</li>
- *     <li>corpEntryDate: 入住园区日期</li>
- *     <li>corpProductCategoryItemId: 产品类型id</li>
- *     <li>corpProductCategoryItemName: 产品类型</li>
- *     <li>corpProductDesc: 主要技术及产品</li>
- *     <li>corpQualificationItemId: 企业资质认证id</li>
- *     <li>corpQualificationItemName: 企业资质认证</li>
- *     <li>corpLogoUri: 企业LOGO</li>
- *     <li>corpDescription: 企业简介</li>
- *     <li>corpEmployeeAmount: 员工总数</li>
- *     <li>corpEmployeeAmountMale: 男员工总数</li>
- *     <li>corpEmployeeAmountFemale: 女员工总数</li>
- *     <li>corpEmployeeAmountRd: 研发员工总数</li>
- *     <li>corpEmployeeReturneeRate: 海归人数占比(%)</li>
- *     <li>corpEmployeeAverageAge: 员工平均年龄</li>
- *     <li>corpManagerAverageAge: 高管平均年龄</li>
- *     <li>managerName: 总经理名称</li>
- *     <li>managerPhone: 总经理电话</li>
- *     <li>managerEmail: 总经理邮箱</li>
- *     <li>remark: 备注</li>
- *     <li>trackingUid: 跟进人UID</li>
- *     <li>propertyArea: 资产面积</li>
- *     <li>propertyUnitPrice: 资产单价</li>
- *     <li>propertyType: 资产类型</li>
- *     <li>longitude: 经度</li>
- *     <li>latitude: 纬度</li>
- *     <li>contactDuty:联系人职务</li>
- *     <li>namespaceId:域空间ID</li>
+ * <li>communityId: 客户所属园区id</li>
+ * <li>customerNumber: 客户编码</li>
+ * <li>name: 客户名称</li>
+ * <li>nickName: 客户昵称</li>
+ * <li>categoryItemId: 客户类型id</li>
+ * <li>categoryItemName: 客户类型名</li>
+ * <li>levelItemId: 客户级别id</li>
+ * <li>levelItemName: 客户级别名</li>
+ * <li>sourceItemId: 来源途径id</li>
+ * <li>sourceItemName: 来源途径名</li>
+ * <li>contactAvatarUri: 联系人头像</li>
+ * <li>contactName: 联系人名称</li>
+ * <li>contactGenderItemId: 联系人性别id</li>
+ * <li>contactGenderItemName: 联系人性别名</li>
+ * <li>contactMobile: 联系人手机号码</li>
+ * <li>contactPhone: 联系人座机号码</li>
+ * <li>contactOffficePhone: 办公电话</li>
+ * <li>contactFamilyPhone: 家庭电话</li>
+ * <li>contactEmail: 电子邮件</li>
+ * <li>contactFax: 传真</li>
+ * <li>contactAddressId: 地址id</li>
+ * <li>contactAddress: 地址</li>
+ * <li>corpEmail: 企业邮箱</li>
+ * <li>corpWebsite: 企业网址</li>
+ * <li>corpRegAddress: 企业注册地址</li>
+ * <li>corpOpAddress: 企业运营地址</li>
+ * <li>corpLegalPerson: 法人代表</li>
+ * <li>corpRegCapital: 注册资金(万元)</li>
+ * <li>corpNatureItemId: 企业性质id</li>
+ * <li>corpNatureItemName: 企业性质</li>
+ * <li>corpScale: 企业规模</li>
+ * <li>corpIndustryItemId: 行业类型id</li>
+ * <li>corpIndustryItemName: 行业类型</li>
+ * <li>corpPurposeItemId: 企业定位id</li>
+ * <li>corpPurposeItemName: 企业定位</li>
+ * <li>corpAnnualTurnover: 年营业额（万元）</li>
+ * <li>corpBusinessScope: 营业范围</li>
+ * <li>corpBusinessLicense: 营业执照号</li>
+ * <li>corpSiteArea: 场地面积</li>
+ * <li>corpEntryDate: 入住园区日期</li>
+ * <li>corpProductCategoryItemId: 产品类型id</li>
+ * <li>corpProductCategoryItemName: 产品类型</li>
+ * <li>corpProductDesc: 主要技术及产品</li>
+ * <li>corpQualificationItemId: 企业资质认证id</li>
+ * <li>corpQualificationItemName: 企业资质认证</li>
+ * <li>corpLogoUri: 企业LOGO</li>
+ * <li>corpDescription: 企业简介</li>
+ * <li>corpEmployeeAmount: 员工总数</li>
+ * <li>corpEmployeeAmountMale: 男员工总数</li>
+ * <li>corpEmployeeAmountFemale: 女员工总数</li>
+ * <li>corpEmployeeAmountRd: 研发员工总数</li>
+ * <li>corpEmployeeReturneeRate: 海归人数占比(%)</li>
+ * <li>corpEmployeeAverageAge: 员工平均年龄</li>
+ * <li>corpManagerAverageAge: 高管平均年龄</li>
+ * <li>managerName: 总经理名称</li>
+ * <li>managerPhone: 总经理电话</li>
+ * <li>managerEmail: 总经理邮箱</li>
+ * <li>remark: 备注</li>
+ * <li>trackingUid: 跟进人UID</li>
+ * <li>propertyArea: 资产面积</li>
+ * <li>propertyUnitPrice: 资产单价</li>
+ * <li>propertyType: 资产类型</li>
+ * <li>longitude: 经度</li>
+ * <li>latitude: 纬度</li>
+ * <li>contactDuty:联系人职务</li>
+ * <li>namespaceId:域空间ID</li>
+ * <li>unifiedSocialCreditCode:统一社会信用代码</li>
+ * <li>postUri:标题图</li>
+ * <li>banner:banner图</li>
+ * <li>hotline:咨询电话</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -134,7 +143,7 @@ public class CreateEnterpriseCustomerCommand {
     private String managerPhone;
     private String managerEmail;
     private String remark;
-    
+
     private Long trackingUid;
     private Double propertyArea;
     private Double propertyUnitPrice;
@@ -153,6 +162,72 @@ public class CreateEnterpriseCustomerCommand {
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
     private Byte  deviceType;
+
+    private String unifiedSocialCreditCode;
+    private String postUri;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String hotline;
+    //potential data primary key
+    private Long sourceId;
+    //service alliance activity
+    private String sourceType;
+
+    private Long originPotentialSourceId;
+
+
+    //新增的客户字段
+    private Long buyOrLeaseItemId;
+    private String buyOrLeaseItemName;
+    private String bizAddress;
+    private String bizLife;
+    private String customerIntentionLevel;
+    private String enterDevGoal;
+    private String controllerName;
+    private String controllerSunBirth;
+    private String controllerLunarBirth;
+    private Long financingDemandItemId;
+    private String financingDemandItemName;
+    private String stringTag1;
+    private String stringTag2;
+    private String stringTag3;
+    private String stringTag4;
+    private String stringTag5;
+    private String stringTag6;
+    private String stringTag7;
+    private String stringTag8;
+    private String stringTag9;
+    private String stringTag10;
+    private String stringTag11;
+    private String stringTag12;
+    private String stringTag13;
+    private String stringTag14;
+    private String stringTag15;
+    private String stringTag16;
+    private Long dropBox1ItemId;
+    private Long dropBox2ItemId;
+    private Long dropBox3ItemId;
+    private Long dropBox4ItemId;
+    private Long dropBox5ItemId;
+    private Long dropBox6ItemId;
+    private Long dropBox7ItemId;
+    private Long dropBox8ItemId;
+    private Long dropBox9ItemId;
+
+    private String dropBox1ItemName;
+    private String dropBox2ItemName;
+    private String dropBox3ItemName;
+    private String dropBox4ItemName;
+    private String dropBox5ItemName;
+    private String dropBox6ItemName;
+    private String dropBox7ItemName;
+    private String dropBox8ItemName;
+    private String dropBox9ItemName;
+
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
 
     public Long getOrgId() {
         return orgId;
@@ -435,7 +510,6 @@ public class CreateEnterpriseCustomerCommand {
     }
 
 
-
     public Long getCorpEntryDate() {
         return corpEntryDate;
     }
@@ -709,69 +783,102 @@ public class CreateEnterpriseCustomerCommand {
         this.sourceItemName = sourceItemName;
     }
 
-	public Long getTrackingUid() {
-		return trackingUid;
-	}
+    public Long getTrackingUid() {
+        return trackingUid;
+    }
 
-	public void setTrackingUid(Long trackingUid) {
-		this.trackingUid = trackingUid;
-	}
+    public void setTrackingUid(Long trackingUid) {
+        this.trackingUid = trackingUid;
+    }
 
-	public Double getPropertyArea() {
-		return propertyArea;
-	}
+    public Double getPropertyArea() {
+        return propertyArea;
+    }
 
-	public void setPropertyArea(Double propertyArea) {
-		this.propertyArea = propertyArea;
-	}
+    public void setPropertyArea(Double propertyArea) {
+        this.propertyArea = propertyArea;
+    }
 
-	public Double getPropertyUnitPrice() {
-		return propertyUnitPrice;
-	}
+    public Double getPropertyUnitPrice() {
+        return propertyUnitPrice;
+    }
 
-	public void setPropertyUnitPrice(Double propertyUnitPrice) {
-		this.propertyUnitPrice = propertyUnitPrice;
-	}
+    public void setPropertyUnitPrice(Double propertyUnitPrice) {
+        this.propertyUnitPrice = propertyUnitPrice;
+    }
 
-	public Long getPropertyType() {
-		return propertyType;
-	}
+    public Long getPropertyType() {
+        return propertyType;
+    }
 
-	public void setPropertyType(Long propertyType) {
-		this.propertyType = propertyType;
-	}
+    public void setPropertyType(Long propertyType) {
+        this.propertyType = propertyType;
+    }
 
-	public Double getLongitude() {
-		return longitude;
-	}
+    public Double getLongitude() {
+        return longitude;
+    }
 
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
-	}
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 
-	public Double getLatitude() {
-		return latitude;
-	}
+    public Double getLatitude() {
+        return latitude;
+    }
 
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
 
-	public String getContactDuty() {
-		return contactDuty;
-	}
+    public String getContactDuty() {
+        return contactDuty;
+    }
 
-	public void setContactDuty(String contactDuty) {
-		this.contactDuty = contactDuty;
-	}
+    public void setContactDuty(String contactDuty) {
+        this.contactDuty = contactDuty;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
 
     public Byte getDeviceType() {
         return deviceType;
@@ -779,5 +886,404 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    public Long getOriginPotentialSourceId() {
+        return originPotentialSourceId;
+    }
+
+    public void setOriginPotentialSourceId(Long originPotentialSourceId) {
+        this.originPotentialSourceId = originPotentialSourceId;
+    }
+
+    public String getBizAddress() {
+        return bizAddress;
+    }
+
+    public void setBizAddress(String bizAddress) {
+        this.bizAddress = bizAddress;
+    }
+
+    public String getBizLife() {
+        return bizLife;
+    }
+
+    public void setBizLife(String bizLife) {
+        this.bizLife = bizLife;
+    }
+
+    public String getCustomerIntentionLevel() {
+        return customerIntentionLevel;
+    }
+
+    public void setCustomerIntentionLevel(String customerIntentionLevel) {
+        this.customerIntentionLevel = customerIntentionLevel;
+    }
+
+    public String getEnterDevGoal() {
+        return enterDevGoal;
+    }
+
+    public void setEnterDevGoal(String enterDevGoal) {
+        this.enterDevGoal = enterDevGoal;
+    }
+
+    public String getControllerName() {
+        return controllerName;
+    }
+
+    public void setControllerName(String controllerName) {
+        this.controllerName = controllerName;
+    }
+
+    public String getControllerSunBirth() {
+        return controllerSunBirth;
+    }
+
+    public void setControllerSunBirth(String controllerSunBirth) {
+        this.controllerSunBirth = controllerSunBirth;
+    }
+
+    public String getControllerLunarBirth() {
+        return controllerLunarBirth;
+    }
+
+    public void setControllerLunarBirth(String controllerLunarBirth) {
+        this.controllerLunarBirth = controllerLunarBirth;
+    }
+
+
+
+    public String getStringTag1() {
+        return stringTag1;
+    }
+
+    public void setStringTag1(String stringTag1) {
+        this.stringTag1 = stringTag1;
+    }
+
+    public String getStringTag2() {
+        return stringTag2;
+    }
+
+    public void setStringTag2(String stringTag2) {
+        this.stringTag2 = stringTag2;
+    }
+
+    public String getStringTag3() {
+        return stringTag3;
+    }
+
+    public void setStringTag3(String stringTag3) {
+        this.stringTag3 = stringTag3;
+    }
+
+    public String getStringTag4() {
+        return stringTag4;
+    }
+
+    public void setStringTag4(String stringTag4) {
+        this.stringTag4 = stringTag4;
+    }
+
+    public String getStringTag5() {
+        return stringTag5;
+    }
+
+    public void setStringTag5(String stringTag5) {
+        this.stringTag5 = stringTag5;
+    }
+
+    public String getStringTag6() {
+        return stringTag6;
+    }
+
+    public void setStringTag6(String stringTag6) {
+        this.stringTag6 = stringTag6;
+    }
+
+    public String getStringTag7() {
+        return stringTag7;
+    }
+
+    public void setStringTag7(String stringTag7) {
+        this.stringTag7 = stringTag7;
+    }
+
+    public String getStringTag8() {
+        return stringTag8;
+    }
+
+    public void setStringTag8(String stringTag8) {
+        this.stringTag8 = stringTag8;
+    }
+
+    public String getStringTag9() {
+        return stringTag9;
+    }
+
+    public void setStringTag9(String stringTag9) {
+        this.stringTag9 = stringTag9;
+    }
+
+    public String getStringTag10() {
+        return stringTag10;
+    }
+
+    public void setStringTag10(String stringTag10) {
+        this.stringTag10 = stringTag10;
+    }
+
+    public String getStringTag11() {
+        return stringTag11;
+    }
+
+    public void setStringTag11(String stringTag11) {
+        this.stringTag11 = stringTag11;
+    }
+
+    public String getStringTag12() {
+        return stringTag12;
+    }
+
+    public void setStringTag12(String stringTag12) {
+        this.stringTag12 = stringTag12;
+    }
+
+    public String getStringTag13() {
+        return stringTag13;
+    }
+
+    public void setStringTag13(String stringTag13) {
+        this.stringTag13 = stringTag13;
+    }
+
+    public String getStringTag14() {
+        return stringTag14;
+    }
+
+    public void setStringTag14(String stringTag14) {
+        this.stringTag14 = stringTag14;
+    }
+
+    public String getStringTag15() {
+        return stringTag15;
+    }
+
+    public void setStringTag15(String stringTag15) {
+        this.stringTag15 = stringTag15;
+    }
+
+    public String getStringTag16() {
+        return stringTag16;
+    }
+
+    public void setStringTag16(String stringTag16) {
+        this.stringTag16 = stringTag16;
+    }
+
+    public Long getBuyOrLeaseItemId() {
+        return buyOrLeaseItemId;
+    }
+
+    public void setBuyOrLeaseItemId(Long buyOrLeaseItemId) {
+        this.buyOrLeaseItemId = buyOrLeaseItemId;
+    }
+
+    public Long getFinancingDemandItemId() {
+        return financingDemandItemId;
+    }
+
+    public void setFinancingDemandItemId(Long financingDemandItemId) {
+        this.financingDemandItemId = financingDemandItemId;
+    }
+
+    public String getBuyOrLeaseItemName() {
+        return buyOrLeaseItemName;
+    }
+
+    public void setBuyOrLeaseItemName(String buyOrLeaseItemName) {
+        this.buyOrLeaseItemName = buyOrLeaseItemName;
+    }
+
+    public String getFinancingDemandItemName() {
+        return financingDemandItemName;
+    }
+
+    public void setFinancingDemandItemName(String financingDemandItemName) {
+        this.financingDemandItemName = financingDemandItemName;
+    }
+
+    public Long getDropBox1ItemId() {
+        return dropBox1ItemId;
+    }
+
+    public void setDropBox1ItemId(Long dropBox1ItemId) {
+        this.dropBox1ItemId = dropBox1ItemId;
+    }
+
+    public Long getDropBox2ItemId() {
+        return dropBox2ItemId;
+    }
+
+    public void setDropBox2ItemId(Long dropBox2ItemId) {
+        this.dropBox2ItemId = dropBox2ItemId;
+    }
+
+    public Long getDropBox3ItemId() {
+        return dropBox3ItemId;
+    }
+
+    public void setDropBox3ItemId(Long dropBox3ItemId) {
+        this.dropBox3ItemId = dropBox3ItemId;
+    }
+
+    public Long getDropBox4ItemId() {
+        return dropBox4ItemId;
+    }
+
+    public void setDropBox4ItemId(Long dropBox4ItemId) {
+        this.dropBox4ItemId = dropBox4ItemId;
+    }
+
+    public Long getDropBox5ItemId() {
+        return dropBox5ItemId;
+    }
+
+    public void setDropBox5ItemId(Long dropBox5ItemId) {
+        this.dropBox5ItemId = dropBox5ItemId;
+    }
+
+    public Long getDropBox6ItemId() {
+        return dropBox6ItemId;
+    }
+
+    public void setDropBox6ItemId(Long dropBox6ItemId) {
+        this.dropBox6ItemId = dropBox6ItemId;
+    }
+
+    public Long getDropBox7ItemId() {
+        return dropBox7ItemId;
+    }
+
+    public void setDropBox7ItemId(Long dropBox7ItemId) {
+        this.dropBox7ItemId = dropBox7ItemId;
+    }
+
+    public Long getDropBox8ItemId() {
+        return dropBox8ItemId;
+    }
+
+    public void setDropBox8ItemId(Long dropBox8ItemId) {
+        this.dropBox8ItemId = dropBox8ItemId;
+    }
+
+    public Long getDropBox9ItemId() {
+        return dropBox9ItemId;
+    }
+
+    public void setDropBox9ItemId(Long dropBox9ItemId) {
+        this.dropBox9ItemId = dropBox9ItemId;
+    }
+
+    public String getDropBox1ItemName() {
+        return dropBox1ItemName;
+    }
+
+    public void setDropBox1ItemName(String dropBox1ItemName) {
+        this.dropBox1ItemName = dropBox1ItemName;
+    }
+
+    public String getDropBox2ItemName() {
+        return dropBox2ItemName;
+    }
+
+    public void setDropBox2ItemName(String dropBox2ItemName) {
+        this.dropBox2ItemName = dropBox2ItemName;
+    }
+
+    public String getDropBox3ItemName() {
+        return dropBox3ItemName;
+    }
+
+    public void setDropBox3ItemName(String dropBox3ItemName) {
+        this.dropBox3ItemName = dropBox3ItemName;
+    }
+
+    public String getDropBox4ItemName() {
+        return dropBox4ItemName;
+    }
+
+    public void setDropBox4ItemName(String dropBox4ItemName) {
+        this.dropBox4ItemName = dropBox4ItemName;
+    }
+
+    public String getDropBox5ItemName() {
+        return dropBox5ItemName;
+    }
+
+    public void setDropBox5ItemName(String dropBox5ItemName) {
+        this.dropBox5ItemName = dropBox5ItemName;
+    }
+
+    public String getDropBox6ItemName() {
+        return dropBox6ItemName;
+    }
+
+    public void setDropBox6ItemName(String dropBox6ItemName) {
+        this.dropBox6ItemName = dropBox6ItemName;
+    }
+
+    public String getDropBox7ItemName() {
+        return dropBox7ItemName;
+    }
+
+    public void setDropBox7ItemName(String dropBox7ItemName) {
+        this.dropBox7ItemName = dropBox7ItemName;
+    }
+
+    public String getDropBox8ItemName() {
+        return dropBox8ItemName;
+    }
+
+    public void setDropBox8ItemName(String dropBox8ItemName) {
+        this.dropBox8ItemName = dropBox8ItemName;
+    }
+
+    public String getDropBox9ItemName() {
+        return dropBox9ItemName;
+    }
+
+    public void setDropBox9ItemName(String dropBox9ItemName) {
+        this.dropBox9ItemName = dropBox9ItemName;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -47,6 +49,8 @@ import com.everhomes.util.StringHelper;
  * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  * <li>postUri: 标题图uri</li>
  * <li>postUrl: 标题图url</li>
+ * <li>emailDomain: 邮箱域名</li>
+ * <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  * @author janson
  *
@@ -100,7 +104,28 @@ public class EnterpriseDTO {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
-    
+
+    private String emailDomain;
+
+    @ItemType(OrganizationMemberDTO.class)
+    private List<OrganizationContactDTO> adminMembers;
+
+    public List<OrganizationContactDTO> getAdminMembers() {
+        return adminMembers;
+    }
+
+    public void setAdminMembers(List<OrganizationContactDTO> adminMembers) {
+        this.adminMembers = adminMembers;
+    }
+
+    public String getEmailDomain() {
+        return emailDomain;
+    }
+
+    public void setEmailDomain(String emailDomain) {
+        this.emailDomain = emailDomain;
+    }
+
     public String getPostUri() {
 		return postUri;
 	}

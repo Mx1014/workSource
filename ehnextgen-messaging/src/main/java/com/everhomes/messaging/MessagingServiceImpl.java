@@ -5,12 +5,16 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.message.MessageProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordSenderTag;
+import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.FetchMessageCommandResponse;
 import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
@@ -19,10 +23,15 @@ import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MessagePersistWorker;
+import com.everhomes.util.Name;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
@@ -30,6 +39,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -42,7 +52,7 @@ import java.util.stream.Collectors;
  *
  */
 @Component
-public class MessagingServiceImpl implements MessagingService {
+public class MessagingServiceImpl implements MessagingService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
 
 //    private static BlockingEventStored blockingEventStored = new BlockingEventStored();
@@ -60,6 +70,9 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private MessageProvider messageProvider;
 
     @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
@@ -85,11 +98,15 @@ public class MessagingServiceImpl implements MessagingService {
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     static final Integer MAX_TIME_OUT =30*60*1000;
-    
+
     public MessagingServiceImpl() {
     }
-    
-    @PostConstruct
+
+    private final static String MESSAGE_INDEX_ID = "indexId";
+
+    //升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         if(handlers != null) {
             handlers.forEach((handler) -> {
@@ -108,6 +125,13 @@ public class MessagingServiceImpl implements MessagingService {
             Map<String, Object> map = new HashMap<>();
             map.put("stored",stored);
             taskScheduler.scheduleWithFixedDelay(()-> { setExpireKey(stored); }, 60*1000);
+        }
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
         }
     }
     
@@ -141,7 +165,22 @@ public class MessagingServiceImpl implements MessagingService {
             if(r.getChannelToken() == null || r.getChannelToken().isEmpty()) {
                 LOGGER.warn("channel is empty!" + r.getStoreSequence());
             } else {
-             dtoMessages.add(toMessageDto(r));   
+                dtoMessages.add(toMessageDto(r));
+                MessageRecordDto record = new MessageRecordDto();
+                record.setAppId(r.getAppId());
+                record.setNamespaceId(r.getNamespaceId());
+                record.setMessageSeq(r.getMessageSequence());
+                record.setSenderUid(r.getSenderUid());
+                record.setSenderTag(MessageRecordSenderTag.FETCH_PASTTORECENT_MESSAGES.getCode());
+                record.setDstChannelType(r.getChannelType());
+                record.setDstChannelToken(r.getChannelToken());
+                record.setBodyType(r.getContextType());
+                record.setBody(r.getContent());
+                record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
+                record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
+                record.setMeta(r.getMeta());
+                record.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                MessagePersistWorker.getQueue().offer(record);
             }
         }
         
@@ -224,9 +263,13 @@ public class MessagingServiceImpl implements MessagingService {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
         MessageRoutingHandler handler = handlerMap.get(dstChannelType);
+
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {
-            
+
+                //手动添加消息唯一索引
+                message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
+
                 if(null == context) {
                     MessageRoutingContext newCtx = new MessageRoutingContext();
                     String inStr = null;
@@ -237,12 +280,10 @@ public class MessagingServiceImpl implements MessagingService {
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.EXCLUDE)))) {
                         newCtx.setExcludeUsers(jsonToLongList(inStr));
                     }
-                    
                     handler.routeMessage(newCtx, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
                 } else {
                     handler.routeMessage(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);    
                 }
-                
             } else {
                 if(LOGGER.isDebugEnabled())
                     LOGGER.debug(String.format("Message to %s:%s is dropped due to filtering", dstChannelType, dstChannelToken));  
@@ -380,7 +421,9 @@ public class MessagingServiceImpl implements MessagingService {
                         restResponse.setResponseObject(response);
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
                         restResponse.setErrorDescription("OK");
+                        LOGGER.info("signal, subject={}",subject);
                         handler.handleResult(restResponse);
+                        LOGGER.info("login after signal, result={}",restResponse);
                         deferredResult.setResult(restResponse);
 //                        deferredResult.setResultHandler(handler);
                         return null;
@@ -424,6 +467,7 @@ public class MessagingServiceImpl implements MessagingService {
                 }
 
                 try {
+                    LOGGER.info("localBus publish, subject={}",subject);
                     localBus.publish(null, subject, StringHelper.toJsonString(message));
                     if(!REDIS_ENABLE){
                         removeEverythingWithKey(subject);

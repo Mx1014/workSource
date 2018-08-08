@@ -1,6 +1,5 @@
 package com.everhomes.yellowPage;
 
-import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -10,6 +9,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.module.GetServiceModuleCommand;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -17,26 +18,25 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -225,25 +225,69 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 	}
 
-//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-//			"#categoryId,#keywords,#condition}", unless="#result == null")
+	/**   
+	* @Function: YellowPageProviderImpl.java
+	* @Description: 后台查询服务联盟使用
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午4:11:45 
+	*
+	*/
 	@Override
-	public List<ServiceAlliances> queryServiceAlliance(
+	public List<ServiceAlliances> queryServiceAllianceAdmin(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR) {
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, parentId, categoryId, childTagIds, keywords, displayFlag, false);
+	}
+	
+	
+	private List<ServiceAlliances> queryServiceAlliance(
+			CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, boolean isByScene) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		// 取别名
+		com.everhomes.server.schema.tables.EhServiceAlliances alliances = Tables.EH_SERVICE_ALLIANCES;
+		com.everhomes.server.schema.tables.EhAllianceTag tags = Tables.EH_ALLIANCE_TAG;
+		com.everhomes.server.schema.tables.EhAllianceTagVals tagVal = Tables.EH_ALLIANCE_TAG_VALS;
+		
+		
+        SelectQuery<Record> query = context.selectQuery();;
+         
+        query.addSelect(alliances.fields());
+        
+		if (CollectionUtils.isEmpty(childTagIds)) {
 
-        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+			query.addFrom(alliances);
+			
+		} else {
+			query.addFrom(alliances.leftOuterJoin(tagVal)
+					.on(tagVal.OWNER_ID.eq(alliances.ID).and(tagVal.TAG_ID.in(childTagIds))).leftOuterJoin(tags)
+					.on(tags.ID.eq(tagVal.TAG_ID)));
 
-        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%").or(Tables.EH_SERVICE_ALLIANCES.RANGE.
-					eq("all")));
-		}else{
-//        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
-//					and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId)));
-			query.addConditions(conditionOR);
+			query.addConditions(tags.ID.isNotNull().and(tags.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())));
+			
+			query.addGroupBy(alliances.ID);
+			query.addHaving(alliances.ID.count().eq(childTagIds.size()));
 		}
+        
+        if (isByScene) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%" + ownerId + "%")
+					.or(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")));
+    		
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
+    		
+        } else {
+        	
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+    		
+            if (null != displayFlag) {
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(displayFlag));
+            }
+        }
 
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
@@ -259,12 +303,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
         }
         
-        if(null!=parentId){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
-        } else {
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
-		}
-
+        // 必须传对应parentId，如旧版本有数据问题需通过sql解决
+    	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
 
         //by dengs,按照defaultorder排序，20170525
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
@@ -272,70 +312,28 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         LOGGER.info(query.toString());
 
-        query.fetch().map((r) -> {
-        	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
-            return null;
-        });
+        saList = query.fetchInto(ServiceAlliances.class);
         
         if(saList != null && saList.size() > 0) {
             return saList;
         }
         return saList;
 	}
-//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-//			"#categoryId,#keywords,#organizationId,#organizationType}", unless="#result == null")
+	
+	/** 
+	* @see com.everhomes.yellowPage.YellowPageProvider#queryServiceAllianceByScene(com.everhomes.listing.CrossShardListingLocator, int, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String)   
+	* @Function: YellowPageProviderImpl.java
+	* @Description: 客户端查询时使用
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午4:13:54 
+	*/
 	@Override
-	public List<ServiceAlliances> queryServiceAlliance(
-			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords, Long organizationId,String organizationType) {
-		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
- 
-
-		query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%")
-						.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))
-						.and(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")))
-		);
-        
-        if(locator.getAnchor() != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
-            }
-        
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
-        
-        if(!org.springframework.util.StringUtils.isEmpty(keywords)){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
-        }
-        
-        if(categoryId != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
-        }
-        
-        if(null!=parentId){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
-        } else {
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
-		}
-        //by dengs,客户端不能查看displayFlag为 HIDE的服务联盟
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
-        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
-        query.addLimit(pageSize);
-
-        LOGGER.info(query.toString());
-
-        query.fetch().map((r) -> {
-        	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
-            return null;
-        });
-        
-        if(saList != null && saList.size() > 0) {
-            return saList;
-        }
-        return saList;
+	public List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, parentId, categoryId, childTagIds, keywords, null, true);
 	}
-
 
 	@Override
 	public YellowPage findYellowPageById(Long id, String ownerType, Long ownerId) {
@@ -404,23 +402,34 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAlliances.class));
         sa.setId(id);
-      //设置序号默认是id，by dengs,20170524.
-        sa.setDefaultOrder(id);
+        
+        //如果是“policydeclare”类型则把日期格式为为排序序号
+        if (null != sa.getEndTime()) {
+        	 sa.setDefaultOrder(getDateDefaultOrder(sa));
+        } else {
+        	  sa.setDefaultOrder(-id); //缺陷 #29826：旧的排序保持，新的排序按id倒叙排
+        }
+        
         if(sa.getStatus() == null) {
             sa.setStatus(YellowPageStatus.ACTIVE.getCode());    
         }
         sa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        EhServiceAlliancesDao dao = new EhServiceAlliancesDao(context.configuration());
-        dao.insert(sa);
+        EhServiceAlliancesDao dao = new EhServiceAlliancesDao(context.configuration());        dao.insert(sa);
 		
 	}
-
+	
 
 	@Caching(evict = { @CacheEvict(value="queryServiceAlliance", allEntries=true)})
 	@Override
 	public void updateServiceAlliances(ServiceAlliances sa) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhServiceAlliancesDao dao = new EhServiceAlliancesDao(context.configuration());
+		
+		//如果修改了结束时间，则更新defaulOrder
+		if (null != sa.getEndTime()) {
+			sa.setDefaultOrder(getDateDefaultOrder(sa));
+		}
+		
         dao.update(sa);
 	}
 
@@ -506,12 +515,16 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.in(sa.getId()));
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.DEFAULT_ORDER.asc()); //获取图片按defaultOrder  服务联盟v3.4需求
         query.fetch().map((EhServiceAllianceAttachmentsRecord record) -> {
 			if(ServiceAllianceAttachmentType.BANNER.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
 				sa.getAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
 			} else if(ServiceAllianceAttachmentType.FILE_ATTACHMENT.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
 				sa.getFileAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
-			}
+			} else if(ServiceAllianceAttachmentType.COVER_ATTACHMENT.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
+				sa.getCoverAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			} 
+
 
              return null;
          });
@@ -1094,7 +1107,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<JumpModuleDTO> jumpModules(Integer namespaceId) {
+	public List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString) {
 		List<JumpModuleDTO> modules = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1104,7 +1117,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
 		);
 		query.addConditions(condition);
-
+		if (!StringUtils.isEmpty(bizString)) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.MODULE_URL.eq(bizString));
+		}
 
 		query.fetch().map((r) -> {
 			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));
@@ -1243,4 +1258,25 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         return query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
 	
 	}
+
+	/**
+	 * 如果有时间时，表示是policydeclare类型
+	 * 需要把defaultOrder组装成 yyyyMMddHHmmss(ms)
+	 * 比如：20180615102559111
+	 * 最后三位是毫秒
+	 * @param sa
+	 * @return
+	 */
+	private Long getDateDefaultOrder(ServiceAlliances sa) {
+		long timeMillis = System.currentTimeMillis();
+		long ms = timeMillis % 1000; // 获得毫秒
+		long ms1 = ms/100;
+		long ms2 = (ms % 100) / 10;
+		long ms3 = (ms % 10);
+		
+		String timeHeadStr = DateUtil.dateToStr(sa.getEndTime(), "yyyyMMdd");
+		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
+		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
+	}
+	
 }

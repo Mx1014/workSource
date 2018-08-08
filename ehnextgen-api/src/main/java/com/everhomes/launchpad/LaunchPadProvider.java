@@ -7,6 +7,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import org.jooq.Condition;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,9 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup, Byte scopeCode, long scopeId, List<String> tag);
     List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags, String categryName);
     void updateLaunchPadLayout(LaunchPadLayout launchPadLayout);
+
+    void deleteLaunchPadLayout(Long id);
+
     LaunchPadLayout findLaunchPadLayoutById(long id);
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);
     List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, Map<Byte, Long> defalutScopeMap, String keyword, int offset, int pageSize);
@@ -52,6 +56,8 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup,String location);
 
     List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup, String location, String itemName, Byte scopeCode, Long scopeId);
+
+    Condition getPreviewPortalVersionCondition(String tableName);
 
     void deletePreviewVersionItems(Integer namespaceId);
 

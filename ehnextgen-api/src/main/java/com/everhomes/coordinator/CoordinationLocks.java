@@ -14,6 +14,7 @@ public enum CoordinationLocks {
     CREATE_F_BILL_ACCOUNT("family.bill.account.create"),
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
+    UPDATE_PUNCH_MONTH_REPORT("punch.month.report.update"),
     REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
@@ -98,6 +99,8 @@ public enum CoordinationLocks {
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+    SYNC_THIRD_CONTRACT("sync.third.contract"),
+    SYNC_THIRD_CUSTOMER("sync.third.customer"),
 
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
 
@@ -129,7 +132,18 @@ public enum CoordinationLocks {
     REMIND_DEMO_ADD("remind_demo_add"),
     REMIND_CATEGORY_SORTING("remind_category_sorting"),
     REMIND_SORTING("remind_sorting"),
-    REMIND_SCHEDULED("remind_scheduled");
+    REMIND_SCHEDULED("remind_scheduled"),
+    MEETING_ROOM_DEFAULT_INIT("meeting_room_default_init"),
+    MEETING_ROOM_TIME_LOCK("meeting_room_time_lock"),
+    MEETING_ROOM_RESOURCE_RECOVERY("meeting_room_resource_recovery"),
+    MEETING_REMIND("meeting_remind"),
+
+    ARCHIVES_CONFIGURATION("archives_configuration"),
+    ARCHIVES_NOTIFICATION("archives_notification"),
+    VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
+    VISITOR_SYS_CONFIG("visitor_sys_config"),
+    VISITOR_SYS_LOCATION("visitor_sys_location");
+
 
     private String code;
 

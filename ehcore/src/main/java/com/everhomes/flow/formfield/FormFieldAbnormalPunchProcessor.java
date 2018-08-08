@@ -9,7 +9,7 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormAbnormalPunchValue;
+import com.everhomes.rest.enterpriseApproval.ComponentAbnormalPunchValue;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class FormFieldAbnormalPunchProcessor implements FormFieldProcessor {
 
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
-        PostApprovalFormAbnormalPunchValue abnormalPunch = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormAbnormalPunchValue.class);
+        ComponentAbnormalPunchValue abnormalPunch = JSON.parseObject(fieldDTO.getFieldValue(), ComponentAbnormalPunchValue.class);
         if ("异常日期".equals(variable)) {
             return new FlowConditionStringVariable(abnormalPunch.getAbnormalDate());
         } else if ("异常班次".equals(variable)) {

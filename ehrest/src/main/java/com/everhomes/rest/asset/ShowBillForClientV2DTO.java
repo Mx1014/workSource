@@ -28,8 +28,20 @@ public class ShowBillForClientV2DTO {
     @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
     private String contractNum;
+    private String bizPayeeType;
+    private Long bizPayeeId;
+    private Byte registerStatus;
+    private Long categoryId;
 
-    public ShowBillForClientV2DTO() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public ShowBillForClientV2DTO() {
     }
 
     public ShowBillForClientV2DTO(Long billGroupId, String contractId) {
@@ -118,4 +130,29 @@ public class ShowBillForClientV2DTO {
     public void setBills(List<BillForClientV2> bills) {
         this.bills = bills;
     }
+
+	public String getBizPayeeType() {
+		return bizPayeeType;
+	}
+
+	public void setBizPayeeType(String bizPayeeType) {
+		this.bizPayeeType = bizPayeeType;
+	}
+
+	public Long getBizPayeeId() {
+		return bizPayeeId;
+	}
+
+	public void setBizPayeeId(Long bizPayeeId) {
+		this.bizPayeeId = bizPayeeId;
+	}
+
+	public Byte getRegisterStatus() {
+		return registerStatus;
+	}
+
+	public void setRegisterStatus(Byte registerStatus) {
+		this.registerStatus = registerStatus;
+	}
+
 }

@@ -1,11 +1,14 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.rest.organization.pm.SendNoticeCommand;
+import com.everhomes.rest.pushmessagelog.PushStatusCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class SendNoticeAction implements Runnable {
 
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+   	private PushMessageLogService pushMessageLogService;
 
     @Override
     public void run() {
@@ -42,8 +48,26 @@ public class SendNoticeAction implements Runnable {
         UserContext.setCurrentNamespaceId(operator.getNamespaceId());
 
         SendNoticeCommand command = (SendNoticeCommand) StringHelper.fromJsonString(cmd, SendNoticeCommand.class);
-        propertyMgrService.pushMessage(command, operator);
-
+        if(command !=null){
+        	//更新推送记录状态
+            pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.PUSHING.getCode());
+            LOGGER.info("update pushMessageLog status pushing .");
+        }
+        
+        try{
+        	
+        	propertyMgrService.pushMessage(command, operator);
+        	
+        }catch(Exception e){
+        	//在有异常的情况下也要更新推送记录状态为完成
+            pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.FINISH.getCode());
+            LOGGER.info("update pushMessageLog status finish ,e={}",e);
+            throw e ;
+        }
+        
+        //更新推送记录状态为完成
+        pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.FINISH.getCode());
+        LOGGER.info("update pushMessageLog status finish .");
         LOGGER.debug("End scheduling a push to push....");
 
         UserContext.setCurrentNamespaceId(null);

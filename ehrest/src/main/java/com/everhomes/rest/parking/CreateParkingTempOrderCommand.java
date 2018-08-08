@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderToken: 临时费用订单token，来自第三方</li>
  * <li>price: 金额</li>
  * <li>clientAppName: clientAppName</li>
+ * <li>paymentType: 支付方式,这里传 9， WECHAT_APPPAY(1): 微信APP支付  WECHAT_SCAN_PAY(7): 微信扫码支付(正扫) ALI_SCAN_PAY(8): 支付宝扫码支付(正扫) WECHAT_JS_PAY(9): 微信JS 支付（公众号） ALI_JS_PAY(10): 支付宝JS 支付（生活号）WECHAT_JS_ORG_PAY(21): 微信公众帐号支付</li>
  * </ul>
  */
 public class CreateParkingTempOrderCommand {
@@ -36,7 +37,7 @@ public class CreateParkingTempOrderCommand {
 	private BigDecimal price;
 
 	private String clientAppName;
-
+	private Integer paymentType;
 	public String getClientAppName() {
 		return clientAppName;
 	}
@@ -99,6 +100,14 @@ public class CreateParkingTempOrderCommand {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
 	}
 
 	@Override

@@ -76,6 +76,7 @@ public class ParkingLotDTO {
     private Byte businessLicenseFlag;
 
     private Byte vipParkingFlag;
+    private Byte monthRechargeFlag;
     private String vipParkingUrl;
     private Byte identityCardFlag;
 
@@ -166,6 +167,14 @@ public class ParkingLotDTO {
 
     public void setSearchCarFlag(Byte searchCarFlag) {
         this.searchCarFlag = searchCarFlag;
+    }
+
+    public Byte getMonthRechargeFlag() {
+        return monthRechargeFlag;
+    }
+
+    public void setMonthRechargeFlag(Byte monthRechargeFlag) {
+        this.monthRechargeFlag = monthRechargeFlag;
     }
 
     public String getContact() {

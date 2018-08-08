@@ -1,9 +1,9 @@
 ehapp.version=master-SNAPSHOT
 codegen.version=0.0.3-SNAPSHOT
-ehutil.version=0.0.7-SNAPSHOT
+ehutil.version=1.0.0-SNAPSHOT
 ehutil-common.version=1.0.0-SNAPSHOT
-ehplatform.version=0.1.0-SNAPSHOT
-ehplatform-persist.version=0.1.0-SNAPSHOT
+ehplatform.version=1.0.1-SNAPSHOT
+ehplatform-persist.version=1.0.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
 ehorder-sdk.version=1.0.0-SNAPSHOT
 
@@ -12,8 +12,8 @@ scrabbler.version=1.0.0
 encryptor.version=1.0.0
 generator.version=1.0.0
 
-tomcat.version=8.0.8
-spring-boot-starter-parent.version=1.1.9.RELEASE
+tomcat.version=8.5.14
+spring-boot-starter-parent.version=1.5.3.RELEASE
 
 mysql-connector-java.version=5.1.30
 jooq.version=3.4.1
@@ -26,23 +26,23 @@ commons-io.version=2.4
 commons-lang.version=2.3
 httpcomponents.version=4.4.5
 gson.version=2.3
-jackson.version=2.3.3
+jackson.version=2.8.8
 cglib.version=2.2.2
-junit.version=4.11
-slf4j-api.version=1.7.7
-slf4j-ext.version=1.7.12
+junit.version=4.12
+slf4j-api.version=1.7.25
+slf4j-ext.version=1.7.25
 jaxws-rt.version=2.1.4
 freemarker.version=2.3.23
 spring.version=4.0.8.RELEASE
-spring-data-redis.version=1.3.1.RELEASE
+spring-data-redis.version=1.8.3.RELEASE
 spring-websocket.version=4.0.8.RELEASE
 elasticsearch.version=1.4.5
 cglib-nodep.version=2.2.2
 bcprov-jdk14.version=1.47
 lucene-spatial.version=3.1.0
-jackson-annotations.version=2.3.3
-jackson-core.version=2.3.3
-jackson-databind.version=2.3.3
+jackson-annotations.version=2.8.8
+jackson-core.version=2.8.8
+jackson-databind.version=2.8.8
 jesque.version=2.0.2
 xbean.version=2.2.0
 xbean_xpath.version=2.0.0
@@ -62,7 +62,7 @@ geohash.version=1.0.13
 zxing-core.version=3.2.0
 validation-api.version=1.1.0.Final
 httpclient.version=4.3.5
-fastjson.version=1.2.4
+fastjson.version=1.2.47
 itextpdf.version=5.5.11
 
 maven-compiler-plugin.version=3.2
@@ -81,6 +81,14 @@ logback-kafka-appender.version = 0.1.1-SNAPSHOT
 logstash-logback-encoder.version = 2.4
 kafka.version = 0.10.1.0
 
-ehpay-rest.version=1.0.0-SNAPSHOT
-ehpay-rest-response.version=1.0.0-SNAPSHOT
+ehpay-rest.version=2.0.0-SNAPSHOT
+ehpay-rest-response.version=2.0.0-SNAPSHOT
 oauth2-client.version=1.0.0-SNAPSHOT
+
+
+okhttp3.version = 3.2.0
+alpn-boot.version = 8.1.4.v20150727
+
+pay-sdk.version=1.0.0-SNAPSHOT
+sensitive-word.version=1.2.0
+

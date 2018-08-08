@@ -4,14 +4,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Map;
 
 @RestDoc(value="Flow controller", site="core")
 @RestController
@@ -295,7 +301,6 @@ public class FlowController extends ControllerBase {
     /**
      * <b>URL: /flow/testCase</b>
      * <p> 仅仅用于测试 </p>
-     * @return 
      */
     @RequestMapping("testCase")
     @RestReturn(value=String.class)
@@ -305,5 +310,18 @@ public class FlowController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /flow/mapping/{mode}/{id1}/{id2}/{functionName}</b>
+     * <p> 第三方回调 </p>
+     */
+    @SuppressDiscover
+    @RequestMapping("mapping/{mode}/{id1}/{id2}/{functionName}")
+    @RestReturn(value=Object.class)
+    public DeferredResult<Object> mapping(@PathVariable Byte mode, @PathVariable Long id1,
+                                                @PathVariable Long id2, @PathVariable String functionName,
+                                                HttpServletRequest request) {
+        return flowService.flowScriptMappingCall(mode, id1, id2, functionName, request);
     }
 }

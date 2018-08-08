@@ -370,8 +370,8 @@ INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`descrip
 INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (103,1,'cePPQVM-I4cN73W_ZQZ6VkISDgHNAvUBZPjH2J','Jm38pWr5XEvdXnHmNuBb4PbzaP-sIpEZvcmvxC9S4ypDVRql-KUbN0Dq_Djv-GxZ','common-pay','',1,'2015-09-01 17:43:53');
 
 -- eh_banners
-INSERT INTO `eh_banners`(id,namespace_id,appId,banner_location,banner_group,scope_code,scope_id,`name`,vendor_tag,poster_path,start_time,end_time,`status`,`order`,creator_uid,create_time,delete_time,action_type,action_data)
-VALUES (1, 0, 0, '/home', 'Default', 0, 0, 'zuolin', 'zuolin', 'cs://1/image/aW1hZ2UvTVRveFl6YzJOVEkwTVRsaFptVXdNbUUxTkdZMlpEWXpZbUV6WVRrMllqUTBOUQ', null, null, '2', '1', '0', '2015-06-30 16:01:45', null, '13', '{"url":"https://zuolin.com"}');
+INSERT INTO `eh_banners`(id,namespace_id,appId,banner_location,banner_group,scope_code,scope_id,`name`,vendor_tag,poster_path,start_time,end_time,`status`,`order`,creator_uid,create_time,delete_time,action_type,action_data, target_type)
+VALUES (1, 0, 0, '/home', 'Default', 0, 0, 'zuolin', 'zuolin', 'cs://1/image/aW1hZ2UvTVRveFl6YzJOVEkwTVRsaFptVXdNbUUxTkdZMlpEWXpZbUV6WVRrMllqUTBOUQ', null, null, '2', '1', '0', '2015-06-30 16:01:45', null, '13', '{"url":"https://zuolin.com"}', '');
 
 -- eh_launch_pad_items;
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) VALUES (1, 0, 0, 0, 0, '/home', 'GovAgencies', 'PM', '物业', 'cs://1/image/aW1hZ2UvTVRwak5tWTNabUpsTVRNMk16VTNNek16T1dabVlqZzJPREl4TjJJNFpUVTVZdw', 1, 1, 2, '{"itemLocation":"/home/Pm","layoutName":"PmLayout","title":"物业","entityTag":"PM"}', 0, 0, 1, 1, '', 0,NULL);
