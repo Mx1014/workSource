@@ -9,6 +9,7 @@ import java.util.List;
  * <ul>
  * <li>organizationId: 总公司ID</li>
  * <li>statisticsMonth: 统计月份,格式:yyyyMM</li>
+ * <li>lastUpdateTime: 数据最近更新时间</li>
  * <li>userId: 用户id</li>
  * <li>detailId: 员工detailId</li>
  * <li>workDayCount: 出勤天数</li>
@@ -20,6 +21,7 @@ import java.util.List;
 public class PunchMonthlyStatisticsByMemberResponse {
     private Long organizationId;
     private String statisticsMonth;
+    private Long lastUpdateTime;
     private Long userId;
     private Long detailId;
     private Integer workDayCount;
@@ -73,6 +75,14 @@ public class PunchMonthlyStatisticsByMemberResponse {
 
     public void setRestDayCount(Integer restDayCount) {
         this.restDayCount = restDayCount;
+    }
+
+    public Long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(Long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
     }
 
     public List<PunchStatusStatisticsItemDTO> getPunchStatusStatisticsList() {

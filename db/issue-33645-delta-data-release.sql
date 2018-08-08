@@ -36,6 +36,7 @@ SELECT 'punch.status' AS scope,19 AS code,'zh_CN' AS locale,'缺卡' AS text UNI
 SELECT 'punch.status' AS scope,-1 AS code,'zh_CN' AS locale,'未设置规则' AS text UNION ALL
 SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text UNION ALL
 SELECT 'punch.status' AS scope,-3 AS code,'zh_CN' AS locale,'未打卡' AS text UNION ALL
+SELECT 'punch' AS scope,10300 AS code,'zh_CN' AS locale,'月报数据还没有生成' AS text UNION ALL
 
 SELECT 'PunchStatusStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'未到' AS text UNION ALL
 SELECT 'PunchStatusStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'迟到' AS text UNION ALL

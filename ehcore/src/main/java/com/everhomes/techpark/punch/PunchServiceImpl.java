@@ -12144,6 +12144,11 @@ public class PunchServiceImpl implements PunchService {
         if (!org.springframework.util.StringUtils.hasText(cmd.getStatisticsMonth())) {
             cmd.setStatisticsMonth(monthSF.get().format(new Date()));
         }
+        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(cmd.getOrganizationId(), cmd.getStatisticsMonth());
+        if (report == null) {
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_MONTH_STATISTICS_WAITTING_GENERATE, "no data");
+        }
         OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
         MonthlyStatisticsByMemberRecordMapper record = punchProvider.monthlyStatisticsByMember(cmd.getOrganizationId(), cmd.getStatisticsMonth(), organizationMemberDetail.getId());
         PunchMonthlyStatisticsByMemberResponse response = new PunchMonthlyStatisticsByMemberResponse();
@@ -12153,6 +12158,7 @@ public class PunchServiceImpl implements PunchService {
         response.setDetailId(organizationMemberDetail.getId());
         response.setWorkDayCount(0);
         response.setRestDayCount(0);
+        response.setLastUpdateTime(report.getUpdateTime() != null ? report.getUpdateTime().getTime() : report.getCreateTime().getTime());
 
         if (record == null) {
             return response;
@@ -12261,7 +12267,6 @@ public class PunchServiceImpl implements PunchService {
         if (null != cmd.getUserId()) {
             userId = cmd.getUserId();
         }
-        PunchExceptionRequestStatisticsItemType itemType = PunchExceptionRequestStatisticsItemType.fromCode(cmd.getPunchExceptionRequestStatisticsItemType());
         GeneralApprovalAttribute approvalAttribute = convertRequestItemTypeToApprovalAttribute(cmd.getPunchExceptionRequestStatisticsItemType());
         java.sql.Date startDay = socialSecurityService.getTheFirstDate(cmd.getStatisticsMonth());
         java.sql.Date endDay = socialSecurityService.getTheLastDate(cmd.getStatisticsMonth());
@@ -12281,8 +12286,7 @@ public class PunchServiceImpl implements PunchService {
         PunchExceptionRequestItemDetailDTO dto = new PunchExceptionRequestItemDetailDTO();
         dto.setExceptionId(r.getId());
         dto.setFlowCaseId(r.getRequestId());
-        dto.setWaitForApproval(com.everhomes.rest.approval.ApprovalStatus.fromCode(r.getStatus()) ==
-                com.everhomes.rest.approval.ApprovalStatus.AGREEMENT ? NormalFlag.NO.getCode() : NormalFlag.YES.getCode());
+        dto.setWaitForApproval(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT == com.everhomes.rest.approval.ApprovalStatus.fromCode(r.getStatus()) ? NormalFlag.NO.getCode() : NormalFlag.YES.getCode());
         String dayUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_DAY), PunchConstants.locale, "天");
         String hourUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_HOUR), PunchConstants.locale, "小时");
         String minuteUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_MINUTE), PunchConstants.locale, "分钟");
@@ -12304,7 +12308,7 @@ public class PunchServiceImpl implements PunchService {
                 break;
             case OVERTIME:
                 if (r.getDurationDay() != null && r.getDurationDay().compareTo(BigDecimal.ZERO) > 0) {
-                    dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
+                    dto.setTitle(r.getDurationDay().setScale(3, RoundingMode.UNNECESSARY) + dayUnit);
                 } else {
                     dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(r.getDurationMinute() * 60 * 1000, hourUnit, minuteUnit));
                 }
@@ -12315,7 +12319,7 @@ public class PunchServiceImpl implements PunchService {
                 break;
             case GO_OUT:
             case BUSINESS_TRIP:
-                dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
+                dto.setTitle(r.getDurationDay().setScale(3, RoundingMode.UNNECESSARY) + dayUnit);
                 map = getExceptionBeginEndTimeMap(r);
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
                         PunchConstants.GO_OUT_TEMPLATE_CONTENT, RentalNotificationTemplateCode.locale, map, "");
