@@ -18,10 +18,10 @@ set @zuolin_menu_parent_parent_id=23000000;-- select * from eh_web_menus where n
 set @zuolin_menu_parent_id=23010000; -- select * from eh_web_menus where name='OA管理' and type='zuolin'
 set @zuolin_menu_path=CONCAT("/",@zuolin_menu_parent_parent_id,"/",@zuolin_menu_parent_id,"/",@zuolin_menu_id);-- 如：/23000000/23010000/XXXX
 -- 园区后台菜单路径（三层）
-set @park_menu_id=(select max(id) + 2 from eh_web_menus);-- 如：16032200
-set @park_menu_parent_parent_id=40000010;-- select * from eh_web_menus where name='企业办公' and type='park'
-set @park_menu_parent_id=53000000; -- select * from eh_web_menus where name='OA管理' and type='park'
-set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000010/53000000/XXX
+-- set @park_menu_id=(select max(id) + 2 from eh_web_menus);-- 如：16032200
+-- set @park_menu_parent_parent_id=40000010;-- select * from eh_web_menus where name='企业办公' and type='park'
+-- set @park_menu_parent_id=53000000; -- select * from eh_web_menus where name='OA管理' and type='park'
+-- set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000010/53000000/XXX
 -- 普通公司后台菜单路径（三层）
 set @organization_menu_id=(select max(id) + 3 from eh_web_menus);-- 如：16032200
 set @organization_menu_parent_parent_id=70000010;-- select * from eh_web_menus where name='企业办公' and type='organization'
@@ -40,8 +40,8 @@ VALUES (@order_module_id, '交易明细', @module_id, @order_path, '1', '4', '2'
 INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
 VALUES (@zuolin_menu_id, '企业账单', @zuolin_menu_parent_id, NULL, @data_type, 1, 2, @zuolin_menu_path, 'zuolin', 220, @module_id, 3, 'system', 'module', NULL);
 -- 园区（levle=3)
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
-VALUES (@park_menu_id, '企业账单', @park_menu_parent_id, NULL, @data_type, 1, 2, @park_menu_path, 'park', 220, @module_id, 3, 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
+-- VALUES (@park_menu_id, '企业账单', @park_menu_parent_id, NULL, @data_type, 1, 2, @park_menu_path, 'park', 220, @module_id, 3, 'system', 'module', NULL);
 -- 普通公司（levle=3)
 INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
 VALUES (@organization_menu_id, '企业账单', @organization_menu_parent_id, NULL, @data_type, 1, 2, @organization_menu_path, 'organization', 220, @module_id, 3, 'system', 'module', NULL);
