@@ -10108,7 +10108,7 @@ public class PunchServiceImpl implements PunchService {
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(cmd.getQueryTime());
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-
+        Calendar today = Calendar.getInstance();
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTime(startCalendar.getTime());
         endCalendar.add(Calendar.MONTH, 1);
@@ -10138,22 +10138,26 @@ public class PunchServiceImpl implements PunchService {
 //					}
 //				}
             } else {
-//                //当天没有打卡也么有计算规则
+//                
 //                dto.setPunchDate(startCalendar.getTime().getTime());
-//                PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
-//                if (null == pr)
-//                    continue;
-//                dto.setRuleType(pr.getRuleType());
-//                //获取当天的排班
-//                PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
-//                if (ptr != null) {
-//                    dto.setTimeRuleId(ptr.getId());
-//                    if (ptr.getId() == null || ptr.getId() == 0) {
-//                        dto.setTimeRuleName("休息");
-//                    } else {
-//                        dto.setTimeRuleName(ptr.getName());
-//                    }
-//                }
+            	if(today.after(startCalendar)){
+            		//如果计算的日期在今天之前,就跳过
+            		continue;
+            	}
+                PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+                if (null == pr)
+                    continue;
+                dto.setRuleType(pr.getRuleType());
+                //获取当天的排班
+                PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
+                if (ptr != null) {
+                    dto.setTimeRuleId(ptr.getId());
+                    if (ptr.getId() == null || ptr.getId() == 0) {
+                        dto.setTimeRuleName("休息");
+                    } else {
+                        dto.setTimeRuleName(ptr.getName());
+                    }
+                }
             } 
             //放在这里设置punchDate因为 ConvertHelper.convert(log, MonthDayStatusDTO.class); 会让punchDate消失
             dto.setPunchDate(startCalendar.getTime().getTime());
