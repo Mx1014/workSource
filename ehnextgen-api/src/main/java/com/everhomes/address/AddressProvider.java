@@ -108,4 +108,6 @@ public interface AddressProvider {
 	Integer countApartmentNumberByBuildingName(Long communityId, String buildingName);
 	Integer countRelatedEnterpriseCustomerNumber(Long buildingId);
 	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
+	List<Address> findActiveAddressByCommunityId(Long id);
+	List<Address> findActiveAddressByBuildingName(String name);
 }

@@ -1868,6 +1868,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 				.from(Tables.EH_ADDRESSES)
 				.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
 				.and(Tables.EH_ADDRESSES.STATUS.eq((byte)2))
+				.and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
 				.fetchOneInto(Integer.class);
 	}
 
@@ -1934,6 +1935,16 @@ public class CommunityProviderImpl implements CommunityProvider {
 					.from(Tables.EH_COMMUNITIES)
 					.where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(nameSpaceId))
 					.fetchInto(Community.class);
+	}
+
+	@Override
+	public List<Building> findBuildingsByCommunityId(Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		return context.select()
+					.from(Tables.EH_BUILDINGS)
+					.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+					.and(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
+					.fetchInto(Building.class);
 	}
 
 }

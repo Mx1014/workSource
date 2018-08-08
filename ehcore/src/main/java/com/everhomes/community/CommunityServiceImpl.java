@@ -4755,8 +4755,10 @@ public class CommunityServiceImpl implements CommunityService {
         	dto.setRelatedContractNumber(relatedContractNumber);
         	
         	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName()); 
-    		Double areaAveragePrice = totalRent/r.getRentArea();
-    		dto.setAreaAveragePrice(areaAveragePrice);
+    		if (r.getRentArea() != null && r.getRentArea() > 0) {
+    			Double areaAveragePrice = totalRent/r.getRentArea();
+        		dto.setAreaAveragePrice(areaAveragePrice);
+			}
         	return dto;
         }).collect(Collectors.toList());
 		
@@ -4771,7 +4773,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd) {
 		CommunityStatisticsDTO result =  new CommunityStatisticsDTO();
-		if (cmd.getCommunityId() != null) {
+		if (cmd.getCommunityId() == null) {
 			initializeCommunityStatisticsDTO(result);
 			List<Community> communities = communityProvider.findCommunitiesByNamespaceId(cmd.getNameSpaceId());
 			for (Community community : communities) {
@@ -4819,9 +4821,10 @@ public class CommunityServiceImpl implements CommunityService {
 		//在租实时均价
 		Double totalRent = contractProvider.getTotalRentInCommunity(community.getId()); 
 		dto.setTotalRent(totalRent);
-		Double areaAveragePrice = totalRent/community.getRentArea();
-		dto.setAreaAveragePrice(areaAveragePrice);
-		
+		if (community.getRentArea() != null && community.getRentArea() > 0) {
+			Double areaAveragePrice = totalRent/community.getRentArea();
+			dto.setAreaAveragePrice(areaAveragePrice);
+		}
 		return dto;
 	} 
 
@@ -4941,6 +4944,63 @@ public class CommunityServiceImpl implements CommunityService {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
 					"no data");
 		}
+	}
+
+	@Override
+	public void caculateCommunityArea() {
+		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(11);
+		for (Community community : communities) {
+			initCommunityData(community);
+			List<Address> addresses = addressProvider.findActiveAddressByCommunityId(community.getId());
+			for (Address address : addresses) {
+				community.setAptCount(community.getAptCount() + 1);
+				community.setAreaSize(community.getAreaSize() + (address.getAreaSize() != null ? address.getAreaSize() : 0.0));
+				community.setRentArea(community.getRentArea() + (address.getRentArea() != null ? address.getRentArea() : 0.0));
+				community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
+				community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
+				community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+			}
+			communityProvider.updateCommunity(community);
+		}
+	}
+	
+	private void initCommunityData(Community community){
+		community.setAptCount(0);
+		community.setAreaSize(0.0);
+		community.setRentArea(0.0);
+		community.setChargeArea(0.0);
+		community.setFreeArea(0.0);
+		community.setSharedArea(0.0);
+	}
+
+	@Override
+	public void caculateBuildingArea() {
+		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(11);
+		for (Community community : communities) {
+			List<Building> buildings = communityProvider.findBuildingsByCommunityId(community.getId());
+			for (Building building : buildings) {
+				initBuildingData(building);
+				List<Address> addresses = addressProvider.findActiveAddressByBuildingName(building.getName());
+				for (Address address : addresses) {
+					//address.setBuildingId(building.getId());
+					//building.setAptCount(building.getAptCount() + 1);
+					building.setAreaSize(building.getAreaSize() + (address.getAreaSize() != null ? address.getAreaSize() : 0.0));
+					building.setRentArea(building.getRentArea() + (address.getRentArea() != null ? address.getRentArea() : 0.0));
+					building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
+					building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
+					building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+				}
+				communityProvider.updateBuilding(building);
+			}
+		}
+	}
+
+	private void initBuildingData(Building building) {
+		building.setAreaSize(0.0);
+		building.setRentArea(0.0);
+		building.setChargeArea(0.0);
+		building.setFreeArea(0.0);
+		building.setSharedArea(0.0);
 	}
 }
 

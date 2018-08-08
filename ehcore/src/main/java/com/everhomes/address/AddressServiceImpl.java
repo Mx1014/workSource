@@ -77,6 +77,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -3227,13 +3228,42 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				return dto;
 			}).collect(Collectors.toList());
 			
+			List<ExportApartmentsInBuildingDTO> filterData = filterExportApartmentsInBuildingDTO(data,cmd);
+			
 			String[] propertyNames = {"apartmentName", "status", "apartmentFloor", "areaSize", "rentArea", "freeArea", "chargeArea", "orientation", "namespaceAddressType", "namespaceAddressToken"};
 			String[] titleNames = {"*房源", "*状态", "楼层", "建筑面积", "在租面积", "可招租面积", "收费面积", "朝向","第三方来源", "第三方标识"};
 			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
-			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, filterData);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
 					"no data");
 		}
 	}
+		
+	private List<ExportApartmentsInBuildingDTO> filterExportApartmentsInBuildingDTO(List<ExportApartmentsInBuildingDTO> data,ListPropApartmentsByKeywordCommand cmd){
+		List<ExportApartmentsInBuildingDTO>  filterData = new ArrayList<>();
+		for(ExportApartmentsInBuildingDTO dto : data){
+			filterData.add(dto);
+		    //按状态筛选
+			if(cmd.getLivingStatus() != null && dto.getStatus() != cmd.getLivingStatus()){
+				filterData.remove(dto);
+                continue;
+			}
+			//按楼层筛选
+			if (cmd.getApartmentFloor() != null && !dto.getApartmentFloor().equals(cmd.getApartmentFloor())) {
+				filterData.remove(dto);
+                continue;
+			}
+			//按建筑面积筛选
+			if (cmd.getAreaSizeFrom() != null && dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+			if (cmd.getAreaSizeTo() != null && dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
+				filterData.remove(dto);
+                continue;
+			}
+		}
+		return filterData;
+	}	
 }

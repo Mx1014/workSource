@@ -157,4 +157,8 @@ public interface CommunityService {
 
 	void exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse httpServletResponse);
 
+	void caculateCommunityArea();
+
+	void caculateBuildingArea();
+
 }

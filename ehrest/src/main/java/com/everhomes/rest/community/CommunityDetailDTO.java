@@ -1,7 +1,5 @@
 package com.everhomes.rest.community;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -20,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargeArea: 收费面积</li>
  *     <li>categoryName: 分类名称</li>
  *     <li>categoryId: 分类id</li>
+ *     <li>communityNumber: 项目编号</li>
  * </ul>
  */
 public class CommunityDetailDTO {
@@ -38,7 +37,14 @@ public class CommunityDetailDTO {
 	private Double chargeArea;
     private String categoryName;
     private Long categoryId;
+    private String communityNumber;
     
+	public String getCommunityNumber() {
+		return communityNumber;
+	}
+	public void setCommunityNumber(String communityNumber) {
+		this.communityNumber = communityNumber;
+	}
 	public Long getCommunityId() {
 		return communityId;
 	}

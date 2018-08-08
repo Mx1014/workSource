@@ -512,6 +512,46 @@ public class CommunityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /community/listApartmentsInCommunity</b>
+     * <p>获取园区的房源信息</p>
+     */
+//    @RequestMapping("listApartmentsInCommunity")
+//    @RestReturn(value=BuildingStatisticsDTO.class)
+//    public RestResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+//    	BuildingStatisticsDTO result = this.communityService.getBuildingStatistics(cmd);
+//        RestResponse response =  new RestResponse(result);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
+    /**
+     * <b>URL: /community/caculateCommunityArea</b>
+     * <p>计算园区各个面积</p>
+     */
+    @RequestMapping("caculateCommunityArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateCommunityArea() {
+    	this.communityService.caculateCommunityArea();
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/caculateBuildingArea</b>
+     * <p>计算楼栋各个面积</p>
+     */
+    @RequestMapping("caculateBuildingArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateBuildingArea() {
+    	this.communityService.caculateBuildingArea();
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }
