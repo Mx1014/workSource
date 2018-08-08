@@ -12376,7 +12376,7 @@ public class PunchServiceImpl implements PunchService {
         response.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(), PunchRuleStatus.ACTIVE.getCode()));
         PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, new Date(cmd.getPunchDate()), UserContext.currentUserId());
         if (null != ptr) {
-            if(ptr.getId().equals(0)){
+            if(ptr.getId().equals(0L)){
                 response.setCurrentTimeRuleName("休息");
             }else {
                 response.setCurrentTimeRuleName(ptr.getName());
