@@ -10117,7 +10117,6 @@ public class PunchServiceImpl implements PunchService {
         for (; startCalendar.before(endCalendar); startCalendar.add(Calendar.DAY_OF_MONTH, 1)) {
             PunchDayLog log = findPunchDayLogByDate(startCalendar.getTime(), dayLogList);
             MonthDayStatusDTO dto = new MonthDayStatusDTO();
-            dto.setPunchDate(startCalendar.getTime().getTime());
             if (null != log) {
                 dto = ConvertHelper.convert(log, MonthDayStatusDTO.class); 
                 //异常状态用log的
@@ -10155,7 +10154,9 @@ public class PunchServiceImpl implements PunchService {
 //                        dto.setTimeRuleName(ptr.getName());
 //                    }
 //                }
-            }
+            } 
+            //放在这里设置punchDate因为 ConvertHelper.convert(log, MonthDayStatusDTO.class); 会让punchDate消失
+            dto.setPunchDate(startCalendar.getTime().getTime());
             response.getDayStatus().add(dto);
         }
         return response;
