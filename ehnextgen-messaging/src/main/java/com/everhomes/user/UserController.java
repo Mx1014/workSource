@@ -1631,6 +1631,20 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/findUsersByPhones</b>
+	 * <p>通过域空间和手机号查询用户信息</p>
+	 * @return
+	 */
+	public RestResponse findUsersByPhones(findUserByPhonesCommand cmd){
+		
+		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+     
+    }
+	
+	/**
 	 * <b>URL: /user/isUserAuth</b>
 	 * <p>判断用户是否为认证用户</p>
 	 * @return

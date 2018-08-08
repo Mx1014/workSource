@@ -6537,4 +6537,27 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+    
+    /**
+     * 根据手机号查询某域空间中的用户
+     * @param cmd
+     * @return
+     */
+    @Autowired
+    public User getUserFromPhone(findUserByPhonesCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		String phone = cmd.getPhone() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			return null ;
+		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+		if (userIdentifier != null) {
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if (user != null) {
+				user.setIdentifierToken(userIdentifier.getIdentifierToken());
+				return user;
+			}
+		}
+		return null;
+	}
 }
