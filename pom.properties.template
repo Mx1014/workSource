@@ -5,6 +5,7 @@ ehutil-common.version=1.0.0-SNAPSHOT
 ehplatform.version=0.1.0-SNAPSHOT
 ehplatform-persist.version=0.1.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
+ehorder-sdk.version=1.0.0-SNAPSHOT
 
 bluto.version=1.0.3
 scrabbler.version=1.0.0

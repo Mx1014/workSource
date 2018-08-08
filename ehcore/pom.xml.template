@@ -389,6 +389,12 @@
             <version>1.4</version>
         </dependency>
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar end -->
+
+        <dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehorder-sdk</artifactId>
+            <version>${ehorder-sdk.version}</version>
+        </dependency>
         
 	</dependencies>
 
