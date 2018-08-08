@@ -15,7 +15,21 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.ClockCode;
+import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExceptionStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
+import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
+import com.everhomes.rest.techpark.punch.PunchOwnerType;
+import com.everhomes.rest.techpark.punch.PunchRquestType;
+import com.everhomes.rest.techpark.punch.PunchRuleStatus;
+import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.everhomes.rest.techpark.punch.TimeCompareFlag;
+import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
@@ -54,7 +68,25 @@ import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkdayRules;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchHolidaysRecord;
+import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchOvertimeRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
+import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
+import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchTimeIntervalsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
+import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
+import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsHistoryRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsTodayRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
@@ -72,7 +104,26 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.DeleteWhereStep;
+import org.jooq.InsertQuery;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record10;
+import org.jooq.Record13;
+import org.jooq.Record17;
+import org.jooq.Record2;
+import org.jooq.Record3;
+import org.jooq.Record5;
+import org.jooq.Record7;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectHavingStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.UpdateConditionStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +142,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -3070,38 +3122,38 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchExceptionRequest> listAbonormalExceptionRequestByOwnerAndMonth(String ownerType, Long organizationId,
-                                                                                    List<String> months) {
-        List<PunchExceptionRequest> results = new ArrayList<>();
-        for (String punchMonth : months) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-            Date beginDate;
-            try {
-                beginDate = new Date(dateFormat.parse(punchMonth + "01").getTime());
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(beginDate);
-                calendar.add(Calendar.MONTH, 1);
-                Date endDate = new Date(calendar.getTimeInMillis());
-                SelectConditionStep<Record> step = getReadOnlyContext().
-                        select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
-                        .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(organizationId))
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
-                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()));
-//					.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
-//			LOGGER.debug(step.toString());
-                Result<Record> records = step.fetch();
-                if (null != records && records.size() > 0) {
-                    results.addAll(records.map(r -> ConvertHelper.convert(r, PunchExceptionRequest.class)));
+    public Map<Long, Integer> countAbonormalExceptionRequestGroupByPunchDate(Long organizationId, Long userId, String month, List<Byte> statusList) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date beginDate;
+        try {
+            beginDate = new Date(dateFormat.parse(month + "01").getTime());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(beginDate);
+            calendar.add(Calendar.MONTH, 1);
+            Date endDate = new Date(calendar.getTimeInMillis());
+            SelectHavingStep<Record2<Date, Integer>> step = getReadOnlyContext().
+                    select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE, Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
+                    .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(organizationId))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.greaterOrEqual(beginDate))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.lt(endDate))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode()))
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.in(statusList)).groupBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE);
+            Result<Record2<Date, Integer>> records = step.fetch();
+            if (null != records && records.size() > 0) {
+                Map<Long, Integer> result = new HashMap<>();
+                for (Record2<Date, Integer> record : records) {
+                    if (record.value1() != null) {
+                        result.put(record.value1().getTime(), record.value2());
+                    }
                 }
-            } catch (ParseException e) {
-                LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
+                return result;
             }
+        } catch (ParseException e) {
+            LOGGER.error("listAbonormalExceptionRequestByOwnerAndMonth error : \n", e);
+            return new HashMap<>();
         }
-        if (results.size() == 0) {
-            results = null;
-        }
-        return results;
+        return new HashMap<>();
     }
 
     @Override

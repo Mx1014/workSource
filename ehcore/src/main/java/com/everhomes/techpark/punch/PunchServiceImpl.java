@@ -3319,6 +3319,7 @@ public class PunchServiceImpl implements PunchService {
         statistic.setFullNormalFlag(NormalFlag.YES.getCode());
         statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 
+        Map<Long, Integer> abonormalExceptionRequestCountMap = new HashMap<>();
         if (statistic.getUserId() != null && statistic.getUserId() > 0) {
             statistic.setExceptionRequestCounts(punchProvider.countExceptionRequests(statistic.getUserId(), statistic.getOwnerId(), statistic.getPunchMonth(),
                     Arrays.asList(com.everhomes.rest.approval.ApprovalStatus.WAITING_FOR_APPROVING.getCode(), com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())));
@@ -3326,7 +3327,11 @@ public class PunchServiceImpl implements PunchService {
 
             List<PunchExceptionRequestStatisticsItemDTO> punchExceptionRequestStatisticsItemDTOS = punchProvider.countPunchExceptionRequestBetweenBeginAndEndTime(statistic.getUserId(), statistic.getOwnerId(), statistic.getPunchMonth());
             punchExceptionRequestCountByPunchMonthStatistics(statistic, punchExceptionRequestStatisticsItemDTOS);
+
+            abonormalExceptionRequestCountMap = punchProvider.countAbonormalExceptionRequestGroupByPunchDate(statistic.getOwnerId(), statistic.getUserId(), statistic.getPunchMonth(), Arrays.asList(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
         }
+
+
 
         for (PunchDayLog pdl : list) {
             statistic.setBelateTime(statistic.getBelateTime() + pdl.getBelateTimeTotal());
@@ -3361,7 +3366,7 @@ public class PunchServiceImpl implements PunchService {
                 Byte isAbsence = NormalFlag.NO.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                     String[] status = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-                    isWorkDay = countWorkDay(status, exceptionRequests);
+                    isWorkDay = countWorkDay(status, exceptionRequests,abonormalExceptionRequestCountMap.get(pdl.getPunchDate().getTime()));
                     if (pdl.getApprovalStatusList() != null && pdl.getApprovalStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
                         String[] asList = StringUtils.splitPreserveAllTokens(pdl.getApprovalStatusList(), PunchConstants.STATUS_SEPARATOR);
                         for (int i = 0; i < asList.length && i < status.length; i++) {
@@ -3381,7 +3386,7 @@ public class PunchServiceImpl implements PunchService {
                         //不上班跳过
                         continue;
                     } else {
-                        isWorkDay = countWorkDay(pdl.getStatusList(), exceptionRequests);
+                        isWorkDay = countWorkDay(pdl.getStatusList(), exceptionRequests, abonormalExceptionRequestCountMap.get(pdl.getPunchDate().getTime()));
                         String status = pdl.getStatusList();
                         if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
                             status = pdl.getApprovalStatusList();
@@ -3426,7 +3431,7 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
-    private Byte countWorkDay(String[] status, List<PunchExceptionRequest> exceptionRequests) {
+    private Byte countWorkDay(String[] status, List<PunchExceptionRequest> exceptionRequests, Integer abonormalExceptionRequestCount) {
         //下面要看外出/出差等申请结果
         if (null != exceptionRequests) {
             List workApprovalAttribute = new ArrayList<>();
@@ -3434,13 +3439,14 @@ public class PunchServiceImpl implements PunchService {
             workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
             workApprovalAttribute.add(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode());
             for (PunchExceptionRequest request : exceptionRequests) {
-                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
+                if (workApprovalAttribute.contains(request.getApprovalAttribute())
+                        && com.everhomes.rest.approval.ApprovalStatus.AGREEMENT == com.everhomes.rest.approval.ApprovalStatus.fromCode(request.getStatus())) {
                     return NormalFlag.YES.getCode();
                 }
             }
         }
         for (String s : status) {
-            if (NormalFlag.fromCode(countWorkDay(s, null)) == NormalFlag.YES) {
+            if (NormalFlag.fromCode(countWorkDay(s, exceptionRequests, abonormalExceptionRequestCount)) == NormalFlag.YES) {
                 return NormalFlag.YES.getCode();
             }
         }
@@ -3539,7 +3545,7 @@ public class PunchServiceImpl implements PunchService {
         return getTimeLong(punchTime, null) - (log.getShouldPunchTime()==null?log.getRuleTime():log.getShouldPunchTime());
     }
 
-    private Byte countWorkDay(String status, List<PunchExceptionRequest> exceptionRequests) {
+    private Byte countWorkDay(String status, List<PunchExceptionRequest> exceptionRequests, Integer abonormalExceptionRequestCount) {
         Byte isNormal = NormalFlag.NO.getCode();
         if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             isNormal = NormalFlag.YES.getCode();
@@ -3563,10 +3569,14 @@ public class PunchServiceImpl implements PunchService {
             workApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
             workApprovalAttribute.add(GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode());
             for (PunchExceptionRequest request : exceptionRequests) {
-                if (workApprovalAttribute.contains(request.getApprovalAttribute())) {
+                if (workApprovalAttribute.contains(request.getApprovalAttribute())
+                        && com.everhomes.rest.approval.ApprovalStatus.AGREEMENT == com.everhomes.rest.approval.ApprovalStatus.fromCode(request.getStatus())) {
                     isNormal = NormalFlag.YES.getCode();
                 }
             }
+        }
+        if (abonormalExceptionRequestCount != null && abonormalExceptionRequestCount > 0) {
+            isNormal = NormalFlag.YES.getCode();
         }
         return isNormal;
     }
@@ -9623,17 +9633,14 @@ public class PunchServiceImpl implements PunchService {
             }
         });
         for (PunchExceptionRequest request : exceptionRequests) {
+            if (com.everhomes.rest.approval.ApprovalStatus.AGREEMENT != com.everhomes.rest.approval.ApprovalStatus.fromCode(request.getStatus())) {
+                continue;
+            }
             if (SMART_APPROVAL_ATTRIBUTES.contains(request.getApprovalAttribute())) {
                 tiDTOs = addExceptionRequest2TimeIntervals(request, tiDTOs);
             }
         }
         return tiDTOs;
-    }
-
-    private List<TimeInterval> processTimeRuleDTO(List<TimeInterval> tiDTOs, Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
-        List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, enterpriseId,
-                dayStart, dayEnd);
-        return processTimeRuleDTO(exceptionRequests, tiDTOs);
     }
 
     public void setCalendarDateBegin(Calendar calendarDateBegin) {
