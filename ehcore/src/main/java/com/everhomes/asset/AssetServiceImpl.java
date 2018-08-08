@@ -5024,6 +5024,9 @@ public class AssetServiceImpl implements AssetService {
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
         titleSize.add(20);
+        propertyNames.add("dueDayCount");
+        titleName.add("欠费天数");
+        titleSize.add(20);
         propertyNames.add("amountExemption");
         titleName.add("减免金额");
         titleSize.add(20);
@@ -5104,6 +5107,7 @@ public class AssetServiceImpl implements AssetService {
         		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
             }
             detail.put("addresses", dto.getAddresses());
+            detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
             //导出增加减免（总和）、减免备注、增收（总和）、增收备注
             if(listBillDetailVO != null) {
             	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
