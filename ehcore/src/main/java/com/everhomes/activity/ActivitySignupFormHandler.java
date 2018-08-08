@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -9,6 +10,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityRosterSourceFlag;
+import com.everhomes.rest.activity.ActivityRosterStatus;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivitySignupCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
@@ -50,18 +53,14 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
     @Autowired
     private ActivityService activityService;
 
+    @Autowired
+    private ActivityProivider activityProivider;
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         if (StringUtils.isBlank(cmd.getSourceType())) {
             cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
         }
-        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
-        GeneralForm generalForm = new GeneralForm();
-        if (!CollectionUtils.isEmpty(forms)) {
-            generalForm = forms.get(0);
-        }else {
-            generalForm = getDefaultGeneralForm(cmd.getSourceType());
-        }
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
         List<PostApprovalFormItem> values = cmd.getValues();
         Long activityId = 0L;
         for (PostApprovalFormItem item :values) {
@@ -69,17 +68,27 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
                 activityId = Long.valueOf(item.getFieldValue());
             }
         }
+        if (activityId == null || activityId == 0L) {
+            LOGGER.error("activityId is invalid");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "activityId is invalid.");
+        }
+        List<ActivityRoster> rosterList = this.activityProivider.listRosters(cmd.getOwnerId(), ActivityRosterStatus.NORMAL);
+        if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
+            return dto;
+        }
+        GeneralForm generalForm = this.generalFormProvider.getGeneralFormById(rosterList.get(0).getFormId());
         ActivitySignupCommand activitySignupCommand = new ActivitySignupCommand();
         activitySignupCommand.setActivityId(activityId);
         activitySignupCommand.setAdultCount(1);
         activitySignupCommand.setSignupSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
         activitySignupCommand.setFormOriginId(generalForm.getFormOriginId());
         activitySignupCommand.setValues(cmd.getValues());
+        activitySignupCommand.setFormId(generalForm.getId());
         LOGGER.info("activity signup, cmd={}",activitySignupCommand);
         ActivityDTO activityDTO = this.activityService.signup(activitySignupCommand);
 
 
-        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
 
         List<PostApprovalFormItem> items = new ArrayList<>();
         PostApprovalFormItem item = new PostApprovalFormItem();
@@ -97,15 +106,20 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         if (StringUtils.isBlank(cmd.getSourceType())) {
             cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
         }
-        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
         GeneralFormDTO dto = new GeneralFormDTO();
-        if (!CollectionUtils.isEmpty(forms)) {
-            dto = ConvertHelper.convert(forms.get(0), GeneralFormDTO.class);
-        }else {
-            dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
+        if (cmd.getOwnerId() == null) {
+            LOGGER.error("activityId is invalid");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "activityId is invalid.");
         }
-        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
-        if (cmd.getOwnerId() != null) {
+        List<ActivityRoster> rosterList = this.activityProivider.listRosters(cmd.getOwnerId(), ActivityRosterStatus.NORMAL);
+        if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
+            return null;
+        }
+        GeneralForm generalForm = this.generalFormProvider.getGeneralFormById(rosterList.get(0).getFormId());
+        if (generalForm != null) {
+            dto = ConvertHelper.convert(generalForm,GeneralFormDTO.class);
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
             GeneralFormFieldDTO generalFormFieldDTO = new GeneralFormFieldDTO();
             generalFormFieldDTO.setFieldName("ACTIVITY_ID");
             generalFormFieldDTO.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
@@ -115,9 +129,10 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
             generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
             fieldDTOs.add(generalFormFieldDTO);
+            dto.setFormFields(fieldDTOs);
+            return dto;
         }
-        dto.setFormFields(fieldDTOs);
-        return dto;
+        return null;
     }
 
     @Override

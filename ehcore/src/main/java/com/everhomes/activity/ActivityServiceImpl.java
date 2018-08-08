@@ -801,15 +801,24 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 }
 
 //	            activityProvider.createActivityRoster(roster);
+                if (cmd.getValues() == null) {
+                    UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),UserContext.getCurrentNamespaceId());
+                    if (userIdentifier != null) {
+                        roster.setPhone(userIdentifier.getIdentifierToken());
+                    }
+                    roster.setRealName(user.getNickName());
+                }
                 createActivityRoster(roster);
 
-                //报名对接表单，添加表单值数据
-                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
-                addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
-                addGeneralFormValuesCommand.setSourceId(roster.getId());
-                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-                addGeneralFormValuesCommand.setValues(cmd.getValues());
-                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                if (cmd.getValues() != null) {
+                    //报名对接表单，添加表单值数据
+                    addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                    addGeneralFormValuesCommand.setSourceId(roster.getId());
+                    addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                    addGeneralFormValuesCommand.setValues(cmd.getValues());
+                    this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                }
 
                 //启动定时器，当时间超过设定时间时，取消订单。 条件与前面设置订单号、订单开始时间一致。放在此处是因为定时器需要rosterId   add by yanjun 20170516
                 if (activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0) {
@@ -1462,13 +1471,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 
-                //报名对接表单，添加表单值数据
-                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
-                addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
-                addGeneralFormValuesCommand.setSourceId(roster.getId());
-                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-                addGeneralFormValuesCommand.setValues(cmd.getValues());
-                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+	            if (cmd.getValues() != null) {
+                    //报名对接表单，添加表单值数据
+                    addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                    addGeneralFormValuesCommand.setSourceId(roster.getId());
+                    addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                    addGeneralFormValuesCommand.setValues(cmd.getValues());
+                    this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                }
 
 	            activityProvider.updateActivity(activity);
                 // 注册成功事件 add by jiarui
@@ -1530,7 +1541,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
 		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
-		signupInfoDTO.setValues(values);
+		if (values != null) {
+            signupInfoDTO.setValues(values);
+        }
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
@@ -1575,7 +1588,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setCommunityName(cmd.getCommunityName());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
-
+        if (cmd.getFormId() != null) {
+            roster.setFormId(cmd.getFormId());
+        }
         return roster;
 	}
 
@@ -2273,7 +2288,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
-        
+        if (cmd.getFormId() != null) {
+            roster.setFormId(cmd.getFormId());
+        }
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
 
@@ -6891,6 +6908,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     @Override
     public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
         GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+        getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
         GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
         String fileName = "活动报名模板";
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);

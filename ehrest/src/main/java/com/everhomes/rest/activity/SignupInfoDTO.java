@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>id: id</li>
  * <li>phone: 手机</li>
  * <li>nickName: 昵称</li>
+ * <li>realName:真实名称</li>
  * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>communityName: 园区名称</li>
  * <li>values: values: 报名中，每项对应的值{@link PostApprovalFormItem}</li>
@@ -44,6 +45,7 @@ public class SignupInfoDTO {
 	private Long id;
 	private String phone;
 	private String nickName;
+	private String realName;
 	private Byte gender;
 	private String communityName;
 	@ItemType(PostApprovalFormItem.class)
@@ -72,6 +74,14 @@ public class SignupInfoDTO {
     private Timestamp refundTime;
 	private Byte status;
 	private String signupStatusText;
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
 
     public Byte getGender() {
         return gender;

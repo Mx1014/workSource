@@ -8,13 +8,14 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>sourceType: 源类型</li>
  * <li>sourceId: 源Id</li>
+ * <li>activityId: 活动ID</li>
  * </ul>
  */
 public class ExportActivitySignupTemplateCommand {
     private Integer namespaceId;
     private String sourceType;
     private Long sourceId;
-
+    private Long activityId;
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -37,6 +38,14 @@ public class ExportActivitySignupTemplateCommand {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public Long getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
     }
 
     @Override

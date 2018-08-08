@@ -14,7 +14,8 @@ import java.util.List;
  *<li>activityId:活动ID</li>
  *<li>adultCount:成人数</li>
  *<li>childCount:小孩数</li>
- * <li>formOriginId: 表单ID</li>
+ *<li>formOriginId: 表单formOriginID</li>
+ *<li>formId: 表单ID</li>
  *<li>values: 报名中，每项对应的值{@link PostApprovalFormItem} </li>
  *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  *<li>signupSourceFlag: 来源  参考{@link com.everhomes.rest.activity.ActivityRosterSourceFlag}</li>
@@ -29,6 +30,7 @@ public class ActivitySignupCommand {
     @NotNull
     private Integer childCount;
 
+    private Long formId;
     private Long formOriginId;
 
 	@ItemType(PostApprovalFormItem.class)
@@ -38,6 +40,14 @@ public class ActivitySignupCommand {
     
     
     public ActivitySignupCommand() {
+    }
+
+    public Long getFormId() {
+        return formId;
+    }
+
+    public void setFormId(Long formId) {
+        this.formId = formId;
     }
 
     public Long getFormOriginId() {
