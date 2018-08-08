@@ -6055,10 +6055,12 @@ public class AssetProviderImpl implements AssetProvider {
 		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
+		EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
 		SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(t2.STATUS);
         query.addFrom(t2);
-		query.addConditions(t2.ORDER_ID.eq(orderId));
+        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
+		query.addConditions(t3.PAYMENT_ORDER_ID.eq(orderId));
 		query.fetch().map(r -> {
 			Integer status = r.getValue(t2.STATUS);
 			if(status != null && status.equals(1)) {
