@@ -602,7 +602,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
                                                               Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,
-                                                              SortField order, String cardTypeId,  Long pageAnchor, Integer pageSize){
+                                                              SortField order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
@@ -637,6 +637,10 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 		if (StringUtils.isNotBlank(cardTypeId)) {
 			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CARD_TYPE_ID.eq(cardTypeId));
+		}
+		if(StringUtils.isNotBlank(ownerKeyWords)){
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.like("%"+ownerKeyWords+"%")
+			.or(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.like("%"+ownerKeyWords+"%")));
 		}
 
         if (null != order) {
