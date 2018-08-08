@@ -1166,14 +1166,14 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     @Override
     public void addActivities(List<UserActivity> activityList) {
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWrite());
-        long id = sequenceProvider.getNextSequenceBlock(
-                NameMapper.getSequenceDomainFromTablePojo(EhUserActivities.class), activityList.size()+10);
-        id += 5;
-        for (UserActivity activity : activityList) {
-            activity.setId(id++);
-        }
         EhUserActivitiesDao dao = new EhUserActivitiesDao(cxt.configuration());
-        dao.insert(activityList.toArray(new EhUserActivities[0]));
+
+        for (UserActivity activity : activityList) {
+            long id = sequenceProvider.getNextSequence(
+                    NameMapper.getSequenceDomainFromTablePojo(EhUserActivities.class));
+            activity.setId(id);
+            dao.insert(activity);
+        }
     }
 
     @Override
