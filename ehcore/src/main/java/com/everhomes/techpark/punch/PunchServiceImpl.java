@@ -3923,7 +3923,7 @@ public class PunchServiceImpl implements PunchService {
             sb.append(hour);
             sb.append("小时");
         }
-        time = time % 60;
+        time = time % 3600;
         int min = Integer.valueOf((time / 60) + "");
         if (min > 0) {
             sb.append(min);
