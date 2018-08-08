@@ -1631,11 +1631,11 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /user/findUsersByPhone</b>
+	 * <b>URL: /user/getUserByPhone</b>
 	 * <p>通过域空间和手机号查询用户信息</p>
 	 * @return
 	 */
-	public RestResponse findUsersByPhone(findUserByPhoneCommand cmd){
+	public RestResponse getUserByPhone(findUserByPhoneCommand cmd){
 		
 		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
