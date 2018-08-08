@@ -91,3 +91,4 @@ alpn-boot.version = 8.1.4.v20150727
 pay-sdk.version=1.0.0-SNAPSHOT
 sensitive-word.version=1.2.0
 
+spring-kafka.version=1.2.2.RELEASE

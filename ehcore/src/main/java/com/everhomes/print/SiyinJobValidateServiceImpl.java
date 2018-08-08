@@ -1,22 +1,6 @@
 // @formatter:off
 package com.everhomes.print;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -32,21 +16,27 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.print.PrintColorType;
-import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.print.PrintJobTypeType;
-import com.everhomes.rest.print.PrintOrderLockType;
-import com.everhomes.rest.print.PrintOrderStatusType;
-import com.everhomes.rest.print.PrintOwnerType;
-import com.everhomes.rest.print.PrintPaperSizeType;
-import com.everhomes.rest.print.PrintSettingType;
+import com.everhomes.rest.print.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.xml.XMLToJSON;
-
-import scala.math.BigInt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
 import sun.misc.BASE64Decoder;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *	司印打印记录验证功能类

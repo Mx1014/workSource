@@ -2,7 +2,6 @@
 package com.everhomes.core;
 
 import com.everhomes.atomikos.AtomikosHelper;
-import com.everhomes.bus.LocalEventBus;
 import com.everhomes.sequence.MysqlSequenceProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfigura
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
@@ -35,7 +33,6 @@ import org.springframework.context.annotation.FilterType;
     HibernateJpaAutoConfiguration.class,
     FreeMarkerAutoConfiguration.class
 })
-@EnableBinding(LocalEventBus.BusEventChannel.class)
 public class CoreServerApp {
     final static Logger logger = LoggerFactory.getLogger(CoreServerApp.class);
     
