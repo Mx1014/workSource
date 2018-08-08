@@ -19,14 +19,14 @@ set @zuolin_menu_parent_id=23010000; -- select * from eh_web_menus where name='O
 set @zuolin_menu_path=CONCAT("/",@zuolin_menu_parent_parent_id,"/",@zuolin_menu_parent_id,"/",@zuolin_menu_id);-- 如：/23000000/23010000/XXXX
 -- 园区后台菜单路径（三层）
 set @park_menu_id=(select max(id) + 2 from eh_web_menus);-- 如：16032200
-set @park_menu_parent_parent_id=40000030;-- select * from eh_web_menus where name='物业服务' and type='park'
-set @park_menu_parent_id=47000000; -- select * from eh_web_menus where name='物业管理' and type='park'
-set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000030/47000000/XXX
+set @park_menu_parent_parent_id=40000010;-- select * from eh_web_menus where name='企业办公' and type='park'
+set @park_menu_parent_id=53000000; -- select * from eh_web_menus where name='OA管理' and type='park'
+set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000010/53000000/XXX
 -- 普通公司后台菜单路径（三层）
 set @organization_menu_id=(select max(id) + 3 from eh_web_menus);-- 如：16032200
-set @organization_menu_parent_parent_id=40000030;-- select * from eh_web_menus where name='物业服务' 
-set @organization_menu_parent_id=47000000; -- select * from eh_web_menus where name='物业管理'
-set @organization_menu_path=CONCAT("/",@organization_menu_parent_parent_id,"/",@organization_menu_parent_id,"/",@organization_menu_id);-- 如：/40000030/47000000/XXX
+set @organization_menu_parent_parent_id=70000010;-- select * from eh_web_menus where name='企业办公' and type='organization'
+set @organization_menu_parent_id=77000000; -- select * from eh_web_menus where name='OA管理' and type='organization'
+set @organization_menu_path=CONCAT("/",@organization_menu_parent_parent_id,"/",@organization_menu_parent_id,"/",@organization_menu_id);-- 如：/40000010/53000000/XXX
 
 -- 新增模块 eh_service_modules
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `multiple_flag`, `module_control_type`,`category`) 
