@@ -73,7 +73,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "activityId is invalid.");
         }
-        List<ActivityRoster> rosterList = this.activityProivider.listRosters(cmd.getOwnerId(), ActivityRosterStatus.NORMAL);
+        List<ActivityRoster> rosterList = this.activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
         if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
             return dto;
         }

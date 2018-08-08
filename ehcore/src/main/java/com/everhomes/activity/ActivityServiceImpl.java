@@ -267,6 +267,7 @@ import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -1540,6 +1541,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
 		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
 		if (values != null) {
             signupInfoDTO.setValues(values);
@@ -6963,10 +6965,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         if (rosters.size() > 0) {
             List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
             List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别"));
-            List<PostApprovalFormItem> itemList = signupInfoDTOs.get(0).getValues();
-            if (!CollectionUtils.isEmpty(itemList)) {
-                for (PostApprovalFormItem postApprovalFormItem : itemList) {
-                    titleNames.add(postApprovalFormItem.getFieldDisplayName());
+            List<PostApprovalFormItem> itemList = new ArrayList<>();
+            if (rosters.size() >= 1) {
+                itemList = signupInfoDTOs.get(1).getValues();
+                if (!CollectionUtils.isEmpty(itemList)) {
+                    for (PostApprovalFormItem postApprovalFormItem : itemList) {
+                        titleNames.add(postApprovalFormItem.getFieldDisplayName());
+                    }
                 }
             }
             titleNames.addAll(Arrays.asList("报名时间", "报名来源", "报名状态"));
@@ -6996,6 +7001,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 signupValue.add(signupInfoDTO.getPhone());
                 signupValue.add(signupInfoDTO.getNickName());
                 signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+                if (i == 0) {
+                    if (!CollectionUtils.isEmpty(itemList)) {
+                        for (PostApprovalFormItem postApprovalFormItem : itemList) {
+                            signupValue.add("");
+                        }
+                    }
+                }
                 if (!CollectionUtils.isEmpty(signupInfoDTO.getValues())) {
                     for (PostApprovalFormItem postApprovalFormItem : signupInfoDTO.getValues()) {
                         signupValue.add(postApprovalFormItem.getFieldValue());
