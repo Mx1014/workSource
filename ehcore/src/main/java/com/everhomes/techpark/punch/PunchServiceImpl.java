@@ -10117,9 +10117,9 @@ public class PunchServiceImpl implements PunchService {
         for (; startCalendar.before(endCalendar); startCalendar.add(Calendar.DAY_OF_MONTH, 1)) {
             PunchDayLog log = findPunchDayLogByDate(startCalendar.getTime(), dayLogList);
             MonthDayStatusDTO dto = new MonthDayStatusDTO();
+            dto.setPunchDate(startCalendar.getTime().getTime());
             if (null != log) {
-                dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
-                dto.setPunchDate(log.getPunchDate().getTime());
+                dto = ConvertHelper.convert(log, MonthDayStatusDTO.class); 
                 //异常状态用log的
 //				if (null == log.getStatusList()) {
 //					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
