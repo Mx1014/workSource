@@ -1177,7 +1177,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
 				//add by tangcen
-				oldApartments.add(apartment.getApartmentName());
+				oldApartments.add(apartment.getApartmentName()+"收费面积："+ apartment.getAreaSize());
 			});
 		}
 
@@ -1201,14 +1201,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
 				//add by tangcen
-				newApartments.add(buildingApartment.getApartmentName());
+				newApartments.add(buildingApartment.getApartmentName() +"收费面积："+ buildingApartment.getChargeArea());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
-				if(buildingApartment.getId() == null) {
+				
+				ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingById(buildingApartment.getId());
+				if(contractBuildingMapping == null) {
 					//新增的资产
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
 					mapping.setNamespaceId(contract.getNamespaceId());
-//					mapping.setOrganizationName(contract.getCustomerName());
 					mapping.setContractId(contract.getId());
 					mapping.setAreaSize(buildingApartment.getChargeArea());
 					mapping.setContractNumber(contract.getContractNumber());
@@ -1229,9 +1230,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 							addressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 						}
-
 					}
 				} else {
+					//更新合同资产收费面积
+					contractBuildingMapping.setAreaSize(buildingApartment.getChargeArea());
+					contractBuildingMappingProvider.updateContractBuildingMapping(contractBuildingMapping);
 					//保留的资产
 					map.remove(buildingApartment.getId());
 				}
