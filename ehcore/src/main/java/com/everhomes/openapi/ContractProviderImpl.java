@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -36,10 +39,6 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -62,11 +61,6 @@ import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
-import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
-import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
-import com.everhomes.server.schema.tables.daos.EhContractsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
@@ -1320,11 +1314,16 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public Byte filterAptitudeCustomer(Long id){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class));
-		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
-		EhContractCategories ecc = dao.findById(id);
-
+	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
+		result[0] = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()))
+				.orderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc()).fetchAny().map((r) -> {
+					return ConvertHelper.convert(r, GeneralForm.class);
+				});
+		return result[0];
+		context.
 		if(ecc != null){
 			return ecc.getAptitudeFlag();
 		}else{

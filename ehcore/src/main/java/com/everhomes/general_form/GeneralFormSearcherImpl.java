@@ -131,13 +131,19 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                     GeneralFormFieldType type = GeneralFormFieldType.fromCode(item.getFieldValue());
                     switch (type) {
                         case NUMBER_TEXT:
+                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            break;
                         case INTEGER_TEXT:
+                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            break;
                         case DROP_BOX:
                             FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         case SINGLE_LINE_TEXT:
+                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            break;
                         case MULTI_LINE_TEXT:
-
+                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         default:
                             break;

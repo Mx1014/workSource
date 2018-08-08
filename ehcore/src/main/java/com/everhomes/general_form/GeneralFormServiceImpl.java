@@ -23,6 +23,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,6 +40,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -667,15 +670,38 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
+    public GeneralFormValsResponse getGeneralFormVal(GetGeneralFormValCommand cmd){
         List<GeneralFormVal> request;
-        List<GeneralFormValDTO> result;
+        Map<String, Object> returnMap = new HashMap<>();
 
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null){
 
-
+            GeneralFormValsResponse response = new GeneralFormValsResponse();
             request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getModuleId(), cmd.getOwnerId());
-            return request.stream().map(r -> ConvertHelper.convert(r, GeneralFormValDTO.class)).collect(Collectors.toList());
+            for (GeneralFormVal val : request) {
+
+                GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+                String fieldValue = dto.getFieldValue();
+                ObjectMapper mapper = new ObjectMapper();
+                JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+                Map<String,String> urMap;
+                try {
+                    urMap = mapper.readValue(fieldValue, jvt);
+                    for (Map.Entry<String, String> entry : urMap.entrySet()) {
+                        fieldValue  = entry.getValue();
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            break;
+                        }
+                    }
+                    returnMap.put(dto.getFieldName(), fieldValue);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+            response.setValList(returnMap);
+            return response;
         }else{
             LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                     + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());

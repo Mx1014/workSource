@@ -134,9 +134,9 @@ public class GeneralFormController extends ControllerBase {
 	 * <p> 获取表单值 </p>
 	 */
 	@RequestMapping("getGeneralFormVal")
-	@RestReturn(value=GeneralFormValDTO.class, collection = true)
+	@RestReturn(value=GeneralFormValsResponse.class)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormVal(cmd);
+		GeneralFormValsResponse dto = generalFormService.getGeneralFormVal(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
