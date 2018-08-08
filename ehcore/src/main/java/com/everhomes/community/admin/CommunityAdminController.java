@@ -198,7 +198,7 @@ public class CommunityAdminController extends ControllerBase {
      * <p>根据关键字查询待审核小区列表</p>
      */
     @RequestMapping("listCommunitiesByKeyword")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordAdminCommand cmd) {
     	
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -207,7 +207,7 @@ public class CommunityAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid keyword parameter");
 		}
-    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	ListCommunitiesByKeywordResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
     	RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

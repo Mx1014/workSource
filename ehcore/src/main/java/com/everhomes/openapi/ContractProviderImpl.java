@@ -1362,4 +1362,16 @@ public class ContractProviderImpl implements ContractProvider {
 		return result;
 	}
 
+	@Override
+	public List<Contract> findContractByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return 	 context.select()
+						.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+						.leftOuterJoin(Tables.EH_CONTRACTS)
+						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+						.fetchInto(Contract.class);
+	}
+
 }

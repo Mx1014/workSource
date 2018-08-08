@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.address.*;
-
+import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
 import com.everhomes.asset.AddressIdAndName;
 
 import org.jooq.Record2;
@@ -110,4 +110,5 @@ public interface AddressProvider {
 	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
 	List<Address> findActiveAddressByCommunityId(Long id);
 	List<Address> findActiveAddressByBuildingName(String name);
+	List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
 }

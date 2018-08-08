@@ -113,5 +113,7 @@ public interface ContractProvider {
 	Integer countRelatedContractNumberInBuilding(String buildingName);
 
 	Double getTotalRentInBuilding(String buildingName);
+
+	List<Contract> findContractByAddressId(Long addressId);
 	
 }

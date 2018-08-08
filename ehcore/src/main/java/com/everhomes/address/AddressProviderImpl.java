@@ -14,6 +14,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.server.schema.tables.EhOrganizationAddressMappings;
+import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
@@ -46,6 +48,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
+import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -1041,6 +1044,50 @@ public class AddressProviderImpl implements AddressProvider {
 						.and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
 						.and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
 						.fetchInto(Address.class);
+	}
+
+	@Override
+	public List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		query.addFrom(Tables.EH_ADDRESSES);
+		query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		
+		if (cmd.getCommunityId() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		}
+		if (cmd.getFloorNumber() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getFloorNumber()));
+		}
+		if (cmd.getKeyword() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.like("%" + cmd.getKeyword() + "%")
+								.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeyword() + "%")));
+		}
+		if (cmd.getAreaSizeFrom() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.AREA_SIZE.ge(cmd.getAreaSizeFrom()));
+		}
+		if (cmd.getAreaSizeTo() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.AREA_SIZE.le(cmd.getAreaSizeTo()));
+		}
+		if (cmd.getRentAreaFrom() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.RENT_AREA.ge(cmd.getRentAreaFrom()));
+		}
+		if (cmd.getRentAreaTo() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.RENT_AREA.le(cmd.getRentAreaTo()));
+		}
+		if (cmd.getChargeAreaFrom() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.CHARGE_AREA.ge(cmd.getChargeAreaFrom()));
+		}
+		if (cmd.getChargeAreaTo() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.CHARGE_AREA.le(cmd.getChargeAreaTo()));
+		}
+		if (cmd.getFreeAreaFrom() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.FREE_AREA.ge(cmd.getFreeAreaFrom()));
+		}
+		if (cmd.getFreeAreaTo() != null) {
+			query.addConditions(Tables.EH_ADDRESSES.FREE_AREA.le(cmd.getFreeAreaTo()));
+		}
+		return query.fetchInto(Address.class);
 	}
 
 	

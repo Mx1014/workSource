@@ -3189,54 +3189,72 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		PropAptStatisticDTO statistics = getStatistics(resultList);
 		
 		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
-		List<PropFamilyDTO>  filterEdResult = new ArrayList<>();
+		List<PropFamilyDTO>  filterData = new ArrayList<>();
 		for(PropFamilyDTO dto : resultList){
-		    filterEdResult.add(dto);
-		    //按状态筛选
+			filterData.add(dto);
+			//按状态筛选
 			if(cmd.getLivingStatus() != null && dto.getLivingStatus() != cmd.getLivingStatus()){
-                filterEdResult.remove(dto);
+				filterData.remove(dto);
                 continue;
 			}
 			//按楼层筛选
-			if (cmd.getApartmentFloor() != null && !dto.getApartmentFloor().equals(cmd.getApartmentFloor())) {
-				filterEdResult.remove(dto);
-                continue;
+			if (!StringUtils.isEmpty(cmd.getApartmentFloor())){
+				if (dto.getApartmentFloor()==null || !dto.getApartmentFloor().equals(cmd.getApartmentFloor())) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
 			//按建筑面积筛选
-			if (cmd.getAreaSizeFrom() != null && dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getAreaSizeFrom() != null) {
+				if (dto.getAreaSize()==null || dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
-			if (cmd.getAreaSizeTo() != null && dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getAreaSizeTo() != null) {
+				if (dto.getAreaSize()==null || dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
 			//按在租面积筛选
-			if (cmd.getRentAreaFrom() != null && dto.getRentArea().doubleValue() < cmd.getRentAreaFrom().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getRentAreaFrom() != null) {
+				if (dto.getRentArea()==null || dto.getRentArea().doubleValue() < cmd.getRentAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
-			if (cmd.getRentAreaTo() != null && dto.getRentArea().doubleValue() > cmd.getRentAreaTo().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getRentAreaTo() != null) {
+				if (dto.getRentArea()==null || dto.getRentArea().doubleValue() > cmd.getRentAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
 			//按收费面积筛选
-			if (cmd.getChargeAreaFrom() != null && dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getChargeAreaFrom() != null) {
+				if (dto.getChargeArea()==null || dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
-			if (cmd.getChargeAreaTo() != null && dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getChargeAreaTo() != null ) {
+				if (dto.getChargeArea()==null || dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
 			//按可招租面积筛选
-			if (cmd.getFreeAreaFrom() != null && dto.getFreeArea().doubleValue() < cmd.getFreeAreaFrom().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getFreeAreaFrom() != null) {
+				if (dto.getFreeArea()==null || dto.getFreeArea().doubleValue() < cmd.getFreeAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
-			if (cmd.getFreeAreaTo() != null && dto.getFreeArea().doubleValue() > cmd.getFreeAreaTo().doubleValue()) {
-				filterEdResult.remove(dto);
-                continue;
+			if (cmd.getFreeAreaTo() != null) {
+				if (dto.getFreeArea()==null || dto.getFreeArea().doubleValue() > cmd.getFreeAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
 			}
 			
 			dto.setReservationInvolved((byte)0);
@@ -3260,7 +3278,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				dto.setArrangementInvolved((byte)1);
 			}
 		}
-		response.setResultList(filterEdResult);
+		response.setResultList(filterData);
 
 		return response;
 	}

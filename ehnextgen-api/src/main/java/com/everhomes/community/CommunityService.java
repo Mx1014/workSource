@@ -35,8 +35,7 @@ public interface CommunityService {
 
     CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
 
-	ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
-			ListComunitiesByKeywordAdminCommand cmd);
+	ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd);
 	
 	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
 	BuildingDTO getBuilding(GetBuildingCommand cmd);
@@ -107,7 +106,7 @@ public interface CommunityService {
 	
 	void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
 	
-	ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
+	ListCommunitiesByKeywordResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
 	
 	List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd);
 	
@@ -160,5 +159,7 @@ public interface CommunityService {
 	void caculateCommunityArea();
 
 	void caculateBuildingArea();
+
+	ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
 
 }

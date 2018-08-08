@@ -203,10 +203,10 @@ public class CommunityController extends ControllerBase {
      * <p>根据域查询小区</p>
      */
     @RequestMapping("listCommunitiesByNamespaceId")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByNamespaceId(ListComunitiesByKeywordAdminCommand cmd) {
     	
-    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	ListCommunitiesByKeywordResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
     	RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -332,9 +332,9 @@ public class CommunityController extends ControllerBase {
      * <p>根据域,城市，区县，分类，关键字查询小区</p>
      */
     @RequestMapping("listCommunitiesByCategory")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
-    	ListCommunitiesByKeywordCommandResponse resp = communityService.listCommunitiesByCategory(cmd);
+    	ListCommunitiesByKeywordResponse resp = communityService.listCommunitiesByCategory(cmd);
         RestResponse response =  new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -516,15 +516,15 @@ public class CommunityController extends ControllerBase {
      * <b>URL: /community/listApartmentsInCommunity</b>
      * <p>获取园区的房源信息</p>
      */
-//    @RequestMapping("listApartmentsInCommunity")
-//    @RestReturn(value=BuildingStatisticsDTO.class)
-//    public RestResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
-//    	BuildingStatisticsDTO result = this.communityService.getBuildingStatistics(cmd);
-//        RestResponse response =  new RestResponse(result);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+    @RequestMapping("listApartmentsInCommunity")
+    @RestReturn(value=ListApartmentsInCommunityResponse.class)
+    public RestResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+    	ListApartmentsInCommunityResponse result = this.communityService.listApartmentsInCommunity(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /community/caculateCommunityArea</b>

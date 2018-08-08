@@ -57,6 +57,8 @@ import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
@@ -72,6 +74,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.ApartmentInfoDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDataDTO;
@@ -104,6 +107,8 @@ import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.community.ImportCommunityDataDTO;
+import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.community.ListApartmentsInCommunityResponse;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListBuildingsByKeywordsCommand;
@@ -112,7 +117,7 @@ import com.everhomes.rest.community.ListChildProjectCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdCommand;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdResponse;
 import com.everhomes.rest.community.ListResourceCategoryCommand;
@@ -200,6 +205,8 @@ import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.UserOrganizationStatus;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -368,6 +375,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+	
+	@Autowired
+	private PropertyMgrProvider propertyMgrProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -784,9 +794,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
-			ListComunitiesByKeywordAdminCommand cmd) {
-		
+	public ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd) {
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -795,7 +803,7 @@ public class CommunityServiceImpl implements CommunityService {
 		locator.setAnchor(cmd.getPageAnchor());
 		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword(), cmd.getNamespaceId(), cmd.getCommunityType());
 
-		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
+		ListCommunitiesByKeywordResponse response = new ListCommunitiesByKeywordResponse();
 		if(list != null && list.size() > pageSize){
 			list.remove(list.size()-1);
 			response.setNextPageAnchor(list.get(list.size()-1).getId());
@@ -3992,14 +4000,14 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
+	public ListCommunitiesByKeywordResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
 		List<Community> list = communityProvider.listCommunitiesByCategory(cmd.getNamespaceId(), cmd.getCityId(), cmd.getAreaId(),
 				cmd.getCategoryId(), cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
 
-		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
+		ListCommunitiesByKeywordResponse response = new ListCommunitiesByKeywordResponse();
 		
 		if(list.size() > 0){
 			List<CommunityDTO> resultList = list.stream().map((c) -> {
@@ -4792,6 +4800,11 @@ public class CommunityServiceImpl implements CommunityService {
 				Double areaAveragePrice = result.getTotalRent()/result.getRentArea();
 				result.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 			}
+			result.setAreaSize(doubleRoundHalfUp(result.getAreaSize(),2));
+			result.setRentArea(doubleRoundHalfUp(result.getRentArea(),2));
+			result.setFreeArea(doubleRoundHalfUp(result.getFreeArea(),2));
+			result.setChargeArea(doubleRoundHalfUp(result.getChargeArea(),2));
+			result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
 		}else {
 			result = generateCommunityStatistics(cmd.getCommunityId());
 		}
@@ -4814,6 +4827,11 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityStatisticsDTO dto = ConvertHelper.convert(community, CommunityStatisticsDTO.class);
 		dto.setCommunityId(community.getId());
 		dto.setCommunityName(community.getName());
+		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		
 		Integer buildingNumber = communityProvider.countActiveBuildingsByCommunityId(community.getId());
 		dto.setBuildingNumber(buildingNumber);
@@ -4839,6 +4857,10 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityDetailDTO dto = ConvertHelper.convert(community, CommunityDetailDTO.class);
 		dto.setCommunityId(community.getId());
 		dto.setCommunityName(community.getName());
+		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
 		
 		ResourceCategoryAssignment assignment = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(),cmd.getProjectType(),cmd.getNamespaceId());
 		if (assignment != null) {
@@ -4883,7 +4905,12 @@ public class CommunityServiceImpl implements CommunityService {
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 		BuildingStatisticsDTO dto = ConvertHelper.convert(building, BuildingStatisticsDTO.class);
 		dto.setBuildingId(building.getId());
-		dto.setBuildingName(building.getName());	
+		dto.setBuildingName(building.getName());
+		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		
 		Integer apartmentNumber = addressProvider.countApartmentNumberByBuildingName(building.getCommunityId(), building.getName());
 		dto.setApartmentNumber(apartmentNumber);
@@ -5007,6 +5034,104 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setChargeArea(0.0);
 		building.setFreeArea(0.0);
 		building.setSharedArea(0.0);
+	}
+	
+	@Override
+	public ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
+		List<ApartmentInfoDTO> apartments = new ArrayList<>();
+		initListApartmentsInCommunityResponse(result);
+		
+		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+
+		for (Address address : addresses) {
+			//获取房源状态
+			byte livingStatus = AddressMappingStatus.LIVING.getCode();
+			CommunityAddressMapping mapping = communityAddressMappingMap.get(address.getId());
+			if(mapping != null){
+				livingStatus = mapping.getLivingStatus().byteValue();
+			}
+			//按房源状态筛选
+			if (cmd.getLivingStatus()!=null && livingStatus!=cmd.getLivingStatus().byteValue()) {
+				continue;
+			}	
+			//获取在租实时均价
+			double areaAveragePrice = 0;
+			double totalRent = 0;
+			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
+			if (contracts != null && contracts.size() > 0){
+				for (Contract contract : contracts) {
+					totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
+				}
+				totalRent = doubleRoundHalfUp(totalRent,2);
+			}
+			if (address.getRentArea() != null && address.getRentArea() > 0) {
+				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
+	    	}
+			//按在租实时均价筛选
+			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
+				continue;
+			}
+			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
+				continue;
+			}
+			
+			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus,areaAveragePrice,totalRent);
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+			apartments.add(dto);
+			caculateTotalApartmentStatistic(result,dto);
+		}
+		result.setApartments(apartments);
+		
+		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
+		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
+		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
+		result.setTotalChargeArea(doubleRoundHalfUp(result.getTotalChargeArea(),2));
+		result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
+		
+		return result;
+	}
+	
+	private void caculateTotalApartmentStatistic(ListApartmentsInCommunityResponse result, ApartmentInfoDTO dto) {
+		result.setTotalApartmentNumber(result.getTotalApartmentNumber() + 1);
+		result.setTotalAreaSize(result.getTotalAreaSize().doubleValue() + (dto.getAreaSize()!=null ?dto.getAreaSize().doubleValue():0.0));
+		result.setTotalRentArea(result.getTotalRentArea().doubleValue() + (dto.getRentArea()!=null ?dto.getRentArea().doubleValue():0.0));
+		result.setTotalFreeArea(result.getTotalFreeArea().doubleValue() + (dto.getFreeArea()!=null ?dto.getFreeArea().doubleValue():0.0));
+		result.setTotalChargeArea(result.getTotalChargeArea().doubleValue() + (dto.getChargeArea()!=null ?dto.getChargeArea().doubleValue():0.0));
+		result.setTotalRent(result.getTotalRent().doubleValue() + (dto.getTotalRent()!=null ? dto.getTotalRent().doubleValue():0.0));
+	}
+
+	private void initListApartmentsInCommunityResponse(ListApartmentsInCommunityResponse response){
+		response.setTotalApartmentNumber(0);
+		response.setTotalAreaSize(0.0);
+		response.setTotalRentArea(0.0);
+		response.setTotalFreeArea(0.0);
+		response.setTotalChargeArea(0.0);
+		response.setTotalRent(0.0);
+	}
+	
+	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus,double areaAveragePrice,double totalRent){
+		ApartmentInfoDTO dto = new ApartmentInfoDTO();
+		Community community = communityProvider.findCommunityById(address.getId());
+		dto.setCommunityName(community.getName());
+		dto.setAddressId(address.getId());
+		dto.setBuildingName(address.getBuildingName());
+		dto.setApartmentFloor(address.getApartmentFloor());
+		dto.setApartmentName(address.getApartmentName());
+		dto.setLivingStatus(livingStatus);
+		dto.setAreaAveragePrice(areaAveragePrice);
+		dto.setTotalRent(totalRent);
+		dto.setAreaSize(address.getAreaSize());
+		dto.setRentArea(address.getRentArea());
+		dto.setFreeArea(address.getFreeArea());
+		dto.setChargeArea(address.getChargeArea());
+		return dto;
 	}
 	
 	//四舍五入截断double类型数据
