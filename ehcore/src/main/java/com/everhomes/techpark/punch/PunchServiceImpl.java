@@ -3325,7 +3325,7 @@ public class PunchServiceImpl implements PunchService {
                     Arrays.asList(com.everhomes.rest.approval.ApprovalStatus.WAITING_FOR_APPROVING.getCode(), com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())));
             statistic.setPunchExceptionRequestCount(statistic.getExceptionRequestCounts());
 
-            List<PunchExceptionRequestStatisticsItemDTO> punchExceptionRequestStatisticsItemDTOS = punchProvider.countPunchExceptionRequestBetweenBeginAndEndTime(statistic.getUserId(), statistic.getOwnerId(), statistic.getPunchMonth());
+            List<PunchExceptionRequestStatisticsItemDTO> punchExceptionRequestStatisticsItemDTOS = punchProvider.countPunchExceptionRequestGroupByMonth(statistic.getUserId(), statistic.getOwnerId(), statistic.getPunchMonth());
             punchExceptionRequestCountByPunchMonthStatistics(statistic, punchExceptionRequestStatisticsItemDTOS);
 
             abonormalExceptionRequestCountMap = punchProvider.countAbonormalExceptionRequestGroupByPunchDate(statistic.getOwnerId(), statistic.getUserId(), statistic.getPunchMonth(), Arrays.asList(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode()));
