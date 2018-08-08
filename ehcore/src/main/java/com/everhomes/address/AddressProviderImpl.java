@@ -991,6 +991,7 @@ public class AddressProviderImpl implements AddressProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		//SELECT count(DISTINCT(customer_id)) from eh_customer_entry_infos WHERE building_id in (1973266,1973267);
 		List<Long> customerIdList = context.selectDistinct(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID)
+											.from(Tables.EH_CUSTOMER_ENTRY_INFOS)
 											.where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(buildingId))
 											.fetchInto(Long.class);
 		
@@ -1010,8 +1011,9 @@ public class AddressProviderImpl implements AddressProvider {
 										.and(Tables.EH_ADDRESSES.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
 		List<Long> organizationOwnerIds = context.selectDistinct(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID)
-										.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
-										.fetchInto(Long.class);
+												.from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+												.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+												.fetchInto(Long.class);
 		
 		if (organizationOwnerIds != null && organizationOwnerIds.size() > 0) {
 			return organizationOwnerIds.size();

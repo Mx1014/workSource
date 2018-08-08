@@ -259,6 +259,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -4754,10 +4755,10 @@ public class CommunityServiceImpl implements CommunityService {
         	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName());
         	dto.setRelatedContractNumber(relatedContractNumber);
         	
-        	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName()); 
+        	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName());
     		if (r.getRentArea() != null && r.getRentArea() > 0) {
     			Double areaAveragePrice = totalRent/r.getRentArea();
-        		dto.setAreaAveragePrice(areaAveragePrice);
+        		dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 			}
         	return dto;
         }).collect(Collectors.toList());
@@ -4786,8 +4787,11 @@ public class CommunityServiceImpl implements CommunityService {
 				result.setTotalRent(result.getTotalRent() + dto.getTotalRent());
 				result.setRelatedContractNumber(result.getRelatedContractNumber() + dto.getRelatedContractNumber());
 			}
-			Double areaAveragePrice = result.getTotalRent()/result.getRentArea();
-			result.setAreaAveragePrice(areaAveragePrice);
+			result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
+			if (result.getRentArea() != null && result.getRentArea() > 0) {
+				Double areaAveragePrice = result.getTotalRent()/result.getRentArea();
+				result.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
+			}
 		}else {
 			result = generateCommunityStatistics(cmd.getCommunityId());
 		}
@@ -4820,10 +4824,10 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRelatedContractNumber(relatedContractNumber);
 		//在租实时均价
 		Double totalRent = contractProvider.getTotalRentInCommunity(community.getId()); 
-		dto.setTotalRent(totalRent);
+		dto.setTotalRent(doubleRoundHalfUp(totalRent,2));
 		if (community.getRentArea() != null && community.getRentArea() > 0) {
 			Double areaAveragePrice = totalRent/community.getRentArea();
-			dto.setAreaAveragePrice(areaAveragePrice);
+			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 		}
 		return dto;
 	} 
@@ -4862,20 +4866,16 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setRentArea(cmd.getRentArea());
 		community.setFreeArea(cmd.getFreeArea());
 		community.setChargeArea(cmd.getChargeArea());
+		community.setCommunityNumber(cmd.getCommunityNumber());
 		
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
-		ResourceCategoryAssignment assignment = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(),cmd.getProjectType(),cmd.getNamespaceId());
-		if (assignment != null) {
-			if (!assignment.getResourceCategryId().equals(cmd.getCategoryId())) {
-				CreateResourceCategoryAssignmentCommand command = new CreateResourceCategoryAssignmentCommand();
-				command.setResourceType(cmd.getProjectType());
-				command.setResourceId(cmd.getCommunityId());
-				command.setResourceCategoryId(cmd.getCategoryId());
-				command.setNamespaceId(cmd.getNamespaceId());
-				createResourceCategoryAssignment(command);
-			}
-		}
+		CreateResourceCategoryAssignmentCommand command = new CreateResourceCategoryAssignmentCommand();
+		command.setResourceType(cmd.getProjectType());
+		command.setResourceId(cmd.getCommunityId());
+		command.setResourceCategoryId(cmd.getCategoryId());
+		command.setNamespaceId(cmd.getNamespaceId());
+		createResourceCategoryAssignment(command);
 	}
 
 	@Override
@@ -4884,16 +4884,22 @@ public class CommunityServiceImpl implements CommunityService {
 		BuildingStatisticsDTO dto = ConvertHelper.convert(building, BuildingStatisticsDTO.class);
 		dto.setBuildingId(building.getId());
 		dto.setBuildingName(building.getName());	
+		
 		Integer apartmentNumber = addressProvider.countApartmentNumberByBuildingName(building.getCommunityId(), building.getName());
 		dto.setApartmentNumber(apartmentNumber);
+		
 		//在租合同数
 		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName());
     	dto.setRelatedContractNumber(relatedContractNumber);
+    	
     	//在租实时均价
     	Double totalRent = contractProvider.getTotalRentInBuilding(building.getName()); 
-		Double areaAveragePrice = totalRent/building.getRentArea();
-		dto.setAreaAveragePrice(areaAveragePrice);
-		
+    	dto.setTotalRent(doubleRoundHalfUp(totalRent,2));
+    	if (building.getRentArea() != null && building.getRentArea() > 0) {
+			Double areaAveragePrice = totalRent/building.getRentArea();
+			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
+    	}
+    	
 		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getId());
 		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
 		
@@ -5001,6 +5007,12 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setChargeArea(0.0);
 		building.setFreeArea(0.0);
 		building.setSharedArea(0.0);
+	}
+	
+	//四舍五入截断double类型数据
+	private double doubleRoundHalfUp(double input,int scale){
+		BigDecimal digit = new BigDecimal(input); 
+		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 }
 

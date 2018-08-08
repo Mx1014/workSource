@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  *     <li>categoryId: 分类id</li>
  *     <li>projectType: 资源实体类型 小区园区：EhCommunities</li>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>communityNumber: 项目编号</li>
  * </ul>
  */
 public class UpdateCommunityNewCommand {
@@ -40,6 +41,14 @@ public class UpdateCommunityNewCommand {
     private Long categoryId;
     private String projectType;
     private Integer namespaceId;
+    private String communityNumber;
+    
+	public String getCommunityNumber() {
+		return communityNumber;
+	}
+	public void setCommunityNumber(String communityNumber) {
+		this.communityNumber = communityNumber;
+	}
     
 	public Long getCommunityId() {
 		return communityId;

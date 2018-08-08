@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>areaAveragePrice: 在租实时均价（元/平方米）</li>
  *     <li>relatedEnterpriseCustomerNumber: 入驻企业数</li>
  *     <li>relatedOrganizationOwnerNumber: 入驻用户数</li>
+ *     <li>totalRent: 在租合同总金额</li>
  * </ul>
  */
 public class BuildingStatisticsDTO {
@@ -31,7 +32,14 @@ public class BuildingStatisticsDTO {
 	private Double areaAveragePrice;
 	private Integer relatedEnterpriseCustomerNumber;
 	private Integer relatedOrganizationOwnerNumber;
+	private Double totalRent;
 	
+	public Double getTotalRent() {
+		return totalRent;
+	}
+	public void setTotalRent(Double totalRent) {
+		this.totalRent = totalRent;
+	}
 	public Long getBuildingId() {
 		return buildingId;
 	}

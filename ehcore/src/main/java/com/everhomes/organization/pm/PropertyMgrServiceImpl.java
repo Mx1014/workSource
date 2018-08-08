@@ -2655,6 +2655,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
 
         //门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要增加相应的值 by xiongying 20170815
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize + address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize + address.getAreaSize());
+        }
         if (address.getRentArea() != null) {
             Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
             building.setRentArea(buildingRentArea + address.getRentArea());
@@ -2740,7 +2747,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
 
         if (cmd.getAreaSize() != null) {
-            address.setAreaSize(cmd.getAreaSize());
+        	 Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+             Double oldAddressAreaSize = address.getAreaSize() == null ? 0.0 : address.getAreaSize();
+             building.setAreaSize(buildingAreaSize - oldAddressAreaSize + cmd.getAreaSize());
+             Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+             community.setAreaSize(communityAreaSize - oldAddressAreaSize + cmd.getAreaSize());
+             
+             address.setAreaSize(cmd.getAreaSize());
         }
 
         if (cmd.getSharedArea() != null) {
@@ -3010,6 +3023,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要减去相应的值 by xiongying 20170815
         Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize - address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize - address.getAreaSize());
+        }
         if (address.getRentArea() != null) {
             Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
             building.setRentArea(buildingRentArea - address.getRentArea());
