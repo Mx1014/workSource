@@ -341,5 +341,5 @@ public interface UserService {
 
     Byte isUserAuth();
     
-    UserDTO getUserFromPhone(findUserByPhonesCommand cmd);
+    UserDTO getUserFromPhone(findUserByPhoneCommand cmd);
 }
