@@ -3457,6 +3457,11 @@ public class AssetProviderImpl implements AssetProvider {
             for (Long billId : billIds) {
             	reCalBillById(billId);
             }
+            //修改税率之后，合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）
+            
+            
+            
+            
         }
     }
 
