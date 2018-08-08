@@ -50,4 +50,6 @@ public interface NewsProvider {
 	void increaseViewCount(Long newsId, Long nViewCount);
 
 	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
+
+	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
 }
