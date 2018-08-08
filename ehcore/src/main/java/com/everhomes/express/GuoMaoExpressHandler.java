@@ -75,7 +75,25 @@ public class GuoMaoExpressHandler implements ExpressHandler{
 	}
 
 	@Override
-	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {}
+
+	@Override
+	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+
+	}
+
+	@Override
+	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+
+	}
+
+	@Override
+	public void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String, String> params) {
+
+	}
+
+	@Override
+	public void afterCreateOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		Flow flow = flowService.getEnabledFlow(expressOrder.getNamespaceId(), ExpressServiceErrorCode.MODULE_CODE,
 				FlowModuleType.NO_MODULE.getCode(), expressOrder.getOwnerId(), expressOrder.getOwnerType());
 		//当没有设置工作流的时候，表示是禁用模式
@@ -100,20 +118,6 @@ public class GuoMaoExpressHandler implements ExpressHandler{
 		}
 		expressOrder.setFlowCaseId(flowCase.getId());
 		expressOrder.setStatus(ExpressOrderStatus.PROCESSING.getCode());
-	}
-
-	@Override
-	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-
-	}
-
-	@Override
-	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-
-	}
-
-	@Override
-	public void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String, String> params) {
-
+		expressOrderProvider.updateExpressOrder(expressOrder);
 	}
 }

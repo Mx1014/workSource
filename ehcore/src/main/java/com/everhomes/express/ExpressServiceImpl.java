@@ -723,6 +723,7 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			handler.createOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			expressOrderProvider.createExpressOrder(expressOrder);
+			handler.afterCreateOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			return null;
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
