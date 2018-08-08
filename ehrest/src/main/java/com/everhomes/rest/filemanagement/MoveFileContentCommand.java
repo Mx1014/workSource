@@ -11,8 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型,填organization</li>
  * <li>ownerId: 公司id</li>
  * <li>contentIds: id列表 要移动的文件/文件夹id</li>
- * <li>targetCatalogId: 目标目录id</li>
- * <li>targetParentId: 目标文件夹id 直接放在目录下则为空</li>
+ * <li>targetPath: 目标路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
  * </ul>
  */
 public class MoveFileContentCommand {
@@ -23,22 +22,13 @@ public class MoveFileContentCommand {
 
 	private List<Long> contentIds;
 
-	private Long targetCatalogId;
+	private String targetPath;
 
-	private Long targetParentId;
 
 	public MoveFileContentCommand() {
 
 	}
 
-	public MoveFileContentCommand(String ownerType, Long ownerId, List<Long> contentIds, Long targetCatalogId, Long targetParentId) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.setContentIds(contentIds);
-		this.targetCatalogId = targetCatalogId;
-		this.targetParentId = targetParentId;
-	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -57,22 +47,6 @@ public class MoveFileContentCommand {
 	}
  
 
-	public Long getTargetCatalogId() {
-		return targetCatalogId;
-	}
-
-	public void setTargetCatalogId(Long targetCatalogId) {
-		this.targetCatalogId = targetCatalogId;
-	}
-
-	public Long getTargetParentId() {
-		return targetParentId;
-	}
-
-	public void setTargetParentId(Long targetParentId) {
-		this.targetParentId = targetParentId;
-	}
-
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -87,4 +61,11 @@ public class MoveFileContentCommand {
 		this.contentIds = contentIds;
 	}
 
+	public String getTargetPath() {
+		return targetPath;
+	}
+
+	public void setTargetPath(String targetPath) {
+		this.targetPath = targetPath;
+	}
 }
