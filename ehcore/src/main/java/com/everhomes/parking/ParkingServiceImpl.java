@@ -307,7 +307,7 @@ public class ParkingServiceImpl implements ParkingService {
 //					String tag1 = flow.getStringTag1();
 //					Integer flowMode = Integer.valueOf(tag1);
 					dto.setFlowMode(r.getFlowMode());
-					dto.setFlowId(flow.getId());
+					dto.setFlowId(flow.getFlowMainId());
 					LOGGER.info("parking enabled flow, flow={}", flow);
 					Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 					LOGGER.info("parking main flow, flow={}", mainFlow);
