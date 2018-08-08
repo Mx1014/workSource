@@ -260,7 +260,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					}
 				}
 				if(addrs.length() > 0){
-					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 2));
+					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 1));
 				}
 			}
 		}
