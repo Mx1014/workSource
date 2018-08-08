@@ -983,7 +983,7 @@ public class AclinkController extends ControllerBase {
    /**
    *
    * <b>URL: /aclink/getZLAesUserKey</b>
-   * <p> 申请门禁钥匙 </p>
+   * <p> 第三方申请门禁钥匙 </p>
    * @return
    */
   @RequestMapping("getZLAesUserKey")
@@ -998,4 +998,23 @@ public class AclinkController extends ControllerBase {
       response.setErrorDescription("OK");
       return response;
   }
+  
+  /**
+  *
+  * <b>URL: /aclink/createZLVisitorQRKey</b>
+  * <p> 第三方申请访客二维码 </p>
+  * @return
+  */
+ @RequestMapping("createZLVisitorQRKey")
+ @RestReturn(value=CreateZLVisitorQRKeyResponse.class)
+ @RequireAuthentication(value = true)
+ public RestResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd) {
+     RestResponse response = new RestResponse();
+
+     response.setResponseObject(doorAccessService.createZLVisitorQRKey(cmd));
+
+     response.setErrorCode(ErrorCodes.SUCCESS);
+     response.setErrorDescription("OK");
+     return response;
+ }
 }

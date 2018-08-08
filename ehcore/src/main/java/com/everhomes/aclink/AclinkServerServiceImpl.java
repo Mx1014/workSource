@@ -425,6 +425,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 			for(DoorAccess da : listDoorAccess){
 				DoorAccessDTO doorDto = ConvertHelper.convert(da, DoorAccessDTO.class);
 				doorDto.setLocalUUid(da.getUuid());
+				doorDto.setGroupId(da.getGroupid());
 				//把公钥返回给内网服务器,安全性待优化
 				doorDto.setLocalAesKey(da.getAesIv());
 				doorAccessDtos.add(doorDto);

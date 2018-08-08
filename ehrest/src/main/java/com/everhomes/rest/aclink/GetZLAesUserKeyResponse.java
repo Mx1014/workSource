@@ -7,9 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id:门禁id</li>
- * <li>status: 门禁状态， 0 激活中，1 已激活，2 无效</li>
- * <li>activeUserId: 激活者id</li>
+ * <li>userKeys:钥匙列表{@link com.everhomes.rest.aclink.AclinkAppUserKeyDTO}</li>
  * </ul>
  */
 public class GetZLAesUserKeyResponse {

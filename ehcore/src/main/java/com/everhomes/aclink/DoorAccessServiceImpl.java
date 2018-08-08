@@ -403,7 +403,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public ListDoorAccessResponse searchDoorAccessByAdmin(QueryDoorAccessAdminCommand cmd) {
-        CrossShardListingLocator locator = new CrossShardListingLocator();
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
@@ -5190,12 +5190,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public ListZLDoorAccessResponse listDoorAccessMacByApp() {
 		List<String> listMac = new ArrayList<String>();
 		ListZLDoorAccessResponse rsp = new ListZLDoorAccessResponse();
-		//上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
 		Long ownerId = 500000125L;
-		
-		List<DoorAccess> das = doorAccessProvider.listDoorAccessByOwnerId(new CrossShardListingLocator(), ownerId, DoorAccessOwnerType.ENTERPRISE, 0);
+		ListDoorAccessGroupCommand cmd = new ListDoorAccessGroupCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(DoorAccessOwnerType.ENTERPRISE.getCode());
+		List<DoorAccessDTO> das = listDoorAccessGroup(cmd).getDoors();
 		if(das != null && das.size() != 0){
-			for(DoorAccess da : das){
+			for(DoorAccessDTO da : das){
 				listMac.add(da.getHardwareId());
 			}
 			rsp.setListMac(listMac);
@@ -5220,6 +5222,49 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		GetZLAesUserKeyResponse rsp = new GetZLAesUserKeyResponse();
 		rsp.setUserKeys(userKeys);
 		
+		return rsp;
+	}
+
+	@Override
+	public void createVisitorBatch(CreateVisitorBatchCommand cmd) {
+		if(cmd.getDoorIds() != null && cmd.getDoorIds().size() > 0 && cmd.getAuthList() != null && cmd.getAuthList().size() > 0){
+			for(Long doorId : cmd.getDoorIds()){
+				if(doorId == null) continue;
+				for(CreateLocalVistorCommand itemCmd : cmd.getAuthList()){
+					if(itemCmd == null || itemCmd.getNamespaceId() == null) continue;
+					itemCmd.setDoorId(doorId);
+					itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+					itemCmd.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+			        if(itemCmd.getValidEndMs() == null) {
+			        	itemCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+			        }
+			        if(itemCmd.getValidFromMs() == null) {
+			        	itemCmd.setValidFromMs(System.currentTimeMillis());	
+			        }
+					createLocalVisitorAuth(itemCmd);
+				}
+			}
+		}
+	}
+
+	@Override
+	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd) {
+		CreateZLVisitorQRKeyResponse rsp = new CreateZLVisitorQRKeyResponse();
+		DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getMacAddress());
+		if(doorAccess == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+		}
+		
+		
+//		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		Integer namespaceId = 2;
+		User user = UserContext.current().getUser();
+		CreateDoorVisitorCommand cmd2 = ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class);
+		cmd2.setNamespaceId(namespaceId);
+		cmd2.setDoorId(doorAccess.getId());
+        DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd2);
+        rsp.setMacAddress(cmd.getMacAddress());
+        rsp.setQrCode(auth.getQrKey());
 		return rsp;
 	}
 }
