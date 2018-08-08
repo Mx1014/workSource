@@ -1676,6 +1676,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			Activity activity = checkActivityExist(cmd.getActivityId());
 			List<List<PostApprovalFormItem>> values = new ArrayList<>();
             GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+            getTemplateBySourceIdCommand.setOwnerId(activity.getId());
             GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
             List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId(),values, form);
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
@@ -1699,14 +1700,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                         r.setActivityId(cmd.getActivityId());
                         r.setStatus(ActivityRosterStatus.NORMAL.getCode());
                         activityProvider.createActivityRoster(r);
-
-                        //报名对接表单，添加表单值数据
-                        addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
-                        addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
-                        addGeneralFormValuesCommand.setSourceId(r.getId());
-                        addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-                        addGeneralFormValuesCommand.setValues(values.get(i));
-                        this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        if (form != null) {
+                            //报名对接表单，添加表单值数据
+                            addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                            addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
+                            addGeneralFormValuesCommand.setSourceId(r.getId());
+                            addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                            addGeneralFormValuesCommand.setValues(values.get(i));
+                            this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        }
                         // 报名活动事件
                         LocalEventBus.publish(event -> {
                             LocalEventContext context = new LocalEventContext();
@@ -1843,17 +1845,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        roster.setLotteryFlag((byte) 0);
             roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
-
-            List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
-            for (int j=0;j<row.getCells().size();j++) {
-                PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
-                String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
-                postApprovalFormItem.setFieldValue(getStrTrim(value));
-                postApprovalFormItems.add(postApprovalFormItem);
+            roster.setRealName(user.getNickName());
+            roster.setPhone(row.getA().trim());
+            if (form != null) {
+                List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
+                for (int j=0;j<row.getCells().size();j++) {
+                    PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
+                    String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
+                    postApprovalFormItem.setFieldValue(getStrTrim(value));
+                    postApprovalFormItems.add(postApprovalFormItem);
+                }
+                values.add(postApprovalFormItems);
             }
 
-	        rosters.add(roster);
-            values.add(postApprovalFormItems);
+            rosters.add(roster);
 		}
 
 		//保存错误信息
