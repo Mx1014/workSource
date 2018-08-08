@@ -853,18 +853,20 @@ public class ExpressServiceImpl implements ExpressService {
 			expressOrder.setReceiveCounty(receiveAddress.getCounty());
 			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		}else{
-			if(cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
-					cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null || 
-					cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+			if(cmd.getSendType().intValue() != ExpressSendType.GUO_MAO_EXPRESS.getCode().intValue()) {
+				if (cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
+						cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null ||
+						cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+				}
+				expressOrder.setReceiveName(cmd.getReceiveName());
+				expressOrder.setReceivePhone(cmd.getReceivePhone());
+				expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
+				expressOrder.setReceiveProvince(cmd.getReceiveProvince());
+				expressOrder.setReceiveCity(cmd.getReceiveCity());
+				expressOrder.setReceiveCounty(cmd.getReceiveCounty());
+				expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 			}
-			expressOrder.setReceiveName(cmd.getReceiveName());
-			expressOrder.setReceivePhone(cmd.getReceivePhone());
-			expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
-			expressOrder.setReceiveProvince(cmd.getReceiveProvince());
-			expressOrder.setReceiveCity(cmd.getReceiveCity());
-			expressOrder.setReceiveCounty(cmd.getReceiveCounty());
-			expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 		}
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
