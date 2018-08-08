@@ -2064,9 +2064,12 @@ public class AssetProviderImpl implements AssetProvider {
                     isSelected = 1;
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
                     dto.setIsSelected(isSelected);
-                    dto.setTaxRate(scope.getTaxRate());//增加税率
                     isSelected = 0;
                 }
+                dto.setTaxRate(scope.getTaxRate());//增加税率
+            }
+            if(dto.getTaxRate() == null) {
+            	dto.setTaxRate(BigDecimal.ZERO);
             }
             list.add(dto);
         }
@@ -6243,11 +6246,11 @@ public class AssetProviderImpl implements AssetProvider {
 		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
 		for(ServiceModuleAppDTO serviceModuleAppDTO : serviceModuleApps) {
 			String instanceConfig = serviceModuleAppDTO.getInstanceConfig();
-			AssetInstanceConfigDTO assetInstanceConfigDTO = 
-					(AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
+			IsContractChangeFlagDTO isContractChangeFlagDTO = 
+					(IsContractChangeFlagDTO) StringHelper.fromJsonString(instanceConfig, IsContractChangeFlagDTO.class);
 			Byte contractChangeFlag = 0; //0：代表不走合同变更
-			if(assetInstanceConfigDTO != null && categoryId.equals(assetInstanceConfigDTO.getCategoryId()) 
-					&& contractChangeFlag.equals(assetInstanceConfigDTO.getContractChangeFlag())) {
+			if(isContractChangeFlagDTO != null && categoryId.equals(isContractChangeFlagDTO.getCategoryId()) 
+					&& contractChangeFlag.equals(isContractChangeFlagDTO.getContractChangeFlag())) {
 				return true;
 			}
 		}
