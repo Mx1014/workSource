@@ -13,6 +13,7 @@ import com.everhomes.rest.officecubicle.OfficeOrderType;
 import com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus;
 import com.everhomes.rest.officecubicle.OfficeRentType;
 import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,13 @@ public class ExpressFlowModuleListener implements FlowModuleListener {
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         LOGGER.debug("onFlowCaseDetailRender");
+        flowCase.setCustomObject(getCustomObject(flowCase));
         return null;
+    }
+
+    private String getCustomObject(FlowCase flowCase) {
+        ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(flowCase.getId());
+        return StringHelper.toJsonString(expressOrder);
     }
 
     @Override
