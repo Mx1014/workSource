@@ -1635,6 +1635,8 @@ public class UserController extends ControllerBase {
 	 * <p>通过域空间和手机号查询用户信息</p>
 	 * @return
 	 */
+	@RequestMapping("getUserByPhone")
+	@RestReturn(UserDTO.class)
 	public RestResponse getUserByPhone(findUserByPhoneCommand cmd){
 		
 		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
