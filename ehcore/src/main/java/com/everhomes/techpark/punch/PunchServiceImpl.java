@@ -8968,14 +8968,14 @@ public class PunchServiceImpl implements PunchService {
     public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
         //是否刷新当日打卡的flag,在查当天(没有queryTime)和queryTime大于今天的情况下 不刷新
         GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
-        Boolean refreshDayLogFlag = true;
-        if (null == cmd.getQueryTime()) {
-            refreshDayLogFlag = false;
-        } else {
-            if (new Date(cmd.getQueryTime()).after(DateHelper.currentGMTTime())) {
-                refreshDayLogFlag = false;
-            }
-        }
+//        Boolean refreshDayLogFlag = true;
+//        if (null == cmd.getQueryTime()) {
+//            refreshDayLogFlag = false;
+//        } else {
+//            if (new Date(cmd.getQueryTime()).after(DateHelper.currentGMTTime())) {
+//                refreshDayLogFlag = false;
+//            }
+//        }
         Long userId = UserContext.current().getUser().getId();
         if (null != cmd.getUserId()) {
             userId = cmd.getUserId();
@@ -9028,16 +9028,17 @@ public class PunchServiceImpl implements PunchService {
         if (null != pr) {
             ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, punchTime, userId);
         }
-        if (refreshDayLogFlag && null != ptr && pdl == null) {
-            //2018年4月11日 修改:
-            //之前直接添加一条,理论上应该是没问题的,但是现网出错了,看来这里需要先确定有没有旧数据
-            //所以现在还是采用new 一个新的pdl进行计算,然后给旧的赋值
-            PunchDayLog newPdl = new PunchDayLog();
-            refreshPunchDayLog(detail, pdl, punCalendar, ptr, newPdl);
-            pdl = newPdl;
-            //refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
-            LOGGER.debug("pdl is {}", StringHelper.toJsonString(pdl));
-        }
+        //2018年08月08日 暂时注释掉:对于之前没有刷新pdl的查询的时候也不刷新了(防止未设置规则)
+//        if (refreshDayLogFlag && null != ptr && pdl == null) {
+//            //2018年4月11日 修改:
+//            //之前直接添加一条,理论上应该是没问题的,但是现网出错了,看来这里需要先确定有没有旧数据
+//            //所以现在还是采用new 一个新的pdl进行计算,然后给旧的赋值
+//            PunchDayLog newPdl = new PunchDayLog();
+//            refreshPunchDayLog(detail, pdl, punCalendar, ptr, newPdl);
+//            pdl = newPdl;
+//            //refreshPunchDayLog(userId, cmd.getEnterpriseId(), null, punCalendar, ptr, pdl);
+//            LOGGER.debug("pdl is {}", StringHelper.toJsonString(pdl));
+//        }
         String[] statusList = null;
         String[] approvalStatus = null;
         if (null != pdl) {
