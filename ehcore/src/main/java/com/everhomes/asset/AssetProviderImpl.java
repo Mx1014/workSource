@@ -536,12 +536,12 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
         
-        //增加欠费天数查询条件
+        //增加欠费天数查询条件 : 0＜天数≤30,30＜天数≤60
         if(!org.springframework.util.StringUtils.isEmpty(dueDayCountStart)) {
-        	query.addConditions(t.DUE_DAY_COUNT.greaterOrEqual(dueDayCountStart));
+        	query.addConditions(t.DUE_DAY_COUNT.greaterThan(dueDayCountStart));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dueDayCountEnd)) {
-        	query.addConditions(t.DUE_DAY_COUNT.lessThan(dueDayCountEnd));
+        	query.addConditions(t.DUE_DAY_COUNT.lessOrEqual(dueDayCountEnd));
         }
         
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
