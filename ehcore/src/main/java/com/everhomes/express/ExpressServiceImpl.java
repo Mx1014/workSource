@@ -364,6 +364,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
 		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
 		expressOrderDTO.setReceivePhone(expressOrder.getReceivePhone());
+		expressOrderDTO.setFlowCaseId(expressOrder.getFlowCaseId());
+		expressOrderDTO.setExpressTarget(expressOrder.getExpressTarget());
+		expressOrderDTO.setExpressRemark(expressOrder.getExpressRemark());
+		expressOrderDTO.setExpressWay(expressOrder.getExpressWay());
 		return expressOrderDTO;
 	}
 	
@@ -932,6 +936,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
 		expressOrderDTO.setSendType(expressOrder.getSendType());//加上业务类别
 		expressOrderDTO.setExpressLogoUrl(getUrl(getExpressCompanyLogo(expressOrder.getExpressCompanyId())));
+		expressOrderDTO.setFlowCaseId(expressOrder.getFlowCaseId());
+		expressOrderDTO.setExpressTarget(expressOrder.getExpressTarget());
+		expressOrderDTO.setExpressRemark(expressOrder.getExpressRemark());
+		expressOrderDTO.setExpressWay(expressOrder.getExpressWay());
 		return expressOrderDTO;
 	}
 	
