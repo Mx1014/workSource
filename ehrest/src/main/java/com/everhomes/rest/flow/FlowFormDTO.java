@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>updateTime: updateTime</li>
  *     <li>name: name</li>
  *     <li>updateFlag: updateFlag</li>
+ *     <li>status: status</li>
  * </ul>
  */
 public class FlowFormDTO {
@@ -19,6 +20,7 @@ public class FlowFormDTO {
     private String name;
 
     private Byte updateFlag;
+    private Byte status;
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -44,6 +46,13 @@ public class FlowFormDTO {
         this.name = name;
     }
 
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {

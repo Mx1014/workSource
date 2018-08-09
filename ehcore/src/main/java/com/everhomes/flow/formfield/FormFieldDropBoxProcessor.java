@@ -34,7 +34,7 @@ public class FormFieldDropBoxProcessor extends FormFieldSingleLineTextProcessor 
 
         dto.setFieldType(fieldDTO.getFieldType());
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
-        dto.setName(fieldDTO.getFieldName());
+        dto.setValue(fieldDTO.getFieldName());
 
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.DROP_BOX).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 

@@ -39,7 +39,7 @@ public class FormFieldDateProcessor implements FormFieldProcessor {
 
         dto.setFieldType(fieldDTO.getFieldType());
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
-        dto.setName(fieldDTO.getFieldName());
+        dto.setValue(fieldDTO.getFieldName());
 
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.DATE).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 

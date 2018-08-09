@@ -8,6 +8,8 @@ import com.everhomes.flow.event.FlowGraphStartEvent;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.common.FlowCaseDetailActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
@@ -17,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
@@ -65,7 +68,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     private FlowEventLogProvider flowEventLogProvider;
 
     @Autowired
-    private FlowUserSelectionProvider flowUserSelectionProvider;
+    private FlowServiceMappingProvider flowServiceMappingProvider;
+
+    @Autowired
+    private FlowProvider flowProvider;
 
     private ThreadPoolTaskScheduler scheduler;
 
@@ -107,7 +113,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     }
 
     @Override
-    public FlowCaseState prepareSubFlowCaseStart(UserInfo logonUser, FlowCase flowCase) {
+    public FlowCaseState prepareBranchFlowCaseStart(UserInfo logonUser, FlowCase flowCase) {
         FlowCaseState ctx = new FlowCaseState();
         if (flowCase == null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
@@ -258,8 +264,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         }
         ctx.setCurrentLane(currentLane);
 
-        if (stepDTO.getFlowTargetId() != null) {
-            FlowGraphNode targetNode = flowGraph.getGraphNode(stepDTO.getFlowTargetId());
+        if (stepDTO.getTargetNodeId() != null) {
+            FlowGraphNode targetNode = flowGraph.getGraphNode(stepDTO.getTargetNodeId());
             ctx.setNextNode(targetNode);
         }
 
@@ -334,7 +340,230 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 
     @Override
     public void startStepEnter(FlowCaseState ctx, FlowGraphNode from) {
+        // 子流程进入的时候, 添加任务跟踪
+        Long subFlowParentId = ctx.getFlowCase().getSubFlowParentId();
+        if (!Objects.equals(subFlowParentId, 0L)) {
+            FlowEventLog log = new FlowEventLog();
+            log.setId(flowEventLogProvider.getNextId());
+            Flow flow = ctx.getFlowGraph().getFlow();
+            log.setFlowMainId(flow.getFlowMainId());
+            log.setFlowVersion(flow.getFlowVersion());
+            log.setNamespaceId(flow.getNamespaceId());
+            log.setFlowNodeId(ctx.getCurrentNode().getFlowNodeId());
+            log.setParentId(0L);
+            log.setFlowCaseId(ctx.getFlowCase().getId());
+            log.setFlowUserId(ctx.getOperator().getId());
+            log.setFlowUserName(ctx.getOperator().getNickName());
+            ctx.pushProcessType(FlowCaseStateStackType.TRACKER_ACTION);
+
+            Map<String, Object> map = new HashMap<>(1);
+            // map.put("serviceName", mapping.getDisplayName());
+
+            log.setLogContent(flowService.templateRender(FlowTemplateCode.DEFAULT_SUB_FLOW_START_TRACKER_TEXT, map));
+            ctx.popProcessType();
+            log.setStepCount(ctx.getFlowCase().getStepCount());
+            log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+            log.setTrackerApplier(1L);
+            log.setTrackerProcessor(1L);
+            log.setSubjectId(0L);
+
+            FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+            actionData.setFlowCaseId(subFlowParentId);
+            actionData.setModuleId(ctx.getModuleId());
+            actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+
+            String uri = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
+            log.setExtra(String.format("{\"route\":\"%s\", \"subFlowParentId\":%s}", uri, subFlowParentId));
+            ctx.getLogs().add(log);
+        }
+
         normalStepEnter(ctx, from);
+    }
+
+    @Override
+    public void subflowStepEnter(FlowCaseState ctx, FlowGraphNode from) {
+        FlowGraphNode currentNode = ctx.getCurrentNode();
+        FlowNode flowNode = currentNode.getFlowNode();
+
+        FlowServiceMapping mapping = flowServiceMappingProvider.findConfigMapping(flowNode.getNamespaceId(),
+                flowNode.getSubFlowProjectType(), flowNode.getSubFlowProjectId(), flowNode.getSubFlowModuleType(),
+                flowNode.getSubFlowModuleId(), flowNode.getSubFlowOwnerType(), flowNode.getSubFlowOwnerId());
+        if (mapping == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
+                    FlowServiceErrorCode.ERROR_SUB_FLOW_INVALID, "could not found sub flow service association flow");
+        }
+
+        Flow snapshot = flowProvider.getSnapshotFlowWithoutStatus(mapping.getFlowMainId());
+        if (snapshot == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
+                    FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot flow not exist");
+        }
+
+        FlowCase flowCase = ctx.getFlowCase();
+        if (flowCase.getSubFlowPath() != null && flowCase.getSubFlowPath().split("/").length > 5) {
+            FlowSubFlowEndDTO endDTO = new FlowSubFlowEndDTO();
+            endDTO.setStepType(FlowStepType.ABSORT_STEP.getCode());
+            endDTO.setParentFlowCaseId(ctx.getFlowCase().getId());
+
+            LOGGER.warn("sub flow over 5, abort it");
+
+            FlowTimeout ft = new FlowTimeout();
+            ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+            ft.setBelongTo(flowNode.getId());
+            ft.setTimeoutType(FlowTimeoutType.SUBFLOW_TIMEOUT.getCode());
+            ft.setStatus(FlowStatusType.VALID.getCode());
+
+            // 日志
+            FlowEventLog log = new FlowEventLog();
+            log.setId(flowEventLogProvider.getNextId());
+            Flow flow = ctx.getFlowGraph().getFlow();
+            log.setFlowMainId(flow.getFlowMainId());
+            log.setFlowVersion(flow.getFlowVersion());
+            log.setNamespaceId(flow.getNamespaceId());
+            log.setFlowNodeId(flowNode.getId());
+            log.setParentId(0L);
+            log.setFlowCaseId(flowCase.getId());
+            log.setFlowUserId(ctx.getOperator().getId());
+            log.setFlowUserName(ctx.getOperator().getNickName());
+
+            log.setLogContent(flowService.templateRender(FlowTemplateCode.DEFAULT_SUB_FLOW_TOO_DEEP_TEXT, null));
+            log.setStepCount(flowCase.getStepCount());
+            log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+            log.setTrackerApplier(1L);
+            log.setTrackerProcessor(1L);
+            log.setSubjectId(0L);
+            endDTO.addLog(log);
+
+            ft.setJson(endDTO.toString());
+
+            Long timeoutTick = System.currentTimeMillis() + 1000L;
+            ft.setTimeoutTick(new Timestamp(timeoutTick));
+            ctx.getTimeouts().add(ft);
+
+            normalStepEnter(ctx, from);
+            return;
+        }
+
+        // 创建 flowCase
+        CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+        cmd.setTitle(mapping.getDisplayName());
+        cmd.setContent(flowCase.getContent());
+        cmd.setFlowCaseId(flowService.getNextFlowCaseId());
+        cmd.setFlowMainId(snapshot.getTopId());
+        cmd.setFlowVersion(snapshot.getFlowVersion());
+        cmd.setProjectType(flowCase.getProjectType());
+        cmd.setProjectId(flowCase.getProjectId());
+        cmd.setProjectTypeA(flowCase.getProjectTypeA());
+        cmd.setProjectIdA(flowCase.getProjectIdA());
+        cmd.setRouteUri(cmd.getRouteUri());
+        cmd.setApplierOrganizationId(flowCase.getApplierOrganizationId());
+        cmd.setCurrentOrganizationId(flowCase.getApplierOrganizationId());
+        cmd.setApplyUserId(flowCase.getApplyUserId());
+        cmd.setReferId(flowCase.getReferId());
+        cmd.setReferType(flowCase.getReferType());
+        cmd.setReferType(flowCase.getReferType());
+        cmd.setServiceType(mapping.getDisplayName());
+        cmd.setSubFlowParentId(flowCase.getId());
+
+        flowListenerManager.onSubFlowEnter(ctx, mapping, snapshot, cmd);
+        flowService.createFlowCase(cmd);
+
+        // 添加一条日志跟踪
+        FlowEventLog log = new FlowEventLog();
+        log.setId(flowEventLogProvider.getNextId());
+        Flow flow = ctx.getFlowGraph().getFlow();
+        log.setFlowMainId(flow.getFlowMainId());
+        log.setFlowVersion(flow.getFlowVersion());
+        log.setNamespaceId(flow.getNamespaceId());
+        log.setFlowNodeId(flowNode.getId());
+        log.setParentId(0L);
+        log.setFlowCaseId(flowCase.getId());
+        log.setFlowUserId(ctx.getOperator().getId());
+        log.setFlowUserName(ctx.getOperator().getNickName());
+        ctx.pushProcessType(FlowCaseStateStackType.TRACKER_ACTION);
+
+        Map<String, Object> map = new HashMap<>(1);
+        map.put("serviceName", mapping.getDisplayName());
+
+        log.setLogContent(flowService.templateRender(FlowTemplateCode.DEFAULT_SUB_FLOW_ENTER_TEXT, map));
+        ctx.popProcessType();
+        log.setStepCount(flowCase.getStepCount());
+        log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+        log.setTrackerApplier(1L);
+        log.setTrackerProcessor(1L);
+        log.setSubjectId(0L);
+
+        ctx.getLogs().add(log);
+
+        normalStepEnter(ctx, from);
+    }
+
+    @Override
+    public void subflowStepLeave(FlowCaseState ctx, FlowGraphNode current, FlowGraphNode to) {
+        FlowStepType stepType = ctx.getStepType();
+        FlowCase flowCase = ctx.getFlowCase();
+
+        FlowCase subFlowCase = flowCaseProvider.getFlowCaseBySubFlowParentId(flowCase.getId());
+        switch (stepType) {
+            case ABSORT_STEP:
+                // 子流程的父流程被终止了, 子流程应该也终止
+                FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+                stepDTO.setAutoStepType(stepType.getCode());
+                stepDTO.setFlowCaseId(subFlowCase.getId());
+                stepDTO.setStepCount(subFlowCase.getStepCount());
+                stepDTO.setFlowMainId(subFlowCase.getFlowMainId());
+                stepDTO.setFlowVersion(subFlowCase.getFlowVersion());
+                stepDTO.setFlowNodeId(subFlowCase.getCurrentNodeId());
+                stepDTO.setEventType(FlowEventType.STEP_FLOW.getCode());
+                flowService.processAutoStep(stepDTO);
+                break;
+            default:
+                break;
+        }
+
+        FlowNode flowNode = current.getFlowNode();
+        // 添加一条日志跟踪
+        FlowEventLog log = new FlowEventLog();
+        log.setId(flowEventLogProvider.getNextId());
+        Flow flow = ctx.getFlowGraph().getFlow();
+        log.setFlowMainId(flow.getFlowMainId());
+        log.setFlowVersion(flow.getFlowVersion());
+        log.setNamespaceId(flow.getNamespaceId());
+        log.setFlowNodeId(current.getFlowNodeId());
+        log.setParentId(0L);
+        log.setFlowCaseId(flowCase.getId());
+        log.setFlowUserId(ctx.getOperator().getId());
+        log.setFlowUserName(ctx.getOperator().getNickName());
+        ctx.pushProcessType(FlowCaseStateStackType.TRACKER_ACTION);
+
+        FlowServiceMapping mapping = flowServiceMappingProvider.findConfigMapping(flowNode.getNamespaceId(),
+                flowNode.getSubFlowProjectType(), flowNode.getSubFlowProjectId(), flowNode.getSubFlowModuleType(),
+                flowNode.getSubFlowModuleId(), flowNode.getSubFlowOwnerType(), flowNode.getSubFlowOwnerId());
+        if (mapping == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
+                    FlowServiceErrorCode.ERROR_SUB_FLOW_INVALID, "could not found sub flow service association flow");
+        }
+
+        Map<String, Object> map = new HashMap<>(1);
+        map.put("serviceName", mapping.getDisplayName());
+
+        String originalStepTypeStr = ctx.getExtra("originalStepType");
+        FlowStepType originalStepType = FlowStepType.fromCode(originalStepTypeStr);
+
+        if (originalStepType == FlowStepType.ABSORT_STEP) {
+            log.setLogContent(flowService.templateRender(FlowTemplateCode.DEFAULT_SUB_FLOW_ABORT_TEXT, map));
+        } else {
+            log.setLogContent(flowService.templateRender(FlowTemplateCode.DEFAULT_SUB_FLOW_END_TEXT, map));
+        }
+
+        ctx.popProcessType();
+        log.setStepCount(flowCase.getStepCount()-1);
+        log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+        log.setTrackerApplier(1L);
+        log.setTrackerProcessor(1L);
+        log.setSubjectId(0L);
+
+        ctx.getLogs().add(log);
     }
 
     private Map<FlowEventLog, FlowCaseState> getFlowEventLog(FlowCaseState ctx, FlowGraphLink link) {
@@ -412,7 +641,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             subject = createFlowSubject(cmd, namespaceId);
             event.setSubject(subject);
         }
-        if (cmd.getImages()  != null && cmd.getImages().size() > 0) {
+        if (cmd.getImages() != null && cmd.getImages().size() > 0) {
             if (subject == null) {
                 subject = createFlowSubject(cmd, namespaceId);
                 event.setSubject(subject);
@@ -534,7 +763,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                         subNextNode.stepEnter(subCtx, currentNode);
                     }
                 }
-
                 stepOK = true;
             } catch (FlowStepErrorException ex) {
                 stepOK = false;
@@ -616,7 +844,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         currentNode.fireAction(ctx);
 
         //create step timeout
-        createStepTimeout(ctx, currentRawNode);
+        if (!currentRawNode.getAllowTimeoutAction().equals((byte) 0)) {
+            createStepTimeout(ctx, currentRawNode);
+        }
 
         if (logStep && log == null) {
             UserInfo firedUser = ctx.getOperator();
@@ -640,29 +870,27 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     }
 
     @Override
-    public void createStepTimeout(FlowCaseState ctx, FlowNode currentRawNode) {
-        if (!currentRawNode.getAllowTimeoutAction().equals((byte) 0)) {
-            FlowTimeout ft = new FlowTimeout();
-            ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
-            ft.setBelongTo(currentRawNode.getId());
-            ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
-            ft.setStatus(FlowStatusType.VALID.getCode());
+    public void createStepTimeout(FlowCaseState ctx, FlowNode flowNode) {
+        FlowTimeout ft = new FlowTimeout();
+        ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+        ft.setBelongTo(flowNode.getId());
+        ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
+        ft.setStatus(FlowStatusType.VALID.getCode());
 
-            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-            stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
-            stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
-            stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());
-            stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
-            stepDTO.setFlowNodeId(currentRawNode.getId());
-            stepDTO.setAutoStepType(currentRawNode.getAutoStepType());
-            stepDTO.setOperatorId(User.SYSTEM_UID);
-            stepDTO.setEventType(FlowEventType.STEP_TIMEOUT.getCode());
-            ft.setJson(stepDTO.toString());
+        FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+        stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
+        stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
+        stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());
+        stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
+        stepDTO.setFlowNodeId(flowNode.getId());
+        stepDTO.setAutoStepType(flowNode.getAutoStepType());
+        stepDTO.setOperatorId(User.SYSTEM_UID);
+        stepDTO.setEventType(FlowEventType.STEP_TIMEOUT.getCode());
+        ft.setJson(stepDTO.toString());
 
-            Long timeoutTick = DateHelper.currentGMTTime().getTime() + currentRawNode.getAutoStepMinute() * 60 * 1000L;
-            ft.setTimeoutTick(new Timestamp(timeoutTick));
-            ctx.getTimeouts().add(ft);
-        }
+        Long timeoutTick = DateHelper.currentGMTTime().getTime() + flowNode.getAutoStepMinute() * 60 * 1000L;
+        ft.setTimeoutTick(new Timestamp(timeoutTick));
+        ctx.getTimeouts().add(ft);
     }
 
     @Override
@@ -800,6 +1028,23 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             log.setLogType(FlowLogType.STEP_TRACKER.getCode());
             log.setStepCount(ctx.getFlowCase().getStepCount());
             ctx.getLogs().add(log);    //added but not save to database now.
+        }
+
+        // 子流程处理
+        if (!Objects.equals(ctx.getFlowCase().getSubFlowParentId(), 0L)) {
+            FlowSubFlowEndDTO endDTO = new FlowSubFlowEndDTO();
+            endDTO.setParentFlowCaseId(ctx.getFlowCase().getSubFlowParentId());
+            endDTO.setStepType(fromStep.getCode());
+
+            FlowTimeout ft = new FlowTimeout();
+            ft.setBelongEntity(FlowEntityType.FLOW.getCode());
+            ft.setBelongTo(ctx.getFlowCase().getFlowMainId());
+            ft.setTimeoutType(FlowTimeoutType.SUBFLOW_TIMEOUT.getCode());
+            ft.setStatus(FlowStatusType.VALID.getCode());
+            ft.setTimeoutTick(new Timestamp(System.currentTimeMillis() + 1000L));
+            ft.setJson(endDTO.toString());
+
+            ctx.getTimeouts().add(ft);
         }
     }
 }
