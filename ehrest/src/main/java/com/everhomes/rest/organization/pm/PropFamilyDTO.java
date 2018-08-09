@@ -37,7 +37,16 @@ public class PropFamilyDTO {
     private Byte arrangementInvolved;
     private String buildingName;
     private String communityName;
+    private Long reservationId;
     
+	public Long getReservationId() {
+		return reservationId;
+	}
+
+	public void setReservationId(Long reservationId) {
+		this.reservationId = reservationId;
+	}
+
 	public String getBuildingName() {
 		return buildingName;
 	}

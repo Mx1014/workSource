@@ -164,4 +164,6 @@ public interface CommunityService {
 
 	FloorRangeDTO getFloorRange(GetFloorRangeCommand cmd);
 
+	void changeBuildingOrder(ChangeBuildingOrderCommand cmd);
+
 }

@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>address: 地址</li>
  *     <li>managerName: 联系人</li>
  *     <li>contact: 联系电话</li>
+ *     <li>defaultOrder: 排序字段</li>
  * </ul>
  */
 public class BuildingInfoDTO {
@@ -30,7 +31,18 @@ public class BuildingInfoDTO {
 	private String address;
 	private String managerName;
 	private String contact;
+	private Long defaultOrder;
 	
+	public Long getDefaultOrder() {
+		return defaultOrder;
+	}
+
+	
+	public void setDefaultOrder(Long defaultOrder) {
+		this.defaultOrder = defaultOrder;
+	}
+
+
 	public Integer getRelatedContractNumber() {
 		return relatedContractNumber;
 	}

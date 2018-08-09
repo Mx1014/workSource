@@ -540,6 +540,19 @@ public class CommunityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /community/changeBuildingOrder</b>
+     * <p>更新楼层的排序</p>
+     */
+    @RequestMapping("changeBuildingOrder")
+    @RestReturn(value=String.class)
+    public RestResponse changeBuildingOrder(ChangeBuildingOrderCommand cmd) {
+    	this.communityService.changeBuildingOrder(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     
     /**

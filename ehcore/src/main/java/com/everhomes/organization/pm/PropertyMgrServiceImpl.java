@@ -3257,13 +3257,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}
 			}
 			
+			//房源预定相关
 			dto.setReservationInvolved((byte)0);
 			if(AddressLivingStatus.OCCUPIED.getCode() == dto.getLivingStatus()){
-				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
+				List<PmResourceReservation> reservations = propertyMgrProvider.findReservationByAddress(dto.getAddressId(), ReservationStatus.ACTIVE);
+				if (reservations != null && reservations.size() > 0) {
 					dto.setReservationInvolved((byte)1);
+					dto.setReservationId(reservations.get(0).getId());
 				}
 			}
 			
+			//房源拆分合并相关
 			dto.setArrangementInvolved((byte)0);
 			AddressArrangement arrangement = null;
 			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(dto.getAddressId());

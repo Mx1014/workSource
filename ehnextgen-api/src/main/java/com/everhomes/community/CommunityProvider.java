@@ -156,5 +156,6 @@ public interface CommunityProvider {
 	List<Community> findCommunitiesByNamespaceId(Integer nameSpaceId);
 	List<Building> findBuildingsByCommunityId(Long communityId);
 	List<Building> findBuildingsByNamespaceId(Integer namespaceId);
+	Map<Long, Building> mapBuildingIdAndBuilding(List<Long> buildingIds);
 	
 }

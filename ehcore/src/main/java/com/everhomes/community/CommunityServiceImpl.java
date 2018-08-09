@@ -80,9 +80,11 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDataDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingInfoDTO;
+import com.everhomes.rest.community.BuildingOrderDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatisticsDTO;
 import com.everhomes.rest.community.BuildingStatus;
+import com.everhomes.rest.community.ChangeBuildingOrderCommand;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityDetailDTO;
 import com.everhomes.rest.community.CommunityGeoPointDTO;
@@ -5191,5 +5193,31 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return dto;
 	}
+
+	@Override
+	public void changeBuildingOrder(ChangeBuildingOrderCommand cmd) {
+		if (cmd.getBuildingOrders() != null && cmd.getBuildingOrders().size() > 0) {
+			List<BuildingOrderDTO> buildingOrders = cmd.getBuildingOrders();
+			
+			List<Long> buildingIds = new ArrayList<>();
+			Map<Long, Long> newBuildingIdOrderMap = new HashMap<>();
+			buildingOrders.stream().forEach(r->{
+				buildingIds.add(r.getBuildingId());
+				newBuildingIdOrderMap.put(r.getBuildingId(), r.getDefaultOrder());
+			});
+			
+			Map<Long, Building> buildingIdAndBuildingMap = communityProvider.mapBuildingIdAndBuilding(buildingIds);
+			for (Long buildingId : buildingIds) {
+				Long newOrder = newBuildingIdOrderMap.get(buildingId);
+				Building building = buildingIdAndBuildingMap.get(buildingId);
+				Long oldOrder = building.getDefaultOrder();
+				if (!newOrder.equals(oldOrder)) {
+					building.setDefaultOrder(newOrder);
+					communityProvider.updateBuilding(building);
+				}
+			}
+		}
+	}
+	
 }
 

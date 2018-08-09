@@ -1957,4 +1957,20 @@ public class CommunityProviderImpl implements CommunityProvider {
 					.fetchInto(Building.class);
 	}
 
+	@Override
+	public Map<Long, Building> mapBuildingIdAndBuilding(List<Long> buildingIds) {
+		Map<Long, Building> result = new HashMap<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		context.select()
+				.from(Tables.EH_BUILDINGS)
+				.where(Tables.EH_BUILDINGS.ID.in(buildingIds))
+				.and(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
+				.fetchInto(Building.class)
+				.stream()
+				.forEach(r->{
+					result.put(r.getId(), r);
+				});
+		return result;
+	}
+
 }
