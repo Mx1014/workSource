@@ -15,6 +15,8 @@ import javax.validation.constraints.NotNull;
  * <li>organizationId: 企业id</li>
  * <li>communityFetchType：查询类型</li>
  * <li>type:表单相关类型</li>
+ * <li>pageSize: 每页大小</li>
+ * <li>pageOffset: 页码</li>
  * </ul>
  */
 public class ListCommunityFormCommand {
@@ -40,6 +42,9 @@ public class ListCommunityFormCommand {
     private String communityFetchType;
 
     private String type;
+
+    private Integer pageSize;
+    private Integer pageOffset;
 
     public String getType() {
         return type;
@@ -108,5 +113,21 @@ public class ListCommunityFormCommand {
 
     public void setAppId(Long appId) {
         this.appId = appId;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Integer getPageOffset() {
+        return pageOffset;
+    }
+
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 }

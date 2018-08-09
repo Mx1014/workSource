@@ -12,11 +12,15 @@ import com.everhomes.server.schema.tables.records.EhCommunityGeneralFormRecord;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -72,5 +76,18 @@ public class CommunityFormProviderImpl implements CommunityFormProvider{
             return generalForms;
         }
         return null;
+    }
+
+    @Override
+    public List<CommunityGeneralForm> listCommunityGeneralFormByCommunityIds(List<Long> communityIds, String type, Integer pageOffset, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        return context.select(Tables.EH_COMMUNITIES.ID.as("community_id"),Tables.EH_COMMUNITY_GENERAL_FORM.ID,Tables.EH_COMMUNITY_GENERAL_FORM.NAMESPACE_ID,
+                Tables.EH_COMMUNITY_GENERAL_FORM.FORM_ID,Tables.EH_COMMUNITY_GENERAL_FORM.TYPE)
+                .from(Tables.EH_COMMUNITIES).leftOuterJoin(Tables.EH_COMMUNITY_GENERAL_FORM).on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_COMMUNITY_GENERAL_FORM.COMMUNITY_ID))
+                .and(Tables.EH_COMMUNITY_GENERAL_FORM.TYPE.eq(type))
+                .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .limit(pageOffset,pageSize)
+                .fetchInto(CommunityGeneralForm.class);
     }
 }

@@ -8,7 +8,9 @@ import com.everhomes.util.StringHelper;
  *     <li>id:id</li>
  *     <li>namespaceId:域空间ID</li>
  *     <li>communityId:项目ID</li>
+ *     <Li>communityName: 项目名称</Li>
  *     <li>formId:表单ID</li>
+ *     <li>formName:表单名称</li>
  *     <li>type:类型</li>
  * </ul>
  */
@@ -16,7 +18,9 @@ public class CommunityGeneralFormDTO {
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private String communityName;
     private Long formId;
+    private String formName;
     private String type;
 
     public Long getId() {
@@ -58,6 +62,23 @@ public class CommunityGeneralFormDTO {
     public void setType(String type) {
         this.type = type;
     }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getFormName() {
+        return formName;
+    }
+
+    public void setFormName(String formName) {
+        this.formName = formName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
