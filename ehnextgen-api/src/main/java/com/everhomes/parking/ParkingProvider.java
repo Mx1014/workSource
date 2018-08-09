@@ -119,7 +119,7 @@ public interface ParkingProvider {
     List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                                String plateNumber, String plateOwnerName, String plateOwnerPhone,
                                                                Timestamp startDate, Timestamp endDate, Byte status,
-                                                               String requestorEnterpriseName, Long pageAnchor, Integer pageSize);
+                                                               String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, Integer pageSize);
 
     List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                              Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);

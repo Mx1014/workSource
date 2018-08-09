@@ -947,7 +947,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	public List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
 																	  String plateNumber, String plateOwnerName, String plateOwnerPhone,
 																	  Timestamp startDate, Timestamp endDate, Byte status,
-																	  String requestorEnterpriseName, Long pageAnchor, Integer pageSize) {
+																	  String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, Integer pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
 		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
 
@@ -984,6 +984,10 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 		if (StringUtils.isNotBlank(requestorEnterpriseName)) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTERPRISE_NAME.like("%" + requestorEnterpriseName + "%"));
+		}
+		if (StringUtils.isNotBlank(ownerKeyWords)) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + ownerKeyWords + "%")
+					.or(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + ownerKeyWords + "%")));
 		}
 
 		query.addOrderBy(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.desc());

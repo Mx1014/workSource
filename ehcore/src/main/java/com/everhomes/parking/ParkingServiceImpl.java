@@ -279,6 +279,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 //		User user = UserContext.current().getUser();
 		List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
+		ParkingSourceRequestType requestType = ParkingSourceRequestType.fromCode(cmd.getSourceRequestType());
 
 		List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
 			ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
@@ -317,6 +318,9 @@ public class ParkingServiceImpl implements ParkingService {
 						dto.setFlowId(null);
 					}
 				}
+			}
+			if(requestType == ParkingSourceRequestType.BACKGROUND){
+				dto.setFlowMode(r.getFlowMode());
 			}
 
 			return dto;
@@ -539,7 +543,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
-
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//应用管理权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_APPLY_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
+		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
@@ -2398,7 +2405,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
-				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getOwnerKeyWords(), cmd.getPageAnchor(), pageSize);
 
 		SearchParkingCarVerificationResponse response = new SearchParkingCarVerificationResponse();
 
@@ -2439,7 +2446,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
-				cmd.getStatus(), cmd.getRequestorEnterpriseName(), null,configProvider.getIntValue("parking.exportcarverifications.maxcount",10000));
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(),  cmd.getOwnerKeyWords(),null,configProvider.getIntValue("parking.exportcarverifications.maxcount",10000));
 
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("车辆认证申请记录");
@@ -2491,6 +2498,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ListParkingCarVerificationsResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd) {
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//应用管理权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_APPLY_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
+		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
