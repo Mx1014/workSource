@@ -619,7 +619,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
         }
         WarehouseOrder order = null;
-        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()){
+        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode() || cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()){
              //增加普通入库单
             order = ConvertHelper.convert(cmd, WarehouseOrder.class);
             long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper

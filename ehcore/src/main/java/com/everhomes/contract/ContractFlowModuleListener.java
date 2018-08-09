@@ -134,9 +134,19 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
-    }
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
+		}
+		FlowCase flowCase = ctx.getFlowCase();
+		if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
+			// 审批驳回开始节点，更新合同的状态为待发起 -- djm
+			Contract contract = contractProvider.findContractById(flowCase.getReferId());
+			contract.setStatus(ContractStatus.WAITING_FOR_LAUNCH.getCode());
+			contractProvider.updateContract(contract);
+			contractSearcher.feedDoc(contract);
+		}
+	}
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
@@ -207,7 +217,92 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-
+		
+		List<FlowCaseEntity> chargingItemEntities = new ArrayList<>();
+		FlowCaseEntity chargingItemeE;
+		
+		StringBuffer chargingItems = new StringBuffer();
+		
+		/*e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
+		e.setKey("计价条款");
+		
+		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
+			
+			StringBuffer paymentVariable = new StringBuffer();
+			// 计价条款json 转对象
+			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
+				contractDetailDTO.getChargingItems().get(i).getChargingVariables();
+				
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("收费项目");
+				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getChargingItemName());
+				chargingItemEntities.add(chargingItemeE);
+				
+				Map json = (Map) JSONObject.parse(contractDetailDTO.getChargingItems().get(i).getChargingVariables());
+				for (Object map : json.entrySet()) {
+					List<Map<String, String>> ChargingVariables = (List<Map<String, String>>) ((Map.Entry) map).getValue();
+					
+					StringBuffer FormulaVariable = new StringBuffer();
+					for (int j = 0; j < ChargingVariables.size(); j++) {
+						
+						FormulaVariable.append( ChargingVariables.get(j).get("variableName") + "："
+								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
+						paymentVariable.append("  " + ChargingVariables.get(j).get("variableName") + "："
+								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
+					}
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("计费公式");
+					chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
+					chargingItemEntities.add(chargingItemeE);
+					
+					//paymentVariable.append(System.getProperty("line.separator"));
+				}
+				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
+					
+					
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("起计日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					chargingItemEntities.add(chargingItemeE);
+					
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("起计日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					chargingItemEntities.add(chargingItemeE); 
+					
+					paymentVariable.append("  开始日期："
+							+ timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()) + " 结束日期 ："
+							+ timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
+				}
+				// 添加应用的资产
+				StringBuffer apartmentVariable = new StringBuffer();
+				contractDetailDTO.getChargingItems().get(i).getApartments();
+				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "， ");
+				}
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("应用资产");
+				chargingItemeE.setValue(apartmentVariable.toString());
+				chargingItemEntities.add(chargingItemeE); 
+			}
+			chargingItems.append("  " + contractDetailDTO.getChargingItems().get(i).getChargingItemName() + "： "
+					+ contractDetailDTO.getChargingItems().get(i).getFormula() + "(" + paymentVariable + ")");
+			
+			
+			e.setChargingItemEntities(chargingItemEntities);
+			
+			e.setValue(e.getChargingItemEntities().toString());
+			entities.add(e);
+		}
+		e.setValue(chargingItemEntities.toString());
+		entities.add(e);*/
+		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("合同编号");
@@ -237,6 +332,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		e.setKey("合同结束时间");
 		e.setValue(timeToStr(contractDetailDTO.getContractEndDate()));
 		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("经办人");
+		e.setValue(contractDetailDTO.getCreatorName());
+		entities.add(e);
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -250,52 +351,67 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		StringBuffer apartments = new StringBuffer();
 
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
-			apartments.append(apartment.getBuildingName() + "/" + apartment.getApartmentName() + "  面积："
-					+ apartment.getChargeArea() + " "); 
+			apartments.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "  面积："
+					+ apartment.getChargeArea() + "，"); 
 		}
-		e.setValue(apartments.toString());
-		entities.add(e);
-
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("经办人");
-		e.setValue(contractDetailDTO.getCreatorName());
+		e.setValue((apartments.toString()).substring(0, (apartments.toString()).length()-1));
 		entities.add(e);
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
 		e.setKey("计价条款");
-		StringBuffer chargingItems = new StringBuffer();
 		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
-			StringBuffer paymentVariable = new StringBuffer();
 			// 计价条款json 转对象
 			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
 				contractDetailDTO.getChargingItems().get(i).getChargingVariables();
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("收费项目");
+				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getChargingItemName());
+				chargingItemEntities.add(chargingItemeE);
 				Map json = (Map) JSONObject.parse(contractDetailDTO.getChargingItems().get(i).getChargingVariables());
 				for (Object map : json.entrySet()) {
 					List<Map<String, String>> ChargingVariables = (List<Map<String, String>>) ((Map.Entry) map).getValue();
+					StringBuffer FormulaVariable = new StringBuffer();
 					for (int j = 0; j < ChargingVariables.size(); j++) {
-						paymentVariable.append("  " + ChargingVariables.get(j).get("variableName") + "："
+						FormulaVariable.append( ChargingVariables.get(j).get("variableName") + "："
 								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
 					}
-					paymentVariable.append(System.getProperty("line.separator"));
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("计费公式");
+					chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
+					chargingItemEntities.add(chargingItemeE);
 				}
 				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
-					paymentVariable.append("  开始日期："
-							+ timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()) + " 结束日期 ："
-							+ timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("起计日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					chargingItemEntities.add(chargingItemeE);
+					
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("起计日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					chargingItemEntities.add(chargingItemeE); 
 				}
 				// 添加应用的资产
+				StringBuffer apartmentVariable = new StringBuffer();
 				contractDetailDTO.getChargingItems().get(i).getApartments();
 				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
-					paymentVariable.append(apartment.getBuildingName() + "/" + apartment.getApartmentName() + " ");
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "， ");
 				}
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("应用资产");
+				chargingItemeE.setValue(apartmentVariable.toString());
+				chargingItemEntities.add(chargingItemeE); 
 			}
-			chargingItems.append("  " + contractDetailDTO.getChargingItems().get(i).getChargingItemName() + "： "
-					+ contractDetailDTO.getChargingItems().get(i).getFormula() + "(" + paymentVariable + ")");
+			e.setChargingItemEntities(chargingItemEntities);
+			//e.setValue(e.getChargingItemEntities().toString());
+			entities.add(e);
 		}
-		e.setValue(chargingItems.toString());
-		entities.add(e);
 
 		return entities;
 	}

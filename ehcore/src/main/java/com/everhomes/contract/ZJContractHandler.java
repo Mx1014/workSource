@@ -50,6 +50,8 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
@@ -809,6 +811,12 @@ public class ZJContractHandler implements ContractService{
 
 
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

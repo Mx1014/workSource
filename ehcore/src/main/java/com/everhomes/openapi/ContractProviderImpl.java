@@ -205,7 +205,7 @@ public class ContractProviderImpl implements ContractProvider {
 		SelectConditionStep<Record> query = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-//				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber));
 				
 		if (categoryId != null || "".equals(categoryId)) {
@@ -561,6 +561,7 @@ public class ContractProviderImpl implements ContractProvider {
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addJoin(Tables.EH_CONTRACT_BUILDING_MAPPINGS, Tables.EH_CONTRACTS.ID.eq(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID));
 		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId));
+		query.addConditions(Tables.EH_CONTRACTS.STATUS.notEqual(CommonStatus.INACTIVE.getCode()));
 
 		query.addOrderBy(Tables.EH_CONTRACTS.ID.desc());
 		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_CONTRACTS.recordType(), Contract.class));

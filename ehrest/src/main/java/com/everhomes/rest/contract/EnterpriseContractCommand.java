@@ -6,25 +6,20 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: 合同id</li>
+ *     <li>contractId: 合同id</li>
  *     <li>contractNumber: 合同编号</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 园区id</li>
- *     <li>partyAId: 合同甲方id</li>
  * </ul>
- * Created by ying.xiong on 2017/8/2.
+ * Created by djm on 2018/8/9.
  */
-public class FindContractCommand {
+public class EnterpriseContractCommand {
 	@NotNull
-    private Long id;
-
-    private String contractNumber;
-    @NotNull
+    private Long contractId;
+	@NotNull
     private Integer namespaceId;
-    @NotNull
+	@NotNull
     private Long communityId;
-
-    private Long partyAId;
 
     private Long organizationId;
     @NotNull
@@ -38,15 +33,13 @@ public class FindContractCommand {
 		this.categoryId = categoryId;
 	}
 
-	public FindContractCommand() {
+	public EnterpriseContractCommand() {
     }
 
-    public FindContractCommand(Long id, String contractNumber, Integer namespaceId, Long communityId, Long partyAId) {
-        this.id = id;
-        this.contractNumber = contractNumber;
+    public EnterpriseContractCommand(Long contractId, Integer namespaceId, Long communityId) {
+        this.contractId = contractId;
         this.namespaceId = namespaceId;
         this.communityId = communityId;
-        this.partyAId = partyAId;
     }
 
     public Long getOrganizationId() {
@@ -57,23 +50,15 @@ public class FindContractCommand {
         this.organizationId = organizationId;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getContractId() {
+		return contractId;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
 
-    public String getContractNumber() {
-        return contractNumber;
-    }
-
-    public void setContractNumber(String contractNumber) {
-        this.contractNumber = contractNumber;
-    }
-
-    public Integer getNamespaceId() {
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 
@@ -89,14 +74,6 @@ public class FindContractCommand {
         this.communityId = communityId;
     }
 
-    public Long getPartyAId() {
-        return partyAId;
-    }
-
-    public void setPartyAId(Long partyAId) {
-        this.partyAId = partyAId;
-    }
-    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

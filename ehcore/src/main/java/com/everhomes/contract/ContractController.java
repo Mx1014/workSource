@@ -26,6 +26,8 @@ import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
@@ -472,5 +474,18 @@ public class ContractController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+	
+	/**
+	 * <b>URL: /contract/EnterpriseContractDetail</b>
+	 * <p>企业客户APP获取合同详情</p>
+	 */
+	@RequestMapping("EnterpriseContractDetail")
+	@RestReturn(EnterpriseContractDTO.class)
+	public RestResponse EnterpriseContractDetail(EnterpriseContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
+		return new RestResponse(detail);
 	}
 }

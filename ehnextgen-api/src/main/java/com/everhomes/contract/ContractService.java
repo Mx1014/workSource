@@ -17,6 +17,8 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
@@ -101,5 +103,7 @@ public interface ContractService {
 
     //add by tangcen
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+
+	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
    
 }
