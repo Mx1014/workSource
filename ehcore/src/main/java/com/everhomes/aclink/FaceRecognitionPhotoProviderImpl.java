@@ -145,6 +145,7 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 			auth.setValidFromMs(r.getValue(Tables.EH_DOOR_AUTH.VALID_FROM_MS));
 			auth.setNickname(r.getValue(Tables.EH_DOOR_AUTH.NICKNAME));
 			auth.setPhone(r.getValue(Tables.EH_DOOR_AUTH.PHONE));
+			auth.setCreateTime(r.getValue(Tables.EH_DOOR_AUTH.CREATE_TIME));
 			//左邻门禁,取二维码字符串
 			auth.setLocalAuthKey(r.getValue(Tables.EH_DOOR_AUTH.STRING_TAG6));
 			listPhotos.add(photo);
