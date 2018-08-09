@@ -9118,6 +9118,12 @@ public class PunchServiceImpl implements PunchService {
 	        		//今日的数据,状态是休息的 intervals清空
 	        		response.setIntervals(new ArrayList<>());
 	        	}
+	        	for(PunchIntevalLogDTO intevalLogDTO : response.getIntervals()){
+	        		if(intevalLogDTO.getStatus().equals(PunchStatus.FORGOT_OFF_DUTY.getCode() + "")
+	        				||intevalLogDTO.getStatus().equals(PunchStatus.BELATE_AND_FORGOT.getCode() + "")){
+	        			intevalLogDTO.setStatus(PunchStatus.FORGOT_ON_DUTY.getCode() + "");
+	        		}
+	        	}
             }
     	}
 	}
