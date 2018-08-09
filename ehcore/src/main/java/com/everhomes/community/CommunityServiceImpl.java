@@ -4758,8 +4758,9 @@ public class CommunityServiceImpl implements CommunityService {
         	buildings.remove(buildings.size() - 1);
             nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
-
-        List<BuildingInfoDTO> dtoList = buildings.stream().map((r) -> {
+        
+        List<BuildingInfoDTO> dtoList = new ArrayList<>();
+        buildings.stream().forEach((r) -> {
         	BuildingInfoDTO dto = ConvertHelper.convert(r, BuildingInfoDTO.class);
         	dto.setBuildingId(r.getId());
         	dto.setBuildingName(r.getName());
@@ -4772,8 +4773,20 @@ public class CommunityServiceImpl implements CommunityService {
     			Double areaAveragePrice = totalRent/r.getRentArea();
         		dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 			}
-        	return dto;
-        }).collect(Collectors.toList());
+    		if (dto.getAreaSize()!=null) {
+    			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+    		}
+    		if(dto.getRentArea()!=null){
+    			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+    		}
+    		if(dto.getFreeArea()!=null){
+    			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+    		}
+    		if(dto.getChargeArea()!=null){
+    			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+    		}
+    		dtoList.add(dto);
+        });
 		
         ListBuildingsByKeywordsResponse response = new ListBuildingsByKeywordsResponse();
         response.setNextPageAnchor(nextPageAnchor);
@@ -4842,15 +4855,23 @@ public class CommunityServiceImpl implements CommunityService {
 		//在租实时均价
 		Double totalRent = contractProvider.getTotalRentInCommunity(community.getId()); 
 		dto.setTotalRent(doubleRoundHalfUp(totalRent,2));
+		
 		if (community.getRentArea() != null && community.getRentArea() > 0) {
 			Double areaAveragePrice = totalRent/community.getRentArea();
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 		}
-		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
-		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
 		
 		return dto;
 	} 
@@ -4862,10 +4883,18 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityDetailDTO dto = ConvertHelper.convert(community, CommunityDetailDTO.class);
 		dto.setCommunityId(community.getId());
 		dto.setCommunityName(community.getName());
-		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
 		
 		ResourceCategoryAssignment assignment = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(),cmd.getProjectType(),cmd.getNamespaceId());
 		if (assignment != null) {
@@ -5093,27 +5122,26 @@ public class CommunityServiceImpl implements CommunityService {
 			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
 				continue;
 			}
-			
 			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus,areaAveragePrice,totalRent);
-			if (dto.getAreaSize()!=null) {
-				dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-			}
-			if(dto.getRentArea()!=null){
-				dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-			}
-			if(dto.getFreeArea()!=null){
-				dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-			}
-			if(dto.getChargeArea()!=null){
-				dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
-			}
-			if(dto.getTotalRent()!=null){
-				dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
-			}
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
 		}
-		result.setApartments(apartments);
+		//分页
+		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
+		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
+		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
+		int size = 0;
+		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
+			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
+				apartmentsForOnePage.add(apartmentInfoDTO);
+				size ++;
+				if (size >= pageSize) {
+					break;
+				}
+			}
+		}
+		result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+		result.setApartments(apartmentsForOnePage);
 		
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
@@ -5123,7 +5151,6 @@ public class CommunityServiceImpl implements CommunityService {
 		if (result.getTotalRentArea()!=null && result.getTotalRentArea().doubleValue() > 0) {
 			result.setTotalAreaAveragePrice(doubleRoundHalfUp(result.getTotalRent()/result.getTotalRentArea(),2));
 		}
-		
 		return result;
 	}
 	
@@ -5160,6 +5187,23 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());
 		dto.setChargeArea(address.getChargeArea());
+		
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
+		if(dto.getTotalRent()!=null){
+			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+		}
+		
 		return dto;
 	}
 	

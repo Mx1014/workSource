@@ -19,8 +19,29 @@ public class ListApartmentsInCommunityCommand {
     private Double freeAreaTo;
     private Double areaAveragePriceFrom;
     private Double areaAveragePriceTo;
-	
-    public Integer getNamespaceId() {
+    private String buildingName;
+    private Integer pageSize;
+    private Long pageAnchor;
+    
+    public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+	public Integer getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 	public void setNamespaceId(Integer namespaceId) {

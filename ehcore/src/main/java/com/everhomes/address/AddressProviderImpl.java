@@ -1052,9 +1052,13 @@ public class AddressProviderImpl implements AddressProvider {
 		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(Tables.EH_ADDRESSES);
 		query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
 		
 		if (cmd.getCommunityId() != null) {
 			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		}
+		if (!org.springframework.util.StringUtils.isEmpty(cmd.getBuildingName())) {
+			query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
 		}
 		if (!org.springframework.util.StringUtils.isEmpty(cmd.getFloorNumber())) {
 			query.addConditions(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getFloorNumber()));

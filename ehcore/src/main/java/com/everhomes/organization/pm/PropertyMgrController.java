@@ -21,6 +21,7 @@ import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -2246,6 +2247,20 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查找预定计划</p>
+	 * <b>URL: /pm/findReservations</b>
+	 */
+	@RequestMapping("findReservations")
+	@RestReturn(value = ListReservationsDTO.class, collection = true)
+	public RestResponse findReservations(FindReservationsCommand cmd){
+	    List<ListReservationsDTO> list = propertyMgrService.findReservations(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <p>list all reservations given addresses</p>
 	 * <b>URL: /pm/listReservations</b>
 	 */
@@ -2311,19 +2326,19 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-	//展示房源日志：pm/listApartmentEvents（新增接口）
-	/**
-	 * <p>展示房源日志</p>
-	 * <b>URL: /pm/listApartmentEvents</b>
-	 */
-	@RequestMapping("listApartmentEvents")
-	@RestReturn(value = ApartmentEventDTO.class, collection = true)
-	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
-	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
-		RestResponse response = new RestResponse(result);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
+//	/**
+//	 * <p>展示房源日志</p>
+//	 * <b>URL: /pm/listApartmentEvents</b>
+//	 */
+//	@RequestMapping("listApartmentEvents")
+//	@RestReturn(value = ApartmentEventDTO.class, collection = true)
+//	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
+//	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
+//		RestResponse response = new RestResponse(result);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 }

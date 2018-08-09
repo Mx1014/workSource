@@ -160,6 +160,7 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -424,6 +425,8 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.google.zxing.Result;
+
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -8006,5 +8009,26 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<ListReservationsDTO> findReservations(FindReservationsCommand cmd) {
+		List<ListReservationsDTO> result = new ArrayList<>();
+		
+		List<PmResourceReservation> reservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.fromCode(cmd.getStatus()));
+		for(PmResourceReservation r : reservations){
+        	ListReservationsDTO dto = new ListReservationsDTO();
+        	dto.setAddressName(addressProvider.getAddressNameById(r.getAddressId()));
+        	dto.setAddressId(r.getAddressId());
+        	dto.setCreateUname(userProvider.getNickNameByUid(r.getCreatorUid()));
+        	dto.setEndTime(r.getEndTime());
+        	dto.setStartTime(r.getStartTime());
+        	dto.setEnterpriseCustomerName(enterpriseCustomerProvider.getEnterpriseCustomerNameById(r.getEnterpriseCustomerId()));
+        	dto.setEnterpriseCustomerId(r.getEnterpriseCustomerId());
+        	dto.setReservationId(r.getId());
+        	dto.setReservationStatus(r.getStatus());
+        	result.add(dto);
+        }
+		return result;
 	}
 }

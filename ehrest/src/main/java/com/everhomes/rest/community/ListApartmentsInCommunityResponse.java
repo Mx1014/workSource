@@ -14,8 +14,14 @@ public class ListApartmentsInCommunityResponse {
 	private Double totalRent;
 	private Double totalAreaAveragePrice;
 	List<ApartmentInfoDTO> apartments;
+	private Long nextPageAnchor;
 	
-	
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 	public Double getTotalRent() {
 		return totalRent;
 	}
