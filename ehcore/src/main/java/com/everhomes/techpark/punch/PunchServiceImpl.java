@@ -198,6 +198,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -233,6 +234,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -9010,16 +9012,7 @@ public class PunchServiceImpl implements PunchService {
                 pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
                 PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
                 if (null != punchLog) {
-                	//2018年8月9日 对5.8.0之前版本的签到签退做特殊处理 -- 修改为非工作日
-                	if(UserContext.current() != null && UserContext.current().getVersion() != null){
-	                    Version appVersion = Version.fromVersionString(UserContext.current().getVersion()); 
-	                	if((punchLog.getPunchType().equals(PunchType.OVERTIME_ON_DUTY.getCode()) ||
-	                			punchLog.getPunchType().equals(PunchType.OVERTIME_OFF_DUTY.getCode())) && 
-	                			(Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) < 
-	                					Version.encodeValue(5,8,0))){
-	                		punchLog.setPunchType(PunchType.NOT_WORKDAY.getCode());
-	                	}
-                	}
+                	
                     if (null != punchLog.getExpiryTime()) {
                         punchLog.setExpiryTime(process24hourTimeToGMTTime(pDate, punchLog.getExpiryTime()));
                     }
@@ -9104,10 +9097,32 @@ public class PunchServiceImpl implements PunchService {
             response.setRequestDTOs(requestDTOs);
         }
 //		}
+        //旧版本兼容性处理
+        oldVersionProcess(response, cmd);
         return response;
     }
 
-    private List<ExceptionRequestDTO> listUserException(java.sql.Date pDate, Long userId, Long enterpriseId, PunchTimeRule ptr) {
+    private void oldVersionProcess(GetPunchDayStatusResponse response, GetPunchDayStatusCommand cmd) {
+    	if(UserContext.current() != null && UserContext.current().getVersion() != null){
+            Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
+            if(Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) < 
+    					Version.encodeValue(5,8,0) ){
+            	//2018年8月9日 对5.8.0之前版本的签到签退做特殊处理 -- 修改为非工作日
+	        	if((response.getPunchType().equals(PunchType.OVERTIME_ON_DUTY.getCode()) ||
+	        			response.getPunchType().equals(PunchType.OVERTIME_OFF_DUTY.getCode())) ){
+	        				response.setPunchType(PunchType.NOT_WORKDAY.getCode());
+	        	}
+	        	if((cmd.getQueryTime() == null ||
+	        			dateSF.get().format(DateHelper.currentGMTTime()).equals(dateSF.get().format(new java.sql.Date(cmd.getQueryTime()))))
+	        			&& response.getPunchType().equals(PunchType.NOT_WORKDAY.getCode()) ){
+	        		//今日的数据,状态是休息的 intervals清空
+	        		response.setIntervals(new ArrayList<>());
+	        	}
+            }
+    	}
+	}
+
+	private List<ExceptionRequestDTO> listUserException(java.sql.Date pDate, Long userId, Long enterpriseId, PunchTimeRule ptr) {
     	List<ExceptionRequestDTO> result = new ArrayList<>(); 
     	//当日+上班打卡时间-最早打卡时间 默认0
     	Timestamp dayStart = new Timestamp(pDate.getTime() +(ptr.getStartEarlyTimeLong() == null ? 0L : ptr.getStartEarlyTimeLong()) 
