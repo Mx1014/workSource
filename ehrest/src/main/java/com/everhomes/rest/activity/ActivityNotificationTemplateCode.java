@@ -20,4 +20,5 @@ public class ActivityNotificationTemplateCode {
     public static final int ACTIVITY_CHANGE_TIME_ADDRESS = 16;      //活动发布后，修改时间和地址
     public static final int ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS = 17;    //活动发布后，修改标题、时间和地点
 
+    public static final int ACTIVITY_SIGNUP_SUCCESS = 21;  //报名成功后，发送消息推送
 }

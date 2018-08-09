@@ -885,6 +885,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
                     sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
                 }
+                Map<String, String> rosterMap = new HashMap<String, String>();
+                rosterMap.put("postName", activity.getSubject());
+                sendMessageCode(user.getId(), user.getLocale(), rosterMap, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_SUCCESS, null);
                 long signupStatEndTime = System.currentTimeMillis();
                 LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime),
                         (signupStatEndTime - rosterStatStartTime), cmd);
