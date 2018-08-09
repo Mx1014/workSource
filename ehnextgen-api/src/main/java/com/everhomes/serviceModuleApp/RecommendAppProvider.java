@@ -12,7 +12,7 @@ public interface RecommendAppProvider {
 
 	RecommendApp findRecommendAppById(Long id);
 
-	List<RecommendApp> listRecommendApps(Byte scopeType, Long scopeId);
+	List<RecommendApp> listRecommendApps(Byte scopeType, Long scopeId, Long appId);
 
 	void delete(Long id);
 

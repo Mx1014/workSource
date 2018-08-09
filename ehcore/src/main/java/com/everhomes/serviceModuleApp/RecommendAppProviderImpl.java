@@ -59,11 +59,14 @@ public class RecommendAppProviderImpl implements RecommendAppProvider {
 	}
 
 	@Override
-	public List<RecommendApp> listRecommendApps(Byte scopeType, Long scopeId) {
+	public List<RecommendApp> listRecommendApps(Byte scopeType, Long scopeId, Long appId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhRecommendApps.class));
 		SelectQuery<EhRecommendAppsRecord> query = context.selectQuery(Tables.EH_RECOMMEND_APPS);
 		query.addConditions(Tables.EH_RECOMMEND_APPS.SCOPE_TYPE.eq(scopeType));
 		query.addConditions(Tables.EH_RECOMMEND_APPS.SCOPE_ID.eq(scopeId));
+		if(appId != null){
+			query.addConditions(Tables.EH_RECOMMEND_APPS.APP_ID.eq(appId));
+		}
 
 		query.addOrderBy(Tables.EH_RECOMMEND_APPS.ORDER.asc());
 

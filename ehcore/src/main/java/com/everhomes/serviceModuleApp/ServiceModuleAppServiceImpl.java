@@ -936,24 +936,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				config.setVisibilityFlag(cmd.getVisibilityFlag());
 				appCommunityConfigProvider.createAppCommunityConfig(config);
 
-				if(TrueOrFalseFlag.fromCode(cmd.getRecommendFlag()) == TrueOrFalseFlag.TRUE){
-					RecommendApp recommendApp = new RecommendApp();
-					recommendApp.setScopeType(ScopeType.COMMUNITY.getCode());
-					recommendApp.setScopeId(cmd.getCommunityId());
-					recommendApp.setAppId(cmd.getAppOriginId());
-					Integer maxOrder = recommendAppProvider.findMaxOrder(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId());
-					if(maxOrder == null){
-						recommendApp.setOrder(1);
-					}else {
-						recommendApp.setOrder(maxOrder + 1);
-					}
-					recommendAppProvider.createRecommendApp(recommendApp);
-				}
-
 			}else {
-
-				if(TrueOrFalseFlag.fromCode(cmd.getRecommendFlag()) )
-
 				config.setDisplayName(cmd.getDisplayName());
 				config.setVisibilityFlag(cmd.getVisibilityFlag());
 				config.setOperatorUid(UserContext.currentUserId());
@@ -962,11 +945,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			}
 
+			//推荐设置
+			changeRecommendApp(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getAppOriginId(), cmd.getRecommendFlag());
+
 		}else {
 			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(cmd.getAppOriginId(), cmd.getOrganizationId());
 			orgapp.setDisplayName(cmd.getDisplayName());
 			orgapp.setVisibilityFlag(cmd.getVisibilityFlag());
 			organizationAppProvider.updateOrganizationApp(orgapp);
+
+			//推荐设置
+			changeRecommendApp(ScopeType.ORGANIZATION.getCode(), cmd.getOrganizationId(), cmd.getAppOriginId(), cmd.getRecommendFlag());
 		}
 
 	}
@@ -974,6 +963,23 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	private void changeRecommendApp(Byte scopeType, Long scopeId, Long appId, Byte recommendFlag){
 
+		List<RecommendApp> recommendApps = recommendAppProvider.listRecommendApps(scopeType, scopeId, appId);
+
+		if(TrueOrFalseFlag.fromCode(recommendFlag) == TrueOrFalseFlag.TRUE && (recommendApps == null || recommendApps.size() == 0)){
+			RecommendApp recommendApp = new RecommendApp();
+			recommendApp.setScopeType(scopeType);
+			recommendApp.setScopeId(scopeId);
+			recommendApp.setAppId(appId);
+			Integer maxOrder = recommendAppProvider.findMaxOrder(scopeType, scopeId);
+			if(maxOrder == null){
+				recommendApp.setOrder(1);
+			}else {
+				recommendApp.setOrder(maxOrder + 1);
+			}
+			recommendAppProvider.createRecommendApp(recommendApp);
+		}else if(TrueOrFalseFlag.fromCode(recommendFlag) != TrueOrFalseFlag.TRUE && recommendApps != null && recommendApps.size() > 0){
+			recommendAppProvider.delete(recommendApps.get(0).getId());
+		}
 	}
 
 
