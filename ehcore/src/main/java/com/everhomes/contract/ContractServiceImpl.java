@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.openapi.*;
 import com.everhomes.rest.contract.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -75,12 +76,6 @@ import com.everhomes.gogs.GogsRepo;
 import com.everhomes.gogs.GogsRepoType;
 import com.everhomes.gogs.GogsService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.openapi.ContractTemplate;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
@@ -3201,11 +3196,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
     @Override
 	public Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
 		Byte aptitudeFlag = 0;
+		aptitudeFlag = contractProvider.filterAptitudeCustomer(cmd.getOwnerId(),cmd.getNamespaceId());
 		return aptitudeFlag;
 	}
 
 	@Override
-	public void updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+	public AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+		if(cmd.getAptitudeFlag() != null && cmd.getNamespaceId() != null && cmd.getOwnerId() != null) {
+			EnterpriseCustomerAptitudeFlag flag = contractProvider.updateAptitudeCustomer(cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getAptitudeFlag());
+			return ConvertHelper.convert(flag, AptitudeCustomerFlagDTO.class);
+		}else{
+			LOGGER.error("the namespaceId or ownerId or flag is null ");
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+					"the namespaceId or ownerId or flag is null ");
+		}
 
 	}
 

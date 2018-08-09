@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.openapi.EnterpriseCustomerAptitudeFlag;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
@@ -68,8 +69,8 @@ public interface ContractService {
 		return null;
 	}
 
-	default void updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
-
+	default AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+		return null;
 	}
    
 }

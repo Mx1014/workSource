@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class FilterAptitudeCustomerCommand {
     Integer namespaceId;
+    Long ownerId;
     Long id;
 
     public Integer getNamespaceId() {
@@ -20,6 +21,14 @@ public class FilterAptitudeCustomerCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

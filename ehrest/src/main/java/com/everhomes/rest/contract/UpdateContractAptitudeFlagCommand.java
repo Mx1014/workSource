@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class UpdateContractAptitudeFlagCommand {
     Integer namespaceId;
+    Long ownerId;
     Byte aptitudeFlag;
     Long id;
 
@@ -29,6 +30,14 @@ public class UpdateContractAptitudeFlagCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

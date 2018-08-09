@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.openapi.EnterpriseCustomerAptitudeFlag;
 import com.everhomes.rest.contract.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -459,12 +460,12 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/updateAptitudeCustomer</b>
 	 */
 	@RequestMapping("updateAptitudeCustomer")
-	@RestReturn(value = String.class)
+	@RestReturn(value = AptitudeCustomerFlagDTO.class)
 	public RestResponse updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		contractService.updateAptitudeCustomer(cmd);
-		RestResponse response = new RestResponse();
+		AptitudeCustomerFlagDTO flag = contractService.updateAptitudeCustomer(cmd);
+		RestResponse response = new RestResponse(flag);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
