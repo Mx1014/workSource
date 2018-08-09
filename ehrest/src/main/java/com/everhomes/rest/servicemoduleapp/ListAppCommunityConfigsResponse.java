@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>appCategoryDtos: 应用分类列表，参考{@link AppCategoryDTO}</li>
- *     <li>recommendAppsDtos: 应用分类列表，参考{@link AppCategoryDTO}</li>
+ *     <li>recommendAppsDtos: 推荐应用列表，参考{@link AppCommunityConfigDTO}</li>
  *     <li>thirdDtos: 第三方应用，此处暂时没有用到，永远是空 参考{@link com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO}</li>
  * </ul>
  */

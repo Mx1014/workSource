@@ -704,6 +704,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//清空原有自定义配置
 		appCommunityConfigProvider.deleteAppCommunityConfigByCommunityId(cmd.getCommunityId());
 
+		//清空原有首页推荐
+		recommendAppProvider.deleteByScope(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId());
+
 		//查询管理公司
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
 
