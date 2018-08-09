@@ -361,7 +361,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     private String getPayMethodExtendInfo(){
-        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
         String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
 
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
