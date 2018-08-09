@@ -1,5 +1,6 @@
 package com.everhomes.express;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.flow.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
@@ -113,8 +114,9 @@ public class ExpressFlowModuleListener implements FlowModuleListener {
     }
 
     private String getCustomObject(FlowCase flowCase) {
-        ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(flowCase.getId());
-        return StringHelper.toJsonString(expressOrder);
+        ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(flowCase.getReferId());
+        JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(expressOrder));
+        return jo==null?null:jo.toJSONString();
     }
 
     @Override
