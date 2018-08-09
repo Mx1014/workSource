@@ -10137,13 +10137,9 @@ public class PunchServiceImpl implements PunchService {
 //						}
 //					}
 //				}
-            } else {
-//                
-//                dto.setPunchDate(startCalendar.getTime().getTime());
-            	if(today.after(startCalendar)){
-            		//如果计算的日期在今天之前,就跳过
-            		continue;
-            	}
+            } else if(today.before(startCalendar)) {
+//              //今天之后的日期进行处理
+            		 
                 PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
                 if (null == pr)
                     continue;
