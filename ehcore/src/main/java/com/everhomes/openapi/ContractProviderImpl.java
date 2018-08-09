@@ -1346,14 +1346,14 @@ public class ContractProviderImpl implements ContractProvider {
 			return flag;
 		}else{
 			long id = this.dbProvider.allocPojoRecordId(EhEnterpriseCustomerAptitudeFlag.class);
-			EhEnterpriseCustomerAptitudeFlag flag = new EhEnterpriseCustomerAptitudeFlag();
-			flag.setId(id);
-			flag.setNamespaceId(namespaceId);
-			flag.setOwnerId(ownerId);
-			flag.setOwnerType("community");
-			flag.setValue(adptitudeFlag);
-			dao.insert();
-			return ConvertHelper.convert(flag, EnterpriseCustomerAptitudeFlag.class);
+			EhEnterpriseCustomerAptitudeFlag flag2 = new EhEnterpriseCustomerAptitudeFlag();
+			flag2.setId(id);
+			flag2.setNamespaceId(namespaceId);
+			flag2.setOwnerId(ownerId);
+			flag2.setOwnerType("community");
+			flag2.setValue(adptitudeFlag);
+			dao.insert(flag2);
+			return ConvertHelper.convert(flag2, EnterpriseCustomerAptitudeFlag.class);
 
 		}
 
