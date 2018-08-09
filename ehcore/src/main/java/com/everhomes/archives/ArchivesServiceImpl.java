@@ -79,9 +79,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
-    private ImportFileService importFileService;
-
-    @Autowired
     private ContentServerService contentServerService;
 
     @Autowired
@@ -278,19 +275,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         // 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
+        final Integer stickCount = cmd.getPageSize();  //  置顶数跟随页码大小变化 at 31/07/2018
 
-        List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
+        //  保存置顶人员
+        List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);
         if (!StringUtils.isEmpty(cmd.getKeywords()) || detailIds == null) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
-            List<ArchivesContactDTO> contacts = new ArrayList<>(listArchivesContacts(cmd, response, null));
-            response.setContacts(contacts);
+            response.setContacts(listArchivesContacts(cmd, response, null));
         } else {
             if (StringUtils.isEmpty(cmd.getPageAnchor())) {
                 List<ArchivesContactDTO> contacts = new ArrayList<>();
-                //  读取置顶人员
+                //  先获取置顶人员信息
                 for (Long detailId : detailIds) {
                     ArchivesContactDTO stickDTO = getArchivesStickyContactInfo(detailId);
                     if (stickDTO != null)
@@ -360,12 +357,18 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getTargetTypes() != null)
             orgCommand.setTargetTypes(cmd.getTargetTypes());
 
-        //modified by lei.lv
-        orgCommand.setVisibleFlag(VisibleFlag.ALL.getCode());
-
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-        if (members != null && members.getMembers() != null) {
-            members.getMembers().forEach(r -> {
+        ListOrganizationMemberCommandResponse res;
+        //  1.置顶个数超过页总数
+        if (orgCommand.getPageSize() == 0) {
+            orgCommand.setPageSize(1);
+            res = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+            response.setNextPageAnchor(res.getMembers().get(0).getDetailId());
+        } else {
+            //  2.置顶个数未超过页总数
+            res = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+            if (res.getMembers() == null)
+                return contacts;
+            res.getMembers().forEach(r -> {
                 ArchivesContactDTO dto = new ArchivesContactDTO();
                 dto.setDetailId(r.getDetailId());
                 dto.setOrganizationId(r.getOrganizationId());
@@ -385,7 +388,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setStick("0");
                 contacts.add(dto);
             });
-            response.setNextPageAnchor(members.getNextPageAnchor());
+            response.setNextPageAnchor(res.getNextPageAnchor());
         }
         return contacts;
     }
@@ -632,17 +635,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         else
             employee.setContractPartyId(cmd.getOrganizationId());
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-        //  3-2.配置转正
+        //  3-2.增加入职记录
+        addCheckInLogs(detailId, cmd);
+        //  3-3.配置转正
         EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
         command.setDetailIds(Collections.singletonList(employee.getId()));
         command.setOrganizationId(employee.getOrganizationId());
         command.setEmploymentTime(format.format(employee.getEmploymentTime().toLocalDate()));
         command.setEmploymentEvaluation("");
         employArchivesEmployeesConfig(command);
-        //  3-3.查询若存在于离职列表则删除
+        //  3-4.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
-        //  3-4.增加入职记录
-        addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
@@ -1206,6 +1209,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.PROVIDENT_FUND_NUMBER, employee.getProvidentFundNumber());
         valueMap.put(ArchivesParameter.REG_RESIDENCE_TYPE, employee.getRegResidenceType());
         valueMap.put(ArchivesParameter.REG_RESIDENCE, employee.getRegResidence());
+        valueMap.put(ArchivesParameter.ID_PHOTO, employee.getIdPhoto());
+        valueMap.put(ArchivesParameter.VISA_PHOTO, employee.getVisaPhoto());
+        valueMap.put(ArchivesParameter.LIFE_PHOTO, employee.getLifePhoto());
+        valueMap.put(ArchivesParameter.ENTRY_FORM, employee.getEntryForm());
+        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, employee.getGraduationCertificate());
+        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, employee.getDegreeCertificate());
+        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, employee.getContractCertificate());
         if (employee.getBirthday() != null)
             valueMap.put(ArchivesParameter.BIRTHDAY, String.valueOf(employee.getBirthday()));
         if (employee.getProcreative() != null)
@@ -1659,7 +1669,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void setArchivesNotification(ArchivesNotificationCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         ArchivesNotifications originNotify = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
         if (originNotify == null) {
             ArchivesNotifications newNotify = new ArchivesNotifications();
@@ -1786,10 +1796,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (date.equals(employee.getIdExpiryDate()))
                 idExpiry.append(employee.getContactName()).append("，");
             if (ArchivesUtil.getMonthAndDay(date).equals(employee.getCheckInTimeIndex())) {
+                Integer count = date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear();
+                if(count == 0)
+                    continue;
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
-                map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
+                map.put("year", count);
                 anniversary.append(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, ""));
             }
             if (ArchivesUtil.getMonthAndDay(date).equals(employee.getBirthdayIndex())) {
@@ -1857,6 +1870,18 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd){
+        Integer namespaceId = cmd.getNamespaceId();
+        ArchivesNotifications notification = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
+        if (notification == null) {
+            return new ArchivesNotificationDTO();
+        }
+        ArchivesNotificationDTO res = ConvertHelper.convert(notification, ArchivesNotificationDTO.class);
+        res.setTargets(JSON.parseArray(notification.getNotifyTarget(), ArchivesNotificationTarget.class));
+        return res;
+    }
+
+    @Override
     public void makeArchivesCheckInTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutCheckInTime();
@@ -1877,6 +1902,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void cleanRedundantArchivesDetails() {
         List<Long> detailIds = archivesProvider.listDismissalDetailIds();
+        if(detailIds.size() == 0)
+            detailIds = Collections.singletonList(0L);
         List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus(detailIds);
         if (details == null)
             return;
@@ -1885,6 +1912,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             OrganizationMember member = archivesProvider.findOrganizationMemberWithStatusByDetailId(detail.getId());
             if (member == null){
                 organizationProvider.deleteOrganizationMemberDetails(detail);
+                archivesProvider.deleteArchivesStickyContactsByDetailId(detail.getNamespaceId(), detail.getId());
                 LOGGER.info("the [" + i++ + "] times to make the delete the detail") ;
             }
         }

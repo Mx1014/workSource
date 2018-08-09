@@ -527,6 +527,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public PreOrderDTO payPrintOrderV2(PayPrintOrderCommandV2 cmd) {
 		//检查订单id是否存在，是否已经是  已支付状态
 		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+		if(order.getPayDto()!=null && order.getPayDto().length()>0){
+			PreOrderDTO preOrder = (PreOrderDTO)StringHelper.fromJsonString(order.getPayDto(), PreOrderDTO.class);
+			return preOrder;
+		}
 
 		//检查订单是否被锁定
 		//没有被锁定的订单，锁定他
@@ -606,8 +610,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				payMethodDTO.setPaymentParams(paymentParamsDTO);
 
 				return payMethodDTO;
-			}).collect(Collectors.toList()));//todo
+			}).collect(Collectors.toList()));
 		}
+		order.setPayDto(StringHelper.toJsonString(preDto));
+		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 		return preDto;
 	}
 

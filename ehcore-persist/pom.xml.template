@@ -58,7 +58,7 @@
             <scope>compile</scope>  
         </dependency>
         
-        <!-- ÉîÛÚÍåÎïÒµ½É·Ñ¶Ô½ÓËùÐèÒÀÀµ£ºaxis 1.4 jar start -->
+        <!-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½É·Ñ¶Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½axis 1.4 jar start -->
         <dependency>
             <groupId>org.apache.axis</groupId>
             <artifactId>axis</artifactId>
@@ -90,7 +90,7 @@
             <artifactId>wsdl4j</artifactId>
             <version>1.4</version>
         </dependency>
-        <!-- ÉîÛÚÍåÎïÒµ½É·Ñ¶Ô½ÓËùÐèÒÀÀµ£ºaxis 1.4 jar end -->
+        <!-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½É·Ñ¶Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½axis 1.4 jar end -->
     </dependencies>
 
     <build>
@@ -124,7 +124,20 @@
 	                         </configuration>
 	                     </execution>
 	                 </executions>
-	            </plugin>            
+	            </plugin>
+	            <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 	        </plugins>
     </build>
     

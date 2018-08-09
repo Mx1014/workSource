@@ -1,3 +1,12 @@
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_dto` text COMMENT '支付系统返回预付单信息';
+
+
+
+
+
+
+
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
@@ -60,9 +69,4 @@ CREATE TABLE `eh_visitor_sys_message_receivers` (
 ALTER TABLE eh_visitor_sys_visitors ADD COLUMN source TINYINT DEFAULT '0' COMMENT '访客来源，0:内部录入 1:外部对接';
 ALTER TABLE eh_visitor_sys_visitors ADD COLUMN notify_third_success_flag TINYINT DEFAULT '0' COMMENT '访客来源为外部对接，0：未回调到第三方 1：回调失败 2:回调成功';
 -- end
--- 通用脚本
--- AUTHOR: dengs
--- REMARK: issue-34945 添加字段存储支付信息 add by dengs, 20180808
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_dto` text COMMENT '支付系统返回预付单信息';
-
 -- --------------------- SECTION END ---------------------------------------------------------

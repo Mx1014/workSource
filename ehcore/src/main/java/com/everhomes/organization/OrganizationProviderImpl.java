@@ -2994,6 +2994,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ea;
     }
 
+    @Override
+    public List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
+            List<Long> organizationIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+        query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.in(organizationIds));
+        query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.ne(OrganizationAddressStatus.INACTIVE.getCode()));
+        List<OrganizationAddress> list = query.fetch().map(r -> ConvertHelper.convert(r, OrganizationAddress.class));
+
+        return list;
+    }
+
 
     @Override
     public void deleteOrganizationAddress(OrganizationAddress address) {
@@ -5391,7 +5403,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
 
         if (null != locator && null != locator.getAnchor())
-            condition = condition.and(t1.field("detail_id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("detail_id").le(locator.getAnchor()));
 
         Organization org = findOrganizationById(listCommand.getOrganizationId());
 
@@ -5479,8 +5491,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(null);
 
         if (result.size() >= pageSize) {
-            result.remove(result.size() - 1);
             locator.setAnchor(result.get(result.size() - 1).getDetailId());
+            result.remove(result.size() - 1);
         }
         return result;
     }

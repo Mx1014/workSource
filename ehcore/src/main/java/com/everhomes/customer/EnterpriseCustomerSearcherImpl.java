@@ -224,14 +224,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         } else {
             qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
-                    .field("contactName")
-                    .field("contactAddress")
-                    .field("contactMobile")
-                    .field("trackingName");
+                    .field("contactName",5.0f)
+                    .field("contactAddress",4.0f)
+                    .field("contactPhone",3.0f)
+                    .field("trackingName",4.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile")
+            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactPhone")
             		.addHighlightedField("trackingName");
         }
 

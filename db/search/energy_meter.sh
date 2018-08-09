@@ -28,13 +28,15 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeter" -d '
             "type" : "long"
           },
           "meterNumber" : {
-            "type" : "string"
+            "type" : "string",
+            "index":"not_analyzed"
           },
           "meterType" : {
             "type" : "long"
           },
           "name" : {
-            "type" : "string"
+            "type" : "string",
+            "index":"not_analyzed"
           },
           "operatorName" : {
             "type" : "string"
