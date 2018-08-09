@@ -534,7 +534,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 						scopeId = communityId;
 					}
 
-					List<RecommendApp> recommendApps = recommendAppProvider.listRecommendApps(scopeType, scopeId);
+					List<RecommendApp> recommendApps = recommendAppProvider.listRecommendApps(scopeType, scopeId, null);
 					//有推荐的应用
 					if (recommendApps != null && recommendApps.size() != 0) {
 						for (RecommendApp recommendApp : recommendApps) {
@@ -792,7 +792,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 
 			//首页推荐的应用
-			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId());
+			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId(), null);
 
 		}else {
 
@@ -841,7 +841,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 
 			//首页推荐的应用
-			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.ORGANIZATION.getCode(), cmd.getOrganizationId());
+			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.ORGANIZATION.getCode(), cmd.getOrganizationId(), null);
 
 		}
 
