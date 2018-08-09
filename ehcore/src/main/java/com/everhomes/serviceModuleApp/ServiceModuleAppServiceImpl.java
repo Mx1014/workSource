@@ -35,10 +35,7 @@ import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
-import com.everhomes.rest.module.RouterInfo;
-import com.everhomes.rest.module.ServiceModuleAppType;
-import com.everhomes.rest.module.ServiceModuleLocationType;
-import com.everhomes.rest.module.ServiceModuleSceneType;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -759,10 +756,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Override
 	public ListAppCommunityConfigsResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
+
+		ListAppCommunityConfigsResponse response = new ListAppCommunityConfigsResponse();
+
 		Community community = null;
 		if(cmd.getCommunityId() != null){
 			community = communityProvider.findCommunityById(cmd.getCommunityId());
 		}
+
+		List<RecommendApp>  recommendApps = new ArrayList<>();
 
 		List<AppCommunityConfigDTO>  dtos = new ArrayList<>();
 		if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
@@ -785,6 +787,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 				}
 			}
+
+			//首页推荐的应用
+			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId());
 
 		}else {
 
@@ -832,10 +837,62 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			}
 
+			//首页推荐的应用
+			recommendApps = recommendAppProvider.listRecommendApps(ScopeType.ORGANIZATION.getCode(), cmd.getOrganizationId());
+
 		}
 
-		ListAppCommunityConfigsResponse response = new ListAppCommunityConfigsResponse();
-		//response.setDtos(dtos);
+		if(dtos == null){
+			return response;
+		}
+
+
+		List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), 0L);
+
+		if(appCategories == null){
+			return response;
+		}
+
+		List<AppCategoryDTO> appCategoryDtos = new ArrayList<>();
+
+		for (AppCategory appCategory: appCategories) {
+
+			AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+
+			List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(null, appCategory.getId(), TerminalType.MOBILE.getCode(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode());
+
+			List<AppCommunityConfigDTO> tempConfigDtos = new ArrayList<>();
+			if(serviceModuleEntries != null && serviceModuleEntries.size() > 0){
+				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
+					for (ServiceModuleEntry entry: serviceModuleEntries){
+						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
+							tempConfigDtos.add(appCommunityConfigDto);
+						}
+					}
+				}
+				dto.setAppCommunityConfigDtos(tempConfigDtos);
+			}
+
+			appCategoryDtos.add(dto);
+		}
+
+
+		List<AppCommunityConfigDTO>  recommendDtos = new ArrayList<>();
+		//首页推荐的应用
+		if(recommendApps != null){
+			for (RecommendApp recommendApp: recommendApps){
+				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
+					if(recommendApp.getAppId().equals(appCommunityConfigDto.getAppOriginId())){
+						recommendDtos.add(appCommunityConfigDto);
+					}
+				}
+			}
+		}
+
+
+		response.setRecommendAppsDtos(recommendDtos);
+
+		response.setAppCategoryDtos(appCategoryDtos);
 		return response;
 	}
 
@@ -848,6 +905,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}
 
 		dto.setServiceModuleAppName(serviceModuleApp.getName());
+		dto.setModuleId(serviceModuleApp.getModuleId());
 
 		ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(dto.getAppOriginId());
 

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>serviceModuleAppName: 所属应用名称</li>
  *     <li>iconUrl: 所属应用icon</li>
  *     <li>appNo: 应用详情profile编号</li>
+ *     <li>moduleId: moduleId</li>
  * </ul>
  */
 public class AppCommunityConfigDTO {
@@ -25,6 +26,7 @@ public class AppCommunityConfigDTO {
 	private String serviceModuleAppName;
 	private String iconUrl;
 	private String appNo;
+	private Long moduleId;
 
 	public Long getId() {
 		return id;
@@ -96,6 +98,14 @@ public class AppCommunityConfigDTO {
 
 	public void setAppNo(String appNo) {
 		this.appNo = appNo;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

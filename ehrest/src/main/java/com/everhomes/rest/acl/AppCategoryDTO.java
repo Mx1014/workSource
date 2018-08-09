@@ -41,7 +41,7 @@ public class AppCategoryDTO {
 
 	private List<AppDTO> appDtos;
 
-	List<AppCommunityConfigDTO> appCommunityConfigDtos;
+	private List<AppCommunityConfigDTO> appCommunityConfigDtos;
 
 	public Long getId() {
 		return id;
