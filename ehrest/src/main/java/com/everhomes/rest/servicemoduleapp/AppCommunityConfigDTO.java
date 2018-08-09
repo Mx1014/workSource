@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *     <li>iconUrl: 所属应用icon</li>
  *     <li>appNo: 应用详情profile编号</li>
  *     <li>moduleId: moduleId</li>
+ *     <li>recommendFlag: 是否推荐</li>
  * </ul>
  */
 public class AppCommunityConfigDTO {
@@ -27,6 +28,7 @@ public class AppCommunityConfigDTO {
 	private String iconUrl;
 	private String appNo;
 	private Long moduleId;
+	private Byte recommendFlag;
 
 	public Long getId() {
 		return id;
@@ -106,6 +108,14 @@ public class AppCommunityConfigDTO {
 
 	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	public Byte getRecommendFlag() {
+		return recommendFlag;
+	}
+
+	public void setRecommendFlag(Byte recommendFlag) {
+		this.recommendFlag = recommendFlag;
 	}
 
 	@Override

@@ -887,6 +887,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					if(recommendApp.getAppId().equals(appCommunityConfigDto.getAppOriginId())){
 						recommendDtos.add(appCommunityConfigDto);
+						appCommunityConfigDto.setRecommendFlag(TrueOrFalseFlag.TRUE.getCode());
 					}
 				}
 			}
