@@ -9010,6 +9010,16 @@ public class PunchServiceImpl implements PunchService {
                 pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
                 PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
                 if (null != punchLog) {
+                	//2018年8月9日 对5.8.0之前版本的签到签退做特殊处理 -- 修改为非工作日
+                	if(UserContext.current() != null && UserContext.current().getVersion() != null){
+	                    Version appVersion = Version.fromVersionString(UserContext.current().getVersion()); 
+	                	if((punchLog.getPunchType().equals(PunchType.OVERTIME_ON_DUTY.getCode()) ||
+	                			punchLog.getPunchType().equals(PunchType.OVERTIME_OFF_DUTY.getCode())) && 
+	                			(Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) < 
+	                					Version.encodeValue(5,8,0))){
+	                		punchLog.setPunchType(PunchType.NOT_WORKDAY.getCode());
+	                	}
+                	}
                     if (null != punchLog.getExpiryTime()) {
                         punchLog.setExpiryTime(process24hourTimeToGMTTime(pDate, punchLog.getExpiryTime()));
                     }
