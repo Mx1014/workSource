@@ -4932,6 +4932,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
+		//给出按半天预约的 区间信息
+		if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) || cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+			List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
+					RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
+			setDefaultTimeIntervalName(halfTimeIntervals);
+			response.setHalfDayTimeIntervals(halfTimeIntervals.stream().map(r->ConvertHelper.convert(r,TimeIntervalDTO.class)).collect(Collectors.toList()));
+		}
 		//每日开放时间
 		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
@@ -5093,12 +5100,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) || cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 			List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
 					RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
-			if (halfTimeIntervals.get(0).getName() == null)
-				halfTimeIntervals.get(0).setName("上午");
-			if (halfTimeIntervals.size()>1 && halfTimeIntervals.get(1).getName() == null)
-				halfTimeIntervals.get(1).setName("下午");
-			if (halfTimeIntervals.size()>2 && halfTimeIntervals.get(2).getName() == null)
-				halfTimeIntervals.get(2).setName("晚上");
+			setDefaultTimeIntervalName(halfTimeIntervals);
 			response.setHalfDayTimeIntervals(halfTimeIntervals.stream().map(r->ConvertHelper.convert(r,TimeIntervalDTO.class)).collect(Collectors.toList()));
 		}
 		//每日开放时间
@@ -6003,6 +6005,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 
 		}
+		//给出按半天预约的 区间信息
+		if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) || cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+			List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
+					RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
+			setDefaultTimeIntervalName(halfTimeIntervals);
+			response.setHalfDayTimeIntervals(halfTimeIntervals.stream().map(r->ConvertHelper.convert(r,TimeIntervalDTO.class)).collect(Collectors.toList()));
+		}
 		//每日开放时间
 		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
@@ -6512,16 +6521,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) || cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 			List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
 					RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
-			if (halfTimeIntervals.get(0).getName() == null)
-				halfTimeIntervals.get(0).setName("上午");
-			if (halfTimeIntervals.size()>1 && halfTimeIntervals.get(1).getName() == null)
-				halfTimeIntervals.get(1).setName("下午");
-			if (halfTimeIntervals.size()>2 && halfTimeIntervals.get(2).getName() == null)
-				halfTimeIntervals.get(2).setName("晚上");
+			setDefaultTimeIntervalName(halfTimeIntervals);
 			response.setHalfDayTimeIntervals(halfTimeIntervals.stream().map(r->ConvertHelper.convert(r,TimeIntervalDTO.class)).collect(Collectors.toList()));
 		}
 		cellList.get().clear();
 		return response;
+	}
+
+	private void setDefaultTimeIntervalName(List<RentalTimeInterval> halfTimeIntervals){
+		if (halfTimeIntervals == null || halfTimeIntervals.size() == 0)
+			return;
+		if (halfTimeIntervals.get(0).getName() == null)
+			halfTimeIntervals.get(0).setName("上午");
+		if (halfTimeIntervals.size()>1 && halfTimeIntervals.get(1).getName() == null)
+			halfTimeIntervals.get(1).setName("下午");
+		if (halfTimeIntervals.size()>2 && halfTimeIntervals.get(2).getName() == null)
+			halfTimeIntervals.get(2).setName("晚上");
 	}
 
 	private void calculateAvailableCount(RentalSiteRulesDTO dto, RentalResource rs, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
