@@ -58,4 +58,6 @@ public interface ServiceModuleAppService {
     ListAllLaunchPadAppsResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd);
 
 	void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd);
+
+	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
 }

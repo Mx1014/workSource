@@ -16,7 +16,7 @@ public interface UserAppProvider {
 
 	void delete(Long id);
 
-	void delete(List<Long> id);
+	void delete(List<Long> ids);
 
 	void deleteByUserId(Long userId, Byte locationType, Long locationTargetId);
 }

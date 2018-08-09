@@ -91,4 +91,12 @@ public class UserAppProviderImpl implements UserAppProvider {
 		query.addConditions(Tables.EH_USER_APPS.LOCATION_TARGET_ID.eq(locationTargetId));
 		query.execute();
 	}
+
+
+	@Override
+	public void delete(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserApps.class));
+		EhUserAppsDao dao = new EhUserAppsDao(context.configuration());
+		dao.deleteById(ids);
+	}
 }

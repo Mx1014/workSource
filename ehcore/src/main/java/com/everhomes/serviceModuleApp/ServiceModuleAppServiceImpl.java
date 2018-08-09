@@ -30,6 +30,7 @@ import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.rest.launchpadbase.*;
@@ -128,6 +129,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private UserAppProvider userAppProvider;
+
+
+	@Autowired
+	private RecommendAppProvider recommendAppProvider;
+
 
     @Autowired
     private DbProvider dbProvider;
@@ -506,29 +512,46 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}else if(userAppFlag){
 
             List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, null);
-            if(tempApps != null && tempApps.size() > 0){
-                List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
-                //有用户自定义应用
-                if(userApps != null && userApps.size() != 0){
-                    for (UserApp userApp: userApps){
-                        for (ServiceModuleApp app: apps){
-                            if(userApp.getAppId().equals(app.getId())){
-                                apps.add(app);
-                            }
-                        }
-                    }
-                }else {
-                    //List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+            if(tempApps != null && tempApps.size() > 0) {
+				List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+				//有用户自定义应用
+				if (userApps != null && userApps.size() != 0) {
+					for (UserApp userApp : userApps) {
+						for (ServiceModuleApp app : tempApps) {
+							if (userApp.getAppId().equals(app.getOriginId())) {
+								apps.add(app);
+							}
+						}
+					}
+				} else {
+					//List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+
+					Byte scopeType = ScopeType.ORGANIZATION.getCode();
+					Long scopeId = orgId;
+
+					Community community = communityProvider.findCommunityById(communityId);
+
+					//园区自定义配置的
+					if (community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1) {
+						scopeType = ScopeType.COMMUNITY.getCode();
+						scopeId = communityId;
+					}
+
+					List<RecommendApp> recommendApps = recommendAppProvider.listRecommendApps(scopeType, scopeId);
+					//有推荐的应用
+					if (recommendApps != null && recommendApps.size() != 0) {
+						for (RecommendApp recommendApp : recommendApps) {
+							for (ServiceModuleApp app : tempApps) {
+								if (recommendApp.getAppId().equals(app.getOriginId())) {
+									apps.add(app);
+								}
+							}
+						}
 
 
-
-                }
-            }
-
-
-
-
-
+					}
+				}
+			}
 		}
 
 		if(apps != null && apps.size() > 0){
@@ -1033,5 +1056,36 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             return null;
         });
 
+	}
+
+
+	@Override
+	public void updateRecommendApps(UpdateRecommendAppsCommand cmd) {
+
+		if(ScopeType.fromCode(cmd.getScopeType()) == null || cmd.getScopeId() == null || cmd.getAppIds() == null || cmd.getAppIds().size() == 0){
+			LOGGER.error("invalid parameter, cmd = {}.", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+
+		}
+
+		dbProvider.execute(status -> {
+
+			recommendAppProvider.deleteByScope(cmd.getScopeType(), cmd.getScopeId());
+
+			Integer order = 1;
+
+			for (Long appId: cmd.getAppIds()){
+
+				RecommendApp recommendApp = new RecommendApp();
+				recommendApp.setAppId(appId);
+				recommendApp.setScopeType(cmd.getScopeType());
+				recommendApp.setScopeId(cmd.getScopeId());
+				recommendApp.setOrder(order);
+				order = order + 1;
+				recommendAppProvider.createRecommendApp(recommendApp);
+			}
+
+			return null;
+		});
 	}
 }
