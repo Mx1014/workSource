@@ -393,7 +393,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     FlowServiceErrorCode.ERROR_SUB_FLOW_INVALID, "could not found sub flow service association flow");
         }
 
-        Flow snapshot = flowProvider.getSnapshotFlowWithoutStatus(mapping.getFlowMainId());
+        Flow snapshot = flowProvider.getSnapshotFlowById(mapping.getFlowMainId());
         if (snapshot == null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
                     FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot flow not exist");
