@@ -19,4 +19,6 @@ public interface RecommendAppProvider {
 	void delete(List<Long> ids);
 
 	void deleteByScope(Byte scopeType, Long scopeId);
+
+	Integer findMaxOrder(Byte scopeType, Long scopeId);
 }

@@ -13,9 +13,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserApps;
 import com.everhomes.server.schema.tables.records.EhRecommendAppsRecord;
 import com.everhomes.server.schema.tables.records.EhUserAppsRecord;
 import com.everhomes.util.ConvertHelper;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -95,5 +93,17 @@ public class RecommendAppProviderImpl implements RecommendAppProvider {
 		query.addConditions(Tables.EH_RECOMMEND_APPS.SCOPE_TYPE.eq(scopeType));
 		query.addConditions(Tables.EH_RECOMMEND_APPS.SCOPE_ID.eq(scopeId));
 		query.execute();
+	}
+
+	@Override
+	public Integer findMaxOrder(Byte scopeType, Long scopeId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhRecommendApps.class));
+		Integer maxId = context.select(Tables.EH_RECOMMEND_APPS.ORDER.max())
+				.from(Tables.EH_RECOMMEND_APPS)
+				.where(Tables.EH_RECOMMEND_APPS.SCOPE_TYPE.eq(scopeType)
+						.and(Tables.EH_RECOMMEND_APPS.SCOPE_ID.eq(scopeId)))
+				.fetchOne().value1();
+
+		return maxId;
 	}
 }

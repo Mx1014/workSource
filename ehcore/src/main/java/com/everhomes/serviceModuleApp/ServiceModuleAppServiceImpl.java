@@ -935,12 +935,31 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				config.setDisplayName(cmd.getDisplayName());
 				config.setVisibilityFlag(cmd.getVisibilityFlag());
 				appCommunityConfigProvider.createAppCommunityConfig(config);
+
+				if(TrueOrFalseFlag.fromCode(cmd.getRecommendFlag()) == TrueOrFalseFlag.TRUE){
+					RecommendApp recommendApp = new RecommendApp();
+					recommendApp.setScopeType(ScopeType.COMMUNITY.getCode());
+					recommendApp.setScopeId(cmd.getCommunityId());
+					recommendApp.setAppId(cmd.getAppOriginId());
+					Integer maxOrder = recommendAppProvider.findMaxOrder(ScopeType.COMMUNITY.getCode(), cmd.getCommunityId());
+					if(maxOrder == null){
+						recommendApp.setOrder(1);
+					}else {
+						recommendApp.setOrder(maxOrder + 1);
+					}
+					recommendAppProvider.createRecommendApp(recommendApp);
+				}
+
 			}else {
+
+				if(TrueOrFalseFlag.fromCode(cmd.getRecommendFlag()) )
+
 				config.setDisplayName(cmd.getDisplayName());
 				config.setVisibilityFlag(cmd.getVisibilityFlag());
 				config.setOperatorUid(UserContext.currentUserId());
 				config.setOperatorTime(new Timestamp(System.currentTimeMillis()));
 				appCommunityConfigProvider.updateAppCommunityConfig(config);
+
 			}
 
 		}else {
@@ -951,6 +970,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}
 
 	}
+
+
+	private void changeRecommendApp(Byte scopeType, Long scopeId, Long appId, Byte recommendFlag){
+
+	}
+
 
 	/**
 	 *

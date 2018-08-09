@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>appOriginId: appOriginId</li>
  *     <li>visibilityFlag: 是否可见{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>displayName: 显示名称</li>
+ *     <li>recommendFlag: 是否推荐{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class UpdateAppCommunityConfigCommand {
@@ -17,6 +18,7 @@ public class UpdateAppCommunityConfigCommand {
 	private Long appOriginId;
 	private Byte visibilityFlag;
 	private String displayName;
+	private Byte recommendFlag;
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -56,6 +58,14 @@ public class UpdateAppCommunityConfigCommand {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public Byte getRecommendFlag() {
+		return recommendFlag;
+	}
+
+	public void setRecommendFlag(Byte recommendFlag) {
+		this.recommendFlag = recommendFlag;
 	}
 
 	@Override
