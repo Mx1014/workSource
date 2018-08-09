@@ -9,6 +9,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.community_form.CommunityGeneralFormDTO;
 import com.everhomes.rest.community_form.CreateOrUpdateCommunityFormCommand;
 import com.everhomes.rest.community_form.DeleteCommunityFormCommand;
+import com.everhomes.rest.community_form.ListCommunityFormCommand;
+import com.everhomes.rest.community_form.ListCommunityFormResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,22 @@ public class CommunityFormController extends ControllerBase {
         this.communityFormService.deleteCommunityGeneralForm(cmd);
 
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /communityForm/listCommunityForm</b>
+     * <p>项目和表单的关系列表</p>
+     */
+    @RequestMapping("listCommunityForm")
+    @RestReturn(value=ListCommunityFormResponse.class)
+    public RestResponse listCommunityForm(@Valid ListCommunityFormCommand cmd) {
+
+        ListCommunityFormResponse result = this.communityFormService.listCommunityForm(cmd);
+
+        RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
