@@ -1947,4 +1947,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 					.fetchInto(Building.class);
 	}
 
+	@Override
+	public List<Building> findBuildingsByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		return context.select()
+					.from(Tables.EH_BUILDINGS)
+					.where(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
+					.fetchInto(Building.class);
+	}
+
 }

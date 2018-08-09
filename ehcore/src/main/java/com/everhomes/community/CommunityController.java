@@ -527,6 +527,22 @@ public class CommunityController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /community/getFloorRange</b>
+     * <p>获取楼层查询范围</p>
+     */
+    @RequestMapping("getFloorRange")
+    @RestReturn(value=FloorRangeDTO.class)
+    public RestResponse getFloorRange(GetFloorRangeCommand cmd) {
+    	FloorRangeDTO result = this.communityService.getFloorRange(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    
+    /**
      * <b>URL: /community/caculateCommunityArea</b>
      * <p>计算园区各个面积</p>
      */

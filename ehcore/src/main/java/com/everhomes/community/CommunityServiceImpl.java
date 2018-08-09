@@ -94,6 +94,7 @@ import com.everhomes.rest.community.CreateChildProjectCommand;
 import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.community.DeleteChildProjectCommand;
+import com.everhomes.rest.community.FloorRangeDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetBuildingStatisticsCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
@@ -103,6 +104,7 @@ import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.community.GetCommunityByUuidCommand;
 import com.everhomes.rest.community.GetCommunityDetailCommand;
 import com.everhomes.rest.community.GetCommunityStatisticsCommand;
+import com.everhomes.rest.community.GetFloorRangeCommand;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
@@ -5116,6 +5118,9 @@ public class CommunityServiceImpl implements CommunityService {
 		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
 		result.setTotalChargeArea(doubleRoundHalfUp(result.getTotalChargeArea(),2));
 		result.setTotalRent(doubleRoundHalfUp(result.getTotalRent(),2));
+		if (result.getTotalRentArea()!=null && result.getTotalRentArea().doubleValue() > 0) {
+			result.setTotalAreaAveragePrice(doubleRoundHalfUp(result.getTotalRent()/result.getTotalRentArea(),2));
+		}
 		
 		return result;
 	}
@@ -5160,6 +5165,31 @@ public class CommunityServiceImpl implements CommunityService {
 	private double doubleRoundHalfUp(double input,int scale){
 		BigDecimal digit = new BigDecimal(input); 
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+	
+	@Override
+	public FloorRangeDTO getFloorRange(GetFloorRangeCommand cmd) {
+		FloorRangeDTO dto = new FloorRangeDTO();
+		List<Building> buildings = new ArrayList<>();
+		
+		if (cmd.getCommunityId()!=null) {
+			buildings = communityProvider.findBuildingsByCommunityId(cmd.getCommunityId());
+		}else if (cmd.getNamespaceId()!=null) {
+			buildings = communityProvider.findBuildingsByNamespaceId(cmd.getNamespaceId());
+		}
+		
+		int maxFloor = 0;
+		for (Building building : buildings) {
+			if (building.getFloorNumber() == null) {
+				continue;
+			}
+			if (building.getFloorNumber().intValue() > maxFloor) {
+				maxFloor = building.getFloorNumber().intValue();
+			}
+		}
+		dto.setMaxFloor(maxFloor);
+		
+		return dto;
 	}
 }
 

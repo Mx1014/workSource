@@ -154,6 +154,7 @@ public interface CommunityProvider {
 			CrossShardListingLocator locator, int pageSize);
 	Integer countRelatedContractNumberInCommunity(Long communityId);
 	List<Community> findCommunitiesByNamespaceId(Integer nameSpaceId);
-	List<Building> findBuildingsByCommunityId(Long id);
+	List<Building> findBuildingsByCommunityId(Long communityId);
+	List<Building> findBuildingsByNamespaceId(Integer namespaceId);
 	
 }

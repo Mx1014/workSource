@@ -162,4 +162,6 @@ public interface CommunityService {
 
 	ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
 
+	FloorRangeDTO getFloorRange(GetFloorRangeCommand cmd);
+
 }
