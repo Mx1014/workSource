@@ -21,8 +21,10 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -3400,114 +3402,124 @@ public class AssetProviderImpl implements AssetProvider {
         
         //判断一下是否该物业缴费模块是否配置了走合同变更的开关
         if(isContractChangeFlag(namespaceId, ServiceModuleConstants.ASSET_MODULE, categoryId)) {
-        	//若开关关闭，则税率修改后，系统自动按照修改后的税率更新未出账单及未出账单对应的合同费用清单
-        	Set<Long> billIds = new HashSet<>();
-        	EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
-        	//获取所有未出账单的id、以及合同那边的费用清单列表
-        	getReadOnlyContext().select(bill.ID)
-	            .from(bill)
-	            .where(bill.NAMESPACE_ID.eq(namespaceId))
-	            .and(bill.CATEGORY_ID.eq(categoryId))
-	            .and(bill.OWNER_ID.eq(communityId))
-	            .and(bill.SWITCH.eq((byte) 0).or(bill.SWITCH.eq((byte) 3))) //未出账单 or 合同那边的草稿合同费用清单
-	            .fetch()
-	            .forEach(r -> {
-	            	billIds.add(r.getValue(bill.ID));
-            });
-        	//根据设置的税率重新计算费项
-        	EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
-            getReadOnlyContext().select(billItems.ID,billItems.BILL_ID,billItems.AMOUNT_RECEIVABLE,t.TAX_RATE)
-                    .from(billItems)
-                    .leftOuterJoin(t)
-                    .on(billItems.CHARGING_ITEMS_ID.eq(t.CHARGING_ITEM_ID))
-                    .where(billItems.NAMESPACE_ID.eq(namespaceId))
-                    .and(billItems.CATEGORY_ID.eq(categoryId))
-                    .and(billItems.OWNER_ID.eq(communityId))
-                    .and(t.NAMESPACE_ID.eq(namespaceId))
-                    .and(t.CATEGORY_ID.eq(categoryId))
-                    .and(t.OWNER_ID.eq(communityId))
-                    .and(billItems.BILL_ID.in(billIds))
-                    .fetch()
-                    .forEach(r -> {
-                    	//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
-                    	final BigDecimal[] amountReceivable = {new BigDecimal("0")};
-        		        final BigDecimal[] amountReceivableWithoutTax = {new BigDecimal("0")};
-        		        final BigDecimal[] amountReceived = {new BigDecimal("0")};
-        		        final BigDecimal[] amountReceivedWithoutTax = {new BigDecimal("0")};
-        		        //final BigDecimal[] amountOwed = {new BigDecimal("0")};
-        		        //final BigDecimal[] amountOwedWithoutTax = {new BigDecimal("0")};
-        		        final BigDecimal[] taxAmount = {new BigDecimal("0")};
-        		        final BigDecimal[] taxRate = {new BigDecimal("0")};
-        		        taxRate[0] = r.getValue(t.TAX_RATE);
-            			if(taxRate[0] != null) {
-            				Long billItemId = r.getValue(billItems.ID);
-            				amountReceivable[0] = r.getValue(billItems.AMOUNT_RECEIVABLE);
-            				BigDecimal taxRateDiv = taxRate[0].divide(new BigDecimal(100));
-                			amountReceivableWithoutTax[0] = amountReceivable[0].divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
-                			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
-                			taxAmount[0] = amountReceivable[0].subtract(amountReceivableWithoutTax[0]);
-                			this.dbProvider.execute((TransactionStatus status) -> {
-                	            context.update(billItems)
-                	            		.set(billItems.AMOUNT_RECEIVABLE, amountReceivable[0])
-                	            		.set(billItems.AMOUNT_RECEIVABLE_WITHOUT_TAX, amountReceivableWithoutTax[0])
-                	            		.set(billItems.TAX_AMOUNT, taxAmount[0])
-                	            		.set(billItems.TAX_RATE, taxRate[0])
-                	            		.set(billItems.AMOUNT_RECEIVED, amountReceived[0])
-                	            		.set(billItems.AMOUNT_RECEIVED_WITHOUT_TAX, amountReceivedWithoutTax[0])
-                	            		.set(billItems.AMOUNT_OWED, amountReceivable[0])
-                	            		.set(billItems.AMOUNT_OWED_WITHOUT_TAX, amountReceivableWithoutTax[0])
-                	                    .where(billItems.NAMESPACE_ID.eq(namespaceId))
-                	                    .and(billItems.OWNER_ID.eq(communityId))
-                	                    .and(billItems.CATEGORY_ID.eq(categoryId))
-                	                    .and(billItems.ID.eq(billItemId))
-                	                    .execute();
-                	            return null;
-                	        });
-            			}
-                    });
-        	//重新计算账单
-            for (Long billId : billIds) {
-            	reCalBillById(billId);
-            }
-            //修改税率之后，合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）
-            //第一步：首先修改“缴费”模块的计价条款变量值 eh_default_charging_items
-            getReadOnlyContext().select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID,Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID,
-            		Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES,t.TAX_RATE)
-	            .from(Tables.EH_DEFAULT_CHARGING_ITEMS)
-	            .leftOuterJoin(t)
-	            .on(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID.eq(t.CHARGING_ITEM_ID))
-	            .where(Tables.EH_DEFAULT_CHARGING_ITEMS.NAMESPACE_ID.eq(namespaceId))
-	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.COMMUNITY_ID.eq(communityId))
-	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-	            .and(t.NAMESPACE_ID.eq(namespaceId))
-	            .and(t.CATEGORY_ID.eq(categoryId))
-	            .and(t.OWNER_ID.eq(communityId))
-	            .fetch()
-	            .forEach(r -> {
-	            	Long id = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.ID);
-	        		String chargingVariables = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES);
-	        		BigDecimal taxRate = r.getValue(t.TAX_RATE);
-	        		updateChargingVariables(id, chargingVariables, taxRate, "EH_DEFAULT_CHARGING_ITEMS");
-	            });
-            
-            //第二步：修改合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）eh_contract_charging_items
-            EhContractChargingItems t2 = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t2");
-            EhContracts t3 = Tables.EH_CONTRACTS.as("t3");
-            SelectQuery<Record> query = context.selectQuery();
-            query.addSelect(t2.ID,t2.CHARGING_ITEM_ID,t2.CHARGING_VARIABLES,t.TAX_RATE);
-            query.addFrom(t2);
-            query.addJoin(t3, t3.ID.eq(t2.CONTRACT_ID));
-            query.addJoin(t, t.CHARGING_ITEM_ID.eq(t2.CHARGING_ITEM_ID));
-            query.addConditions(t3.NAMESPACE_ID.eq(namespaceId));
-            query.addConditions(t3.COMMUNITY_ID.eq(communityId));
-            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-            query.addConditions(t.CATEGORY_ID.eq(categoryId));
-            query.addConditions(t.OWNER_ID.eq(communityId));
-            query.fetch().forEach(r -> {
-            	Long id = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.ID);
-        		String chargingVariables = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_VARIABLES);
-        		BigDecimal taxRate = r.getValue(t.TAX_RATE);
-        		updateChargingVariables(id, chargingVariables, taxRate, "EH_CONTRACT_CHARGING_ITEMS");
+        	DbProvider dbProvider = this.dbProvider;
+        	ExecutorUtil.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                    	//若开关关闭，则税率修改后，系统自动按照修改后的税率更新未出账单及未出账单对应的合同费用清单
+                    	Set<Long> billIds = new HashSet<>();
+                    	EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+                    	//获取所有未出账单的id、以及合同那边的费用清单列表
+                    	getReadOnlyContext().select(bill.ID)
+            	            .from(bill)
+            	            .where(bill.NAMESPACE_ID.eq(namespaceId))
+            	            .and(bill.CATEGORY_ID.eq(categoryId))
+            	            .and(bill.OWNER_ID.eq(communityId))
+            	            .and(bill.SWITCH.eq((byte) 0).or(bill.SWITCH.eq((byte) 3))) //未出账单 or 合同那边的草稿合同费用清单
+            	            .fetch()
+            	            .forEach(r -> {
+            	            	billIds.add(r.getValue(bill.ID));
+                        });
+                    	//根据设置的税率重新计算费项
+                    	EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+                        getReadOnlyContext().select(billItems.ID,billItems.BILL_ID,billItems.AMOUNT_RECEIVABLE,t.TAX_RATE)
+                                .from(billItems)
+                                .leftOuterJoin(t)
+                                .on(billItems.CHARGING_ITEMS_ID.eq(t.CHARGING_ITEM_ID))
+                                .where(billItems.NAMESPACE_ID.eq(namespaceId))
+                                .and(billItems.CATEGORY_ID.eq(categoryId))
+                                .and(billItems.OWNER_ID.eq(communityId))
+                                .and(t.NAMESPACE_ID.eq(namespaceId))
+                                .and(t.CATEGORY_ID.eq(categoryId))
+                                .and(t.OWNER_ID.eq(communityId))
+                                .and(billItems.BILL_ID.in(billIds))
+                                .fetch()
+                                .forEach(r -> {
+                                	//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
+                                	final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+                    		        final BigDecimal[] amountReceivableWithoutTax = {new BigDecimal("0")};
+                    		        final BigDecimal[] amountReceived = {new BigDecimal("0")};
+                    		        final BigDecimal[] amountReceivedWithoutTax = {new BigDecimal("0")};
+                    		        //final BigDecimal[] amountOwed = {new BigDecimal("0")};
+                    		        //final BigDecimal[] amountOwedWithoutTax = {new BigDecimal("0")};
+                    		        final BigDecimal[] taxAmount = {new BigDecimal("0")};
+                    		        final BigDecimal[] taxRate = {new BigDecimal("0")};
+                    		        taxRate[0] = r.getValue(t.TAX_RATE);
+                        			if(taxRate[0] != null) {
+                        				Long billItemId = r.getValue(billItems.ID);
+                        				amountReceivable[0] = r.getValue(billItems.AMOUNT_RECEIVABLE);
+                        				BigDecimal taxRateDiv = taxRate[0].divide(new BigDecimal(100));
+                            			amountReceivableWithoutTax[0] = amountReceivable[0].divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+                            			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+                            			taxAmount[0] = amountReceivable[0].subtract(amountReceivableWithoutTax[0]);
+                            			dbProvider.execute((TransactionStatus status) -> {
+                            	            context.update(billItems)
+                            	            		.set(billItems.AMOUNT_RECEIVABLE, amountReceivable[0])
+                            	            		.set(billItems.AMOUNT_RECEIVABLE_WITHOUT_TAX, amountReceivableWithoutTax[0])
+                            	            		.set(billItems.TAX_AMOUNT, taxAmount[0])
+                            	            		.set(billItems.TAX_RATE, taxRate[0])
+                            	            		.set(billItems.AMOUNT_RECEIVED, amountReceived[0])
+                            	            		.set(billItems.AMOUNT_RECEIVED_WITHOUT_TAX, amountReceivedWithoutTax[0])
+                            	            		.set(billItems.AMOUNT_OWED, amountReceivable[0])
+                            	            		.set(billItems.AMOUNT_OWED_WITHOUT_TAX, amountReceivableWithoutTax[0])
+                            	                    .where(billItems.NAMESPACE_ID.eq(namespaceId))
+                            	                    .and(billItems.OWNER_ID.eq(communityId))
+                            	                    .and(billItems.CATEGORY_ID.eq(categoryId))
+                            	                    .and(billItems.ID.eq(billItemId))
+                            	                    .execute();
+                            	            return null;
+                            	        });
+                        			}
+                                });
+                    	//重新计算账单
+                        for (Long billId : billIds) {
+                        	reCalBillById(billId);
+                        }
+                        //修改税率之后，合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）
+                        //第一步：首先修改“缴费”模块的计价条款变量值 eh_default_charging_items
+                        getReadOnlyContext().select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID,Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID,
+                        		Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES,t.TAX_RATE)
+            	            .from(Tables.EH_DEFAULT_CHARGING_ITEMS)
+            	            .leftOuterJoin(t)
+            	            .on(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID.eq(t.CHARGING_ITEM_ID))
+            	            .where(Tables.EH_DEFAULT_CHARGING_ITEMS.NAMESPACE_ID.eq(namespaceId))
+            	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.COMMUNITY_ID.eq(communityId))
+            	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+            	            .and(t.NAMESPACE_ID.eq(namespaceId))
+            	            .and(t.CATEGORY_ID.eq(categoryId))
+            	            .and(t.OWNER_ID.eq(communityId))
+            	            .fetch()
+            	            .forEach(r -> {
+            	            	Long id = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.ID);
+            	        		String chargingVariables = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES);
+            	        		BigDecimal taxRate = r.getValue(t.TAX_RATE);
+            	        		updateChargingVariables(id, chargingVariables, taxRate, "EH_DEFAULT_CHARGING_ITEMS");
+            	            });
+                        
+                        //第二步：修改合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）eh_contract_charging_items
+                        EhContractChargingItems t2 = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t2");
+                        EhContracts t3 = Tables.EH_CONTRACTS.as("t3");
+                        SelectQuery<Record> query = context.selectQuery();
+                        query.addSelect(t2.ID,t2.CHARGING_ITEM_ID,t2.CHARGING_VARIABLES,t.TAX_RATE);
+                        query.addFrom(t2);
+                        query.addJoin(t3, t3.ID.eq(t2.CONTRACT_ID));
+                        query.addJoin(t, t.CHARGING_ITEM_ID.eq(t2.CHARGING_ITEM_ID));
+                        query.addConditions(t3.NAMESPACE_ID.eq(namespaceId));
+                        query.addConditions(t3.COMMUNITY_ID.eq(communityId));
+                        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+                        query.addConditions(t.CATEGORY_ID.eq(categoryId));
+                        query.addConditions(t.OWNER_ID.eq(communityId));
+                        query.fetch().forEach(r -> {
+                        	Long id = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.ID);
+                    		String chargingVariables = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_VARIABLES);
+                    		BigDecimal taxRate = r.getValue(t.TAX_RATE);
+                    		updateChargingVariables(id, chargingVariables, taxRate, "EH_CONTRACT_CHARGING_ITEMS");
+                        });
+                    }catch (Exception e){
+                        LOGGER.error("executor task error. error: {}", e);
+                    }
+                }
             });
         }
     }
