@@ -18,6 +18,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -413,24 +414,75 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public void deleteFileContents(DeleteFileContentCommand cmd) {
-        fileManagementProvider.updateFileContentStatusByIds(cmd.getContendIds(), FileManagementStatus.INVALID.getCode());
+        for (Long contentId : cmd.getContendIds()) {
+
+            FileContent content = fileManagementProvider.findFileContentById(contentId);
+
+            Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
+            Long parentId = map.get("parentId");
+            Long catalogId = map.get("catalogId");
+            if (checkContentMoved(content, parentId, catalogId)) {
+                return;
+            }else {
+                fileManagementProvider.updateFileContentStatusByIds(contentId, FileManagementStatus.INVALID.getCode());
+            }
+        }
     }
 
     @Override
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
+
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (content == null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
                     "the file content not found.");
 
+        Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
+        Long parentId = map.get("parentId");
+        Long catalogId = map.get("catalogId");
         //  1.check the name
-        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(),
+        // 改动:根据path找目录(因为可能有移动)
+        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), catalogId, parentId,
                 cmd.getContentName(), cmd.getContentSuffix(), cmd.getContentId());
         //  2.update the name
         content.setContentName(cmd.getContentName());
-        fileManagementProvider.updateFileContent(content);
+        if (checkContentMoved(content, parentId, catalogId)) {
+            //移动了新建
+            content.setCatalogId(catalogId);
+            content.setParentId(parentId);
+            content.setPath("/" + catalogId);
+            fileManagementProvider.createFileContent(content);
+        } else {
+            //没移动就更新
+            fileManagementProvider.updateFileContent(content);
+
+        }
         //  3.return back
         return ConvertHelper.convert(content, FileContentDTO.class);
+    }
+    /**
+     * content和新的parentId,catalogId比较是否移动了
+     * 移动了返回true,没有返回false
+     * */
+    private boolean checkContentMoved(FileContent content, Long parentId, Long catalogId) {
+        if (parentId == null) {
+
+            if (content.getParentId() == null && content.getCatalogId().equals(catalogId)) {
+                //直接放在目录下且目录相同就是没移动
+                return false;
+            }
+            //否则移动了
+            return true;
+        }
+        else if (parentId.equals(content.getParentId())) {
+            //如果有上级id 就比对上级id 一样的就是没移动
+            return false;
+
+        }else{
+            //否则移动了
+            return true;
+
+        }
     }
 
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
@@ -527,10 +579,29 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (dto.getIconUrl() == null)
                 dto.setIconUrl(fileIcons.get("other"));
         }
+        dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
+
         return dto;
     }
-    
-	@Override
+    /** id的path 转换成String 的path */
+    private String processPathString(String path) {
+        String[] pathArray = StringUtils.split(path, "/");
+        StringBuilder sb = new StringBuilder();
+        FileCatalog catalog = fileManagementProvider.findFileCatalogById(Long.valueOf(pathArray[0]));
+        sb.append("/");
+        sb.append(catalog.getName());
+        //不要最后一个路径(那是文件自身)
+        for (int i = 1; i < sb.length() - 1; i++) {
+            FileContent content = fileManagementProvider.findFileContentById(Long.valueOf(pathArray[i]));
+            if (null != content) {
+                sb.append("/");
+                sb.append(content.getContentName());
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
 	public void moveFileContent(MoveFileContentCommand cmd) {
         this.dbProvider.execute((TransactionStatus status) -> {
             Map<String, Long> map = checkFilePath(cmd.getTargetPath(), cmd.getOwnerId());
@@ -547,6 +618,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
                     content.setStatus(FileManagementStatus.VALID.getCode());
                     fileManagementProvider.updateFileContent(content);
                 }
+
+                //  1.whether the name has been used
+                String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), content.getCatalogId(),
+                        parentId, content.getContentName(), content.getContentSuffix());
+                content.setContentName(contentName);
+
                 content.setParentId(parentId);
                 if (parentId != null) {
                     FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
@@ -560,18 +637,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         });
 	}
 
-    private Map checkFilePath(String targetPath, Long ownerId) {
+    private Map<String, Long> checkFilePath(String targetPath, Long ownerId) {
         if (null == targetPath) {
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
                     "target path can not be null.");
         }
         String[] pathArray = null;
         if (targetPath.contains("/")) {
-            pathArray = targetPath.split("/");
-        }else{
+            StringUtils.split(targetPath, "/");
+        } else {
             pathArray = new String[]{targetPath};
         }
-
         return checkFilePath(pathArray, ownerId);
 
     }

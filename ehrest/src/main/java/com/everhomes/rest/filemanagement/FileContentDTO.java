@@ -18,6 +18,7 @@ import java.sql.Timestamp;
  * <li>contentUri: 内容uri</li>
  * <li>contentUrl: 内容url(下载链接)</li>
  * <li>iconUrl: 图标url</li>
+ * <li>path: 路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
  * <li>createTime: 创建时间</li>
  * </ul>
  */
@@ -48,6 +49,8 @@ public class FileContentDTO {
     private String iconUrl;
 
     private Timestamp createTime;
+
+    private String path;
 
     public FileContentDTO() {
     }
@@ -160,4 +163,12 @@ public class FileContentDTO {
 	public void setLocationName(Long locationName) {
 		this.locationName = locationName;
 	}
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 }

@@ -35,7 +35,7 @@ public interface FileManagementProvider {
 
     void createFileContent(FileContent content);
 
-    void updateFileContentStatusByIds(List<Long> ids, Byte status);
+    void updateFileContentStatusByIds(Long id, Byte status);
 
     void deleteFileContentByCatalogId(Long catalogId);
 

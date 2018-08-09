@@ -283,11 +283,11 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public void updateFileContentStatusByIds(List<Long> ids, Byte status) {
+    public void updateFileContentStatusByIds(Long id, Byte status) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         UpdateQuery<EhFileManagementContentsRecord> query = context.updateQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.in(ids));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.eq(id));
         query.addValue(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS, status);
         query.execute();
     }
