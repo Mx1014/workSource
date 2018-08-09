@@ -7,7 +7,9 @@ import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.app.App;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.launchpad.CommunityBiz;
 import com.everhomes.launchpad.CommunityBizProvider;
 import com.everhomes.launchpad.CommunityBizService;
@@ -126,6 +128,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private UserAppProvider userAppProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -461,6 +466,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//工作台园区运营是查询授权管理的应用
 		boolean manageFlag = false;
 
+		//广场查询用户自定义的应用
+        boolean userAppFlag = false;
+
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
 			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
 			orgId = cmd.getContext().getOrganizationId();
@@ -487,82 +495,44 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			appType = ServiceModuleAppType.COMMUNITY.getCode();
 			sceneType = ServiceModuleSceneType.CLIENT.getCode();
 
-			installFlag = true;
+            userAppFlag = true;
 		}
 
-		List<ServiceModuleApp> apps = null;
+		List<ServiceModuleApp> apps = new ArrayList<>();
 		if(installFlag) {
 			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, null);
 		}else if(manageFlag){
 			apps = serviceModuleAppProvider.listManageServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType);
+		}else if(userAppFlag){
+
+            List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, null);
+            if(tempApps != null && tempApps.size() > 0){
+                List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+                //有用户自定义应用
+                if(userApps != null && userApps.size() != 0){
+                    for (UserApp userApp: userApps){
+                        for (ServiceModuleApp app: apps){
+                            if(userApp.getAppId().equals(app.getId())){
+                                apps.add(app);
+                            }
+                        }
+                    }
+                }else {
+                    //List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+
+
+
+                }
+            }
+
+
+
+
+
 		}
 
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){
-
-//				AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
-//
-//				//广场的应用设置可见性，并编辑的名称。
-//				if(ServiceModuleAppType.fromCode(appType) == ServiceModuleAppType.COMMUNITY && ServiceModuleSceneType.fromCode(sceneType) == ServiceModuleSceneType.CLIENT){
-//
-//					Community community = communityProvider.findCommunityById(communityId);
-//
-//					//园区自定义配置的
-//					if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
-//						AppCommunityConfig appCommunity = appCommunityConfigProvider.findAppCommunityConfigByCommunityIdAndAppOriginId(communityId, app.getOriginId());
-//
-//						if(appCommunity != null){
-//							if(appCommunity.getVisibilityFlag() != null && appCommunity.getVisibilityFlag().byteValue() == 0){
-//								//隐藏的应用要去掉
-//								continue;
-//							}
-//							if(appCommunity.getDisplayName() != null){
-//								appDTO.setName(appCommunity.getDisplayName());
-//							}
-//						}
-//
-//					}else {
-//						//跟随公司的
-//						OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), orgId);
-//
-//						if(orgapp != null){
-//							if(orgapp.getVisibilityFlag() != null && orgapp.getVisibilityFlag().byteValue() == 0){
-//								//隐藏的应用要去掉
-//								continue;
-//							}
-//							if(orgapp.getDisplayName() != null){
-//								appDTO.setName(orgapp.getDisplayName());
-//							}
-//						}
-//					}
-//				}
-//
-//				appDTO.setAppId(app.getOriginId());
-//
-//				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
-//				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
-//
-//                appDTO.setActionData(app.getInstanceConfig());
-//                PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
-//                if(handler != null){
-//                    String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
-//                    if(itemActionData != null){
-//                        appDTO.setActionData(itemActionData);
-//                    }
-//                }
-//
-//				appDTO.setActionData(launchPadService.refreshActionData(appDTO.getActionData()));
-//
-//                //填充路由信息
-//				RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), appDTO.getActionData());
-//				appDTO.setRouterPath(routerInfo.getPath());
-//				appDTO.setRouterQuery(routerInfo.getQuery());
-//
-//				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
-//				if(profile != null && profile.getIconUri() != null){
-//					String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
-//					appDTO.setIconUrl(url);
-//				}
 
 				AppDTO appDTO = toAppDto(app, sceneType, communityId, orgId);
 				if(appDTO == null){
@@ -1036,12 +1006,32 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		Long userId = UserContext.currentUserId();
 
-		userAppProvider.deleteByUserId(userId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), cmd.getCommunityId());
+		if(cmd.getCommunityId() == null || cmd.getAppIds() == null || cmd.getAppIds().size() == 0){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
 
-		for (Long appId: cmd.getAppIds()){
+        }
 
-		}
+        dbProvider.execute(status -> {
 
+            userAppProvider.deleteByUserId(userId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), cmd.getCommunityId());
+
+            Integer order = 1;
+
+            for (Long appId: cmd.getAppIds()){
+
+                UserApp userApp = new UserApp();
+                userApp.setAppId(appId);
+                userApp.setUserId(userId);
+                userApp.setLocationType(ServiceModuleLocationType.MOBILE_COMMUNITY.getCode());
+                userApp.setLocationTargetId(cmd.getCommunityId());
+                userApp.setOrder(order);
+                order = order + 1;
+                userAppProvider.createUserApp(userApp);
+            }
+
+            return null;
+        });
 
 	}
 }
