@@ -1056,10 +1056,10 @@ public class AddressProviderImpl implements AddressProvider {
 		if (cmd.getCommunityId() != null) {
 			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
-		if (cmd.getFloorNumber() != null) {
+		if (!org.springframework.util.StringUtils.isEmpty(cmd.getFloorNumber())) {
 			query.addConditions(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getFloorNumber()));
 		}
-		if (cmd.getKeyword() != null) {
+		if (!org.springframework.util.StringUtils.isEmpty(cmd.getKeyword())) {
 			query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.like("%" + cmd.getKeyword() + "%")
 								.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeyword() + "%")));
 		}

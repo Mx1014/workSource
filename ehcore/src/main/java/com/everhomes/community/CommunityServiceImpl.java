@@ -4827,11 +4827,6 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityStatisticsDTO dto = ConvertHelper.convert(community, CommunityStatisticsDTO.class);
 		dto.setCommunityId(community.getId());
 		dto.setCommunityName(community.getName());
-		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
-		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		
 		Integer buildingNumber = communityProvider.countActiveBuildingsByCommunityId(community.getId());
 		dto.setBuildingNumber(buildingNumber);
@@ -4847,6 +4842,12 @@ public class CommunityServiceImpl implements CommunityService {
 			Double areaAveragePrice = totalRent/community.getRentArea();
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
 		}
+		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+		
 		return dto;
 	} 
 
@@ -4906,11 +4907,6 @@ public class CommunityServiceImpl implements CommunityService {
 		BuildingStatisticsDTO dto = ConvertHelper.convert(building, BuildingStatisticsDTO.class);
 		dto.setBuildingId(building.getId());
 		dto.setBuildingName(building.getName());
-		dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-		dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-		dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-		dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
-		dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		
 		Integer apartmentNumber = addressProvider.countApartmentNumberByBuildingName(building.getCommunityId(), building.getName());
 		dto.setApartmentNumber(apartmentNumber);
@@ -4932,6 +4928,22 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
+		
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
+		if(dto.getTotalRent()!=null){
+			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+		}
 		
 		return dto;
 	}
@@ -5079,11 +5091,21 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			
 			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus,areaAveragePrice,totalRent);
-			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
-			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
-			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
-			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
-			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+			if (dto.getAreaSize()!=null) {
+				dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+			}
+			if(dto.getRentArea()!=null){
+				dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+			}
+			if(dto.getFreeArea()!=null){
+				dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+			}
+			if(dto.getChargeArea()!=null){
+				dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+			}
+			if(dto.getTotalRent()!=null){
+				dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
+			}
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
 		}
@@ -5118,7 +5140,7 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus,double areaAveragePrice,double totalRent){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
-		Community community = communityProvider.findCommunityById(address.getId());
+		Community community = communityProvider.findCommunityById(address.getCommunityId());
 		dto.setCommunityName(community.getName());
 		dto.setAddressId(address.getId());
 		dto.setBuildingName(address.getBuildingName());
