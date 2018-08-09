@@ -206,7 +206,7 @@ public interface Rentalv2Provider {
 	List<RentalOrderRule> listRentalOrderRules(String resourceType, String ownerType, Long ownerId, Byte handleType);
 
 	List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-										 Long startTime, Long endTime,String tag1, String tag2,String keyword, Long pageAnchor ,
+										 Long startTime, Long endTime,String tag1, String tag2,String vendorType,String keyword, Long pageAnchor ,
 										 Integer pageSize);
 	BigDecimal getRentalOrdersTotalAmount(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 										  Long startTime, Long endTime,String tag1, String tag2,String keyword);

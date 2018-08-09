@@ -8214,7 +8214,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalOrder> orders = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
 				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
-				cmd.getTag2(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+				cmd.getTag2(), cmd.getVendorType(),cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 		response.setTotalAmount(rentalv2Provider.getRentalOrdersTotalAmount(cmd.getResourceTypeId(), cmd.getResourceType(),
 				cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag1(),
 				cmd.getTag2(), cmd.getKeyword()));
