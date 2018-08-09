@@ -5236,10 +5236,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 					itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
 					itemCmd.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
 			        if(itemCmd.getValidEndMs() == null) {
-			        	itemCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+			        	if(cmd.getValidEndMs() == null){
+			        		itemCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+			        	}else{
+			        		itemCmd.setValidEndMs(cmd.getValidEndMs());
+			        	}
 			        }
 			        if(itemCmd.getValidFromMs() == null) {
-			        	itemCmd.setValidFromMs(System.currentTimeMillis());	
+			        	if(cmd.getValidFromMs() == null){
+			        		itemCmd.setValidFromMs(System.currentTimeMillis());	
+			        	}else{
+			        		itemCmd.setValidFromMs(cmd.getValidFromMs());
+			        	}
 			        }
 					createLocalVisitorAuth(itemCmd);
 				}
@@ -5256,7 +5264,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 		
 		
-//		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
 		Integer namespaceId = 2;
 		User user = UserContext.current().getUser();
 		CreateDoorVisitorCommand cmd2 = ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class);
