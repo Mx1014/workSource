@@ -351,7 +351,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 				FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
 		Long flowId = flow.getFlowMainId();
-		String requestFlowType = flow.getStringTag1();
+		Integer requestFlowType = parkingLot.getFlowMode();
 
 		if(cardListSize == 0){
 			//当查询的月卡信息不存在时，检查申请条件
@@ -1030,11 +1030,12 @@ public class ParkingServiceImpl implements ParkingService {
 			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+//		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
 		SortField order = null;
 		//排序
-		if (null != flow && null != cmd.getStatus()) {
-			Integer flowMode = Integer.valueOf(flow.getStringTag1());
+		if (null != cmd.getStatus()) {
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+			Integer flowMode = parkingLot.getFlowMode();
 			if (ParkingCardRequestStatus.AUDITING.getCode() == cmd.getStatus()) {
 				order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
 			}else if (ParkingCardRequestStatus.QUEUEING.getCode() == cmd.getStatus()) {
@@ -1281,7 +1282,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
 			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
-			String tag1 = flow.getStringTag1();
+			Integer tag1 = parkingLot.getFlowMode();
 			StringBuilder strBuilder = new StringBuilder();
 			List<ParkingCardRequest> list = null;
 			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
