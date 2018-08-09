@@ -1898,7 +1898,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
-        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.asc());
         query.addLimit(pageSize);
 
         if(LOGGER.isDebugEnabled()) {
