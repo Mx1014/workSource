@@ -6544,7 +6544,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      * @return
      */
     @Autowired
-    public UserDTO getUserFromPhone(findUserByPhoneCommand cmd) {
+    public UserDTO getUserFromPhone(FindUserByPhoneCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		String phone = cmd.getPhone() ;
 		if(namespaceId ==null || StringUtils.isBlank(phone) ){

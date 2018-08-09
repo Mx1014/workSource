@@ -1637,7 +1637,7 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getUserByPhone")
 	@RestReturn(UserDTO.class)
-	public RestResponse getUserByPhone(findUserByPhoneCommand cmd){
+	public RestResponse getUserByPhone(FindUserByPhoneCommand cmd){
 		
 		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
 		resp.setErrorCode(ErrorCodes.SUCCESS);

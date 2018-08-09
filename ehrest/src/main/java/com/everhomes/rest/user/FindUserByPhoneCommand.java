@@ -4,12 +4,12 @@ import com.everhomes.util.StringHelper;
 
 /**
 
- *         <ul>
- *         <li>namespaceId:域空间ID</li>
+ *<ul>
+ *<li>namespaceId:域空间ID</li>
  *         <li>phone:手机号</li>
  *         </ul>
  */
-public class findUserByPhoneCommand {
+public class FindUserByPhoneCommand {
     private Integer namespaceId;
     private String phone ;
     
