@@ -1357,6 +1357,10 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
+		if(expressOrder.getPayDto()!=null && expressOrder.getPayDto().length()>0){
+			PreOrderDTO preOrder = (PreOrderDTO)StringHelper.fromJsonString(expressOrder.getPayDto(), PreOrderDTO.class);
+			return preOrder;
+		}
 		ExpressSendType sendType = ExpressSendType.fromCode(expressOrder.getSendType());
 		if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
 				|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()
@@ -1395,13 +1399,13 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId, OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(), expressOrder.getId()));
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId, OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(), expressOrder.getId()));
 		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
-		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
-		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
+		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("express.pay.callBackUrl", "%s/evh/express/notifyExpressOrderPaymentV2"), homeurl);
@@ -1438,6 +1442,8 @@ public class ExpressServiceImpl implements ExpressService {
 				return payMethodDTO;
 			}).collect(Collectors.toList()));
 		}
+		expressOrder.setPayDto(StringHelper.toJsonString(preDto));
+		expressOrderProvider.updateExpressOrder(expressOrder);
 		return preDto;
 	}
 

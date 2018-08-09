@@ -19,5 +19,4 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `express_type` TINYINT COMMENT '0:物
 ALTER TABLE `eh_express_orders`	ADD COLUMN `express_way` TINYINT COMMENT '0:陆运 1:空运  国贸快递专用';
 ALTER TABLE `eh_express_orders`	ADD COLUMN `express_target` TINYINT COMMENT '0:同城 1:外埠  国贸快递专用';
 ALTER TABLE `eh_express_orders`	ADD COLUMN `express_remark` TEXT COMMENT '备注 国贸快递专用';
-
-
+ALTER TABLE `eh_express_orders`	ADD COLUMN `pay_dto` TEXT COMMENT '支付2.0下单详情';
