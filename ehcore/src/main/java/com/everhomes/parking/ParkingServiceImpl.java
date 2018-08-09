@@ -277,7 +277,7 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"OwnerId or ownerType cannot be null.");
 		}
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
 
 		List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
@@ -298,7 +298,7 @@ public class ParkingServiceImpl implements ParkingService {
 			dto.setFlowId(null);
 			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 			if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
-				Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+				Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 						FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
 				//当没有设置工作流的时候，表示是禁用模式
 				if (flow!=null){
@@ -1684,10 +1684,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		Long flowId = cmd.getFlowId();
 		if(null == flowId) {
-			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+			Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
 
 			if (null == flow) {
@@ -3290,7 +3290,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"非法parkingLotToken");
 		}
 		ParkingLot r = list.get(0);
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
 
 		if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
@@ -3308,7 +3308,7 @@ public class ParkingServiceImpl implements ParkingService {
 		dto.setFlowId(null);
 		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 		if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
-			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+			Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
 			//当没有设置工作流的时候，表示是禁用模式
 			if (flow!=null){
