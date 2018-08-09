@@ -691,4 +691,20 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/exportApartmentsInCommunity</b>
+     * <p>导出项目下的房源信息</p>
+     */
+    @RequestMapping("exportApartmentsInCommunity")
+    @RestReturn(value = String.class)
+    public RestResponse exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd, HttpServletResponse httpServletResponse) {
+    	communityService.exportApartmentsInCommunity(cmd, httpServletResponse);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }

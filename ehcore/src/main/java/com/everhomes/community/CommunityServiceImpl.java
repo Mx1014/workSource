@@ -74,6 +74,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.ApartmentExportDataDTO;
 import com.everhomes.rest.community.ApartmentInfoDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.BuildingDTO;
@@ -4926,12 +4927,31 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
-		CreateResourceCategoryAssignmentCommand command = new CreateResourceCategoryAssignmentCommand();
-		command.setResourceType(cmd.getResourceType());
-		command.setResourceId(cmd.getCommunityId());
-		command.setResourceCategoryId(cmd.getCategoryId());
-		command.setNamespaceId(cmd.getNamespaceId());
-		createResourceCategoryAssignment(command);
+		Integer namespaceId = cmd.getNamespaceId();
+		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getCommunityId(), cmd.getResourceType(), namespaceId);
+		if(null != rca) {
+			if(null != cmd.getCategoryId()) {
+				ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getCategoryId());
+				checkResourceCategoryIsNull(category);
+				rca.setResourceCategryId(category.getId());
+				communityProvider.updateResourceCategoryAssignment(rca);
+			}else{
+				communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
+			}
+		}else{
+			if(null != cmd.getCategoryId()){
+				ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getCategoryId());
+				checkResourceCategoryIsNull(category);
+				rca = new ResourceCategoryAssignment();
+				rca.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				rca.setCreatorUid(UserContext.current().getUser().getId());
+				rca.setNamespaceId(namespaceId);
+				rca.setResourceCategryId(category.getId());
+				rca.setResourceId(cmd.getCommunityId());
+				rca.setResourceType(cmd.getResourceType());
+				communityProvider.createResourceCategoryAssignment(rca);
+			}
+		}
 	}
 
 	@Override
@@ -5140,8 +5160,11 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			}
 		}
-		result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
-		result.setApartments(apartmentsForOnePage);
+		
+		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
+			result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+			result.setApartments(apartmentsForOnePage);
+		}
 		
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
@@ -5203,7 +5226,6 @@ public class CommunityServiceImpl implements CommunityService {
 		if(dto.getTotalRent()!=null){
 			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		}
-		
 		return dto;
 	}
 	
@@ -5261,6 +5283,95 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			}
 		}
+	}
+
+
+	@Override
+	public void exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd,HttpServletResponse response) {
+		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
+		List<ApartmentExportDataDTO> data = new ArrayList<>();
+		initListApartmentsInCommunityResponse(result);
+		
+		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+
+		for (Address address : addresses) {
+			//获取房源状态
+			byte livingStatus = AddressMappingStatus.LIVING.getCode();
+			CommunityAddressMapping mapping = communityAddressMappingMap.get(address.getId());
+			if(mapping != null){
+				livingStatus = mapping.getLivingStatus().byteValue();
+			}
+			//按房源状态筛选
+			if (cmd.getLivingStatus()!=null && livingStatus!=cmd.getLivingStatus().byteValue()) {
+				continue;
+			}	
+			//获取在租实时均价
+			double areaAveragePrice = 0;
+			double totalRent = 0;
+			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
+			if (contracts != null && contracts.size() > 0){
+				for (Contract contract : contracts) {
+					totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
+				}
+				totalRent = doubleRoundHalfUp(totalRent,2);
+			}
+			if (address.getRentArea() != null && address.getRentArea() > 0) {
+				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
+	    	}
+			//按在租实时均价筛选
+			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
+				continue;
+			}
+			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
+				continue;
+			}
+			ApartmentExportDataDTO dto = convertToApartmentExportDataDTO(address,livingStatus,areaAveragePrice,totalRent);
+			data.add(dto);
+		}
+		if (data != null && data.size() > 0) {
+			String fileName = String.format("房源信息导出");
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+			String[] propertyNames = {"communityName","buildingName","apartmentFloor","apartmentName","livingStatus","areaSize","rentArea","freeArea","chargeArea","areaAveragePrice","orientation","namespaceAddressType","namespaceAddressToken"};
+			String[] titleNames = {"项目名称", "楼宇名称", "楼层名称", "房源", "状态", "建筑面积(㎡)","在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "在租实时均价(元/平方米)","朝向","第三方来源","第三方标识"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+
+	private ApartmentExportDataDTO convertToApartmentExportDataDTO(Address address, byte livingStatus,double areaAveragePrice, double totalRent) {
+		ApartmentExportDataDTO dto = new ApartmentExportDataDTO();
+		Community community = communityProvider.findCommunityById(address.getCommunityId());
+		dto.setCommunityName(community.getName());
+		dto.setBuildingName(address.getBuildingName());
+		dto.setApartmentFloor(address.getApartmentFloor());
+		dto.setApartmentName(address.getApartmentName());
+		dto.setLivingStatus(livingStatus);
+		dto.setAreaSize(address.getAreaSize());
+		dto.setRentArea(address.getRentArea());
+		dto.setFreeArea(address.getFreeArea());
+		dto.setChargeArea(address.getChargeArea());
+		dto.setAreaAveragePrice(areaAveragePrice);
+		dto.setOrientation(address.getOrientation());
+		dto.setNamespaceAddressType(address.getNamespaceAddressType());
+		dto.setNamespaceAddressToken(address.getNamespaceAddressToken());
+		if (dto.getAreaSize()!=null) {
+			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+		}
+		if(dto.getRentArea()!=null){
+			dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+		}
+		if(dto.getFreeArea()!=null){
+			dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+		}
+		if(dto.getChargeArea()!=null){
+			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+		}
+		return dto;
 	}
 	
 }

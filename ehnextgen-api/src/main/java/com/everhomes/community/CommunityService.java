@@ -166,4 +166,6 @@ public interface CommunityService {
 
 	void changeBuildingOrder(ChangeBuildingOrderCommand cmd);
 
+	void exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd, HttpServletResponse httpServletResponse);
+
 }
