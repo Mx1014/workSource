@@ -9227,6 +9227,7 @@ public class PunchServiceImpl implements PunchService {
                 //因为如果有异常审批一定会有pl,所以异常写在里面
                 dto1 = convertPunchLog2DTOWithExceptionRequestToken(pl);
             }
+            dto1.setStatusString(statusToString(null, dto1.getClockStatus()));
             intervalDTO.getPunchLogs().add(dto1);
 
             PunchLogDTO dto2 = null;
@@ -9241,6 +9242,7 @@ public class PunchServiceImpl implements PunchService {
             } else {
                 dto2 = convertPunchLog2DTOWithExceptionRequestToken(pl);
             }
+            dto2.setStatusString(statusToString(null, dto2.getClockStatus()));
             intervalDTO.getPunchLogs().add(dto2);
             LOGGER.debug("dto1 =" + dto1 + "dto 2 = " + dto2);
             if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
@@ -9274,6 +9276,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                 }
             }
+            intervalDTO.setStatusString(statusToString(null, Byte.valueOf(intervalDTO.getStatus())));
             response.getIntervals().add(intervalDTO);
         }
         return response;

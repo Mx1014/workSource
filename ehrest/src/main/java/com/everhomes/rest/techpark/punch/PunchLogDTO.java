@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude： 维度</li>
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>statusString：打卡状态文字</li>
  * <li>requestToken： 异常申请的token </li>
  * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
  * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
@@ -35,6 +36,7 @@ public class PunchLogDTO {
 	private Long ruleTime;
     private Long punchTime;
     private Byte clockStatus;
+    private String statusString;
 	private Double longitude;
 	private Double latitude;
 	private String identification;
@@ -257,5 +259,13 @@ public class PunchLogDTO {
 
 	public void setPunchOrgnizationId(Long punchOrgnizationId) {
 		this.punchOrgnizationId = punchOrgnizationId;
+	}
+
+	public String getStatusString() {
+		return statusString;
+	}
+
+	public void setStatusString(String statusString) {
+		this.statusString = statusString;
 	}
 }
