@@ -110,8 +110,8 @@ public interface ContractProvider {
 	Boolean getContractTemplateById(Long id);
 
 	//合同模块筛选资质用户 by pengyu.huang
-	Byte filterAptitudeCustomer(Long id);
+	Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId);
 
-	void updateAptitudeCustomer(Long id, Byte adptitudeFlag);
+	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
 	
 }

@@ -1316,34 +1316,47 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
-		result[0] = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+		EnterpriseCustomerAptitudeFlag flag = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
 				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()))
-				.orderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc()).fetchAny().map((r) -> {
-					return ConvertHelper.convert(r, GeneralForm.class);
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.ne(namespaceId))
+				.fetchAny().map((r) -> {
+					return ConvertHelper.convert(r, EnterpriseCustomerAptitudeFlag.class);
 				});
-		return result[0];
-		context.
-		if(ecc != null){
-			return ecc.getAptitudeFlag();
+		if(flag != null){
+			return flag.getValue();
 		}else{
-			LOGGER.error("not find categories,id : " + id);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "not find categories");
+			LOGGER.error("the namespace and communityid not find flag");
+			return 0;
 		}
 	}
 
 	@Override
-	public void updateAptitudeCustomer(Long id, Byte adptitudeFlag){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class));
-		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
-		EhContractCategories ecc = dao.findById(id);
-		if(ecc != null) {
-			ecc.setAptitudeFlag(adptitudeFlag);
-			dao.update(ecc);
+	public EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
+		EhEnterpriseCustomerAptitudeFlagDao dao = new EhEnterpriseCustomerAptitudeFlagDao(context.configuration());
+		EnterpriseCustomerAptitudeFlag flag = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.ne(namespaceId))
+				.fetchAny().map((r) -> {
+					return ConvertHelper.convert(r, EnterpriseCustomerAptitudeFlag.class);
+				});
+		if(flag != null){
+			flag.setValue(adptitudeFlag);
+			dao.update(flag);
+			return flag;
 		}else{
-			LOGGER.error("not find categories,id : " + id);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "not find categories");
+			long id = this.dbProvider.allocPojoRecordId(EhEnterpriseCustomerAptitudeFlag.class);
+			EhEnterpriseCustomerAptitudeFlag flag = new EhEnterpriseCustomerAptitudeFlag();
+			flag.setId(id);
+			flag.setNamespaceId(namespaceId);
+			flag.setOwnerId(ownerId);
+			flag.setOwnerType("community");
+			flag.setValue(adptitudeFlag);
+			dao.insert();
+			return ConvertHelper.convert(flag, EnterpriseCustomerAptitudeFlag.class);
+
 		}
+
 	}
 
 }
