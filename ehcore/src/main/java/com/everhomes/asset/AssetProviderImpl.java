@@ -12,12 +12,14 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.pm.DefaultChargingItem;
 import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.PaymentUserStatus;
@@ -30,6 +32,9 @@ import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhContractChargingItems;
+import com.everhomes.server.schema.tables.EhContracts;
+import com.everhomes.server.schema.tables.EhDefaultChargingItems;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
@@ -62,6 +67,9 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.google.gson.Gson;
+
+import scala.languageFeature.reflectiveCalls;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
@@ -2065,8 +2073,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
                     dto.setIsSelected(isSelected);
                     isSelected = 0;
+                    dto.setTaxRate(scope.getTaxRate());//增加税率
                 }
-                dto.setTaxRate(scope.getTaxRate());//增加税率
             }
             if(dto.getTaxRate() == null) {
             	dto.setTaxRate(BigDecimal.ZERO);
@@ -3381,6 +3389,7 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
+                    .and(t.NAMESPACE_ID.eq(namespaceId))
                     .and(t.CATEGORY_ID.eq(categoryId))
                     .execute();
             if(list.size()>0){
@@ -3394,13 +3403,13 @@ public class AssetProviderImpl implements AssetProvider {
         	//若开关关闭，则税率修改后，系统自动按照修改后的税率更新未出账单及未出账单对应的合同费用清单
         	Set<Long> billIds = new HashSet<>();
         	EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
-        	//获取所有未出账单的id
+        	//获取所有未出账单的id、以及合同那边的费用清单列表
         	getReadOnlyContext().select(bill.ID)
 	            .from(bill)
 	            .where(bill.NAMESPACE_ID.eq(namespaceId))
 	            .and(bill.CATEGORY_ID.eq(categoryId))
 	            .and(bill.OWNER_ID.eq(communityId))
-	            .and(bill.SWITCH.eq((byte) 0))
+	            .and(bill.SWITCH.eq((byte) 0).or(bill.SWITCH.eq((byte) 3))) //未出账单 or 合同那边的草稿合同费用清单
 	            .fetch()
 	            .forEach(r -> {
 	            	billIds.add(r.getValue(bill.ID));
@@ -3461,11 +3470,169 @@ public class AssetProviderImpl implements AssetProvider {
             	reCalBillById(billId);
             }
             //修改税率之后，合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）
+            //第一步：首先修改“缴费”模块的计价条款变量值 eh_default_charging_items
+            getReadOnlyContext().select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID,Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID,
+            		Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES,t.TAX_RATE)
+	            .from(Tables.EH_DEFAULT_CHARGING_ITEMS)
+	            .leftOuterJoin(t)
+	            .on(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID.eq(t.CHARGING_ITEM_ID))
+	            .where(Tables.EH_DEFAULT_CHARGING_ITEMS.NAMESPACE_ID.eq(namespaceId))
+	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.COMMUNITY_ID.eq(communityId))
+	            .and(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+	            .and(t.NAMESPACE_ID.eq(namespaceId))
+	            .and(t.CATEGORY_ID.eq(categoryId))
+	            .and(t.OWNER_ID.eq(communityId))
+	            .fetch()
+	            .forEach(r -> {
+	            	Long id = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.ID);
+	        		String chargingVariables = r.getValue(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES);
+	        		BigDecimal taxRate = r.getValue(t.TAX_RATE);
+	        		updateChargingVariables(id, chargingVariables, taxRate, "EH_DEFAULT_CHARGING_ITEMS");
+	            });
             
-            
-            
-            
+            //第二步：修改合同管理要重新修改计价条款中已保存的税率（包括单价（不含税）、单价（含税）、税率等等）eh_contract_charging_items
+            EhContractChargingItems t2 = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t2");
+            EhContracts t3 = Tables.EH_CONTRACTS.as("t3");
+            SelectQuery<Record> query = context.selectQuery();
+            query.addSelect(t2.ID,t2.CHARGING_ITEM_ID,t2.CHARGING_VARIABLES,t.TAX_RATE);
+            query.addFrom(t2);
+            query.addJoin(t3, t3.ID.eq(t2.CONTRACT_ID));
+            query.addJoin(t, t.CHARGING_ITEM_ID.eq(t2.CHARGING_ITEM_ID));
+            query.addConditions(t3.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t3.COMMUNITY_ID.eq(communityId));
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+            query.addConditions(t.OWNER_ID.eq(communityId));
+            query.fetch().forEach(r -> {
+            	Long id = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.ID);
+        		String chargingVariables = r.getValue(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_VARIABLES);
+        		BigDecimal taxRate = r.getValue(t.TAX_RATE);
+        		updateChargingVariables(id, chargingVariables, taxRate, "EH_CONTRACT_CHARGING_ITEMS");
+            });
         }
+    }
+    
+    public void updateChargingVariables(Long id, String chargingVariables, BigDecimal taxRate,String tableName) {
+    	try {
+        	if(chargingVariables != null && chargingVariables != "") {
+        		if(chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {//单价
+        			ChargingVariables chargingVariableList = 
+	                		(ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
+	                if(chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+	                	BigDecimal dj = BigDecimal.ZERO;//单价
+	                	BigDecimal djbhs = BigDecimal.ZERO;//单价不含税
+	                	BigDecimal mj = BigDecimal.ZERO;
+	                	for(ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+	                		if(chargingVariable.getVariableIdentifier() != null) {
+	                			if(chargingVariable.getVariableIdentifier().equals("dj")) {
+	                				dj = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                			}
+	                			if(chargingVariable.getVariableIdentifier().equals("mj")) {
+	                				mj = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                			}
+	                		}
+	                	}
+	                	BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+	                	djbhs = dj.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);//修改税率之后，重新计算不含税
+	                	//重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+	                	ChargingVariables newChargingVariableList = new ChargingVariables();
+	                	newChargingVariableList.setChargingVariables(new ArrayList<>());
+	                	ChargingVariable djChargingVariable = new ChargingVariable();
+	                	djChargingVariable.setVariableIdentifier("dj");
+	                	djChargingVariable.setVariableName("单价(含税)");
+	                	djChargingVariable.setVariableValue(dj);
+	                	newChargingVariableList.getChargingVariables().add(djChargingVariable);
+	                	ChargingVariable djbhsChargingVariable = new ChargingVariable();
+	                	djbhsChargingVariable.setVariableIdentifier("djbhs");
+	                	djbhsChargingVariable.setVariableName("单价(不含税)");
+	                	djbhsChargingVariable.setVariableValue(djbhs);
+	                	newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
+	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
+	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
+	                	taxRateChargingVariable.setVariableName("税率");
+	                	taxRateChargingVariable.setVariableValue(taxRate);
+	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+	                	ChargingVariable mjChargingVariable = new ChargingVariable();
+	                	mjChargingVariable.setVariableIdentifier("mj");
+	                	mjChargingVariable.setVariableName("面积");
+	                	mjChargingVariable.setVariableValue(mj);
+	                	newChargingVariableList.getChargingVariables().add(mjChargingVariable);
+	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+	                	if(tableName.equals("EH_DEFAULT_CHARGING_ITEMS")) {
+	                		this.dbProvider.execute((TransactionStatus status) -> {
+	            	            context.update(Tables.EH_DEFAULT_CHARGING_ITEMS)
+	            	            		.set(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES, newChargingVariableList.toString())
+	            	                    .where(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.eq(id))
+	            	                    .execute();
+	            	            return null;
+	            	        });
+	                	}else if(tableName.equals("EH_CONTRACT_CHARGING_ITEMS")) {
+	                		this.dbProvider.execute((TransactionStatus status) -> {
+	            	            context.update(Tables.EH_CONTRACT_CHARGING_ITEMS)
+	            	            		.set(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_VARIABLES, newChargingVariableList.toString())
+	            	                    .where(Tables.EH_CONTRACT_CHARGING_ITEMS.ID.eq(id))
+	            	                    .execute();
+	            	            return null;
+	            	        });
+	                	}
+	                }
+        		}else if(chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {//固定金额
+        			ChargingVariables chargingVariableList = 
+	                		(ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
+	                if(chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+	                	BigDecimal gdje = BigDecimal.ZERO;//固定金额(含税)
+	                	BigDecimal gdjebhs = BigDecimal.ZERO;//固定金额(不含税)
+	                	for(ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+	                		if(chargingVariable.getVariableIdentifier() != null) {
+	                			if(chargingVariable.getVariableIdentifier().equals("gdje")) {
+	                				gdje = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                			}
+	                		}
+	                	}
+	                	BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+	                	gdjebhs = gdje.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);//修改税率之后，重新计算不含税
+	                	//重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+	                	ChargingVariables newChargingVariableList = new ChargingVariables();
+	                	newChargingVariableList.setChargingVariables(new ArrayList<>());
+	                	ChargingVariable gdjeChargingVariable = new ChargingVariable();
+	                	gdjeChargingVariable.setVariableIdentifier("gdje");
+	                	gdjeChargingVariable.setVariableName("固定金额(含税)");
+	                	gdjeChargingVariable.setVariableValue(gdje);
+	                	newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
+	                	ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+	                	gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+	                	gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
+	                	gdjebhsChargingVariable.setVariableValue(gdjebhs);
+	                	newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
+	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
+	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
+	                	taxRateChargingVariable.setVariableName("税率");
+	                	taxRateChargingVariable.setVariableValue(taxRate);
+	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+	                	if(tableName.equals("EH_DEFAULT_CHARGING_ITEMS")) {
+	                		this.dbProvider.execute((TransactionStatus status) -> {
+	            	            context.update(Tables.EH_DEFAULT_CHARGING_ITEMS)
+	            	            		.set(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES, newChargingVariableList.toString())
+	            	                    .where(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.eq(id))
+	            	                    .execute();
+	            	            return null;
+	            	        });
+	                	}else if(tableName.equals("EH_CONTRACT_CHARGING_ITEMS")) {
+	                		this.dbProvider.execute((TransactionStatus status) -> {
+	            	            context.update(Tables.EH_CONTRACT_CHARGING_ITEMS)
+	            	            		.set(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_VARIABLES, newChargingVariableList.toString())
+	            	                    .where(Tables.EH_CONTRACT_CHARGING_ITEMS.ID.eq(id))
+	            	                    .execute();
+	            	            return null;
+	            	        });
+	                	}
+	                }
+        		}
+        	}
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
     @Override
