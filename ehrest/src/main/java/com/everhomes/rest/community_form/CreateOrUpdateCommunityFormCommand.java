@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId:域空间ID</li>
  *     <li>communityId:项目ID</li>
- *     <li>formId:表单ID</li>
+ *     <li>formOriginId:表单ID</li>
  *     <li>type:类型</li>
  * </ul>
  */
 public class CreateOrUpdateCommunityFormCommand {
     private Integer namespaceId;
     private Long communityId;
-    private Long formId;
+    private Long formOriginId;
     private String type;
 
     public Integer getNamespaceId() {
@@ -33,12 +33,12 @@ public class CreateOrUpdateCommunityFormCommand {
         this.communityId = communityId;
     }
 
-    public Long getFormId() {
-        return formId;
+    public Long getFormOriginId() {
+        return formOriginId;
     }
 
-    public void setFormId(Long formId) {
-        this.formId = formId;
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
     }
 
     public String getType() {

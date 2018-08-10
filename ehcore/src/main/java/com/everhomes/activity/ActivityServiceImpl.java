@@ -661,8 +661,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         addAdditionalInfo(roster, user, activity);
         CommunityGeneralForm communityGeneralForm = this.communityFormProvider.findCommunityGeneralForm(communityId, CommunityFormType.ACTIVITY_SIGNUP);
         if (communityGeneralForm != null) {
-            roster.setFormId(communityGeneralForm.getFormId());
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralForm.getFormId());
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralForm.getFormOriginId());
+            roster.setFormId(form.getId());
             if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
                 form.setStatus(GeneralFormStatus.RUNNING.getCode());
                 generalFormProvider.updateGeneralForm(form);
@@ -7072,7 +7072,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             List<CommunityGeneralForm> list = this.communityFormProvider.listCommunityGeneralFormByFormId(form.getId());
             if (!CollectionUtils.isEmpty(list)) {
                 for(CommunityGeneralForm communityGeneralForm : list) {
-                    communityGeneralForm.setFormId(generalFormDTO.getId());
+                    communityGeneralForm.setFormOriginId(generalFormDTO.getId());
                     this.communityFormProvider.updateCommunityGeneralForm(communityGeneralForm);
                 }
             }

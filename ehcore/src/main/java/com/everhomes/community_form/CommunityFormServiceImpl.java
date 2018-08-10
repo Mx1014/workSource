@@ -49,7 +49,7 @@ public class CommunityFormServiceImpl implements CommunityFormService{
             communityGeneralForm = ConvertHelper.convert(cmd,CommunityGeneralForm.class);
             this.communityFormProvider.createCommunityGeneralForm(communityGeneralForm);
         }else {
-            communityGeneralForm.setFormId(cmd.getFormId());
+            communityGeneralForm.setFormOriginId(cmd.getFormOriginId());
             this.communityFormProvider.updateCommunityGeneralForm(communityGeneralForm);
         }
         return ConvertHelper.convert(communityGeneralForm,CommunityGeneralFormDTO.class);

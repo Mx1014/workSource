@@ -67,7 +67,7 @@ public class CommunityFormProviderImpl implements CommunityFormProvider{
     public List<CommunityGeneralForm> listCommunityGeneralFormByFormId(Long formId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunityGeneralForm.class));
         SelectQuery<EhCommunityGeneralFormRecord> query = context.selectQuery(Tables.EH_COMMUNITY_GENERAL_FORM);
-        query.addConditions(Tables.EH_COMMUNITY_GENERAL_FORM.FORM_ID.eq(formId));
+        query.addConditions(Tables.EH_COMMUNITY_GENERAL_FORM.FORM_ORIGIN_ID.eq(formId));
         List<EhCommunityGeneralFormRecord> records = query.fetch();
         if (!CollectionUtils.isEmpty(records)) {
             List<CommunityGeneralForm> generalForms = records.stream().map(r->{
@@ -83,7 +83,7 @@ public class CommunityFormProviderImpl implements CommunityFormProvider{
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         return context.select(Tables.EH_COMMUNITIES.ID.as("community_id"),Tables.EH_COMMUNITY_GENERAL_FORM.ID,Tables.EH_COMMUNITY_GENERAL_FORM.NAMESPACE_ID,
-                Tables.EH_COMMUNITY_GENERAL_FORM.FORM_ID,Tables.EH_COMMUNITY_GENERAL_FORM.TYPE)
+                Tables.EH_COMMUNITY_GENERAL_FORM.FORM_ORIGIN_ID,Tables.EH_COMMUNITY_GENERAL_FORM.TYPE)
                 .from(Tables.EH_COMMUNITIES).leftOuterJoin(Tables.EH_COMMUNITY_GENERAL_FORM).on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_COMMUNITY_GENERAL_FORM.COMMUNITY_ID))
                 .and(Tables.EH_COMMUNITY_GENERAL_FORM.TYPE.eq(type))
                 .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
