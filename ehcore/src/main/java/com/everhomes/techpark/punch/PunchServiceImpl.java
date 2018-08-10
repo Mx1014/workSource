@@ -9120,9 +9120,16 @@ public class PunchServiceImpl implements PunchService {
 	        		response.setIntervals(new ArrayList<>());
 	        	}
 	        	for(PunchIntevalLogDTO intevalLogDTO : response.getIntervals()){
-	        		if(PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.FORGOT_OFF_DUTY  
-	        				|| PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.BELATE_AND_FORGOT){
-	        			intevalLogDTO.setStatus(PunchStatus.FORGOT_ON_DUTY.getCode() + "");
+	        		if(intevalLogDTO.getStatus() == null){
+	        			continue;
+	        		}
+	        		try{
+		        		if(PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.FORGOT_OFF_DUTY  
+		        				|| PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.BELATE_AND_FORGOT){
+		        			intevalLogDTO.setStatus(PunchStatus.FORGOT_ON_DUTY.getCode() + "");
+		        		}
+	        		}catch(Exception e){
+	        			LOGGER.error("版本兼容处理出现了问题", e);
 	        		}
 	        	}
             }
