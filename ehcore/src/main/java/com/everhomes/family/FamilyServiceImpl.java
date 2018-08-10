@@ -2324,4 +2324,13 @@ public class FamilyServiceImpl implements FamilyService {
     	    }
 	    }
 	}
+
+
+    @Override
+    public ListUserFamilyByCommunityIdResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd) {
+
+
+        //addressProvider.getUserFamiliesByUserId()
+        return null;
+    }
 }

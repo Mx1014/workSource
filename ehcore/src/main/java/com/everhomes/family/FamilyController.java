@@ -455,8 +455,12 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("listUserFamilyByCommunityId")
     @RestReturn(value=ListUserFamilyByCommunityIdResponse.class)
     public RestResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd) {
+        ListUserFamilyByCommunityIdResponse res = familyService.listUserFamilyByCommunityId(cmd);
 
-        return null;
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
 }
