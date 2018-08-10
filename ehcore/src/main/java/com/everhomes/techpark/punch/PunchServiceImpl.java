@@ -9108,19 +9108,19 @@ public class PunchServiceImpl implements PunchService {
             if(Version.encodeValue(appVersion.getMajor(), appVersion.getMinor(), appVersion.getRevision()) < 
     					Version.encodeValue(5,8,0) ){
             	//2018年8月9日 对5.8.0之前版本的签到签退做特殊处理 -- 修改为非工作日
-	        	if((response.getPunchType().equals(PunchType.OVERTIME_ON_DUTY.getCode()) ||
-	        			response.getPunchType().equals(PunchType.OVERTIME_OFF_DUTY.getCode())) ){
+	        	if(PunchType.fromCode(response.getPunchType()) == PunchType.OVERTIME_ON_DUTY ||
+	        			PunchType.fromCode(response.getPunchType()) == PunchType.OVERTIME_OFF_DUTY ){
 	        				response.setPunchType(PunchType.NOT_WORKDAY.getCode());
 	        	}
 	        	if((cmd.getQueryTime() == null ||
 	        			dateSF.get().format(DateHelper.currentGMTTime()).equals(dateSF.get().format(new java.sql.Date(cmd.getQueryTime()))))
-	        			&& response.getPunchType().equals(PunchType.NOT_WORKDAY.getCode()) ){
+	        			&& PunchType.fromCode(response.getPunchType()) == PunchType.NOT_WORKDAY  ){
 	        		//今日的数据,状态是休息的 intervals清空
 	        		response.setIntervals(new ArrayList<>());
 	        	}
 	        	for(PunchIntevalLogDTO intevalLogDTO : response.getIntervals()){
-	        		if(intevalLogDTO.getStatus().equals(PunchStatus.FORGOT_OFF_DUTY.getCode() + "")
-	        				||intevalLogDTO.getStatus().equals(PunchStatus.BELATE_AND_FORGOT.getCode() + "")){
+	        		if(PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.FORGOT_OFF_DUTY  
+	        				|| PunchStatus.fromCode(Byte.valueOf(intevalLogDTO.getStatus())) == PunchStatus.BELATE_AND_FORGOT){
 	        			intevalLogDTO.setStatus(PunchStatus.FORGOT_ON_DUTY.getCode() + "");
 	        		}
 	        	}
