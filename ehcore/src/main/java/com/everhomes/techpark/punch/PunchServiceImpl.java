@@ -5329,8 +5329,8 @@ public class PunchServiceImpl implements PunchService {
         }
         Long nextPageAnchor = null;
         if (results.size() > pageSize) {
-            results.remove(results.size() - 1);
             nextPageAnchor = results.get(results.size() - 1).getId();
+            results.remove(results.size() - 1);
         }
 
         response.setExtColumns(new ArrayList<>());
