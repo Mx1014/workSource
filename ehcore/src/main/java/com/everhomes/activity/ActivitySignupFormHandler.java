@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.general_form.GeneralForm;
@@ -24,11 +25,13 @@ import com.everhomes.rest.general_approval.GeneralFormRenderType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
@@ -65,7 +68,8 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         Long activityId = 0L;
         for (PostApprovalFormItem item :values) {
             if ("ACTIVITY_ID".equals(item.getFieldName())) {
-                activityId = Long.valueOf(item.getFieldValue());
+                PostApprovalFormTextValue textValue = new Gson().fromJson(item.getFieldValue(), PostApprovalFormTextValue.class);
+                activityId = Long.valueOf(textValue.getText());
             }
         }
         if (activityId == null || activityId == 0L) {
@@ -126,7 +130,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             generalFormFieldDTO.setRequiredFlag(TrueOrFalseFlag.TRUE.getCode());
             generalFormFieldDTO.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
             generalFormFieldDTO.setFieldDisplayName("活动ID");
-            generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
+            generalFormFieldDTO.setFieldValue(JSON.parseObject(cmd.getOwnerId().toString(), PostApprovalFormTextValue.class).getText());
             generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
             fieldDTOs.add(generalFormFieldDTO);
             dto.setFormFields(fieldDTOs);
