@@ -431,7 +431,7 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
 
-		if(TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) == TrueOrFalseFlag.TRUE){
+		if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) != TrueOrFalseFlag.TRUE && TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) == TrueOrFalseFlag.TRUE){
 			checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
 		}
 
