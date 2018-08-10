@@ -1729,14 +1729,15 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
     	
     	// 非登录用户只能看第一页 add by xiongying20161009
-    	if(cmd.getPageAnchor() != null ) {
-    		 if(!userService.isLogon()){
-    			 LOGGER.error("Not logged in.");
-  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
-  					   "Not logged in.");
-
-    		 }
-    	}
+        // 允许用户一直浏览 add by yanlong.liang20180810
+//    	if(cmd.getPageAnchor() != null ) {
+//    		 if(!userService.isLogon()){
+//    			 LOGGER.error("Not logged in.");
+//  			   throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+//  					   "Not logged in.");
+//
+//    		 }
+//    	}
     	
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
