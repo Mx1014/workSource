@@ -3,6 +3,7 @@ package com.everhomes.rest.filemanagement;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -19,6 +20,7 @@ import java.sql.Timestamp;
  * <li>contentUrl: 内容url(下载链接)</li>
  * <li>iconUrl: 图标url</li>
  * <li>path: 路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
+ * <li>contents: 可见范围列表 参考{@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * <li>createTime: 创建时间</li>
  * </ul>
  */
@@ -51,6 +53,7 @@ public class FileContentDTO {
     private Timestamp createTime;
 
     private String path;
+    private List<FileContentDTO> contents;
 
     public FileContentDTO() {
     }
@@ -170,5 +173,13 @@ public class FileContentDTO {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public List<FileContentDTO> getContents() {
+        return contents;
+    }
+
+    public void setContents(List<FileContentDTO> contents) {
+        this.contents = contents;
     }
 }

@@ -33,4 +33,5 @@ public interface FileManagementService {
 
 	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd);
 
+    ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd);
 }

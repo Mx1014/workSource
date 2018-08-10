@@ -185,14 +185,24 @@ public class FileManagementController extends ControllerBase {
 		return new RestResponse();
 	}
 
-	/**
-	 * <p>根据后缀查询文件图标</p>
-	 * <b>URL: /fileManagement/getFileIcon</b>
-	 */
-	@RequestMapping("getFileIcon")
-	@RestReturn(GetFileIconResponse.class)
-	public RestResponse getFileIcon(GetFileIconCommand cmd){
-		return new RestResponse(fileManagementService.getFileIcon(cmd));
-	}
+    /**
+     * <p>根据后缀查询文件图标</p>
+     * <b>URL: /fileManagement/getFileIcon</b>
+     */
+    @RequestMapping("getFileIcon")
+    @RestReturn(GetFileIconResponse.class)
+    public RestResponse getFileIcon(GetFileIconCommand cmd){
+        return new RestResponse(fileManagementService.getFileIcon(cmd));
+    }
+
+    /**
+     * <p>获取目录文件夹的树状结构</p>
+     * <b>URL: /fileManagement/listAllFloders</b>
+     */
+    @RequestMapping("getFileIcon")
+    @RestReturn(ListAllFlodersResponse.class)
+    public RestResponse listAllFloders(ListAllFlodersCommand cmd){
+        return new RestResponse(fileManagementService.listAllFloders(cmd));
+    }
 
 }

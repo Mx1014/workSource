@@ -323,8 +323,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileContentDTO> folders = new ArrayList<>();
         List<FileContentDTO> files = new ArrayList<>();
         Map<String, String> fileIcons = fileService.getFileIconUrl();
-
+        FileContent searchContent = null;
+        if (cmd.getContentId() != null) {
+            searchContent = fileManagementProvider.findFileContentById(cmd.getContentId());
+        }
+        //如果找得到文件夹就查文件夹path下的
+        String searchPath = searchContent == null ? null: searchContent.getPath();
         List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            if (searchPath != null) {
+                //在文件夹下搜索就不搜索目录
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.isNull());
+            }
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
@@ -334,6 +343,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
         });
 
         List<FileContent> folderResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            if (searchPath != null) {
+                //搜索文件夹下
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(searchPath + "/%"));
+            }
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.eq(FileContentType.FOLDER.getCode()));
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
@@ -345,6 +358,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         List<FileContent> contentResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.ne(FileContentType.FOLDER.getCode()));
+            if (searchPath != null) {
+                //搜索文件夹下
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(searchPath + "/%"));
+            }
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
@@ -688,8 +705,56 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
 	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
-	
-		return new GetFileIconResponse();
+		return new GetFileIconResponse(fileService.findUrlByFileType(cmd.getFileSuffix()));
 	}
+
+    @Override
+    public ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd) {
+        ListAllFlodersResponse response = new ListAllFlodersResponse();
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
+        List<FileCatalog> results = fileManagementProvider.listFileCatalogs(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), null, Integer.MAX_VALUE - 1, null);
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        if (results != null && results.size() > 0) {
+            results.forEach(r -> {
+                FileCatalogDTO dto = convertToCatalogDTO(r, fileIcons);
+                dto.setDownloadPermission(FileDownloadPermissionStatus.ALLOW.getCode());
+                dto.setContents(listCataLogAllContents(r.getId(), cmd.getOwnerId(), fileIcons));
+                catalogs.add(dto);
+            });
+        }
+        response.setCatalogs(catalogs);
+        return null;
+    }
+
+    private List<FileContentDTO> listCataLogAllContents(Long catalogId, Long ownerId, Map<String, String> fileIcons) {
+        return listSubContents(catalogId, ownerId, fileIcons, null);
+    }
+
+    private List<FileContentDTO> listSubContents(Long catalogId, Long ownerId, Map<String, String> fileIcons, Long contentId) {
+        List<FileContentDTO> results = new ArrayList<>();
+        List<FileContent> topFloders = fileManagementProvider.queryFileContents(new ListingLocator(), UserContext.getCurrentNamespaceId()
+                , ownerId, (locator, query) -> {
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.eq(FileContentType.FOLDER.getCode()));
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
+                    if (contentId == null) {
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+
+                    } else {
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(contentId));
+                        //防止parentid和id一样,死循环
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.ne(contentId));
+                    }
+                    query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
+                    return query;
+                });
+        if (topFloders != null && topFloders.size() > 0) {
+            topFloders.forEach(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
+                dto.setContents(listSubContents(catalogId, ownerId, fileIcons, dto.getId()));
+                results.add(dto);
+            });
+        }
+        return results;
+    }
 
 }
