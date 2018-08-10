@@ -131,6 +131,7 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 				.where(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId))
 				.and(Tables.EH_PORTAL_LAYOUTS.TYPE.eq(type))
 				.and(Tables.EH_PORTAL_LAYOUTS.INDEX_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
+				.and(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
 				.fetchAnyInto(PortalLayout.class);
 	}
 
