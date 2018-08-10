@@ -292,8 +292,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				if (amorpm != null) {
 					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
-									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
-											.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm))))
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())))
+							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm))
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
 									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate()))))
 					        .or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
@@ -2684,7 +2684,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		context.delete(Tables.EH_RENTALV2_REFUND_TIPS)
 				.where(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_TYPE.eq(sourceType))
 				.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_ID.eq(sourceId))
-				.and(Tables.EH_RENTALV2_ORDER_RULES.RESOURCE_TYPE.eq(resourceType))
+				.and(Tables.EH_RENTALV2_REFUND_TIPS.RESOURCE_TYPE.eq(resourceType))
 				.execute();
 	}
 
