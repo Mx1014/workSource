@@ -9085,13 +9085,16 @@ public class PunchServiceImpl implements PunchService {
             }
         }
         if (null != ptr) {
-        	if(PunchDayType.WORKDAY == ptr.getPunchDayType()){
-        		response = processWorkdayPunchIntervalDTO(response, ptr, punchLogs, statusList, approvalStatus);        		
-        	}else {
-        		PunchOvertimeRule por = getPunchOvertimeRuleByPunchDayType(pr, ptr.getPunchDayType());
-            	if (por != null) {
-            		response = processHolidayPunchIntervalDTO(response, ptr, punchLogs);
-            	}
+        	if(null != pdl && !pdl.getStatusList().equals(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode() + "")){
+        		//这里判断如果没有pdl 或者pdl的状态是无规则就是没有规则,不去统计intervals
+	        	if(PunchDayType.WORKDAY == ptr.getPunchDayType()){
+	        		response = processWorkdayPunchIntervalDTO(response, ptr, punchLogs, statusList, approvalStatus);        		
+	        	}else {
+	        		PunchOvertimeRule por = getPunchOvertimeRuleByPunchDayType(pr, ptr.getPunchDayType());
+	            	if (por != null) {
+	            		response = processHolidayPunchIntervalDTO(response, ptr, punchLogs);
+	            	}
+	        	}
         	}
             //找到用户当日申请列表
             List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
