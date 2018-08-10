@@ -9227,7 +9227,9 @@ public class PunchServiceImpl implements PunchService {
                 //因为如果有异常审批一定会有pl,所以异常写在里面
                 dto1 = convertPunchLog2DTOWithExceptionRequestToken(pl);
             }
-            dto1.setStatusString(statusToString(null, dto1.getClockStatus()));
+            if(PunchStatus.fromCode(dto1.getClockStatus()) == PunchStatus.BELATE || PunchStatus.fromCode(dto1.getClockStatus()) == PunchStatus.LEAVEEARLY
+            		|| PunchStatus.fromCode(dto1.getClockStatus()) == PunchStatus.NORMAL)
+            	dto1.setStatusString(statusToString(null, dto1.getClockStatus()));
             intervalDTO.getPunchLogs().add(dto1);
 
             PunchLogDTO dto2 = null;
@@ -9242,7 +9244,9 @@ public class PunchServiceImpl implements PunchService {
             } else {
                 dto2 = convertPunchLog2DTOWithExceptionRequestToken(pl);
             }
-            dto2.setStatusString(statusToString(null, dto2.getClockStatus()));
+            if(PunchStatus.fromCode(dto2.getClockStatus()) == PunchStatus.BELATE || PunchStatus.fromCode(dto2.getClockStatus()) == PunchStatus.LEAVEEARLY
+            		|| PunchStatus.fromCode(dto2.getClockStatus()) == PunchStatus.NORMAL)	 
+            	dto2.setStatusString(statusToString(null, dto2.getClockStatus()));
             intervalDTO.getPunchLogs().add(dto2);
             LOGGER.debug("dto1 =" + dto1 + "dto 2 = " + dto2);
             if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
@@ -10153,6 +10157,11 @@ public class PunchServiceImpl implements PunchService {
             MonthDayStatusDTO dto = new MonthDayStatusDTO();
             if (null != log) {
                 dto = ConvertHelper.convert(log, MonthDayStatusDTO.class); 
+                if(PunchStatus.fromCode(Byte.valueOf(log.getStatusList())) == PunchStatus.NO_ASSIGN_PUNCH_RULE
+                		|| PunchStatus.fromCode(Byte.valueOf(log.getStatusList())) == PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED){
+                	dto.setRuleType(null);
+                	dto.setTimeRuleId(null);
+                }
                 //异常状态用log的
 //				if (null == log.getStatusList()) {
 //					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
