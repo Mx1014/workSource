@@ -18,7 +18,7 @@ public class PortalLayoutDTO {
 
     private Byte type;
 
-    private String indexFlag;
+    private Byte indexFlag;
 
     public Long getId() {
         return id;
