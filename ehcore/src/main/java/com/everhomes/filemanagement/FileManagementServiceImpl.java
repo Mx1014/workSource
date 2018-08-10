@@ -390,22 +390,28 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         FileContentDTO dto = new FileContentDTO();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
-        FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getParentId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (catalog == null)
             return dto;
+        Map<String, Long> map = checkFilePath(cmd.getPath(), catalog.getOwnerId());
+        Long parentId = map.get("parentId");
+        Long catalogId = map.get("catalogId");
+        FileContent parentContent = null;
+        if (null != parentId) {
+            parentContent = fileManagementProvider.findFileContentById(parentId);
+        }
 
         //  1.whether the name has been used
-        String contentName = setContentNameAutomatically(namespaceId, catalog.getOwnerId(), catalog.getId(),
-                cmd.getParentId(), cmd.getContentName(), cmd.getContentSuffix());
+        String contentName = setContentNameAutomatically(namespaceId, catalog.getOwnerId(), catalogId,
+                parentId, cmd.getContentName(), cmd.getContentSuffix());
 
         //  2.create it & set the path
         FileContent content = new FileContent();
-        content.setNamespaceId(catalog.getNamespaceId());
+        content.setNamespaceId(namespaceId);
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
-        content.setCatalogId(catalog.getId());
-        content.setParentId(cmd.getParentId());
+        content.setCatalogId(catalogId);
+        content.setParentId(parentId);
         if (parentContent != null)
             content.setPath(parentContent.getPath());
         else
