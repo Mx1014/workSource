@@ -20,6 +20,7 @@ import com.everhomes.aclink.huarun.*;
 import com.everhomes.aclink.lingling.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.blacklist.BlacklistService;
@@ -3084,6 +3085,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setNickname(cmd.getUserName());
         auth.setLinglingUuid(uuid);
         auth.setCurrStorey(cmd.getDoorNumber());
+        auth.setRightOpen((byte) 1);
         
         //按次开门只适用于左邻门禁 by liuyilin 20180509
 		if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
@@ -5191,7 +5193,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		List<String> listMac = new ArrayList<String>();
 		ListZLDoorAccessResponse rsp = new ListZLDoorAccessResponse();
 		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
-		Long ownerId = 500000125L;
+		App app = UserContext.current().getCallerApp();
+		if(app == null || app.getName() == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth error");
+		}
+		Long ownerId = Long.valueOf(app.getName());
 		ListDoorAccessGroupCommand cmd = new ListDoorAccessGroupCommand();
 		cmd.setOwnerId(ownerId);
 		cmd.setOwnerType(DoorAccessOwnerType.ENTERPRISE.getCode());
