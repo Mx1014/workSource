@@ -36,5 +36,7 @@ public interface OrganizationNotificationTemplateCode {
 
 	int DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 20;//${userName}（${contactToken}）的${organizationName}企业管理员身份已被移除。
 	int DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 21;//您的${organizationName}企业管理员身份已被移除。
+	
+	int DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 22;//你在${organizationName}的超级管理员身份已被移除。
 
 }
