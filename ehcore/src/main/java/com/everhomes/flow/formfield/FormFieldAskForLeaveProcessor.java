@@ -42,7 +42,7 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.DROP_BOX.getCode());
         dto.setDisplayName("请假类型");
-        dto.setName("请假类型");
+        dto.setValue("请假类型");
         //  请假类型的接口
         List<ApprovalCategoryDTO> categories = punchService.listApprovalCategories().getCategoryList();
         dto.setOptions(categories.stream().map(ApprovalCategoryDTO::getCategoryName).collect(Collectors.toList()));
@@ -52,21 +52,21 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("开始时间");
-        dto.setName("开始时间");
+        dto.setValue("开始时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("结束时间");
-        dto.setName("结束时间");
+        dto.setValue("结束时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
         dto.setDisplayName("请假时长");
-        dto.setName("请假时长");
+        dto.setValue("请假时长");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 

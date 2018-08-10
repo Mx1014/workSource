@@ -1912,6 +1912,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             OrganizationMember member = archivesProvider.findOrganizationMemberWithStatusByDetailId(detail.getId());
             if (member == null){
                 organizationProvider.deleteOrganizationMemberDetails(detail);
+                archivesProvider.deleteArchivesStickyContactsByDetailId(detail.getNamespaceId(), detail.getId());
                 LOGGER.info("the [" + i++ + "] times to make the delete the detail") ;
             }
         }

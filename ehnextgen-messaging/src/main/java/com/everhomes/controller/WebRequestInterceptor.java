@@ -295,14 +295,18 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if(org.springframework.util.StringUtils.isEmpty(context.getVersion()) || context.getVersion().equals("0.0.0")){
             context.setScheme(userAgents.get("scheme"));
         }else{
-            VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
+            try {
+                VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
 
-            // if (LOGGER.isDebugEnabled()) {
-            //     LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
-            // }
-            if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
-                context.setScheme(HTTP);
-            } else {
+                // if (LOGGER.isDebugEnabled()) {
+                //     LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
+                // }
+                if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
+                    context.setScheme(HTTP);
+                } else {
+                    context.setScheme(userAgents.get("scheme"));
+                }
+            }catch(Exception ex) {
                 context.setScheme(userAgents.get("scheme"));
             }
         }

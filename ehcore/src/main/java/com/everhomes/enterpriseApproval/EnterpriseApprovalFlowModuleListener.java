@@ -63,6 +63,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Autowired
     LocaleStringService localeStringService;
 
+    @Autowired
+    private FlowService flowService;
+
     private DecimalFormat decimalFormat = new DecimalFormat("0.000");
 
     private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -107,7 +110,8 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER, "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
+        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString(
+                EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER, "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
         List<FlowCaseEntity> entities = processCreatingEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
@@ -400,7 +404,14 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         List<FlowCaseEntity> entities = new ArrayList<>();
         if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
             List<GeneralApprovalVal> vals = this.generalApprovalValProvider
-                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getRootFlowCaseId());
+            if (vals.size() == 0) {
+                vals = this.generalApprovalValProvider
+                        .queryGeneralApprovalValsByFlowCaseId(flowCase.getSubFlowRootFlowCaseId());
+            }
+            if (vals.size() == 0) {
+                return new ArrayList<>();
+            }
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
             // 模板设定的字段DTOs

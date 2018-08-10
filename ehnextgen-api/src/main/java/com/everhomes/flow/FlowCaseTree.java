@@ -29,7 +29,10 @@ public class FlowCaseTree {
     public void setFlowCase(FlowCase flowCase) {
         this.flowCase = flowCase;
     }
-    
+
+    /**
+     * 获取所有的叶子节点列表，也就是正在执行的任务列表
+     */
     public List<FlowCaseTree> getLeafNodes() {
         List<FlowCaseTree> leafNodes = new ArrayList<>();
         if (this.nodes != null && this.nodes.size() > 0) {

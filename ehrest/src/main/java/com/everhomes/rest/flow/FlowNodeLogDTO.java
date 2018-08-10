@@ -32,6 +32,8 @@ public class FlowNodeLogDTO {
 	private String params;
     private Byte needSelectNextNode;
     private Long nodeEnterTime;
+    private Long formOriginId;
+    private Long formVersion;
 
     @ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
@@ -112,11 +114,6 @@ public class FlowNodeLogDTO {
 		this.params = params;
 	}
 
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public void setNeedSelectNextNode(Byte needSelectNextNode) {
         this.needSelectNextNode = needSelectNextNode;
     }
@@ -137,7 +134,28 @@ public class FlowNodeLogDTO {
         return isRejectNode;
     }
 
-    public void setIsRejectNode(Byte isRejectNode) {
+	public Long getFormOriginId() {
+		return formOriginId;
+	}
+
+	public void setFormOriginId(Long formOriginId) {
+		this.formOriginId = formOriginId;
+	}
+
+	public Long getFormVersion() {
+		return formVersion;
+	}
+
+	public void setFormVersion(Long formVersion) {
+		this.formVersion = formVersion;
+	}
+
+	public void setIsRejectNode(Byte isRejectNode) {
         this.isRejectNode = isRejectNode;
     }
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

@@ -18,6 +18,7 @@ import java.sql.Timestamp;
  *     <li>status: status</li>
  *     <li>lastNode: lastNode</li>
  *     <li>flowVersion: flowVersion</li>
+ *     <li>lastVersion: 最新的版本</li>
  *     <li>runTime: runTime</li>
  *     <li>createTime: createTime</li>
  *     <li>updateTime: updateTime</li>
@@ -42,6 +43,7 @@ public class FlowDTO {
     private Byte status;
     private Long lastNode;
     private Integer flowVersion;
+    private Integer lastVersion;
     private Timestamp runTime;
     private Timestamp createTime;
     private Timestamp updateTime;
@@ -238,6 +240,19 @@ public class FlowDTO {
 
     public void setNeedFormFlag(Byte needFormFlag) {
         this.needFormFlag = needFormFlag;
+    }
+
+    public Integer getLastVersion() {
+        return lastVersion;
+    }
+
+    public void setLastVersion(Integer lastVersion) {
+        this.lastVersion = lastVersion;
+    }
+
+    public void fixDisplayVersion() {
+        Integer v = this.getLastVersion();
+        this.setLastVersion(v + 9999);
     }
 
     @Override

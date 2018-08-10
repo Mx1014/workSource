@@ -11,7 +11,13 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowEventType {
-	STEP_START("step_start"), STEP_TIMEOUT("step_timeout"), STEP_MODULE("step_module"), BUTTON_FIRED("button_fired");
+
+	STEP_START("step_start"),
+	STEP_TIMEOUT("step_timeout"),
+	STEP_MODULE("step_module"),
+	STEP_FLOW("step_flow"),
+	BUTTON_FIRED("button_fired"),
+	;
 	
 	private String code;
     private FlowEventType(String code) {
