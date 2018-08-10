@@ -1544,7 +1544,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
+		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NONEED.getCode());
 		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
 		if (values != null) {
             signupInfoDTO.setValues(values);
