@@ -447,5 +447,16 @@ public class FamilyController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+
+    /**
+     * <b>URL: /family/listUserFamilyByCommunityId</b>
+     * <p>获取用户相关的banner</p>
+     */
+    @RequestMapping("listUserFamilyByCommunityId")
+    @RestReturn(value=ListUserFamilyByCommunityIdResponse.class)
+    public RestResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd) {
+
+        return null;
+    }
     
 }
