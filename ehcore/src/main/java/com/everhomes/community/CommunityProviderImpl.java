@@ -910,7 +910,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_BUILDINGS.BUILDING_NUMBER.eq(buildingNumber));
-        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
 
         return ConvertHelper.convert(query.fetchOne(), Building.class);
     }

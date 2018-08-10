@@ -2594,7 +2594,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setSharedArea(cmd.getSharedArea());
             address.setFreeArea(cmd.getFreeArea());
             //房源所在楼层
-            address.setApartmentFloor(cmd.getApartmentFloor().toString());
+            address.setApartmentFloor(cmd.getApartmentFloor());
             address.setIsFutureApartment((byte)0);
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());

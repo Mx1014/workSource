@@ -6,5 +6,6 @@
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '20007', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20016', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10201', 'zh_CN', '楼宇名称已存在');
 
 ------------------------ SECTION END ---------------------------------------------------------

@@ -561,8 +561,8 @@ public class CommunityController extends ControllerBase {
      */
     @RequestMapping("caculateCommunityArea")
     @RestReturn(value=String.class)
-    public RestResponse caculateCommunityArea() {
-    	this.communityService.caculateCommunityArea();
+    public RestResponse caculateCommunityArea(CaculateCommunityAreaCommand cmd) {
+    	this.communityService.caculateCommunityArea(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -575,8 +575,8 @@ public class CommunityController extends ControllerBase {
      */
     @RequestMapping("caculateBuildingArea")
     @RestReturn(value=String.class)
-    public RestResponse caculateBuildingArea() {
-    	this.communityService.caculateBuildingArea();
+    public RestResponse caculateBuildingArea(CaculateBuildingAreaCommand cmd) {
+    	this.communityService.caculateBuildingArea(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

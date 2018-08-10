@@ -85,6 +85,8 @@ import com.everhomes.rest.community.BuildingOrderDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatisticsDTO;
 import com.everhomes.rest.community.BuildingStatus;
+import com.everhomes.rest.community.CaculateBuildingAreaCommand;
+import com.everhomes.rest.community.CaculateCommunityAreaCommand;
 import com.everhomes.rest.community.ChangeBuildingOrderCommand;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityDetailDTO;
@@ -1122,10 +1124,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 			if (cmd.getId() == null) {
-
+				//检查园区下是否有同名的楼栋
+				checkBuildingNameUnique(cmd.getName(), cmd.getCommunityId());
 				LOGGER.info("add building, cmd={}", cmd);
 				this.communityProvider.createBuilding(userId, building);
-
 			} else {
 				LOGGER.info("update building, cmd={}", cmd);
 				Building b = this.communityProvider.findBuildingById(cmd.getId());
@@ -1133,7 +1135,6 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCreateTime(b.getCreateTime());
 				building.setNamespaceId(b.getNamespaceId());
 				this.communityProvider.updateBuilding(building);
-
 			}
 			processBuildingAttachments(userId, cmd.getAttachments(), building);
 
@@ -1146,6 +1147,16 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return dto;
 	}
+
+	private void checkBuildingNameUnique(String buildingName, Long communityId) {
+		Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, buildingName);
+		if(building != null) {
+			LOGGER.error("building name already exsits.buildingName=" + buildingName);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NAME_EXIST,
+					"building name already exsits.");
+		}
+	}
+
 
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
@@ -1461,6 +1472,7 @@ public class CommunityServiceImpl implements CommunityService {
 			if (building == null) {
 				building = new Building();
 				building.setName(data.getName());
+				building.setBuildingNumber(data.getBuildingNumber());
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
 				building.setManagerName(data.getContactor());
@@ -1594,7 +1606,7 @@ public class CommunityServiceImpl implements CommunityService {
 			RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
 					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
-					StringUtils.isNotBlank(r.getI())) {
+					StringUtils.isNotBlank(r.getI()) || StringUtils.isNotBlank(r.getJ())) {
 				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
 				data.setName(trim(r.getA()));
 				data.setBuildingNumber(trim(r.getB()));
@@ -4914,17 +4926,24 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		community.setName(cmd.getCommunityName());
 		community.setAliasName(cmd.getAliasName());
-		community.setCityId(cmd.getCityId());
-		community.setCityName(cmd.getCityName());
-		community.setAreaId(cmd.getAreaId());
-		community.setAreaName(cmd.getAreaName());
 		community.setAddress(cmd.getAddress());
-		community.setAreaSize(cmd.getAreaSize());
-		community.setRentArea(cmd.getRentArea());
-		community.setFreeArea(cmd.getFreeArea());
-		community.setChargeArea(cmd.getChargeArea());
+//		面积数据由房源的面积数据累加得来，不接受直接修改
+//		community.setAreaSize(cmd.getAreaSize());
+//		community.setRentArea(cmd.getRentArea());
+//		community.setFreeArea(cmd.getFreeArea());
+//		community.setChargeArea(cmd.getChargeArea());
 		community.setCommunityNumber(cmd.getCommunityNumber());
 		
+		if (cmd.getCityId() != null) {
+			community.setCityId(cmd.getCityId());
+			Region region = regionProvider.findRegionById(cmd.getCityId());
+			community.setCityName(region.getName());
+		}
+		if (cmd.getAreaId() != null) {
+			community.setAreaId(cmd.getAreaId());
+			Region region = regionProvider.findRegionById(cmd.getAreaId());
+			community.setAreaName(region.getName());
+		}	
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
 		Integer namespaceId = cmd.getNamespaceId();
@@ -5045,8 +5064,8 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void caculateCommunityArea() {
-		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(11);
+	public void caculateCommunityArea(CaculateCommunityAreaCommand cmd) {
+		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(cmd.getNamespaceId());
 		for (Community community : communities) {
 			initCommunityData(community);
 			List<Address> addresses = addressProvider.findActiveAddressByCommunityId(community.getId());
@@ -5072,8 +5091,8 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void caculateBuildingArea() {
-		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(11);
+	public void caculateBuildingArea(CaculateBuildingAreaCommand cmd) {
+		List<Community> communities = communityProvider.findCommunitiesByNamespaceId(cmd.getNamespaceId());
 		for (Community community : communities) {
 			List<Building> buildings = communityProvider.findBuildingsByCommunityId(community.getId());
 			for (Building building : buildings) {
@@ -5146,7 +5165,7 @@ public class CommunityServiceImpl implements CommunityService {
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
 		}
-		//分页
+		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
 		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
 		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
 		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
@@ -5155,14 +5174,16 @@ public class CommunityServiceImpl implements CommunityService {
 			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
 				apartmentsForOnePage.add(apartmentInfoDTO);
 				size ++;
-				if (size >= pageSize) {
+				if (size > pageSize) {
 					break;
 				}
 			}
 		}
-		
 		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
-			result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+			if (size > pageSize) {
+				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
+				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+			}
 			result.setApartments(apartmentsForOnePage);
 		}
 		
