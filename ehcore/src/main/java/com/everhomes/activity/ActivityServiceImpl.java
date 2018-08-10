@@ -662,7 +662,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         CommunityGeneralForm communityGeneralForm = this.communityFormProvider.findCommunityGeneralForm(communityId, CommunityFormType.ACTIVITY_SIGNUP);
         if (communityGeneralForm != null) {
             roster.setFormId(communityGeneralForm.getFormId());
-            GeneralForm form = this.generalFormProvider.getGeneralFormById(communityGeneralForm.getFormId());
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralForm.getFormId());
             if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
                 form.setStatus(GeneralFormStatus.RUNNING.getCode());
                 generalFormProvider.updateGeneralForm(form);

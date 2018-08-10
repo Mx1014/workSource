@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId:域空间ID</li>
  *     <li>communityId:项目ID</li>
  *     <Li>communityName: 项目名称</Li>
- *     <li>formId:表单ID</li>
+ *     <li>formOriginId:表单formOriginID</li>
  *     <li>formName:表单名称</li>
  *     <li>type:类型</li>
  * </ul>
@@ -19,7 +19,7 @@ public class CommunityGeneralFormDTO {
     private Integer namespaceId;
     private Long communityId;
     private String communityName;
-    private Long formId;
+    private Long formOriginId;
     private String formName;
     private String type;
 
@@ -47,12 +47,12 @@ public class CommunityGeneralFormDTO {
         this.communityId = communityId;
     }
 
-    public Long getFormId() {
-        return formId;
+    public Long getFormOriginId() {
+        return formOriginId;
     }
 
-    public void setFormId(Long formId) {
-        this.formId = formId;
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
     }
 
     public String getType() {

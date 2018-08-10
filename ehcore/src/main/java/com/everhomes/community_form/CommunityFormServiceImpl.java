@@ -85,8 +85,8 @@ public class CommunityFormServiceImpl implements CommunityFormService{
                     if (community != null) {
                         communityGeneralFormDTO.setCommunityName(community.getName());
                     }
-                    if (communityGeneralFormDTO.getFormId() != null) {
-                        GeneralForm generalForm = this.generalFormProvider.getGeneralFormById(communityGeneralFormDTO.getFormId());
+                    if (communityGeneralFormDTO.getFormOriginId() != null) {
+                        GeneralForm generalForm = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralFormDTO.getFormOriginId());
                         if (generalForm != null) {
                             communityGeneralFormDTO.setFormName(generalForm.getFormName());
                         }
