@@ -2330,7 +2330,53 @@ public class FamilyServiceImpl implements FamilyService {
     public ListUserFamilyByCommunityIdResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd) {
 
 
-        //addressProvider.getUserFamiliesByUserId()
-        return null;
+        List<Family> families = familyProvider.listFamilByCommunityIdAndUid(cmd.getCommunityId(), UserContext.currentUserId());
+
+        List<FamilyDTO> dtos = new ArrayList<>();
+
+        if(families != null){
+            for(Family family: families){
+                FamilyDTO dto = ConvertHelper.convert(family,FamilyDTO.class);
+
+
+                Address address = this.addressProvider.findAddressById(family.getIntegralTag1());
+                if (address == null) {
+                    LOGGER.error("Address is not found,addressId=" + family.getIntegralTag1());
+                }
+
+
+                if(address != null){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                    dto.setAddress(address.getAddress());
+                    dto.setAddressId(address.getId());
+                    dto.setAddressStatus(address.getStatus());
+                }
+
+                Community community = null;
+                if(address != null){
+                    community = this.communityProvider.findCommunityById(address.getCommunityId());
+                    if(community == null) {
+                        LOGGER.error("Community is not found,communityId=" + address.getCommunityId());
+                    }
+                }
+                if(community != null){
+                    dto.setCommunityName(community.getName());
+                    dto.setCommunityType(community.getCommunityType());
+                    dto.setCityName(community.getCityName());
+                    dto.setAreaName(community.getAreaName());
+                    dto.setCommunityId(community.getId());
+                    dto.setCommunityAliasName(community.getAliasName());
+                    dto.setDefaultForumId(community.getDefaultForumId());
+                    dto.setFeedbackForumId(community.getFeedbackForumId());
+                }
+
+                dtos.add(dto);
+            }
+        }
+
+        ListUserFamilyByCommunityIdResponse response = new ListUserFamilyByCommunityIdResponse();
+        response.setDtos(dtos);
+        return response;
     }
 }
