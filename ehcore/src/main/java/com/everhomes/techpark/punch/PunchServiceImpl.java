@@ -3228,19 +3228,20 @@ public class PunchServiceImpl implements PunchService {
 
             //找到每一个打卡日期的异常申请修改审批后状态
             //既然轮询了顺便就统计一下 设备异常次数
-            int deviceChangeCounts = 0;
+//            int deviceChangeCounts = 0;
             List<DayStatusDTO> dayStatusDTOList = new ArrayList<>();
             for (PunchDayLog dayLog : dayLogList) {
-                if (NormalFlag.YES == NormalFlag.fromCode(dayLog.getDeviceChangeFlag())) {
-                    deviceChangeCounts++;
-                }
+//                if (NormalFlag.YES == NormalFlag.fromCode(dayLog.getDeviceChangeFlag())) {
+//                    deviceChangeCounts++;
+//                }
                 DayStatusDTO dayStatusDTO = new DayStatusDTO();
                 dayStatusDTO.setDate(dayStatusSF.get().format(dayLog.getPunchDate()));
                 dayStatusDTO.setStatus(processStatus(dayLog.getSplitDateTime(), dayLog.getStatusList(), dayLog.getApprovalStatusList()));
                 dayStatusDTOList.add(dayStatusDTO);
             }
             statistic.setStatusList(StringHelper.toJsonString(dayStatusDTOList));
-            statistic.setDeviceChangeCounts(deviceChangeCounts);
+            statistic.setDeviceChangeCounts(punchProvider.countDeviceChanges(socialSecurityService.getTheFirstDate(statistic.getPunchMonth()),
+            		socialSecurityService.getTheLastDate(statistic.getPunchMonth()),  detail.getTargetId(), ownerId));
 
             //算每一项需要计算的
             processPunchListCount(dayLogList, statistic);

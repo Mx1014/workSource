@@ -447,4 +447,7 @@ public interface PunchProvider {
 	void setPunchTimeRuleStatus(Long prId, Byte targetStatus);
 
 	void setPunchSchedulingsStatus(Long prId, Byte targetStatus, Date beginDate);
+
+	public Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate,
+			Long userId, Long ownerId);
 }

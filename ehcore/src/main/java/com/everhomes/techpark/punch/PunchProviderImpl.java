@@ -102,6 +102,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -4228,5 +4229,17 @@ public class PunchProviderImpl implements PunchProvider {
         step.execute();
 
     }
+
+	@Override
+	public Integer countDeviceChanges(Date theFirstDate, Date theLastDate, Long userId, Long ownerId) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_PUNCH_LOGS); 
+		Condition condition = (Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId));
+		condition = condition.and(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId)); 
+		condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(theFirstDate).and(theLastDate));  
+		condition = condition.and(Tables.EH_PUNCH_LOGS.DEVICE_CHANGE_FLAG.eq(NormalFlag.NEED.getCode())); 
+		return step.where(condition).fetchOneInto(Integer.class); 
+	}
 }
 
