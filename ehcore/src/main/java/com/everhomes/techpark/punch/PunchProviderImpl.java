@@ -2711,12 +2711,13 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     public Integer countPunchLogDevice(Long userId, Long companyId,
-                                       Date beginDate, Date endDate) {
+                                       Date beginDate, Date punchDate) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
                 .where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
                 .and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(companyId))
-                .and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginDate, endDate))
+                .and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
+                .and(Tables.EH_PUNCH_LOGS.DEVICE_CHANGE_FLAG.eq(NormalFlag.NEED.getCode()))
                 .fetchCount();
     }
 
