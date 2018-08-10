@@ -2432,6 +2432,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	             dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 	             dto.setProcessStatus(getStatus(activity).getCode());
 	             dto.setFamilyId(activity.getCreatorFamilyId());
+                 ActivityRoster creator = activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                 if (creator.getFormId() == null) {
+                     dto.setSignupFormFlag(TrueOrFalseFlag.FALSE.getCode());
+                  }else {
+                        dto.setSignupFormFlag(TrueOrFalseFlag.TRUE.getCode());
+                 }
 	             dto.setGroupId(activity.getGroupId());
 	             dto.setStartTime(activity.getStartTime().toString());
 	             dto.setStopTime(activity.getEndTime().toString());
