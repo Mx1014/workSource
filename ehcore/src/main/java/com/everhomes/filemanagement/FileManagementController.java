@@ -199,7 +199,7 @@ public class FileManagementController extends ControllerBase {
      * <p>获取目录文件夹的树状结构</p>
      * <b>URL: /fileManagement/listAllFloders</b>
      */
-    @RequestMapping("getFileIcon")
+    @RequestMapping("listAllFloders")
     @RestReturn(ListAllFlodersResponse.class)
     public RestResponse listAllFloders(ListAllFlodersCommand cmd){
         return new RestResponse(fileManagementService.listAllFloders(cmd));
