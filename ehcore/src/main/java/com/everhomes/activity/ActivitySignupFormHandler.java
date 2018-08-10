@@ -133,6 +133,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             generalFormFieldDTO.setFieldDisplayName("活动ID");
             generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
             generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+            generalFormFieldDTO.setDataSourceType(GeneralFormDataSourceType.ACTIVITY_ID.getCode());
             fieldDTOs.add(generalFormFieldDTO);
             dto.setFormFields(fieldDTOs);
             return dto;
