@@ -1,10 +1,12 @@
 package com.everhomes.requisition;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
-import com.everhomes.general_form.GeneralFormModuleHandler;
-import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_form.*;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -19,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "requisition")
 public class RequisitionFormHandler implements GeneralFormModuleHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequisitionFormHandler.class);
@@ -30,16 +35,28 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralFormService generalFormService;
     @Autowired
+    private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
     private DbProvider dbProvider;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         PostGeneralFormDTO result = this.dbProvider.execute((TransactionStatus status) -> {
-            Long referId = generalFormService.saveGeneralForm(cmd);
+            Long referId;
+            if(cmd.getRequisitionId() == null) {
+                referId = generalFormService.saveGeneralForm(cmd);
+            }else{
+                referId = cmd.getRequisitionId();
+            }
+            GeneralApproval approval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(
+                    cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
+
 
             //创建工作流
             Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.REQUISITION_MODULE
-                    , FlowModuleType.NO_MODULE.getCode(),cmd.getOwnerId(), cmd.getOwnerType());
+                    , "requisition",approval.getId(), "GENERAL_APPROVAL");
             if (null == flow) {
                 LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.REQUISITION_MODULE);
                 throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
@@ -71,7 +88,27 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
-        return null;
+
+        generalFormService.deleteGeneralFormVal(cmd);
+
+        addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
+        GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
+        String source_type = "EhGeneralFormValRequests";
+
+        if(generalApproval != null) {
+            cmd2.setGeneralFormId(generalApproval.getFormOriginId());
+            cmd2.setSourceId(cmd.getRequisitionId());
+            cmd2.setSourceType(source_type);
+            cmd2.setValues(cmd.getValues());
+            generalFormService.addGeneralFormValues(cmd2);
+        }else{
+            LOGGER.error("getGeneralApprovalByNameAndRunning false: can not find running approval. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
+                    + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+                    "getGeneralApprovalByNameAndRunning false: can not find running approval.");
+        }
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+        return dto;
     }
 
     @Override

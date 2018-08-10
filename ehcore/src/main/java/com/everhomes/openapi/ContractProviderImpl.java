@@ -1316,13 +1316,16 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
-		EnterpriseCustomerAptitudeFlag flag = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+		EhEnterpriseCustomerAptitudeFlagDao dao = new EhEnterpriseCustomerAptitudeFlagDao(context.configuration());
+
+		SelectConditionStep<Record> query = context.select()
+				.from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
 				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.ne(namespaceId))
-				.fetchAny().map((r) -> {
-					return ConvertHelper.convert(r, EnterpriseCustomerAptitudeFlag.class);
-				});
-		if(flag != null){
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.eq(namespaceId));
+		Record result = query.fetchAny();
+
+		if(result != null){
+			EnterpriseCustomerAptitudeFlag flag = ConvertHelper.convert(result, EnterpriseCustomerAptitudeFlag.class);
 			return flag.getValue();
 		}else{
 			LOGGER.error("the namespace and communityid not find flag");
@@ -1334,13 +1337,15 @@ public class ContractProviderImpl implements ContractProvider {
 	public EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
 		EhEnterpriseCustomerAptitudeFlagDao dao = new EhEnterpriseCustomerAptitudeFlagDao(context.configuration());
-		EnterpriseCustomerAptitudeFlag flag = context.select().from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+
+		SelectConditionStep<Record> query = context.select()
+				.from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
 				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.ne(namespaceId))
-				.fetchAny().map((r) -> {
-					return ConvertHelper.convert(r, EnterpriseCustomerAptitudeFlag.class);
-				});
-		if(flag != null){
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.eq(namespaceId));
+		Record result = query.fetchAny();
+
+		if(result != null){
+			EnterpriseCustomerAptitudeFlag flag = ConvertHelper.convert(result, EnterpriseCustomerAptitudeFlag.class);
 			flag.setValue(adptitudeFlag);
 			dao.update(flag);
 			return flag;

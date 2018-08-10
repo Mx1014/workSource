@@ -128,24 +128,25 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         if(cmd.getConditionFields() != null && cmd.getConditionFields().size() > 0){
             for(SearchGeneralFormItem item : cmd.getConditionFields()){
                 if(StringUtils.isNotBlank(item.getFieldValue())) {
-                    GeneralFormFieldType type = GeneralFormFieldType.fromCode(item.getFieldValue());
+                    GeneralFormFieldType type = GeneralFormFieldType.fromCode(item.getFieldType().getCode());
                     switch (type) {
                         case NUMBER_TEXT:
-                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         case INTEGER_TEXT:
-                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         case DROP_BOX:
-                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         case SINGLE_LINE_TEXT:
-                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         case MULTI_LINE_TEXT:
-                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                         default:
+                            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
                             break;
                     }
                 }
@@ -246,7 +247,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             
             if (generalFormVal.size() > 0) {
                 GeneralFormVal first = generalFormVal.iterator().next();
-                // builder.field("id", first.getId());
+                builder.field("id", first.getSourceId());
                 builder.field("organizationId", first.getOrganizationId());
                 builder.field("namespaceId", first.getNamespaceId());
                 builder.field("ownerId", first.getOwnerId());

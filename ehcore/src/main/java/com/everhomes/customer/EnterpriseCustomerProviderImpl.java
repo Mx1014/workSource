@@ -2414,12 +2414,4 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     }
 
-    @Override
-    public Byte getConfigAptitudeSwitch(){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfigurations.class));
-        EhConfigurations dao = new EhEnterpriseCustomersDao(context.configuration());
-        EhEnterpriseCustomers eepc = dao.findById(id);
-        eepc.setAptitudeFlag(approvalStatus);
-        return 0;
-    }
 }

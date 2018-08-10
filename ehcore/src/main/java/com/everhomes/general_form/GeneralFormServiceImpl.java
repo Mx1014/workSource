@@ -142,8 +142,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                         generalFormValProvider.createGeneralFormVal(obj);
                         objs.add(obj);
                     }
-                    generalFormSearcher.feedDoc(objs);
+
                 }
+                generalFormSearcher.feedDoc(objs);
                 return null;
             });
         }
@@ -657,9 +658,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public void deleteGeneralFormVal(PostGeneralFormValCommand cmd){
+    public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
             generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
+
+            generalFormSearcher.deleteById(cmd.getSourceId());
         }else{
             LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
                     + cmd.getCurrentOrganizationId() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
@@ -670,38 +673,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormValsResponse getGeneralFormVal(GetGeneralFormValCommand cmd){
+    public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
         List<GeneralFormVal> request;
-        Map<String, Object> returnMap = new HashMap<>();
+        List<GeneralFormValDTO> result;
 
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null){
 
-            GeneralFormValsResponse response = new GeneralFormValsResponse();
+
             request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getModuleId(), cmd.getOwnerId());
-            for (GeneralFormVal val : request) {
-
-                GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
-                String fieldValue = dto.getFieldValue();
-                ObjectMapper mapper = new ObjectMapper();
-                JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
-                Map<String,String> urMap;
-                try {
-                    urMap = mapper.readValue(fieldValue, jvt);
-                    for (Map.Entry<String, String> entry : urMap.entrySet()) {
-                        fieldValue  = entry.getValue();
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            break;
-                        }
-                    }
-                    returnMap.put(dto.getFieldName(), fieldValue);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-            response.setValList(returnMap);
-            return response;
+            return request.stream().map(r -> ConvertHelper.convert(r, GeneralFormValDTO.class)).collect(Collectors.toList());
         }else{
             LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                     + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
@@ -746,6 +726,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         });
         return sourceId;
     }
+
+
 
 
     @Override

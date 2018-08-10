@@ -74,6 +74,8 @@ public interface GeneralFormProvider {
     
     GeneralFormValRequest getGeneralFormValRequest(Long id);
 
+    Long updateGeneralFormValRequestStatus(Long sourceId, Byte status);
+
     List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids);
 
     List<GeneralFormVal> listGeneralForm(CrossShardListingLocator locator, Integer pageSize);

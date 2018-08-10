@@ -62,7 +62,7 @@ public interface GeneralFormService {
 
 	void deleteGeneralFormVal(PostGeneralFormValCommand cmd);
 
-	GeneralFormValsResponse getGeneralFormVal(GetGeneralFormValCommand cmd);
+	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
 
 	/**

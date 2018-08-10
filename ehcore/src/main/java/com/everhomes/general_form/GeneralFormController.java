@@ -116,27 +116,29 @@ public class GeneralFormController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /general_form/updateGeneralFormVal</b>
+	 * <b>URL: /general_form/deleteGeneralFormVal</b>
 	 * <p> 删除表单值 </p>
 	 */
 	@RequestMapping("deleteGeneralFormVal")
-	@RestReturn(value=String.class)
+	@RestReturn(value=Long.class)
 	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
-		generalFormService.deleteGeneralFormVal(cmd);
+		Long id = generalFormService.deleteGeneralFormVal(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
+
+
 	/**
 	 * <b>URL: /general_form/getGeneralFormVal</b>
 	 * <p> 获取表单值 </p>
 	 */
 	@RequestMapping("getGeneralFormVal")
-	@RestReturn(value=GeneralFormValsResponse.class)
+	@RestReturn(value=GeneralFormValDTO.class, collection = true)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		GeneralFormValsResponse dto = generalFormService.getGeneralFormVal(cmd);
+		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormVal(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -190,5 +192,8 @@ public class GeneralFormController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+
 
 }

@@ -290,6 +290,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
 	}
 
+
+
 	@Override
 	public Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
@@ -329,7 +331,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
         return ConvertHelper.convert( dao.findById(id), GeneralFormValRequest.class);
 	}
-	
+
+	@Override
+	public Long updateGeneralFormValRequestStatus(Long sourceId, Byte status){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
+		EhGeneralFormValRequests dto = dao.findById(sourceId);
+		dto.setStatus(status);
+		dao.update(dto);
+		return dto.getId();
+	}
+
 	@Override
 	public List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids){
 

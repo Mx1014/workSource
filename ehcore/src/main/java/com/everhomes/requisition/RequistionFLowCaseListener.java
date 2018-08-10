@@ -1,11 +1,15 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormValsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private ServiceModuleProvider serviceModuleProvider;
     @Autowired
     private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -67,7 +73,16 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     public void onFlowCaseEnd(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
+        Integer namespaceId = flowCase.getNamespaceId();
+        Long ownerId = flowCase.getProjectId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.FINISH.getCode());
+        List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(namespaceId,referId,25000l, ownerId);
+        for(GeneralFormVal temp: request){
+            if(temp.getFieldName().equals("客户名称")){
+                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(temp.getFieldValue()), (byte)1);
+            }
+        }
+
 //        String owner = requisitionProvider.getOwnerById(referId);
 //        RequistionListener lis = map.get(owner);
 //        lis.onRequisitionEnd();

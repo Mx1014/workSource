@@ -14,6 +14,7 @@ import java.util.List;
  * <li>sourceType：sourceType</li>
  * <li>communityId : 项目id</li>
  * <li>currentOrganizationId：用户当前公司id</li>
+ * <li>requisitionId : 表单Id</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>
  * @author janson
@@ -27,6 +28,8 @@ public class PostGeneralFormValCommand {
 
 	private String sourceType;
 	private Long sourceId;
+
+	private Long requisitionId;
 
 	private Long communityId;
     private Long currentOrganizationId;
@@ -99,7 +102,15 @@ public class PostGeneralFormValCommand {
         this.currentOrganizationId = currentOrganizationId;
     }
 
-    @Override
+	public Long getRequisitionId() {
+		return requisitionId;
+	}
+
+	public void setRequisitionId(Long requisitionId) {
+		this.requisitionId = requisitionId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
