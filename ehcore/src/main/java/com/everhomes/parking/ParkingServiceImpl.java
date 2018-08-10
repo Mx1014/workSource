@@ -3103,7 +3103,7 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListBusinessPayeeAccountResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider
-				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId());
+				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBusinessType());
 		if(accounts==null || accounts.size()==0){
 			return new ListBusinessPayeeAccountResponse();
 		}
