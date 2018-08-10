@@ -6785,7 +6785,8 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setDeviceChangeFlag(NormalFlag.NO.getCode());
         punchDayLog.setPunchCount(0);
         punchDayLog.setPunchTimesPerDay((byte) 0);
-        punchDayLog.setRestFlag(NormalFlag.YES.getCode());
+        //2018年8月10日 修改为非休息日(因为没规则不需要统计)
+        punchDayLog.setRestFlag(NormalFlag.NO.getCode());
         punchDayLog.setAbsentFlag(NormalFlag.NO.getCode());
         punchDayLog.setNormalFlag(NormalFlag.YES.getCode());
         if (pr != null) {
