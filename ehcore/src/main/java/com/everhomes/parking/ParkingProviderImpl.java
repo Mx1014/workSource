@@ -766,8 +766,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 	    	query.addConditions(Tables.EH_PARKING_FLOW.OWNER_ID.eq(ownerId));
 	    if(null != parkingLotId)
 	    	query.addConditions(Tables.EH_PARKING_FLOW.PARKING_LOT_ID.eq(parkingLotId));
-	    if(null != parkingLotId)
-	    	query.addConditions(Tables.EH_PARKING_FLOW.FLOW_ID.eq(flowId));
+	    //by dengs,如果切换工作流，这里就查不出来原来的配置，现在改成与工作流配置无关
+//	    if(null != parkingLotId)
+//	    	query.addConditions(Tables.EH_PARKING_FLOW.FLOW_ID.eq(flowId));
 	     
 	    return ConvertHelper.convert(query.fetchAny(), ParkingFlow.class);
 	}
