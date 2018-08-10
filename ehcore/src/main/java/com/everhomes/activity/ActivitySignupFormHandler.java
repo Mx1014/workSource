@@ -68,7 +68,8 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         Long activityId = 0L;
         for (PostApprovalFormItem item :values) {
             if ("ACTIVITY_ID".equals(item.getFieldName())) {
-                PostApprovalFormTextValue textValue = new Gson().fromJson(item.getFieldValue(), PostApprovalFormTextValue.class);
+                item.setFieldValue(item.getFieldValue().replaceAll("\\\\",""));
+                PostApprovalFormTextValue textValue = JSONObject.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class);
                 activityId = Long.valueOf(textValue.getText());
             }
         }
