@@ -28,7 +28,7 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
-import com.everhomes.rest.acl.AppCategoryDTO;
+import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.common.TrueOrFalseFlag;

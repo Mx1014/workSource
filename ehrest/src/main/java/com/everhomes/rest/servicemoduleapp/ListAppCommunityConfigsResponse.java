@@ -1,6 +1,6 @@
 package com.everhomes.rest.servicemoduleapp;
 
-import com.everhomes.rest.acl.AppCategoryDTO;
+import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;

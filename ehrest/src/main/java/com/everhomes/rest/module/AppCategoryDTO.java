@@ -1,4 +1,4 @@
-package com.everhomes.rest.acl;
+package com.everhomes.rest.module;
 
 import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO;
@@ -11,8 +11,8 @@ import java.util.List;
  *     <li>id: 应用分类id</li>
  *     <li>name: 应用分类名称</li>
  *     <li>parentId: 父级id</li>
- *     <li>locationType: 分类位置，参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
- *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link com.everhomes.rest.module.ServiceModuleAppType}</li>
+ *     <li>locationType: 分类位置，参考{@link ServiceModuleLocationType}</li>
+ *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link ServiceModuleAppType}</li>
  *     <li>defaultOrder: defaultOrder</li>
  *     <li>leafFlag: 是否为叶子节点，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>dtos: 下级分类，参考{@link AppCategoryDTO}</li>

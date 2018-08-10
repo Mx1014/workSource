@@ -1,11 +1,11 @@
-package com.everhomes.rest.acl;
+package com.everhomes.rest.module;
 
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>locationType: 分类位置，参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
+ *     <li>locationType: 分类位置，参考{@link ServiceModuleLocationType}</li>
  *     <li>parentId: parentId</li>
  * </ul>
  */
