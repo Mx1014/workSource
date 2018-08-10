@@ -8,6 +8,7 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10031', 'zh_CN', '物品编号和名称不能匹配');
 -- end
 
+-- 仓库管理
 -- 更新 warehouse_material.sh warehouse.sh warehouse_stock_log.sh warehouse_stock.sh es的结构
 -- 同步  /warehouse/syncWarehouseIndex
 -- 同步/warehouse/syncWarehouseMaterialCategoryIndex
@@ -15,3 +16,7 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 -- 同步/warehouse/syncWarehouseRequestMaterialIndex
 -- 同步/warehouse/syncWarehouseStockIndex
 -- 同步/warehouse/syncWarehouseStockLogIndex
+
+-- 能耗管理
+-- 更新 energy_meter.sh es上的结构
+-- 同步 /energy/syncEnergyMeterIndex

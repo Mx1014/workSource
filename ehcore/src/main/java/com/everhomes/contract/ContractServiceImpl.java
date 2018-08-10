@@ -176,7 +176,6 @@ import com.everhomes.rest.contract.listContractTemplateCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
@@ -3281,10 +3280,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-		List<FlowCaseEntity> chargingItemEntities = new ArrayList<>();
-		FlowCaseEntity chargingItemeE;
-		
-		StringBuffer chargingItems = new StringBuffer();
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -3340,10 +3335,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		e.setValue((apartments.toString()).substring(0, (apartments.toString()).length()-1));
 		entities.add(e);
 		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
-		e.setKey("计价条款");
 		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
+			
+			List<FlowCaseEntity> chargingItemEntities = new ArrayList<>();
+			FlowCaseEntity chargingItemeE;
+			
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
+			e.setKey("计价条款");
+			
 			// 计价条款json 转对象
 			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
 				contractDetailDTO.getChargingItems().get(i).getChargingVariables();
@@ -3353,19 +3353,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getChargingItemName());
 				chargingItemEntities.add(chargingItemeE);
 				Map json = (Map) JSONObject.parse(contractDetailDTO.getChargingItems().get(i).getChargingVariables());
+				StringBuffer FormulaVariable = new StringBuffer();
 				for (Object map : json.entrySet()) {
 					List<Map<String, String>> ChargingVariables = (List<Map<String, String>>) ((Map.Entry) map).getValue();
-					StringBuffer FormulaVariable = new StringBuffer();
 					for (int j = 0; j < ChargingVariables.size(); j++) {
 						FormulaVariable.append( ChargingVariables.get(j).get("variableName") + "："
 								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
 					}
-					chargingItemeE = new FlowCaseEntity();
-					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
-					chargingItemeE.setKey("计费公式");
-					chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
-					chargingItemEntities.add(chargingItemeE);
 				}
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("计费公式");
+				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
+				chargingItemEntities.add(chargingItemeE);
+				
 				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
 					chargingItemeE = new FlowCaseEntity();
 					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -3375,9 +3376,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					
 					chargingItemeE = new FlowCaseEntity();
 					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
-					chargingItemeE.setKey("起计日期");
-					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
-					chargingItemEntities.add(chargingItemeE); 
+					chargingItemeE.setKey("截至日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
+					chargingItemEntities.add(chargingItemeE);  
 				}
 				// 添加应用的资产
 				StringBuffer apartmentVariable = new StringBuffer();
@@ -3391,14 +3392,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				chargingItemeE.setValue(apartmentVariable.toString());
 				chargingItemEntities.add(chargingItemeE); 
 			}
-			
 			e.setChargingItemEntities(chargingItemEntities);
-			//e.setValue(e.getChargingItemEntities().toString());
 			entities.add(e);
 		}
-
 		dto.setEntities(entities);
-		
 		return dto;
 	}
 	private String timeToStr(Timestamp time) {
