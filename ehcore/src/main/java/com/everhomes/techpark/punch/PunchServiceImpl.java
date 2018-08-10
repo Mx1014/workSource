@@ -10168,8 +10168,8 @@ public class PunchServiceImpl implements PunchService {
             MonthDayStatusDTO dto = new MonthDayStatusDTO();
             if (null != log) {
                 dto = ConvertHelper.convert(log, MonthDayStatusDTO.class); 
-                if(PunchStatus.fromCode(Byte.valueOf(log.getStatusList())) == PunchStatus.NO_ASSIGN_PUNCH_RULE
-                		|| PunchStatus.fromCode(Byte.valueOf(log.getStatusList())) == PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED){
+                if( log.getStatusList().equals(PunchStatus.NO_ASSIGN_PUNCH_RULE + "")
+                		||  log.getStatusList().equals(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED + "")){
                 	dto.setRuleType(null);
                 	dto.setTimeRuleId(null);
                 }
