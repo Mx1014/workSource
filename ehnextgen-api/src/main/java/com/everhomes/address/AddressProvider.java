@@ -111,4 +111,5 @@ public interface AddressProvider {
 	List<Address> findActiveAddressByCommunityId(Long id);
 	List<Address> findActiveAddressByBuildingName(String name);
 	List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
+	Byte getAddressLivingStatusByAddressId(Long addressId);
 }

@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 public class ExportApartmentsInBuildingDTO {
 	
 	private String apartmentName;
-	private Byte status;
+	private String livingStatus;
 	private String apartmentFloor;
 	private Double areaSize;
 	private Double rentArea;
@@ -26,13 +26,13 @@ public class ExportApartmentsInBuildingDTO {
 	}
 
 
-	public Byte getStatus() {
-		return status;
+	public String getLivingStatus() {
+		return livingStatus;
 	}
 
 
-	public void setStatus(Byte status) {
-		this.status = status;
+	public void setLivingStatus(String livingStatus) {
+		this.livingStatus = livingStatus;
 	}
 
 

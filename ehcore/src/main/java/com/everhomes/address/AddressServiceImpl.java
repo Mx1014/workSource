@@ -3268,19 +3268,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse response) {
 		List<ApartmentDTO> aptList = this.listApartmentsByKeyword(cmd).second();
 		if (aptList != null && aptList.size()>0) {
-			String fileName = String.format("房源信息_%s", cmd.getBuildingName());
+			String fileName = null;
+			if (cmd.getCommunityId() != null) {
+				Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+				fileName = String.format("房源信息_%s_%s", community.getName(),cmd.getBuildingName());
+			}else {
+				fileName = String.format("房源信息_%s", cmd.getBuildingName());
+			}
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
-
 			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
-				Byte livingStatus = addressProvider.getAddressLivingStatus(r.getAddressId(), r.getAddress());
-				dto.setStatus(livingStatus); 
+				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
+				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 				return dto;
 			}).collect(Collectors.toList());
 			
 			List<ExportApartmentsInBuildingDTO> filterData = filterExportApartmentsInBuildingDTO(data,cmd);
 			
-			String[] propertyNames = {"apartmentName", "status", "apartmentFloor", "areaSize", "rentArea", "freeArea", "chargeArea", "orientation", "namespaceAddressType", "namespaceAddressToken"};
+			String[] propertyNames = {"apartmentName", "livingStatus", "apartmentFloor", "areaSize", "rentArea", "freeArea", "chargeArea", "orientation", "namespaceAddressType", "namespaceAddressToken"};
 			String[] titleNames = {"*房源", "*状态", "楼层", "建筑面积", "在租面积", "可招租面积", "收费面积", "朝向","第三方来源", "第三方标识"};
 			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, filterData);
@@ -3295,7 +3300,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		for(ExportApartmentsInBuildingDTO dto : data){
 			filterData.add(dto);
 		    //按状态筛选
-			if(cmd.getLivingStatus() != null && dto.getStatus() != cmd.getLivingStatus()){
+			if(cmd.getLivingStatus() != null && AddressMappingStatus.fromDesc(dto.getLivingStatus()).getCode() != cmd.getLivingStatus()){
 				filterData.remove(dto);
                 continue;
 			}

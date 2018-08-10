@@ -796,23 +796,23 @@ public class AddressProviderImpl implements AddressProvider {
 
 	@Override
 	public Byte getAddressLivingStatus(Long addressId, String addressName) {
-		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-	        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
-	                .from(Tables.EH_ADDRESSES)
-	                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
-	                .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
-	                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
-	        if(aByte == null){
-	            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
-	                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
-	                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
-	                    .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
-	                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
-	        }
-	        if(aByte == null){
-	            aByte = 1;
-	        }
-	        return aByte;
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
+                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+        if(aByte == null){
+            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                    .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
+                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+        }
+        if(aByte == null){
+            aByte = 1;
+        }
+        return aByte;
 	}
 
 	@Override
@@ -1092,6 +1092,25 @@ public class AddressProviderImpl implements AddressProvider {
 			query.addConditions(Tables.EH_ADDRESSES.FREE_AREA.le(cmd.getFreeAreaTo()));
 		}
 		return query.fetchInto(Address.class);
+	}
+
+	@Override
+	public Byte getAddressLivingStatusByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+        if(aByte == null){
+            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+        }
+        if(aByte == null){
+            aByte = 1;
+        }
+        return aByte;
 	}
 
 	
