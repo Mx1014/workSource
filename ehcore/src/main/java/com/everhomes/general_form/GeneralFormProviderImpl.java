@@ -337,7 +337,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 		EhGeneralFormValRequests dto = dao.findById(sourceId);
-		dto.setStatus(status);
+		//dto.setStatus(status);
 		dao.update(dto);
 		return dto.getId();
 	}

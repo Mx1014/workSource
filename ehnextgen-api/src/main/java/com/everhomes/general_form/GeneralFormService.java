@@ -60,7 +60,7 @@ public interface GeneralFormService {
 	 */
 	List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd);
 
-	void deleteGeneralFormVal(PostGeneralFormValCommand cmd);
+	Long deleteGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
