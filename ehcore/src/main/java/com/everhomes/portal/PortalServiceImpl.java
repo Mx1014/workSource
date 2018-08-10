@@ -374,14 +374,23 @@ public class PortalServiceImpl implements PortalService {
 		portalLayout.setStatus(PortalLayoutStatus.ACTIVE.getCode());
 
 		this.dbProvider.execute((status) -> {
-			if(null != cmd.getLayoutTemplateId()){
-				PortalLayoutTemplate template = portalLayoutTemplateProvider.findPortalLayoutTemplateById(cmd.getLayoutTemplateId());
+			if(null != cmd.getType()){
+				PortalLayoutTemplate template = portalLayoutTemplateProvider.findPortalLayoutTemplateByType(cmd.getType());
+				if(template == null){
+					LOGGER.error("PortalLayoutTemplate not found type = {}", cmd.getType());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"PortalLayoutTemplate not found type = + " + cmd.getType());
+				}
 
 				//主页签标志，“首页”类型模板默认开启。
 				portalLayout.setType(template.getType());
+				portalLayout.setIndexFlag(cmd.getIndexFlag());
 				if(PortalLayoutType.fromCode(template.getType()) == PortalLayoutType.SERVICEMARKETLAYOUT){
-					checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
 					portalLayout.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+				}
+
+				if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) == TrueOrFalseFlag.TRUE){
+					checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
 				}
 
 				if(null != template && !StringUtils.isEmpty(template.getTemplateJson())){

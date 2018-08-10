@@ -52,11 +52,11 @@ public class PortalLayoutDTO {
         this.type = type;
     }
 
-    public String getIndexFlag() {
+    public Byte getIndexFlag() {
         return indexFlag;
     }
 
-    public void setIndexFlag(String indexFlag) {
+    public void setIndexFlag(Byte indexFlag) {
         this.indexFlag = indexFlag;
     }
 }
