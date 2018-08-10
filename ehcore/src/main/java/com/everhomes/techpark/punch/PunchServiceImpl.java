@@ -10656,48 +10656,49 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public void updateVacationBalances(UpdateVacationBalancesCommand cmd) {
-        PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(cmd.getDetailId());
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        if (null == detail) {
-            return;
-        }
-        if (null == balance) {
-            balance = newVacationBalance(detail, cmd.getOrganizationId());
-
-        }
-        if (cmd.getAnnualLeaveBalanceCorrection() == null) {
-            cmd.setAnnualLeaveBalanceCorrection(0.0);
-        }
-        Double newALB = new BigDecimal(String.valueOf(balance.getAnnualLeaveBalance())).add(new BigDecimal(String.valueOf(cmd.getAnnualLeaveBalanceCorrection()))).doubleValue();
-        if (newALB < 0) {
-            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
-                newALB = 0.0;
-                cmd.setAnnualLeaveBalanceCorrection(-balance.getAnnualLeaveBalance());
-            } else {
-                throw RuntimeErrorException.errorWith(
-                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
-            }
-        }
-        balance.setAnnualLeaveBalance(newALB);
-
-        if (cmd.getOvertimeCompensationBalanceCorrection() == null) {
-            cmd.setOvertimeCompensationBalanceCorrection(0.0);
-        }
-        Double newOCB = new BigDecimal(String.valueOf(balance.getOvertimeCompensationBalance())).add(new BigDecimal(String.valueOf(cmd.getOvertimeCompensationBalanceCorrection()))).doubleValue();
-        if (newOCB < 0) {
-            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
-                newOCB = 0.0;
-                cmd.setOvertimeCompensationBalanceCorrection(-balance.getOvertimeCompensationBalance());
-
-            } else {
-                throw RuntimeErrorException.errorWith(
-                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_OVERTIME_CORRECTION_TOO_SMALL, "调休余额不足");
-            }
-        }
-        balance.setOvertimeCompensationBalance(newOCB);
-        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(), UserContext.currentUserId());
-
-
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.VACATION_BALANCE_UPDATE.getCode() + cmd.getDetailId()).enter(() -> {
+	        PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(cmd.getDetailId());
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+	        if (null == detail) {
+	            return null;
+	        }
+	        if (null == balance) {
+	            balance = newVacationBalance(detail, cmd.getOrganizationId());
+	
+	        }
+	        if (cmd.getAnnualLeaveBalanceCorrection() == null) {
+	            cmd.setAnnualLeaveBalanceCorrection(0.0);
+	        }
+	        Double newALB = new BigDecimal(String.valueOf(balance.getAnnualLeaveBalance())).add(new BigDecimal(String.valueOf(cmd.getAnnualLeaveBalanceCorrection()))).doubleValue();
+	        if (newALB < 0) {
+	            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
+	                newALB = 0.0;
+	                cmd.setAnnualLeaveBalanceCorrection(-balance.getAnnualLeaveBalance());
+	            } else {
+	                throw RuntimeErrorException.errorWith(
+	                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_ANNUAL_LEAVE_CORRECTION_TOO_SMALL, "年假余额不足");
+	            }
+	        }
+	        balance.setAnnualLeaveBalance(newALB);
+	
+	        if (cmd.getOvertimeCompensationBalanceCorrection() == null) {
+	            cmd.setOvertimeCompensationBalanceCorrection(0.0);
+	        }
+	        Double newOCB = new BigDecimal(String.valueOf(balance.getOvertimeCompensationBalance())).add(new BigDecimal(String.valueOf(cmd.getOvertimeCompensationBalanceCorrection()))).doubleValue();
+	        if (newOCB < 0) {
+	            if (NormalFlag.YES == NormalFlag.fromCode(cmd.getIsBatch())) {
+	                newOCB = 0.0;
+	                cmd.setOvertimeCompensationBalanceCorrection(-balance.getOvertimeCompensationBalance());
+	
+	            } else {
+	                throw RuntimeErrorException.errorWith(
+	                        PunchServiceErrorCode.SCOPE, PunchServiceErrorCode.ERROR_OVERTIME_CORRECTION_TOO_SMALL, "调休余额不足");
+	            }
+	        }
+	        balance.setOvertimeCompensationBalance(newOCB);
+	        saveBalanceAndLog(balance, cmd.getDescription(), cmd.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(), UserContext.currentUserId());
+	        return null;
+    	});
     }
 
     private void saveBalanceAndLog(PunchVacationBalance balance, String description, Double annualLeaveBalanceCorrection,
@@ -10994,16 +10995,20 @@ public class PunchServiceImpl implements PunchService {
                 continue;
             } else {
                 //// TODO: 2018/1/26  检验权限 是否有操作此用户的权限
-                PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(detail.getId());
-
-                if (null != balance) {
-                    //有balance的就算覆盖
-                    coverNum++;
-                } else {
-                    balance = newVacationBalance(detail, organizationId);
-                }
-
-                saveImportEmployeeSalary(balance, r, log, response, userId);
+            	Tuple<Integer, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.VACATION_BALANCE_UPDATE.getCode() + detail.getId()).enter(() -> {
+	                PunchVacationBalance balance = punchVacationBalanceProvider.findPunchVacationBalanceByDetailId(detail.getId());
+	                int coverNum1 = 0;
+	                if (null != balance) {
+	                    //有balance的就算覆盖
+	                    coverNum1++;
+	                } else {
+	                    balance = newVacationBalance(detail, organizationId);
+	                }
+	
+	                saveImportEmployeeSalary(balance, r, log, response, userId);
+	                return coverNum1;
+            	});
+            	coverNum += tuple.first();
             }
         }
         response.setTotalCount((long) (resultList.size() - 2));
