@@ -1692,8 +1692,34 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return dto;
     }
 
+    @Override
+    public void reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd) {
 
 
+        if(cmd.getAppCategoryId() == null || cmd.getEntryIds() == null || cmd.getEntryIds().size() == 0){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(null, cmd.getAppCategoryId(), null, null, null);
+
+        if(serviceModuleEntries != null){
+
+            Integer order = 0;
+            for (Long entryId: cmd.getEntryIds()){
+                order = order + 1;
+
+                for (ServiceModuleEntry entry: serviceModuleEntries){
+                    if(entryId.equals(entry.getId())){
+                        entry.setDefaultOrder(order);
+                        serviceModuleEntryProvider.udpate(entry);
+                        break;
+                    }
+
+                }
+            }
+        }
+    }
 
     private AppCategoryDTO toAppCategoryDTO(AppCategory appCategory){
         AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
