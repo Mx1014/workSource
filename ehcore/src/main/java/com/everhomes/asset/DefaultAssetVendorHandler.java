@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.rest.asset.CreatePaymentBillOrder;
+import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 
 /**
@@ -14,21 +15,16 @@ import com.everhomes.rest.order.PreOrderDTO;
  */
 public class DefaultAssetVendorHandler extends AssetVendorHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAssetVendorHandler.class);
-    @Autowired
-    private AssetProvider assetProvider;
-
-    @Autowired
-    private CommunityProvider communityProvider;
     
     public PreOrderDTO createOrder(CreatePaymentBillOrder cmd) {
-	    XxxAssetBillOrder order = prepareAssetOrder(cmd);
+    	PreOrderCommand order = preparePaymentBillOrder(cmd);
 	    // eh_payment_bill_orders
 	    return createPreOrder(order);
 	}
 	
-	protected PreOrderDTO createPreOrder(XxxAssetBillOrder order) {
+	protected PreOrderDTO createPreOrder(PreOrderCommand order) {
 	    PreOrderDTO preOrderDTO = null;
-	    //1、检查买方（付款方）是否有会员，无则创建
+	    /*//1、检查买方（付款方）是否有会员，无则创建
 	    User buyer = userProvider.findUserById(UserContext.currentUserId());
 	
 	    //2、收款方是否有会员，无则报错
@@ -50,17 +46,20 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	
 	    //5、保存订单信息
 	    //saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-	
+*/	
 	    //6、返回
 	    return preOrderDTO;
 	}
 	
-	protected XxxAssetBillOrder prepareAssetOrder(PlaceAnAssetOrderCommand cmd) {
-	    return null;
+	protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrder cmd) {
+		//组装command ， 请求支付模块的下预付单
+        PreOrderCommand preOrderCommand = new PreOrderCommand();
+		
+	    return preOrderCommand;
 	}
 	
-	protected afterAssetOrderCreate() {
-	    
+	protected void afterAssetOrderCreate() {
+		
 	}
 
 }

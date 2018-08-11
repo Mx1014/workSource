@@ -3288,6 +3288,7 @@ public class AssetServiceImpl implements AssetService {
     public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrder cmd) {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        //return handler.placeAnAssetOrder(cmd);
         return handler.createOrder(cmd);
     }
 
