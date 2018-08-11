@@ -27,3 +27,53 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92000', '电商', '400', '/400/92000', '1', '2', '2', '10', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '1', 'classify');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92100', '微商城', '92000', '/400/92000/92100', '1', '3', '2', '10', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', '13', '2018-07-04 17:23:33', '0', '0', '0', '1', NULL, '1', '1', 'module');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92200', '食堂', '92000', '/400/92000/92200', '1', '3', '2', '20', '2018-07-31 12:09:15', NULL, '13', '2018-07-31 12:09:25', '0', '0', '0', '1', '', '1', '1', 'module');
+
+
+
+-- 将原有的外部链接和电商改成新的模块  add by yanjun  20180811
+
+
+-- 将原有的外部链接和电商改成新的模块  add by yanjun  20180811
+
+
+DROP PROCEDURE IF EXISTS update_url_module_function;
+DELIMITER //
+CREATE PROCEDURE `update_url_module_function` ()
+BEGIN
+  DECLARE aid LONG;
+  DECLARE ans INTEGER;
+  DECLARE aversionid LONG;
+	DECLARE aname VARCHAR(200);
+	DECLARE adata VARCHAR(200);
+	DECLARE atype INTEGER;
+  DECLARE amoduleid LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT id, namespace_id, version_id, label, action_data, IF(action_type = 'ZuoLinUrl', 13 , 14),  IF(action_type = 'ZuoLinUrl', 92100 , 90100) from eh_portal_items WHERE action_type = 'ThirdUrl' OR action_type = 'ZuoLinUrl';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO aid, ans, aversionid, aname, adata, atype, amoduleid;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				SET @appId = (SELECT MAX(id) + 1 from eh_service_module_apps);
+
+				INSERT INTO `eh_service_module_apps` (`id`, `namespace_id`, `version_id`, `origin_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `module_control_type`, `custom_tag`, `custom_path`, `access_control_type`) VALUES (@appId, ans, aversionid, @appId, aname, amoduleid, adata, '2', atype, NOW(), NOW(), '1', '1', 'unlimit_control', NULL, NULL, '0');
+				UPDATE eh_portal_items SET action_type = 'ModuleApp', action_data = CONCAT('{"moduleAppId":', @appId, '}') WHERE id = aid;
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_url_module_function;
+DROP PROCEDURE IF EXISTS update_url_module_function;
+
+
+
+
+
+
+
