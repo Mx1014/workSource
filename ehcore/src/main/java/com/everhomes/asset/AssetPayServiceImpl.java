@@ -19,6 +19,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.gorder.sdk.order.OrderService;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.order.PayProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentCallBackHandler;
@@ -46,6 +48,9 @@ import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.StringRestResponse;
+import com.everhomes.rest.asset.AssetServiceErrorCode;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
@@ -91,6 +96,12 @@ public class AssetPayServiceImpl implements AssetPayService{
 	
 	@Value("${server.contextPath:}")
     private String contextPath;
+	
+	@Autowired
+	private OrderService orderService;
+	
+	@Autowired
+	private LocaleStringProvider localeStringProvider;
 	
 	/**
 	 * 列出当前项目下所有的收款方账户
@@ -139,47 +150,147 @@ public class AssetPayServiceImpl implements AssetPayService{
         return result;
 	}
 	
+//    public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
+//        PreOrderDTO preOrderDTO = null;
+//        //1、检查买方（付款方）是否有会员，无则创建
+//        User userById = userProvider.findUserById(UserContext.currentUserId());
+//        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+//        String userIdenify = null;
+//        if(userIdentifier != null) {
+//        	userIdenify = userIdentifier.getIdentifierToken();
+//        }
+//        PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId().toString(), "NS" + cmd.getNamespaceId().toString(), userIdenify, null, null, null);
+//        if(payUserDTO != null) {
+//        	cmd.setPayerId(payUserDTO.getId());
+//        }else {
+//        	LOGGER.error("payerUserId no find, cmd={}", cmd);
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//                    "payerUserId no find");
+//        }
+//
+//        //2、收款方是否有会员，无则报错
+//        Long payeeUserId = cmd.getBizPayeeId();
+//        if(payeeUserId == null) {
+//        	LOGGER.error("payeeUserId no find, cmd={}", cmd);
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//                    "payeeUserId no find");
+//        }
+//        
+//        //3、组装报文，发起下单请求
+//        OrderCommandResponse orderCommandResponse = createOrder(cmd);
+//        
+//        //4、组装支付方式
+//        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+//        
+//        
+//		//preOrderDTO.setPayMethod(orderCommandResponse.getPaymentMethods());//todo
+//		//preOrderDTO.setPayMethod(getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl()));//todo
+//
+//        //5、保存订单信息
+//        saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+//
+//        //6、返回
+//        return preOrderDTO;
+//    }
     public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
         PreOrderDTO preOrderDTO = null;
         //1、检查买方（付款方）是否有会员，无则创建
-        User userById = userProvider.findUserById(UserContext.currentUserId());
-        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
-        String userIdenify = null;
-        if(userIdentifier != null) {
-        	userIdenify = userIdentifier.getIdentifierToken();
-        }
-        PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId().toString(), "NS" + cmd.getNamespaceId().toString(), userIdenify, null, null, null);
-        if(payUserDTO != null) {
-        	cmd.setPayerId(payUserDTO.getId());
-        }else {
-        	LOGGER.error("payerUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                    "payerUserId no find");
-        }
+        User buyer = userProvider.findUserById(UserContext.currentUserId());
 
         //2、收款方是否有会员，无则报错
         Long payeeUserId = cmd.getBizPayeeId();
         if(payeeUserId == null) {
-        	LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            LOGGER.error("Payee user id not found(id in payment system), cmd={}", cmd);
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                    "payeeUserId no find");
+                    "Payee user id not found");
         }
         
-        //3、组装报文，发起下单请求
-        OrderCommandResponse orderCommandResponse = createOrder(cmd);
-        
-        //4、组装支付方式
-        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
-        
-        
-		//preOrderDTO.setPayMethod(orderCommandResponse.getPaymentMethods());//todo
-		//preOrderDTO.setPayMethod(getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl()));//todo
+        CreatePurchaseOrderCommand createOrderCommand = preparePurchaseOrderByBuyer(cmd, buyer);
+        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!createOrderResp.getErrorCode().equals(200)) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderResp.getResponse();
 
         //5、保存订单信息
         saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 
         //6、返回
         return preOrderDTO;
+    }
+    
+    private CreatePurchaseOrderCommand preparePurchaseOrderByBuyer(PreOrderCommand cmd, User buyer){
+        Map<String, String> flattenMap = new HashMap<>();
+        StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
+
+        CreatePurchaseOrderCommand createOrderCmd = new CreatePurchaseOrderCommand();
+        
+        String accountCode = generateAccountCode(cmd.getNamespaceId());
+        createOrderCmd.setAccountCode(accountCode);
+        createOrderCmd.setClientAppName(cmd.getClientAppName());
+
+        String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
+        createOrderCmd.setBizOrderNum(BizOrderNum);
+        
+        createOrderCmd.setBuyerType(OwnerType.USER.getCode());
+        createOrderCmd.setBuyerId(String.valueOf(buyer.getId()));
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(buyer.getId(), cmd.getNamespaceId());
+        if(buyerIdentifier != null) {
+            String buyerPhone = buyerIdentifier.getIdentifierToken();
+            createOrderCmd.setBuyerPhone(buyerPhone);
+        }
+        
+        createOrderCmd.setPayeeUserId(cmd.getBizPayeeId());//收款方ID
+        createOrderCmd.setAmount(cmd.getAmount());
+        createOrderCmd.setPaymentParams(flattenMap);
+        createOrderCmd.setPaymentType(cmd.getPaymentType());
+        if(cmd.getExpiration() != null) {
+            createOrderCmd.setExpirationMillis(cmd.getExpiration());
+        }
+        
+        createOrderCmd.setBackUrl(getPayCallbackUrl(cmd));
+        createOrderCmd.setExtendInfo(cmd.getExtendInfo());
+        //localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.PAYMENT_GOOD_NAME, buyer.getLocale());
+        createOrderCmd.setGoodsName("物业缴费");
+        createOrderCmd.setGoodsDescription(null);
+        createOrderCmd.setIndustryName(null);
+        createOrderCmd.setIndustryCode(null);
+        createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
+        createOrderCmd.setOrderRemark1("物业缴费");
+        createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+        createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
+        createOrderCmd.setOrderRemark4(null);
+        createOrderCmd.setOrderRemark5(null);
+        
+        return createOrderCmd;
+    }
+    
+    private String getPayCallbackUrl(PreOrderCommand cmd) {
+        String configKey = "pay.v2.callback.url.asset";
+        String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
+        if(backUrl == null || backUrl.trim().length() == 0) {
+            LOGGER.error("Payment callback url empty, configKey={}, cmd={}", configKey, cmd);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAY_CALLBACK_URL_EMPTY,
+                    "Payment callback url empty");
+        }
+        
+        if(!backUrl.toLowerCase().startsWith("http")) {
+            String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+            backUrl = homeUrl + contextPath + backUrl;
+        }
+        
+        return backUrl;
+    }
+    
+    private String generateAccountCode(Integer namespaceId) {
+        StringBuilder strBuilder = new StringBuilder();
+        
+        strBuilder.append("NS");
+        strBuilder.append(namespaceId);
+        
+        return strBuilder.toString();
     }
     
     public void payNotify(OrderPaymentNotificationCommand cmd, PaymentCallBackHandler handler) {
