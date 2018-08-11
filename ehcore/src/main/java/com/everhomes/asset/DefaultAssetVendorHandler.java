@@ -1,13 +1,20 @@
 package com.everhomes.asset;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.everhomes.community.CommunityProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrder;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
  * @author created by ycx
@@ -16,9 +23,14 @@ import com.everhomes.rest.order.PreOrderDTO;
 public class DefaultAssetVendorHandler extends AssetVendorHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAssetVendorHandler.class);
     
+    @Autowired
+    private AssetProvider assetProvider;
+    
     public PreOrderDTO createOrder(CreatePaymentBillOrder cmd) {
+    	//保存订单数据 eh_payment_bill_orders
+    	
+    	//组装command ， 请求支付模块的下预付单
     	PreOrderCommand order = preparePaymentBillOrder(cmd);
-	    // eh_payment_bill_orders
 	    return createPreOrder(order);
 	}
 	
@@ -52,14 +64,41 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	}
 	
 	protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrder cmd) {
+		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
 		//组装command ， 请求支付模块的下预付单
-        PreOrderCommand preOrderCommand = new PreOrderCommand();
-		
-	    return preOrderCommand;
+        return handler.preparePaymentBillOrder(cmd);
 	}
 	
 	protected void afterAssetOrderCreate() {
 		
 	}
+	
+	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
+        if(null == namespaceId) {
+            LOGGER.error("checkAssetVendor namespaceId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor namespaceId cannot be null.");
+        }
+        AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
+        return assetVendor;
+    }
+	
+	private AssetVendorHandler getAssetVendorHandler(String vendorName) {
+        AssetVendorHandler handler = null;
+
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = AssetVendorHandler.ASSET_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+
+        return handler;
+    }
 
 }

@@ -187,7 +187,7 @@ public class AssetPayServiceImpl implements AssetPayService{
 //		//preOrderDTO.setPayMethod(getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl()));//todo
 //
 //        //5、保存订单信息
-//        saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+        //saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 //
 //        //6、返回
 //        return preOrderDTO;

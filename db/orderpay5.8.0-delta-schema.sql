@@ -7,6 +7,8 @@ CREATE TABLE `eh_payment_bill_orders`(
   `id` BIGINT NOT NULL,
   `namespace_id` INT(10),
   `bill_id` VARCHAR(255),
+  `order_id` BIGINT COMMENT '业务订单ID，用于作关联关系',
+  `order_num` varchar(255) COMMENT '业务订单编号，如：WUF00000000000004926',
   `general_order_id` BIGINT COMMENT '统一订单ID',
   `amount` DECIMAL(10,2),
   `payment_status` INT DEFAULT 0 COMMENT '支付状态，0-待支付、1-支付成功、2-支付中、5-支付失败',
