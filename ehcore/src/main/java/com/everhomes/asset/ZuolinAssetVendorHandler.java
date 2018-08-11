@@ -78,7 +78,7 @@ import java.util.stream.Collectors;
  * Created by ying.xiong on 2017/4/11.
  */
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX + "ZUOLIN")
-public class ZuolinAssetVendorHandler extends AssetVendorHandler {
+public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(ZuolinAssetVendorHandler.class);
     @Autowired
     private AssetProvider assetProvider;

@@ -22,6 +22,7 @@ import com.everhomes.rest.asset.BillItemIdCommand;
 import com.everhomes.rest.asset.BillStaticsCommand;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreatePaymentBillOrder;
 import com.everhomes.rest.asset.ExemptionItemIdCommand;
 import com.everhomes.rest.asset.ExportBillTemplatesCommand;
 import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
@@ -53,8 +54,6 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -260,46 +259,10 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
 	}
     
-    public PreOrderDTO createOrder(PlaceAnAssetOrderCommand cmd) {
-        XxxAssetBillOrder order = prepareAssetOrder(cmd);
-        // eh_asset_bill_orders
-        return createPreOrder(order);
+    public PreOrderDTO createOrder(CreatePaymentBillOrder cmd) {
+    	LOGGER.error("Insufficient privilege, handler createOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
     
-    protected PreOrderDTO createPreOrder(XxxAssetBillOrder order) {
-        PreOrderDTO preOrderDTO = null;
-        //1、检查买方（付款方）是否有会员，无则创建
-        User buyer = userProvider.findUserById(UserContext.currentUserId());
-
-        //2、收款方是否有会员，无则报错
-        Long payeeUserId = cmd.getBizPayeeId();
-        if(payeeUserId == null) {
-            LOGGER.error("Payee user id not found(id in payment system), cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                    "Payee user id not found");
-        }
-        
-        CreatePurchaseOrderCommand createOrderCommand = preparePurchaseOrderByBuyer(cmd, buyer);
-        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
-        if(!createOrderResp.getErrorCode().equals(200)) {
-            LOGGER.error("create order fail");
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                    "create order fail");
-        }
-        OrderCommandResponse response = createOrderResp.getResponse();
-
-        //5、保存订单信息
-        //saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-
-        //6、返回
-        return preOrderDTO;
-    }
-    
-    protected XxxAssetBillOrder prepareAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        return null;
-    }
-    
-    protected afterAssetOrderCreate() {
-        
-    }
 }

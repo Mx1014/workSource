@@ -145,7 +145,7 @@ public interface AssetService {
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
-	PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrder cmd);
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
