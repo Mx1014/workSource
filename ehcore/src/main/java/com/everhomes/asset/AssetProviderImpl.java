@@ -2811,7 +2811,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        /*DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
         long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
         AssetPaymentOrder order = new AssetPaymentOrder();
@@ -2845,7 +2845,8 @@ public class AssetProviderImpl implements AssetProvider {
         order.setStatus((byte)0);
         EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
         dao.insert(order);
-        return nextOrderId;
+        return nextOrderId;*/
+    	return null;
     }
 
 
@@ -2911,20 +2912,20 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills.class),bills.size());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders.class),bills.size());
         long nextSequence = nextBlockSequence - bills.size()+1;
-        List<com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
-            com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills orderBill  = new com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills();
+            com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders orderBill  = new com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders();
             BillIdAndAmount billIdAndAmount = bills.get(i);
             orderBill.setId(nextSequence++);
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
             orderBill.setBillId(billIdAndAmount.getBillId());
             orderBill.setOrderId(orderId);
-            orderBill.setStatus(0);
+            orderBill.setPaymentStatus(0);
             orderBills.add(orderBill);
         }
-        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
+        EhPaymentBillOrdersDao dao = new EhPaymentBillOrdersDao(dslContext.configuration());
         dao.insert(orderBills);
     }
 
@@ -5839,6 +5840,12 @@ public class AssetProviderImpl implements AssetProvider {
         	}
         }
 	    return isConfigSubtraction;
+	}
+
+	public Long getNextOrderId() {
+		long nextOrderId = this.sequenceProvider.getNextSequence(
+    			NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders.class));
+    	return nextOrderId;
 	}
     
 }

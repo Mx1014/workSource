@@ -1982,7 +1982,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         }
         //对左邻的用户，直接检查bill的状态即可
         checkHasPaidBills(billIds);
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        Long orderId = assetProvider.getNextOrderId();
         assetProvider.saveOrderBills(bills,orderId);
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空
