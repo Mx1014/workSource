@@ -3285,7 +3285,7 @@ public class AssetServiceImpl implements AssetService {
 
 
     @Override
-    public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrder cmd) {
+    public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd) {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         //return handler.placeAnAssetOrder(cmd);
@@ -4838,7 +4838,8 @@ public class AssetServiceImpl implements AssetService {
         AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
         		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
         		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,order.getId());
+        // TODO: 待对接
+        // assetProvider.saveOrderBills(bills,order.getId());
         
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
         

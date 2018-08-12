@@ -24,7 +24,7 @@ import java.util.List;
  * <li>billIds: 账单id列表</li>
  *</ul>
  */
-public class CreatePaymentBillOrder {
+public class CreatePaymentBillOrderCommand {
     private Integer namespaceId;
     private Long communityId;
     private String clientAppName;

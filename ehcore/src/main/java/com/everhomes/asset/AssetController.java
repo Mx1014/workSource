@@ -1099,7 +1099,7 @@ public RestResponse updateBillsToSettled(UpdateBillsToSettled cmd) {
  */
 @RequestMapping("payBills")
 @RestReturn(PreOrderDTO.class)
-public RestResponse placeAnAssetOrder(CreatePaymentBillOrder cmd){
+public RestResponse placeAnAssetOrder(CreatePaymentBillOrderCommand cmd){
     PreOrderDTO response = assetService.placeAnAssetOrder(cmd);
     RestResponse restResponse = new RestResponse(response);
     restResponse.setErrorCode(ErrorCodes.SUCCESS);

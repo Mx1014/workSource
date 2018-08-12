@@ -26,8 +26,9 @@ import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BillIdAndAmount;
-import com.everhomes.rest.asset.CreatePaymentBillOrder;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessOrderType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
@@ -74,67 +75,26 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
-    public PreOrderDTO createOrder(CreatePaymentBillOrder cmd) {
+    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
         // 校验参数
         checkPaymentBillOrderPaidStatus(cmd);
         PaymentBillGroup billGroup = checkBillGroup(cmd);
         checkPaymentPayeeId(cmd, billGroup);
-        
-        // 
-        //assetProvider.createBillOrderMaps(cmd.getBills(), businessOrderType);
-        
+
+        // 组装订单数据
         CreatePurchaseOrderCommand preOrderCommand = preparePaymentBillOrder(cmd, billGroup);
         
+        // 发送下单请求
         PurchaseOrderCommandResponse orderResponse = sendCreatePreOrderRequest(preOrderCommand);
 
+        // 根据订单和支付回来的报文更新业务信息
         afterBillOrderCreated(cmd, orderResponse);
-        //5、更新统一订单信息
-        //afterPaymentBillOrderCreate(orderCommandResponse, order.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-        
-                
-	    return preOrderDTO;
-	}    
-    
-    protected void afterBillOrderCreated(CreatePaymentBillOrder cmd, PurchaseOrderCommandResponse orderResponse) {
-        List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
-        for(BillIdAndAmount bill : cmd.getBills()) {
-            PaymentBillOrder orderBill  = new PaymentBillOrder();
-            orderBill.setNamespaceId(cmd.getNamespaceId());
-            orderBill.setAmount(new BigDecimal(bill.getAmountOwed()));
-            orderBill.setBillId(bill.getBillId());
-            orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
-            orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
-            //orderBill.setGeneralOrderId(orderResponse.geti);
-            //orderBill.setOrderType(orderType);
-            orderBill.setPaymentType(cmd.getPaymentType());
-            // orderBill.setPaymentChannel(paymentChannel);
-            
-            billOrderList.add(orderBill);
-        }
-        
-        assetProvider.createBillOrderMaps(billOrderList);
-    }
-	
-	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
-		PreOrderDTO preOrderDTO = null;
-        CreatePurchaseOrderRestResponse  createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
-        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
-            LOGGER.error("Failed to create bill order, params={}", createOrderCommand);
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_ORDER_CREATION_FAILED,
-                    "Failed to create bill order");
-        }
-        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
-        
-        //4、组装支付方式
-        //preOrderDTO = orderCommandResponseToDto(orderCommandResponse, createOrderCommand);
-
-        //6、返回
-        return orderCommandResponse;
+          
+        // 返回给客户端支付的报文
+	    return populatePreOrderDto(preOrderCommand, orderResponse);
 	}
-	
-
     
-    protected CreatePurchaseOrderCommand preparePaymentBillOrder(CreatePaymentBillOrder cmd, PaymentBillGroup billGroup) {
+    protected CreatePurchaseOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
         CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
         
         BigDecimal totalAmountCents = calculateBillOrderAmount(cmd);
@@ -144,7 +104,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setAccountCode(accountCode);
         preOrderCommand.setClientAppName(cmd.getClientAppName());
 
-        preOrderCommand.setBusinessOrderType(cmd.getBusinessOrderType());
+        preOrderCommand.setBusinessOrderType(getBusinessOrderType(cmd));
         // 移到统一订单系统完成
         // String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
         // preOrderCommand.setBizOrderNum(BizOrderNum);
@@ -176,6 +136,69 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         
         return preOrderCommand;
     }
+    
+	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
+        CreatePurchaseOrderRestResponse  createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            LOGGER.error("Failed to create bill order, params={}", createOrderCommand);
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_ORDER_CREATION_FAILED,
+                    "Failed to create bill order");
+        }
+        
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+        
+        return orderCommandResponse;
+	}
+    
+    protected void afterBillOrderCreated(CreatePaymentBillOrderCommand cmd, PurchaseOrderCommandResponse orderResponse) {
+        List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
+        for(BillIdAndAmount bill : cmd.getBills()) {
+            PaymentBillOrder orderBill  = new PaymentBillOrder();
+            orderBill.setNamespaceId(cmd.getNamespaceId());
+            orderBill.setAmount(new BigDecimal(bill.getAmountOwed()));
+            orderBill.setBillId(bill.getBillId());
+            orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
+            orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
+            //orderBill.setGeneralOrderId(orderResponse.geti);
+            //orderBill.setOrderType(orderType);
+            orderBill.setPaymentType(cmd.getPaymentType());
+            // orderBill.setPaymentChannel(paymentChannel);
+            
+            billOrderList.add(orderBill);
+        }
+        
+        assetProvider.createBillOrderMaps(billOrderList);
+    }
+    
+    private PreOrderDTO populatePreOrderDto(CreatePurchaseOrderCommand preOrderCommand, PurchaseOrderCommandResponse orderResponse){
+        OrderCommandResponse orderCommandResponse = orderResponse.getPayResponse();
+        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
+            payMethods.add(payMethodDTO);
+        }
+        dto.setPayMethod(payMethods);
+        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+        if(orderResponse.getAmount() != null) {
+            dto.setAmount(orderResponse.getAmount().longValue());
+        }
+        dto.setOrderId(orderResponse.getOrderId());
+        return dto;
+    }
 	
 	/**
 	 * 通用版本，帐单数据在左邻系统，直接从系统中读取数据来进行校验；
@@ -183,7 +206,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @param cmd 命令参数
 	 * @throws RuntimeErrorException 当所有帐单都已经被支付，则不需要再进行支付，此时抛异常
 	 */
-	protected void checkPaymentBillOrderPaidStatus(CreatePaymentBillOrder cmd) {
+	protected void checkPaymentBillOrderPaidStatus(CreatePaymentBillOrderCommand cmd) {
 	    List<BillIdAndAmount> bills = cmd.getBills();
         List<String> billIds = new ArrayList<>();
         for(BillIdAndAmount billIdAndAmount : bills){
@@ -199,7 +222,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         }
 	}
 	
-	protected PaymentBillGroup checkBillGroup(CreatePaymentBillOrder cmd) {
+	protected PaymentBillGroup checkBillGroup(CreatePaymentBillOrderCommand cmd) {
         PaymentBillGroup billGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(billGroup == null) {
             LOGGER.error("Bill group not found, billGroupId={}", cmd.getBillGroupId());
@@ -215,7 +238,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @param billGroup 帐单组信息
 	 * @return
 	 */
-	protected void checkPaymentPayeeId(CreatePaymentBillOrder cmd, PaymentBillGroup billGroup) {
+	protected void checkPaymentPayeeId(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
 	    // TODO: 收款方类型也应该校验一下，但未确定以往数据是否已经补上该信息，故暂时不校验
         // String payeeuserType = billGroup.getBizPayeeType();
@@ -235,7 +258,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @param cmd 下单请求信息
 	 * @return 总金额，以分为单位
 	 */
-	protected BigDecimal calculateBillOrderAmount(CreatePaymentBillOrder cmd) {
+	protected BigDecimal calculateBillOrderAmount(CreatePaymentBillOrderCommand cmd) {
 	    List<BillIdAndAmount> bills = cmd.getBills();
 	    BigDecimal totalAmountCents = new BigDecimal(0);
         for(BillIdAndAmount billIdAndAmount : bills){
@@ -246,6 +269,21 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         
         return totalAmountCents;
 	}
+    
+    /**
+     * 获取业务订单类型。
+     * 订单类型集中在统一订单系统中定义，订单类型有一个code和一个acronym(code的缩写)，code为使用的业务订单类型，
+     * acronym主要是用做产生订单编号的
+     * @param cmd
+     * @return
+     */
+    private String getBusinessOrderType(CreatePaymentBillOrderCommand cmd) {
+        if(cmd.getBusinessOrderType() != null) {
+            return cmd.getBusinessOrderType();
+        } else {
+            return BusinessOrderType.WUYE_CODE.getCode();
+        }
+    }
 	
 	/**
 	 * 获取支付的额外参数信息，按通联的定义，在微信公众号支付时，必须填写微信的openid
@@ -253,7 +291,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
      * @param billGroup 帐单组
 	 * @return 支付的额外参数信息
 	 */
-	protected Map<String, String> getPaymentParams(CreatePaymentBillOrder cmd, PaymentBillGroup billGroup) {
+	protected Map<String, String> getPaymentParams(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
 	    Map<String, String> map = null;
 	    
 	    PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
@@ -285,7 +323,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
      * @param billGroup 帐单组
 	 * @return 取付款方的额外参数信息
 	 */
-	protected String getBusinessPayerParams(CreatePaymentBillOrder cmd, PaymentBillGroup billGroup) {
+	protected String getBusinessPayerParams(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
 	    OwnerType businessPayerType = OwnerType.fromCode(cmd.getBusinessPayerType());
 	    if(businessPayerType == OwnerType.ORGANIZATION) {
 	        // TODO: 未考虑企业帐号支付，先全部认为是个人帐号支付
@@ -322,7 +360,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @param billGroup 帐单组
 	 * @return 扩展信息
 	 */
-	protected String genPaymentExtendInfo(CreatePaymentBillOrder cmd, PaymentBillGroup billGroup) {
+	protected String genPaymentExtendInfo(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
 	    // 通过账单ID找到ownerID，再通过ownerID找到项目名称
         String projectName = "";
         if(cmd.getBills() != null) {
@@ -344,7 +382,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         return strBuilder.toString();
 	}
 	
-	private String getPayCallbackUrl(CreatePaymentBillOrder cmd) {
+	private String getPayCallbackUrl(CreatePaymentBillOrderCommand cmd) {
         String configKey = "pay.v2.callback.url.asset";
         String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
         if(backUrl == null || backUrl.trim().length() == 0) {
@@ -393,33 +431,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             handler = PlatformContext.getComponent(handlerPrefix + vendorName);
         }
         return handler;
-    }
-	
-	private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
-        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
-        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
-        	PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-        	payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
-        	payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
-        	String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
-        	payMethodDTO.setPaymentLogo(paymentLogo);
-        	payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
-        	PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-        	com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
-        	if(bizPaymentParamsDTO != null) {
-        		paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
-        	}
-        	payMethodDTO.setPaymentParams(paymentParamsDTO);
-        	payMethods.add(payMethodDTO);
-        }
-        dto.setPayMethod(payMethods);
-        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
-        dto.setAmount(cmd.getAmount());
-        dto.setOrderId(cmd.getOrderId());
-        return dto;
     }
 	
 	/*
