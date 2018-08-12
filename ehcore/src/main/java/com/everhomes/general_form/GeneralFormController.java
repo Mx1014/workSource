@@ -101,14 +101,14 @@ public class GeneralFormController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /general_form/listDefaultFields</b>
-	 * <p>根據模块获取默认字段	</p>
+	 * <b>URL: /general_form/syncFromDb</b>
+	 * <p>刷新es</p>
 	 */
-	@RequestMapping("listDefaultFields")
-	@RestReturn(value=GeneralFormFieldDTO.class)
-	public RestResponse listDefaultFields(ListDefaultFieldsCommand cmd){
-		List<GeneralFormFieldDTO> dtos = generalFormService.getDefaultFieldsByModuleId(cmd);
-		RestResponse response = new RestResponse(dtos);
+	@RequestMapping("syncFromDb")
+	@RestReturn(value=String.class)
+	public RestResponse syncFromDb(){
+		generalFormSearcher.syncFromDb();
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -123,7 +123,7 @@ public class GeneralFormController extends ControllerBase {
 	@RestReturn(value=Long.class)
 	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
 		Long id = generalFormService.deleteGeneralFormVal(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(id);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

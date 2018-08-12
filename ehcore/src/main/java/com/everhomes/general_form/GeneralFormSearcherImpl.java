@@ -1,6 +1,9 @@
 package com.everhomes.general_form;
 
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.search.AbstractElasticSearch;
@@ -45,6 +48,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
     @Autowired
     GeneralFormProvider generalFormProvider;
+    @Autowired
+    AddressProvider addressProvider;
+    @Autowired
+    EnterpriseCustomerProvider enterpriseCustomerProvider;
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -54,13 +61,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         deleteById(id.toString());
     }
 
+
+
     @Override
     public void bulkUpdate(List<GeneralFormVal> generalFormVals) {
         BulkRequestBuilder brb = getClient().prepareBulk();
         XContentBuilder source = createDoc(generalFormVals);
         if(null != source) {
-            LOGGER.info("id:" + generalFormVals.iterator().next().getId());
-            brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVals.iterator().next().getId().toString()).source(source));
+            LOGGER.info("id:" + generalFormVals.iterator().next().getSourceId());
+            brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVals.iterator().next().getSourceId().toString()).source(source));
         }
         if (brb.numberOfActions() > 0) {
             brb.execute().actionGet();
@@ -72,7 +81,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     @Override
     public void feedDoc(List<GeneralFormVal> generalFormVals) {
         XContentBuilder source = createDoc(generalFormVals);
-        feedDoc(generalFormVals.iterator().next().getId().toString(), source);
+        feedDoc(generalFormVals.iterator().next().getSourceId().toString(), source);
     }
 
     @Override
@@ -81,8 +90,27 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         this.deleteAll();
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        for(;;) {
-            List<GeneralFormVal> generalFormVal = generalFormProvider.listGeneralForm(locator, pageSize);
+        List<GeneralFormVal> generalFormVal = generalFormProvider.listGeneralForm();
+        List<GeneralFormValRequest> generalFormValRequests = generalFormProvider.listGeneralFormValRequest();
+        List<List<GeneralFormVal>> vals = new ArrayList<>();
+        for(GeneralFormValRequest request: generalFormValRequests){
+            Long sourceId = request.getId();
+            List<GeneralFormVal> createBulUpdate = new ArrayList<>();
+            for(GeneralFormVal temp :generalFormVal){
+                if(temp.getSourceId() == sourceId){
+                    createBulUpdate.add(temp);
+                }
+            }
+            vals.add(createBulUpdate);
+        }
+
+        for(List<GeneralFormVal> temp : vals){
+            if(temp.size() > 0) {
+                this.bulkUpdate(temp);
+            }
+        }
+        /*for(int i = 0 ; i < vals.size() ; i++ ) {
+
 
             if(generalFormVal.size() > 0) {
                 this.bulkUpdate(generalFormVal);
@@ -91,7 +119,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             if(locator.getAnchor() == null) {
                 break;
             }
-        }
+        }*/
 
         this.optimize(1);
         this.refresh();
@@ -205,14 +233,25 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                         urMap = mapper.readValue(fieldValue, jvt);
                         for (Entry<String, String> entry : urMap.entrySet()) {
                             fieldValue  = entry.getValue();
-                            if (StringUtils.isNotBlank(fieldValue)) {
+
+                            if(entry.getKey().equals("addressId")){
+                                fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
                                 break;
                             }
+                            if(entry.getKey().equals("customerName")){
+                                EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
+                                fieldValue = customer.getName();
+                                break;
+                            }
+                            if(entry.getKey().equals("text")) {
+                                if (StringUtils.isNotBlank(fieldValue)) {
+                                    break;
+                                }
+                            }
+
                         }
                         returnMap.put(dto.getFieldName(), fieldValue);
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
 
                 }
@@ -220,6 +259,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 if(request != null)
                     returnMap.put("approvalStatus",request.getApprovalStatus());
                 returnMap.put("sourceId", sourceId);
+
                 fieldVals.add(returnMap);
             }
         }
@@ -244,7 +284,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         try {
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
-            
             if (generalFormVal.size() > 0) {
                 GeneralFormVal first = generalFormVal.iterator().next();
                 builder.field("id", first.getSourceId());
@@ -258,6 +297,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 builder.field("sourceType", first.getSourceType());
                 builder.field("formOriginId", first.getFormOriginId());
                 builder.field("formVersion", first.getFormVersion());
+                builder.field("approvalStatus", 0);
             }
 
             for (GeneralFormVal val : generalFormVal) {

@@ -302,6 +302,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
         generalFormValRequests.setNamespaceId(namespaceId);
         generalFormValRequests.setSourceId(sourceId);
         generalFormValRequests.setSourceType(sourceType);
+		generalFormValRequests.setApprovalStatus((byte)0);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
@@ -325,6 +326,14 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
+	public List<GeneralFormValRequest> listGeneralFormValRequest(){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+
+		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormValRequest.class));
+	}
+
+	@Override
 	public GeneralFormValRequest getGeneralFormValRequest(Long id){
 	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
@@ -337,7 +346,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 		EhGeneralFormValRequests dto = dao.findById(sourceId);
-		//dto.setStatus(status);
+		dto.setStatus(status);
 		dao.update(dto);
 		return dto.getId();
 	}
@@ -356,6 +365,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
 	}
 
+
+	@Override
+	public List<GeneralFormVal> listGeneralForm(){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormVals.class));
+
+		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
+
+	}
 
 
 	@Override
