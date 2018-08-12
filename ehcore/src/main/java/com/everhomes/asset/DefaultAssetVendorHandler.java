@@ -246,7 +246,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         // 支付系统中的收款方ID
         Long payeeUserId = billGroup.getBizPayeeId();
         if(payeeUserId == null) {
-            LOGGER.error("Payee user id not found(id in payment system), billGroupId={}, cmd={}");
+            LOGGER.error("Payee user id not found(id in payment system), billGroupId={}, cmd={}", billGroup.getId(), cmd);
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.PAYMENT_PAYEE_NOT_CONFIG,
                     "Payee user id not found");
         } 
