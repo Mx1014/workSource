@@ -728,7 +728,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 //        }
         //如果账单为新的，则进行存储
         Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,orderId);
+        //assetProvider.saveOrderBills(bills,orderId);
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空
         if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
@@ -1969,53 +1969,4 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	return assetProvider.showCreateBillSubItemList(cmd);
     }
-    
-    protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrder cmd) {
-    	List<BillIdAndAmount> bills = cmd.getBills();
-        List<String> billIds = new ArrayList<>();
-        Long amountsInCents = 0l;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
-            String amountOwed = billIdAndAmount.getAmountOwed();
-            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
-            amountsInCents += amountOwedInCents.longValue();
-        }
-        //对左邻的用户，直接检查bill的状态即可
-        checkHasPaidBills(billIds);
-        Long orderId = assetProvider.getNextOrderId();
-        assetProvider.saveOrderBills(bills,orderId);
-        Long payerId = Long.parseLong(cmd.getPayerId());
-        //检查下单人的类型和id，不能为空
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-            payerId = UserContext.currentUserId();
-        }
-        //组装command ， 请求支付模块的下预付单
-        PreOrderCommand preOrderCommand = new PreOrderCommand();
-        preOrderCommand.setAmount(amountsInCents);
-        preOrderCommand.setCommunityId(cmd.getCommunityId());
-        preOrderCommand.setClientAppName(cmd.getClientAppName());
-        preOrderCommand.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        preOrderCommand.setNamespaceId(cmd.getNamespaceId());
-        preOrderCommand.setOpenid(cmd.getOpenid());
-        preOrderCommand.setOrderId(orderId);
-        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        preOrderCommand.setPayerId(payerId);
-        //通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
-        if(billIds != null) {
-        	Long billId = Long.parseLong(billIds.get(0));
-        	projectName = assetProvider.getProjectNameByBillID(billId);
-        }
-        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        String billGroupName = "";
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	preOrderCommand.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	preOrderCommand.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        	billGroupName = paymentBillGroup.getName();
-        }
-        preOrderCommand.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
-        return preOrderCommand;
-    }
-    
 }

@@ -152,7 +152,7 @@ public interface AssetProvider {
 
     Long findAssetOrderByBillIds(List<String> billIds);
 
-    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+    void createBillOrderMaps(List<BillIdAndAmount> bills, String businessOrderType);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
 
@@ -391,6 +391,4 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
-	
-	Long getNextOrderId();
 }

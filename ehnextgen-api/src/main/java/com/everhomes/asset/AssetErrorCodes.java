@@ -17,5 +17,11 @@ public class AssetErrorCodes {
     static final int HTTP_EBEI_ERROR = 10006;
     static final int HAS_PAID_BILLS = 10007;
     static final int NOT_CORP_MANAGER = 10008;
+    /** 帐单组不存在 */
+    static final int BILL_GROUP_NOT_FOUND = 10009;
+    /** 收款方帐号没有配置 */
+    static final int PAYMENT_PAYEE_NOT_CONFIG = 10010;
+    /** 缴费订单创建失败 */
+    static final int BILL_ORDER_CREATION_FAILED = 10011;
 
 }

@@ -2,96 +2,51 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
-
-/**
- * Created by Wentian Wang on 2017/9/12.
- */
 /**
  *<ul>
- * <li>clientAppName:客户端名称</li>
- * <li>billIds:账单id列表</li>
- * <li>contactNum:合同号</li>
- * <li>amountOwed:缴纳金额，单位元</li>
- * <li>communityId:园区id</li>
- * <li>payerType:支付者的类型，eh_user为个人，eh_organization为企业</li>
- * <li>payerId:支付者的id</li>
- * <li>payerName:支付者的名称</li>
- * <li>ownerType:所属者类型，通常为community</li>
- * <li>openid:微信标识</li>
- * <li>namespaceId：域空间</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>communityId: 小区ID</li>
+ * <li>clientAppName: 客户端名称</li>
+ * <li>billGroupId: 帐单组ID</li>
+ * <li>contactNumber: 合同编号</li>
+ * <li>amount: 缴纳金额，单位元</li>
+ * <li>businessPayerType: 付款方的类型，参考{@link com.everhomes.rest.order.OwnerType}</li>
+ * <li>businessPayerId: 付款方的id，如个人ID、企业ID</li>
+ * <li>businessPayerName: 付款方名称</li>
+ * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付，参考{@link com.everhomes.rest.order.PaymentType}</li>
+ * <li>sourceType: 支付来源，如手机或PC之类，参考{@link com.everhomes.pay.order.SourceType}</li>
+ * <li>extendInfo: 扩展信息，传给支付系统而支付系统会原样返回</li>
+ * <li>billIds: 账单id列表</li>
  *</ul>
  */
 public class CreatePaymentBillOrder {
+    private Integer namespaceId;
+    private Long communityId;
     private String clientAppName;
+    private Long billGroupId;
+    private String contactNumber;
+    private String amount;
+    private String businessPayerType;
+    private String businessPayerId;
+    private String payerName;
+    private Integer sourceType;
+    private Integer paymentType;
+    private String extendInfo;
+    private PaymentParamsDTO paymentParams;
+    
     @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
-    private Long billGroupId;
-    private String contactNum;
-    private String amountOwed;
-    private Long communityId;
-    private String payerType;
-    private String payerId;
-    private String payerName;
-    private String ownerType;
-    private String openid;
-    private Integer namespaceId;
 
-    public Long getBillGroupId() {
-        return billGroupId;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setBillGroupId(Long billGroupId) {
-        this.billGroupId = billGroupId;
-    }
-
-    public String getClientAppName() {
-        return clientAppName;
-    }
-
-    public void setClientAppName(String clientAppName) {
-        this.clientAppName = clientAppName;
-    }
-
-    public List<BillIdAndAmount> getBills() {
-        return bills;
-    }
-
-    public void setBills(List<BillIdAndAmount> bills) {
-        this.bills = bills;
-    }
-
-    public String getPayerId() {
-        return payerId;
-    }
-
-    public void setPayerId(String payerId) {
-        this.payerId = payerId;
-    }
-
-    public String getOpenid() {
-        return openid;
-    }
-
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
-
-    public String getContactNum() {
-        return contactNum;
-    }
-
-    public void setContactNum(String contactNum) {
-        this.contactNum = contactNum;
-    }
-
-    public String getAmountOwed() {
-        return amountOwed;
-    }
-
-    public void setAmountOwed(String amountOwed) {
-        this.amountOwed = amountOwed;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getCommunityId() {
@@ -102,20 +57,52 @@ public class CreatePaymentBillOrder {
         this.communityId = communityId;
     }
 
-    public String getOwnerType() {
-        return ownerType;
+    public String getClientAppName() {
+        return clientAppName;
     }
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
+    public void setClientAppName(String clientAppName) {
+        this.clientAppName = clientAppName;
     }
 
-    public String getPayerType() {
-        return payerType;
+    public Long getBillGroupId() {
+        return billGroupId;
     }
 
-    public void setPayerType(String payerType) {
-        this.payerType = payerType;
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public String getBusinessPayerType() {
+        return businessPayerType;
+    }
+
+    public void setBusinessPayerType(String businessPayerType) {
+        this.businessPayerType = businessPayerType;
+    }
+
+    public String getBusinessPayerId() {
+        return businessPayerId;
+    }
+
+    public void setBusinessPayerId(String businessPayerId) {
+        this.businessPayerId = businessPayerId;
     }
 
     public String getPayerName() {
@@ -126,11 +113,48 @@ public class CreatePaymentBillOrder {
         this.payerName = payerName;
     }
 
-    public Integer getNamespaceId() {
-        return namespaceId;
+    public Integer getPaymentType() {
+        return paymentType;
     }
 
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
+    public void setPaymentType(Integer paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public Integer getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(Integer sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public String getExtendInfo() {
+        return extendInfo;
+    }
+
+    public void setExtendInfo(String extendInfo) {
+        this.extendInfo = extendInfo;
+    }
+
+    public PaymentParamsDTO getPaymentParams() {
+        return paymentParams;
+    }
+
+    public void setPaymentParams(PaymentParamsDTO paymentParams) {
+        this.paymentParams = paymentParams;
+    }
+
+    public List<BillIdAndAmount> getBills() {
+        return bills;
+    }
+
+    public void setBills(List<BillIdAndAmount> bills) {
+        this.bills = bills;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
