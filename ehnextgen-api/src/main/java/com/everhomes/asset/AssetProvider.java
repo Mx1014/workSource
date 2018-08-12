@@ -152,7 +152,7 @@ public interface AssetProvider {
 
     Long findAssetOrderByBillIds(List<String> billIds);
 
-    void createBillOrderMaps(List<BillIdAndAmount> bills, String businessOrderType);
+    void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
 

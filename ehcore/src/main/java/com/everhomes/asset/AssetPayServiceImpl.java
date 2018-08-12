@@ -212,7 +212,7 @@ public class AssetPayServiceImpl implements AssetPayService{
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "create order fail");
         }
-        OrderCommandResponse response = createOrderResp.getResponse();
+        //OrderCommandResponse response = createOrderResp.getResponse();
 
         //5、保存订单信息
         //saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
@@ -231,26 +231,26 @@ public class AssetPayServiceImpl implements AssetPayService{
         createOrderCmd.setAccountCode(accountCode);
         createOrderCmd.setClientAppName(cmd.getClientAppName());
 
-        String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
-        createOrderCmd.setBizOrderNum(BizOrderNum);
-        
-        createOrderCmd.setBuyerType(OwnerType.USER.getCode());
-        createOrderCmd.setBuyerId(String.valueOf(buyer.getId()));
-        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(buyer.getId(), cmd.getNamespaceId());
-        if(buyerIdentifier != null) {
-            String buyerPhone = buyerIdentifier.getIdentifierToken();
-            createOrderCmd.setBuyerPhone(buyerPhone);
-        }
-        
-        createOrderCmd.setPayeeUserId(cmd.getBizPayeeId());//收款方ID
-        createOrderCmd.setAmount(cmd.getAmount());
-        createOrderCmd.setPaymentParams(flattenMap);
-        createOrderCmd.setPaymentType(cmd.getPaymentType());
-        if(cmd.getExpiration() != null) {
-            createOrderCmd.setExpirationMillis(cmd.getExpiration());
-        }
-        
-        createOrderCmd.setBackUrl(getPayCallbackUrl(cmd));
+//        String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
+//        createOrderCmd.setBizOrderNum(BizOrderNum);
+//        
+//        createOrderCmd.setBuyerType(OwnerType.USER.getCode());
+//        createOrderCmd.setBuyerId(String.valueOf(buyer.getId()));
+//        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(buyer.getId(), cmd.getNamespaceId());
+//        if(buyerIdentifier != null) {
+//            String buyerPhone = buyerIdentifier.getIdentifierToken();
+//            createOrderCmd.setBuyerPhone(buyerPhone);
+//        }
+//        
+//        createOrderCmd.setPayeeUserId(cmd.getBizPayeeId());//收款方ID
+//        createOrderCmd.setAmount(cmd.getAmount());
+//        createOrderCmd.setPaymentParams(flattenMap);
+//        createOrderCmd.setPaymentType(cmd.getPaymentType());
+//        if(cmd.getExpiration() != null) {
+//            createOrderCmd.setExpirationMillis(cmd.getExpiration());
+//        }
+//        
+//        createOrderCmd.setBackUrl(getPayCallbackUrl(cmd));
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
         //localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.PAYMENT_GOOD_NAME, buyer.getLocale());
         createOrderCmd.setGoodsName("物业缴费");

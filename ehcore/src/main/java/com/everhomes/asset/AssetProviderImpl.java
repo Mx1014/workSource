@@ -18,6 +18,7 @@ import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -2913,38 +2914,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createBillOrderMaps(List<BillIdAndAmount> bills, String businessOrderType) {
+    public void createBillOrderMaps(List<PaymentBillOrder> billOrderList) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillOrders.class), bills.size());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillOrders.class), billOrderList.size());
         
-        // 由于订单信息已经移到统一订单系统，此时业务系统已经没有了订单表，为了保持原来的订单ID产生方式，
-        // 需要借用帐单与订单的关系表的ID来完成生成（注：如果不是使用表的实际ID，则需要特殊写sequence的同步）；
-        // 使用该方式主要是不想特殊写sequence的同步，故在往该表插入记录时，取第一个ID作为订单ID by lqs 20180812
-        long orderId = nextBlockSequence;
-        String orderNumber = generateOrderNumber(businessOrderType, orderId);
         List<EhPaymentBillOrders> orderBills = new ArrayList<>();
-        for(int i = 0; i < bills.size(); i ++){
-            EhPaymentBillOrders orderBill  = new EhPaymentBillOrders();
-            BillIdAndAmount billIdAndAmount = bills.get(i);
-            orderBill.setId(nextBlockSequence++);
-            orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
-            orderBill.setBillId(billIdAndAmount.getBillId());
-            //orderBill.setOrderId(orderId);
-            orderBill.setPaymentStatus(0);
-            orderBills.add(orderBill);
+        for(PaymentBillOrder billdOrder : billOrderList){
+            EhPaymentBillOrders billOrderInDb  = ConvertHelper.convert(billdOrder, EhPaymentBillOrders.class);
+            billOrderInDb.setId(nextBlockSequence++);
+            orderBills.add(billOrderInDb);
         }
+        
         EhPaymentBillOrdersDao dao = new EhPaymentBillOrdersDao(dslContext.configuration());
         dao.insert(orderBills);
-    }
-    
-    private String generateOrderNumber(String orderType, Long orderId) {
-        String v2code = OrderType.OrderTypeEnum.getV2codeByPyCode(orderType);
-        DecimalFormat df = new DecimalFormat("00000000000000000");
-        String orderIdStr = df.format(orderId);
-        if(orderIdStr!=null && orderIdStr.length() >17){
-            orderIdStr = orderIdStr.substring(2);
-        }
-        return v2code+orderIdStr;
     }
 
     @Override

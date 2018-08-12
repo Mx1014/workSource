@@ -30,6 +30,7 @@ import com.everhomes.rest.asset.CreatePaymentBillOrder;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -37,6 +38,7 @@ import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -73,27 +75,47 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
     public PreOrderDTO createOrder(CreatePaymentBillOrder cmd) {
+        // 校验参数
         checkPaymentBillOrderPaidStatus(cmd);
         PaymentBillGroup billGroup = checkBillGroup(cmd);
         checkPaymentPayeeId(cmd, billGroup);
         
-        String businessOrderType = OrderType.OrderTypeEnum.WUYE_CODE.getPycode();
-
-        assetProvider.createBillOrderMaps(cmd.getBills(), businessOrderType);
+        // 
+        //assetProvider.createBillOrderMaps(cmd.getBills(), businessOrderType);
         
         CreatePurchaseOrderCommand preOrderCommand = preparePaymentBillOrder(cmd, billGroup);
         
-        PreOrderDTO preOrderDTO = sendCreatePreOrderRequest(preOrderCommand);
+        PurchaseOrderCommandResponse orderResponse = sendCreatePreOrderRequest(preOrderCommand);
 
-
+        afterBillOrderCreated(cmd, orderResponse);
         //5、更新统一订单信息
         //afterPaymentBillOrderCreate(orderCommandResponse, order.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
         
                 
 	    return preOrderDTO;
-	}
+	}    
+    
+    protected void afterBillOrderCreated(CreatePaymentBillOrder cmd, PurchaseOrderCommandResponse orderResponse) {
+        List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
+        for(BillIdAndAmount bill : cmd.getBills()) {
+            PaymentBillOrder orderBill  = new PaymentBillOrder();
+            orderBill.setNamespaceId(cmd.getNamespaceId());
+            orderBill.setAmount(new BigDecimal(bill.getAmountOwed()));
+            orderBill.setBillId(bill.getBillId());
+            orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
+            orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
+            //orderBill.setGeneralOrderId(orderResponse.geti);
+            //orderBill.setOrderType(orderType);
+            orderBill.setPaymentType(cmd.getPaymentType());
+            // orderBill.setPaymentChannel(paymentChannel);
+            
+            billOrderList.add(orderBill);
+        }
+        
+        assetProvider.createBillOrderMaps(billOrderList);
+    }
 	
-	protected PreOrderDTO sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
+	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
 		PreOrderDTO preOrderDTO = null;
         CreatePurchaseOrderRestResponse  createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
         if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
@@ -101,13 +123,13 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_ORDER_CREATION_FAILED,
                     "Failed to create bill order");
         }
-        OrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
         
         //4、组装支付方式
         //preOrderDTO = orderCommandResponseToDto(orderCommandResponse, createOrderCommand);
 
         //6、返回
-        return preOrderDTO;
+        return orderCommandResponse;
 	}
 	
 
@@ -116,27 +138,29 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
         
         BigDecimal totalAmountCents = calculateBillOrderAmount(cmd);
-        preOrderCommand.setAmount(totalAmountCents.longValue());
+        preOrderCommand.setAmount(totalAmountCents);
         
         String accountCode = generateAccountCode(cmd.getNamespaceId());
         preOrderCommand.setAccountCode(accountCode);
         preOrderCommand.setClientAppName(cmd.getClientAppName());
 
+        preOrderCommand.setBusinessOrderType(cmd.getBusinessOrderType());
         // 移到统一订单系统完成
         // String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
         // preOrderCommand.setBizOrderNum(BizOrderNum);
         
-        preOrderCommand.setBuyerType(cmd.getBusinessPayerType());
-        preOrderCommand.setBuyerId(cmd.getBusinessPayerId());
-        getBusinessPayerParams(cmd, billGroup);
-        
-        preOrderCommand.setPayeeId(billGroup.getBizPayeeId());
-        //preOrderCommand.setBizPayeeType(billGroup.getBizPayeeType());
+        preOrderCommand.setBusinessPayerType(cmd.getBusinessPayerType());
+        preOrderCommand.setBusinessPayerId(cmd.getBusinessPayerId());
+        String businessPayerParams = getBusinessPayerParams(cmd, billGroup);
+        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+        preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType());
+        preOrderCommand.setPaymentPayeeId(billGroup.getBizPayeeId());
 
         preOrderCommand.setExtendInfo(genPaymentExtendInfo(cmd, billGroup));
         preOrderCommand.setPaymentParams(getPaymentParams(cmd, billGroup));
         preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
-        preOrderCommand.setBackUrl(getPayCallbackUrl(cmd));
+        preOrderCommand.setCallbackUrl(getPayCallbackUrl(cmd));
         preOrderCommand.setExtendInfo(cmd.getExtendInfo());
         //localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.PAYMENT_GOOD_NAME, buyer.getLocale());
         preOrderCommand.setGoodsName("物业缴费");
