@@ -19,7 +19,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.gorder.sdk.order.OrderService;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
@@ -71,7 +71,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
     private String contextPath;
 	
 	@Autowired
-	private OrderService orderService;
+	protected GeneralOrderService orderService;
 	
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
@@ -159,10 +159,10 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             orderBill.setBillId(bill.getBillId());
             orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
             orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
-            //orderBill.setGeneralOrderId(orderResponse.geti);
-            //orderBill.setOrderType(orderType);
+            orderBill.setGeneralOrderId(orderResponse.getOrderId());
+            //orderBill.setOrderType(orderResponse.getPaymentOrderType());
             orderBill.setPaymentType(cmd.getPaymentType());
-            // orderBill.setPaymentChannel(paymentChannel);
+            orderBill.setPaymentChannel(orderResponse.getPaymentChannel());
             
             billOrderList.add(orderBill);
         }

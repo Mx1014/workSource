@@ -19,7 +19,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.gorder.sdk.order.OrderService;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.order.PayProvider;
 import com.everhomes.order.PaymentAccount;
@@ -98,7 +98,7 @@ public class AssetPayServiceImpl implements AssetPayService{
     private String contextPath;
 	
 	@Autowired
-	private OrderService orderService;
+	private GeneralOrderService orderService;
 	
 	@Autowired
 	private LocaleStringProvider localeStringProvider;

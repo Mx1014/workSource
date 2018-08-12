@@ -8,8 +8,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.gorder.sdk.order.OrderService;
 import com.everhomes.rest.gorder.http.RestClientSettings;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 
 @Component
 public class OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{
@@ -19,7 +19,7 @@ public class OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEv
     private ConfigurationProvider configurationProvider;
     
     @Autowired
-    private OrderService orderService;
+    private GeneralOrderService orderService;
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
