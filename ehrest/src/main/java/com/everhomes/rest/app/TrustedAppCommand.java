@@ -3,14 +3,15 @@ package com.everhomes.rest.app;
 import javax.validation.constraints.NotNull;
 
 public class TrustedAppCommand {
-    @NotNull
-    private String appKey;
 
-    public String getAppKey() {
-        return appKey;
+    @NotNull
+    private String thirdPartyAppKey;
+
+    public String getThirdPartyAppKey() {
+        return thirdPartyAppKey;
     }
 
-    public void setAppKey(String appKey) {
-        this.appKey = appKey;
+    public void setThirdPartyAppKey(String thirdPartyAppKey) {
+        this.thirdPartyAppKey = thirdPartyAppKey;
     }
 }

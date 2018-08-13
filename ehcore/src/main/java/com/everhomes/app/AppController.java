@@ -31,7 +31,7 @@ public class AppController extends ControllerBase {
     @RequestMapping("isTrustedApp")
     @RestReturn(value=String.class)
     public RestResponse isTrustedApp(@Valid TrustedAppCommand cmd) {
-        if(s_trustedApps.contains(cmd.getAppKey()))
+        if(s_trustedApps.contains(cmd.getThirdPartyAppKey()))
             return new RestResponse("YES");
         
         return new RestResponse("NO");
