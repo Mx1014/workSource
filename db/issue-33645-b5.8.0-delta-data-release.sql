@@ -182,3 +182,14 @@ WHERE l.punch_organization_id IS NULL;
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 将非工作日变更为休息
 UPDATE eh_punch_statistics SET status_list=REPLACE(status_list,'非工作日','休息')  WHERE status_list LIKE '%非工作日%';
+
+-- AUTHOR: 张智伟 20180813
+-- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 初始化考勤月报的异常打卡申请次数
+UPDATE eh_punch_statistics s INNER JOIN
+(
+SELECT enterprise_id,user_id,REPLACE(LEFT(punch_date,7),'-','') AS punch_month,COUNT(1) AS exception_request_counts
+FROM eh_punch_exception_requests WHERE approval_attribute='ABNORMAL_PUNCH' AND status IN(0,1) GROUP BY enterprise_id,user_id,LEFT(punch_date,7)
+) e
+ON s.owner_id=e.enterprise_id AND s.user_id=e.user_id AND s.punch_month=e.punch_month
+SET s.exception_request_counts=e.exception_request_counts,s.punch_exception_request_count=e.exception_request_counts
+WHERE s.user_id>0;

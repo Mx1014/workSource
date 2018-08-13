@@ -1228,7 +1228,7 @@ public class PunchAdminController extends ControllerBase {
     /**
      * <b>URL: /punch/punchDayLogInitializeByMonth</b>
      * <p>
-     * 初始化某个月的每日统计数据
+     * 初始化某个月的每日统计数据,上线时手动调用进行初始化
      * </p>
      */
     @RequestMapping("punchDayLogInitializeByMonth")
