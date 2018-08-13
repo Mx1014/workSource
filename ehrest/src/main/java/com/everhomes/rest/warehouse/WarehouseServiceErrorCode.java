@@ -38,5 +38,6 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_WAREHOUSENAME_EMPTY = 10029; 
     static final int ERROR_AMOUNT_FORMAT = 10030; 
     static final int ERROR_WAREHOUSE_NUMBERANDNAME_NOT_MATCH = 10031;
+    static final int ERROR_WAREHOUSE_CATEGORYNAME_NOT_MATCH = 10032;
 }
 

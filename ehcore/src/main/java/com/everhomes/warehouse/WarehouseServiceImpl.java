@@ -2129,6 +2129,14 @@ public class WarehouseServiceImpl implements WarehouseService {
 					return log;
 				}
 			}
+			if (StringUtils.isNotEmpty(data.getCategoryName())) {
+				if (!data.getCategoryName().equals(materials.get(0).getCategoryName())) {
+					log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_CATEGORYNAME_NOT_MATCH);
+					log.setData(data);
+					log.setErrorLog("CategoryName and Name not match");
+					return log;
+				}
+			}
 			
 			data.setMaterial(materials.get(0));
 		}
