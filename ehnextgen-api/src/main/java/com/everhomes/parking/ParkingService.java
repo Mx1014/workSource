@@ -164,4 +164,5 @@ public interface ParkingService {
     ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd);
 
     String transformToken(TransformTokenCommand cmd);
+    Long createOrderNo(ParkingLot lot);
 }
