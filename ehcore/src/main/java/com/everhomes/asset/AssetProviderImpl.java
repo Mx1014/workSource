@@ -5323,7 +5323,7 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 
 	@Override
-	public String findEndTimeByPeriod(String endTimeStr, Long contractId) {
+	public String findEndTimeByPeriod(String endTimeStr, Long contractId, Long chargingItemId) {
 		//SELECT date_str_end FROM eh_payment_bill_items 
 		//WHERE date_str_begin<"2018-09-10" 
 		//AND contract_id=7322 
@@ -5336,6 +5336,7 @@ public class AssetProviderImpl implements AssetProvider {
 										.from(billItems)
 						        		.where(billItems.CONTRACT_ID.eq(contractId))
 						        		.and(billItems.DATE_STR_BEGIN.le(endTimeStr))
+						        		.and(billItems.CHARGING_ITEMS_ID.eq(chargingItemId))
 						        		.groupBy(billItems.DATE_STR_END)
 						        		.orderBy(billItems.DATE_STR_END.desc())
 						        		.limit(0, 1)

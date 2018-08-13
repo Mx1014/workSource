@@ -357,7 +357,7 @@ public interface AssetProvider {
 	
 	PaymentBills findLastBill(Long contractId);
 	
-	String findEndTimeByPeriod(String endTimeStr, Long contractId);
+	String findEndTimeByPeriod(String endTimeStr, Long contractId, Long chargingItemId);
     
     PaymentLateFine findLastedFine(Long id);
     

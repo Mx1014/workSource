@@ -2355,10 +2355,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
 						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
 							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId(), chargingItems.get(i).getChargingItemId());
 						}else {
 							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId(), chargingItems.get(i).getChargingItemId());
 						}
 						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
 						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
@@ -2388,10 +2388,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
 						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
 							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
 						}else {
 							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
 						}
 						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
 						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
@@ -2880,9 +2880,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
-		//cmd.setCategoryId(1022L);
-		//cmd.setCommunityId(240111044332061479L);
-		//cmd.setNamespaceId((int) 11L);
 		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
 
 		DurationParamDTO dto = new DurationParamDTO();
@@ -2906,10 +2903,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 							.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
 					if (EndTimeByDayTimestamp.after(chargingItems.get(i).getChargingExpiredTime())) {
 						endTimeByDay = yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
-						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId());
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId(), chargingItems.get(i).getChargingItemId());
 					} else {
 						endTimeByDay = yyyyMMdd.format(EndTimeByDayTimestamp);
-						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId());
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId(), chargingItems.get(i).getChargingItemId());
 					}
 					chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
 					chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
