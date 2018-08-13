@@ -42,6 +42,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.default.personal_bind_phone', '12000001802', '支付个人帐号默认的绑定手机号', 0, NULL, 0);
 	
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.system_id', '10', '由支付系统分配的业务系统ID', 0, NULL, 0);
+	
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

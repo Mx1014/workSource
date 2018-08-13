@@ -22,6 +22,7 @@ import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
 import com.everhomes.rest.gorder.order.BusinessPayerType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -121,6 +122,8 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         
         return preOrderCommand;
     }
@@ -128,9 +131,15 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
         CreatePurchaseOrderRestResponse  createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
         if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
-            LOGGER.error("Failed to create bill order, params={}", createOrderCommand);
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_ORDER_CREATION_FAILED,
-                    "Failed to create bill order");
+            String scope = OrderErrorCode.SCOPE;
+			int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+			String description = "Failed to create order";
+			if(createOrderResp != null) {
+				code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+				scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+				description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+			}
+			throw RuntimeErrorException.errorWith(scope, code, description);
         }
         
         PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
