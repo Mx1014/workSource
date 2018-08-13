@@ -1,8 +1,7 @@
 package com.everhomes.punch;
  
 
-
-import java.io.ByteArrayInputStream;
+ 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -10,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,17 +22,18 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.SignatureHelper;
 
 public class OpenApiClient {
@@ -44,41 +45,30 @@ public class OpenApiClient {
 //			String url =   "http://localhost:8080/evh/openapi/getOrgCheckInData";
 			CloseableHttpClient closeableHttpClient = createHttpsClient();
 			// 建立HttpPost对象
-			HttpPost httppost = new HttpPost(url);
-			
-			
-			httppost.setHeader("Accept", "application/json");
-			httppost.setHeader("Content-Type",
-					"application/x-www-form-urlencode;charset=utf-8"); 
-			
-			GetOrgCheckInDataCommand cmd = new GetOrgCheckInDataCommand();
-			cmd.setAppKey("d06d0ba1-49a6-411f-a153-8d3c08fdeb08");
-//			cmd.setAppKey("93e8275c-31e2-11e5-b7ad-b083fe4e159f");
-			cmd.setOrgId(1035830L);
-//			cmd.setOrgId(1045660L);
-			cmd.setBeginDate(1527782400000L);
-			cmd.setEndDate(1528992000000L);
-			cmd.setTimestamp(DateHelper.currentGMTTime().getTime());
-			cmd.setNonce(23432423);
+			HttpPost httppost = new HttpPost(url);  
 			Map<String,String> map = new HashMap<String, String>(); 
-			map.put("endDate",cmd.getEndDate() + "");
-			map.put("beginDate", cmd.getBeginDate() + "");
-			map.put("orgId",cmd.getOrgId() + "");
-			map.put("appKey",cmd.getAppKey());
-			map.put("timestamp",cmd.getTimestamp() + "");
-			map.put("nonce",cmd.getNonce() + "");
+			map.put("endDate", "1528992000000");
+			map.put("beginDate",   "1527782400000");
+			//1045660
+			map.put("orgId", "1035830");
+			//93e8275c-31e2-11e5-b7ad-b083fe4e159f
+			map.put("appKey", "d06d0ba1-49a6-411f-a153-8d3c08fdeb08");
+			map.put("timestamp", new Date().getTime() + "");
+			map.put("nonce",  "23432423");
 
 			String signature = SignatureHelper.computeSignature(map,  "d1l5CAZl76/zjStIA+WXN8lmBAus/BQQcmxvxC6ypQdNMhlNbYCvf9mEL0z6KMZU8IyiaJSNc2ijB3+fol+vvQ=");
 //			String signature = SignatureHelper.computeSignature(map,  "2nDpmzJj63Un0GzXyeZKUKlVSOKzNHv4FidFL9uCpNaLq6rqE0VAOv3uPaR0jWIRMNqedgci3vzLPAkaX1jg6Q==");
-			cmd.setSignature(signature);
-			BasicHttpEntity bhe = new BasicHttpEntity();
-			bhe.setContent(new ByteArrayInputStream(cmd.toString()
-					.getBytes("UTF-8")));
-			bhe.setContentLength(cmd.toString().getBytes("UTF-8").length);
-			httppost.setEntity(bhe); 
+			map.put("signature", signature);
+			List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                formparams.add(new BasicNameValuePair(entry.getKey(), entry
+                        .getValue()));
+            }
+			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
+                    formparams, Consts.UTF_8);
+			httppost.setEntity(entity); 
 			HttpResponse httpResponse = closeableHttpClient.execute(httppost);
-			
-//			System.out.println("获取数据消耗时间（毫秒）： "+(System.currentTimeMillis()-culTime));
+			 
 			HttpEntity httpEntity1 = httpResponse.getEntity();
 			result = EntityUtils.toString(httpEntity1);
 			// 关闭连接
@@ -87,7 +77,7 @@ public class OpenApiClient {
 				e.printStackTrace();
 			}
 		System.out.print(result);
-	}
+	} 
 
 	public static CloseableHttpClient createHttpsClient() throws Exception {
 		X509TrustManager x509mgr = new X509TrustManager() {
