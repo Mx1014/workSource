@@ -2547,7 +2547,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			task.setLockKey(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
 			SyncDataTask dataTask = syncDataTaskService.executeTask(() -> {
 				SyncDataResponse response = new SyncDataResponse();
-				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId());
+				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), cmd.getContractApplicationScene());
 				return response;
 			}, task);
 			dataTask.getId();
