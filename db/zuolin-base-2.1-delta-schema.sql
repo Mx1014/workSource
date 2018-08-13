@@ -35,5 +35,16 @@ CREATE TABLE `eh_user_apps` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
 
 
+-- 用户自定义的广场应用
+CREATE TABLE `eh_recommend_apps` (
+  `id` bigint(20) NOT NULL,
+  `app_id` bigint(20) NOT NULL,
+  `scope_type` tinyint(4) DEFAULT NULL COMMENT '范围，1-园区，4-公司',
+  `scope_id` bigint(20) DEFAULT NULL COMMENT '范围对象id',
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `u_eh_recommend_app_scope_id` (`scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
+
 ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
 

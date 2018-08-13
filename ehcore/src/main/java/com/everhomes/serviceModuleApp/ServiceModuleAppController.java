@@ -169,5 +169,19 @@ public class ServiceModuleAppController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: /servicemoduleapp/updateRecommendApps</b>
+	 * <p>编辑广场推荐应用</p>
+	 */
+	@RequestMapping("updateRecommendApps")
+	@RestReturn(value=String.class)
+	public RestResponse updateRecommendApps(UpdateRecommendAppsCommand cmd) {
+		serviceModuleAppService.updateRecommendApps(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 }
