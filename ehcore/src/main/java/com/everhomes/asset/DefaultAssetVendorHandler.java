@@ -113,7 +113,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
         preOrderCommand.setCallbackUrl(getPayCallbackUrl(cmd));
         preOrderCommand.setExtendInfo(cmd.getExtendInfo());
-        //localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.PAYMENT_GOOD_NAME, buyer.getLocale());
         preOrderCommand.setGoodsName("物业缴费");
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);
@@ -233,6 +232,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	    BusinessPayerType payerType = BusinessPayerType.fromCode(cmd.getBusinessPayerType());
 	    if(payerType == null) {
 	        payerType = BusinessPayerType.ORGANIZATION;
+	        cmd.setBusinessPayerType(payerType.getCode());
 	    }
 	    
 	    if(cmd.getBusinessPayerId() == null) {
