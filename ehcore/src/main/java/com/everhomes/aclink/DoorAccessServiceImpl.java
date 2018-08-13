@@ -1202,6 +1202,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     
                     doorAuthProvider.updateDoorAuth(doorAuth);
                     
+                    //通知内网服务器同步授权信息(目前是访客,用户与访客的同步待合并)
+                    NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+                    cmd1.setDoorId(doorAuth.getDoorId());
+                    faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+                    
                     if(aesUserKey1 != null) {
                         aesUserKey1.setStatus(AesUserKeyStatus.INVALID.getCode());
                         aesUserKeyProvider.updateAesUserKey(aesUserKey1);    
