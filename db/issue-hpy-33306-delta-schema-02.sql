@@ -71,7 +71,6 @@ ALTER TABLE eh_visitor_sys_visitors ADD COLUMN notify_third_success_flag TINYINT
 -- 通用脚本
 -- ADD BY xq.tian
 -- ISSUE-32697 运营统计重构
-ALTER TABLE eh_terminal_hour_statistics ADD COLUMN cumulative_active_user_number BIGINT NOT NULL DEFAULT 0;
 
 ALTER TABLE eh_terminal_day_statistics ADD COLUMN average_active_user_number BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_terminal_day_statistics ADD COLUMN average_active_user_change_rate DECIMAL(10, 2) NOT NULL DEFAULT 0;
