@@ -216,6 +216,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             }
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS, "Bills have been paid");
         }
+        
 	}
 	
 	protected PaymentBillGroup checkBillGroup(CreatePaymentBillOrderCommand cmd) {
@@ -268,12 +269,12 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 */
 	protected BigDecimal calculateBillOrderAmount(CreatePaymentBillOrderCommand cmd) {
 	    List<BillIdAndAmount> bills = cmd.getBills();
-	    BigDecimal totalAmountCents = new BigDecimal(0);
+	    BigDecimal totalAmountCents = BigDecimal.ZERO;
         for(BillIdAndAmount billIdAndAmount : bills){
             String billAmountStr = billIdAndAmount.getAmountOwed();
             LOGGER.info("Calculate the amount, billId={}, amount={}", billIdAndAmount.getBillId(), billAmountStr);
             BigDecimal billAmountCents = new BigDecimal(billAmountStr).multiply(new BigDecimal(100));
-            totalAmountCents.add(billAmountCents);
+            totalAmountCents = totalAmountCents.add(billAmountCents);
         }
         
         return totalAmountCents;
@@ -356,7 +357,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         } 
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue("gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
