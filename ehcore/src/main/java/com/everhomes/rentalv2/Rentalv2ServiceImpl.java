@@ -4563,7 +4563,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalOrderStatistics statistics = ConvertHelper.convert(order, RentalOrderStatistics.class);
 					statistics.setOrderId(order.getId());
 					List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(order.getResourceType(),
-							RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), order.getRentalType());
+							EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId(), order.getRentalType());
 					if (dayopenTimes != null && dayopenTimes.size() > 0) {
 						RentalDayopenTime t = dayopenTimes.get(0);
 						statistics.setValidTimeLong((long) (t.getCloseTime() - t.getOpenTime()) * 3600 * 1000);
