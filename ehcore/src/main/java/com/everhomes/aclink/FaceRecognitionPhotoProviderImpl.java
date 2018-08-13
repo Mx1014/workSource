@@ -178,5 +178,20 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 		EhFaceRecognitionPhotosDao dao = new EhFaceRecognitionPhotosDao(context.configuration());
         dao.update(listPhotos.toArray(new FaceRecognitionPhoto[listPhotos.size()]));
 	}
+
+	@Override
+	public FaceRecognitionPhoto findPhotoByAuthId(Long authId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFaceRecognitionPhotos.class));
+
+		SelectQuery<EhFaceRecognitionPhotosRecord> query = context.selectQuery(Tables.EH_FACE_RECOGNITION_PHOTOS);
+		query.addConditions(Tables.EH_FACE_RECOGNITION_PHOTOS.AUTH_ID.eq(authId));
+		query.addOrderBy(Tables.EH_FACE_RECOGNITION_PHOTOS.ID.desc());
+		query.addLimit(1);
+
+		List<FaceRecognitionPhoto> objs = query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, FaceRecognitionPhoto.class);
+		});
+		return objs != null && objs.size() > 0 ? objs.get(0) : null;
+	}
 	
 }

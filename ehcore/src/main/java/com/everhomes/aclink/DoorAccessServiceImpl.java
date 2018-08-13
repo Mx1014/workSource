@@ -115,6 +115,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Security;
+import java.sql.Timestamp;
 import java.text.Format;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1203,9 +1204,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     doorAuthProvider.updateDoorAuth(doorAuth);
                     
                     //通知内网服务器同步授权信息(目前是访客,用户与访客的同步待合并)
-                    NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
-                    cmd1.setDoorId(doorAuth.getDoorId());
-                    faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+                    FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(doorAuth.getId());
+                    if(photo != null){
+                    	photo.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    	faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(photo);
+                    	NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+                        cmd1.setDoorId(doorAuth.getDoorId());
+                        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+                    }
                     
                     if(aesUserKey1 != null) {
                         aesUserKey1.setStatus(AesUserKeyStatus.INVALID.getCode());
