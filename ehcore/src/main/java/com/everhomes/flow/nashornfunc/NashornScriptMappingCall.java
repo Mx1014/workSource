@@ -1,7 +1,8 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.*;
-import com.everhomes.rest.RestResponse;
+import com.everhomes.flow.FlowRuntimeScript;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
+import com.everhomes.scriptengine.nashorn.NashornScript;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.Undefined;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -20,7 +21,7 @@ public class NashornScriptMappingCall implements NashornScript<Object> {
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    public NashornScriptMappingCall(FlowScript flowScript, String funcName,
+    public NashornScriptMappingCall(FlowRuntimeScript flowScript, String funcName,
                                     Map<String, String[]> paramMap, String requestBody, DeferredResult<Object> dr) {
         this.mapping = new NashornScriptMapping(flowScript);
         this.funcName = funcName;
@@ -62,7 +63,6 @@ public class NashornScriptMappingCall implements NashornScript<Object> {
         }
     }
 
-    @Override
     public String getJSFunc() {
         return funcName;
     }

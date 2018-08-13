@@ -10,7 +10,7 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormBusinessTripValue;
+import com.everhomes.rest.enterpriseApproval.ComponentBusinessTripValue;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class FormFieldBusinessTripProcessor implements FormFieldProcessor {
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormBusinessTripValue businessTrip = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormBusinessTripValue.class);
+        ComponentBusinessTripValue businessTrip = JSON.parseObject(fieldDTO.getFieldValue(), ComponentBusinessTripValue.class);
         if ("开始时间".equals(variable)) {
             return new FlowConditionStringVariable(businessTrip.getStartTime());
         } else if ("结束时间".equals(variable)) {

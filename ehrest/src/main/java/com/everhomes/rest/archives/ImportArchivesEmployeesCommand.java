@@ -4,20 +4,28 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间 id</li>
  * <li>organizationId: 公司 id</li>
  * <li>departmentId: 部门 id</li>
- * <li>formOriginId: 表单 id</li>
  * </ul>
  */
 public class ImportArchivesEmployeesCommand {
+
+    private Integer namespaceId;
 
     private Long organizationId;
 
     private Long departmentId;
 
-    private Long formOriginId;
-
     public ImportArchivesEmployeesCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {
@@ -34,14 +42,6 @@ public class ImportArchivesEmployeesCommand {
 
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
-    }
-
-    public Long getFormOriginId() {
-        return formOriginId;
-    }
-
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
     }
 
     @Override

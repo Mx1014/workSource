@@ -1,29 +1,43 @@
 
 package com.everhomes.asset;
 
-import com.everhomes.constants.ErrorCodes;
-   import com.everhomes.controller.ControllerBase;
-   import com.everhomes.discover.RestDoc;
-   import com.everhomes.discover.RestReturn;
-   import com.everhomes.rest.RestResponse;
-   import com.everhomes.rest.asset.*;
-   import com.everhomes.rest.order.PreOrderDTO;
-   import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-   import com.everhomes.rest.user.UserServiceErrorCode;
-   import com.everhomes.rest.user.admin.ImportDataResponse;
-   import com.everhomes.user.User;
-   import com.everhomes.user.UserContext;
-   import com.everhomes.util.RuntimeErrorException;
-   import org.slf4j.Logger;
-   import org.slf4j.LoggerFactory;
-   import org.springframework.beans.factory.annotation.Autowired;
-   import org.springframework.web.bind.annotation.*;
-   import org.springframework.web.multipart.MultipartFile;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
-   import javax.servlet.http.HttpServletRequest;
-   import javax.servlet.http.HttpServletResponse;
-   import javax.validation.Valid;
-   import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
 **************************************************************
@@ -350,38 +364,34 @@ public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
     return response;
 }
 
-// this is for 获取园区下的所有滞纳金标准   4
-/**
- * <p>获取园区下的所有滞纳金标准</p>
- * <b>URL: /asset/listLateFineStandards</b>
- */
-@RequestMapping("listLateFineStandards")
-@RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
-public RestResponse listLateFineStandards(ListLateFineStandardsCommand cmd) {
-    List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
-    RestResponse response = new RestResponse(list);
-    response.setErrorDescription("OK");
-    response.setErrorCode(ErrorCodes.SUCCESS);
-    return response;
-}
-//左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
-// 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
-// )
-// 修改时(此修改支持删除,增加)，只使用此接口，全部：储存到namespaceid，同步到下面的communityid； 单个：修改单个的并且修改decoupleFlag
-//
-/**
- * <p>园区收费项权限配置</p>
- * <b>URL: /asset/configChargingItems</b>
- */
-@RequestMapping("configChargingItems")
-@RestReturn(value = String.class)
-public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
-    assetService.configChargingItems(cmd);
-    RestResponse response = new RestResponse();
-    response.setErrorDescription("OK");
-    response.setErrorCode(ErrorCodes.SUCCESS);
-    return response;
-}
+    // this is for 获取园区下的所有滞纳金标准   4
+    /**
+     * <p>获取园区下的所有滞纳金标准</p>
+     * <b>URL: /asset/listLateFineStandards</b>
+     */
+    @RequestMapping("listLateFineStandards")
+    @RestReturn(value = ListLateFineStandardsDTO.class, collection = true)
+    public RestResponse listLateFineStandards(ListLateFineStandardsCommand cmd) {
+        List<ListLateFineStandardsDTO> list = assetService.listLateFineStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    /**
+     * <p>园区收费项权限配置</p>
+     * <b>URL: /asset/configChargingItems</b>
+     */
+    @RequestMapping("configChargingItems")
+    @RestReturn(value = String.class)
+    public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
+        assetService.configChargingItems(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
 
 // this is for 展示一个收费项目的客户可见的所有标准列表         4
 /**
@@ -1104,8 +1114,7 @@ public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
 @RequestMapping(value = "listPaymentBill")
 @RestReturn(ListPaymentBillResp.class)
 public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
-    ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
+    ListPaymentBillResp result = assetService.listPaymentBill(cmd);
     RestResponse response = new RestResponse(result);
     return response;
 }
@@ -1117,16 +1126,30 @@ public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest r
 @RequestMapping(value = "listPaymentBillDetail")
 @RestReturn(PaymentOrderBillDTO.class)
 public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-    ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+    ListPaymentBillResp listPaymentBillResp = assetService.listPaymentBill(cmd);
     PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-    if(listPaymentBillResp != null && listPaymentBillResp.getList() != null
-            && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
-            && listPaymentBillResp.getList().get(0).getChildren() != null) {
-        result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+    if(listPaymentBillResp != null && listPaymentBillResp.getPaymentOrderBillDTOs() != null
+            && listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0 
+            && listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
+        result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
     }
     RestResponse response = new RestResponse(result);
     return response;
 }
+
+    /**
+     * <b>URL: /asset/autoNoticeConfig</b>
+     * <p>自动缴费配置</p>
+     */
+    @RequestMapping("autoNoticeConfig")
+    @RestReturn(String.class)
+    public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
+        assetService.autoNoticeConfig(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 
 /**
@@ -1150,19 +1173,7 @@ public String hi(@RequestBody PaymentExpectanciesCommand cmd){
     assetService.paymentExpectanciesCalculate(cmd);
     return "ROU ARE WA GA DEKI ROU KU ROU!";
 }
-/**
- * <b>URL: /asset/autoNoticeConfig</b>
- * <p>自动缴费配置</p>
- */
-@RequestMapping("autoNoticeConfig")
-@RestReturn(String.class)
-public RestResponse autoNoticeConfig(AutoNoticeConfigCommand cmd){
-    assetService.autoNoticeConfig(cmd);
-    RestResponse restResponse = new RestResponse();
-    restResponse.setErrorCode(ErrorCodes.SUCCESS);
-    restResponse.setErrorDescription("OK");
-    return restResponse;
-}
+
 
 /**
  * <b>URL: /asset/listAutoNoticeConfig</b>
@@ -1178,19 +1189,19 @@ public RestResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd){
     return restResponse;
 }
 
-/**
- * <b>URL: /asset/checkEnterpriseHasArrearage</b>
- * <p>检查企业是否有欠费的账单</p>
- */
-@RequestMapping("checkEnterpriseHasArrearage")
-@RestReturn(value = CheckEnterpriseHasArrearageResponse.class)
-public RestResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd){
-    CheckEnterpriseHasArrearageResponse res = assetService.checkEnterpriseHasArrearage(cmd);
-    RestResponse restResponse = new RestResponse(res);
-    restResponse.setErrorDescription("OK");
-    restResponse.setErrorCode(ErrorCodes.SUCCESS);
-    return restResponse;
-}
+    /**
+     * <b>URL: /asset/checkEnterpriseHasArrearage</b>
+     * <p>检查企业是否有欠费的账单</p>
+     */
+    @RequestMapping("checkEnterpriseHasArrearage")
+    @RestReturn(value = CheckEnterpriseHasArrearageResponse.class)
+    public RestResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd){
+        CheckEnterpriseHasArrearageResponse res = assetService.checkEnterpriseHasArrearage(cmd);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
 
 /**
  * <b>URL: /asset/functionDisableList</b>
@@ -1336,12 +1347,235 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
+     * <b>URL: /asset/listPayeeAccounts</b>
+     * <p>列出当前项目下所有的收款方账户</p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListBizPayeeAccountDTO.class, collection = true)
+    public RestResponse listPayeeAccounts(ListPayeeAccountsCommand cmd){
+    	List<ListBizPayeeAccountDTO> list = assetService.listPayeeAccounts(cmd);
+        RestResponse restResponse = new RestResponse(list);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+	 * <b>URL: /asset/payNotify</b>
+	 * <p>支付模块回调接口，通知支付结果</p>
+	 */
+	@RequestMapping("payNotify")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+		assetService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /asset/isProjectNavigateDefault</b>
+	 * <p>项目导航区分全部、解耦 是否使用默认配置</p>
+	 */
+	@RequestMapping("isProjectNavigateDefault")
+	@RestReturn(value = IsProjectNavigateDefaultResp.class)
+	public RestResponse isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd){
+		IsProjectNavigateDefaultResp dto = assetService.isProjectNavigateDefault(cmd);
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+     * <b>URL: /asset/transferOrderPaymentType</b>
+     * <p>以前的订单数据需要刷支付方式，做数据迁移</p>
+     */
+    @RequestMapping("transferOrderPaymentType")
+    public RestResponse transferOrderPaymentType(){
+        assetService.transferOrderPaymentType();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /*
      * <p>计算天企汇历史合同的租赁总额字段接口</p>
      * <b>URL: /asset/calculateRentForContract</b>
      */
     @RequestMapping("calculateRentForContract")
     public RestResponse calculateRentForContract(CalculateRentCommand cmd) {
         assetService.calculateRentForContract(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    /**
+     * to map an application to another. The relation is mutual, and for one of the two applications,
+     * it can only have one mate from the same module to prevent a bigamy
+     * @param cmd
+     * @return OK
+     */
+    @RequestMapping("createAnAppMapping")
+    @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+    public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
+        assetService.createAnAppMapping(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * forcely update a mapping relation to be allocated again
+     * @param cmd
+     * @return OK
+     */
+    @RequestMapping("updateAnAppMapping")
+    @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+    public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+        assetService.updateAnAppMapping(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /asset/isUserExistInAddress</b>
+     * <p>用于创建账单时，判断个人用户是否关联了该账单所包含的楼栋门牌</p>
+     */
+    @RequestMapping("isUserExistInAddress")
+    @RestReturn(value=IsUserExistInAddressResponse.class)
+    public RestResponse isUserExistInAddress(IsUserExistInAddressCmd cmd){
+    	IsUserExistInAddressResponse response = assetService.isUserExistInAddress(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <p>对公转账：按照账单组展示已出账单</p>
+     * <b>URL: /asset/listSettledBillForEnt</b>
+     */
+    @RequestMapping("listSettledBillForEnt")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
+    	ListBillsResponse listBillsResponse = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
+        assetService.exportSettledBillsForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：结算-账单明细</p>
+     * <b>URL: /asset/listPaymentBillForEnt</b>
+     */
+    @RequestMapping(value = "listPaymentBillForEnt")
+    @RestReturn(ListPaymentBillResp.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillResp result = assetService.listPaymentBillForEnt(cmd);
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrdersForEnt</b>
+     */
+    @RequestMapping("exportOrdersForEnt")
+    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response) {
+        assetService.exportOrdersForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：信息列表</p>
+     * <b>URL: /asset/publicTransferBill</b>
+     */
+    @RequestMapping("publicTransferBill")
+    @RestReturn(value = PublicTransferBillRespForEnt.class)
+    public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
+    	PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    
+    /**
+     * <p>对公转账：展示账单组列表</p>
+     * <b>URL: /asset/listBillGroupsForEnt</b>
+     */
+    @RequestMapping("listBillGroupsForEnt")
+    @RestReturn(value = ListBillGroupsDTO.class, collection = true)
+    public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
+        List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyBillSubItem</b>
+     */
+    @RequestMapping("batchModifyBillSubItem")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+        assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     * @throws ParseException 
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    	assetService.testLateFine(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

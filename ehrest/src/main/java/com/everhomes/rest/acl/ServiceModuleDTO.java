@@ -7,21 +7,26 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>业务模块</p>
  * <ul>
- * <li>id: 模块id</li>
- * <li>name: 模块名称</li>
- * <li>vType: 值类型 0业务模块，1权限</li>
- * <li>parentId: 父级id </li>
- * <li>path: 层次关系</li>
- * <li>level: 级别</li>
- * <li>serviceModules: 子业务模块</li>
- * <li>serviceModuleApps: 模块关联应用</li>
- * <li>description: 描述</li>
- * <li>updateTime: 更新时间</li>
- * <li>createTime: 创建时间</li>
- * <li>operatorUName: 操作人</li>
- * <li>instanceConfig: 参数，比如第三方链接值就是{"url":"http......."}</li>
+ *     <li>id: 模块id</li>
+ *     <li>name: 模块名称</li>
+ *     <li>vType: 值类型 0业务模块，1权限</li>
+ *     <li>parentId: 父级id</li>
+ *     <li>path: 层次关系</li>
+ *     <li>level: 级别</li>
+ *     <li>serviceModules: 子业务模块 {@link com.everhomes.rest.acl.ServiceModuleDTO}</li>
+ *     <li>serviceModuleApps: 模块关联应用 {@link com.everhomes.rest.acl.ServiceModuleDTO}</li>
+ *     <li>type: type</li>
+ *     <li>description: 描述</li>
+ *     <li>updateTime: 更新时间</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>operatorUid: operatorUid</li>
+ *     <li>operatorUName: 操作人</li>
+ *     <li>instanceConfig: 参数，比如第三方链接值就是{"url":"http......."}</li>
+ *     <li>multipleFlag: multipleFlag</li>
+ *     <li>moduleControlType: moduleControlType</li>
+ *     <li>category: 模块分类，参考{@link com.everhomes.rest.acl.ServiceModuleCategory}</li>
+ *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -60,6 +65,10 @@ public class ServiceModuleDTO implements Serializable {
 	private Byte multipleFlag;
 
 	private String moduleControlType;
+
+	private String category;
+	
+	private Byte accessControlType;
 
 	public Long getId() {
 		return id;
@@ -195,5 +204,21 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setModuleControlType(String moduleControlType) {
 		this.moduleControlType = moduleControlType;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	
+	public Byte getAccessControlType() {
+		return accessControlType;
+	}
+
+	public void setAccessControlType(Byte accessControlType) {
+		this.accessControlType = accessControlType;
 	}
 }

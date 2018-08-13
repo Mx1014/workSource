@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>itemDisplayName: 字段选项名</li>
  *     <li>defaultOrder: 顺序</li>
  *     <li>businessValue: 在业务模块中定义的值，没有则为空</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -32,6 +33,16 @@ public class ScopeFieldItemInfo {
     private Integer defaultOrder;
 
     private Byte businessValue;
+    
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 
     public Byte getBusinessValue() {
         return businessValue;

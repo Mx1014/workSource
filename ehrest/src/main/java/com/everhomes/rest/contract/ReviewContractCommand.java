@@ -1,11 +1,15 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
  *     <li>invalidReason: 作废时传作废原因</li>
  *     <li>result: 结果 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -26,8 +30,19 @@ public class ReviewContractCommand {
     private Byte paymentFlag = 0;
 
     private String invalidReason;
+    
+    private Byte contractApplicationScene = 0;
+    
+    
+	public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
 
-    public String getInvalidReason() {
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	public String getInvalidReason() {
         return invalidReason;
     }
 
@@ -90,4 +105,9 @@ public class ReviewContractCommand {
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

@@ -20,6 +20,9 @@ public interface FlowConstants {
 
     //合同模块id
     Long CONTRACT_MODULE = 21200L;
+    
+    //付款模块id
+    Long PAYMENT_CONTRACT_MODULE = 21215L;
 
     // 物品搬迁模块id
     Long RELOCATION_MODULE = 49200L;

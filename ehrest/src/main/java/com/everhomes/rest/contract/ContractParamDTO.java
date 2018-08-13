@@ -17,6 +17,8 @@ import java.util.List;
  *     <li>expiredUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  *     <li>receivableDate: 合同费用清单应收日期</li>
  *     <li>receivableUnit: 合同费用清单应收日期单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
+ *     <li>payorreceiveContractType: 合同类型 0 收款合同 1付款合同</li>
+ *     <li>generateContractNumberRule: 合同编号规则</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -35,6 +37,27 @@ public class ContractParamDTO {
     private Byte receivableUnit;
 
     private Integer paidPeriod;
+    private Byte payorreceiveContractType;
+    
+    @ItemType(GenerateContractNumberRule.class)
+    private GenerateContractNumberRule generateContractNumberRule;
+
+    
+    public GenerateContractNumberRule getGenerateContractNumberRule() {
+		return generateContractNumberRule;
+	}
+
+	public void setGenerateContractNumberRule(GenerateContractNumberRule generateContractNumberRule) {
+		this.generateContractNumberRule = generateContractNumberRule;
+	}
+
+	public Byte getPayorreceiveContractType() {
+		return payorreceiveContractType;
+	}
+
+	public void setPayorreceiveContractType(Byte payorreceiveContractType) {
+		this.payorreceiveContractType = payorreceiveContractType;
+	}
 
     @ItemType(ContractParamGroupMapDTO.class)
     private List<ContractParamGroupMapDTO> notifyGroups;

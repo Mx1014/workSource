@@ -2,7 +2,6 @@ package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -19,10 +18,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.zjgk.ZjgkJsonEntity;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -38,7 +34,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/7/17.

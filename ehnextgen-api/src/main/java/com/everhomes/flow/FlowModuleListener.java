@@ -50,12 +50,12 @@ public interface FlowModuleListener {
 	/**
 	 * 当用户触发<b>终止</b>按钮或者程序触发 flowCase 终止，会触发该方法的调用
 	 */
-	default void onFlowCaseAbsorted(FlowCaseState ctx) { }
+	void onFlowCaseAbsorted(FlowCaseState ctx);
 
     /**
      * 当用户触发按钮或者程序触发 flowCase 正常结束，会触发该方法的调用
      */
-	default void onFlowCaseEnd(FlowCaseState ctx) { }
+	void onFlowCaseEnd(FlowCaseState ctx);
 
     /**
      * 当用户触发按钮或程序触发导致 flowCase 节点改变时，会触发该方法的调用，同时包含终止和正常结束情况
@@ -72,7 +72,9 @@ public interface FlowModuleListener {
      * @param flowCase 任务
      * @param flowUserType 当前用户的身份：申请人、处理人、督办人
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
+	default String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
+        return flowCase.getContent();
+	}
 
     /**
      * 用于任务的详情显示
@@ -148,6 +150,13 @@ public interface FlowModuleListener {
      * @param flow  工作流
      */
     default void onFlowStateChanged(Flow flow) {
+
+    }
+
+    /**
+     * 工作流启用之前触发调用
+     */
+    default void onFlowStateChanging(Flow flow) {
 
     }
 }

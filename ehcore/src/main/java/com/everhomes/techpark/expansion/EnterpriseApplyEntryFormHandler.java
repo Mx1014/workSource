@@ -7,9 +7,11 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.LeasePromotionConfigType;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
@@ -31,6 +33,8 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
     @Autowired
     private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -131,36 +135,24 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-//        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-//                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
-//
-//        GeneralFormDTO dto;
 
         //查询初始默认数据
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-        return handler.getTemplateBySourceId(cmd);
+        GeneralFormDTO dto = handler.getTemplateBySourceId(cmd);
+        LeasePromotionConfig leasePromotionConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(cmd.getNamespaceId(), LeasePromotionConfigType.HIDE_ADDRESS_FLAG.getCode(),
+                cmd.getSourceId());
+        if (leasePromotionConfig != null && "1".equals(leasePromotionConfig.getConfigValue())){ //隐藏门牌
+            List<GeneralFormFieldDTO> formFields = dto.getFormFields();
+            for (int i = 0;i < formFields.size();i++)
+                if (LeasePromotionFormDataSourceType.LEASE_PROMOTION_APARTMENT.getCode().equals(formFields.get(i).getFieldName())){
+                    formFields.remove(i);
+                    break;
+                }
+        }
+        return dto;
 
-//        GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
-//        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-//        if (null != request) {
-//            try {
-//                GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
-//                cmd2.setFormId(request.getSourceId());
-//                dto = generalFormService.getTemplateByFormId(cmd2);
-//                fieldDTOs.addAll(dto.getFormFields());
-//            }catch (Exception e) {
-//                LOGGER.error("get Template By SourceId, cmd={}", cmd, e);
-//                dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-//            }
-//        } else {
-//            dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-//        }
-//        dto.setFormFields(fieldDTOs);
-
-//        return dto;
     }
 
     @Override

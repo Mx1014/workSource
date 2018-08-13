@@ -136,10 +136,16 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("equipmentName", 1.2f)
-                    .field("standardNumber", 1.0f)
-                    .field("standardName", 1.2f);
+//            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+//            		.field("equipmentName", 1.2f)
+//                    .field("standardNumber", 1.0f)
+//                    .field("standardName", 1.2f)
+//                    .field("equipmentNumber", 1.2f);
+			qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
+					.field("equipmentName")
+					.field("standardNumber")
+					.field("standardName")
+					.field("equipmentNumber");
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
@@ -220,6 +226,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 					dto.setLocation(equipment.getLocation());
 					dto.setStatus(equipment.getStatus());
 					dto.setSequenceNo(equipment.getSequenceNo());
+					dto.setCustomNumber(equipment.getCustomNumber());
 				}
 				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 				if (standard != null) {
@@ -233,7 +240,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				dto.setReviewTime(map.getReviewTime());*/
 
 				/*if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(map.getReviewerUid(), equipment.getOwnerId());
 					if(member != null) {
 						dto.setReviewer(member.getContactName());
 					}
@@ -290,6 +297,8 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
             if(equipment != null) {
             	b.field("ownerId", equipment.getOwnerId());
+            	b.field("equipmentName", equipment.getName());
+            	b.field("equipmentNumber", equipment.getCustomNumber());
             	b.field("ownerType", equipment.getOwnerType());
 				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());

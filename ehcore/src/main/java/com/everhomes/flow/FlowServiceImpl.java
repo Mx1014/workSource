@@ -1,6 +1,45 @@
 // @formatter:off
 package com.everhomes.flow;
 
+import java.io.BufferedReader;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
@@ -30,6 +69,11 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.gogs.GogsCommit;
+import com.everhomes.gogs.GogsRawFileParam;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsRepoType;
+import com.everhomes.gogs.GogsService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -54,11 +98,18 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
@@ -72,37 +123,19 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.MD5Utils;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.ValidatorUtil;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.lang.reflect.Method;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class FlowServiceImpl implements FlowService {
@@ -255,6 +288,9 @@ public class FlowServiceImpl implements FlowService {
 
     @Autowired
     private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private GogsService gogsService;
 
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -1192,7 +1228,7 @@ public class FlowServiceImpl implements FlowService {
 
     private void validateScriptConfig(FlowScript script, List<FlowScriptConfigInfo> configs) {
         LinkedTransferQueue<List<FlowScriptConfigValidateResult>> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptConfigValidator(script, configs, transferQueue));
+        nashornEngineService.push(new NashornScriptConfigValidator(toRuntimeScript(script), configs, transferQueue));
 
         List<FlowScriptConfigValidateResult> result = null;
         try {
@@ -1215,7 +1251,7 @@ public class FlowServiceImpl implements FlowService {
 
     private void validateSyntax(FlowScript script) {
         LinkedTransferQueue<Boolean> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptValidator(script, transferQueue));
+        nashornEngineService.push(new NashornScriptValidator(toValidateScript(script), transferQueue));
 
         Boolean pass = null;
         try {
@@ -1235,7 +1271,7 @@ public class FlowServiceImpl implements FlowService {
 
     private List<FlowScriptConfigInfo> getScriptConfig(FlowScript script) {
         LinkedTransferQueue<List<FlowScriptConfigInfo>> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptConfigExtractor(script, transferQueue));
+        nashornEngineService.push(new NashornScriptConfigExtractor(toRuntimeScript(script), transferQueue));
 
         List<FlowScriptConfigInfo> configs = null;
         try {
@@ -1564,6 +1600,8 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = flowProvider.getFlowById(flowId);
 
         checkFlowValidationStatus(flow);
+
+        flowListenerManager.onFlowStateChanging(flow);
 
         // 避免同时启用工作流的问题
         String lockKey = MD5Utils.getMD5(String.format("%s:%s:%s:%s:%s:%s:%s:%s",
@@ -3165,6 +3203,7 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
+            cmd.setOrganizationId(null);
             details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
@@ -3664,7 +3703,7 @@ public class FlowServiceImpl implements FlowService {
                     flowEventLogProvider.createFlowEventLogs(flowCaseState.getLogs());
                     flowEventLogProvider.updateFlowEventLogs(flowCaseState.getUpdateLogs());
 
-                    flowEvaluateProvider.createFlowEvaluate(ctx.getFlowEvas());
+                    flowEvaluateProvider.createFlowEvaluate(flowCaseState.getFlowEvas());
                 } else if (ctx.getStepType() != FlowStepType.NO_STEP) {
                     throw new FlowStepBusyException("already step by others, flowCaseId = " + flowCase.getId());
                 } else {
@@ -4404,7 +4443,7 @@ public class FlowServiceImpl implements FlowService {
             for (Long u : users) {
                 UserInfo ui = userService.getUserSnapshotInfo(u);
                 if (ui != null) {
-                    OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(u, ul.getOrganizationId());
+                    OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(u, ul.getOrganizationId());
                     if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                         ui.setNickName(om.getContactName());
                     }
@@ -4506,7 +4545,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void fixupUserInfo(Long organizationId, UserInfo userInfo) {
         if (userInfo != null) {
-            OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userInfo.getId(), organizationId);
+            OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(userInfo.getId(), organizationId);
             if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                 userInfo.setNickName(om.getContactName());
             }
@@ -5178,14 +5217,63 @@ public class FlowServiceImpl implements FlowService {
             validateSyntax(script);
         }
 
-        flowScriptProvider.createFlowScriptWithId(script);
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        GogsCommit commit = gogsCommitScript(repo, script.gogsPath(), "", cmd.getScript(), true);
+        script.setLastCommit(commit.getId());
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
             List<FlowScriptConfigInfo> scriptConfig = getScriptConfig(script);
             createFlowScriptConfig(script, scriptConfig);
         }
+
+        script.setScript(null);// not used, migrate to gogs repo
+        flowScriptProvider.createFlowScriptWithId(script);
         return toFlowScriptDTO(script, EhFlowScripts.class.getSimpleName(), script.getId());
+    }
+
+    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);
+    }
+
+    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setLastCommit(lastCommit);
+        return gogsService.deleteFile(repo, path, param);
+    }
+
+    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
+        byte[] file = gogsService.getFile(repo, path, lastCommit);
+        return new String(file, Charset.forName("UTF-8"));
+    }
+
+    private String gogsCommitMessage() {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
+        return String.format(
+                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
+    }
+
+    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
+        if (repo == null) {
+            repo = new GogsRepo();
+            repo.setName("flow");
+            repo.setNamespaceId(namespaceId);
+            repo.setModuleType(moduleType);
+            repo.setModuleId(moduleId);
+            repo.setOwnerType(ownerType);
+            repo.setOwnerId(ownerId);
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
+        return repo;
     }
 
     private void createFlowScriptConfig(FlowScript script, List<FlowScriptConfigInfo> configInfo) {
@@ -5221,6 +5309,11 @@ public class FlowServiceImpl implements FlowService {
                 flowScript.setStatus(FlowCommonStatus.INACTIVE.getCode());
             }
             flowScriptProvider.updateFlowScripts(flowScripts);
+
+            GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                    script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+            // FIXME last commit should from cmd
+            gogsDeleteScript(repo, script.gogsPath(), script.getLastCommit());
         }
     }
 
@@ -5232,6 +5325,8 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "flow script not exist id=%s", cmd.getId());
         }
+        String oldPath = script.gogsPath();
+        String oldCommit = script.getLastCommit();
 
         script.setScript(cmd.getScript());
         script.setDescription(cmd.getDescription());
@@ -5245,13 +5340,29 @@ public class FlowServiceImpl implements FlowService {
             // 语法检查
             validateSyntax(script);
         }
-        flowScriptProvider.createFlowScriptWithId(script);
+
+        // 向代码仓库提交
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+
+        boolean isNewFile = !Objects.equals(oldPath, script.gogsPath());
+        // FIXME last commit should from cmd
+        GogsCommit commit = gogsCommitScript(repo, script.gogsPath(), script.getLastCommit(), cmd.getScript(), isNewFile);
+        script.setLastCommit(commit.getId());
+
+        // 目前来说，如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+        if (isNewFile) {
+            gogsDeleteScript(repo, oldPath, oldCommit);
+        }
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
             List<FlowScriptConfigInfo> scriptConfig = getScriptConfig(script);
             createFlowScriptConfig(script, scriptConfig);
         }
+
+        script.setScript(null);// not used, migrate to gogs repo
+        flowScriptProvider.createFlowScriptWithId(script);
         return toFlowScriptDTO(script, EhFlowScripts.class.getSimpleName(), script.getId());
     }
 
@@ -5272,6 +5383,7 @@ public class FlowServiceImpl implements FlowService {
         FlowScriptType scriptType = FlowScriptType.fromCode(cmd.getScriptType());
         switch (scriptType) {
             case JAVASCRIPT: {
+                // TODO get objects from gogs repo and need commit_id from request, so todo it
                 List<FlowScript> scriptList = flowScriptProvider.listFlowScripts(
                         flow.getNamespaceId(), EntityType.ORGANIZATIONS.getCode(), flow.getOrganizationId(),
                         flow.getModuleType(), flow.getModuleId(), cmd.getScriptType(), cmd.getKeyword(), pageSize, locator);
@@ -5349,22 +5461,22 @@ public class FlowServiceImpl implements FlowService {
     public DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request) {
         DeferredResult<Object> deferredResult = new DeferredResult<>(5 * 60 * 1000L);
 
-        FlowScript flowScript = null;
+        FlowScript script = null;
 
         FlowScriptMappingMode mappingMode = FlowScriptMappingMode.fromCode(mode);
         switch (mappingMode) {
             case SCRIPT_ID_VERSION:
-                flowScript = flowScriptProvider.findByMainIdAndVersion(id1, Integer.valueOf(id2 + ""));
+                script = flowScriptProvider.findByMainIdAndVersion(id1, Integer.valueOf(id2 + ""));
                 break;
             case ORGANIZATION_MODULE:
-                flowScript = flowScriptProvider.findNewestFlowScript(id1);
+                script = flowScriptProvider.findNewestFlowScript(id1);
                 break;
             default:
                 LOGGER.warn("unknown script mapping mode = {}, id1 = {}, id2 = {}", mode, id1, id2);
                 break;
         }
 
-        if (flowScript == null) {
+        if (script == null) {
             deferredResult.setResult("could not found function");
             return deferredResult;
         }
@@ -5380,12 +5492,35 @@ public class FlowServiceImpl implements FlowService {
         }
 
         Map<String, String[]> parameterMap = request.getParameterMap();
-        nashornEngineService.push(new NashornScriptMappingCall(flowScript, functionName, parameterMap, requestBody.toString(), deferredResult));
+
+        FlowRuntimeScript runtimeScript = toRuntimeScript(script);
+        nashornEngineService.push(new NashornScriptMappingCall(runtimeScript, functionName, parameterMap, requestBody.toString(), deferredResult));
         return deferredResult;
+    }
+
+    @Override
+    public FlowRuntimeScript toRuntimeScript(FlowScript script) {
+        FlowRuntimeScript runtimeScript = new FlowRuntimeScript(script.getScriptMainId(), script.getScriptVersion());
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        if (repo == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "repo not found for script: %s", script);
+        }
+        byte[] file = gogsService.getFile(repo, script.gogsPath(), script.getLastCommit());
+        runtimeScript.setScript(new String(file));
+        return runtimeScript;
+    }
+
+    private FlowValidateScript toValidateScript(FlowScript script) {
+        return new FlowValidateScript(script.getScriptMainId(), script.getScriptVersion(), script.getScript());
     }
 
     private FlowScriptDTO toFlowScriptDTO(FlowScript script, String ownerType, Long ownerId) {
         FlowScriptDTO dto = ConvertHelper.convert(script, FlowScriptDTO.class);
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        dto.setScript(gogsGetScript(repo, script.gogsPath(), script.getLastCommit()));
         dto.setConfigs(getFlowScriptConfigDTO(ownerType, ownerId));
         return dto;
     }
@@ -5848,6 +5983,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setOrganizationId(null);
 
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());

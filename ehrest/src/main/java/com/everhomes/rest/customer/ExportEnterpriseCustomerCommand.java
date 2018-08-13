@@ -56,6 +56,10 @@ public class ExportEnterpriseCustomerCommand {
 
     private String trackingName;
 
+    private Long corpIndustryItemId;
+
+    private Boolean infoFLag ;
+
     public String getIncludedGroupIds() {
         return includedGroupIds;
     }
@@ -256,6 +260,22 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setTrackingUids(String trackingUids) {
         this.trackingUids = trackingUids;
+    }
+
+    public Long getCorpIndustryItemId() {
+        return corpIndustryItemId;
+    }
+
+    public void setCorpIndustryItemId(Long corpIndustryItemId) {
+        this.corpIndustryItemId = corpIndustryItemId;
+    }
+
+    public Boolean getInfoFLag() {
+        return infoFLag;
+    }
+
+    public void setInfoFLag(Boolean infoFLag) {
+        this.infoFLag = infoFLag;
     }
 
     @Override

@@ -30,7 +30,7 @@ import com.everhomes.discover.ItemType;
  * <li>iconUri: 图标的uri</li>
  * <li>iconUrl: 图标的url</li>
  * <li>operatorUid: 更新人id</li>
- * <li>iconUrl: 更新人名称</li>
+ * <li>operatorName: 更新人名称</li>
  * </ul>
  * @author janson
  *

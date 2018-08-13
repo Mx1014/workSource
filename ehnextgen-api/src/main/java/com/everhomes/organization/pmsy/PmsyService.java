@@ -2,6 +2,9 @@ package com.everhomes.organization.pmsy;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -39,4 +42,6 @@ public interface PmsyService {
 	PmsyCommunityDTO getPmProperty(GetPmsyPropertyCommand cmd);
 	
 	PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd);
+	
+	void payNotify(@Valid OrderPaymentNotificationCommand cmd);
 }

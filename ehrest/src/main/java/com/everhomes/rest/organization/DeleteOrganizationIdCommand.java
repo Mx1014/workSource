@@ -1,9 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -23,7 +23,9 @@ public class DeleteOrganizationIdCommand {
 	private String scopeType;
 
 	private Long enterpriseId;
-	
+
+	private Byte checkAuth;
+
 	public DeleteOrganizationIdCommand() {
     }
 
@@ -57,6 +59,14 @@ public class DeleteOrganizationIdCommand {
 
 	public void setScopeType(String scopeType) {
 		this.scopeType = scopeType;
+	}
+
+	public Byte getCheckAuth() {
+		return checkAuth;
+	}
+
+	public void setCheckAuth(Byte checkAuth) {
+		this.checkAuth = checkAuth;
 	}
 
 	@Override

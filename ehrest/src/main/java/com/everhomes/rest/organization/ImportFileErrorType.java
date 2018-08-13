@@ -2,11 +2,11 @@ package com.everhomes.rest.organization;
 
 /**
  * <ul>
- * <li>TITLE_ERROE("title_error"): 模板错误</li>
+ * <li>TITLE_ERROR("title_error"): 模板错误</li>
  * </ul>
  */
 public enum ImportFileErrorType {
-    TITLE_ERROE("title_error");
+    TITLE_ERROR("title_error");
 
     private String code;
 

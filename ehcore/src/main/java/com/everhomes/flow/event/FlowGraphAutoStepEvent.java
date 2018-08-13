@@ -192,6 +192,12 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 
 			break;
         case TRANSFER_STEP:
+            FlowCaseStatus status = FlowCaseStatus.fromCode(flowCase.getStatus());
+            if (status == FlowCaseStatus.ABSORTED || status == FlowCaseStatus.FINISHED) {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
+                        "flowCase already absort or finished, flowCaseId=" + flowCase.getId());
+            }
+
             next = currentNode;
             ctx.setNextNode(next);
 
@@ -242,6 +248,12 @@ public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
             break;
 		case END_STEP:
 		case ABSORT_STEP:
+            status = FlowCaseStatus.fromCode(flowCase.getStatus());
+            if (status == FlowCaseStatus.ABSORTED || status == FlowCaseStatus.FINISHED) {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
+                        "flowCase already absort or finished, flowCaseId=" + flowCase.getId());
+            }
+
             tracker = new FlowEventLog();
             if(ctx.getOperator() != null) {
                 templateMap.put("applierName", ctx.getOperator().getNickName());

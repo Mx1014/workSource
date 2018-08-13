@@ -449,7 +449,9 @@ public interface FlowService {
 
     FlowGraphDTO getFlowGraphNew(FlowIdCommand cmd);
 
-    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
+	FlowRuntimeScript toRuntimeScript(FlowScript script);
+
+	FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
 
     FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
 

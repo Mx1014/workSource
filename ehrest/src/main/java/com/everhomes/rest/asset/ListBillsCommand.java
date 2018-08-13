@@ -25,12 +25,15 @@ import javax.validation.constraints.NotNull;
  * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
+ * <li>category_id: 应用标识id</li>
  * <li>contractNum:合同编号</li>
  * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  * <li>isUploadCertificate:账单是否附带缴费凭证（0：否，1：是）</li>
  * <li>contractNum: 合同编号</li>
  * <li>organizationId: 企业id</li>
  * <li>customerTel: 客户手机号</li>
+ * <li>categoryId : 多入口应用数据范围id</li>
+ * <li>targetIdForEnt: 对公转账的企业id</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -57,10 +60,25 @@ public class ListBillsCommand {
     private String targetType;
     private String contractNum;
     private Long organizationId;
+
+    private Long categoryId;
+    
+    private Long targetIdForEnt;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
+
+
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -247,5 +265,13 @@ public class ListBillsCommand {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public Long getTargetIdForEnt() {
+		return targetIdForEnt;
+	}
+
+	public void setTargetIdForEnt(Long targetIdForEnt) {
+		this.targetIdForEnt = targetIdForEnt;
 	}
 }

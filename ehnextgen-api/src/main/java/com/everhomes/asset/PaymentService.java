@@ -12,6 +12,4 @@ import com.everhomes.rest.user.UserInfo;
 
 public interface PaymentService {
     ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception;
-
-    PaymentAccountResp findPaymentAccount();
 }

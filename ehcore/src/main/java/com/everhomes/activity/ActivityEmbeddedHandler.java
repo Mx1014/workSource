@@ -265,7 +265,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
         
-        if(cmd.getTag() != null) {
+        if(StringUtils.isBlank(post.getTag()) && cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
 

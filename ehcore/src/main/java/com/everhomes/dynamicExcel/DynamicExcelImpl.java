@@ -2,8 +2,18 @@
 package com.everhomes.dynamicExcel;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.entity.EntityType;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.varField.FieldProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -11,6 +21,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,13 +31,22 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/23.
@@ -40,6 +60,12 @@ public class DynamicExcelImpl implements DynamicExcelService{
             return 0;
         }
     };
+
+    @Autowired
+    private ImportFileService importFileService;
+
+    @Autowired
+    private FieldProvider fieldProvider;
 
     /**
      *
@@ -59,44 +85,56 @@ public class DynamicExcelImpl implements DynamicExcelService{
         DynamicExcelHandler h = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
         //遍历筛选过的sheet
-        for( int i = 0; i < sheetNames.size(); i++){
-            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i),params,null,false,withData );
+        for (int i = 0; i < sheetNames.size(); i++) {
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i), params, null, false, withData);
             LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
-            for(DynamicSheet sheet: sheets){
+            for (DynamicSheet sheet : sheets) {
                 List<DynamicField> fields = sheet.getDynamicFields();
                 List<List<String>> data = null;
-                String intro = baseInfo;
-                if(withData){
+                StringBuilder intro = null;
+                if (baseInfo == null) {
+                    intro = new StringBuilder();
+                } else {
+                    intro = new StringBuilder(baseInfo);
+                }
+                if (withData) {
                     //获取数据
                     data = h.getExportData(sheet, params, context);
                 }
-                if(StringUtils.isEmpty(baseInfo)){
-                    intro = DynamicExcelStrings.baseIntro;
+                if (StringUtils.isEmpty(baseInfo)) {
+                    intro = new StringBuilder(DynamicExcelStrings.baseIntro);
                 }
-                if(enumSupport){
-                    intro += DynamicExcelStrings.enumNotice;
-                    for(DynamicField df : fields){
-                        if(df.getAllowedValued() !=null){
+                // remove excel header infos if sheet is not customer basic info
+                if (!withData && sheet.getGroupId() != 1) {
+                    intro = new StringBuilder(DynamicExcelStrings.baseIntroManager);
+                }
+                if (enumSupport) {
+                    intro.append(DynamicExcelStrings.enumNotice);
+                    for (DynamicField df : fields) {
+                        if (df.getAllowedValued() != null) {
                             StringBuilder enumItem = new StringBuilder();
                             enumItem.append(df.getDisplayName());
                             enumItem.append(":");
-                            for(String enumStr : df.getAllowedValued()){
+                            for (String enumStr : df.getAllowedValued()) {
                                 enumItem.append(enumStr);
                                 enumItem.append(",");
                             }
-                            if(enumItem.lastIndexOf(",") == enumItem.length() - 1){
+                            if (enumItem.lastIndexOf(",") == enumItem.length() - 1) {
                                 enumItem.deleteCharAt(enumItem.length() - 1);
                             }
                             enumItem.append("\n");
-                            intro += enumItem.toString();
+                            intro.append(enumItem.toString());
                         }
                     }
                 }
+               if(Arrays.stream(params.getClass().getDeclaredFields()).map(Field::getName).collect(Collectors.toList()).contains("headerDisplay")){
+                   intro = new StringBuilder("");
+               }
                 try {
-                    DebugExcelUtil.exportExcel(workbook,dynamicSheetNum.get(),sheet.getDisplayName(),intro,fields,data);
-                    dynamicSheetNum.set(dynamicSheetNum.get()+1);
+                    DebugExcelUtil.exportExcel(workbook, dynamicSheetNum.get(), sheet.getDisplayName(), intro.toString(), fields, data);
+                    dynamicSheetNum.set(dynamicSheetNum.get() + 1);
                 } catch (Exception e) {
-                    LOGGER.info("one sheet export failed, sheet name = {}",sheet.getDisplayName());
+                    LOGGER.info("one sheet export failed, sheet name = {}", sheet.getDisplayName());
                 }
             }
         }
@@ -104,9 +142,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        if(excelName == null){
+        if (excelName == null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            excelName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
+            excelName = "客户数据导出" + sdf.format(Calendar.getInstance().getTime());
             excelName = excelName + ".xls";
         }
         response.setContentType("application/msexcel");
@@ -114,6 +152,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            LOGGER.error("UnsupportedEncodingException",e);
         }
         try {
             out = response.getOutputStream();
@@ -122,8 +161,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            LOGGER.error("IoException",e);
         } finally {
-            if(byteArray!=null){
+            if (byteArray != null) {
                 byteArray = null;
             }
         }
@@ -139,159 +179,137 @@ public class DynamicExcelImpl implements DynamicExcelService{
      */
     public DynamicImportResponse importMultiSheet(MultipartFile file, String code, Integer headerRow, Object params) {
         DynamicImportResponse response = new DynamicImportResponse();
-        Workbook workbook = null;
-        try{
-            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
-            if(workbook == null) {int err = 1/0;}
-        }catch (Exception e){
-            LOGGER.info("import multi sheet failed, failed to get inputStream, workbook is null? = {}, error = {}"
-                    ,workbook==null,e);
-            response.setFailCause("import multi sheet failed, failed to get inputStream,workbook is null >"
-                    +String.valueOf(workbook == null));
-            return response;
-        }
-        DynamicExcelHandler h = getHandler(code);
+        Workbook workbook = initExcelWorkBook(file);
+        DynamicExcelHandler excelHandler = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
         //遍历所有的sheet
-        sheet:for(int i = 0; i < workbook.getNumberOfSheets(); i++) {
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             Sheet sheet = null;
-            try{
+            try {
                 sheet = workbook.getSheetAt(i);
-
-//                //获得行对象和列对象时，可以不用这一步吗？
-//                DynamicSheet ds = h.getDynamicSheet(sheet.getSheetName(), storage);
-//                //获得sheet的容器对象
-//                String className = ds.getClassName();
-//                Class<?> sheetClass = null;
-//                try {
-//                    sheetClass = Class.forName(className);
-//                } catch (ClassNotFoundException e) {
-//                    LOGGER.error("import failed,class not found exception, group name is = {}", sheet.getSheetName());
-//                    continue sheet;
-//                }
-//                List<Object> sheetClassObjs = new ArrayList<>();
-                    Row headRow = null;
-                    if (headerRow != null) {
-                        headRow = sheet.getRow(headerRow);
-                    } else {
-                        headRow = sheet.getRow(1);
-                        headerRow = 1;
-                    }
-//                List<DynamicField> headers = new ArrayList<>();
-                    List<String> headers = new ArrayList<>();
-                    //获得了 dynamicField的列表
-//                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
-//                    Cell cell = headRow.getCell(j);
-//                    String headerDisplay = ExcelUtils.getCellValue(cell);
-//                    headers.add(headerDisplay);
-//                }
-                    for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
-                        Cell cell = headRow.getCell(j);
-                        String headerDisplay = ExcelUtils.getCellValue(cell);
-                        headers.add(headerDisplay);
-                    }
-                List<DynamicSheet> ds = h.getDynamicSheet(sheet.getSheetName(),params,headers,true, false);
+                Row headRow = null;
+                if (headerRow != null) {
+                    headRow = sheet.getRow(headerRow);
+                } else {
+                    headRow = sheet.getRow(1);
+                    headerRow = 1;
+                }
+                List<String> headers = new ArrayList<>();
+                for (int j = headRow.getFirstCellNum(); j < headRow.getLastCellNum(); j++) {
+                    Cell cell = headRow.getCell(j);
+                    String headerDisplay = ExcelUtils.getCellValue(cell);
+                    headers.add(headerDisplay);
+                    headers.removeIf((r) -> r.equals("错误原因"));
+                }
+                List<DynamicSheet> ds = excelHandler.getDynamicSheet(sheet.getSheetName(), params, headers, true, false);
                 if (ds.size() != 1) {
-                    LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}",sheet.getSheetName()
-                            ,ds==null?0:ds.size());
-                    response.setFailedRowNumber(response.getFailedRowNumber()+(sheet.getPhysicalNumberOfRows() - headerRow));
-                    continue sheet;
-                }else{
+                    LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}", sheet.getSheetName(), ds.size());
+                } else {
                     DynamicSheet dynamicSheet = ds.get(0);
                     LOGGER.info("import dyanmic excel dynamic sheets include = {}", dynamicSheet);
                     List<DynamicField> dynamicFields = dynamicSheet.getDynamicFields();
-                    if(dynamicFields.size() != headers.size()){
-                        LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {},  ",
-                                dynamicSheet,headers);
-                        response.setFailedRowNumber(response.getFailedRowNumber()+(sheet.getPhysicalNumberOfRows() - headerRow));
-                        continue sheet;
+                    if (dynamicFields.size() != headers.size()) {
+                        LOGGER.error("headers' size is not euqual to dynamicFields', dynamicSheet = {}, headers = {},  ", dynamicSheet, headers);
                     }
                 }
-//                //数据的获得
-//                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
-//                    Row row = sheet.getRow(j);
-//                    //构建sheet的实例
-//                    Object sheetClassInstance = null;
-//                    try {
-//                        sheetClassInstance = sheetClass.newInstance();
-//                    } catch (Exception e) {
-//                        LOGGER.error("sheetClass new Instance failed, sheetClass = {}", sheetClass.getSimpleName());
-//                        continue sheet;
-//                    }
-//                    for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
-//                        Cell cell = row.getCell(k);
-//                        String cellValue = ExcelUtils.getCellValue(cell);
-//                        //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
-//                        String fieldValue = h.valueProcess(cellValue,sheetClass,ds);
-//                        DynamicField df = headers.get(k);
-//                        try {
-//                            setToObj(df, sheetClassInstance, cellValue);
-//                        } catch (Exception e) {
-//                            LOGGER.error("set2Obj failed, sheetClass = {},fieldName = {}, cellValue = {}",
-//                                    sheetClass.getSimpleName(), df.getFieldName(), cellValue);
-//                        }
-//                    }
-//                    sheetClassObjs.add(sheetClassInstance);
-//                }
+
                 List<DynamicRowDTO> rowDatas = new ArrayList<>();
                 List<DynamicField> dynamicFields = ds.get(0).getDynamicFields();
-                for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
-                        Row row = sheet.getRow(j);
-                        DynamicRowDTO rowData = new DynamicRowDTO();
-                        List<DynamicColumnDTO> columns = new ArrayList<>();
-                        for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
-                            Cell cell = row.getCell(k);
-                            String cellValue = ExcelUtils.getCellValue(cell,dynamicFields.get(k));
-                            //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
-                            //必填项校验
-                            if(dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)){
-                                response.setFailedRowNumber(response.getFailedRowNumber() + 1);
-                                if(response.getFailCause()!=null){
-                                    response.setFailCause(dynamicFields.get(k).getDisplayName() + "为必填项!");
-                                }
-                                continue;
-                            }
-                            DynamicColumnDTO dto = new DynamicColumnDTO();
-                            dto.setValue(cellValue);
-                            dto.setHeaderDisplay(headers.get(k));
-                            dto.setFieldName(dynamicFields.get(k).getFieldName());
-                            dto.setColumnNum(k);
-                            columns.add(dto);
-                        }
-                        rowData.setColumns(columns);
-                        rowData.setRowNum(j);
-                        rowDatas.add(rowData);
+                // owner id for import file origin
+                Long ownerId = ds.get(0).getOwnerId();
+
+                //获取dynamic field 的map  用于错误日志导出
+                Map<String, String> dynamicFieldGroup = getDynamicFieldMap(dynamicFields);
+                // 导出信息提示
+                ImportFileTask task = new ImportFileTask();
+                task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+                task.setOwnerId(ownerId);
+                task.setType(ImportFileTaskType.CUSTOMER_TASK.getCode());
+                task.setCreatorUid(UserContext.currentUserId());
+                Integer finalHeadRow = headerRow;
+                Sheet finalSheet = sheet;
+                task = importFileService.executeTask(() -> {
+                    ImportFileResponse importFileResponse = new ImportFileResponse();
+                    if (dynamicFieldGroup.size() > 0) {
+                        //设置导出报错的结果excel的标题
+                        importFileResponse.setTitle(dynamicFieldGroup);
                     }
-
-
-                     h.importData(ds.get(0),rowDatas,params,context,response);
-                    //插入
-//                try {
-//                    h.save2Schema(sheetClassObjs, sheetClass,storage1 , context);
-//                    Integer successRowNumber = response.getSuccessRowNumber();
-//                    successRowNumber += sheetClassObjs.size();
-//                    response.setSuccessRowNumber(successRowNumber);
-//                } catch (Exception e) {
-//                    LOGGER.error("save2Schema failed, sheetClass = {},sheeClassObjsNum = {}",
-//                            sheetClass.getSimpleName(), sheetClassObjs.size());
-//                    Integer failedRowNumber = response.getFailedRowNumber();
-//                    failedRowNumber += sheetClassObjs.size();
-//                    response.setFailedRowNumber(failedRowNumber);
-//                    continue sheet;
-//                }
-            }catch(Exception e){
-                LOGGER.info("sheet = {}, failed to import,error = {}",sheet.getSheetName(),e);
-                if(response.getFailCause() != null){
-                    response.setFailCause(sheet.getSheetName() + "页无法识别，sheet页需要来自模板");
+                    List<ImportFileResultLog<Map<String,String>>> results =  importCustomerDynamicExcelData(finalHeadRow, params, response, excelHandler, context, finalSheet, headers, ds, rowDatas, dynamicFields);
+                    importFileResponse.setTotalCount((long) rowDatas.size());
+                    importFileResponse.setFailCount((long) results.size());
+                    importFileResponse.setLogs(results);
+                    return importFileResponse;
+                }, task);
+                // 返回给web
+                response.setId(task.getId());
+            } catch (Exception e) {
+                LOGGER.info("sheet = {}, failed to import,error = {}", sheet==null?"":sheet.getSheetName(), e);
+                if (response.getFailCause() != null) {
+                    response.setFailCause(sheet==null?"":sheet.getSheetName() + "页无法识别，sheet页需要来自模板");
                 }
             }
         }
-//        try{
-//            //后处理
-//            h.postProcess(response);
-//        }catch (Exception e){}
-        response.write2failCause(workbook.getNumberOfSheets());
         return response;
+    }
+
+    private Workbook initExcelWorkBook(MultipartFile file) {
+        Workbook workbook = null;
+        try {
+            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
+            if (workbook == null) {
+                throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_IMPORT_ERROR, "workBook is null");
+            }
+        } catch (Exception e) {
+            LOGGER.info("import multi sheet failed, failed to get inputStream, workbook is null, error = {}", e);
+
+        }
+        return workbook;
+    }
+
+    private List<ImportFileResultLog<Map<String,String>>> importCustomerDynamicExcelData(Integer headerRow, Object params, DynamicImportResponse response, DynamicExcelHandler excelHandler, Map<Object, Object> context, Sheet sheet, List<String> headers, List<DynamicSheet> ds, List<DynamicRowDTO> rowDatas, List<DynamicField> dynamicFields) {
+        List<ImportFileResultLog<Map<String,String>>> resultLogs =new ArrayList<>();
+        // get each row column data from excel
+        rowDatas = getDynamicColumnData(headerRow, sheet, headers, rowDatas, dynamicFields);
+        excelHandler.importData(ds.get(0), rowDatas, params, context, response,resultLogs);
+        return resultLogs;
+    }
+
+    private List<DynamicRowDTO> getDynamicColumnData(Integer headerRow, Sheet sheet, List<String> headers, List<DynamicRowDTO> rowDatas, List<DynamicField> dynamicFields) {
+        for (int j = headerRow + 1; j <= sheet.getLastRowNum(); j++) {
+            Row row = sheet.getRow(j);
+            DynamicRowDTO rowData = new DynamicRowDTO();
+            List<DynamicColumnDTO> columns = new ArrayList<>();
+            for (int k =0; k < headers.size(); k++) {
+                Cell cell = row.getCell(k);
+                String cellValue = ExcelUtils.getCellValue(cell, dynamicFields.get(k)).trim().replaceAll("\n", "");
+                //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
+                //必填项校验
+                DynamicColumnDTO dto = new DynamicColumnDTO();
+                if (dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)) {
+                    dto.setMandatoryFlag(false);
+                }
+                dto.setValue(cellValue);
+                dto.setHeaderDisplay(headers.get(k));
+                dto.setFieldName(dynamicFields.get(k).getFieldName());
+                dto.setFieldId(dynamicFields.get(k).getFieldId());
+                dto.setColumnNum(k);
+                columns.add(dto);
+            }
+            rowData.setColumns(columns);
+            rowData.setRowNum(j);
+            rowDatas.add(rowData);
+        }
+        return rowDatas;
+    }
+
+    private Map<String,String> getDynamicFieldMap(List<DynamicField> dynamicFields) {
+        Map<String, String> dynamicFieldMap = new LinkedHashMap<>();
+        if(dynamicFields!=null && dynamicFields.size()>0){
+            dynamicFields.forEach((field)->{
+                dynamicFieldMap.put(field.getFieldName(), field.getDisplayName());
+            });
+        }
+        return dynamicFieldMap;
     }
 
     private void setToObj(DynamicField df, Object dto,String value) throws Exception {

@@ -1,6 +1,5 @@
 package com.everhomes.rentalv2;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.*;
 
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
-import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
@@ -20,7 +18,6 @@ import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
-import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,22 +27,12 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
-import com.everhomes.flow.node.FlowGraphNodeEnd;
-import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
-import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -54,15 +41,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
-import org.elasticsearch.common.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
@@ -118,11 +96,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		if(null != flowCase.getReferId()){
 			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		}
-		if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
-				&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode()) {
-			CancelRentalBillCommand cmd = new CancelRentalBillCommand();
-			cmd.setRentalBillId(order.getId());
-			rentalv2Service.cancelRentalBill(cmd,false);
+		if (order.getStatus()==SiteBillStatus.PAYINGFINAL.getCode() || order.getStatus()==SiteBillStatus.APPROVING.getCode()) {
+			order.setStatus(SiteBillStatus.FAIL.getCode());
+			rentalv2Provider.updateRentalBill(order);
 		}
 
 	}
@@ -212,11 +188,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		FlowCaseEntity e = new FlowCaseEntity();
+		//用户名
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"user", RentalNotificationTemplateCode.locale, ""));
 		User user = this.userProvider.findUserById(order.getRentalUid());
-		if (null != user)
+		if (order.getUserName() != null)
+			e.setValue(order.getUserName());
+		else if (null != user)
 			e.setValue(user.getNickName());
 		else {
 			LOGGER.debug("user is null...userId = " + order.getRentalUid());
@@ -224,6 +203,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		entities.add(e);
 
+		//联系方式
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -237,21 +217,22 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"organization", RentalNotificationTemplateCode.locale, ""));
-
+		//公司名
 		Long orgId = order.getUserEnterpriseId();
-		e.setValue("无");
 		if (null != orgId) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"organization", RentalNotificationTemplateCode.locale, ""));
+
+			e.setValue("无");
 			Organization org = organizationProvider.findOrganizationById(orgId);
-			if (org!=null)
+			if (org != null)
 				e.setValue(org.getName());
+			entities.add(e);
 		}
 
-		entities.add(e);
-
+		//资源名
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -259,6 +240,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getResourceName());
 		entities.add(e);
 
+		//详情
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -266,6 +248,26 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getUseDetail());
 		entities.add(e);
 
+		//规格
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"spec", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getSpec());
+			entities.add(e);
+		}
+		//资源地址
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"address", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getAddress());
+			entities.add(e);
+		}
+
+		//套餐名
 		if (!StringUtils.isEmpty(order.getPackageName())){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -275,6 +277,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//门禁
 		if (order.getDoorAuthId()!=null){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -296,21 +299,24 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 //		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
 //				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
+		//预订数量
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"count", RentalNotificationTemplateCode.locale, ""));
-			e.setValue(order.getRentalCount() + "");
+			e.setValue(order.getRentalCount().intValue() + "");
 			entities.add(e);
 //		}
 
+		//价格
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"price", RentalNotificationTemplateCode.locale, ""));
-		e.setValue(order.getPayTotalMoney().toString());
+		e.setValue(order.getPayTotalMoney().toString()+"元");
 		entities.add(e);
 
+		//推荐员
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
 				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId(),null);
 		if (null != recommendUsers && recommendUsers.size() != 0) {
@@ -335,6 +341,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//免费物资
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
 				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId(),null);
 		if (null != goodItems && goodItems.size() != 0) {
@@ -357,6 +364,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//付费商品
 		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order.getId(), order.getResourceType());
 		if (null != ribs) { 
 			e = new FlowCaseEntity();
@@ -413,7 +421,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		String contentString = "";
 		if(null != order.getOfflinePayeeUid()){
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(order.getOfflinePayeeUid(), order.getOrganizationId());
 			if(null!=member){
 				map.put("offlinePayeeName", member.getContactName());
 				map.put("offlinePayeeContact", member.getContactToken());
@@ -542,7 +550,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			String contactName="";
 			String contactToken="";
 			if(null != order.getOfflinePayeeUid()){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(order.getOfflinePayeeUid(), order.getOrganizationId());
 				if(null != member){
 					contactName = member.getContactName();
 					contactToken = member.getContactToken();

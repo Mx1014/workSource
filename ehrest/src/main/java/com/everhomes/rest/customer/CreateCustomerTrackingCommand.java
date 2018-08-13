@@ -2,6 +2,8 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
@@ -31,6 +33,11 @@ public class CreateCustomerTrackingCommand {
     private String content;
     private String contentImgUri;
 	private Long communityId;
+
+	private BigDecimal visitTimeLength;
+	private  Long visitPersonUid;
+	private  String visitPersonName;
+	private String contactPhone;
 
 	private Long orgId;
 
@@ -158,6 +165,37 @@ public class CreateCustomerTrackingCommand {
 		this.contentImgUri = contentImgUri;
 	}
 
+	public BigDecimal getVisitTimeLength() {
+		return visitTimeLength;
+	}
+
+	public void setVisitTimeLength(BigDecimal visitTimeLength) {
+		this.visitTimeLength = visitTimeLength;
+	}
+
+	public Long getVisitPersonUid() {
+		return visitPersonUid;
+	}
+
+	public void setVisitPersonUid(Long visitPersonUid) {
+		this.visitPersonUid = visitPersonUid;
+	}
+
+	public String getVisitPersonName() {
+		return visitPersonName;
+	}
+
+	public void setVisitPersonName(String visitPersonName) {
+		this.visitPersonName = visitPersonName;
+	}
+
+	public String getContactPhone() {
+		return contactPhone;
+	}
+
+	public void setContactPhone(String contactPhone) {
+		this.contactPhone = contactPhone;
+	}
 
 	@Override
     public String toString() {

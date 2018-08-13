@@ -105,6 +105,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(orderId, finalOrderStatus);
             assetProvider.changeBillStatusOnOrder(billStatuses,orderId);
+            assetProvider.changeOrderPaymentType(orderId, cmd.getPaymentType());
             return null;
         });
     }
