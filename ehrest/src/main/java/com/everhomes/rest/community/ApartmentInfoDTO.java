@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class ApartmentInfoDTO {
 	
+	private Long communityId;
 	private Long addressId;
 	private String communityName;
 	private String buildingName;
@@ -16,7 +17,20 @@ public class ApartmentInfoDTO {
 	private Double chargeArea;
 	private Double totalRent;
 	private Double areaAveragePrice;
+	private Integer floorNumber;
 	
+	public Integer getFloorNumber() {
+		return floorNumber;
+	}
+	public void setFloorNumber(Integer floorNumber) {
+		this.floorNumber = floorNumber;
+	}
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 	public Double getTotalRent() {
 		return totalRent;
 	}

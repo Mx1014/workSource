@@ -3893,9 +3893,16 @@ public class CommunityServiceImpl implements CommunityService {
 		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
 		checkResourceCategoryIsNull(category);
 		
+		//删除分类时，删除园区与该分类的关联关系
+		List<ResourceCategoryAssignment> assignments = communityProvider.listResourceCategoryAssignment(category.getId(), category.getNamespaceId());
+		if (assignments!=null && assignments.size()>0) {
+			for (ResourceCategoryAssignment assignment : assignments) {
+				communityProvider.deleteResourceCategoryAssignmentById(assignment.getId());
+			}
+		}
+		
 		category.setStatus(ResourceCategoryStatus.INACTIVE.getCode());
 		communityProvider.updateResourceCategory(category);
-		
 	}
 
 
@@ -5219,6 +5226,9 @@ public class CommunityServiceImpl implements CommunityService {
 	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus,double areaAveragePrice,double totalRent){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
 		Community community = communityProvider.findCommunityById(address.getCommunityId());
+		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+		dto.setFloorNumber(building.getFloorNumber());
+		dto.setCommunityId(address.getCommunityId());
 		dto.setCommunityName(community.getName());
 		dto.setAddressId(address.getId());
 		dto.setBuildingName(address.getBuildingName());
