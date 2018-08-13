@@ -13,6 +13,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -32,7 +33,7 @@ public class ZhenZhiHuiSSO{
     private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiSSO.class);
 
-    public void ssoservice(HttpServletRequest request)
+    public void ssoservice(HttpServletRequest request, HttpServletResponse response)
     {
         String TICKET = request.getParameter("TICKET");
 

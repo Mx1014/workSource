@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -24,8 +25,8 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
     @RequestMapping("sso")
     @RestReturn(String.class)
     @RequireAuthentication(false)
-    public RestResponse share(HttpServletRequest request) {
-        zhenZhiHuiSSO.ssoservice(request);
+    public RestResponse share(HttpServletRequest request, HttpServletResponse response) {
+        zhenZhiHuiSSO.ssoservice(request,response);
         return new RestResponse();
     }
 }
