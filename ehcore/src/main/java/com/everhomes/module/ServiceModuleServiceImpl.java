@@ -1370,6 +1370,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getSimpleName(), entry.getId());
                     dto.setIconUrl(url);
                 }
+
+                if(dto.getAppCategoryId() != null){
+                    AppCategory appCategory = appCategoryProvider.findById(dto.getId());
+                    if(appCategory != null){
+                        dto.setAppCategoryName(appCategory.getName());
+                    }
+                }
                 dtos.add(dto);
             }
         }
