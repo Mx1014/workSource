@@ -31,7 +31,7 @@ public class NavigatorInstanceConfig implements Serializable  {
 
 	private Byte allOrMoreFlag;
 
-	private Byte allOrMoreType;
+	private String allOrMoreType;
 
 	private String allOrMoreLabel;
 
@@ -117,11 +117,11 @@ public class NavigatorInstanceConfig implements Serializable  {
 		this.allOrMoreFlag = allOrMoreFlag;
 	}
 
-	public Byte getAllOrMoreType() {
+	public String getAllOrMoreType() {
 		return allOrMoreType;
 	}
 
-	public void setAllOrMoreType(Byte allOrMoreType) {
+	public void setAllOrMoreType(String allOrMoreType) {
 		this.allOrMoreType = allOrMoreType;
 	}
 
