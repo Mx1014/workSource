@@ -93,6 +93,19 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
 
+
+-- AUTHOR: jun.yan  20180813
+-- REMARK: 修改菜单目录
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16300000', '支付结算管理', '16000000', NULL, NULL, '1', '2', '/16000000/16300000', 'zuolin', '90', NULL, '2', 'system', 'classify', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16400000', '营销管理', '16000000', NULL, NULL, '1', '2', '/16000000/16400000', 'zuolin', '100', NULL, '2', 'system', 'classify', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('55000000', '支付结算管理', '40000040', NULL, NULL, '1', '2', '/40000040/55000000', 'park', '70', NULL, '2', 'system', 'classify', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('56000000', '营销管理', '40000040', NULL, NULL, '1', '2', '/40000040/56000000', 'park', '80', NULL, '2', 'system', 'classify', '2');
+
+
+UPDATE eh_web_menus SET parent_id = 16300000, path = '/16000000/16300000/16070000'  WHERE id = 16070000;
+
+UPDATE eh_web_menus SET parent_id = 55000000, path = '/40000040/55000000/52000000'  WHERE id = 52000000;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
