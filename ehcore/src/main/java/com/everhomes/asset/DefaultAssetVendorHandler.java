@@ -232,7 +232,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	protected void checkBusinessPayer(CreatePaymentBillOrderCommand cmd) {
 	    BusinessPayerType payerType = BusinessPayerType.fromCode(cmd.getBusinessPayerType());
 	    if(payerType == null) {
-	        payerType = BusinessPayerType.ORGANIZATION;
+	        payerType = BusinessPayerType.USER;
 	        cmd.setBusinessPayerType(payerType.getCode());
 	    }
 	    
@@ -417,31 +417,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         strBuilder.append(namespaceId);
         
         return strBuilder.toString();
-    }
-	
-	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
-        if(null == namespaceId) {
-            LOGGER.error("checkAssetVendor namespaceId cannot be null.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "checkAssetVendor namespaceId cannot be null.");
-        }
-        AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
-        if(null == assetVendor && defaultNamespaceId!=null)  assetVendor = assetProvider.findAssetVendorByNamespace(defaultNamespaceId);
-        if(null == assetVendor) {
-            LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "assetVendor not found");
-        }
-        return assetVendor;
-    }
-	
-	private AssetVendorHandler getAssetVendorHandler(String vendorName) {
-        AssetVendorHandler handler = null;
-        if(vendorName != null && vendorName.length() > 0) {
-            String handlerPrefix = AssetVendorHandler.ASSET_VENDOR_PREFIX;
-            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
-        }
-        return handler;
     }
 	
 	/*
