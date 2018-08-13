@@ -1,7 +1,7 @@
 -- 新增装修办理模块 by st.zheng
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('43000', '装修办理', '40000', '/200/40000/43000', '1', '3', '2', '10', now(), '{}', '13', now(), '0', '0', '0', NULL, 'community_control', '1', '1', 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16032200', '装修办理', '16030000', NULL, 'decoration-management', '1', '2', '/16000000/16030000/16032200', 'zuolin', '8', '43000', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16032300', '装修办理', '16030000', NULL, 'decoration-management', '1', '2', '/16000000/16030000/16032300', 'zuolin', '8', '43000', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('45150000', '装修办理', '45000000', NULL, 'decoration-management', '1', '2', '/40000040/45000000/45150000', 'park', '2', '43000', '3', 'system', 'module', NULL);
 
 set @privilege_id = (select max(id) from eh_service_module_privileges);
