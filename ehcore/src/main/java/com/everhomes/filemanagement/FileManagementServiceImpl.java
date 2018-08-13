@@ -615,7 +615,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         sb.append("/");
         sb.append(catalog.getName());
         //不要最后一个路径(那是文件自身)
-        for (int i = 1; i < sb.length() - 1; i++) {
+        for (int i = 1; i < pathArray.length - 1; i++) {
             FileContent content = fileManagementProvider.findFileContentById(Long.valueOf(pathArray[i]));
             if (null != content) {
                 sb.append("/");
@@ -633,6 +633,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             Long parentId = map.get("parentId");
 
             for (Long contentId : cmd.getContentIds()) {
+            	
                 FileContent content = fileManagementProvider.findFileContentById(contentId);
                 if (null == content) {
                     throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
@@ -651,6 +652,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 content.setParentId(parentId);
                 if (parentId != null) {
                     FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
+                    if(StringUtils.isNotBlank(parentContent.getPath()) && 
+                    		(parentContent.getPath().contains("/" + contentId + "/") || parentContent.getPath().endsWith("/" + contentId))){ 
+                        throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_CANNOT_MOVE,
+                                "cant move to own sub Content.");
+                    }
                     content.setPath(parentContent.getPath() + "/" + contentId);
                 } else {
                     content.setPath("/" + catalogId);
@@ -700,13 +706,22 @@ public class FileManagementServiceImpl implements  FileManagementService{
                     fileManagementProvider.updateFileContent(content);
                 }
             }else{
-                AddFileContentCommand cmd = new AddFileContentCommand();
-                cmd.setCatalogId(catalog.getId());
-                cmd.setContentName(pathArray[i]);
-                cmd.setContentType(FileContentType.FOLDER.getCode());
-                cmd.setParentId(parentId);
-                FileContentDTO dto = addFileContent(cmd);
-                parentId = dto.getId();
+            	content = new FileContent();
+                content.setNamespaceId(catalog.getNamespaceId());
+                content.setOwnerId(catalog.getOwnerId());
+                content.setOwnerType(catalog.getOwnerType());
+                content.setCatalogId(catalog.getId());
+                content.setParentId(parentId);
+                if (parentId != null){
+                	FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
+                    content.setPath(parentContent.getPath());
+                    }
+                else
+                    content.setPath("");
+                content.setContentType(FileContentType.FOLDER.getCode());
+                content.setContentName(pathArray[i]);
+                fileManagementProvider.createFileContent(content);
+                parentId = content.getId();
             }
         }
         result.put("parentId", parentId);
