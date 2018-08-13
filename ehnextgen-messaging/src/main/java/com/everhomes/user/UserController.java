@@ -805,6 +805,20 @@ public class UserController extends ControllerBase {
 		return new RestResponse("OK");
 	}
 
+	/**
+	 * <b>URL: /user/sendCodeWithPictureValidateByApp</b>
+	 * <p></p>
+	 * @return OK
+	 */
+	@RequestMapping("sendCodeWithPictureValidateByApp")
+	@RestReturn(String.class)
+	public RestResponse sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
+		assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+		userService.sendCodeWithPictureValidateByApp(cmd, request);
+		return new RestResponse("OK");
+	}
+
 
 
 	/**
@@ -1400,6 +1414,54 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+    /**
+     * <b>URL: /user/verificationCodeForBindPhoneByApp</b>
+     * <p>微信APP绑定手机号发送验证码</p>
+     */
+    @RequestMapping("verificationCodeForBindPhoneByApp")
+    @RestReturn(value = String.class)
+    public RestResponse verificationCodeForBindPhoneByApp(@Valid VerificationCodeForBindPhoneCommand cmd) {
+        userService.verificationCodeForBindPhoneByApp(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+
+	/**
+	 * <b>URL: /user/bindPhoneByApp</b>
+	 * <p>微信APP登录验证并登录</p>
+	 * @return
+	 */
+	@RequestMapping("bindPhoneByApp")
+	@RestReturn(LogonCommandResponse.class)
+	public RestResponse bindPhoneByApp(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhoneByApp(cmd);
+		LogonCommandResponse logonCommandResponse = new LogonCommandResponse();
+		if(login != null){
+
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			logonCommandResponse.setLoginToken(tokenString);
+			logonCommandResponse.setUid(login.getUserId());
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		}
+
+
+		logonCommandResponse.setAccessPoints(listAllBorderAccessPoints());
+		logonCommandResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse(logonCommandResponse);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 	/**
 	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
 	 * <p>校验验证码并重置密码</p>
@@ -1410,6 +1472,22 @@ public class UserController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
 		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPasswordWithoutIdentifyToken</b>
+	 * <p>校验验证码并重置密码（无需手机号码）</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPasswordWithoutIdentifyToken")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPasswordWithoutIdentifyToken(@Valid CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd) {
+		userService.checkVerifyCodeAndResetPasswordWithoutIdentifyToken(cmd);
 		RestResponse resp = new RestResponse();
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");

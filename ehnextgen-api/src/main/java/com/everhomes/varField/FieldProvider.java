@@ -7,11 +7,12 @@ import java.util.Map;
  * Created by ying.xiong on 2017/8/3.
  */
 public interface FieldProvider {
+    Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName, Long categoryId);
     Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName);
     List<FieldGroup> listFieldGroups(List<Long> ids);
     FieldGroup findFieldGroup(Long id);
     List<FieldGroup> listFieldGroups(String moduleName);
-    Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath);
+    Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId);
     List<Field> listFields(List<Long> ids);
     List<Field> listFields(String moduleName, String groupPath);
 
@@ -24,8 +25,8 @@ public interface FieldProvider {
     FieldGroup findGroupByGroupLogicName(String groupLogicName);
 
     List<FieldItem> listFieldItems(Long fieldId);
-    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId);
-    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId);
+    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId, Long categoryId);
+    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, Long fieldId, String displayName);
@@ -36,20 +37,28 @@ public interface FieldProvider {
 
     void createScopeFieldGroup(ScopeFieldGroup scopeGroup);
     void updateScopeFieldGroup(ScopeFieldGroup scopeGroup);
-    ScopeFieldGroup findScopeFieldGroup(Long id, Integer namespaceId, Long communityId);
+    ScopeFieldGroup findScopeFieldGroup(Long id, Integer namespaceId, Long communityId, Long categoryId);
 
     void createScopeField(ScopeField scopeField);
     void updateScopeField(ScopeField scopeField);
-    ScopeField findScopeField(Long id, Integer namespaceId, Long communityId);
+    ScopeField findScopeField(Long id, Integer namespaceId, Long communityId, Long categoryId);
 
     void createScopeFieldItem(ScopeFieldItem scopeFieldItem);
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);
-    ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId);
+    ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId, Long categoryId);
 
     void createFieldItem(FieldItem item);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName);
     Field findField(Long groupId, String fieldName);
     Field findField(String moduleName, String name, String groupPath);
+    //add by tangcen
+	FieldItem findFieldItemByBusinessValue(Long fieldId, Byte businessValue);
 
     List<Field> listMandatoryFields(String moduleName, Long  groupId);
+
+    List <Long>checkCustomerField(Integer namespaceId, Long communityId, String moduleName);
+
+    Field findFieldById(Long fieldId);
+
+    FieldItem findFieldItemByItemId(Long itemId);
 }

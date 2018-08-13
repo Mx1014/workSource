@@ -14,6 +14,7 @@ import java.util.List;
  * <li>downloadPermission: 下载权限 0-拒绝下载 1-允许下载</li>
  * <li>iconUrl: 图标url</li>
  * <li>createTime: 创建时间</li>
+ * <li>contents: 可见范围列表 参考{@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * </ul>
  */
 public class FileCatalogDTO {
@@ -30,6 +31,7 @@ public class FileCatalogDTO {
     private String iconUrl;
 
     private Timestamp createTime;
+    private List<FileContentDTO> contents;
 
     public FileCatalogDTO() {
     }
@@ -85,5 +87,13 @@ public class FileCatalogDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<FileContentDTO> getContents() {
+        return contents;
+    }
+
+    public void setContents(List<FileContentDTO> contents) {
+        this.contents = contents;
     }
 }

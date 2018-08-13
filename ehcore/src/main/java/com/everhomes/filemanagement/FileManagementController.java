@@ -173,5 +173,36 @@ public class FileManagementController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+ 
+	/**
+	 * <p>移动文件</p>
+	 * <b>URL: /fileManagement/moveFileContent</b>
+	 */
+	@RequestMapping("moveFileContent")
+	@RestReturn(String.class)
+	public RestResponse moveFileContent(MoveFileContentCommand cmd){
+		fileManagementService.moveFileContent(cmd);
+		return new RestResponse();
+	}
+
+    /**
+     * <p>根据后缀查询文件图标</p>
+     * <b>URL: /fileManagement/getFileIcon</b>
+     */
+    @RequestMapping("getFileIcon")
+    @RestReturn(GetFileIconResponse.class)
+    public RestResponse getFileIcon(GetFileIconCommand cmd){
+        return new RestResponse(fileManagementService.getFileIcon(cmd));
+    }
+
+    /**
+     * <p>获取目录文件夹的树状结构</p>
+     * <b>URL: /fileManagement/listAllFloders</b>
+     */
+    @RequestMapping("listAllFloders")
+    @RestReturn(ListAllFlodersResponse.class)
+    public RestResponse listAllFloders(ListAllFlodersCommand cmd){
+        return new RestResponse(fileManagementService.listAllFloders(cmd));
+    }
 
 }

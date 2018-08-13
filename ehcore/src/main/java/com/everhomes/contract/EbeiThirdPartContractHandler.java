@@ -318,7 +318,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
 
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
-
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
             return ;
@@ -383,15 +382,10 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
                 namespaceId, myContractList.size(), mergeContractList.size());
-        dbProvider.execute(s->{
-            syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
-            return true;
-        });
+        syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
 
-        if(mergeContractList != null && mergeContractList.size() > 0) {
-            List<String> ownerIdList = mergeContractList.stream().map(contract -> {
-                return contract.getOwnerId();
-            }).collect(Collectors.toList());
+        if (mergeContractList.size() > 0) {
+            List<String> ownerIdList = mergeContractList.stream().map(EbeiContract::getOwnerId).collect(Collectors.toList());
             String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
             getOwnerStatus(communityIdentifier, ownerIds);
         }
@@ -402,12 +396,15 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     private void syncAllContracts(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList) {
         if (theirContractList != null) {
             for (EbeiContract ebeiContract : theirContractList) {
-                if("0".equals(ebeiContract.getState())) {
+                if ("0".equals(ebeiContract.getState())) {
                     if (myContractList != null) {
                         for (Contract contract : myContractList) {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
-                                deleteContract(contract);
+//                                dbProvider.execute((s) -> {
+                                    deleteContract(contract);
+//                                    return true;
+//                                });
                             }
                         }
                     }
@@ -418,20 +415,28 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
                                 notdeal = false;
-                                updateContract(contract, communityId, ebeiContract);
+//                                dbProvider.execute((s) -> {
+                                    updateContract(contract, communityId, ebeiContract);
+//                                    return true;
+//                                });
                             }
                         }
                     }
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber());
+                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber(), null);
                         if (contract == null) {
-                            insertContract(NAMESPACE_ID, communityId, ebeiContract);
+//                            dbProvider.execute((s) -> {
+                                insertContract(NAMESPACE_ID, communityId, ebeiContract);
+//                                return true;
+//                            });
                         }else {
+//                            dbProvider.execute((s) -> {
                             updateContract(contract, communityId, ebeiContract);
+//                                return true;
+//                            });
                         }
                     }
-
                 }
             }
         }

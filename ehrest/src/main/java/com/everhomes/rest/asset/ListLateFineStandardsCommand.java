@@ -23,6 +23,16 @@ public class ListLateFineStandardsCommand {
     private String ownerType;
     @NotNull
     private Integer namespaceId;
+    private Long categoryId;
+    private Long moduleId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {
@@ -52,5 +62,13 @@ public class ListLateFineStandardsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
 
 }

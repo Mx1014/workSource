@@ -8,6 +8,7 @@ import java.util.List;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.PortalItemActionType;
 import com.everhomes.rest.portal.PortalItemStatus;
 import com.everhomes.server.schema.tables.records.EhPortalItemsRecord;
@@ -103,6 +104,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.max())
 				.from(Tables.EH_PORTAL_ITEMS)
 				.where(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId))
+				.and(Tables.EH_PORTAL_ITEMS.ACTION_TYPE.ne(PortalItemActionType.ALLORMORE.getCode()))
 				.fetchOne().value1();
 
 		return defaultOrder;

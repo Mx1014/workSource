@@ -76,7 +76,7 @@ public class EnterpriseNoticeController extends ControllerBase {
     public RestResponse getEnterpriseNoticeDetail(GetEnterpriseNoticeCommand cmd) {
         EnterpriseNoticeDTO enterpriseNoticeDTO = null;
         boolean isPreview = EnterpriseNoticeShowType.PREVIEW == EnterpriseNoticeShowType.fromCode(cmd.getShowType());
-        if (isPreview || enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getId())) {
+        if (isPreview || enterpriseNoticeService.isNoticeSendToCurrentUser(cmd.getOrganizationId(), cmd.getId())) {
             enterpriseNoticeDTO = enterpriseNoticeService.getEnterpriseNoticeDetailInfo(cmd.getId());
         }
         if (enterpriseNoticeDTO == null) {

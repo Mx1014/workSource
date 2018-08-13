@@ -39,6 +39,7 @@ import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
+import com.everhomes.rest.organization.ApplyForEnterpriseContactNewCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.BatchUpdateOrganizationContactVisibleFlagCommand;
@@ -257,14 +258,10 @@ public interface OrganizationService {
 	PmManagementsResponse listPmManagements(ListPmManagementsCommand cmd);
 
 	ListTopicsByTypeCommandResponse listUserTask(ListUserTaskCommand cmd);
-//	ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd);
-//	void processPartnerOrganizationUser(Long userId, Long partnerId);
 
 	SearchTopicsByTypeResponse searchTopicsByType(SearchTopicsByTypeCommand cmd);
 
 	void createDepartment(CreateDepartmentCommand cmd);
-//	ListDepartmentsCommandResponse listDepartments(ListDepartmentsCommand cmd);
-
 
 	boolean updateOrganizationMemberByIds(UpdateOrganizationMemberByIdsCommand cmd);
 
@@ -294,13 +291,15 @@ public interface OrganizationService {
 	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd, Boolean checkAuth);
 
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
-	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
-			ListOrganizationContactCommand cmd, boolean pinyinFlag);
+//	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
+//			ListOrganizationContactCommand cmd, boolean pinyinFlag);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
+	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
 	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
+	OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
 	void leaveForEnterpriseContact(LeaveEnterpriseCommand cmd);
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
@@ -463,12 +462,7 @@ public interface OrganizationService {
      */
 	OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd);
 
-	/**
-	 * 简单的通讯录
-	 * @param cmd
-     * @return
-     */
-	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
+	/* 认证 */
 	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
 	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
 
@@ -484,7 +478,7 @@ public interface OrganizationService {
 	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
 
 
-	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+//	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
 
 	void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd);
 
@@ -567,22 +561,6 @@ public interface OrganizationService {
 	 * @return ListOrganizationContactCommandResponse
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
-
-    /****** new interfac for archives-1.0  START******/
-
-    //  暂时舍弃 by R 20170718
-//    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
-
-/*
-	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
-													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-    Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
-
-    void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
-*/
-
-	/****** new interfac for archives-1.0 END******/
-
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
@@ -608,8 +586,6 @@ public interface OrganizationService {
 
 
 	// added by R, for salaryGroup 20170630
-	Organization createSalaryGroupOrganization(Long organizationId, String name);
-	ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
 	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
 
 	/**人事管理-离职**/
@@ -627,6 +603,7 @@ public interface OrganizationService {
 
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
+	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd); //	简洁的查询
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 
 	/**根据detailId更新通用信息**/
@@ -637,7 +614,7 @@ public interface OrganizationService {
 	FindOrgPersonelCommandResponse findOrgPersonel(FindOrgPersonelCommand cmd);
 
 	/**根据总公司id快速拿到所有公司人员的档案id**/
-	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);
+	List<Long> listDetailIdsByEnterpriseId(Long enterpriseId);
 
 	/**通过机构类型和名称获取机构id**/
 	Long getOrganizationNameByNameAndType(String name, String groupType);
@@ -659,7 +636,7 @@ public interface OrganizationService {
 	Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd);
 	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
 
-	void checkOrganizationpPivilege(Long orgId, Long pivilegeId);
+	void checkOrganizationPrivilege(Long orgId, Long pivilegeId);
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);

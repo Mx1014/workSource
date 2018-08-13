@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
  *     <li>fieldId: 在系统里的字段id</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -18,6 +19,16 @@ public class ListFieldItemCommand {
 
     private Long fieldId;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getCommunityId() {
         return communityId;
     }

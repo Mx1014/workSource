@@ -47,6 +47,7 @@ public class ListPaymentBillCmd {
     private Integer namespaceId;
     private Long communityId;
     private Long organizationId;
+    private Long categoryId;
 
     private List<Long> orderIds;
 
@@ -108,9 +109,19 @@ public class ListPaymentBillCmd {
     private Long addressId;
     private String buildingName;
     private String apartmentName;
+    private Long targetId;
+    private Long ownerId;
 
     public Long getPageAnchor() {
         return pageAnchor;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public void setPageAnchor(Long pageAnchor) {
@@ -288,5 +299,21 @@ public class ListPaymentBillCmd {
 
 	public void setApartmentName(String apartmentName) {
 		this.apartmentName = apartmentName;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

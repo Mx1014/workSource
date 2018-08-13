@@ -18,12 +18,14 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -321,8 +323,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
         List<FileContentDTO> folders = new ArrayList<>();
         List<FileContentDTO> files = new ArrayList<>();
         Map<String, String> fileIcons = fileService.getFileIconUrl();
-
+        FileContent searchContent = null;
+        if (cmd.getContentId() != null) {
+            searchContent = fileManagementProvider.findFileContentById(cmd.getContentId());
+        }
+        //如果找得到文件夹就查文件夹path下的
+        String searchPath = searchContent == null ? null: searchContent.getPath();
         List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            if (searchPath != null) {
+                //在文件夹下搜索就不搜索目录
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.isNull());
+            }
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
@@ -332,6 +343,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
         });
 
         List<FileContent> folderResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+            if (searchPath != null) {
+                //搜索文件夹下
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(searchPath + "/%"));
+            }
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.eq(FileContentType.FOLDER.getCode()));
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
@@ -343,6 +358,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
         List<FileContent> contentResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.ne(FileContentType.FOLDER.getCode()));
+            if (searchPath != null) {
+                //搜索文件夹下
+                query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(searchPath + "/%"));
+            }
             if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
                 query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.in(cmd.getCatalogIds()));
             if (cmd.getKeywords() != null)
@@ -371,22 +390,28 @@ public class FileManagementServiceImpl implements  FileManagementService{
     public FileContentDTO addFileContent(AddFileContentCommand cmd) {
         FileContentDTO dto = new FileContentDTO();
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
-        FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getParentId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (catalog == null)
             return dto;
+        Map<String, Long> map = checkFilePath(cmd.getPath(), catalog.getOwnerId());
+        Long parentId = map.get("parentId");
+        Long catalogId = map.get("catalogId");
+        FileContent parentContent = null;
+        if (null != parentId) {
+            parentContent = fileManagementProvider.findFileContentById(parentId);
+        }
 
         //  1.whether the name has been used
-        String contentName = setContentNameAutomatically(namespaceId, catalog.getOwnerId(), catalog.getId(),
-                cmd.getParentId(), cmd.getContentName(), cmd.getContentSuffix());
+        String contentName = setContentNameAutomatically(namespaceId, catalog.getOwnerId(), catalogId,
+                parentId, cmd.getContentName(), cmd.getContentSuffix());
 
         //  2.create it & set the path
         FileContent content = new FileContent();
-        content.setNamespaceId(catalog.getNamespaceId());
+        content.setNamespaceId(namespaceId);
         content.setOwnerId(catalog.getOwnerId());
         content.setOwnerType(catalog.getOwnerType());
-        content.setCatalogId(catalog.getId());
-        content.setParentId(cmd.getParentId());
+        content.setCatalogId(catalogId);
+        content.setParentId(parentId);
         if (parentContent != null)
             content.setPath(parentContent.getPath());
         else
@@ -412,24 +437,75 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public void deleteFileContents(DeleteFileContentCommand cmd) {
-        fileManagementProvider.updateFileContentStatusByIds(cmd.getContendIds(), FileManagementStatus.INVALID.getCode());
+        for (Long contentId : cmd.getContendIds()) {
+
+            FileContent content = fileManagementProvider.findFileContentById(contentId);
+
+            Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
+            Long parentId = map.get("parentId");
+            Long catalogId = map.get("catalogId");
+            if (checkContentMoved(content, parentId, catalogId)) {
+                return;
+            }else {
+                fileManagementProvider.updateFileContentStatusByIds(contentId, FileManagementStatus.INVALID.getCode());
+            }
+        }
     }
 
     @Override
     public FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd) {
+
         FileContent content = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (content == null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
                     "the file content not found.");
 
+        Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
+        Long parentId = map.get("parentId");
+        Long catalogId = map.get("catalogId");
         //  1.check the name
-        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), content.getCatalogId(), content.getParentId(),
+        // 改动:根据path找目录(因为可能有移动)
+        checkFileContentName(content.getNamespaceId(), content.getOwnerId(), catalogId, parentId,
                 cmd.getContentName(), cmd.getContentSuffix(), cmd.getContentId());
         //  2.update the name
         content.setContentName(cmd.getContentName());
-        fileManagementProvider.updateFileContent(content);
+        if (checkContentMoved(content, parentId, catalogId)) {
+            //移动了新建
+            content.setCatalogId(catalogId);
+            content.setParentId(parentId);
+            content.setPath("/" + catalogId);
+            fileManagementProvider.createFileContent(content);
+        } else {
+            //没移动就更新
+            fileManagementProvider.updateFileContent(content);
+
+        }
         //  3.return back
         return ConvertHelper.convert(content, FileContentDTO.class);
+    }
+    /**
+     * content和新的parentId,catalogId比较是否移动了
+     * 移动了返回true,没有返回false
+     * */
+    private boolean checkContentMoved(FileContent content, Long parentId, Long catalogId) {
+        if (parentId == null) {
+
+            if (content.getParentId() == null && content.getCatalogId().equals(catalogId)) {
+                //直接放在目录下且目录相同就是没移动
+                return false;
+            }
+            //否则移动了
+            return true;
+        }
+        else if (parentId.equals(content.getParentId())) {
+            //如果有上级id 就比对上级id 一样的就是没移动
+            return false;
+
+        }else{
+            //否则移动了
+            return true;
+
+        }
     }
 
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
@@ -526,6 +602,165 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (dto.getIconUrl() == null)
                 dto.setIconUrl(fileIcons.get("other"));
         }
+        dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
+
         return dto;
     }
+    /** id的path 转换成String 的path */
+    private String processPathString(String path) {
+        String[] pathArray = StringUtils.split(path, "/");
+        StringBuilder sb = new StringBuilder();
+        FileCatalog catalog = fileManagementProvider.findFileCatalogById(Long.valueOf(pathArray[0]));
+        sb.append("/");
+        sb.append(catalog.getName());
+        //不要最后一个路径(那是文件自身)
+        for (int i = 1; i < sb.length() - 1; i++) {
+            FileContent content = fileManagementProvider.findFileContentById(Long.valueOf(pathArray[i]));
+            if (null != content) {
+                sb.append("/");
+                sb.append(content.getContentName());
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
+	public void moveFileContent(MoveFileContentCommand cmd) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            Map<String, Long> map = checkFilePath(cmd.getTargetPath(), cmd.getOwnerId());
+            Long catalogId = map.get("catalogId");
+            Long parentId = map.get("parentId");
+
+            for (Long contentId : cmd.getContentIds()) {
+                FileContent content = fileManagementProvider.findFileContentById(contentId);
+                if (null == content) {
+                    throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
+                            "content can not be null.");
+                }
+                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+                    content.setStatus(FileManagementStatus.VALID.getCode());
+                    fileManagementProvider.updateFileContent(content);
+                }
+
+                //  1.whether the name has been used
+                String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), content.getCatalogId(),
+                        parentId, content.getContentName(), content.getContentSuffix());
+                content.setContentName(contentName);
+
+                content.setParentId(parentId);
+                if (parentId != null) {
+                    FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
+                    content.setPath(parentContent.getPath() + "/" + contentId);
+                } else {
+                    content.setPath("/" + catalogId);
+                }
+                fileManagementProvider.updateFileContent(content);
+            }
+            return null;
+        });
+	}
+
+    private Map<String, Long> checkFilePath(String targetPath, Long ownerId) {
+        if (null == targetPath) {
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
+                    "target path can not be null.");
+        }
+        String[] pathArray = null;
+        if (targetPath.contains("/")) {
+            StringUtils.split(targetPath, "/");
+        } else {
+            pathArray = new String[]{targetPath};
+        }
+        return checkFilePath(pathArray, ownerId);
+
+    }
+
+    private Map checkFilePath(String[] pathArray, Long ownerId) {
+        Map<String, Long> result = new HashMap<>();
+        FileCatalog catalog = fileManagementProvider.findAllStatusFileCatalogByName(UserContext.getCurrentNamespaceId(), ownerId, pathArray[0]);
+        if (catalog.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+            catalog.setStatus(FileManagementStatus.VALID.getCode());
+            fileManagementProvider.updateFileCatalog(catalog);
+        }
+        result.put("catalogId", catalog.getId());
+        if (pathArray.length == 1) {
+            return null;
+        }
+        Long parentId = null;
+        for(int i = 1;i< pathArray.length;i++) {
+            FileContent content = fileManagementProvider.findAllStatusFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId, pathArray[i], null);
+            if (null != content) {
+                parentId = content.getId();
+                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+                    content.setStatus(FileManagementStatus.VALID.getCode());
+                    fileManagementProvider.updateFileContent(content);
+                }
+            }else{
+                AddFileContentCommand cmd = new AddFileContentCommand();
+                cmd.setCatalogId(catalog.getId());
+                cmd.setContentName(pathArray[i]);
+                cmd.setContentType(FileContentType.FOLDER.getCode());
+                cmd.setParentId(parentId);
+                FileContentDTO dto = addFileContent(cmd);
+                parentId = dto.getId();
+            }
+        }
+        result.put("parentId", parentId);
+        return result;
+    }
+
+    @Override
+	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
+		return new GetFileIconResponse(fileService.findUrlByFileType(cmd.getFileSuffix()));
+	}
+
+    @Override
+    public ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd) {
+        ListAllFlodersResponse response = new ListAllFlodersResponse();
+        Map<String, String> fileIcons = fileService.getFileIconUrl();
+        List<FileCatalog> results = fileManagementProvider.listFileCatalogs(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), null, Integer.MAX_VALUE - 1, null);
+        List<FileCatalogDTO> catalogs = new ArrayList<>();
+        if (results != null && results.size() > 0) {
+            results.forEach(r -> {
+                FileCatalogDTO dto = convertToCatalogDTO(r, fileIcons);
+                dto.setDownloadPermission(FileDownloadPermissionStatus.ALLOW.getCode());
+                dto.setContents(listCataLogAllContents(r.getId(), cmd.getOwnerId(), fileIcons));
+                catalogs.add(dto);
+            });
+        }
+        response.setCatalogs(catalogs);
+        return null;
+    }
+
+    private List<FileContentDTO> listCataLogAllContents(Long catalogId, Long ownerId, Map<String, String> fileIcons) {
+        return listSubContents(catalogId, ownerId, fileIcons, null);
+    }
+
+    private List<FileContentDTO> listSubContents(Long catalogId, Long ownerId, Map<String, String> fileIcons, Long contentId) {
+        List<FileContentDTO> results = new ArrayList<>();
+        List<FileContent> topFloders = fileManagementProvider.queryFileContents(new ListingLocator(), UserContext.getCurrentNamespaceId()
+                , ownerId, (locator, query) -> {
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_TYPE.eq(FileContentType.FOLDER.getCode()));
+                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
+                    if (contentId == null) {
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+
+                    } else {
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(contentId));
+                        //防止parentid和id一样,死循环
+                        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.ne(contentId));
+                    }
+                    query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CONTENTS.CREATE_TIME.desc());
+                    return query;
+                });
+        if (topFloders != null && topFloders.size() > 0) {
+            topFloders.forEach(r -> {
+                FileContentDTO dto = convertToFileContentDTO(r, fileIcons);
+                dto.setContents(listSubContents(catalogId, ownerId, fileIcons, dto.getId()));
+                results.add(dto);
+            });
+        }
+        return results;
+    }
+
 }

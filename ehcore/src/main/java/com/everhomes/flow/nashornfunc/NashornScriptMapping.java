@@ -1,8 +1,8 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowScript;
-import com.everhomes.flow.NashornEngineService;
-import com.everhomes.flow.NashornScript;
+import com.everhomes.flow.FlowRuntimeScript;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
+import com.everhomes.scriptengine.nashorn.NashornScript;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,12 +11,12 @@ public class NashornScriptMapping implements NashornScript<ScriptObjectMirror> {
 
     private final static String FUNCTION_NAME = "mapping";
 
-    private FlowScript flowScript;
+    private FlowRuntimeScript script;
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    public NashornScriptMapping(FlowScript flowScript) {
-        this.flowScript = flowScript;
+    public NashornScriptMapping(FlowRuntimeScript script) {
+        this.script = script;
     }
 
     @Override
@@ -29,10 +29,11 @@ public class NashornScriptMapping implements NashornScript<ScriptObjectMirror> {
 
     @Override
     public ScriptObjectMirror process(NashornEngineService input) {
-        ScriptObjectMirror mirror = input.getScriptObjectMirror(flowScript.getScriptMainId(), flowScript.getScriptVersion(), this);
+        String key = String.format("%s:%s", script.getScriptMainId(), script.getScriptVersion());
+        ScriptObjectMirror mirror = input.getScriptObjectMirror(key, this);
         if (mirror == null) {
             throw new RuntimeException("Could not found script to eval, scriptMainId = "
-                    + flowScript.getScriptMainId() + ", scriptVersion = " + flowScript.getScriptVersion());
+                    + script.getScriptMainId() + ", scriptVersion = " + script.getScriptVersion());
         }
         return (ScriptObjectMirror) mirror.getMember(getJSFunc());
     }
@@ -49,13 +50,12 @@ public class NashornScriptMapping implements NashornScript<ScriptObjectMirror> {
         finished.set(true);
     }
 
-    @Override
     public String getJSFunc() {
         return FUNCTION_NAME;
     }
 
     @Override
     public String getScript() {
-        return flowScript.getScript();
+        return script.getScript();
     }
 }

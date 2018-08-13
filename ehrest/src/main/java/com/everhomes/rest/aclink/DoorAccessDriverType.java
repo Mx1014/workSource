@@ -8,13 +8,14 @@ package com.everhomes.rest.aclink;
  * <li>huarun_anguan: 华润安冠二维码</li>
  * <li>wanglong: 旺龙梯控</li>
  * <li>uclbrt: 锁掌柜(对接系统)</li>
+ * <li>bus:园区班车</li>
  * </ul>
  * @author janson
  *
  */
 public enum DoorAccessDriverType {
     ZUOLIN("zuolin"), LINGLING("lingling"), PHONE_VISIT("phone_visit"), ZUOLIN_V2("zuolin_v2"), HUARUN_ANGUAN("huarun_anguan"), WANG_LONG("wanglong"),
-    UCLBRT("uclbrt");
+    UCLBRT("uclbrt") ,BUS("bus");
 
     private String code;
     private DoorAccessDriverType(String code) {

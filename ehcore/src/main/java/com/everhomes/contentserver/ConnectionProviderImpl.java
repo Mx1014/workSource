@@ -88,6 +88,7 @@ public class ConnectionProviderImpl implements ConnectionProvider, ApplicationLi
 
     private void handlePing(String key) throws Exception {
         LOGGER.info("do handShake with server.host={}", key);
+        this.getClass().getClassLoader().loadClass("javax.websocket.WebSocketContainer");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         StandardWebSocketClient wsClient = new StandardWebSocketClient(container);
         WebSocketHttpHeaders wsHeaders = new WebSocketHttpHeaders();

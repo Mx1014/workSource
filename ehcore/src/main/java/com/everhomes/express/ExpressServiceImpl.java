@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.*;
@@ -122,8 +122,8 @@ public class ExpressServiceImpl implements ExpressService {
 	@Autowired
     private AppProvider appProvider;
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 
 	@Autowired
 	private UserService userService;
@@ -1312,36 +1312,36 @@ public class ExpressServiceImpl implements ExpressService {
 		return bodyparams;
 	}
 
-	@Override
-	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd) {
-		if (cmd.getId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
-		}
-		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		return (PreOrderDTO)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
-			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
-			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
-					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
-			}
-			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
-			}
-			if (expressOrder.getPaySummary() == null) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
-			}
-			if (TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) != TrueOrFalseFlag.TRUE) {
-				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
-				expressOrderProvider.updateExpressOrder(expressOrder);
-			}
-
-			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
-
-			Long paysummay = payService.changePayAmount(expressOrder.getPaySummary());
-			PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
-					OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(),expressOrder.getId(),UserContext.current().getUser().getId(),paysummay);
-			return dto;
-		}).first();
-	}
+//	@Override
+//	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd) {
+//		if (cmd.getId() == null) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+//		}
+//		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//		return (PreOrderDTO)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
+//			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+//			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
+//					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+//			}
+//			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
+//				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+//			}
+//			if (expressOrder.getPaySummary() == null) {
+//				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+//			}
+//			if (TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) != TrueOrFalseFlag.TRUE) {
+//				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
+//				expressOrderProvider.updateExpressOrder(expressOrder);
+//			}
+//
+//			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
+//
+//			Long paysummay = payService.changePayAmount(expressOrder.getPaySummary());
+//			PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
+//					OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(),expressOrder.getId(),UserContext.current().getUser().getId(),paysummay);
+//			return dto;
+//		}).first();
+//	}
 
 }

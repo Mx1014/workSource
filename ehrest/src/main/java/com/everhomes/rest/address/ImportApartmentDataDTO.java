@@ -14,6 +14,15 @@ public class ImportApartmentDataDTO {
 	private String rentArea;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
+	private String orientation;
+
+	public String getNamespaceAddressType() {
+		return namespaceAddressType;
+	}
+
+	public void setNamespaceAddressType(String namespaceAddressType) {
+		this.namespaceAddressType = namespaceAddressType;
+	}
 
 	public String getNamespaceAddressToken() {
 		return namespaceAddressToken;
@@ -23,12 +32,12 @@ public class ImportApartmentDataDTO {
 		this.namespaceAddressToken = namespaceAddressToken;
 	}
 
-	public String getNamespaceAddressType() {
-		return namespaceAddressType;
+	public String getOrientation() {
+		return orientation;
 	}
 
-	public void setNamespaceAddressType(String namespaceAddressType) {
-		this.namespaceAddressType = namespaceAddressType;
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
 	}
 
 	public String getBuildingName() {

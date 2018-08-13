@@ -10,6 +10,7 @@ package com.everhomes.rest.asset;
  * <li>namespaceId:域名id</li>
  * <li>billGroupId:账单组id</li>
  * <li>billSwitch:账单的状态，0:未出账单;1:已出账单;3:其他.参考{@link com.everhomes.rest.asset.BillSwitch}</li>
+ * <li>targetType:eh_organization：企业模板，eh_user：个人客户模板，参考com.everhomes.rest.asset.AssetTargetType</li>
  *</ul>
  */
 public class BatchImportBillsCommand {
@@ -17,6 +18,7 @@ public class BatchImportBillsCommand {
     private Integer namespaceId;
     private Long billGroupId;
     private Byte billSwitch;
+    private String targetType;
 
     public Byte getBillSwitch() {
         return billSwitch;
@@ -49,4 +51,12 @@ public class BatchImportBillsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
 }

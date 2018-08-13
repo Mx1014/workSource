@@ -1,6 +1,17 @@
 package com.everhomes.notice;
 
-import com.everhomes.rest.notice.*;
+import com.everhomes.rest.notice.CancelEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.CreateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.DeleteEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.EnterpriseNoticeDTO;
+import com.everhomes.rest.notice.EnterpriseNoticePreviewDTO;
+import com.everhomes.rest.notice.GetCurrentUserContactInfoCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
+import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 
 public interface EnterpriseNoticeService {
 
@@ -22,7 +33,7 @@ public interface EnterpriseNoticeService {
 
     String getUserContactNameByUserId(Long userId);
 
-    boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId);
+    boolean isNoticeSendToCurrentUser(Long organizationId, Long enterpriseNoticeId);
 
     EnterpriseNoticeDTO getSharedEnterpriseNoticeDetailInfo(String enterpriseNoticeToken);
 

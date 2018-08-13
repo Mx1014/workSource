@@ -1,11 +1,36 @@
 
 package com.everhomes.openapi;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetVendor;
-import com.everhomes.asset.AssetVendorHandler;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.aclink.DoorAuth;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
@@ -21,16 +46,31 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.aclink.GetVisitorCommand;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
+import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.CheckPaymentUserCommand;
 import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
-import com.everhomes.rest.business.*;
+import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
+import com.everhomes.rest.business.ListUserByIdentifierCommand;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
+import com.everhomes.rest.business.ReSyncBusinessCommand;
+import com.everhomes.rest.business.SyncBusinessCommand;
+import com.everhomes.rest.business.SyncDeleteBusinessCommand;
+import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
+import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
@@ -40,8 +80,29 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.openapi.BizMessageType;
+import com.everhomes.rest.openapi.BusinessMessageCommand;
+import com.everhomes.rest.openapi.BusinessMessageCustomCommand;
+import com.everhomes.rest.openapi.BusinessMessageV2Command;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
+import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
+import com.everhomes.rest.openapi.OpenApiRedirectHandler;
+import com.everhomes.rest.openapi.OrganizationDTO;
+import com.everhomes.rest.openapi.RedirectCommand;
+import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
+import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
+import com.everhomes.rest.openapi.UserAddressDTO;
+import com.everhomes.rest.openapi.UserCouponsCommand;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.ValidateUserPassCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -50,40 +111,38 @@ import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.reserver.CreateReserverOrderCommand;
 import com.everhomes.rest.ui.user.ListAnBangRelatedScenesCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.*;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
-
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.everhomes.rest.user.AnBangTokenCommand;
+import com.everhomes.rest.user.FindTokenByUserIdCommand;
+import com.everhomes.rest.user.GetUserByUuidResponse;
+import com.everhomes.rest.user.GetUserDefaultAddressCommand;
+import com.everhomes.rest.user.GetUserDetailByUuidResponse;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.GetUserInfoByUuid;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.ListUserCommand;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.LogonCommand;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserDtoForBiz;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.SignupToken;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityService;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value = "Business open Constroller", site = "core")
 @RestController
@@ -91,6 +150,7 @@ import java.util.Map;
 public class BusinessOpenController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessOpenController.class);
     private static final String DEFAULT_SORT = "default_order";
+    private  static final String ERROR = "error";
     @Autowired
     private UserService userService;
 
@@ -151,7 +211,6 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse listBizCategories() {
 
         Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
-        ;
         @SuppressWarnings("unchecked")
         //        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 //                CategoryAdminStatus.ACTIVE, orderBy);
@@ -1044,5 +1103,43 @@ public class BusinessOpenController extends ControllerBase {
         RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
         restResponse.setErrorDescription(errorDesc);
         return restResponse;
+    }
+    
+    /**
+     * <b>URL: /openapi/postRedirect</b>
+     * <p>以POST   的方式跳转</p>
+     */
+    @RequestMapping(value = "postRedirect", method = RequestMethod.GET)
+    public Object postRedirect(RedirectCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        OpenApiRedirectHandler handler = PlatformContext.getComponent(OpenApiRedirectHandler.PREFIX + cmd.getHandler());
+        RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
+        if (handler != null) { 
+                String str = handler.build(cmd.getUrl(), request.getParameterMap());
+                if(str == null ){
+                	
+                    restResponse.setErrorDescription("return null from handler by "+ cmd.getHandler());
+                    return restResponse;
+                }else if(str.startsWith(ERROR)){
+                	restResponse.setErrorDescription(str);
+                    return restResponse;
+                }
+                @SuppressWarnings("unchecked")
+				Map<String ,String> formParamsMap = (Map<String, String>) JSONObject.parse(str);
+                ModelAndView mv = new ModelAndView();
+                String viewName = formParamsMap.get("viewName");
+                if(StringUtils.isBlank(viewName)){
+                	
+                    restResponse.setErrorDescription("viewName is blank of handler by "+ cmd.getHandler());
+                    return restResponse;
+                }
+                //mv.setViewName("mybay-redirect");
+                mv.setViewName(viewName);
+                mv.addAllObjects(formParamsMap);                
+                return mv;
+           
+        } else {
+            restResponse.setErrorDescription("Can not find handler by "+ cmd.getHandler());
+            return restResponse;
+        }
     }
 }
