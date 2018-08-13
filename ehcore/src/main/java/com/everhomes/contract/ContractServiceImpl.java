@@ -1634,6 +1634,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setTemplateId(cmd.getTemplateId());
 		}
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		//by --djm issue-35586
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract, flowcaseContractOwnerType);
+		}
 
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
@@ -1645,9 +1650,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		dealContractAttachments(contract, cmd.getAttachments());
 		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
-		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			addToFlowCase(contract, flowcaseContractOwnerType);
-		}
+		
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
 		
