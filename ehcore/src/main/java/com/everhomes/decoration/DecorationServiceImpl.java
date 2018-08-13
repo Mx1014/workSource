@@ -753,7 +753,7 @@ public class DecorationServiceImpl implements  DecorationService {
         request.setCancelReason(cmd.getReason());
         this.decorationProvider.updateDecorationRequest(request);
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(UserContext.currentUserId(), IdentifierType.MOBILE.getCode());
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(),cmd.getOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(),cmd.getOrganizationId());
         if (member != null){
             decorationSMSProcessor.decorationCancel(request,member.getContactName(),userIdentifier.getIdentifierToken());
         }else{
@@ -1071,7 +1071,7 @@ public class DecorationServiceImpl implements  DecorationService {
     public GetUserMemberGroupResponse getUserMemberGroup(GetUserMemberGroupCommand cmd) {
         Long uid = UserContext.currentUserId();
         GetUserMemberGroupResponse response = new GetUserMemberGroupResponse();
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(uid,cmd.getOrganizationId());
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(uid,cmd.getOrganizationId());
         if (member == null)
             return null;
         response.setMemberGroup(member.getMemberGroup());
