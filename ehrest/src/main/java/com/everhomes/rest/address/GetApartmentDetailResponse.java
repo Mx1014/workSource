@@ -58,7 +58,16 @@ public class GetApartmentDetailResponse {
 	private Double freeArea;
 	private Byte isPassiveApartment;
 	private Byte reservationInvolved;
+	private Byte arrangementInvolved;
 	
+	public Byte getArrangementInvolved() {
+		return arrangementInvolved;
+	}
+
+	public void setArrangementInvolved(Byte arrangementInvolved) {
+		this.arrangementInvolved = arrangementInvolved;
+	}
+
 	public Byte getReservationInvolved() {
 		return reservationInvolved;
 	}

@@ -113,19 +113,6 @@ public class AddressAdminController extends ControllerBase {
 //        return response;
 //    }
     
-    /**
-     * <b>URL: /admin/address/importParkAddressData</b>
-     * @param files 上传的文件
-     * @return 上传的结果
-     */
-    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
-    @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-    	RestResponse response = new RestResponse(addressService.importParkAddressData(cmd, files[0]));
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-    	response.setErrorDescription("OK");
-    	return response;
-    }
     
     /**
      * <b>URL: /admin/address/importAddressInfos</b>
@@ -143,6 +130,21 @@ public class AddressAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    //导入楼栋下的房源信息
+    /**
+     * <b>URL: /admin/address/importParkAddressData</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    	RestResponse response = new RestResponse(addressService.importParkAddressData(cmd, files[0]));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     //下载楼栋下的房源信息

@@ -2052,6 +2052,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
                     areaSize = Double.parseDouble(data.getAreaSize());
+                    if (areaSize<0) {
+                    	log.setData(data);
+    					log.setErrorLog("area size should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_AREA_SIZE_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
 				} catch (Exception e) {
 					log.setData(data);
 					log.setErrorLog("area size is not number");
@@ -2064,6 +2071,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if (StringUtils.isNotEmpty(data.getChargeArea())) {
                 try {
                     chargeArea = Double.parseDouble(data.getChargeArea());
+                    if (chargeArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("charge area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("charge area is not number");
@@ -2076,6 +2090,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if (StringUtils.isNotEmpty(data.getRentArea())) {
                 try {
                     rentArea = Double.parseDouble(data.getRentArea());
+                    if (rentArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("rent area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_RENT_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("rent area is not number");
@@ -2099,6 +2120,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if (StringUtils.isNotEmpty(data.getFreeArea())) {
                 try {
                     freeArea = Double.parseDouble(data.getFreeArea());
+                    if (freeArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("free area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_FREE_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("free area is not number");

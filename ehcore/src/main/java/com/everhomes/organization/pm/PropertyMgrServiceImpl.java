@@ -2891,6 +2891,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			}
 		}
 		if (arrangement != null) {
+			response.setArrangementInvolved((byte)1);
 			response.setArrangementOperationType(arrangement.getOperationType());
 			if (AddressArrangementType.MERGE.getCode() == arrangement.getOperationType()) {
 				if (arrangement.getAddressId().equals(cmd.getId())) {
