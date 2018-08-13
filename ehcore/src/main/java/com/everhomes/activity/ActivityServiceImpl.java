@@ -705,7 +705,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     public ActivityDTO signup(ActivitySignupCommand cmd) {
 
     	//检查版本  add by yanjun 20170626
-    	checkPayVersion(cmd);
+        //对接表单后，不能确认是微信端报名还是客户端报名。也不需要在判断版本 add by yanlong.liang 20180813
+//    	checkPayVersion(cmd);
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());

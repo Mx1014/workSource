@@ -10,7 +10,7 @@ package com.everhomes.rest.activity;
  * </ul>
  */
 public enum ActivityRosterSourceFlag {
-	SELF((byte) 1, "APP报名"), BACKEND_ADD((byte) 2, "后台录入"), WECHAT((byte) 3, "微信报名");
+	SELF((byte) 1, "自发报名"), BACKEND_ADD((byte) 2, "后台录入"), WECHAT((byte) 3, "微信报名");
 	private byte code;
 	private String text;
 
