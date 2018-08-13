@@ -1751,12 +1751,15 @@ public class CommunityServiceImpl implements CommunityService {
             c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
 
             if (StringUtils.isNotBlank(cmd.getUserInfoKeyword()) || StringUtils.isNotBlank(cmd.getIdentifierToken())) {
+            	if (cmd.getUserInfoKeyword() == null) {
+            		cmd.setUserInfoKeyword("");
+				}
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
                 if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
-                    condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
+                   condition =  condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
                 }
                 query.addConditions(condition);
             }
