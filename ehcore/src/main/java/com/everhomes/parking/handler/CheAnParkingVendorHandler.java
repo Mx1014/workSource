@@ -7,10 +7,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
-import com.everhomes.parking.chean.CheanJsonEntity;
-import com.everhomes.parking.chean.CheanTempFee;
-import com.everhomes.parking.chean.EncryptUtil;
-import com.everhomes.parking.chean.HttpUtil;
+import com.everhomes.parking.chean.*;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
@@ -24,12 +21,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "CHEAN")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST")
 public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheAnParkingVendorHandler.class);
@@ -39,6 +33,10 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     private static final String GET_TEMP_FEE = "api.aspx/calc";
 
     private static final String PAY_TEMP_FEE = "api.aspx/commit";
+
+    private static final String GET_MONTHCARD = "api.aspx/park.mcard.info";
+
+    private static final String GET_MONTHCARD_TYPE = "api.aspx/park.monthtariffs.get";
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -55,9 +53,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
         String json = this.post(param,GET_TEMP_FEE);
 
-        LOGGER.info("Http response entity={}",json);
-
-        CheanJsonEntity<CheanTempFee> entity = com.alibaba.fastjson.JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanTempFee>>(){});
+        CheanJsonEntity<CheanTempFee> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanTempFee>>(){});
 
         if (null != entity && entity.getStatus()){
             List<CheanTempFee> list = entity.getData();
@@ -94,7 +90,53 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
-        return null;
+
+        JSONObject param = new JSONObject();
+        param.put("credentialtype", "1");
+        param.put("credential", plateNumber);
+
+        String json = this.post(param,GET_MONTHCARD);
+
+        CheanJsonEntity<CheanCard> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanCard>>(){});
+
+        List<ParkingCardDTO> resultList = new ArrayList<>();
+
+        if (entity != null && entity.getStatus()) {
+            CheanCard card = entity.getData().get(0);
+            ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
+
+            // 格式yyyyMMddHHmmss
+            String validEnd = card.getExpirydate();
+            Long endTime = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME);
+
+            setCardStatus(parkingLot, endTime, parkingCardDTO);// 这里设置过期可用，正常可用
+
+            parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+            parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+            parkingCardDTO.setParkingLotId(parkingLot.getId());
+
+            parkingCardDTO.setPlateOwnerName(card.getName());// 车主名称
+            parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
+            parkingCardDTO.setEndTime(endTime);
+
+            String json1 = this.post(null,GET_MONTHCARD_TYPE);
+
+            CheanJsonEntity<CheanCardType> entity1 = JSONObject.parseObject(json1,new TypeReference<CheanJsonEntity<CheanCardType>>(){});
+            if (entity1 != null && entity1.getStatus()) {
+                List<CheanCardType> types =  entity1.getData();
+                types.stream().forEach(type ->{
+                    if(type.getTariffID().equals(card.getTariffid())){
+                        parkingCardDTO.setCardTypeId(type.getTariffID());//月卡类型id
+                        parkingCardDTO.setCardType(type.getTariffName());//月卡类型名称？
+//                        parkingCardDTO.setCardName(entity.getStandardType());
+                    }
+                });
+            }
+
+
+            resultList.add(parkingCardDTO);
+        }
+        return resultList;
     }
 
     @Override
@@ -152,17 +194,12 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         String key = "71cfa1c59773ddfa289994e6d505bba3";
         String branchno = "0";
 
-//        String iv = DATE_FORMAT.format(new Date());
-        String iv = "2018-08-09 11:17:03";
-//        int nonce = (int) Math.random() * 100;
-        int nonce = 75;
-
+        String iv = DATE_FORMAT.format(new Date());
+        int nonce = (int) Math.random() * 100;
         Map<String, Object> params = new HashMap<>();
-
         params.put("from",accessKeyId);
         params.put("timestamp",iv);
         params.put("nonce",String.valueOf(nonce));
-
         String text = null;
         String sign = null;
         try {
@@ -176,19 +213,16 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Parking encrypt param error.");
         }
-
         params.put("sign",sign);
         params.put("branchno",branchno);
-
         params.put("data", data);
         params.put("queryFormat",null);
-
         LOGGER.info("Parking info, namespace={}", this.getClass().getName());
-
-//        String postString = JSONObject.fromObject(params).toString();
         String postString = JSON.toJSONString(params);
         LOGGER.info("Http request entity={}", postString);
-        return HttpUtil.sendPost(url, postString);
+        String result = HttpUtil.sendPost(url, postString);
+        LOGGER.info("Http response entity={}", result);
+        return result;
     }
 
 //    public static void main(String[] args) {
