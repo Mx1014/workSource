@@ -1,5 +1,11 @@
 package com.everhomes.rest.app;
 
+/**
+ * <ul>
+ *     <li>thirdPartyAppKey: 新的客户端传的第三方 appKey</li>
+ *     <li>appKey: 兼容原来的客户端，保留</li>
+ * </ul>
+ */
 public class TrustedAppCommand {
 
     private String thirdPartyAppKey;
