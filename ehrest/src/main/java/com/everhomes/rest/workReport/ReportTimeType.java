@@ -6,13 +6,13 @@ package com.everhomes.rest.workReport;
  * <li>NEXT((byte)1):  次日(下周,下月)</li>
  * </ul>
  */
-public enum WorkReportTimeType {
+public enum ReportTimeType {
 
     CURRENT((byte) 0), NEXT((byte) 1);
 
     private byte code;
 
-    private WorkReportTimeType(byte code) {
+    private ReportTimeType(byte code) {
         this.code = code;
     }
 
@@ -20,11 +20,11 @@ public enum WorkReportTimeType {
         return this.code;
     }
 
-    public static WorkReportTimeType fromCode(Byte code) {
+    public static ReportTimeType fromCode(Byte code) {
         if (code == null)
             return null;
-        WorkReportTimeType[] values = WorkReportTimeType.values();
-        for (WorkReportTimeType value : values) {
+        ReportTimeType[] values = ReportTimeType.values();
+        for (ReportTimeType value : values) {
             if (value.getCode() == code)
                 return value;
         }

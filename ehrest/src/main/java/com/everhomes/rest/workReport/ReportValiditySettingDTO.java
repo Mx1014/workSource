@@ -1,16 +1,18 @@
 package com.everhomes.rest.workReport;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
- * <li>startType: 开始类型 0-current 1-next 参考{@link com.everhomes.rest.workReport.WorkReportTimeType}</li>
+ * <li>startType: 开始类型 0-current 1-next 参考{@link ReportTimeType}</li>
  * <li>startMark: 开始标识 (周一,28号)</li>
  * <li>startTime: 开始时间(09:30)</li>
- * <li>endType: 结束类型 参考{@link com.everhomes.rest.workReport.WorkReportTimeType}</li>
+ * <li>endType: 结束类型 参考{@link ReportTimeType}</li>
  * <li>endMark: 结束标识</li>
  * <li>endTime: 结束时间</li>
  * </ul>
  */
-public class WorkReportValiditySettings {
+public class ReportValiditySettingDTO {
 
     private Byte startType;
 
@@ -24,7 +26,7 @@ public class WorkReportValiditySettings {
 
     private String endTime;
 
-    public WorkReportValiditySettings() {
+    public ReportValiditySettingDTO() {
     }
 
     public Byte getStartType() {
@@ -73,5 +75,10 @@ public class WorkReportValiditySettings {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

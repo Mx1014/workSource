@@ -6,13 +6,13 @@ package com.everhomes.rest.workReport;
  * <li>YES((byte)1): 提醒</li>
  * </ul>
  */
-public enum WorkReportAuthorMsgType {
+public enum ReportAuthorMsgType {
 
     NO((byte) 0), YES((byte) 1);
 
     private byte code;
 
-    private WorkReportAuthorMsgType(byte code) {
+    private ReportAuthorMsgType(byte code) {
         this.code = code;
     }
 
@@ -20,11 +20,11 @@ public enum WorkReportAuthorMsgType {
         return this.code;
     }
 
-    public static WorkReportAuthorMsgType fromCode(Byte code) {
+    public static ReportAuthorMsgType fromCode(Byte code) {
         if (code == null)
             return null;
-        WorkReportAuthorMsgType[] values = WorkReportAuthorMsgType.values();
-        for (WorkReportAuthorMsgType value : values) {
+        ReportAuthorMsgType[] values = ReportAuthorMsgType.values();
+        for (ReportAuthorMsgType value : values) {
             if (value.getCode() == code)
                 return value;
         }

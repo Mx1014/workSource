@@ -11,6 +11,8 @@ public interface WorkReportService {
 
     WorkReportDTO updateWorkReport(UpdateWorkReportCommand cmd);
 
+    WorkReportDTO getWorkReport(WorkReportIdCommand cmd);
+
     ListWorkReportsResponse listWorkReports(ListWorkReportsCommand cmd);
 
     WorkReportDTO updateWorkReportName(UpdateWorkReportNameCommand cmd);

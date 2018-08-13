@@ -6,13 +6,13 @@ package com.everhomes.rest.workReport;
  * <li>SUMMARY((byte) 1): 汇总</li>
  * </ul>
  */
-public enum WorkReportReceiverMsgType {
+public enum ReportReceiverMsgType {
 
     IMMEDIATELY((byte) 0), SUMMARY((byte) 1);
 
     private byte code;
 
-    private WorkReportReceiverMsgType(byte code) {
+    private ReportReceiverMsgType(byte code) {
         this.code = code;
     }
 
@@ -20,11 +20,11 @@ public enum WorkReportReceiverMsgType {
         return this.code;
     }
 
-    public static WorkReportReceiverMsgType fromCode(Byte code) {
+    public static ReportReceiverMsgType fromCode(Byte code) {
         if (code == null)
             return null;
-        WorkReportReceiverMsgType[] values = WorkReportReceiverMsgType.values();
-        for (WorkReportReceiverMsgType value : values) {
+        ReportReceiverMsgType[] values = ReportReceiverMsgType.values();
+        for (ReportReceiverMsgType value : values) {
             if (value.getCode() == code)
                 return value;
         }

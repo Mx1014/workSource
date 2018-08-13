@@ -72,12 +72,11 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
         WorkReport report = new WorkReport();
 
         //  initialize the work report.
-        report.setNamespaceId(namespaceId);
+        report.setNamespaceId(cmd.getNamespaceId());
         report.setOwnerId(cmd.getOwnerId());
         report.setOwnerType(cmd.getOwnerType());
         report.setOrganizationId(cmd.getOrganizationId());
@@ -89,7 +88,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
-            createWorkReport(report, cmd.getOrganizationId(), namespaceId);
+            createWorkReport(report, cmd.getOrganizationId(), cmd.getNamespaceId());
             return null;
         });
 

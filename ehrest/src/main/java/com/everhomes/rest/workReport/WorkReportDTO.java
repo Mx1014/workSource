@@ -20,6 +20,11 @@ import java.util.List;
  * <li>reportAttribute: 工作汇报属性 例如：比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.workReport.WorkReportAttribute}</li>
  * <li>formOriginId: 关联表单id</li>
  * <li>formVersion: 关联表单版本</li>
+ * <li>validitySetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportValiditySettingDTO}</li>
+ * <li>rxMsgType: 接收提醒类型 0-即时 1-汇总</li>
+ * <li>rxMsgSetting: 接收时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
+ * <li>auMsgType: 提交提醒类型 0-不提醒 1-提醒</li>
+ * <li>auMsgSetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
  * <li>updateInfo: 最后编辑信息</li>
  * </ul>
  */
@@ -51,6 +56,16 @@ public class WorkReportDTO {
     private Long formOriginId;
 
     private Long formVersion;
+
+    private ReportValiditySettingDTO validitySetting;
+
+    private Byte rxMsgType;
+
+    private ReportMsgSettingDTO rxMsgSetting;
+
+    private Byte auMsgType;
+
+    private ReportMsgSettingDTO auMsgSetting;
 
     private Timestamp updateTime;
 
@@ -161,6 +176,46 @@ public class WorkReportDTO {
 
     public void setFormVersion(Long formVersion) {
         this.formVersion = formVersion;
+    }
+
+    public ReportValiditySettingDTO getValiditySetting() {
+        return validitySetting;
+    }
+
+    public void setValiditySetting(ReportValiditySettingDTO validitySetting) {
+        this.validitySetting = validitySetting;
+    }
+
+    public Byte getRxMsgType() {
+        return rxMsgType;
+    }
+
+    public void setRxMsgType(Byte rxMsgType) {
+        this.rxMsgType = rxMsgType;
+    }
+
+    public ReportMsgSettingDTO getRxMsgSetting() {
+        return rxMsgSetting;
+    }
+
+    public void setRxMsgSetting(ReportMsgSettingDTO rxMsgSetting) {
+        this.rxMsgSetting = rxMsgSetting;
+    }
+
+    public Byte getAuMsgType() {
+        return auMsgType;
+    }
+
+    public void setAuMsgType(Byte auMsgType) {
+        this.auMsgType = auMsgType;
+    }
+
+    public ReportMsgSettingDTO getAuMsgSetting() {
+        return auMsgSetting;
+    }
+
+    public void setAuMsgSetting(ReportMsgSettingDTO auMsgSetting) {
+        this.auMsgSetting = auMsgSetting;
     }
 
     public Timestamp getUpdateTime() {

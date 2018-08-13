@@ -65,8 +65,22 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /workReport/getWorkReport</b>
+     * <p>1-4.获取汇报详情</p>
+     */
+    @RequestMapping("getWorkReport")
+    @RestReturn(value = WorkReportDTO.class)
+    public RestResponse getWorkReport(WorkReportIdCommand cmd){
+        WorkReportDTO res = workReportService.getWorkReport(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /workReport/listWorkReports</b>
-     * <p>1-4.工作汇报列表</p>
+     * <p>1-5.工作汇报列表</p>
      */
     @RequestMapping("listWorkReports")
     @RestReturn(value = ListWorkReportsResponse.class)
@@ -80,7 +94,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updateWorkReportName</b>
-     * <p>1-5.修改汇报名称</p>
+     * <p>1-6.修改汇报名称</p>
      */
     @RequestMapping("updateWorkReportName")
     @RestReturn(value = WorkReportDTO.class)
@@ -94,7 +108,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/enableWorkReport</b>
-     * <p>1-6.启用工作汇报</p>
+     * <p>1-7.启用工作汇报</p>
      * <p>(若 formOriginId 为 0 时则不能执行此方法，具体流程类似于审批设置的启用)</p>
      */
     @RequestMapping("enableWorkReport")
@@ -109,7 +123,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/disableWorkReport</b>
-     * <p>1-7.关闭工作汇报</p>
+     * <p>1-8.关闭工作汇报</p>
      */
     @RequestMapping("disableWorkReport")
     @RestReturn(value = String.class)
