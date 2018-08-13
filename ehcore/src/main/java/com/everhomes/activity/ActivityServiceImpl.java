@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.bootstrap.PlatformContext;
@@ -226,12 +227,24 @@ import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormFileValue;
+import com.everhomes.rest.general_approval.GeneralFormFileValueDTO;
+import com.everhomes.rest.general_approval.GeneralFormImageValue;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormSubFormValue;
+import com.everhomes.rest.general_approval.GeneralFormSubFormValueDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
+import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -1544,10 +1557,36 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
-		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NONEED.getCode());
+		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
 		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
 		if (values != null) {
-            signupInfoDTO.setValues(values);
+            List<PostApprovalFormItem> results = new ArrayList<>();
+            for(PostApprovalFormItem postApprovalFormItem : values) {
+                GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(postApprovalFormItem.getFieldType());
+                if (null != fieldType) {
+                    switch (GeneralFormFieldType.fromCode(postApprovalFormItem.getFieldType())) {
+                        case SINGLE_LINE_TEXT:
+                        case NUMBER_TEXT:
+                        case DATE:
+                        case DROP_BOX:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case MULTI_LINE_TEXT:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case IMAGE:
+                            break;
+                        case FILE:
+                            break;
+                        case INTEGER_TEXT:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case SUBFORM:
+                            break;
+                    }
+                }
+            }
+            signupInfoDTO.setValues(results);
         }
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -1556,6 +1595,64 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		
 		return signupInfoDTO;
 	}
+
+	/**************process form item start***********************/
+	//在OriginFiledFlag为Need时，value为{text:xxx}的格式，所有需要再手动转一次。
+    //当OriginFiledFLag为NONEED是,获取到的value是正确的，但是fieldDisplayName被去掉了。
+    private PostApprovalFormItem processCommonTextField(PostApprovalFormItem formVal, String jsonVal) {
+        formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        return formVal;
+    }
+
+    private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal) {
+        //  取出子表单字段值
+        PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
+        List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+        //  解析子表单的值
+        for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+            subForms.add(processSubFormItemField(dto.getFieldExtra(), itemValue));
+        }
+        GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+        subFormValue.setSubForms(subForms);
+        formVal.setFieldValue(subFormValue.toString());
+        return formVal;
+    }
+
+    private GeneralFormSubFormValueDTO processSubFormItemField(String extraJson, PostApprovalFormSubformItemValue value) {
+        //  1.取出子表单字段初始内容
+        //  2.将子表单中的值解析
+        //  3.将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubFormValueDTO result = JSON.parseObject(extraJson, GeneralFormSubFormValueDTO.class);
+        Map<String, String> fieldMap = new HashMap<>();
+
+        for (PostApprovalFormItem formVal : value.getValues()) {
+            switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case MULTI_LINE_TEXT:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case IMAGE:
+                    break;
+                case FILE:
+                    break;
+                case INTEGER_TEXT:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case SUBFORM:
+                    break;
+            }
+            fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
+        }
+        for (GeneralFormFieldDTO dto : result.getFormFields())
+            dto.setFieldValue(fieldMap.get(dto.getFieldName()));
+        return result;
+    }
+    /**************process form item end***********************/
 
 	private Byte getAuthFlag(User user) {
 		if (user.getId().longValue() == 0L) {
