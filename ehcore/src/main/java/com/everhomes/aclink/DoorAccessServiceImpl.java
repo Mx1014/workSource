@@ -3511,10 +3511,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+        if(auth.getValidFromMs() > System.currentTimeMillis() || auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
             resp.setIsValid((byte)0);    
         } else {
             resp.setIsValid((byte)1);
+            //授权有效才传二维码 by liuyilin 20180813
+            resp.setQr(auth.getQrKey());
         }
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
@@ -3562,7 +3564,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             
             //ZUOLIN_V2按次开门的二维码不转成9号指令,按次二维码防截图后面再做 by liuyilin 20180717
-            if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN && (auth.getAuthRuleType() == null || auth.getAuthRuleType() == DoorAuthRuleType.DURATION.getCode())) {
+            if(resp.getIsValid() == (byte)1 &&  driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN && (auth.getAuthRuleType() == null || auth.getAuthRuleType() == DoorAuthRuleType.DURATION.getCode())) {
                 byte[] origin = Base64.decodeBase64(auth.getQrKey());
                 byte[] qrLenArr = new byte[2];
                 qrLenArr[0] = origin[2];
@@ -3571,17 +3573,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 qrLen -= 2;
                 byte[] qrArr = new byte[qrLen];
                 System.arraycopy(origin, 6, qrArr, 0, qrLen);
-                
-//                qrArr = Base64.decodeBase64("+mfPObQMjcXYWp+UpXhknA==");
-                
                 Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
                 resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
-                
-                return resp;
             }
         }
-        resp.setQr(auth.getQrKey());
-      
+        
         return resp;
     }
     
