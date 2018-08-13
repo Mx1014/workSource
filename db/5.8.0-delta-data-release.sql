@@ -33,13 +33,13 @@ INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('activi
 UPDATE eh_locale_strings SET text = '来晚啦，活动已删除' WHERE scope = 'forum' and code = 10006;
 -- AUTHOR: 梁燕龙
 -- REMARK: 活动消息推送文案修改。
-UPDATE eh_locale_templates SET text = '${userName}报名参加了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
-UPDATE eh_locale_templates SET text = '${userName}取消了您发起的活动「${postName}」报名' WHERE scope = 'activity.notification' and code = 2;
-UPDATE eh_locale_templates SET text = '您报名参加的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
-UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${tag} 丨 ${title}」因故取消。
+UPDATE eh_locale_templates SET text = '${userName}报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
+UPDATE eh_locale_templates SET text = '${userName}取消报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 2;
+UPDATE eh_locale_templates SET text = '您报名的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
+UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${title}」因故取消。
 更多活动敬请继续关注。' WHERE scope = 'activity.notification' and code = 5;
-UPDATE eh_locale_templates SET text = '您报名的活动 「${tag} 丨 ${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
-UPDATE eh_locale_templates SET text = '「${userName}」报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
+UPDATE eh_locale_templates SET text = '您报名的活动 「${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
+UPDATE eh_locale_templates SET text = '${userName}报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的主题已被发起方改成「${newPostName}」。' WHERE scope = 'activity.notification' and code = 11;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的时间已被发起方改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 12;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的地点已被发起方改成「${address}」。' WHERE scope = 'activity.notification' and code = 13;
@@ -56,22 +56,42 @@ UPDATE eh_version_urls SET target_version = '1.0.2' WHERE app_name = '物业巡�
 
 -- AUTHOR: dengs
 -- REMARK: 访客管理1.1 移动端管理权限
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41850', '移动端管理', '41800', '/200/20000/41800/41850', '1', '3', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
-update eh_service_modules SET  path='/200/20000/41800/41810' WHERE id = 41810;
-update eh_service_modules SET  path='/200/20000/41800/41840' WHERE id = 41840;
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41850', '移动端管理', '41800', '/200/20000/41800/41850', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+update eh_service_modules SET  path='/200/20000/41800/41810',level=4 WHERE id = 41810;
+update eh_service_modules SET  path='/200/20000/41800/41840',level=4 WHERE id = 41840;
 
 set @privilege_id = (select max(id) from eh_service_module_privileges);
-
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4180041850, '0', '园区访客 移动端管理权限', '园区访客 移动端管理权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41850', '0', 4180041850, '移动端管理权限', '0', now());
 
 SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '2', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('42100', '园区访客管理', '40000', '/200/20000/42100', '1', '2', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
 
--- 更新访客的instance_config
 update eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
 update eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
+
+-- AUTHOR: xq.tian  20180725
+-- REMARK: 工作流 2.7
+SET @eh_locale_templates_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+  VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20008, 'zh_CN', '子业务流程进行中', '${serviceName} 进行中', 0);
+INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+  VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20009, 'zh_CN', '子流程创建成功，点击此处查看父流程详情。', '子流程创建成功，点击此处查看父流程详情', 0);
+INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+  VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20010, 'zh_CN', '${serviceName} 已完成', '${serviceName} 已完成', 0);
+INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+  VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20011, 'zh_CN', '${serviceName} 已终止', '${serviceName} 已终止', 0);
+INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+  VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20012, 'zh_CN', '子流程循环层级过多，流程已终止，详情请联系管理员', '子流程循环层级过多，流程已终止，详情请联系管理员', 0);
+
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100025', 'zh_CN', '子流程异常，请检查设置');
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100026', 'zh_CN', '请先发布新版本后再启用');
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

@@ -1,7 +1,6 @@
 package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -21,14 +20,11 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -41,11 +37,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -766,7 +759,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		List<FlowConditionVariableDTO> list = new ArrayList<>();
 		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
 		dto.setDisplayName("报修类型");
-		dto.setName("taskCategoryId");
+		dto.setValue("taskCategoryId");
 		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
@@ -785,7 +778,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 		//目前只有类型一个分支参数
 		if ("taskCategoryId".equals(variable)) {
 			FlowCase flowcase = ctx.getFlowCase();

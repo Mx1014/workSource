@@ -11,7 +11,7 @@ public interface FlowStateProcessor {
 
     FlowCaseState prepareStart(UserInfo logonUser, FlowCase flowCase);
 
-    FlowCaseState prepareSubFlowCaseStart(UserInfo logonUser, FlowCase flowCase);
+    FlowCaseState prepareBranchFlowCaseStart(UserInfo logonUser, FlowCase flowCase);
 
     FlowCaseState prepareStepTimeout(FlowTimeout ft);
 
@@ -32,4 +32,8 @@ public interface FlowStateProcessor {
     boolean allProcessorCompleteInCurrentNode(FlowCaseState ctx, FlowGraphNode currentNode, UserInfo firedUser);
 
     void startStepEnter(FlowCaseState ctx, FlowGraphNode from);
+
+    void subflowStepEnter(FlowCaseState ctx, FlowGraphNode from);
+
+    void subflowStepLeave(FlowCaseState ctx, FlowGraphNode current, FlowGraphNode to);
 }

@@ -48,4 +48,6 @@ public interface FlowCaseProvider {
     Integer countAdminFlowCases(SearchFlowCaseCommand cmd);
 
     List<FlowCase> listFlowCaseGroupByServiceTypes(Integer namespaceId);
+
+    FlowCase getFlowCaseBySubFlowParentId(Long parentId);
 }

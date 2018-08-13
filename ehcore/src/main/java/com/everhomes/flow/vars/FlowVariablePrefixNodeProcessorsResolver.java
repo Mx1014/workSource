@@ -17,7 +17,8 @@ public class FlowVariablePrefixNodeProcessorsResolver implements FlowVariableUse
     FlowEventLogProvider flowEventLogProvider;
 
     @Override
-    public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType fromEntity, Long entityId, FlowUserSelection userSelection, int loopCnt) {
+    public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities,
+                                          FlowEntityType fromEntity, Long entityId, FlowUserSelection userSelection, int loopCnt) {
         FlowNode node;
         List<FlowEventLog> logs = new ArrayList<>();
 

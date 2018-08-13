@@ -115,7 +115,7 @@ public class SmsProviderImpl implements SmsProvider {
         Map<SmsHandler, String[]> handlersMap;
 
         //白名单过滤 add by yanlong.liang
-        phoneNumbers = whiteListFilter(handlerName,namespaceId, phoneNumbers, templateScope, templateId, templateLocale);
+        phoneNumbers = whiteListFilter(handlerName,namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
 
         phoneNumbers = normalize(phoneNumbers);
         // validate(phoneNumbers);
@@ -281,7 +281,7 @@ public class SmsProviderImpl implements SmsProvider {
 
     private String[] whiteListFilter(String handleName, Integer namespaceId,
                                      String[] phoneNumbers, String templateScope,
-                                     int templateId, String templateLocale) {
+                                     int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
         if (phoneNumbers == null) {
             throw new IllegalArgumentException("Illegal argument phoneNumbers null.");
         }
@@ -305,8 +305,14 @@ public class SmsProviderImpl implements SmsProvider {
                     smsLog.setLocale(templateLocale);
                     smsLog.setStatus(SmsLogStatus.SEND_FAILED.getCode());
                     smsLog.setResult("手机号码不在白名单中");
+
+                    String content = "";
+                    if (variables != null) {
+                        Map<String, Object> varsMap = variables.stream().collect(Collectors.toMap(Tuple::first, Tuple::second));
+                        content = varsMap.toString();
+                    }
                     if (sign != null) {
-                        smsLog.setText(sign.getText());
+                        smsLog.setText(sign.getText() + content);
                     }
                     smsLogProvider.createSmsLog(smsLog);
                 }

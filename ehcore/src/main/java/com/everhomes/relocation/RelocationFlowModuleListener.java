@@ -3,22 +3,14 @@ package com.everhomes.relocation;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
-import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
@@ -194,14 +186,14 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
 
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
-        dto.setName("relocationMode");
+        dto.setValue("relocationMode");
         dto.setDisplayName("relocationMode");
         dto.setOptions(Arrays.stream(RelocationFlowMode.values()).map(RelocationFlowMode::getCode).collect(Collectors.toList()));
 //        dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }
 
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 
         FlowCase flowCase = ctx.getFlowCase();
 
