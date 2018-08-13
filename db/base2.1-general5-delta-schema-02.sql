@@ -1,0 +1,39 @@
+
+-- 模块icon
+ALTER TABLE `eh_service_modules` ADD COLUMN `icon_uri`  varchar(255) NULL;
+
+-- 分类结构
+ALTER TABLE `eh_second_app_types` ADD COLUMN `parent_id`  bigint(22) NOT NULL DEFAULT 0 ;
+ALTER TABLE `eh_second_app_types` ADD COLUMN `location_type`  tinyint(4) NULL COMMENT '参考枚举ServiceModuleLocationType';
+ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DEFAULT 0;
+
+
+CREATE TABLE `eh_app_categories` (
+  `id` bigint(22) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `parent_id` bigint(22) NOT NULL DEFAULT '0',
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '参考枚举ServiceModuleLocationType',
+  `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
+  `default_order` bigint(22) DEFAULT '0',
+  `leaf_flag` tinyint(4) DEFAULT NULL COMMENT 'is leaf category, 0-no, 1-yes',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `eh_service_module_entries` CHANGE COLUMN `second_app_type` `app_category_id`  bigint(22) NOT NULL DEFAULT 0;
+
+-- 用户自定义的广场应用
+CREATE TABLE `eh_user_apps` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `app_id` bigint(20) NOT NULL,
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '位置信息，参考枚举ServiceModuleLocationType',
+  `location_target_id` bigint(20) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `u_eh_user_app_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
+
+
+ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
+
