@@ -12,6 +12,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -242,8 +243,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
         if(cmd.getAbnormalFlag() != null && cmd.getAbnormalFlag() == 1){
            fb = FilterBuilders.andFilter(fb, FilterBuilders.missingFilter("addressId"));
-           String str = " 1231 123123";
-           str = str.trim();
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+
         }else {
             if (cmd.getAddressId() != null) {
                 MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");

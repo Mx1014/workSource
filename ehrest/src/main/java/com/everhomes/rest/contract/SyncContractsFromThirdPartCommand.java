@@ -14,6 +14,8 @@ public class SyncContractsFromThirdPartCommand {
 
     private Long orgId;
 
+    private Byte allSyncFlag;
+
     public Long getOrgId() {
         return orgId;
     }
@@ -36,5 +38,13 @@ public class SyncContractsFromThirdPartCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Byte getAllSyncFlag() {
+        return allSyncFlag;
+    }
+
+    public void setAllSyncFlag(Byte allSyncFlag) {
+        this.allSyncFlag = allSyncFlag;
     }
 }

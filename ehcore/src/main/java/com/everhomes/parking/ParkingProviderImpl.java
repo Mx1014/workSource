@@ -36,6 +36,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
