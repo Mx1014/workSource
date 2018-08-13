@@ -18,6 +18,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -667,7 +668,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         String[] pathArray = null;
         if (targetPath.contains("/")) {
-            StringUtils.split(targetPath, "/");
+        	pathArray = StringUtils.split(targetPath, "/");
         } else {
             pathArray = new String[]{targetPath};
         }
@@ -675,10 +676,13 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     }
 
-    private Map checkFilePath(String[] pathArray, Long ownerId) {
+    private Map<String, Long> checkFilePath(String[] pathArray, Long ownerId) {
         Map<String, Long> result = new HashMap<>();
         FileCatalog catalog = fileManagementProvider.findAllStatusFileCatalogByName(UserContext.getCurrentNamespaceId(), ownerId, pathArray[0]);
-        if (catalog.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+        if(null == catalog){ 
+            throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
+                    "the file catalog not found.");
+        }else if (catalog.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
             catalog.setStatus(FileManagementStatus.VALID.getCode());
             fileManagementProvider.updateFileCatalog(catalog);
         }
