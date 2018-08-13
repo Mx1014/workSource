@@ -1,7 +1,7 @@
 package com.everhomes.rest.aclink;
 
 public enum AesUserKeyType {
-    NORMAL((byte)0), TEMP((byte)1), ADMIN((byte)1);
+    NORMAL((byte)0), TEMP((byte)1), ADMIN((byte)2);
     
     private byte code;
     
