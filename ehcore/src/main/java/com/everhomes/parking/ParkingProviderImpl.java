@@ -1,38 +1,25 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
-import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
-import com.everhomes.server.schema.tables.pojos.EhParkingCarVerifications;
-import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
-import com.everhomes.server.schema.tables.pojos.EhParkingCardTypes;
-import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
-import com.everhomes.server.schema.tables.pojos.EhParkingInvoiceTypes;
-import com.everhomes.server.schema.tables.pojos.EhParkingLots;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
-import com.everhomes.server.schema.tables.pojos.EhParkingSpaceLogs;
-import com.everhomes.server.schema.tables.pojos.EhParkingSpaces;
-import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
-import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
-import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
-import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -44,15 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.util.ConvertHelper;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ParkingProviderImpl implements ParkingProvider {
