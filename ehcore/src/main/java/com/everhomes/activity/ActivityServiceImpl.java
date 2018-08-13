@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.bootstrap.PlatformContext;
@@ -1600,7 +1601,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	//在OriginFiledFlag为Need时，value为{text:xxx}的格式，所有需要再手动转一次。
     //当OriginFiledFLag为NONEED是,获取到的value是正确的，但是fieldDisplayName被去掉了。
     private PostApprovalFormItem processCommonTextField(PostApprovalFormItem formVal, String jsonVal) {
-        formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        try {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }catch (JSONException json) {
+            LOGGER.info("value = {}", jsonVal);
+            formVal.setFieldValue(jsonVal);
+        }
         return formVal;
     }
 
