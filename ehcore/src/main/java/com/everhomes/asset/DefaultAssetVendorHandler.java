@@ -209,8 +209,14 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	protected void checkPaymentBillOrderPaidStatus(CreatePaymentBillOrderCommand cmd) {
 	    List<BillIdAndAmount> bills = cmd.getBills();
         List<String> billIds = new ArrayList<>();
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
+        for(int i = 0; i < bills.size(); i++){
+            BillIdAndAmount billIdAndAmount = bills.get(i);
+            if(billIdAndAmount.getBillId() == null || billIdAndAmount.getBillId().trim().length() == 0) {
+                bills.remove(i);
+                i--;
+            } else {
+                billIds.add(billIdAndAmount.getBillId());
+            }
         }
         
         List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
@@ -263,6 +269,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	    BigDecimal totalAmountCents = new BigDecimal(0);
         for(BillIdAndAmount billIdAndAmount : bills){
             String billAmountStr = billIdAndAmount.getAmountOwed();
+            LOGGER.info("Calculate the amount, billId={}, amount={}", billIdAndAmount.getBillId(), billAmountStr);
             BigDecimal billAmountCents = new BigDecimal(billAmountStr).multiply(new BigDecimal(100));
             totalAmountCents.add(billAmountCents);
         }
@@ -336,7 +343,8 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	    try {
 	        businessPayerId = Long.parseLong(businessPayerIdStr);
 	    } catch (Exception e) {
-            LOGGER.error("Payer user id invalid in parameter, current user id will be used, orgPayerId={}, currentUserId={}", businessPayerIdStr, businessPayerId, e);
+	        // 不打印堆栈，因为businessPayerIdStr很可能没有
+            LOGGER.error("Payer user id invalid in parameter, current user id will be used, orgPayerId={}, currentUserId={}", businessPayerIdStr, businessPayerId);
         }
 	    
 	    UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
