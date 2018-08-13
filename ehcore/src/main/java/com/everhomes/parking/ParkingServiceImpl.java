@@ -651,7 +651,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 
-		parkingRechargeOrder.setOrderNo(createOrderNo(parkingLot));
+		parkingRechargeOrder.setOrderNo(createUnPaidOrderNo());
 		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
@@ -1550,8 +1550,18 @@ public class ParkingServiceImpl implements ParkingService {
 		order.setIsDelete(ParkingOrderDeleteFlag.DELETED.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
+	//为还没缴费的订单创建临时订单号，缴费之后会更新此订单号
+	//http://devops.lab.everhomes.com/issues/35564
+	private Long createUnPaidOrderNo() {
+		String suffix = String.valueOf(generateRandomNumber(3));
 
-	private Long createOrderNo(ParkingLot lot) {
+		return Long.valueOf(String.valueOf(System.currentTimeMillis()) + suffix);
+	}
+
+	//创建连续规则的订单号
+	//http://devops.lab.everhomes.com/issues/28392
+	@Override
+	public Long createOrderNo(ParkingLot lot) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String prefix = sdf.format(new Date());
 
