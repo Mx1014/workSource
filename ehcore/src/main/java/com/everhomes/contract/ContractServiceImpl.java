@@ -2880,9 +2880,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
-		cmd.setCategoryId(1022L);
-		cmd.setCommunityId(240111044332061479L);
-		cmd.setNamespaceId((int) 11L);
+		//cmd.setCategoryId(1022L);
+		//cmd.setCommunityId(240111044332061479L);
+		//cmd.setNamespaceId((int) 11L);
 		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
 
 		DurationParamDTO dto = new DurationParamDTO();
