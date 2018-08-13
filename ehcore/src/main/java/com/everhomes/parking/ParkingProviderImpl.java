@@ -1315,8 +1315,15 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor) {
+	public List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Long startCreateTime,Long endCreateTime,Integer pageSize, Long pageAnchor) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition timeCondition = DSL.trueCondition();
+		if(startCreateTime!=null){
+			timeCondition = timeCondition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(new Timestamp(startCreateTime)));
+		}
+		if(endCreateTime!=null){
+			timeCondition = timeCondition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(endCreateTime)));
+		}
 		return context.select()
 				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
@@ -1325,6 +1332,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
 								ParkingRechargeOrderStatus.RECHARGED.getCode(),
 								ParkingRechargeOrderStatus.FAILED.getCode()))))
+				.and(timeCondition)
 				.orderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.desc())
 				.limit(pageSize)
 				.offset(Integer.valueOf("" + (pageAnchor * pageSize)))
@@ -1332,12 +1340,20 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public Long ParkingRechargeOrdersByUserId(Long userId) {
+	public Long ParkingRechargeOrdersByUserId(Long userId,Long startCreateTime,Long endCreateTime) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition timeCondition = DSL.trueCondition();
+		if(startCreateTime!=null){
+			timeCondition = timeCondition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(new Timestamp(startCreateTime)));
+		}
+		if(endCreateTime!=null){
+			timeCondition = timeCondition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(endCreateTime)));
+		}
 		return Long.valueOf(context.selectCount()
 				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
 				.and(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.eq((byte)0).or(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.isNull()))
+				.and(timeCondition)
 				.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(new ArrayList<>(
 						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
 								ParkingRechargeOrderStatus.RECHARGED.getCode(),
