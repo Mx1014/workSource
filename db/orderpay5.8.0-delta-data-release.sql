@@ -32,7 +32,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 -- AUTHOR: liangqishi 20180811
 -- REMARK: 增加连接统一订单服务器的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('gorder.server.home_url', 'https://gorder.zuolin.com', '连接统一订单服务器的链接', 0, NULL, 0);
+	VALUES ('gorder.server.connect_url', 'https://gorder.zuolin.com', '连接统一订单服务器的链接', 0, NULL, 0);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.server.app_key', '69ee0cb3-5afb-4d83-ae12-ef493de48de2', '连接统一订单服务器的appkey', 0, NULL, 0);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
