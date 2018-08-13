@@ -361,6 +361,9 @@ public class ForumServiceImpl implements ForumService {
             LocalEventContext context = new LocalEventContext();
             context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //add by liangming.huang 20180813
+            context.setCommunityId(cmd.getCommunityId());
+
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());

@@ -3938,6 +3938,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				LocalEventContext context = new LocalEventContext();
 				context.setUid(order.getRentalUid());
 				context.setNamespaceId(order.getNamespaceId());
+				context.setCommunityId(order.getCommunityId());
 				event.setContext(context);
 				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
 				event.setEntityId(order.getId());
@@ -4444,6 +4445,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			LocalEventContext context = new LocalEventContext();
 			context.setUid(order.getRentalUid());
 			context.setNamespaceId(order.getNamespaceId());
+			context.setCommunityId(order.getCommunityId());
 			event.setContext(context);
 			event.setEntityType(EhRentalv2Orders.class.getSimpleName());
 			event.setEntityId(order.getId());
