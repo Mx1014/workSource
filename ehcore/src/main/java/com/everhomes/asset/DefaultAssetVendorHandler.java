@@ -1,45 +1,35 @@
 package com.everhomes.asset;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.criteria.Order;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
-import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
-import com.everhomes.pay.order.SourceType;
-import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -79,6 +69,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         // 校验参数
         checkPaymentBillOrderPaidStatus(cmd);
         PaymentBillGroup billGroup = checkBillGroup(cmd);
+        checkBusinessPayer(cmd);
         checkPaymentPayeeId(cmd, billGroup);
 
         // 组装订单数据
@@ -236,6 +227,17 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         }
         
         return billGroup;
+	}
+	
+	protected void checkBusinessPayer(CreatePaymentBillOrderCommand cmd) {
+	    BusinessPayerType payerType = BusinessPayerType.fromCode(cmd.getBusinessPayerType());
+	    if(payerType == null) {
+	        payerType = BusinessPayerType.ORGANIZATION;
+	    }
+	    
+	    if(cmd.getBusinessPayerId() == null) {
+	        cmd.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+	    }
 	}
 	
 	/**
