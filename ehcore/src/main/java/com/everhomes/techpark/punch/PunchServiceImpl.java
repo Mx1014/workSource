@@ -198,7 +198,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -234,7 +233,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -6785,7 +6783,6 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setDeviceChangeFlag(NormalFlag.NO.getCode());
         punchDayLog.setPunchCount(0);
         punchDayLog.setPunchTimesPerDay((byte) 0);
-        //2018年8月10日 修改为非休息日(因为没规则不需要统计)
         punchDayLog.setRestFlag(NormalFlag.NO.getCode());
         punchDayLog.setAbsentFlag(NormalFlag.NO.getCode());
         punchDayLog.setNormalFlag(NormalFlag.YES.getCode());
@@ -6798,11 +6795,12 @@ public class PunchServiceImpl implements PunchService {
                 punchDayLog.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
                 punchDayLog.setTimeRuleId(ptr.getId());
                 punchDayLog.setTimeRuleName(ptr.getName());
-                punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             } else if (ptr != null && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                 punchDayLog.setStatusList(String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode()));
             } else {
                 punchDayLog.setStatusList(String.valueOf(PunchStatus.NOTWORKDAY.getCode()));
+                // 已设置考勤规则同时排休息班的才计入休息
+                punchDayLog.setRestFlag(NormalFlag.YES.getCode());
             }
         }
         punchDayLog.setCreatorUid(0L);

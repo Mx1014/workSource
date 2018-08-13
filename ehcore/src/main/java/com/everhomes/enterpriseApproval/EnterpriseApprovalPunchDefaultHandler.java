@@ -21,10 +21,12 @@ import com.everhomes.rest.enterpriseApproval.ComponentAskForLeaveValue;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchLog;
 import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -163,14 +165,22 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		}
 		request.setStatus(ApprovalStatus.AGREEMENT.getCode());
 		punchProvider.updatePunchExceptionRequest(request);
-		//如果审批类型是-加班请假等,重刷影响日期的pdl
-		if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
-			Calendar punCalendar = Calendar.getInstance();
-			punCalendar.setTime(request.getBeginTime());
-			Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-			punCalendar.setTime(request.getEndTime());
-			Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-			punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(),startDay,endDay);
+
+		try {
+			// 如果审批类型是-加班请假等,重刷影响日期的pdl
+			if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
+				PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
+				if (pr != null) {
+					Calendar punCalendar = Calendar.getInstance();
+					punCalendar.setTime(request.getBeginTime());
+					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punCalendar.setTime(request.getEndTime());
+					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("refreshPunchDayLog error user_id = {}", flowCase.getApplyUserId());
 		}
 
 		// 统计年假使用合计和调休使用合计
