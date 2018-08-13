@@ -5842,10 +5842,10 @@ public class AssetProviderImpl implements AssetProvider {
 	    return isConfigSubtraction;
 	}
 
-//	public Long getNextOrderId() {
-//		long nextOrderId = this.sequenceProvider.getNextSequence(
-//    			NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders.class));
-//    	return nextOrderId;
-//	}
+	public List<PaymentBills> findBillsByIds(List<String> billIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetchInto(PaymentBills.class);
+    }
     
 }

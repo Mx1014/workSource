@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.pay.order.OrderCommandResponse;
@@ -268,15 +266,25 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @return 总金额，以分为单位
 	 */
 	protected BigDecimal calculateBillOrderAmount(CreatePaymentBillOrderCommand cmd) {
-	    List<BillIdAndAmount> bills = cmd.getBills();
-	    BigDecimal totalAmountCents = BigDecimal.ZERO;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            String billAmountStr = billIdAndAmount.getAmountOwed();
-            LOGGER.info("Calculate the amount, billId={}, amount={}", billIdAndAmount.getBillId(), billAmountStr);
-            BigDecimal billAmountCents = new BigDecimal(billAmountStr).multiply(new BigDecimal(100));
-            totalAmountCents = totalAmountCents.add(billAmountCents);
+        List<BillIdAndAmount> bills = cmd.getBills();
+        List<String> billIds = new ArrayList<>();
+        BigDecimal totalAmountCents = BigDecimal.ZERO;
+        for(int i = 0; i < bills.size(); i++){
+            BillIdAndAmount billIdAndAmount = bills.get(i);
+            if(billIdAndAmount.getBillId() == null || billIdAndAmount.getBillId().trim().length() == 0) {
+                bills.remove(i);
+                i--;
+            } else {
+                billIds.add(billIdAndAmount.getBillId());
+            }
         }
-        
+        List<PaymentBills> paymentBillList = assetProvider.findBillsByIds(billIds);
+        for(PaymentBills paymentBill : paymentBillList) {
+        	BigDecimal amountOwed = paymentBill.getAmountOwed();
+        	LOGGER.info("Calculate the amount, billId={}, amount={}", paymentBill.getId(), paymentBill.getAmountOwed());
+        	BigDecimal billAmountCents = amountOwed.multiply(new BigDecimal(100));
+        	totalAmountCents = totalAmountCents.add(billAmountCents);
+        }
         return totalAmountCents;
 	}
     

@@ -391,4 +391,6 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
+	public List<PaymentBills> findBillsByIds(List<String> billIds);
 }
