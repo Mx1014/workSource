@@ -13,8 +13,7 @@ CREATE TABLE `eh_sync_data_errors` (
   `owner_id` BIGINT NOT NULL COMMENT '错误对应的id，如：contractId，对应同步的任务类型',
   `owner_type` VARCHAR(64),
   `error_message` VARCHAR(512) NOT NULL COMMENT '发生错误的信息',
-  `task_id` BIGINT NOT NULL COMMENT '同步版本';
-
+  `task_id` BIGINT NOT NULL COMMENT '同步版本',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
