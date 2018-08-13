@@ -367,6 +367,7 @@ public class ForumServiceImpl implements ForumService {
             event.setEntityType(EhForumPosts.class.getSimpleName());
             event.setEntityId(tempDto.getId());
             Long embeddedAppId = tempDto.getEmbeddedAppId() != null ? tempDto.getEmbeddedAppId() : 0;
+
             event.setEventName(SystemEvent.FORUM_POST_CREATE.suffix(
                     tempDto.getModuleType(), tempDto.getModuleCategoryId(), embeddedAppId));
 

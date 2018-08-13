@@ -2,9 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
-import com.everhomes.rest.flow.FlowConditionExpressionVarType;
-import com.everhomes.rest.flow.FlowConditionLogicOperatorType;
-import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
+import com.everhomes.rest.flow.*;
 
 /**
  * Created by xq.tian on 2017/9/19.
@@ -46,8 +44,10 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
     }
 
     public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionExpression exp) {
-        FlowConditionVariable variable1 = getVariableValue(ctx, exp.getVariableType1(), exp.getVariable1(), exp.getVariableExtra1());
-        FlowConditionVariable variable2 = getVariableValue(ctx, exp.getVariableType2(), exp.getVariable2(), exp.getVariableExtra2());
+        FlowConditionVariable variable1 = getVariableValue(
+                ctx, exp.getVariableType1(), exp.getVariable1(), exp.getEntityType1(), exp.getEntityId1(), exp.getVariableExtra1());
+        FlowConditionVariable variable2 = getVariableValue(
+                ctx, exp.getVariableType2(), exp.getVariable2(), exp.getEntityType2(), exp.getEntityId2(), exp.getVariableExtra2());
 
         if (variable1 == null || variable2 == null) {
             return false;
@@ -73,7 +73,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
         return false;
     }
 
-    private FlowConditionVariable getVariableValue(FlowCaseState ctx, String variableType, String variable, String extra) {
+    private FlowConditionVariable getVariableValue(FlowCaseState ctx, String variableType, String variable, String entityType, Long entityId, String extra) {
         FlowConditionExpressionVarType varType = FlowConditionExpressionVarType.fromCode(variableType);
         FlowConditionVariable value = null;
         switch (varType) {
@@ -82,10 +82,13 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
                 value = new FlowConditionStringVariable(variable);
                 break;
             case FORM:
-                value = flowService.getFormFieldValueByVariable(ctx, variable, extra);
+                value = listenerManager.onFlowConditionFormVariableRender(ctx, variable, entityType, entityId, extra);
+                if (value == null) {
+                    value = flowService.getFormFieldValueByVariable(ctx, variable, entityType, entityId, extra);
+                }
                 break;
             case VARIABLE:
-                value = listenerManager.onFlowConditionVariableRender(ctx, variable, extra);
+                value = listenerManager.onFlowConditionVariableRender(ctx, variable, entityType, entityId, extra);
                 break;
         }
         return value;

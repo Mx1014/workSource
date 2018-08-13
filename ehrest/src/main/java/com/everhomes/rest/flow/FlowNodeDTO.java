@@ -26,6 +26,14 @@ import java.util.List;
  *     <li>nodeType: 节点类型{@link com.everhomes.rest.flow.FlowNodeType}</li>
  *     <li>flowLaneId: 泳道id</li>
  *     <li>needAllProcessorComplete: 节点会签开关</li>
+ *     <li>subFlowGotoNodeId: subFlowGotoNodeId</li>
+ *     <li>subFlowStepType: subFlowStepType</li>
+ *     <li>subFlowProjectType: subFlowProjectType</li>
+ *     <li>subFlowProjectId: subFlowProjectId</li>
+ *     <li>subFlowModuleType: subFlowModuleType</li>
+ *     <li>subFlowModuleId: subFlowModuleId</li>
+ *     <li>subFlowOwnerType: subFlowOwnerType</li>
+ *     <li>subFlowOwnerId: subFlowOwnerId</li>
  *     <li>branch: 分支信息 {@link com.everhomes.rest.flow.FlowBranchDTO}</li>
  *     <li>processors: 处理人列表 {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
  * </ul>
@@ -50,6 +58,15 @@ public class FlowNodeDTO {
     private String nodeType;
     private Long flowLaneId;
     private Long needAllProcessorComplete;
+
+    private Long subFlowGotoNodeId;
+    private String subFlowStepType;
+    private String subFlowProjectType;
+    private Long subFlowProjectId;
+    private String subFlowModuleType;
+    private Long subFlowModuleId;
+    private String subFlowOwnerType;
+    private Long subFlowOwnerId;
 
     private FlowBranchDTO branch;
 
@@ -206,6 +223,70 @@ public class FlowNodeDTO {
 
     public void setBranch(FlowBranchDTO branch) {
         this.branch = branch;
+    }
+
+    public Long getSubFlowGotoNodeId() {
+        return subFlowGotoNodeId;
+    }
+
+    public void setSubFlowGotoNodeId(Long subFlowGotoNodeId) {
+        this.subFlowGotoNodeId = subFlowGotoNodeId;
+    }
+
+    public String getSubFlowStepType() {
+        return subFlowStepType;
+    }
+
+    public void setSubFlowStepType(String subFlowStepType) {
+        this.subFlowStepType = subFlowStepType;
+    }
+
+    public String getSubFlowProjectType() {
+        return subFlowProjectType;
+    }
+
+    public void setSubFlowProjectType(String subFlowProjectType) {
+        this.subFlowProjectType = subFlowProjectType;
+    }
+
+    public Long getSubFlowProjectId() {
+        return subFlowProjectId;
+    }
+
+    public void setSubFlowProjectId(Long subFlowProjectId) {
+        this.subFlowProjectId = subFlowProjectId;
+    }
+
+    public String getSubFlowModuleType() {
+        return subFlowModuleType;
+    }
+
+    public void setSubFlowModuleType(String subFlowModuleType) {
+        this.subFlowModuleType = subFlowModuleType;
+    }
+
+    public Long getSubFlowModuleId() {
+        return subFlowModuleId;
+    }
+
+    public void setSubFlowModuleId(Long subFlowModuleId) {
+        this.subFlowModuleId = subFlowModuleId;
+    }
+
+    public String getSubFlowOwnerType() {
+        return subFlowOwnerType;
+    }
+
+    public void setSubFlowOwnerType(String subFlowOwnerType) {
+        this.subFlowOwnerType = subFlowOwnerType;
+    }
+
+    public Long getSubFlowOwnerId() {
+        return subFlowOwnerId;
+    }
+
+    public void setSubFlowOwnerId(Long subFlowOwnerId) {
+        this.subFlowOwnerId = subFlowOwnerId;
     }
 
     @Override

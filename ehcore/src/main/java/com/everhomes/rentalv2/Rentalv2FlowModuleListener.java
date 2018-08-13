@@ -704,7 +704,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		List<FlowConditionVariableDTO> list = new ArrayList<>();
 		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
 		dto.setDisplayName("金额");
-		dto.setName("amount");
+		dto.setValue("amount");
 		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
@@ -714,7 +714,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 		//目前只有类型一个分支参数
 		if ("amount".equals(variable)) {
 			FlowCase flowcase = ctx.getFlowCase();
