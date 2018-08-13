@@ -35,6 +35,7 @@ import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -883,7 +884,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd);
+    	assetProvider.modifyNotSettledBill(cmd);
     }
 
     @Override
@@ -941,6 +942,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
+    	
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         List<Long> categoryIdList = assetProvider.getOriginIdFromMappingAppForEnergy(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         // 转categoryId
@@ -1313,7 +1315,7 @@ public class AssetServiceImpl implements AssetService {
                 LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
                 LOGGER.error("failed calculation", e);
             }
-        }
+        }    
     }
 
     @Override
@@ -3045,7 +3047,7 @@ public class AssetServiceImpl implements AssetService {
             // 转换
             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
             cmd.setCategoryId(assetCategoryId);
-        }
+         }
         return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId, cmd.getCategoryId());
     }
 
@@ -4689,7 +4691,7 @@ public class AssetServiceImpl implements AssetService {
         response.setPaymentOrderBillDTOs(list);
         return response;
 	}
-
+	
 	public IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){//ownerId为-1代表选择的是全部
@@ -4930,6 +4932,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 	
 	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response, Integer namespaceId, Long communityId, Long moduleId){
+		
 		Calendar c = newClearedCalendar();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -5099,7 +5102,7 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
-        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);	
 	}
 	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -5172,8 +5175,8 @@ public class AssetServiceImpl implements AssetService {
 			LOGGER.error("exportOrdersUtil cmd={}, Exception={}", cmd, e);
 		}
     }
-    
-    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+	
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
 		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -5280,8 +5283,8 @@ public class AssetServiceImpl implements AssetService {
 			}
     	}
     }
-
-	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+    
+    public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
 
@@ -5303,5 +5306,18 @@ public class AssetServiceImpl implements AssetService {
         	return false;
         }
     }
+
+	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
+        return preOrderDTO;
+	}
+
+	public GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd) {
+		//查询eh_payment_order_records表，获取支付状态
+		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
+		return response;
+	}
 
 }
