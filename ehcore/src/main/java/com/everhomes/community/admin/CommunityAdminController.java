@@ -361,27 +361,6 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/community/importBuildingData</b>
-     * <p>导入楼栋信息excel</p>
-     */
-    @RequestMapping("importBuildingData")
-    @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
-    	User manaUser = UserContext.current().getUser();
-		Long userId = manaUser.getId();
-		if(null == files || null == files[0]){
-			LOGGER.error("files is null.userId="+userId);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-					"files is null");
-		}
-//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /admin/community/exportBuildingByCommunityId</b>
      * <p>后台管理 楼栋列表</p>
      */
@@ -677,6 +656,28 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/importBuildingData</b>
+     * <p>导入楼栋信息excel</p>
+     */
+    @RequestMapping("importBuildingData")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null.userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     
     /**
      * <b>URL: /admin/community/exportBuildingByKeywords</b>

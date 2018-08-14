@@ -1052,6 +1052,7 @@ public class AddressProviderImpl implements AddressProvider {
 		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(Tables.EH_ADDRESSES);
 		query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
 		
 		if (cmd.getCommunityId() != null) {

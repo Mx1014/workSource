@@ -2145,15 +2145,35 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             }
             
             //正则校验数字
-        	if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
-    			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
-    			if(!Pattern.compile(reg).matcher(data.getApartmentFloor()).find()){
-    				log.setData(data);
+//        	if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
+//    			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+//    			if(!Pattern.compile(reg).matcher(data.getApartmentFloor()).find()){
+//    				log.setData(data);
+//    				log.setErrorLog("FloorNumber format is error");
+//    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
+//    				errorLogs.add(log);
+//    				continue;
+//    			}
+//    		}
+            if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
+    			try {
+    				int apartmentFloor = Integer.parseInt(data.getApartmentFloor());
+    				if (building.getFloorNumber() != null) {
+						if (apartmentFloor <= 0 || apartmentFloor > building.getFloorNumber().intValue()) {
+							log.setData(data);
+		    				log.setErrorLog("FloorNumber is out of range");
+		    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_OUT_OF_RANGE);
+		    				errorLogs.add(log);
+		    				continue;
+						}
+					}
+				} catch (Exception e) {
+					log.setData(data);
     				log.setErrorLog("FloorNumber format is error");
     				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
     				errorLogs.add(log);
     				continue;
-    			}
+				}
     		}
             //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
 			importApartment(community, building, data, areaSize, chargeArea, rentArea, freeArea);

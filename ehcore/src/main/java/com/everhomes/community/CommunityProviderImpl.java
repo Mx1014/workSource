@@ -16,12 +16,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -79,6 +74,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
@@ -911,8 +908,12 @@ public class CommunityProviderImpl implements CommunityProvider {
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_BUILDINGS.BUILDING_NUMBER.eq(buildingNumber));
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
-
-        return ConvertHelper.convert(query.fetchOne(), Building.class);
+        
+        List<Building> buildings = query.fetchInto(Building.class);
+        if (buildings!=null && buildings.size()>0) {
+			return buildings.get(0);
+		}
+        return null;
     }
 
     @Override

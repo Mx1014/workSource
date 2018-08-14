@@ -7,4 +7,6 @@ ALTER TABLE `eh_buildings` DROP INDEX `u_eh_community_id_name`;
 
 ALTER TABLE `eh_buildings` ADD INDEX `u_eh_community_id_name` (`community_id`, `name`) USING BTREE ;
 
+ALTER TABLE `eh_buildings` MODIFY COLUMN `building_number` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '楼栋编号';
+
 -- END by 唐岑

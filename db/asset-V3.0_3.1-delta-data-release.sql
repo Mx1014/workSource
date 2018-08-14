@@ -11,4 +11,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30002', 'zh_CN', '收费面积不能为负数');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30003', 'zh_CN', '在租面积不能为负数');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30004', 'zh_CN', '可招租面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30005', 'zh_CN', '楼层不在该楼宇楼层范围内');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10012', 'zh_CN', '楼宇编号已存在');
 ------------------------ SECTION END ---------------------------------------------------------

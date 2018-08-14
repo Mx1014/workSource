@@ -1462,7 +1462,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
 		for (ImportBuildingDataDTO data : datas) {
-			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data,communityId);
 			if (log != null) {
 				list.add(log);
 				continue;
@@ -1550,7 +1550,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data,Long communityId) {
 		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
 		//必填项校检
 		if (StringUtils.isEmpty(data.getName())) {
@@ -1559,28 +1559,24 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("building name cannot be empty");
 			return log;
 		}
-		
 		if (StringUtils.isEmpty(data.getAddress())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
 			log.setData(data);
 			log.setErrorLog("address cannot be empty");
 			return log;
 		}
-		
 		if (StringUtils.isEmpty(data.getContactor())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
 			log.setData(data);
 			log.setErrorLog("contactor cannot be empty");
 			return log;
 		}
-		
 		if (StringUtils.isEmpty(data.getPhone())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_PHONE_EMPTY);
 			log.setData(data);
 			log.setErrorLog("phone cannot be empty");
 			return log;
 		}
-		
 		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").replace("、", ",").contains(",")) {
 			log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_LONGITUDE);
 			log.setData(data);
@@ -1594,6 +1590,15 @@ public class CommunityServiceImpl implements CommunityService {
 				log.setCode(CommunityServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
 				log.setData(data);
 				log.setErrorLog("FloorNumber format is error");
+				return log;
+			}
+		}
+		if (StringUtils.isNotEmpty(data.getBuildingNumber())) {
+			Building building = communityProvider.findBuildingByCommunityIdAndNumber(communityId, data.getBuildingNumber());
+			if(building != null && !building.getName().equals(data.getName())) {
+				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NUMBER_EXIST);
+				log.setData(data);
+				log.setErrorLog("building number exists");
 				return log;
 			}
 		}
