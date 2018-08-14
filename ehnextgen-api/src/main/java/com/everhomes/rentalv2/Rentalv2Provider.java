@@ -191,9 +191,9 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
 
-	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
+	List<RentalCell> getRentalCellsByIds(String resourceType,List<Long> cellIds, Long rentalSiteId,Byte rentalType);
 
-	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
+	List<RentalCell> getRentalCellsByRange(String resourceType,Long minId,Long maxId, Long rentalSiteId,Byte rentalType);
 
 	Double countRentalSiteBillBySiteRuleId(Long cellId,RentalResource rentalResource,Byte rentalType);
 
@@ -201,7 +201,7 @@ public interface Rentalv2Provider {
 
 	List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource,Long beginTime,Long endTime);
 
-	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
+	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
