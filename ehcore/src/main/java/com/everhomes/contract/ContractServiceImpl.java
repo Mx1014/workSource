@@ -2482,9 +2482,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
 			if (communities != null) {
 				for (Community community : communities) {
+					//查询categoryid
+					Long categoryId =null;
+					try {
+						categoryId = contractProvider.findCategoryIdByNamespaceId(community.getNamespaceId());
+					} catch (Exception e) {
+						LOGGER.info("contractAutoSync community get categoryId " + categoryId.toString());
+					}
 					SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
 					command.setNamespaceId(community.getNamespaceId());
 					command.setCommunityId(community.getId());
+					command.setCategoryId(categoryId);
+					command.setContractApplicationScene((byte) 0);
 					syncContractsFromThirdPart(command, false);
 				}
 			}

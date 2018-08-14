@@ -108,5 +108,7 @@ public interface ContractProvider {
 	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, String name, Long pageAnchor, Integer pageSize);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	Boolean getContractTemplateById(Long id);
+
+	Long findCategoryIdByNamespaceId(Integer namespaceId);
 	
 }
