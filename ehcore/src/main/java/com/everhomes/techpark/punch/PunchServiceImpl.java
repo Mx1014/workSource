@@ -3668,10 +3668,8 @@ public class PunchServiceImpl implements PunchService {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
 
-//        row.createCell(++i).setCellValue("时间");
         row.createCell(++i).setCellValue("姓名");
         row.createCell(++i).setCellValue("部门");
-//        row.createCell(++i).setCellValue("所属规则");
         row.createCell(++i).setCellValue("应出勤天数");
         row.createCell(++i).setCellValue("实出勤天数");
         row.createCell(++i).setCellValue("旷工天数");
@@ -3797,7 +3795,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private void createPunchLogsSheet(Long dataUpdateTime, List<Long> userIds, ListPunchCountCommand cmd, Long taskId, XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
-        int columnNo = 7;
+        int columnNo = 9;
 
         XSSFSheet sheet = wb.createSheet("打卡记录");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnNo));
@@ -3975,7 +3973,7 @@ public class PunchServiceImpl implements PunchService {
 
     private void createPunchStatisticsSheet(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId,
                                             XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
-        int columnNo = 13;
+        int columnNo = 16;
         List<PunchCountDTO> results = resp.getPunchCountList();
         if (null != resp) {
             if (null != resp.getExtColumns()) {
@@ -5596,7 +5594,7 @@ public class PunchServiceImpl implements PunchService {
 
         XSSFSheet sheet = wb.createSheet("每日统计");
 
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 14));
         XSSFCellStyle style = wb.createCellStyle();
         Font font = wb.createFont();
         font.setFontHeightInPoints((short) 20);
@@ -5614,7 +5612,7 @@ public class PunchServiceImpl implements PunchService {
         rowTitle.setRowStyle(titleStyle);
         //副标题
 
-        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 10));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 14));
         XSSFCellStyle style1 = wb.createCellStyle();
         Font font1 = wb.createFont();
 
