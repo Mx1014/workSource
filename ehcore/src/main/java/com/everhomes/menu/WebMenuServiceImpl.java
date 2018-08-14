@@ -169,13 +169,14 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 
 
+		return null;
+
 
 
 	}
 
 
-	@Override
-	public List<Long> listUserAppIds(Long userId, WebMenu menu, Long organizationId){
+	private List<Long> listUserAppIds(Long userId, WebMenu menu, Long organizationId){
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		String path = null;
