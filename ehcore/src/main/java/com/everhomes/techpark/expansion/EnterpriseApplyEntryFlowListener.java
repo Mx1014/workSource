@@ -427,13 +427,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
 
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
-        dto.setName("test");
+        dto.setValue("test");
         dto.setDisplayName("test111");
         dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }
 
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
         FlowConditionStringVariable stringVariable = new FlowConditionStringVariable("intelligent");
         return stringVariable;
     }

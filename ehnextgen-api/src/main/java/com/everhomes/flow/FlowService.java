@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -309,7 +308,11 @@ public interface FlowService {
 
     Flow getEnabledFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
 
-    /**
+	Flow getAssociatedFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+	FlowServiceMapping getFlowServiceMapping(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType);
+
+	/**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param flowCaseCmd
 	 * @return
@@ -351,7 +354,9 @@ public interface FlowService {
 	 */
 	void processStepTimeout(FlowTimeout ft);
 
-	/**
+    void processSubFlowEnd(FlowTimeout ft);
+
+    /**
 	 * message timeout
 	 * @param ft
 	 */
@@ -415,6 +420,8 @@ public interface FlowService {
 	void processSMSTimeout(FlowTimeout ft);
 
     String getButtonFireEventContentTemplate(FlowStepType step, Map<String, Object> map);
+
+    String templateRender(int code, Map<String, Object> map);
 
     String getStepMessageTemplate(FlowStepType fromStep, FlowCaseStatus nextStatus, FlowGraphEvent event, Map<String, Object> map);
 
@@ -490,7 +497,7 @@ public interface FlowService {
 
     String getFlowCaseRouteURI(Long flowCaseId, Long moduleId);
 
-    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String extra);
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra);
 
     ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
 
@@ -502,7 +509,7 @@ public interface FlowService {
 
     void deleteFlowForm(UpdateFlowFormCommand cmd);
 
-    FlowFormDTO getFlowForm(FlowIdCommand cmd);
+    FlowFormDTO getFlowForm(GetFlowFormCommand cmd);
 
     FlowCaseDetailDTOV2 getFlowCaseDetailByRefer(Long moduleId, FlowUserType flowUserType,
                                                  Long userId, String referType, Long referId, boolean needFlowButton);
@@ -524,4 +531,22 @@ public interface FlowService {
 	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
 
     DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request);
+
+    void updateFlowFormStatus(UpdateFlowFormStatusCommand cmd);
+
+    void doFlowSnapshot(Long flowId);
+
+	void createFlowServiceMapping(CreateFlowServiceMappingCommand cmd);
+
+	List<FlowServiceMappingDTO> listFlowServiceMappings(ListFlowServiceMappingsCommand cmd);
+
+	void updateSubFlowInfo(UpdateSubFlowInfoCommand cmd);
+
+    FlowServiceMappingDTO getFlowServiceMapping(GetFlowServiceMappingCommand cmd);
+
+	void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+    Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 }

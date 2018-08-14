@@ -41,7 +41,7 @@ public interface GeneralFormService {
     /**
      * 根据owner和字段名称获取字段的值
      */
-    GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
+    GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
 
 	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
 
@@ -50,4 +50,10 @@ public interface GeneralFormService {
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
+
+    void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+	Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 }

@@ -13,9 +13,8 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCommonStatus;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -23,7 +22,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-
+import com.everhomes.util.ValidatorUtil;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -61,6 +60,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private GeneralFormKvConfigProvider generalFormKvConfigProvider;
 
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -349,11 +351,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
+    public GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType,
+                                                          Long moduleId, String ownerType, Long ownerId, String fieldName) {
         GeneralFormFieldDTO dto = null;
         // 审批的值是在一张表
         if (moduleId == 52000L) {
-            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(ownerId, fieldName);
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(
+                    formOriginId, 0L/*这张表的version好像都是0*/, ownerId, fieldName);
             if (approvalVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(approvalVal.getFieldType());
@@ -363,7 +367,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         // 其他表单的值是在另一张表
         else {
-            GeneralFormVal formVal = generalFormValProvider.getGeneralFormValBySourceIdAndName(ownerId, ownerType, fieldName);
+            GeneralFormVal formVal = generalFormValProvider.getGeneralFormVal(formOriginId,
+                    null/*这个version不清楚怎么用的, 先不加这个条件*/, ownerId, ownerType, fieldName);
             if (formVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(formVal.getFieldType());
@@ -614,6 +619,58 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         return handler.getGeneralFormReminder(cmd);
+    }
+
+    @Override
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long id : cmd.getFormIds()) {
+            GeneralForm generalForm = generalFormProvider.getGeneralFormById(id);
+            generalForm.setOwnerType(cmd.getOwnerType());
+            generalForm.setOwnerId(cmd.getOwnerId());
+            generalForm.setModuleType(cmd.getModuleType());
+            generalForm.setModuleId(cmd.getModuleId());
+
+            generalFormProvider.createGeneralForm(generalForm);
+        }
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            config.setValue("1");
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
+            config.setValue("1");
+            config.setKey("project-customize");
+            config.setStatus(FlowCommonStatus.VALID.getCode());
+            generalFormKvConfigProvider.createGeneralFormKvConfig(config);
+        }
+    }
+
+    @Override
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            config.setValue("0");
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return 0;
     }
 }
 

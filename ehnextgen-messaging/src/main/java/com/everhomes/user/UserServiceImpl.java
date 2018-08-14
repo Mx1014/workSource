@@ -5612,6 +5612,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				user.setNamespaceUserType(null);
 				LOGGER.info("user={}",user);userProvider.updateUser(user);
 			}
+			//add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+           //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
 //
             UserLogin oldLogin = UserContext.current().getLogin();
             if (oldLogin != null) {
@@ -5639,6 +5644,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             userProvider.updateIdentifier(userIdentifier);
 
+            //add by huangliangming 20180731 使得微信注册时能够激活管理员
+            // 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
+             
             return null;
 
         } else {
@@ -5656,6 +5667,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
+            //add by huangliangming 20180731 使得微信注册时能够激活管理员
+            // 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
+            
             user = userProvider.findUserById(user.getId());
             String salt = EncryptionUtils.createRandomSalt();
             user.setSalt(salt);
@@ -5743,6 +5760,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userProvider.updateIdentifier(userIdentifier);
             login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
+              
+            //add by huangliangming 20180731 使得微信注册时能够激活管理员
+            // 刷新企业通讯录
+             organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
+            
         }
         return login;
     }private void verificationCode(UserIdentifier userIdentifier, String code){

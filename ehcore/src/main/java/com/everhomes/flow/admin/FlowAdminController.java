@@ -4,26 +4,17 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestDoc(value = "Flow Admin controller", site = "core")
 @RestController
@@ -718,6 +709,20 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/updateFlowFormStatus</b>
+     * <p>表单开关</p>
+     */
+    @RequestMapping("updateFlowFormStatus")
+    @RestReturn(value = String.class)
+    public RestResponse updateFlowFormStatus(@Valid UpdateFlowFormStatusCommand cmd) {
+        flowService.updateFlowFormStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/flow/createFlowForm</b>
      * <p>建立表单关联</p>
      */
@@ -751,7 +756,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("getFlowForm")
     @RestReturn(value = FlowFormDTO.class)
-    public RestResponse getFlowForm(@Valid FlowIdCommand cmd) {
+    public RestResponse getFlowForm(@Valid GetFlowFormCommand cmd) {
         FlowFormDTO flowFormDTO = flowService.getFlowForm(cmd);
         RestResponse response = new RestResponse(flowFormDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -862,6 +867,118 @@ public class FlowAdminController extends ControllerBase {
     public RestResponse listFlowModuleAppServiceTypes(@Valid ListFlowModuleAppServiceTypesCommand cmd) {
         ListFlowModuleAppServiceTypesResponse resp = flowService.listFlowModuleAppServiceTypes(cmd);
         RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/doFlowSnapshot</b>
+     * <p>发布新版本的工作流</p>
+     */
+    @RequestMapping("doFlowSnapshot")
+    @RestReturn(value = String.class)
+    public RestResponse doFlowSnapshot(@Valid FlowIdCommand cmd) {
+        flowService.doFlowSnapshot(cmd.getFlowId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowServiceMapping</b>
+     * <p>新增工作流与业务的关联</p>
+     */
+    @RequestMapping("createFlowServiceMapping")
+    @RestReturn(value = String.class)
+    public RestResponse createFlowServiceMapping(@Valid CreateFlowServiceMappingCommand cmd) {
+        flowService.createFlowServiceMapping(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowServiceMapping</b>
+     * <p>获取工作流与业务关联数据</p>
+     */
+    @RequestMapping("getFlowServiceMapping")
+    @RestReturn(FlowServiceMappingDTO.class)
+    public RestResponse getFlowServiceMapping(@Valid GetFlowServiceMappingCommand cmd) {
+        FlowServiceMappingDTO dto = flowService.getFlowServiceMapping(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listFlowServiceMappings</b>
+     * <p>工作流与业务的关联列表</p>
+     */
+    @RequestMapping("listFlowServiceMappings")
+    @RestReturn(value = FlowServiceMappingDTO.class, collection = true)
+    public RestResponse listFlowServiceMappings(@Valid ListFlowServiceMappingsCommand cmd) {
+        List<FlowServiceMappingDTO> list = flowService.listFlowServiceMappings(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateSubFlowInfo</b>
+     * <p>设置子流程的信息</p>
+     */
+    @RequestMapping("updateSubFlowInfo")
+    @RestReturn(String.class)
+    public RestResponse updateSubFlowInfo(@Valid UpdateSubFlowInfoCommand cmd) {
+        flowService.updateSubFlowInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/enableProjectCustomize</b>
+     * <p> 启用基于园区的自定义配置 </p>
+     */
+    @RequestMapping("enableProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse enableProjectCustomize(@Valid EnableProjectCustomizeCommand cmd) {
+        flowService.enableProjectCustomize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/disableProjectCustomize</b>
+     * <p> 禁用基于园区的自定义配置 </p>
+     */
+    @RequestMapping("disableProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+        flowService.disableProjectCustomize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getProjectCustomize</b>
+     * <p> 获取自定义配置属性 </p>
+     */
+    @RequestMapping("getProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+        Byte flag = flowService.getProjectCustomize(cmd);
+        RestResponse response = new RestResponse(flag);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
