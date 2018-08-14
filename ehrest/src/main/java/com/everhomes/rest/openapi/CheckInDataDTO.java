@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>longitude： 经度</li>
  * <li>locationInfo：地点信息</li>
  * <li>wifiInfo： wifi信息</li>
+ * <li>status：状态</li>
  * </ul>
  */
 public class CheckInDataDTO {
@@ -30,6 +31,7 @@ public class CheckInDataDTO {
 	private Double latitude;
 	private String locationInfo;
     private String wifiInfo;
+    private String status;
 
     @Override
     public String toString() {
@@ -114,6 +116,14 @@ public class CheckInDataDTO {
 
 	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
  
 }
