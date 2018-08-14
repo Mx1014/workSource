@@ -99,6 +99,20 @@ public class GeneralFormController extends ControllerBase {
 
 		return response;
 	}
+	
+	/**
+     * <b>URL: /general_form/listDefaultFields</b>
+     * <p>根據模块获取默认字段    </p>
+     */
+    @RequestMapping("listDefaultFields")
+    @RestReturn(value=GeneralFormFieldDTO.class)
+    public RestResponse listDefaultFields(ListDefaultFieldsCommand cmd){
+        List<GeneralFormFieldDTO> dtos = generalFormService.getDefaultFieldsByModuleId(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
 	/**
 	 * <b>URL: /general_form/syncFromDb</b>
