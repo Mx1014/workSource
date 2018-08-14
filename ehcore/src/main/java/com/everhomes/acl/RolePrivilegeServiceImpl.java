@@ -2855,7 +2855,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				projectIds.remove(dto.getProjectId());
 			}
 
-			if(dto.getProjects() != null && dto.getProjects().size() == 0){
+			if(dto.getProjects() != null && dto.getProjects().size() > 0){
 				filterSingleProjectId(dto.getProjects(), projectIds);
 			}
 		}
