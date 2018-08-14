@@ -1,7 +1,23 @@
 // @formatter:off
-package com.everhomes.sso;
+package com.everhomes.zhenzhihui;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.point.UserLevel;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserInfoDTO;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,43 +40,43 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.Hashtable;
 
 @Component
-public class ZhenZhiHuiSSO{
+public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String charset       = "UTF-8";
-    private static final String APPENCKEY     = "50740c53204a658a";
+    private static final String APPENCKEY     = "ece2d40c2badef49";
     private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiSSO.class);
+    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999930;
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
 
-    public void ssoservice(HttpServletRequest request, HttpServletResponse response)
-    {
+    private UserService userService;
+
+    private UserProvider userProvider;
+    @Override
+    public UserLogin ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
 
-        if ( TICKET == null )
-        {
+        if ( TICKET == null ) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "TICKET is null.");
         }
 
-        try
-        {
+        try {
             //使用独有的身份认证时颁发的密钥解密数据
             TICKET = CBCDecrypt(TICKET, APPENCKEY);
         }
-        catch (Exception e1)
-        {
+        catch (Exception e1) {
             e1.printStackTrace();
         }
 
-        if ( TICKET == null )
-        {
+        if ( TICKET == null ) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "TICKET is null.");
         }
 
-        try
-        {
+        try {
             //使用attributes接口从SSO服务器获取信息
             String ret = requestService(SSOServiceURL + TICKET);
             if ( ret != null )
@@ -71,52 +87,97 @@ public class ZhenZhiHuiSSO{
                 if ( bean != null )
                 {
                     //目标用户名称
-                    String user = bean.get("target_user");
+                    String target_user = bean.get("target_user");
                     //方法名
                     String method = bean.get("target_method");
                     //参数
                     String parameter = bean.get("parameter");
                     if(null != parameter){
                         String parameterval = new String( new BASE64Decoder().decodeBuffer(parameter) ,charset);
-                        LOGGER.info("user = {}, method = {}, parameter = {}, parameterval = {}",user,method,parameter,parameterval);
+                        LOGGER.info("target_user = {}, method = {}, parameter = {}, parameterval = {}",target_user,method,parameter,parameterval);
+                        ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO = JSON.parseObject(parameterval, ZhenZhiHuiUserInfoDTO.class);
+                        if (zhenZhiHuiUserInfoDTO != null){
+                            User user = this.userService.findUserByIndentifier(ZHENZHIHUI_NAMESPACE_ID, zhenZhiHuiUserInfoDTO.getShouji());
+                            if (user == null) {
+                                user = createUserAndUserIdentifier(zhenZhiHuiUserInfoDTO);
+                            }
+                        }
                     }
-                    //TODO 拿到用户和请求访问的注册资源地址后，实现登录和响应及重定向客户端请求等操作
-                    //TODO 授权接入系统原有会话维持机制不需要改变，短期内再次接入的用户，可对比自身机制内用户会话缓存
-
-                    /*//申请访问服务的示例
-                    //格式为JSON格式,请自行解析,toJSON方法不能解析
-                    if(parameter != null)
-                        parameter = new String( new BASE64Decoder().decodeBuffer(parameter) ,charset);
-
-                    //-~~~~~~~~调用 业务方法:method , 参数:parameter , 用户:user
-                    String methodret = "[{\"lwfp_entry_eventname\":\"XXXXXX待办\",\"lwfp_step_createtime\":\"2015-08-01\"},{\"lwfp_entryid\":\"ce4fa478a2a645ad982f3050b8da4695\",\"lwfp_entry_eventname\":\"XXXXXX待办\",\"lwfp_step_createtime\":\"2015-08-02\"}]";
-                    //返回业务方法的返回值
-                    response.getWriter().write( new BASE64Encoder().encode( methodret.getBytes(charset)) );
-
-                    //调用业务服务不需要保持session,这里判断假如当前有session则使session失效
-                    HttpSession session = request.getSession(false);
-                    if(session != null)
-                        //使session失效
-                        session.invalidate();
-                    return;*/
                 }
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    private static String requestService ( String url )
-    {
+    @Override
+    public String makeZhenZhiHUiRedirectUrl(Long userId) {
+        return null;
+    }
+
+    private User createUserAndUserIdentifier(ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO){
+        User user = new User();
+        user.setStatus(UserStatus.ACTIVE.getCode());
+        user.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
+        user.setNickName(zhenZhiHuiUserInfoDTO.getMingcheng());
+        user.setGender(UserGender.UNDISCLOSURED.getCode());
+        user.setNamespaceUserType(NamespaceUserType.ZHENZHIHUI.getCode());
+        user.setNamespaceUserToken(zhenZhiHuiUserInfoDTO.getHaoma());
+        user.setLevel(UserLevel.L1.getCode());
+        user.setAvatar("");
+        String salt = EncryptionUtils.createRandomSalt();
+        user.setSalt(salt);
+        try {
+            user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
+        } catch (Exception e) {
+            LOGGER.error("encode password failed");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+        }
+        UserIdentifier old_userIdentifier = this.userProvider.findClaimedIdentifierByToken(ZHENZHIHUI_NAMESPACE_ID, zhenZhiHuiUserInfoDTO.getShouji());
+
+        if (old_userIdentifier != null) {
+            User old_user = this.userProvider.findUserById(old_userIdentifier.getOwnerUid());
+            if (old_user != null) {
+                old_user.setUpdateTime(user.getUpdateTime());
+                old_user.setNamespaceUserToken(user.getNamespaceUserToken());
+                old_user.setNamespaceUserType(user.getNamespaceUserType());
+                this.userProvider.updateUser(old_user);
+
+                old_userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                old_userIdentifier.setRegionCode(86);
+                old_userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                this.userProvider.updateIdentifierByUid(old_userIdentifier);
+                return old_user;
+            } else {
+                old_userIdentifier.setClaimStatus(IdentifierClaimStatus.FREE_STANDING.getCode());
+                this.userProvider.deleteIdentifier(old_userIdentifier);
+                old_userIdentifier = null;
+            }
+        }
+        if (old_userIdentifier == null) {
+            this.userProvider.createUser(user);
+            UserIdentifier userIdentifier = new UserIdentifier();
+            userIdentifier.setOwnerUid(user.getId());
+            userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+            userIdentifier.setIdentifierToken(zhenZhiHuiUserInfoDTO.getShouji());
+            userIdentifier.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
+            userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+            userIdentifier.setRegionCode(86);
+            userIdentifier.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.userProvider.createIdentifier(userIdentifier);
+        }
+        return user;
+    }
+    private static String requestService ( String url ) {
 
         HttpURLConnection httpURLConnection = null;
         InputStream input = null;
         OutputStream output = null;
 
-        try
-        {
+        try {
             URL urlObj = new URL(url);
             httpURLConnection = (HttpURLConnection) urlObj.openConnection();
             httpURLConnection.setRequestMethod("GET");
@@ -149,38 +210,24 @@ public class ZhenZhiHuiSSO{
             output = null;
 
             return new String(byteStream.toByteArray(), "UTF-8");
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             if ( input != null )
-                try
-                {
+                try {
                     input.close();
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            if ( output != null )
-            {
-                try
-                {
+            if ( output != null ) {
+                try {
                     output.flush();
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-                try
-                {
+                try {
                     output.close();
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -190,10 +237,8 @@ public class ZhenZhiHuiSSO{
         return null;
     }
 
-    private static String CBCDecrypt ( String data , String sourcekey ) throws Exception
-    {
-        if ( sourcekey == null || sourcekey.length() != 16 )
-        {
+    private static String CBCDecrypt ( String data , String sourcekey ) throws Exception {
+        if ( sourcekey == null || sourcekey.length() != 16 ) {
             throw new Exception("原始KEY必须为16字节字符串");
         }
         byte[] key = sourcekey.substring(0, 8).getBytes(charset);
@@ -219,17 +264,14 @@ public class ZhenZhiHuiSSO{
         return new String(decryptedData, charset);
     }
 
-    private static Hashtable<String, String> toJSON ( String str )
-    {
+    private static Hashtable<String, String> toJSON ( String str ) {
         BufferedReader sr = null;
-        try
-        {
+        try {
             sr = new BufferedReader(new StringReader(str));
             String line = null;
             sr.readLine();
             Hashtable<String, String> ret = new Hashtable<String, String>();
-            while ((line = sr.readLine()) != null)
-            {
+            while ((line = sr.readLine()) != null) {
                 if ( line.length() == 1 )
                     continue;
                 int idx = line.indexOf(":");
@@ -242,13 +284,9 @@ public class ZhenZhiHuiSSO{
                 ret.put(name, val);
             }
             return ret;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             if ( sr != null )
                 try
                 {
