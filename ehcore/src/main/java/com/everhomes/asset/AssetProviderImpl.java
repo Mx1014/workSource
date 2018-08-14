@@ -10,9 +10,11 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.order.OrderDTO;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -5847,5 +5849,24 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetchInto(PaymentBills.class);
     }
-    
+
+	public List<PaymentBillOrder> findPaymentBillOrderRecordByOrderNum(String bizOrderNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentBillOrdersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_BILL_ORDERS);
+        query.addConditions(Tables.EH_PAYMENT_BILL_ORDERS.ORDER_NUMBER.eq(bizOrderNum));
+        return query.fetchInto(PaymentBillOrder.class);
+	}
+
+	public void updatePaymentBillOrder(String bizOrderNum, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhPaymentBillOrders t = Tables.EH_PAYMENT_BILL_ORDERS.as("t");
+        context.update(t)
+                .set(t.PAYMENT_STATUS, paymentStatus)
+                .set(t.PAYMENT_TYPE, paymentType)
+                .set(t.PAYMENT_TIME, payDatetime)
+                .set(t.PAYMENT_CHANNEL, paymentChannel)
+                .where(t.ORDER_NUMBER.eq(bizOrderNum))
+                .execute();
+	}
+
 }

@@ -490,14 +490,28 @@ public class PmsyServiceImpl implements PmsyService{
         });
 		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
 		return callBack;*/
+		
+		PmsyOrder order = createPmsyOrder(cmd);
+		
 		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
         DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
         CreatePaymentBillOrderCommand createPaymentBillOrderCommand = new CreatePaymentBillOrderCommand(); 
-        PmsyOrder order = createPmsyOrder(cmd);
         createPaymentBillOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
         String amount = changePayAmount(order.getOrderAmount());
         createPaymentBillOrderCommand.setAmount(amount);
         createPaymentBillOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        createPaymentBillOrderCommand.setClientAppName(cmd.getClientAppName());
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+  		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+  		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+  		SelectQuery<Record> query = context.selectQuery();
+  		query.addSelect(t.ID, t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
+  			query.addFrom(t);
+  			query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
+  			query.fetch().map(r -> {
+        	  createPaymentBillOrderCommand.setBillGroupId(r.getValue(t.ID));
+              return null;
+         });
         
         return handler.createOrder(createPaymentBillOrderCommand);
 	}

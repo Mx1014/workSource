@@ -1959,13 +1959,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     	}
     }
     
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	PaymentCallBackHandler handler = PlatformContext.getComponent(
-    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE);
-    	//支付模块回调接口，通知支付结果
-    	assetPayService.payNotify(cmd, handler);
-    }
-    
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	return assetProvider.showCreateBillSubItemList(cmd);
     }

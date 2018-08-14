@@ -1,7 +1,9 @@
 package com.everhomes.asset;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,31 +12,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
 import com.everhomes.rest.gorder.order.BusinessPayerType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.OrderErrorCode;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
+import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -63,6 +80,12 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	
 	@Autowired
 	protected GeneralOrderService orderService;
+	
+	@Autowired 
+    private PayService payService;
+	
+	@Autowired
+    private DbProvider dbProvider;
 	
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
@@ -159,9 +182,10 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
             orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
             orderBill.setGeneralOrderId(orderResponse.getOrderId());
-            //orderBill.setOrderType(orderResponse.getPaymentOrderType());
-            orderBill.setPaymentType(cmd.getPaymentType());
+            orderBill.setPaymentType(orderResponse.getPaymentType());
             orderBill.setPaymentChannel(orderResponse.getPaymentChannel());
+            orderBill.setPaymentOrderType(orderResponse.getPaymentOrderType());
+            orderBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             
             billOrderList.add(orderBill);
         }
@@ -448,5 +472,132 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             return true;
         return false;
     }
+    
+    /**
+     * 支付回调
+     * @param cmd
+     * @param handler
+     */
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+    	}
+    	if(cmd == null) {
+    		LOGGER.error("payNotify fail, cmd={}", cmd);
+    	}
+    	//检查订单是否存在
+    	List<PaymentBillOrder> paymentBillOrderList = assetProvider.findPaymentBillOrderRecordByOrderNum(cmd.getBizOrderNum());
+        if(paymentBillOrderList == null || paymentBillOrderList.size() == 0){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+        
+        GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
+        getPurchaseOrderCommand.setAccountCode(accountCode);
+        getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());
+        
+        if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotify-GetPurchaseOrderCommand=" + GsonUtil.toJson(getPurchaseOrderCommand));
+    	}
+        GetPurchaseOrderRestResponse response = orderService.getPurchaseOrder(getPurchaseOrderCommand);
+        if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotify-getPurchaseOrder response=" + GsonUtil.toJson(response));
+    	}
+        if(response == null || !response.getErrorCode().equals(200)) {
+        	throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.PAYMENT_PAYEE_NOT_CONFIG,
+                    "PayNotify getPurchaseOrder by bizOrderNum is error!");
+        }
+        PurchaseOrderDTO purchaseOrderDTO = response.getResponse();
+        if(purchaseOrderDTO != null) {
+        	com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(purchaseOrderDTO.getPaymentOrderType());
+            if(orderType != null) {
+                switch (orderType) {
+                    case PURCHACE:
+                        if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.PAID.getCode()){
+                            //支付成功
+                            paySuccess(purchaseOrderDTO);
+                        }
+                        break;
+                    default:
+                        LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+                }
+            }else {
+                LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+            }
+        }
+        
+        
+    }
+    
+    public void paySuccess(PurchaseOrderDTO purchaseOrderDTO) {
+        LOGGER.error("default payment success call back, purchaseOrderDTO={}", purchaseOrderDTO);
+        List<PaymentBillOrder> paymentBillOrderList = assetProvider.findPaymentBillOrderRecordByOrderNum(purchaseOrderDTO.getBusinessOrderNumber());
+        List<Long> billIds = new ArrayList<>();
+        for(int i = 0; i < paymentBillOrderList.size(); i++){
+        	PaymentBillOrder paymentBillOrder = paymentBillOrderList.get(i); 
+            billIds.add(Long.parseLong(paymentBillOrder.getBillId()));
+        }
+        //这个没有请求第三发，所以直接走
+        this.dbProvider.execute((TransactionStatus status) -> {
+        	//更新eh_payment_bill_orders表
+            assetProvider.updatePaymentBillOrder(purchaseOrderDTO.getBusinessOrderNumber(), purchaseOrderDTO.getPaymentStatus(),
+            		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentTime(), purchaseOrderDTO.getPaymentChannel());
+            //更新eh_payment_bills账单表、EH_PAYMENT_BILL_ITEMS账单费项表
+            assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds, purchaseOrderDTO.getPaymentType());
+            return null;
+        });
+    }
+    
+    /**
+	 * 列出当前项目下所有的收款方账户
+	 */
+	public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags) {
+		ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
+        // 给支付系统的bizUserId的形式：EhOrganizations1037001
+		String userPrefix = "EhOrganizations";
+        cmd.setBizUserId(userPrefix + orgnizationId);
+        if(tags != null && tags.length > 0) {
+            cmd.setTag1s(Arrays.asList(tags));
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", orgnizationId, tags, cmd);
+        }
+        
+        List<PayUserDTO> payUserDTOs = payService.getPayUserList(cmd.getBizUserId(), cmd.getTag1s());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", orgnizationId, tags, GsonUtil.toJson(payUserDTOs));
+        }
+        List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
+        if(payUserDTOs != null){
+            for(PayUserDTO payUserDTO : payUserDTOs) {
+                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+                // 支付系统中的用户ID
+                dto.setAccountId(payUserDTO.getId());
+                // 用户向支付系统注册帐号时填写的帐号名称
+                dto.setAccountName(payUserDTO.getRemark());
+                dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+                // 帐号类型，1-个人帐号、2-企业帐号
+                Integer userType = payUserDTO.getUserType();
+                if(userType != null && userType.equals(2)) {
+                    dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    dto.setAccountType(OwnerType.USER.getCode());
+                }
+                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                Integer registerStatus = payUserDTO.getRegisterStatus();
+                if(registerStatus != null && registerStatus.intValue() == 1) {
+                    dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                result.add(dto);
+            }
+        }
+        return result;
+	}
 
 }
