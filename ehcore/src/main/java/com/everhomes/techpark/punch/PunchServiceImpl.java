@@ -10025,7 +10025,7 @@ public class PunchServiceImpl implements PunchService {
 					dto.setLocationInfo(pl.getLocationInfo());
 					dto.setWifiInfo(pl.getWifiInfo());
 					dto.setUserId(pl.getUserId());
-					dto.setStatus(statusToString(pl.getStatus()));
+					dto.setStatus(statusToString(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
 					OrganizationMember member = findOrganizationMemberByUIdCache(pl.getUserId(),pl.getEnterpriseId());
 					if(null != member){
 						dto.setUserName(member.getContactName());
