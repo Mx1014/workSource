@@ -11389,6 +11389,7 @@ public class PunchServiceImpl implements PunchService {
             }
 
             report1.setProcess(0);
+            setMonthReportProcess(report1, 0);
             report1.setFilerUid(UserContext.currentUserId());
             report1.setFileTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             report1.setFilerName(socialSecurityService.findNameByOwnerAndUser(cmd.getOwnerId(), report1.getFilerUid()));
