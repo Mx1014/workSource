@@ -165,7 +165,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		//拆成两个独立的方法
 		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
 		//后面一个是根据应用id获取菜单的，这个是菜单的锅
-		List<Long> appOriginIds = listUserAppIds(cmd.getUserId(), null, cmd.getOrganizationId());
+		List<Long> appOriginIds = listUserAppIds(UserContext.currentUserId(), null, cmd.getOrganizationId());
 
 
 		List<AppCategoryDTO> dtos = listCategoryByAppIds(appOriginIds);
