@@ -343,11 +343,11 @@ public class ExpressServiceImpl implements ExpressService {
 
 	private boolean checkPrivilege(ExpressOwner owner, Long serviceAddressId, Long expressCompanyId) {
 		//检查该用户是否在权限列表中
-		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), serviceAddressId, expressCompanyId);
-		if (expressUser == null || CommonStatus.fromCode(expressUser.getStatus()) != CommonStatus.ACTIVE) {
-			//检查是否为管理员
-			return checkAdmin(owner);
-		}
+//		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), serviceAddressId, expressCompanyId);
+//		if (expressUser == null || CommonStatus.fromCode(expressUser.getStatus()) != CommonStatus.ACTIVE) {
+//			//检查是否为管理员
+//			return checkAdmin(owner);
+//		}
 		return true;
 	}
 
