@@ -25,6 +25,8 @@ import java.util.List;
  * <li>rxMsgSetting: 接收时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
  * <li>auMsgType: 提交提醒类型 0-不提醒 1-提醒</li>
  * <li>auMsgSetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
+ * <li>iconUri: 图标uri</li>
+ * <li>iconUrl: 图标url</li>
  * <li>updateInfo: 最后编辑信息</li>
  * </ul>
  */
@@ -66,6 +68,10 @@ public class WorkReportDTO {
     private Byte auMsgType;
 
     private ReportMsgSettingDTO auMsgSetting;
+
+    private String iconUri;
+
+    private String iconUrl;
 
     private Timestamp updateTime;
 
@@ -216,6 +222,22 @@ public class WorkReportDTO {
 
     public void setAuMsgSetting(ReportMsgSettingDTO auMsgSetting) {
         this.auMsgSetting = auMsgSetting;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public Timestamp getUpdateTime() {
