@@ -416,7 +416,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
                                 notdeal = false;
 //                                dbProvider.execute((s) -> {
-                                    updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
+                                updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
 //                                    return true;
 //                                });
                             }
