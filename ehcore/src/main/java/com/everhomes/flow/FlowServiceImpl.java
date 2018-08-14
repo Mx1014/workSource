@@ -309,6 +309,7 @@ public class FlowServiceImpl implements FlowService {
         obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
         obj.setValidationStatus(FlowValidationStatus.UNKNOWN.getCode());
         obj.setStatus(FlowStatusType.CONFIG.getCode());
+        obj.setConfigStatus(FlowStatusType.CONFIG.getCode());
         obj.setOrganizationId(cmd.getOrgId());
         obj.setNamespaceId(cmd.getNamespaceId());
         obj.setProjectType(cmd.getProjectType() != null ? cmd.getProjectType() : EntityType.COMMUNITY.getCode());

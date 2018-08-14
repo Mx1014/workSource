@@ -15,7 +15,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCommonStatus;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -640,7 +639,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
             config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
-            config.setStatus(FlowCommonStatus.VALID.getCode());
             generalFormKvConfigProvider.createGeneralFormKvConfig(config);
         }
     }
@@ -682,6 +680,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         if (config != null) {
             config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
             generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        }
+
+        List<GeneralForm> list = generalFormProvider.listGeneralForm(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId());
+        for (GeneralForm form : list) {
+            form.setStatus(GeneralFormStatus.INVALID.getCode());
+            generalFormProvider.updateGeneralForm(form);
         }
     }
 
