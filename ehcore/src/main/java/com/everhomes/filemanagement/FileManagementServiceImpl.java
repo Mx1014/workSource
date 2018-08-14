@@ -699,7 +699,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         result.put("catalogId", catalog.getId());
         if (pathArray.length == 1) {
-            return null;
+            return result;
         }
         Long parentId = null;
         for(int i = 1;i< pathArray.length;i++) {
