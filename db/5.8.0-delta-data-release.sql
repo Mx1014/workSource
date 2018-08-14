@@ -101,16 +101,14 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('55000000', '支付结算管理', '40000040', NULL, NULL, '1', '2', '/40000040/55000000', 'park', '70', NULL, '2', 'system', 'classify', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('56000000', '营销管理', '40000040', NULL, NULL, '1', '2', '/40000040/56000000', 'park', '80', NULL, '2', 'system', 'classify', '2');
 
-
 UPDATE eh_web_menus SET parent_id = 16300000, path = '/16000000/16300000/16070000', `name` = '收款账户'  WHERE id = 16070000;
-
 UPDATE eh_web_menus SET parent_id = 55000000, path = '/40000040/55000000/52000000', `name` = '收款账户'  WHERE id = 52000000;
-
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('140000', '支付结算管理', '200', '/200/140000', '1', '2', '2', '100', '2018-08-14 14:01:29', NULL, NULL, '2018-08-14 14:01:39', '0', '0', '0', '0', '', '1', '1', 'classify');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('170000', '营销管理', '200', '/200/170000', '1', '2', '2', '110', '2018-08-14 14:01:33', NULL, NULL, '2018-08-14 14:01:42', '0', '0', '0', '0', '', '1', '1', 'classify');
 
 UPDATE eh_service_modules SET `name` = '收款账户', parent_id = '140000', path = '/200/140000' WHERE id = 58000;
+UPDATE eh_service_module_apps SET `name` = '收款账户' WHERE module_id = 58000;
 
 
 -- AUTHOR: 杨崇鑫
