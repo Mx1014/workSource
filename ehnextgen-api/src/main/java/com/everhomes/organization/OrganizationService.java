@@ -23,6 +23,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.contract.ContractDTO;
@@ -726,4 +727,9 @@ public interface OrganizationService {
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
+	
+	List<ProjectDTO> getOrganizationProjectIdsByAppId(Long organizationId, Long moduleId, Long originAppId);
+	
+	List<ProjectDTO> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
+			AppInstanceConfigConfigMatchCallBack matchCallback);
 }

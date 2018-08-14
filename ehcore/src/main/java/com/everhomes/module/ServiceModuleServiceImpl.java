@@ -17,6 +17,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
@@ -32,6 +33,8 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.MultipleFlag;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
@@ -61,6 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Type;
@@ -133,6 +137,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private AppCategoryProvider appCategoryProvider;
+    
+    @Autowired
+    private PortalService portalService;
+    
 
 
     @Override
@@ -1732,4 +1740,19 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
         return dto;
     }
+    
+
+    @Override
+	public List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId) {
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(moduleId);
+		ListServiceModuleAppsResponse resp = portalService.listServiceModuleApps(cmd);
+		if (null == resp || CollectionUtils.isEmpty(resp.getServiceModuleApps())) {
+			return null;
+		}
+
+		return resp.getServiceModuleApps();
+	}
+    
 }
