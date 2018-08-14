@@ -27,7 +27,6 @@ import java.util.List;
  * <li>extTotalDisplay: 请假总时长格式化显示，如3.0天1.0小时</li>
  * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
  * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
- * <li>exceptionRequestCount：异常天数 </li>
  * <li>annualLeaveBalance：年假余额</li>
  * <li>overtimeCompensationBalance：调休余额</li>
  * <li>deviceChangeCounts：设备异常数量</li>
@@ -73,7 +72,6 @@ public class PunchCountDTO {
 	private List<ExtDTO> exts;
 	private Byte userStatus;
 	private Integer exceptionDayCount;
-	private Integer exceptionRequestCount;
     private Double annualLeaveBalance;
     private Double overtimeCompensationBalance;
     private Integer deviceChangeCounts;
@@ -240,14 +238,6 @@ public class PunchCountDTO {
 	}
 	public void setPunchMonth(String punchMonth) {
 		this.punchMonth = punchMonth;
-	}
-
-	public Integer getExceptionRequestCount() {
-		return exceptionRequestCount;
-	}
-
-	public void setExceptionRequestCount(Integer exceptionRequestCount) {
-		this.exceptionRequestCount = exceptionRequestCount;
 	}
 
 	public Double getAnnualLeaveBalance() {

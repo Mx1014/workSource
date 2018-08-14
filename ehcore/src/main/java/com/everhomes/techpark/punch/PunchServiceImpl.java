@@ -3727,7 +3727,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(objToString(statistic.getForgotPunchCountOnDuty()));
         row.createCell(++i).setCellValue(objToString(statistic.getForgotPunchCountOffDuty()));
         row.createCell(++i).setCellValue(objToString(statistic.getDeviceChangeCounts()));
-        row.createCell(++i).setCellValue(objToString(statistic.getExceptionRequestCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getExceptionRequestCounts()));
         row.createCell(++i).setCellValue(statistic.getOvertimeTotalWorkdayDisplay());
         row.createCell(++i).setCellValue(statistic.getOvertimeTotalRestdayDisplay());
         row.createCell(++i).setCellValue(statistic.getOvertimeTotalLegalHolidayDisplay());
