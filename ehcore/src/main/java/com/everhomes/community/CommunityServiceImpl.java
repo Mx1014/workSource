@@ -953,6 +953,19 @@ public class CommunityServiceImpl implements CommunityService {
 			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
 			populateBuilding(dto, building);
+			
+			if (dto.getAreaSize()!=null) {
+				dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+			}
+			if(dto.getRentArea()!=null){
+				dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+			}
+			if(dto.getFreeArea()!=null){
+				dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+			}
+			if(dto.getChargeArea()!=null){
+				dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+			}
 
 			return dto;
 		}else {
@@ -5109,7 +5122,7 @@ public class CommunityServiceImpl implements CommunityService {
 			List<Building> buildings = communityProvider.findBuildingsByCommunityId(community.getId());
 			for (Building building : buildings) {
 				initBuildingData(building);
-				List<Address> addresses = addressProvider.findActiveAddressByBuildingName(building.getName());
+				List<Address> addresses = addressProvider.findActiveAddressByBuildingNameAndCommunityId(building.getName(),community.getId());
 				for (Address address : addresses) {
 					//address.setBuildingId(building.getId());
 					//building.setAptCount(building.getAptCount() + 1);
