@@ -85,7 +85,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Override
-    public Object ssoService(HttpServletRequest request, HttpServletResponse response) {
+    public String ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
         String serviceUrl = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.url", "");
         String appkey = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.appkey", "");
@@ -163,10 +163,8 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                     builder.queryParam(entry.getKey(), entry.getValue());
                                 }
                             }
-                            HttpHeaders httpHeaders = new HttpHeaders();
-                            httpHeaders.setLocation(new URI(builder.build().toUriString()));
                             LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , builder.build().toUriString());
-                            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+                            return builder.build().toUriString();
                         }
                     }
                 }

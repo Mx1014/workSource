@@ -7,5 +7,5 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface ZhenZhiHuiService {
-    Object ssoService(HttpServletRequest request, HttpServletResponse response);
+    String ssoService(HttpServletRequest request, HttpServletResponse response);
 }
