@@ -5834,19 +5834,6 @@ public class FlowServiceImpl implements FlowService {
     public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        for (Long flowId : cmd.getFlowIds()) {
-            FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
-            Flow flow = flowGraph.getFlow();
-            flow.setModuleType(cmd.getModuleType());
-            flow.setModuleId(cmd.getModuleId());
-            flow.setProjectType(cmd.getProjectType());
-            flow.setProjectId(cmd.getProjectId());
-            flow.setOwnerType(cmd.getOwnerType());
-            flow.setOwnerId(cmd.getOwnerId());
-
-            doSnapshot(flowGraph, /*isMirror*/true);
-        }
-
         FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
                 cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
@@ -5891,6 +5878,24 @@ public class FlowServiceImpl implements FlowService {
             return Byte.valueOf(config.getValue());
         }
         return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFlowMirror(DoFlowMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long flowId : cmd.getFlowIds()) {
+            FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
+            Flow flow = flowGraph.getFlow();
+            flow.setModuleType(cmd.getModuleType());
+            flow.setModuleId(cmd.getModuleId());
+            flow.setProjectType(cmd.getProjectType());
+            flow.setProjectId(cmd.getProjectId());
+            flow.setOwnerType(cmd.getOwnerType());
+            flow.setOwnerId(cmd.getOwnerId());
+
+            doSnapshot(flowGraph, /*isMirror*/true);
+        }
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {

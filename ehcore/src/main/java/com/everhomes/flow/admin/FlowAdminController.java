@@ -983,4 +983,18 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/flow/doFlowMirror</b>
+     * <p> 复制工作流 </p>
+     */
+    @RequestMapping("doFlowMirror")
+    @RestReturn(value = String.class)
+    public RestResponse doFlowMirror(@Valid DoFlowMirrorCommand cmd) {
+        flowService.doFlowMirror(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

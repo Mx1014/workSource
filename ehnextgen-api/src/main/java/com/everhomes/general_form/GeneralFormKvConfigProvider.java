@@ -9,5 +9,6 @@ public interface GeneralFormKvConfigProvider {
 
 	GeneralFormKvConfig findById(Long id);
 
-	GeneralFormKvConfig findByKey(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId, String key);
+	GeneralFormKvConfig findByKey(Integer namespaceId, String moduleType, Long moduleId,
+								  String projectType, Long projectId, String ownerType, Long ownerId, String key);
 }

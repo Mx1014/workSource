@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>flowIds: 工作流 id 列表</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>moduleType: moduleType</li>
  *     <li>moduleId: moduleId</li>
@@ -16,8 +17,10 @@ import java.util.List;
  *     <li>ownerId: ownerId</li>
  * </ul>
  */
-public class EnableProjectCustomizeCommand {
+public class DoFlowMirrorCommand {
 
+    @NotNull
+    private List<Long> flowIds;
     private Integer namespaceId;
     private String moduleType;
     private Long moduleId;
@@ -25,6 +28,14 @@ public class EnableProjectCustomizeCommand {
     private Long projectId;
     private String ownerType;
     private Long ownerId;
+
+    public List<Long> getFlowIds() {
+        return flowIds;
+    }
+
+    public void setFlowIds(List<Long> flowIds) {
+        this.flowIds = flowIds;
+    }
 
     public String getProjectType() {
         return projectType;
