@@ -8,7 +8,7 @@ public interface UserCurrentProvider {
 
     UserCurrentSceneDTO  getUserCurrentSceneByUid(GetUserCurrentSceneCommand cmd);
 
-    void addUserCurrentScene(UserCurrentSceneCommand cmd);
+    Long addUserCurrentScene(UserCurrentScene bo);
 
-    void updateUserCurrentScene(UserCurrentSceneCommand cmd);
+    void updateUserCurrentScene(UserCurrentScene bo);
 }

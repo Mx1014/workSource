@@ -10,6 +10,7 @@ import com.everhomes.rest.configurations.admin.ConfigurationsIdAdminDTO;
 import com.everhomes.rest.usercurrentscene.GetUserCurrentSceneCommand;
 import com.everhomes.rest.usercurrentscene.UserCurrentSceneCommand;
 import com.everhomes.rest.usercurrentscene.UserCurrentSceneDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/userCurrentScene")
 public class UserCurrentSceneController extends ControllerBase {
 
+    @Autowired
+    private UserCurrentServer userCurrentServer ;
 
     /**
      * <b>URL: /userCurrentScene/getUserCurrentSceneByUid</b>
@@ -28,7 +31,7 @@ public class UserCurrentSceneController extends ControllerBase {
     @RestReturn(value=UserCurrentSceneDTO.class)
     public RestResponse getUserCurrentSceneByUid(GetUserCurrentSceneCommand cmd) {
 
-        UserCurrentSceneDTO resultDTO =null; //configurationsService.getConfigurationById(cmd);
+        UserCurrentSceneDTO resultDTO =userCurrentServer.getUserCurrentSceneByUid(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
         return response;
@@ -43,7 +46,7 @@ public class UserCurrentSceneController extends ControllerBase {
     @RestReturn(value=UserCurrentSceneDTO.class)
     public RestResponse saveUserCurrentScene(UserCurrentSceneCommand cmd) {
 
-        UserCurrentSceneDTO resultDTO =null; //configurationsService.getConfigurationById(cmd);
+        userCurrentServer.saveUserCurrentScene(cmd);
         RestResponse response = new RestResponse();
         setResponseSuccess(response);
         return response;
