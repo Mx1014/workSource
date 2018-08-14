@@ -3020,10 +3020,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         
         address.setStatus(AddressAdminStatus.INACTIVE.getCode());
         addressProvider.updateAddress(address);
+        //删除房源的状态记录
         addressProvider.updateOrganizationAddressMapping(address.getId());
+        //EH_ORGANIZATION_ADDRESSES这个表不知道是干啥的
         addressProvider.updateOrganizationAddress(address.getId());
-        addressProvider.updateOrganizationOwnerAddress(address.getId());
-
+        //删除房源与个人客户的关联关系
+        //addressProvider.updateOrganizationOwnerAddress(address.getId());
+        //删除房源与企业客户的关联关系
+        //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
+        
         //门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要减去相应的值 by xiongying 20170815
         Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
@@ -3071,8 +3076,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
-
-        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -6153,6 +6156,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
+               
+                if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
+                	dto.setAddressExists((byte)1);
+				}else {
+					dto.setAddressExists((byte)0);
+				}
+                
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -6162,7 +6172,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     }
                 }
                 dto.setApartmentLivingStatus(address.getLivingStatus());
-                
                 LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
                         String.valueOf(r.getAuthType()), locale);
                 if (addressStatusLocale != null) {

@@ -54,6 +54,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -2646,6 +2647,13 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
+                
+                if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
+                	dto.setAddressExists((byte)1);
+				}else {
+					dto.setAddressExists((byte)0);
+				}
+                
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -2660,7 +2668,6 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setBuildingId(building.getId());
             }
         }
-
         return dto;
     }
 
