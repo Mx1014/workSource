@@ -507,7 +507,7 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             }
         });
 
-        if(authorizations != null && authorizations.size() == 0){
+        if(authorizations != null && authorizations.size() > 0){
             return authorizations.get(0);
         }
         return null;

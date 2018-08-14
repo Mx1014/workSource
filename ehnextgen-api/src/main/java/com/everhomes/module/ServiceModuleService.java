@@ -75,4 +75,6 @@ public interface ServiceModuleService {
 	void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd);
 
 	void exportServiceModuleEntries(HttpServletResponse response);
+
+	List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId);
 }
