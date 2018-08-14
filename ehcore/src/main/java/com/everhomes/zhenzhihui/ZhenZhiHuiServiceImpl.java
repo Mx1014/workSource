@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import sun.misc.BASE64Decoder;
+import sun.rmi.runtime.Log;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -124,12 +125,13 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             User user = this.userService.findUserByIndentifier(ZHENZHIHUI_NAMESPACE_ID, zhenZhiHuiUserInfoDTO.getShouji());
                             if (user == null) {
                                 user = createUserAndUserIdentifier(zhenZhiHuiUserInfoDTO);
+                                LOGGER.info("create user for zhenzhihui, userId = {}",user.getId());
                             }
                             UserLogin login = this.userService.innerLogin(ZHENZHIHUI_NAMESPACE_ID,user.getId(), null, null);
                             LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
                             String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
                             setCookieInResponse("token", tokenString, request, response);
-
+                            LOGGER.info("zhenzhihui user login,userId = {}, token = {}", user.getId(), tokenString);
                             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("");
 
                             SceneTokenDTO sceneTokenDTO = new SceneTokenDTO();
@@ -146,7 +148,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                 sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
                                 builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
                             }
-
+                            LOGGER.info("sceneToken = {}", sceneTokenDTO);
                             builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
@@ -157,7 +159,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             }
                             HttpHeaders httpHeaders = new HttpHeaders();
                             httpHeaders.setLocation(new URI(builder.build().toUriString()));
-
+                            LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , builder.build().toUriString());
                             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
                         }
                     }
