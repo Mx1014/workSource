@@ -6,6 +6,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.module.AppCategoryProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
@@ -18,6 +19,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
+import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.rest.acl.WebMenuType;
@@ -94,6 +96,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private OrganizationAppProvider organizationAppProvider;
 
+	@Autowired
+	private AppCategoryProvider appCategoryProvider;
+
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
 		Long userId = cmd.getUserId();
@@ -144,6 +149,34 @@ public class WebMenuServiceImpl implements WebMenuService {
 	}
 
 	private List<WebMenuDTO> listWebMenus(Long userId, WebMenu menu, List<String> categories, Long organizationId){
+
+		//拆成两个独立的方法
+		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
+		//后面一个是根据应用id获取菜单的，这个是菜单的锅
+		List<Long> appOriginIds = listUserAppIds(userId, menu, organizationId);
+
+		// 根据应用id拿菜单
+		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
+
+		return webMenuDTOS;
+	}
+
+	private List<AppCategoryDTO> listUserAppCategory(Long userId, Long organizationId){
+		//拆成两个独立的方法
+		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
+		//后面一个是根据应用id获取菜单的，这个是菜单的锅
+		List<Long> appOriginIds = listUserAppIds(userId, null, organizationId);
+
+
+
+
+
+	}
+
+
+	@Override
+	public List<Long> listUserAppIds(Long userId, WebMenu menu, Long organizationId){
+
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		String path = null;
 		if(null != menu){
@@ -170,7 +203,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, ServiceModuleAppType.OA.getCode(), null, OrganizationAppStatus.ENABLE.getCode(), null);
 
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
-		
+
 		//填充OA和无限制的应用id
 		orgApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
 		unlimitApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
@@ -229,38 +262,38 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 			appOriginIds = appIds;
 		}
-		
+
 		//这里需要优化，需要缓存
 		List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
 		List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
 		Map<Long, ServiceModuleApp> communityAppMap = new HashMap<Long, ServiceModuleApp>();
-        for(ServiceModuleApp r: allApps) {
-            if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
-                communityAppMap.put(r.getOriginId(), r); 
-            }
-        }
+		for(ServiceModuleApp r: allApps) {
+			if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+				communityAppMap.put(r.getOriginId(), r);
+			}
+		}
 		for(Long authAppId : authAppIds) {
-		    ServiceModuleApp app = communityAppMap.get(authAppId);
-		    if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
-		        //如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
-	            ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
-	            relatedProjectCmd.setAppId(authAppId);
-	            relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-	            relatedProjectCmd.setOrganizationId(organizationId);
-	            List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-	            if(projects != null && projects.size() > 0) {
-	                authAppIdsWithoutZeroProjects.add(authAppId);       
-	            }
-		    } else {
+			ServiceModuleApp app = communityAppMap.get(authAppId);
+			if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+				//如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
+				ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+				relatedProjectCmd.setAppId(authAppId);
+				relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+				relatedProjectCmd.setOrganizationId(organizationId);
+				List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+				if(projects != null && projects.size() > 0) {
+					authAppIdsWithoutZeroProjects.add(authAppId);
+				}
+			} else {
 
-		    	//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
+				//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
 				OrganizationApp organizationApp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(authAppId, organizationId);
 				if(organizationApp == null || OrganizationStatus.fromCode(organizationApp.getStatus()) != OrganizationStatus.ACTIVE){
 					continue;
 				}
 
 				authAppIdsWithoutZeroProjects.add(authAppId);
-		    }
+			}
 		}
 
 		// 取下交集
@@ -281,13 +314,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 		appOriginIds.clear();
 		appOriginIds.addAll(appOriginIdSet);
 
-		// 根据应用id拿菜单
-		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
-
-
-		return webMenuDTOS;
-
+		return appOriginIds;
 	}
+
+
+
 
 	private List<Long> getNoAuthOriginId(Integer namespaceId){
 
@@ -339,6 +370,28 @@ public class WebMenuServiceImpl implements WebMenuService {
 		addOaDefaultMenu(dtos, webMenuType);
 
 		return dtos;
+
+	}
+
+
+	private List<AppCategoryDTO> listCategoryByAppIds(List<Long> appIds){
+
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<WebMenu> webMenus = listWebMenuByAppOriginIds(namespaceId, WebMenuType.PARK.getCode(), appIds);
+
+		if(webMenus == null || webMenus.size() == 0){
+			return null;
+		}
+
+
+
+		appCategoryProvider.listAppCategories()
+
+
+
+
+		return null;
 
 	}
 
