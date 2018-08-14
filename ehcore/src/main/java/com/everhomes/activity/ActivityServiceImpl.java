@@ -30,6 +30,7 @@ import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.InteractSetting;
 import com.everhomes.forum.Post;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -39,6 +40,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.order.OrderService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
@@ -52,6 +54,7 @@ import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.poll.ProcessStatus;
@@ -200,6 +203,12 @@ import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessOrderType;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -486,6 +495,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private GeneralOrderService orderService;
 
     @Autowired
     private TaskService taskService;
@@ -1131,6 +1143,243 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         return callback;
     }
 
+    private PurchaseOrderCommandResponse createCommonSignupOrder(CreateSignupOrderV2Command cmd) {
+        //校验参数
+        ActivityRoster roster = checkRoster(cmd);
+        Activity activity = checkActivity(roster);
+
+        //收款方
+        ActivityBizPayee activityBizPayee = checkPaymentPayeeId(activity);
+
+        //组装订单数据
+        CreatePurchaseOrderCommand createPurchaseOrderCommand = preparePaymentSignupOrder(cmd, roster, activity, activityBizPayee);
+
+        // 发送下单请求
+        return sendCreatePreOrderRequest(createPurchaseOrderCommand);
+    }
+
+    @Override
+    public PreOrderDTO createUniteSignupOrder(CreateSignupOrderV2Command cmd) {
+        PurchaseOrderCommandResponse response = createCommonSignupOrder(cmd);
+
+        afterSignupOrderCreated(cmd,response);
+        // 返回给客户端支付的报文
+        return populatePreOrderDto(response);
+    }
+
+    private ActivityRoster checkRoster(CreateSignupOrderV2Command cmd){
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        return roster;
+    }
+    private Activity checkActivity(ActivityRoster roster) {
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+        return activity;
+    }
+    private ActivityBizPayee checkPaymentPayeeId(Activity activity){
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(),activity.getNamespaceId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
+        return activityBizPayee;
+    }
+
+    private CreatePurchaseOrderCommand preparePaymentSignupOrder(CreateSignupOrderV2Command cmd, ActivityRoster roster, Activity activity, ActivityBizPayee activityBizPayee) {
+        CreatePurchaseOrderCommand createPurchaseOrderCommand = new CreatePurchaseOrderCommand();
+
+        BigDecimal amout = activity.getChargePrice();
+        if(amout == null){
+            createPurchaseOrderCommand.setAmount(new BigDecimal(0));
+        }
+        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)));
+
+        createPurchaseOrderCommand.setAccountCode(generateAccountCode());
+        createPurchaseOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        createPurchaseOrderCommand.setBusinessOrderType(generateBusinessOrderType(cmd));
+        createPurchaseOrderCommand.setBusinessPayerType(BusinessPayerType.USER.getCode());
+        createPurchaseOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+        createPurchaseOrderCommand.setBusinessPayerParams(getBusinessPayerParams(cmd));
+
+        createPurchaseOrderCommand.setPaymentPayeeId(activityBizPayee.getBizPayeeId());
+        createPurchaseOrderCommand.setPaymentPayeeType(activityBizPayee.getBizPayeeType());
+
+        createPurchaseOrderCommand.setExtendInfo(getExtendInfo(activity));
+        createPurchaseOrderCommand.setPaymentParams(getPaymentParams(cmd));
+        createPurchaseOrderCommand.setExpirationMillis(getExpirationMillis(roster));
+        createPurchaseOrderCommand.setCallbackUrl(getPayCallbackUrl());
+        createPurchaseOrderCommand.setGoodName("活动报名");
+        createPurchaseOrderCommand.setGoodsDescription(null);
+        createPurchaseOrderCommand.setIndustryName(null);
+        createPurchaseOrderCommand.setIndustryCode(null);
+        createPurchaseOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        createPurchaseOrderCommand.setOrderRemark1("活动报名");
+        createPurchaseOrderCommand.setOrderRemark3(null);
+        createPurchaseOrderCommand.setOrderRemark4(null);
+        createPurchaseOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        return createPurchaseOrderCommand;
+    }
+
+    private PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
+        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
+        }
+
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+
+        return orderCommandResponse;
+    }
+
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
+    private String generateAccountCode(){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        return "NS"+namespaceId;
+    }
+
+    private String generateBusinessOrderType(CreateSignupOrderV2Command cmd){
+        if (cmd.getPaymentType() != null) {
+            return BusinessOrderType.ACTIVITYSIGNUPORDERWECHAT.getCode();
+        }else {
+            return BusinessOrderType.ACTIVITYSIGNUPORDER.getCode();
+        }
+    }
+
+    private String getBusinessPayerParams(CreateSignupOrderV2Command cmd) {
+        OwnerType businessPayerType = OwnerType.USER;
+
+        // 如果参数中的付款方ID不正确，则使用当前用户ID
+        Long businessPayerId = UserContext.currentUserId();
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, UserContext.getCurrentNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
+    }
+
+    private String getExtendInfo(Activity activity) {
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        return "应用名称："+activityCategories.getName()+"；活动名称："+activity.getSubject();
+    }
+
+    private Map<String, String> getPaymentParams(CreateSignupOrderV2Command cmd) {
+        Map<String, String> map = null;
+
+        PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+        if (paymentType == PaymentType.WECHAT_JS_ORG_PAY) {
+            Long businessPayerId = UserContext.currentUserId();
+            User payer = userProvider.findUserById(businessPayerId);
+            if(payer != null) {
+                map = new HashMap<String, String>();
+                map.put("acct", payer.getNamespaceUserToken());
+            } else {
+                LOGGER.error("User not found, userId={}, activityId={}", businessPayerId, cmd.getActivityId());
+            }
+        }
+
+        return map;
+    }
+
+    private Long getExpirationMillis(ActivityRoster roster) {
+        GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+        timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+        Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+        return expiredTime;
+    }
+
+    private String getPayCallbackUrl() {
+        String configKey = "pay.v2.callback.url.activity";
+        String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
+        if(backUrl == null || backUrl.trim().length() == 0) {
+            LOGGER.error("Payment callback url empty, configKey={}", configKey);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAY_CALLBACK_URL_EMPTY,
+                    "Payment callback url empty");
+        }
+
+        if(!backUrl.toLowerCase().startsWith("http")) {
+            String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+            backUrl = homeUrl + contextPath + backUrl;
+        }
+        return backUrl;
+    }
+
+    private PreOrderDTO populatePreOrderDto(PurchaseOrderCommandResponse orderResponse){
+        OrderCommandResponse orderCommandResponse = orderResponse.getPayResponse();
+        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
+            payMethods.add(payMethodDTO);
+        }
+        dto.setPayMethod(payMethods);
+        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+        if(orderResponse.getAmount() != null) {
+            dto.setAmount(orderResponse.getAmount().longValue());
+        }
+        dto.setOrderId(orderResponse.getOrderId());
+        return dto;
+    }
+
+
+    private void afterSignupOrderCreated(CreateSignupOrderV2Command cmd, PurchaseOrderCommandResponse response){
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        roster.setPayOrderId(response.getOrderId());
+//        roster.setOrderNo(response.getBusinessOrderNumber());
+        activityProvider.updateRoster(roster);
+    }
+
     private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
@@ -1243,35 +1492,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
         CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
         createSignupOrderV2Command.setActivityId(cmd.getActivityId());
-        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-        if(roster == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-                    "no roster.");
-        }
-        if (roster.getPayOrderId() != null) {
-            activityProvider.deleteRoster(roster);
-            roster.setId(null);
-            roster.setPayOrderId(null);
-            Long orderNo = this.onlinePayService.createBillId(DateHelper
-                    .currentGMTTime().getTime());
-            roster.setOrderNo(orderNo);
-            activityProvider.createActivityRoster(roster);
-        }
-        Activity activity = activityProvider.findActivityById(roster.getActivityId());
-        if(activity == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-                    "no activity.");
-        }
-        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
-        setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
-        LOGGER.info("createPreOrder createOrderCommand={}",createOrderCommand);
-        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
-        CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
-        callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
+        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+
+        PurchaseOrderCommandResponse response = this.createCommonSignupOrder(createSignupOrderV2Command);
+
+        CreateWechatJsPayOrderResp callback = ConvertHelper.convert(response.getPayResponse(),CreateWechatJsPayOrderResp.class);
         callback.setPayNo(response.getOrderId().toString());
-        roster.setPayOrderId(response.getOrderId());
-        activityProvider.updateRoster(roster);
+        afterSignupOrderCreated(createSignupOrderV2Command, response);
         return callback;
 	}
 

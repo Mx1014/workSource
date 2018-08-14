@@ -37,6 +37,8 @@ public interface ActivityService {
 
     PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
 
+    PreOrderDTO createUniteSignupOrder(CreateSignupOrderV2Command cmd);
+
     CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
