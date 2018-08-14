@@ -6138,4 +6138,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
 	}
 
+	@Override
+	public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

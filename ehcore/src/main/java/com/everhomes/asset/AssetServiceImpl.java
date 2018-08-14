@@ -30,10 +30,12 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -41,6 +43,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -216,7 +219,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ContractServiceImpl contractService;
-
+    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -5315,5 +5320,6 @@ public class AssetServiceImpl implements AssetService {
 		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
 		return response;
 	}
+
 
 }
