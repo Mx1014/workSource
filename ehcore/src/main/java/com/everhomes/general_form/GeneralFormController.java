@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.flow.DeleteFlowByCondCommand;
 import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,4 +82,30 @@ public class GeneralFormController extends ControllerBase {
         return response;
     }
 
+	/**
+	 * <b>URL: /general_form/doFormMirror</b>
+	 * <p> 表单镜像 </p>
+	 */
+	@RequestMapping("doFormMirror")
+	@RestReturn(value=String.class)
+	public RestResponse doFormMirror(DoFormMirrorCommand cmd) {
+		generalFormService.doFormMirror(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/deleteFormByCond</b>
+	 * <p> 根据条件删除表单 </p>
+	 */
+	@RequestMapping("deleteFormByCond")
+	@RestReturn(value = String.class)
+	public RestResponse deleteFormByCond(@Valid DoFormMirrorCommand cmd) {
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

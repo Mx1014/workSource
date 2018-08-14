@@ -941,4 +941,32 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/flow/doFlowMirror</b>
+     * <p> 镜像工作流 </p>
+     */
+    @RequestMapping("doFlowMirror")
+    @RestReturn(value = String.class)
+    public RestResponse doFlowMirror(@Valid DoFlowMirrorCommand cmd) {
+        flowService.doFlowMirror(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowByCond</b>
+     * <p> 根据条件删除工作流 </p>
+     */
+    @RequestMapping("deleteFlowByCond")
+    @RestReturn(value = String.class)
+    public RestResponse deleteFlowByCond(@Valid DeleteFlowByCondCommand cmd) {
+        flowService.deleteFlowByCond(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -543,4 +543,8 @@ public interface FlowService {
 	void updateSubFlowInfo(UpdateSubFlowInfoCommand cmd);
 
     FlowServiceMappingDTO getFlowServiceMapping(GetFlowServiceMappingCommand cmd);
+
+	void doFlowMirror(DoFlowMirrorCommand cmd);
+
+	void deleteFlowByCond(DeleteFlowByCondCommand cmd);
 }
