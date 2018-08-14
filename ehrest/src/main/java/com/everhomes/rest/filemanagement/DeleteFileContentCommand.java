@@ -7,36 +7,29 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>contendIds: (List)内容ids</li>
- * <li>path: 目标路径 (如果移动走就不删了)</li>
+ * <li>contents: (List)要删除的文件/文件夹列表 参考 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * </ul>
  */
 public class DeleteFileContentCommand {
-
-    @ItemType(Long.class)
-    private List<Long> contendIds;
-    private String path;
+ 
+    private List<FileContentDTO> contents; 
     public DeleteFileContentCommand() {
     }
-
-    public List<Long> getContendIds() {
-        return contendIds;
-    }
-
-    public void setContendIds(List<Long> contendIds) {
-        this.contendIds = contendIds;
-    }
+ 
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public String getPath() {
-        return path;
-    }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+	public List<FileContentDTO> getContents() {
+		return contents;
+	}
+
+
+	public void setContents(List<FileContentDTO> contents) {
+		this.contents = contents;
+	}
+ 
 }
