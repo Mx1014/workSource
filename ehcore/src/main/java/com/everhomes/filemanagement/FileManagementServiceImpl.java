@@ -438,11 +438,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     @Override
     public void deleteFileContents(DeleteFileContentCommand cmd) {
-        for (Long contentId : cmd.getContendIds()) {
-
+        for (FileContentDTO dto : cmd.getContents()) {
+        	Long contentId = dto.getId();
             FileContent content = fileManagementProvider.findFileContentById(contentId);
 
-            Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
+            Map<String, Long> map = checkFilePath(content.getPath(), content.getOwnerId());
             Long parentId = map.get("parentId");
             Long catalogId = map.get("catalogId");
             if (checkContentMoved(content, parentId, catalogId)) {
