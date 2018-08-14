@@ -53,7 +53,7 @@ ALTER TABLE eh_flows ADD COLUMN config_status TINYINT NOT NULL DEFAULT 0 COMMENT
 --
 -- 工作流 key-value 表  add by xq.tian  20180814
 --
-DROP TABLE `eh_flow_kv_configs`;
+DROP TABLE IF EXISTS `eh_flow_kv_configs`;
 CREATE TABLE `eh_flow_kv_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -76,7 +76,7 @@ CREATE TABLE `eh_flow_kv_configs` (
 --
 -- 表单 key-value 表  add by xq.tian  20180814
 --
-DROP TABLE `eh_general_form_kv_configs`;
+DROP TABLE IF EXISTS `eh_general_form_kv_configs`;
 CREATE TABLE `eh_general_form_kv_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
