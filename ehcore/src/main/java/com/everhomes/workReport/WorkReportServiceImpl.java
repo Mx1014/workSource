@@ -154,6 +154,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         return null;
     }
 
+    @Override
+    public WorkReportDTO getWorkReport(WorkReportIdCommand cmd) {
+        return null;
+    }
+
     private void updateWorkReportScopeMap(Integer namespaceId, Long reportId, List<WorkReportScopeMapDTO> scopes) {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();

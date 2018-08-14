@@ -21,8 +21,10 @@ import java.util.List;
  * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>reportType: 汇报类型</li>
+ * <li>validitySetting: 提交时间设置</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
+ * <li>iconUrl: 图标url</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
  * <li>ownerToken: 实体标识(对接评论模块)</li>
@@ -53,10 +55,14 @@ public class WorkReportValDTO {
 
     private Byte reportType;
 
+    private ReportValiditySettingDTO validitySetting;
+
     @ItemType(GeneralFormFieldDTO.class)
     private List<GeneralFormFieldDTO> values;
 
     private Byte readStatus;
+
+    private String iconUrl;
 
     private Timestamp updateTime;
 
@@ -155,6 +161,14 @@ public class WorkReportValDTO {
         this.reportType = reportType;
     }
 
+    public ReportValiditySettingDTO getValiditySetting() {
+        return validitySetting;
+    }
+
+    public void setValiditySetting(ReportValiditySettingDTO validitySetting) {
+        this.validitySetting = validitySetting;
+    }
+
     public List<GeneralFormFieldDTO> getValues() {
         return values;
     }
@@ -169,6 +183,14 @@ public class WorkReportValDTO {
 
     public void setReadStatus(Byte readStatus) {
         this.readStatus = readStatus;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public Timestamp getUpdateTime() {
