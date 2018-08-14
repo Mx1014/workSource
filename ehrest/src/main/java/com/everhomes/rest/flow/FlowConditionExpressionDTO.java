@@ -31,6 +31,14 @@ public class FlowConditionExpressionDTO {
     private String variableType2;
     private String variable2;
 
+    private String variableExtra1;
+    private String variableExtra2;
+
+    private String entityType1;
+    private Long entityId1;
+    private String entityType2;
+    private Long entityId2;
+
     public Long getId() {
         return id;
     }
@@ -117,6 +125,54 @@ public class FlowConditionExpressionDTO {
 
     public void setVariableType2(String variableType2) {
         this.variableType2 = variableType2;
+    }
+
+    public String getVariableExtra1() {
+        return variableExtra1;
+    }
+
+    public void setVariableExtra1(String variableExtra1) {
+        this.variableExtra1 = variableExtra1;
+    }
+
+    public String getVariableExtra2() {
+        return variableExtra2;
+    }
+
+    public void setVariableExtra2(String variableExtra2) {
+        this.variableExtra2 = variableExtra2;
+    }
+
+    public String getEntityType1() {
+        return entityType1;
+    }
+
+    public void setEntityType1(String entityType1) {
+        this.entityType1 = entityType1;
+    }
+
+    public Long getEntityId1() {
+        return entityId1;
+    }
+
+    public void setEntityId1(Long entityId1) {
+        this.entityId1 = entityId1;
+    }
+
+    public String getEntityType2() {
+        return entityType2;
+    }
+
+    public void setEntityType2(String entityType2) {
+        this.entityType2 = entityType2;
+    }
+
+    public Long getEntityId2() {
+        return entityId2;
+    }
+
+    public void setEntityId2(Long entityId2) {
+        this.entityId2 = entityId2;
     }
 
     @Override

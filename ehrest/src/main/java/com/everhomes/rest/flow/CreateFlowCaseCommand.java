@@ -46,6 +46,7 @@ public class CreateFlowCaseCommand {
     private Long applierOrganizationId;
 
     private String routeUri;
+    private Long subFlowParentId;
 
     @ItemType(FlowCaseAdditionalFieldDTO.class)
     private FlowCaseAdditionalFieldDTO additionalFieldDTO;
@@ -186,7 +187,15 @@ public class CreateFlowCaseCommand {
 		this.applierOrganizationId = applierOrganizationId;
 	}
 
-	@Override
+    public Long getSubFlowParentId() {
+        return subFlowParentId;
+    }
+
+    public void setSubFlowParentId(Long subFlowParentId) {
+        this.subFlowParentId = subFlowParentId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -543,7 +543,11 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
         try {
             if (TerminalStatisticsTaskStatus.fromCode(task.getStatus()) == TerminalStatisticsTaskStatus.CORRECT_USER_ACTIVITY) {
-                this.correctUserActivity(namespaceId, date);
+                try {
+                    this.correctUserActivity(namespaceId, date);
+                } catch (Exception e) {
+                    LOGGER.error("correct user activity error", e);
+                }
                 task.setStatus(TerminalStatisticsTaskStatus.GENERATE_HOUR_STAT.getCode());
                 statTerminalProvider.updateTerminalStatisticsTask(task);
             }
@@ -767,7 +771,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             activityList.add(activity);
         }
-        userActivityProvider.addActivities(activityList);
+        if (activityList.size() > 0) {
+            userActivityProvider.addActivities(activityList);
+        }
 
         ListingLocator locator = new ListingLocator();
         do {

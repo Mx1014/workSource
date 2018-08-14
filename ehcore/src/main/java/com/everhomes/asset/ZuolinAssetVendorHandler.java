@@ -14,12 +14,14 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -57,6 +59,9 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +132,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private AssetPayServiceForEnt assetPayServiceForEnt;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -642,7 +650,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+    	PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
             cmd.setPageSize(20);
         }
@@ -657,7 +665,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
-        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         
         Contract contract = contractProvider.findContractById(cmd.getContractId());
         for (PaymentExpectancyDTO dto : dtos) {
@@ -675,7 +683,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
-        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
+        BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
         response.setGenerated((byte)1);
@@ -845,38 +853,24 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        	EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-        	paymentBills = context.selectFrom(Tables.EH_PAYMENT_BILLS)
-	            .where(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(cmd.getTargetType()))
-	            .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))//账单的状态，0:未出账单;1:已出账单
-	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
-	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
-	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
-	            .and(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.greaterThan(BigDecimal.ZERO))//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的
-	            .fetchInto(PaymentBills.class);
-        	Iterator<PaymentBills> iter = paymentBills.iterator();  
-        	while (iter.hasNext()) {
-        		PaymentBills paymentBillsDTO = iter.next();
-        	   //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-                //List<Long> queryAddressIds = new ArrayList<>();
-        		List<String> queryAddressList = new ArrayList<>();
-            	context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
-            		.from(t2)
-            		.where(t2.BILL_ID.eq(paymentBillsDTO.getId()))
-            		.fetch()
-                	.forEach(r2 ->{
-                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
-                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
-                });
-            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressList.containsAll(queryAddressList)) {
-            		iter.remove();
-            	}
-//            	if(!addressIds.containsAll(queryAddressIds)) {
-//            		iter.remove();
-//            	}
-        	}
+            SelectQuery<Record> query = context.selectQuery();
+            query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
+                    t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL);
+            query.addFrom(t, t2);
+            query.addConditions(t.ID.eq(t2.BILL_ID));
+            query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
+            query.addConditions(t.SWITCH.eq((byte)1));//账单的状态，0:未出账单;1:已出账单
+            query.addConditions(t.STATUS.eq((byte)0));//账单状态，0:待缴;1:已缴
+            query.addConditions(t.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
+            query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addConditions(t.AMOUNT_OWED.greaterThan(BigDecimal.ZERO));//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的       
+            query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addGroupBy(t.ID);
+            paymentBills = query.fetchInto(PaymentBills.class);
         }
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
@@ -1069,33 +1063,48 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        	ArrayList<Long> groupIds = new ArrayList<>();
+        	EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-            listAllBillsForClientDTOs = assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),
-        			cmd.getTargetType(), null, status, cmd.getBillGroupId());
-            Iterator<ListAllBillsForClientDTO> iter = listAllBillsForClientDTOs.iterator();  
-        	while (iter.hasNext()) {
-        		ListAllBillsForClientDTO ListAllBillsForClientDTO = iter.next();
-        	    //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-        		//List<Long> queryAddressIds = new ArrayList<>();
-        		List<String> queryAddressList = new ArrayList<>();
-        		context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
-            		.from(t2)
-            		.where(t2.BILL_ID.eq(Long.parseLong(ListAllBillsForClientDTO.getBillId())))
-            		.fetch()
-                	.forEach(r2 ->{
-                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
-                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
-                });
-            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressList.containsAll(queryAddressList)) {
-            		iter.remove();
-            	}
-//            	if(!addressIds.containsAll(queryAddressIds)) {
-//            		iter.remove();
-//            	}
-        	}
-            
+            SelectQuery<Record> query = context.selectQuery();
+            query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
+                    t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
+                    t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
+            		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"));
+            query.addFrom(t, t2);
+            query.addConditions(t.ID.eq(t2.BILL_ID));
+            query.addConditions(t.TARGET_TYPE.eq(cmd.getTargetType()));
+            query.addConditions(t.SWITCH.eq((byte)1));//账单的状态，0:未出账单;1:已出账单
+            if(status != null){
+                query.addConditions(t.STATUS.eq(status));
+            }
+            if(cmd.getBillGroupId() != null){
+                query.addConditions(t.BILL_GROUP_ID.eq(cmd.getBillGroupId()));
+            }
+            query.addConditions(t.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
+            query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+            query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addGroupBy(t.ID);
+            query.addOrderBy(t.DATE_STR.desc());
+            List<ListAllBillsForClientDTO> list = new ArrayList<>();
+            query.fetch().map(r -> {
+                ListAllBillsForClientDTO dto = new ListAllBillsForClientDTO();
+                groupIds.add(r.getValue(t.BILL_GROUP_ID));
+                dto.setAmountOwed(r.getValue(t.AMOUNT_OWED).toString());
+                dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE).toString());
+                dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                dto.setChargeStatus(r.getValue(t.STATUS));
+                dto.setBillId(String.valueOf(r.getValue(t.ID)));
+                list.add(dto);
+                return null;
+            });
+		    Map<Long,String> groupNames = assetProvider.getGroupNames(groupIds);
+		    for(int i = 0 ; i < list.size(); i ++){
+		    	list.get(i).setBillGroupName(groupNames.get(groupIds.get(i)));
+		    }
+		    listAllBillsForClientDTOs = list;
         }
         return listAllBillsForClientDTOs;
     }
@@ -1134,6 +1143,24 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             headList.add(dto.getBillItemName()+"(元)");
             cur++;
             mandatoryIndex.add(1);//收费项为必填
+            //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+            if(assetService.isShowEnergy(cmd.getNamespaceId(), cmd.getCommunityId(), ServiceModuleConstants.ASSET_MODULE)) {//判断该域空间下是否显示用量
+            	if(dto.getBillItemId() != null) {
+                	if(dto.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                		headList.add("用量（吨）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+                	}else if (dto.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		headList.add("用量（度）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+    				}
+                }
+            }
         }
         headList.add("楼栋/门牌");
         cur++;
@@ -1179,12 +1206,13 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         "4、带有星号（*）的红色字段为必填项。\n" +
                         "5、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
                         "6、企业客户需填写与系统内客户管理一致的企业名称，个人客户需填写与系统内个人客户资料一致的楼栋门牌，否则会导致无法定位客户。\n" +
-                        "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12", (short)13, (short)2500)
+                        "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12。\n" +
+                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。", (short)13, (short)2500)
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
     }
-
+    
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
         BatchImportBillsResponse response = new BatchImportBillsResponse();
@@ -1468,17 +1496,17 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     cmd.setNoticeTel(data[j]);
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
-                    if(itemPojo == null){
+                	if(itemPojo == null){
                         log.setErrorLog("没有找到收费项目");
                         log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
                         datas.add(log);
                         continue bill;
                     }
-                    BigDecimal amountReceivable = null;
+                	BigDecimal amountReceivable = null;
                     if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("收费项目:"+headers[j]+"必填");
                         log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
-                        datas.add(log);
+                        datas.add(log); 
                         continue bill;
                     }try{
                         amountReceivable = new BigDecimal(data[j]);
@@ -1494,7 +1522,18 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);
-                    billItemDTOList.add(item);
+                    //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                    if(assetService.isShowEnergy(namespaceId, ownerId, ServiceModuleConstants.ASSET_MODULE)) {
+                    	//判断该域空间下是否显示用量  
+                    	//如果费项是属于自用水电费、公摊水电费，那么会有用量
+                    	if(itemPojo.getId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                        		|| itemPojo.getId().equals(AssetEnergyType.personElectricItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicWaterItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                    		item.setEnergyConsume(data[++j]);
+                        }
+                    }
+                	billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
                     try{
@@ -1961,5 +2000,55 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	return assetProvider.showCreateBillSubItemList(cmd);
+    }        
+    
+    public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+        List<BillIdAndAmount> bills = cmd.getBills();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        for(BillIdAndAmount billIdAndAmount : bills){
+            billIds.add(billIdAndAmount.getBillId());
+            String amountOwed = billIdAndAmount.getAmountOwed();
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+        }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
+        //如果账单为新的，则进行存储
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        assetProvider.saveOrderBills(bills,orderId);
+        Long payerId = Long.parseLong(cmd.getPayerId());
+        //检查下单人的类型和id，不能为空
+        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
+            payerId = UserContext.currentUserId();
+        }
+        //组装command ， 请求支付模块的下预付单
+        PreOrderCommand cmd2pay = new PreOrderCommand();
+        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setCommunityId(cmd.getCommunityId());
+        cmd2pay.setClientAppName(cmd.getClientAppName());
+        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
+        cmd2pay.setNamespaceId(cmd.getNamespaceId());
+        cmd2pay.setOpenid(cmd.getOpenid());
+        cmd2pay.setOrderId(orderId);
+        cmd2pay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        cmd2pay.setPayerId(payerId);
+        //通过账单ID找到ownerID，再通过ownerID找到项目名称
+        String projectName = "";
+        if(billIds != null) {
+        	Long billId = Long.parseLong(billIds.get(0));
+        	projectName = assetProvider.getProjectNameByBillID(billId);
+        }
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        String billGroupName = "";
+        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        if(paymentBillGroup != null) {
+        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
+        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        	billGroupName = paymentBillGroup.getName();
+        }
+        cmd2pay.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
+        PreOrderDTO preOrder = assetPayServiceForEnt.createPreOrder(cmd2pay);
+        return preOrder;
     }
 }

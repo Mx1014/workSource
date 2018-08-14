@@ -157,9 +157,9 @@ public interface ParkingProvider {
 
     List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
 
-    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
+    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId,Long startCreateTime,Long endCreateTime, Integer pageSize, Long pageAnchor);
 
-    Long ParkingRechargeOrdersByUserId(Long userId);
+    Long ParkingRechargeOrdersByUserId(Long userId,Long startCreateTime,Long endCreateTime);
 
     List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 

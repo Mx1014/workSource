@@ -204,12 +204,18 @@ public class FlowCaseState {
         return processStack.firstElement();
     }
 
-    private void addNodeTrackLog(String content) {
-        FlowEventLog log = new FlowEventLog();
+    public void putExtra(String key, Object value) {
+        if (this.extra == null) {
+            this.extra = new HashMap<>();
+        }
+        this.extra.put(key, value);
+    }
 
-
-
-        this.logs.add(log);
+    public <T> T getExtra(String key) {
+        if (this.extra != null) {
+            return (T) this.extra.get(key);
+        }
+        return null;
     }
 
     private List<FlowCase> getChildFlowCases(FlowCaseState parentState) {

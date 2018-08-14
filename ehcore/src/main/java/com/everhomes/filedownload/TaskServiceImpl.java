@@ -3,6 +3,7 @@ package com.everhomes.filedownload;
 
 
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.filedownload.AllReadStatus;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.scheduler.ScheduleJobInfoDTO;
@@ -149,6 +150,8 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
         task.setProcess(0);
         task.setStatus(TaskStatus.WAITING.getCode());
         task.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        task.setReadStatus(AllReadStatus.NOTALLREAD.getCode());
+        task.setDownloadTimes(0);
         taskProvider.createTask(task);
         return task;
     }
@@ -186,6 +189,16 @@ public class TaskServiceImpl implements TaskService, ApplicationListener<Context
             }
             updateTask(task);
         }
+    }
+
+    @Override
+    public Integer countNotAllReadStatus(Long userId) {
+        return this.taskProvider.countNotAllReadStatus(userId);
+    }
+
+    @Override
+    public List<Task> listNotReadStatusTasks(Long userId) {
+        return this.taskProvider.listNotReadStatusTasks(userId);
     }
 
 }

@@ -5589,9 +5589,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 			//add by huangliangming 20180731 使得微信注册时能够激活管理员
 			// 刷新企业通讯录
             organizationService.processUserForMember(userIdentifier);
-           //刷新地址信息
+            //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
-//
+            
             UserLogin oldLogin = UserContext.current().getLogin();
             if (oldLogin != null) {
                 this.logoff(oldLogin);
@@ -5618,12 +5618,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             userProvider.updateIdentifier(userIdentifier);
 
-            //add by huangliangming 20180731 使得微信注册时能够激活管理员
-            // 刷新企业通讯录
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
             organizationService.processUserForMember(userIdentifier);
             //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
-             
             return null;
 
         } else {
@@ -5641,8 +5640,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-            //add by huangliangming 20180731 使得微信注册时能够激活管理员
-            // 刷新企业通讯录
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
             organizationService.processUserForMember(userIdentifier);
             //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
@@ -5734,13 +5733,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userProvider.updateIdentifier(userIdentifier);
             login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
-              
-            //add by huangliangming 20180731 使得微信注册时能够激活管理员
-            // 刷新企业通讯录
-             organizationService.processUserForMember(userIdentifier);
+            
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
             //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
-            
         }
         return login;
     }private void verificationCode(UserIdentifier userIdentifier, String code){

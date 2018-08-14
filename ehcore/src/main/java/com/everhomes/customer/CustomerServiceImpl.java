@@ -226,13 +226,17 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -2543,19 +2547,23 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setOrganizationId(organizationDTO.getId());
         //管理员同步过去
 //        dbProvider.execute((TransactionStatus status) -> {
-            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
-            if (untrackAdmins != null && untrackAdmins.size() > 0) {
-                untrackAdmins.forEach((r)->{
-                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
-                    cmd.setContactName(r.getContactName());
-                    cmd.setContactToken(r.getContactToken());
-                    cmd.setOrganizationId(customer.getOrganizationId());
-                    cmd.setNamespaceId(customer.getNamespaceId());
+        List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
+        if (untrackAdmins != null && untrackAdmins.size() > 0) {
+            untrackAdmins.forEach((r) -> {
+                CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                cmd.setContactName(r.getContactName());
+                cmd.setContactToken(r.getContactToken());
+                cmd.setOrganizationId(customer.getOrganizationId());
+                cmd.setNamespaceId(customer.getNamespaceId());
+                try {
                     rolePrivilegeService.createOrganizationAdmin(cmd);
-                });
+                } catch (Exception e) {
+                    LOGGER.debug("set organization admin errro organization id = {},exception ={}", cmd.getOrganizationId(), e);
+                }
+            });
 //                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
-                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            }
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        }
         refreshCustomerAdminStatus(untrackAdmins);
 //            return null;
 //        });
@@ -3227,6 +3235,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
@@ -3250,6 +3259,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
@@ -3972,9 +3982,18 @@ public class CustomerServiceImpl implements CustomerService {
                         relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
-                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
-                    if (members != null && members.size() > 0) {
-                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+//                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
+                    // organization manager module has their children apartment concept
+                    ListOrganizationContactCommand memberCommand = new ListOrganizationContactCommand();
+                    memberCommand.setOrganizationId(p.getTargetId());
+                    memberCommand.setNamespaceId(cmd.getNamespaceId());
+                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
+                    memberCommand.setTargetTypes(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                    memberCommand.setPageSize(Integer.MAX_VALUE-1);
+                    ListOrganizationMemberCommandResponse membersResponse = organizationService.listOrganizationPersonnelsWithDownStream(memberCommand);
+                    if (membersResponse.getMembers() != null && membersResponse.getMembers().size() > 0) {
+//                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                        relatedMembers.addAll(membersResponse.getMembers());
                     }
                 }
             });
@@ -4003,7 +4022,17 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return relatedMembers;
+        // remove duplicated members
+        return removeDuplicatedMembers(relatedMembers);
+    }
+
+    private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
+        Map<Long, OrganizationMemberDTO> map = new HashMap<>();
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach(r -> map.putIfAbsent(r.getTargetId(), r));
+            return new ArrayList<>(map.values());
+        }
+        return new ArrayList<>();
     }
 
     private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
@@ -4016,6 +4045,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                dto.setOrganizationId(s.getOrganizationId());
                 users.add(dto);
             });
         }
@@ -4034,6 +4064,7 @@ public class CustomerServiceImpl implements CustomerService {
                     dto.setContactName(r.getContactName());
                     dto.setGender(r.getGender());
                     dto.setContactToken(r.getIdentifierToken());
+                    dto.setOrganizationId(r.getOwnerId());
                     users.add(dto);
                 }
             });

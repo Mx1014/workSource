@@ -349,11 +349,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
+    public GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType,
+                                                          Long moduleId, String ownerType, Long ownerId, String fieldName) {
         GeneralFormFieldDTO dto = null;
         // 审批的值是在一张表
         if (moduleId == 52000L) {
-            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(ownerId, fieldName);
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(
+                    formOriginId, 0L/*这张表的version好像都是0*/, ownerId, fieldName);
             if (approvalVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(approvalVal.getFieldType());
@@ -363,7 +365,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         // 其他表单的值是在另一张表
         else {
-            GeneralFormVal formVal = generalFormValProvider.getGeneralFormValBySourceIdAndName(ownerId, ownerType, fieldName);
+            GeneralFormVal formVal = generalFormValProvider.getGeneralFormVal(formOriginId,
+                    null/*这个version不清楚怎么用的, 先不加这个条件*/, ownerId, ownerType, fieldName);
             if (formVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(formVal.getFieldType());

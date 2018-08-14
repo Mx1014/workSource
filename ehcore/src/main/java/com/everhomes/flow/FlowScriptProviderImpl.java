@@ -15,7 +15,6 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +169,7 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
         if (scriptType != null) {
             subQuery.addConditions(t.SCRIPT_TYPE.eq(scriptType));
         }
-        subQuery.addConditions(t.STATUS.eq(FlowCommonStatus.ACTIVE.getCode()));
+        subQuery.addConditions(t.STATUS.eq(FlowCommonStatus.VALID.getCode()));
 
         Table<EhFlowScriptsRecord> table = context.selectFrom(t).orderBy(t.SCRIPT_VERSION.desc()).asTable();
         SelectQuery<EhFlowScriptsRecord> query = context.selectFrom(table).getQuery();

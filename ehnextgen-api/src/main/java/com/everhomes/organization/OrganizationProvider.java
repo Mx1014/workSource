@@ -670,4 +670,7 @@ public interface OrganizationProvider {
 	 */
 	List<UserOrganizations>  findUserByCommunityIDAndAuthStatus(Integer namespaceId ,
 			List<Long> communityIds , List<Integer> authStatus ,CrossShardListingLocator locator , int pageSize);
+
+	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
+			List<Long> organizationIds);
 }

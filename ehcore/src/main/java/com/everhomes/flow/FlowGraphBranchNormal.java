@@ -54,7 +54,7 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
         if (subFlowCase == null) {
             subFlowCase = ConvertHelper.convert(ctx.getFlowCase(), FlowCase.class);
             subFlowCase.setId(flowCaseProvider.getNextId());
-            subFlowCase.addPath(subFlowCase.getId());
+            subFlowCase.addPath(ctx.getFlowCase());
             subFlowCase.setParentId(parentId);
             subFlowCase.setStartNodeId(flowBranch.getOriginalNodeId());
             subFlowCase.setEndNodeId(flowBranch.getConvergenceNodeId());
@@ -68,7 +68,7 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
             flowCaseProvider.createFlowCaseHasId(subFlowCase);
         }
         subFlowCase.setStepCount(subFlowCase.getStepCount() + 1);
-        return flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), subFlowCase);
+        return flowStateProcessor.prepareBranchFlowCaseStart(ctx.getOperator(), subFlowCase);
     }
 
     private FlowLink getEndFlowLink(FlowCaseState ctx, FlowGraphNode node, Long linkId) {

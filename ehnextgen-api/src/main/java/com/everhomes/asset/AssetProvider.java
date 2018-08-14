@@ -169,7 +169,7 @@ public interface AssetProvider {
 
     void deleteContractPayment(Long contractId);
 
-    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId);
+    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId);
 
     void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 
@@ -201,6 +201,8 @@ public interface AssetProvider {
     Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
 
     Long findAssetOrderByBillIds(List<String> billIds);
+    
+    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
 
     void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
@@ -317,7 +319,7 @@ public interface AssetProvider {
 
     String getAddressStrByIds(List<Long> collect);
 
-    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
+    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId, Long categoryId, Integer namespaceId);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId);
 
@@ -431,9 +433,7 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
-    
-    AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
-    
+        
     ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 	
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -441,6 +441,16 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
+	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
+	
+	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
+	
+	List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId);
+	
+	Map<Long, String> getGroupNames(ArrayList<Long> groupIds);
+    
+	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 	
 	public List<PaymentBills> findBillsByIds(List<String> billIds);
 	

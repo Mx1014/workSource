@@ -1,5 +1,7 @@
 package com.everhomes.rest.appurl;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -7,9 +9,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>namespaceId: 域空间</li>
- *  <li>osType: 操作系统类型 参考{@link com.everhomes.rest.user.OSType}</li>
  *  <li>name: name</li>
- *  <li>downloadUrl: URL路径</li>
+ *  <li>dtos:  参考{@link com.everhomes.rest.appurl.AppUrlDeviceDTO}</li>
  *  <li>logoUrl: logo路径</li>
  *  <li>description: 相关描述</li>
  * </ul>
@@ -18,22 +19,26 @@ import com.everhomes.util.StringHelper;
 public class CreateAppInfoCommand {
 	
 	@NotNull
-	private Integer namespaceId;
-	private Byte osType;	
+	private Integer namespaceId;	
 	private String name;
-	private String downloadUrl;
 	private String logoUrl;
 	private String description;
+	private List<AppUrlDeviceDTO> dtos ;
 	
 	public CreateAppInfoCommand() {
 		super();
 	}
 
-	public CreateAppInfoCommand(Integer namespaceId, Byte osType) {
-		super();
-		this.namespaceId = namespaceId;
-		this.osType = osType;
+	
+	public List<AppUrlDeviceDTO> getDtos() {
+		return dtos;
 	}
+
+
+	public void setDtos(List<AppUrlDeviceDTO> dtos) {
+		this.dtos = dtos;
+	}
+
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -43,14 +48,6 @@ public class CreateAppInfoCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Byte getOsType() {
-		return osType;
-	}
-
-	public void setOsType(Byte osType) {
-		this.osType = osType;
-	}
-
 	
 	public String getName() {
 		return name;
@@ -58,14 +55,6 @@ public class CreateAppInfoCommand {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getDownloadUrl() {
-		return downloadUrl;
-	}
-
-	public void setDownloadUrl(String downloadUrl) {
-		this.downloadUrl = downloadUrl;
 	}
 
 	public String getLogoUrl() {
