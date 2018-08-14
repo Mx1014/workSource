@@ -3771,36 +3771,32 @@ public class PunchServiceImpl implements PunchService {
         Map<Long, PunchCountDTO> userDeptMap = new HashMap<>();
         XSSFWorkbook wb = new XSSFWorkbook();
         createPunchStatisticsSheet(resp, cmd, taskId, wb, userDeptMap);
-
-        ListPunchDetailsCommand cmd1 = new ListPunchDetailsCommand();
-        cmd1.setPageSize(Integer.MAX_VALUE - 1);
-        if(null != cmd.getMonthReportId()){
-        	PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportById(cmd.getMonthReportId());
-            cmd1.setStartDay(socialSecurityService.getTheFirstDate(report.getPunchMonth()).getTime());
-            cmd1.setEndDay(socialSecurityService.getTheLastDate(report.getPunchMonth()).getTime());
-        }
-        cmd1.setMonthReportId(cmd.getMonthReportId());
-        cmd1.setOwnerId(cmd.getOwnerId());
-        cmd1.setOwnerType(cmd.getOwnerType());
-        cmd1.setUserName(cmd.getUserName());
-        ListPunchDetailsResponse resp1 = listPunchDetails(cmd1);
-        taskService.updateTaskProcess(taskId, 50);
-        Integer minusPer = 30;
-        createPunchDetailsBookSheet(resp.getUpdateTime(), resp1.getPunchDayDetails(), cmd1, taskId, wb, minusPer);
         List<Long> userIds = new ArrayList<>();
-        for (PunchCountDTO dto : resp.getPunchCountList()) {
-            if (dto.getUserId() != null && dto.getUserId() > 0) {
-                userIds.add(dto.getUserId());
+        if (CollectionUtils.isNotEmpty(resp.getPunchCountList())) {
+            for (PunchCountDTO dto : resp.getPunchCountList()) {
+                if (dto.getUserId() != null && dto.getUserId() > 0) {
+                    userIds.add(dto.getUserId());
+                }
             }
+            // 手动clear数据引用，提前结束数据的生命周期，以便GC适时回收
+            resp.getPunchCountList().clear();
         }
-        List<PunchLog> logs = punchProvider.listPunchLogs(getTopEnterpriseId(cmd.getOwnerId()), userIds, cmd.getStartDay(), cmd.getEndDay());
-        taskService.updateTaskProcess(taskId, 80);
 
-        createPunchLogsSheet(resp.getUpdateTime(), logs, cmd, taskId, wb, userDeptMap);
+        ListPunchDetailsCommand listPunchDetailsCommand = new ListPunchDetailsCommand();
+        listPunchDetailsCommand.setStartDay(cmd.getStartDay());
+        listPunchDetailsCommand.setEndDay(cmd.getEndDay());
+        listPunchDetailsCommand.setMonthReportId(cmd.getMonthReportId());
+        listPunchDetailsCommand.setOwnerId(cmd.getOwnerId());
+        listPunchDetailsCommand.setOwnerType(cmd.getOwnerType());
+        listPunchDetailsCommand.setUserName(cmd.getUserName());
+        // 进度条30% -- 60%
+        createPunchDetailsBookSheet(resp.getUpdateTime(), listPunchDetailsCommand, taskId, wb);
+        // 进度条60% -- 100%
+        createPunchLogsSheet(resp.getUpdateTime(),userIds, cmd, taskId, wb, userDeptMap);
         return wb;
     }
 
-    private void createPunchLogsSheet(Long dataUpdateTime, List<PunchLog> logs, ListPunchCountCommand cmd, Long taskId, XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
+    private void createPunchLogsSheet(Long dataUpdateTime, List<Long> userIds, ListPunchCountCommand cmd, Long taskId, XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
         int columnNo = 7;
 
         XSSFSheet sheet = wb.createSheet("打卡记录");
@@ -3837,17 +3833,41 @@ public class PunchServiceImpl implements PunchService {
         rowReminder.setRowStyle(titleStyle1);
         createPunchLogsBookSheetHead(sheet);
         sheet.createFreezePane(2, 3, 3, 4);
-        if (null == logs || logs.size() == 0)
-            return;
+
+        fullPunchLogsBookRow(userIds, cmd, taskId, userDeptMap, sheet);
+    }
+
+    private void fullPunchLogsBookRow(List<Long> userIds, ListPunchCountCommand cmd, Long taskId, Map<Long, PunchCountDTO> userDeptMap, XSSFSheet sheet) {
         Map<Long, String> ruleMap = new HashMap<>();
-        int i = 0;
-        for (PunchLog log : logs) {
-            setNewPunchLogsBookRow(sheet, log, userDeptMap, ruleMap);
-            if (taskId != null && ++i > logs.size() / 2) {
-                taskService.updateTaskProcess(taskId, 90);
+        Long ownerId = getTopEnterpriseId(cmd.getOwnerId());
+        String startDay = dateSF.get().format(new Date(cmd.getStartDay()));
+        String endDay = dateSF.get().format(new Date(cmd.getEndDay()));
+        Integer pageOffset = 0;
+        int num = 0;
+        List<PunchLog> results = punchProvider.listPunchLogs(userIds, ownerId, startDay, endDay, cmd.getExceptionStatus(), pageOffset, PunchConstants.PAGE_SIZE_AT_A_TIME + 1);
+        boolean process = CollectionUtils.isNotEmpty(results);
+        while (process) {
+            Integer nextPageAnchor = null;
+            if (results.size() == PunchConstants.PAGE_SIZE_AT_A_TIME + 1) {
+                results.remove(PunchConstants.PAGE_SIZE_AT_A_TIME.intValue());
+                nextPageAnchor = pageOffset + PunchConstants.PAGE_SIZE_AT_A_TIME;
+            }
+            for (PunchLog log : results) {
+                setNewPunchLogsBookRow(sheet, log, userDeptMap, ruleMap);
+                if (taskId != null && ++num % 100 == 0) {
+                    taskService.updateTaskProcess(taskId, 60 + Math.min(40, num / 100));
+                }
+            }
+            // 手动clear数据引用，提前结束数据的生命周期，以便GC适时回收
+            results.clear();
+            if (nextPageAnchor != null && nextPageAnchor > 0) {
+                pageOffset = nextPageAnchor.intValue();
+                results = punchProvider.listPunchLogs(userIds, ownerId, startDay, endDay, cmd.getExceptionStatus(), pageOffset, PunchConstants.PAGE_SIZE_AT_A_TIME + 1);
+                process = CollectionUtils.isNotEmpty(results);
+            } else {
+                process = false;
             }
         }
-
     }
 
     private void setNewPunchLogsBookRow(XSSFSheet sheet, PunchLog log, Map<Long, PunchCountDTO> userDeptMap, Map<Long, String> ruleMap) {
@@ -3956,7 +3976,6 @@ public class PunchServiceImpl implements PunchService {
     private void createPunchStatisticsSheet(ListPunchCountCommandResponse resp, ListPunchCountCommand cmd, Long taskId,
                                             XSSFWorkbook wb, Map<Long, PunchCountDTO> userDeptMap) {
         int columnNo = 13;
-
         List<PunchCountDTO> results = resp.getPunchCountList();
         if (null != resp) {
             if (null != resp.getExtColumns()) {
@@ -3965,7 +3984,6 @@ public class PunchServiceImpl implements PunchService {
             if (null != resp.getDateList()) {
                 columnNo += resp.getDateList().size();
             }
-
         }
         XSSFSheet sheet = wb.createSheet("月度统计");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnNo));
@@ -4002,14 +4020,18 @@ public class PunchServiceImpl implements PunchService {
         rowReminder.setRowStyle(titleStyle1);
         this.createPunchStatisticsBookSheetHead(sheet, resp);
         sheet.createFreezePane(1, 3, 2, 4);
-        Integer num = 0;
 
         if (null == results || results.size() == 0)
             return;
+        Integer num = 0;
         for (PunchCountDTO statistic : results) {
-            userDeptMap.put(statistic.getUserId(), statistic);
+            if (statistic.getUserId() != null && statistic.getUserId() > 0) {
+                userDeptMap.put(statistic.getUserId(), statistic);
+            }
             this.setNewPunchStatisticsBookRow(sheet, statistic, resp.getDateList(), wb);
-            taskService.updateTaskProcess(taskId, 20 + (int) (++num / (Double.valueOf(results.size()) / 30.00)));
+            if (taskId != null && num++ % 100 == 0) {
+                taskService.updateTaskProcess(taskId, 20 + (int) ((num / (results.size()) * 10.00)));
+            }
         }
     }
 
@@ -5495,7 +5517,7 @@ public class PunchServiceImpl implements PunchService {
     public OutputStream getPunchDetailsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId, Long userId) {
 
         ListPunchDetailsCommand cmd = new ListPunchDetailsCommand();
-        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        cmd.setPageSize(PunchConstants.PAGE_SIZE_AT_A_TIME);
         cmd.setStartDay(startDay);
         cmd.setEndDay(endDay);
         cmd.setExceptionStatus(exceptionStatus);
@@ -5504,9 +5526,7 @@ public class PunchServiceImpl implements PunchService {
         cmd.setOwnerType(ownerType);
         cmd.setUserId(userId);
         taskService.updateTaskProcess(taskId, 2);
-        ListPunchDetailsResponse resp = listPunchDetails(cmd);
-        taskService.updateTaskProcess(taskId, 50);
-        Workbook workbook = createPunchDetailsBook(resp.getPunchDayDetails(), cmd, taskId);
+        Workbook workbook = createPunchDetailsBook(cmd, taskId);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             workbook.write(out);
@@ -5566,14 +5586,13 @@ public class PunchServiceImpl implements PunchService {
         return null;
     }
 
-    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId) {
-
+    private Workbook createPunchDetailsBook(ListPunchDetailsCommand cmd, Long taskId) {
         XSSFWorkbook wb = new XSSFWorkbook();
-        createPunchDetailsBookSheet(System.currentTimeMillis(), dtos, cmd, taskId, wb, 0);
+        createPunchDetailsBookSheet(System.currentTimeMillis(), cmd, taskId, wb);
         return wb;
     }
 
-    private void createPunchDetailsBookSheet(Long updateTime, List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd, Long taskId, XSSFWorkbook wb, int minusPer) {
+    private void createPunchDetailsBookSheet(Long updateTime, ListPunchDetailsCommand listPunchDetailsCommand, Long taskId, XSSFWorkbook wb) {
 
         XSSFSheet sheet = wb.createSheet("每日统计");
 
@@ -5591,7 +5610,7 @@ public class PunchServiceImpl implements PunchService {
 
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(0);
-        rowTitle.createCell(0).setCellValue("每日汇总报表:" + monthChineseSF.get().format(new Date(cmd.getStartDay())));
+        rowTitle.createCell(0).setCellValue("每日汇总报表:" + monthChineseSF.get().format(new Date(listPunchDetailsCommand.getStartDay())));
         rowTitle.setRowStyle(titleStyle);
         //副标题
 
@@ -5609,18 +5628,42 @@ public class PunchServiceImpl implements PunchService {
         XSSFRow rowReminder = sheet.createRow(1);
         rowReminder.createCell(0).setCellValue("数据更新时间:" + datetimeSF.get().format(new Date(updateTime)) + ", 报表生成时间: " + datetimeSF.get().format(DateHelper.currentGMTTime()));
         rowReminder.setRowStyle(titleStyle1);
-        taskService.updateTaskProcess(taskId, 55 - minusPer);
+
         this.createPunchDetailsBookSheetHead(sheet);
         sheet.createFreezePane(2, 3, 3, 4);
+
+        // 分页填充excel表数据
+        fullPunchDetailsBookRowByPage(listPunchDetailsCommand, taskId, sheet);
+    }
+
+    /**
+     * 分页填充excel表数据
+     */
+    private void fullPunchDetailsBookRowByPage(ListPunchDetailsCommand listPunchDetailsCommand, Long taskId, XSSFSheet sheet) {
+        listPunchDetailsCommand.setPageSize(PunchConstants.PAGE_SIZE_AT_A_TIME);
+        listPunchDetailsCommand.setPageAnchor(null);
+        ListPunchDetailsResponse listPunchDetailsResponse = listPunchDetails(listPunchDetailsCommand);
+        boolean process = listPunchDetailsResponse != null && CollectionUtils.isNotEmpty(listPunchDetailsResponse.getPunchDayDetails());
         int num = 0;
-        if (null == dtos || dtos.size() == 0)
-            return;
-        for (PunchDayDetailDTO dto : dtos) {
-            this.setNewPunchDetailsBookRow(sheet, dto);
-            if (++num % 100 == 0) {
-                taskService.updateTaskProcess(taskId, 55 + (int) (num / (Double.valueOf(dtos.size()) / 45.00)) - minusPer);
+        while (process) {
+            List<PunchDayDetailDTO> punchDayDetails = listPunchDetailsResponse.getPunchDayDetails();
+            for (PunchDayDetailDTO dto : punchDayDetails) {
+                this.setNewPunchDetailsBookRow(sheet, dto);
+                if (taskId != null && ++num % 100 == 0) {
+                    taskService.updateTaskProcess(taskId, 30 + Math.min(30, num / 100));
+                }
+            }
+            // 手动clear数据引用，提前结束数据的生命周期，以便GC适时回收
+            punchDayDetails.clear();
+            if (listPunchDetailsResponse.getNextPageAnchor() != null && listPunchDetailsResponse.getNextPageAnchor() > 0) {
+                listPunchDetailsCommand.setPageAnchor(listPunchDetailsResponse.getNextPageAnchor());
+                listPunchDetailsResponse = listPunchDetails(listPunchDetailsCommand);
+                process = listPunchDetailsResponse != null && CollectionUtils.isNotEmpty(listPunchDetailsResponse.getPunchDayDetails());
+            } else {
+                process = false;
             }
         }
+        taskService.updateTaskProcess(taskId, 60);
     }
 
     private String convertTimeLongToString(Long timeLong) {
@@ -6153,9 +6196,7 @@ public class PunchServiceImpl implements PunchService {
     };
 
     @Override
-    public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId
-    		,Long monthReportId) {
-
+    public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId) {
         ListPunchCountCommand cmd = new ListPunchCountCommand();
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         cmd.setStartDay(startDay);
@@ -6167,9 +6208,9 @@ public class PunchServiceImpl implements PunchService {
         cmd.setMonthReportId(monthReportId);
         taskService.updateTaskProcess(taskId, 2);
         ListPunchCountCommandResponse resp = listPunchCount(cmd);
-
         taskService.updateTaskProcess(taskId, 20);
         Workbook wb = createPunchStatisticsBook(resp, cmd, taskId);
+        taskService.updateTaskProcess(taskId, 100);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             wb.write(out);
@@ -11512,10 +11553,9 @@ public class PunchServiceImpl implements PunchService {
         if (null != depName) {
             dto.setDeptName(depName);
         }
-//        PunchRule pr = findPunchRuleByCache("organization", log.getEnterpriseId(), log.getUserId(), punchRuleMap);
-//        if (null != pr) {
+
         dto.setRuleName(findPunchOrganizationName(ruleMap, log.getPunchOrganizationId()));
-//        }
+
         if (null == log.getLocationInfo()) {
             dto.setLocationInfo(log.getWifiInfo());
         }

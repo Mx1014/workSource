@@ -45,6 +45,7 @@ import java.util.List;
  */
 public class PunchCountDTO {
 	private Long userId;
+	private Long detailId;
 	private String userName;
 	private String punchMonth;
 	private String punchOrgName;
@@ -86,6 +87,14 @@ public class PunchCountDTO {
 	private String overtimeTotalRestdayDisplay;
 	private String overtimeTotalLegalHolidayDisplay;
     private List<DayStatusDTO> statusList;
+
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
 
 	public Integer getExceptionDayCount() {
 		return exceptionDayCount;

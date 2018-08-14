@@ -102,7 +102,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -1195,8 +1194,9 @@ public class PunchProviderImpl implements PunchProvider {
             step.limit(pageOffset, pageSize);
         }
         // modify by wh 2017-4-25 order by punch date asc
-        List<EhPunchLogsRecord> resultRecord = step.where(condition)
-                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_TIME.desc()).fetch()
+        List<EhPunchLogsRecord> resultRecord = step.where(condition).orderBy(
+                Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_LOGS.USER_ID.asc(), Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+                Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(), Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc()).fetch()
                 .map((r) -> {
                     return ConvertHelper.convert(r, EhPunchLogsRecord.class);
                 });
