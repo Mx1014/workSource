@@ -7,11 +7,13 @@ import com.everhomes.rest.usercurrentscene.UserCurrentSceneDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserCurrentServerImpl implements UserCurrentServer {
 
+    @Autowired
     private UserCurrentProvider userCurrentProvider ;
 
 
