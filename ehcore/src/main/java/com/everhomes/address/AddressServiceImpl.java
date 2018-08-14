@@ -2830,6 +2830,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setCityId(targetAddress.getCityId());
 			address.setAreaId(targetAddress.getAreaId());
 			address.setAreaName(targetAddress.getAreaName());
+			address.setApartmentFloor(targetAddress.getApartmentFloor());
 			address.setBuildingName(targetAddress.getBuildingName());
 			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 			
@@ -2867,6 +2868,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		address.setCityId(targetAddress.getCityId());
 		address.setAreaId(targetAddress.getAreaId());
 		address.setAreaName(targetAddress.getAreaName());
+		address.setApartmentFloor(targetAddress.getApartmentFloor());
 		address.setBuildingName(targetAddress.getBuildingName());
 		String newInChinese = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
 																		AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_NEW_IN_CHINESE, 

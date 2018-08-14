@@ -3048,19 +3048,26 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
             community.setSharedArea(communitySharedArea - address.getSharedArea());
         }
-        if (address.getBuildArea() != null) {
-            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
-            building.setBuildArea(buildingBuildArea - address.getBuildArea());
-
-            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
-            community.setBuildArea(communityBuildArea - address.getBuildArea());
-        }
+//        if (address.getBuildArea() != null) {
+//            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+//            building.setBuildArea(buildingBuildArea - address.getBuildArea());
+//
+//            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+//            community.setBuildArea(communityBuildArea - address.getBuildArea());
+//        }
         if (address.getChargeArea() != null) {
             Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
             building.setChargeArea(buildingChargeArea - address.getChargeArea());
 
             Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
             community.setChargeArea(communityChargeArea - address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea - address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea - address.getFreeArea());
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
