@@ -62,6 +62,20 @@ public class OAuth2ApiController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /oauth2api/getUserInfoForZhenZhiHui</b>
+     * <p>给圳智慧用的获取用户信息的接口</p>
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping("getUserInfoForZhenZhiHui")
+    @RestReturn(value=UserInfo.class)
+    public RestResponse getUserInfoForZhenZhiHui(HttpServletRequest request, HttpServletResponse response) {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+        UserInfo info = this.oAuth2ApiService.getUserInfoForZhenZhiHui(accessToken.getGrantorUid());
+        return new RestResponse(info);
+    }
+    /**
      * <b>URL: /oauth2api/trd/authenticationInfo</b>
      * <p>用户认证信息</p>
      */

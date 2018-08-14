@@ -2,6 +2,7 @@
 package com.everhomes.rest.user;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -40,6 +41,7 @@ import java.util.List;
  *  <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  *  <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  *  <li>registerDays: 用户注册天数</li>
+ *  <li>organizationList: 用户所加入的公司</li>
  *  </ul>
  **/
 public class UserInfo {
@@ -85,7 +87,17 @@ public class UserInfo {
     private String sceneToken;
     private String registerDaysDesc;
 
+    @ItemType(OrganizationSimpleDTO.class)
+    private List<OrganizationSimpleDTO> organizationList;
     public UserInfo() {
+    }
+
+    public List<OrganizationSimpleDTO> getOrganizationList() {
+        return organizationList;
+    }
+
+    public void setOrganizationList(List<OrganizationSimpleDTO> organizationList) {
+        this.organizationList = organizationList;
     }
 
     public Long getId() {

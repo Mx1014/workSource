@@ -2,7 +2,9 @@
 package com.everhomes.zhenzhihui;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.point.UserLevel;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
@@ -29,6 +31,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.engine.config.spi.ConfigurationService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -67,10 +70,10 @@ import static com.everhomes.controller.WebRequestInterceptor.setCookieInResponse
 @Component
 public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String charset       = "UTF-8";
-    private static final String APPENCKEY     = "ece2d40c2badef49";
-    private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
-    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999930;
-    private static final Long COMMUNITY_ID  = 240111044332063520L;
+//    private static final String APPENCKEY     = "ece2d40c2badef49";
+//    private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
+    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 11;
+    private static final Long COMMUNITY_ID  = 240111044332061474L;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
 
     @Autowired
@@ -79,10 +82,13 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private UserProvider userProvider;
     @Autowired
     private OrganizationServiceImpl organizationService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     @Override
     public Object ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
-
+        String serviceUrl = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.url", "");
+        String appkey = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.appkey", "");
         if ( TICKET == null ) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "TICKET is null.");
@@ -90,7 +96,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
 
         try {
             //使用独有的身份认证时颁发的密钥解密数据
-            TICKET = CBCDecrypt(TICKET, APPENCKEY);
+            TICKET = CBCDecrypt(TICKET, appkey);
         }
         catch (Exception e1) {
             e1.printStackTrace();
@@ -103,11 +109,11 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
 
         try {
             //使用attributes接口从SSO服务器获取信息
-            String ret = requestService(SSOServiceURL + TICKET);
+            String ret = requestService(serviceUrl + TICKET);
             if ( ret != null )
             {
                 //使用独有密钥解密数据
-                ret = CBCDecrypt(ret, APPENCKEY);
+                ret = CBCDecrypt(ret, appkey);
                 Hashtable<String, String> bean = toJSON(ret);
                 if ( bean != null )
                 {
@@ -132,7 +138,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
                             setCookieInResponse("token", tokenString, request, response);
                             LOGGER.info("zhenzhihui user login,userId = {}, token = {}", user.getId(), tokenString);
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("");
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://dev19.zuolin.com/park-news-web/build/index.html?categoryId=0&title=%e6%96%b0%e9%97%bb%e8%b5%84%e8%ae%af&widget=NewsFlash&timeWidgetStyle=datetime#/newsList#sign_suffix");
 
                             SceneTokenDTO sceneTokenDTO = new SceneTokenDTO();
                             sceneTokenDTO.setUserId(user.getId());

@@ -3569,6 +3569,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
+                OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
+                if (OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+                    tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.TRUE.getCode());
+                }else {
+                    tempSimpleOrgDTO.setUserIsManage(TrueOrFalseFlag.FALSE.getCode());
+                }
                 orgs.add(tempSimpleOrgDTO);
             }
         }

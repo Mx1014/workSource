@@ -3,6 +3,9 @@ package com.everhomes.oauth2api;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,9 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
     @Autowired
     private OrganizationProvider organizationProvider;
 
+    @Autowired
+    private OrganizationServiceImpl organizationServiceImpl;
+
     @Override
     public UserInfo getUserInfoForInternal(Long grantorUid) {
         return userService.getUserSnapshotInfoWithPhone(grantorUid);
@@ -43,6 +49,16 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
     public UserInfoDTO getUserInfoForThird(Long grantorUid) {
         UserInfo info = userService.getUserSnapshotInfoWithPhone(grantorUid);
         return sensitiveClean(info);
+    }
+
+    @Override
+    public UserInfo getUserInfoForZhenZhiHui(Long grantorUid) {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(grantorUid);
+        List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationServiceImpl.listUserRelateOrganizations(grantorUid);
+        if (!CollectionUtils.isEmpty(organizationSimpleDTOS)) {
+            userInfo.setOrganizationList(organizationSimpleDTOS);
+        }
+        return userInfo;
     }
 
     @Override

@@ -15,5 +15,7 @@ public interface OAuth2ApiService {
 
     UserInfoDTO getUserInfoForThird(Long grantorUid);
 
+    UserInfo getUserInfoForZhenZhiHui(Long grantorUid);
+
     List<OrganizationMemberDTO> getAuthenticationInfo(Long grantorUid);
 }
