@@ -6,6 +6,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.point.UserLevel;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -19,6 +20,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import sun.misc.BASE64Decoder;
@@ -43,6 +45,8 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Hashtable;
 
+import static com.everhomes.controller.WebRequestInterceptor.setCookieInResponse;
+
 @Component
 public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String charset       = "UTF-8";
@@ -55,7 +59,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
 
     private UserProvider userProvider;
     @Override
-    public UserLogin ssoService(HttpServletRequest request, HttpServletResponse response) {
+    public void ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
 
         if ( TICKET == null ) {
@@ -101,6 +105,10 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             if (user == null) {
                                 user = createUserAndUserIdentifier(zhenZhiHuiUserInfoDTO);
                             }
+                            UserLogin login = this.userService.innerLogin(ZHENZHIHUI_NAMESPACE_ID,user.getId(), null, null);
+                            LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+                            String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+                            setCookieInResponse("token", tokenString, request, response);
                         }
                     }
                 }
@@ -109,12 +117,6 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-    @Override
-    public String makeZhenZhiHUiRedirectUrl(Long userId) {
-        return null;
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO){

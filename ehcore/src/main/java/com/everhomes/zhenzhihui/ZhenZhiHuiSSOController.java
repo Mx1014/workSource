@@ -4,6 +4,7 @@ package com.everhomes.zhenzhihui;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserLogin;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
     @RequireAuthentication(false)
     public RestResponse share(HttpServletRequest request, HttpServletResponse response) {
         zhenZhiHuiService.ssoService(request,response);
+
         return new RestResponse();
     }
 }

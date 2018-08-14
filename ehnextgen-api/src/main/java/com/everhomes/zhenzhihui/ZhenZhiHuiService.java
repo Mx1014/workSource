@@ -7,7 +7,5 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface ZhenZhiHuiService {
-    UserLogin ssoService(HttpServletRequest request, HttpServletResponse response);
-
-    String makeZhenZhiHUiRedirectUrl(Long userId);
+    void ssoService(HttpServletRequest request, HttpServletResponse response);
 }
