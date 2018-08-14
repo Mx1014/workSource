@@ -53,7 +53,9 @@ public interface GeneralFormService {
 
     void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
 
-	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+    GeneralForm mirrorGeneralForm(Long formId, String mirrorOwnerType, Long mirrorOwnerId, String mirrorModuleType, Long mirrorModuleId);
+
+    void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
 
 	Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 }
