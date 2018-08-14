@@ -71,7 +71,7 @@ CREATE TABLE `eh_decoration_fee` (
 `fee_name`  varchar(64) NULL ,
 `fee_price`  varchar(64) NULL ,
 `amount`  varchar(64) NULL ,
-`total_price`  decimal(16,2) NULL ,
+`total_price`  decimal(20,2) NULL ,
 `create_time`  datetime NULL  ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -377,7 +377,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setServiceType(cmd2.getTitle());
             cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.APPLY.getDescribe()+")");
             StringBuilder content = new StringBuilder();
-            content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+            content.append("公司名称:"+request.getApplyCompany()+"\n");
             content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
             content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
                     sdfyMd.format(new Date(request.getEndTime().getTime())));
@@ -908,7 +908,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setServiceType(cmd2.getTitle());
             cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.FILE_APPROVAL.getDescribe()+")");
             StringBuilder content = new StringBuilder();
-            content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+            content.append("公司名称:"+request.getApplyCompany()+"\n");
             content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
             content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
                     sdfyMd.format(new Date(request.getEndTime().getTime())));
@@ -977,7 +977,7 @@ public class DecorationServiceImpl implements  DecorationService {
         cmd2.setServiceType(cmd2.getTitle());
         cmd2.setTitle(cmd2.getTitle()+"("+DecorationRequestStatus.CHECK.getDescribe()+")");
         StringBuilder content = new StringBuilder();
-        content.append("装修公司:"+request.getDecoratorCompany()+"\n");
+        content.append("公司名称:"+request.getApplyCompany()+"\n");
         content.append("装修地点:"+convertAddress(request.getAddress())+"\n");
         content.append("装修日期:"+sdfyMd.format(new Date(request.getStartTime().getTime()))+"至"+
                 sdfyMd.format(new Date(request.getEndTime().getTime())));
