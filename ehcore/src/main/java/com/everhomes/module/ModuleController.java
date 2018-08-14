@@ -351,6 +351,24 @@ public class ModuleController extends ControllerBase {
 
 
     /**
+     * <b>URL: /module/reorderServiceModuleEntries</b>
+     * <p>更新入口排序</p>
+     */
+    @RequestMapping("reorderServiceModuleEntries")
+    @RestReturn(value = String.class)
+    public RestResponse reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.reorderServiceModuleEntries(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
      * <b>URL: /module/updateServiceModuleEntry</b>
      * <p>编辑模块入口</p>
      */

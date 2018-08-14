@@ -71,9 +71,12 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
             query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
         }
 
-        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID);
-
-        query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER);
+        //查询某个分类的话，就不按照模块排序了。查询所有的
+        if(appCategoryId != null){
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER);
+        }else {
+            query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID);
+        }
 
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModuleEntry.class));

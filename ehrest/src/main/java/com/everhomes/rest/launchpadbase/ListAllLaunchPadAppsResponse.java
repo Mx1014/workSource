@@ -1,6 +1,6 @@
 package com.everhomes.rest.launchpadbase;
 
-import com.everhomes.rest.acl.AppCategoryDTO;
+import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 

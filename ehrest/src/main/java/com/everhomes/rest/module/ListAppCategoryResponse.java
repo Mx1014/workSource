@@ -1,4 +1,4 @@
-package com.everhomes.rest.acl;
+package com.everhomes.rest.module;
 
 
 import com.everhomes.util.StringHelper;
@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>appType: appType，参考{@link com.everhomes.rest.module.ServiceModuleAppType}</li>
+ *     <li>appType: appType，参考{@link ServiceModuleAppType}</li>
  * </ul>
  */
 public class ListAppCategoryResponse {

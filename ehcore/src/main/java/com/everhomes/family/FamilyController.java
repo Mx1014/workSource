@@ -450,7 +450,7 @@ public class FamilyController extends ControllerBase {
 
     /**
      * <b>URL: /family/listUserFamilyByCommunityId</b>
-     * <p>获取用户相关的banner</p>
+     * <p>获取用户自该园区的家庭地址</p>
      */
     @RequestMapping("listUserFamilyByCommunityId")
     @RestReturn(value=ListUserFamilyByCommunityIdResponse.class)
