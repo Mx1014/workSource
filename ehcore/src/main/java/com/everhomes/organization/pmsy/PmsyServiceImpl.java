@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetPayService;
+import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.asset.DefaultAssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -34,6 +36,7 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -457,7 +460,7 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	
 	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
-		PmsyOrder order = createPmsyOrder(cmd);
+		/*PmsyOrder order = createPmsyOrder(cmd);
 		
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
@@ -486,7 +489,17 @@ public class PmsyServiceImpl implements PmsyService{
             return null;
         });
 		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
-		return callBack;
+		return callBack;*/
+		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
+        DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
+        CreatePaymentBillOrderCommand createPaymentBillOrderCommand = new CreatePaymentBillOrderCommand(); 
+        PmsyOrder order = createPmsyOrder(cmd);
+        createPaymentBillOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+        String amount = changePayAmount(order.getOrderAmount());
+        createPaymentBillOrderCommand.setAmount(amount);
+        createPaymentBillOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        
+        return handler.createOrder(createPaymentBillOrderCommand);
 	}
 	
 	private PmsyOrder createPmsyOrder(CreatePmsyBillOrderCommand cmd){
@@ -581,12 +594,12 @@ public class PmsyServiceImpl implements PmsyService{
 		return null;
 	}
 	
-	private Long changePayAmount(BigDecimal amount){
+	private String changePayAmount(BigDecimal amount){
 
         if(amount == null){
-            return 0L;
+            return "0";
         }
-        return  amount.multiply(new BigDecimal(100)).longValue();
+        return amount.multiply(new BigDecimal(100)).toString();
     }
 
 	private BigDecimal changePayAmount(Long amount){

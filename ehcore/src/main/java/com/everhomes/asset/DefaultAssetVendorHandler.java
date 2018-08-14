@@ -16,6 +16,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
@@ -42,6 +43,7 @@ import com.everhomes.util.StringHelper;
  * @date 下午2:57:09
  */
 public class DefaultAssetVendorHandler extends AssetVendorHandler{
+	public static final String DEFAULT_ASSET_VENDOR_PREFIX = "DefaultAssetVendor-";
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAssetVendorHandler.class);
     
     @Autowired
@@ -116,7 +118,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);
         preOrderCommand.setIndustryCode(null);
-        preOrderCommand.setSourceType(cmd.getSourceType());
+        preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
         preOrderCommand.setOrderRemark1("物业缴费");
         //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
