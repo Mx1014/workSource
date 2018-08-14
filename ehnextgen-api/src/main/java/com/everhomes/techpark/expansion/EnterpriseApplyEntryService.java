@@ -65,6 +65,6 @@ public interface EnterpriseApplyEntryService {
 
 	LeaseFormRequestDTO openCustomRequestForm(OpenCustomRequestFormCommand cmd);
 
-	void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd;)
+	void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd);
 	
 }
