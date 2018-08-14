@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: ownerId</li>
  * </ul>
  */
-public class DeleteFlowByCondCommand {
+public class DisableProjectCustomizeCommand {
 
     private Integer namespaceId;
     private String moduleType;

@@ -50,4 +50,10 @@ public interface GeneralFormService {
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
+
+    void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+	Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 }

@@ -5,7 +5,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.flow.DeleteFlowByCondCommand;
 import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,13 +82,13 @@ public class GeneralFormController extends ControllerBase {
     }
 
 	/**
-	 * <b>URL: /general_form/doFormMirror</b>
-	 * <p> 表单镜像 </p>
+	 * <b>URL: /general_form/enableProjectCustomize</b>
+	 * <p> 启用表单自定义 </p>
 	 */
-	@RequestMapping("doFormMirror")
+	@RequestMapping("enableProjectCustomize")
 	@RestReturn(value=String.class)
-	public RestResponse doFormMirror(DoFormMirrorCommand cmd) {
-		generalFormService.doFormMirror(cmd);
+	public RestResponse enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+		generalFormService.enableProjectCustomize(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -97,13 +96,28 @@ public class GeneralFormController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /general_form/deleteFormByCond</b>
-	 * <p> 根据条件删除表单 </p>
+	 * <b>URL: /general_form/disableProjectCustomize</b>
+	 * <p> 禁用表单自定义 </p>
 	 */
-	@RequestMapping("deleteFormByCond")
+	@RequestMapping("disableProjectCustomize")
 	@RestReturn(value = String.class)
-	public RestResponse deleteFormByCond(@Valid DoFormMirrorCommand cmd) {
+	public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+		generalFormService.disableProjectCustomize(cmd);
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/getProjectCustomize</b>
+	 * <p> 获取自定义配置属性 </p>
+	 */
+	@RequestMapping("getProjectCustomize")
+	@RestReturn(value = String.class)
+	public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+		Byte flag = generalFormService.getProjectCustomize(cmd);
+		RestResponse response = new RestResponse(flag);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

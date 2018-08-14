@@ -263,6 +263,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowServiceMappingProvider flowServiceMappingProvider;
 
+    @Autowired
+    private FlowKvConfigProvider flowKvConfigProvider;
+
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -5821,11 +5824,13 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public void doFlowMirror(DoFlowMirrorCommand cmd) {
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
         for (Long flowId : cmd.getFlowIds()) {
             FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
             Flow flow = flowGraph.getFlow();
+            flow.setModuleType(cmd.getModuleType());
+            flow.setModuleId(cmd.getModuleId());
             flow.setProjectType(cmd.getProjectType());
             flow.setProjectId(cmd.getProjectId());
             flow.setOwnerType(cmd.getOwnerType());
@@ -5833,10 +5838,23 @@ public class FlowServiceImpl implements FlowService {
 
             doSnapshot(flowGraph, true);
         }
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            config.setValue("1");
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, FlowKvConfig.class);
+            config.setValue("1");
+            config.setKey("project-customize");
+            config.setStatus(FlowCommonStatus.VALID.getCode());
+            flowKvConfigProvider.createFlowKvConfig(config);
+        }
     }
 
     @Override
-    public void deleteFlowByCond(DeleteFlowByCondCommand cmd) {
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
 
         List<Flow> list = flowProvider.listConfigFlowByCond(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
@@ -5846,6 +5864,25 @@ public class FlowServiceImpl implements FlowService {
             flow.setStatus(FlowStatusType.INVALID.getCode());
             flowProvider.updateFlow(flow);
         }
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            config.setValue("0");
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return 0;
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {

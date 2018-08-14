@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>ownerId: ownerId</li>
  * </ul>
  */
-public class DoFormMirrorCommand {
+public class GetProjectCustomizeFlagCommand {
 
     @NotNull
     private List<Long> formIds;

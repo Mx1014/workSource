@@ -2,33 +2,49 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
 /**
  * <ul>
- *     <li>flowIds: flowIds</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>moduleType: moduleType</li>
+ *     <li>moduleId: moduleId</li>
  *     <li>projectType: projectType</li>
  *     <li>projectId: projectId</li>
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
  * </ul>
  */
-public class DoFlowMirrorCommand {
+public class GetProjectCustomizeCommand {
 
-    @NotNull
-    private List<Long> flowIds;
+    private Integer namespaceId;
+    private String moduleType;
+    private Long moduleId;
     private String projectType;
     private Long projectId;
     private String ownerType;
     private Long ownerId;
 
-    public List<Long> getFlowIds() {
-        return flowIds;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setFlowIds(List<Long> flowIds) {
-        this.flowIds = flowIds;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     public String getProjectType() {

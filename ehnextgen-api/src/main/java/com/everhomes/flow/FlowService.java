@@ -544,7 +544,9 @@ public interface FlowService {
 
     FlowServiceMappingDTO getFlowServiceMapping(GetFlowServiceMappingCommand cmd);
 
-	void doFlowMirror(DoFlowMirrorCommand cmd);
+	void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
 
-	void deleteFlowByCond(DeleteFlowByCondCommand cmd);
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+    Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 }

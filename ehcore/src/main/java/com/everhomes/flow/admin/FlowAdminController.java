@@ -943,13 +943,13 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/doFlowMirror</b>
-     * <p> 镜像工作流 </p>
+     * <b>URL: /admin/flow/enableProjectCustomize</b>
+     * <p> 启用基于园区的自定义配置 </p>
      */
-    @RequestMapping("doFlowMirror")
+    @RequestMapping("enableProjectCustomize")
     @RestReturn(value = String.class)
-    public RestResponse doFlowMirror(@Valid DoFlowMirrorCommand cmd) {
-        flowService.doFlowMirror(cmd);
+    public RestResponse enableProjectCustomize(@Valid EnableProjectCustomizeCommand cmd) {
+        flowService.enableProjectCustomize(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -957,14 +957,28 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/deleteFlowByCond</b>
-     * <p> 根据条件删除工作流 </p>
+     * <b>URL: /admin/flow/disableProjectCustomize</b>
+     * <p> 禁用基于园区的自定义配置 </p>
      */
-    @RequestMapping("deleteFlowByCond")
+    @RequestMapping("disableProjectCustomize")
     @RestReturn(value = String.class)
-    public RestResponse deleteFlowByCond(@Valid DeleteFlowByCondCommand cmd) {
-        flowService.deleteFlowByCond(cmd);
+    public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+        flowService.disableProjectCustomize(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getProjectCustomize</b>
+     * <p> 获取自定义配置属性 </p>
+     */
+    @RequestMapping("getProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+        Byte flag = flowService.getProjectCustomize(cmd);
+        RestResponse response = new RestResponse(flag);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
