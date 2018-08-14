@@ -53,7 +53,7 @@ ALTER TABLE eh_flows ADD COLUMN config_status TINYINT NOT NULL DEFAULT 0 COMMENT
 --
 -- 工作流 key-value 表  add by xq.tian  20180814
 --
--- DROP TABLE `eh_flow_kv_configs`;
+DROP TABLE `eh_flow_kv_configs`;
 CREATE TABLE `eh_flow_kv_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -68,7 +68,7 @@ CREATE TABLE `eh_flow_kv_configs` (
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: invalid, 1:waiting_for_approval, 2: valid',
   `create_time` DATETIME(3) NOT NULL COMMENT 'record create time',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
-  `update_time` DATETIME(3) NOT NULL COMMENT 'record update time',
+  `update_time` DATETIME(3) COMMENT 'record update time',
   `updater_uid` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -76,7 +76,7 @@ CREATE TABLE `eh_flow_kv_configs` (
 --
 -- 表单 key-value 表  add by xq.tian  20180814
 --
--- DROP TABLE `eh_general_form_kv_configs`;
+DROP TABLE `eh_general_form_kv_configs`;
 CREATE TABLE `eh_general_form_kv_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -89,7 +89,7 @@ CREATE TABLE `eh_general_form_kv_configs` (
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: invalid, 1:waiting_for_approval, 2: valid',
   `create_time` DATETIME(3) NOT NULL COMMENT 'record create time',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
-  `update_time` DATETIME(3) NOT NULL COMMENT 'record update time',
+  `update_time` DATETIME(3) COMMENT 'record update time',
   `updater_uid` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

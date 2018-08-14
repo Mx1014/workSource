@@ -13,6 +13,7 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCommonStatus;
 import com.everhomes.rest.general_approval.*;
@@ -626,27 +627,40 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         ValidatorUtil.validate(cmd);
 
         for (Long id : cmd.getFormIds()) {
-            GeneralForm generalForm = generalFormProvider.getGeneralFormById(id);
-            generalForm.setOwnerType(cmd.getOwnerType());
-            generalForm.setOwnerId(cmd.getOwnerId());
-            generalForm.setModuleType(cmd.getModuleType());
-            generalForm.setModuleId(cmd.getModuleId());
-
-            generalFormProvider.createGeneralForm(generalForm);
+            mirrorGeneralForm(id, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleType(), cmd.getModuleId());
         }
 
         GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
-            config.setValue("1");
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
         } else {
             config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
-            config.setValue("1");
-            config.setKey("project-customize");
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
             config.setStatus(FlowCommonStatus.VALID.getCode());
             generalFormKvConfigProvider.createGeneralFormKvConfig(config);
         }
+    }
+
+    @Override
+    public GeneralForm mirrorGeneralForm(Long formId, String mirrorOwnerType, Long mirrorOwnerId, String mirrorModuleType, Long mirrorModuleId) {
+        GeneralForm generalForm = generalFormProvider.getGeneralFormById(formId);
+        if (mirrorOwnerType != null) {
+            generalForm.setOwnerType(mirrorOwnerType);
+        }
+        if (mirrorOwnerId != null) {
+            generalForm.setOwnerId(mirrorOwnerId);
+        }
+        if (mirrorModuleType != null) {
+            generalForm.setModuleType(mirrorModuleType);
+        }
+        if (mirrorModuleId != null) {
+            generalForm.setModuleId(mirrorModuleId);
+        }
+        generalFormProvider.createGeneralForm(generalForm);
+        return generalForm;
     }
 
     @Override
@@ -654,9 +668,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         ValidatorUtil.validate(cmd);
 
         GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
-            config.setValue("0");
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
             generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
         }
     }
@@ -666,11 +680,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         ValidatorUtil.validate(cmd);
 
         GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
             return Byte.valueOf(config.getValue());
         }
-        return 0;
+        return TrueOrFalseFlag.FALSE.getCode();
     }
 }
 

@@ -1934,8 +1934,15 @@ public class FlowServiceImpl implements FlowService {
         }
 
         flowGraph = getFlowGraph(flow.getTopId(), flow.getFlowVersion());
-        flow.setStartNode(flowGraph.getStartNode().getFlowNode().getId());
-        flow.setEndNode(flowGraph.getEndNode().getFlowNode().getId());
+
+        FlowGraphNode startNode = flowGraph.getStartNode();
+        if (startNode != null) {
+            flow.setStartNode(startNode.getFlowNode().getId());
+        }
+        FlowGraphNode endNode = flowGraph.getEndNode();
+        if (endNode != null) {
+            flow.setEndNode(endNode.getFlowNode().getId());
+        }
         flowProvider.updateFlow(flow);
     }
 
@@ -5826,6 +5833,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
+
         for (Long flowId : cmd.getFlowIds()) {
             FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
             Flow flow = flowGraph.getFlow();
@@ -5836,18 +5844,18 @@ public class FlowServiceImpl implements FlowService {
             flow.setOwnerType(cmd.getOwnerType());
             flow.setOwnerId(cmd.getOwnerId());
 
-            doSnapshot(flowGraph, true);
+            doSnapshot(flowGraph, /*isMirror*/true);
         }
 
         FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
-            config.setValue("1");
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             flowKvConfigProvider.updateFlowKvConfig(config);
         } else {
             config = ConvertHelper.convert(cmd, FlowKvConfig.class);
-            config.setValue("1");
-            config.setKey("project-customize");
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
             config.setStatus(FlowCommonStatus.VALID.getCode());
             flowKvConfigProvider.createFlowKvConfig(config);
         }
@@ -5866,9 +5874,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
-            config.setValue("0");
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
             flowKvConfigProvider.updateFlowKvConfig(config);
         }
     }
@@ -5878,11 +5886,11 @@ public class FlowServiceImpl implements FlowService {
         ValidatorUtil.validate(cmd);
 
         FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
-                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), "project-customize");
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
             return Byte.valueOf(config.getValue());
         }
-        return 0;
+        return TrueOrFalseFlag.FALSE.getCode();
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {
