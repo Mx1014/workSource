@@ -15,7 +15,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCommonStatus;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -520,6 +519,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
                         }
+                        if (cmd.getProjectId() != null && cmd.getProjectType() != null) {
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_ID.eq(cmd.getProjectId()));
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_TYPE.eq(cmd.getProjectType()));
+                        }
                         condition = condition.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
                         query.addConditions(condition);
                         query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.asc());
@@ -626,11 +629,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        for (Long id : cmd.getFormIds()) {
-            mirrorGeneralForm(id, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleType(), cmd.getModuleId());
-        }
-
-        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
                 cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
             config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
@@ -639,25 +639,32 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
             config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
-            config.setStatus(FlowCommonStatus.VALID.getCode());
             generalFormKvConfigProvider.createGeneralFormKvConfig(config);
         }
     }
 
     @Override
-    public GeneralForm mirrorGeneralForm(Long formId, String mirrorOwnerType, Long mirrorOwnerId, String mirrorModuleType, Long mirrorModuleId) {
+    public GeneralForm mirrorGeneralForm(Long formId, String mirrorModuleType, Long mirrorModuleId,
+                                         String mirrorProjectType, Long mirrorProjectId, String mirrorOwnerType, Long mirrorOwnerId) {
         GeneralForm generalForm = generalFormProvider.getGeneralFormById(formId);
-        if (mirrorOwnerType != null) {
-            generalForm.setOwnerType(mirrorOwnerType);
-        }
-        if (mirrorOwnerId != null) {
-            generalForm.setOwnerId(mirrorOwnerId);
-        }
+
         if (mirrorModuleType != null) {
             generalForm.setModuleType(mirrorModuleType);
         }
         if (mirrorModuleId != null) {
             generalForm.setModuleId(mirrorModuleId);
+        }
+        if (mirrorProjectType != null) {
+            generalForm.setProjectType(mirrorProjectType);
+        }
+        if (mirrorProjectId != null) {
+            generalForm.setProjectId(mirrorProjectId);
+        }
+        if (mirrorOwnerType != null) {
+            generalForm.setOwnerType(mirrorOwnerType);
+        }
+        if (mirrorOwnerId != null) {
+            generalForm.setOwnerId(mirrorOwnerId);
         }
         generalFormProvider.createGeneralForm(generalForm);
         return generalForm;
@@ -667,11 +674,20 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
                 cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
             config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
             generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        }
+
+        List<GeneralForm> list = generalFormProvider.listGeneralForm(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId());
+        for (GeneralForm form : list) {
+            form.setStatus(GeneralFormStatus.INVALID.getCode());
+            generalFormProvider.updateGeneralForm(form);
         }
     }
 
@@ -679,12 +695,23 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
                 cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
         if (config != null) {
             return Byte.valueOf(config.getValue());
         }
         return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFormMirror(DoFormMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long id : cmd.getFormIds()) {
+            mirrorGeneralForm(id, cmd.getModuleType(), cmd.getModuleId(),
+                    cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId());
+        }
     }
 }
 

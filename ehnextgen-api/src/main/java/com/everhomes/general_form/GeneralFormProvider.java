@@ -34,4 +34,7 @@ public interface GeneralFormProvider {
 	GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId);
 
 	GeneralForm getGeneralFormByTag1(Integer namespaceId, String moduleType, Long moduleId, String stringTag1);
+
+    List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+                                      String projectType, Long projectId, String ownerType, Long ownerId);
 }

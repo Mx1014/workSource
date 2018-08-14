@@ -122,4 +122,18 @@ public class GeneralFormController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /general_form/doFormMirror</b>
+	 * <p> 复制表单 </p>
+	 */
+	@RequestMapping("doFormMirror")
+	@RestReturn(value = String.class)
+	public RestResponse doFormMirror(@Valid DoFormMirrorCommand cmd) {
+		generalFormService.doFormMirror(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

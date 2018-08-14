@@ -2,8 +2,12 @@ package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
 /**
  * <ul>
+ *     <li>formIds: 表单 id 列表</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>projectType: projectType</li>
  *     <li>projectId: projectId</li>
@@ -13,8 +17,10 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: ownerId</li>
  * </ul>
  */
-public class EnableProjectCustomizeCommand {
+public class DoFormMirrorCommand {
 
+    @NotNull
+    private List<Long> formIds;
     private Integer namespaceId;
     private String projectType;
     private Long projectId;
@@ -22,6 +28,14 @@ public class EnableProjectCustomizeCommand {
     private Long moduleId;
     private String ownerType;
     private Long ownerId;
+
+    public List<Long> getFormIds() {
+        return formIds;
+    }
+
+    public void setFormIds(List<Long> formIds) {
+        this.formIds = formIds;
+    }
 
     public String getOwnerType() {
         return ownerType;

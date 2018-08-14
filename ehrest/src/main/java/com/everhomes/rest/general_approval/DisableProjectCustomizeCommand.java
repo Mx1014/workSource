@@ -5,6 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
+ *     <li>projectType: projectType</li>
+ *     <li>projectId: projectId</li>
  *     <li>moduleType: moduleType</li>
  *     <li>moduleId: moduleId</li>
  *     <li>ownerType: ownerType</li>
@@ -14,6 +16,8 @@ import com.everhomes.util.StringHelper;
 public class DisableProjectCustomizeCommand {
 
     private Integer namespaceId;
+    private String projectType;
+    private Long projectId;
     private String moduleType;
     private Long moduleId;
     private String ownerType;
@@ -25,6 +29,22 @@ public class DisableProjectCustomizeCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(String projectType) {
+        this.projectType = projectType;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public String getModuleType() {

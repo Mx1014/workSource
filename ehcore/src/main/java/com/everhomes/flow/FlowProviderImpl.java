@@ -325,6 +325,7 @@ public class FlowProviderImpl implements FlowProvider {
             query.addConditions(t.PROJECT_ID.eq(projectId));
             query.addConditions(t.OWNER_TYPE.eq(ownerType));
             query.addConditions(t.OWNER_ID.eq(ownerId));
+            query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
 
             query.addConditions(t.FLOW_MAIN_ID.eq(0L));
             return query;

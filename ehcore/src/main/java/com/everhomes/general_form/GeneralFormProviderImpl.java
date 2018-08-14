@@ -12,12 +12,10 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -232,5 +230,24 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		if (results != null && results.size() > 0)
 			return results.get(0);
 		return null;
+    }
+
+    @Override
+    public List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+											 String projectType, Long projectId, String ownerType, Long ownerId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhGeneralForms t = Tables.EH_GENERAL_FORMS;
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(t);
+
+		query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(t.MODULE_TYPE.eq(moduleType));
+		query.addConditions(t.MODULE_ID.eq(moduleId));
+		query.addConditions(t.OWNER_TYPE.eq(ownerType));
+		query.addConditions(t.OWNER_ID.eq(ownerId));
+		query.addConditions(t.PROJECT_TYPE.eq(projectType));
+		query.addConditions(t.PROJECT_ID.eq(projectId));
+
+		query.addConditions(t.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+		return query.fetchInto(GeneralForm.class);
     }
 }

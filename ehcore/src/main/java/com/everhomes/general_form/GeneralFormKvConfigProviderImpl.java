@@ -51,11 +51,14 @@ public class GeneralFormKvConfigProviderImpl implements GeneralFormKvConfigProvi
     }
 
     @Override
-    public GeneralFormKvConfig findByKey(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId, String key) {
+    public GeneralFormKvConfig findByKey(Integer namespaceId, String moduleType, Long moduleId,
+                                         String projectType, Long projectId, String ownerType, Long ownerId, String key) {
         com.everhomes.server.schema.tables.EhGeneralFormKvConfigs t = Tables.EH_GENERAL_FORM_KV_CONFIGS;
         SelectQuery<EhGeneralFormKvConfigsRecord> query = context().selectFrom(t).getQuery();
         
         ifNotNull(namespaceId, () -> query.addConditions(t.NAMESPACE_ID.eq(namespaceId)));
+        ifNotNull(projectType, () -> query.addConditions(t.PROJECT_TYPE.eq(projectType)));
+        ifNotNull(projectId, () -> query.addConditions(t.PROJECT_ID.eq(projectId)));
         ifNotNull(moduleType, () -> query.addConditions(t.MODULE_TYPE.eq(moduleType)));
         ifNotNull(moduleId, () -> query.addConditions(t.MODULE_ID.eq(moduleId)));
         ifNotNull(ownerType, () -> query.addConditions(t.OWNER_TYPE.eq(ownerType)));

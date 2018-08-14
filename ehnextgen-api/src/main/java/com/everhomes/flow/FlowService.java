@@ -549,4 +549,6 @@ public interface FlowService {
 	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
 
     Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
+
+    void doFlowMirror(DoFlowMirrorCommand cmd);
 }
