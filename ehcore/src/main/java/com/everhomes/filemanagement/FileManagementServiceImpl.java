@@ -550,7 +550,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileContent parentContent = fileManagementProvider.findFileContentById(cmd.getContentId());
         if (catalog == null)
             return response;
-
+        response.setPath(processPathString(parentContent.getCatalogId() + "/" + parentContent.getPath()));
         List<FileContent> results = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, catalog.getOwnerId(), (locator, query) -> {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalog.getId()));
             //  1.get results by the keywords
