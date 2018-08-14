@@ -27,7 +27,7 @@ public interface YellowPageProvider {
 												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag);
 
 	List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
 
 	void createYellowPage(YellowPage yellowPage);
 

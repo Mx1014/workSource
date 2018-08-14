@@ -139,23 +139,6 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/searchNews</b>
-	 * <p>
-	 * 后台关键字搜索新闻列表
-	 * </p>
-	 */
-	@RequestMapping("searchNews")
-	@RestReturn(SearchNewsResponse.class)
-	public RestResponse searchNews(SearchNewsCommand cmd) {
-		SearchNewsResponse searchNewsResponse = newsService.searchNews(cmd);
-
-		RestResponse response = new RestResponse(searchNewsResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /news/getNewsDetailInfo</b>
 	 * <p>
 	 * 查询新闻详情（共用）

@@ -41,12 +41,14 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.parking.handler.Utils.DateStyle;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.reserver.ReserverEntity;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.TargetDTO;
@@ -57,6 +59,7 @@ import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.TagSearchItem;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -74,9 +77,11 @@ import com.everhomes.rest.general_approval.GeneralFormRenderType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GeneralFormValidatorType;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.NewsInstanceConfig;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
@@ -343,6 +348,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	LaunchPadProvider launchPadProvider;
+	
+	@Autowired
+	OrganizationService organizationService;
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -615,11 +623,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		if (null == parent) {
 			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
-			throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE,
-					YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT,
-					localeStringService.getLocalizedString(String.valueOf(YellowPageServiceErrorCode.SCOPE),
-							String.valueOf(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT),
-							UserContext.current().getUser().getLocale(), "parent category not found!"));
+			throwError(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT, "parent category not found!");
 		}
 
 		// 没传时 取logourl
@@ -824,12 +828,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		
 		//检验项目id的正确性。
-		if ("community".equals(cmd.getOwnerType()) && (null == cmd.getOwnerId() || cmd.getOwnerId() < 1)) {
-			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
-		}
-
-		cmd.setOwnerId(cmd.getOwnerId());
-		cmd.setOwnerType(cmd.getOwnerType());
+		checkQueryOwnerId(cmd.getOwnerType(), cmd.getOwnerId());
 
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
@@ -853,20 +852,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 				.fromCode(cmd.getSourceRequestType());
 		// 如果为CLIENT，或者空值，认为是客户端
 		if (ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null) {
-
-			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
-					cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(),  childTagIds, cmd.getKeywords());
-
-			for (ServiceAlliances serviceAlliance : sas) {
-				ServiceAllianceBelongType belongType = ServiceAllianceBelongType
-						.fromCode(serviceAlliance.getOwnerType());
-				if (belongType == ServiceAllianceBelongType.ORGANAIZATION) {
-					// 传给客户端的ownertype,ownerid 都改成小区，兼容老版本
-					serviceAlliance.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-					serviceAlliance.setOwnerId(cmd.getOwnerId());
-				}
+			
+			// 根据community和type获取所有项目id
+			List<Long> authProjectIds = getProjectIdsByScene(cmd.getOwnerId(), cmd.getParentId());
+			if (CollectionUtils.isEmpty(authProjectIds)) {
+				return response;
 			}
-
+			
+			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
+					cmd.getOwnerId(), authProjectIds, cmd.getParentId(), cmd.getCategoryId(),  childTagIds, cmd.getKeywords());
 		} else {
 			sas = this.yellowPageProvider.queryServiceAllianceAdmin(locator, pageSize + 1, cmd.getOwnerType(),
 					cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), childTagIds, cmd.getKeywords(), cmd.getDisplayFlag());
@@ -962,6 +956,27 @@ public class YellowPageServiceImpl implements YellowPageService {
 		this.processRange(response.getDtos());
 		
 		return response;
+	}
+
+	private List<Long> getProjectIdsByScene(Long ownerId, Long type) {
+		if (null == type || type < 1) {
+			return null;
+		}
+		
+		//根据ownerId获取namespaceId
+		Community community = communityProvider.findCommunityById(ownerId);
+		if (null == community) {
+			return null;
+		}
+
+		List<ProjectDTO> dtos = organizationService.getProjectIdsByCommunityAndModuleApps(community.getNamespaceId(),
+				ownerId, SERVICE_ALLIANCE_MODULE_ID, r -> {
+					ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
+							.fromJsonString(r, ServiceAllianceInstanceConfig.class);
+					return null == config ? false : type.equals(config.getType());
+				});
+
+		return null == dtos ? null : dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 	}
 
 	/**   
@@ -1255,15 +1270,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		
 		//检验项目id的正确性。
-		if (null == cmd.getOwnerId() || cmd.getOwnerId() < 1) {
-			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
-		}
+		checkQueryOwnerId(cmd.getOwnerType(), cmd.getOwnerId());
 
 		ServiceAlliances serviceAlliance = ConvertHelper.convert(cmd, ServiceAlliances.class);
 
 		if (null != serviceAlliance.getCategoryId()) {
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceAlliance.getCategoryId());
 			serviceAlliance.setServiceType(category.getName());
+		}
+		
+		//设置属性为当前项目可见时，range参数有可能为空，这里设置成当前项目id
+		if (StringUtils.isEmpty(cmd.getRange())) {
+			cmd.setRange(cmd.getOwnerId() + "");
 		}
 
 		dbProvider.execute(r -> {
@@ -1276,69 +1294,48 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 				// 设置服务联盟显示在app端，by dengs,20170524.
 				serviceAlliance.setDisplayFlag(DisplayFlagType.SHOW.getCode());
-				
+
+				 // 更新表单url
+				updateServiceAllianceFormModuleUrl(serviceAlliance);
+
 				// 更新时间
 				updateServiceAllianceDate(serviceAlliance);
 				this.yellowPageProvider.createServiceAlliances(serviceAlliance);
-				createServiceAllianceAttachments(cmd.getAttachments(), serviceAlliance.getId(),
-						ServiceAllianceAttachmentType.BANNER.getCode());
-				createServiceAllianceAttachments(cmd.getFileAttachments(), serviceAlliance.getId(),
-						ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
-
-				boolean isupdate = false;
-				if (serviceAlliance.getModuleUrl() != null && serviceAlliance.getModuleUrl().contains("{id}")) {
-					String moduleUrl = serviceAlliance.getModuleUrl().replace("{id}",
-							serviceAlliance.getId().toString());
-					serviceAlliance.setModuleUrl(moduleUrl);
-					isupdate = true;
-				}
-
-				// 替换moduleUrl,替换格式如此
-				// zl://approval/create?approvalId=-1&sourceId=6&formId=1
-				if (replaceModuleUrl(serviceAlliance)) {
-					isupdate = true;
-				}
-				if (isupdate) {
-					this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
-				}
-
 			} else {
 				ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
-				if (sa.getLatitude() != null && sa.getLongitude() != null) {
-					sa.setGeohash(GeoHashUtils.encode(sa.getLatitude(), sa.getLongitude()));
+				if (serviceAlliance.getLatitude() != null && serviceAlliance.getLongitude() != null) {
+					serviceAlliance.setGeohash(GeoHashUtils.encode(sa.getLatitude(), sa.getLongitude()));
 				}
+
+				serviceAlliance.setOwnerType(sa.getOwnerType());
+				serviceAlliance.setOwnerId(sa.getOwnerId());
 				serviceAlliance.setType(sa.getType());
 				serviceAlliance.setCreateTime(sa.getCreateTime());
 				serviceAlliance.setCreatorUid(sa.getCreatorUid());
 				// by dengs,20170524 序号和是否在app端显示不能更新掉了。
 				serviceAlliance.setDefaultOrder(sa.getDefaultOrder());
 				serviceAlliance.setDisplayFlag(sa.getDisplayFlag());
-				
-				// 替换moduleUrl,替换格式如此
-				// zl://approval/create?approvalId=-1&sourceId=6&formId=1
-				if (serviceAlliance.getModuleUrl() != null && serviceAlliance.getModuleUrl().contains("{id}")) {
-					String moduleUrl = serviceAlliance.getModuleUrl().replace("{id}",
-							serviceAlliance.getId().toString());
-					serviceAlliance.setModuleUrl(moduleUrl);
-				}
-				replaceModuleUrl(serviceAlliance);
-				
+
+				 // 更新表单url
+				updateServiceAllianceFormModuleUrl(serviceAlliance);
+
 				// 更新时间
 				updateServiceAllianceDate(serviceAlliance);
 				this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
-				createServiceAllianceAttachments(cmd.getAttachments(), serviceAlliance.getId(),
-						ServiceAllianceAttachmentType.BANNER.getCode());
-				createServiceAllianceAttachments(cmd.getFileAttachments(), serviceAlliance.getId(),
-						ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 			}
+
+			// 创建封面图和文件
+			createServiceAllianceAttachments(cmd.getAttachments(), serviceAlliance.getId(),
+					ServiceAllianceAttachmentType.BANNER.getCode());
+			createServiceAllianceAttachments(cmd.getFileAttachments(), serviceAlliance.getId(),
+					ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 
 			// 更新筛选项
 			updateServiceAllianceTagVals(cmd.getTagGroups(), serviceAlliance);
-			
+
 			// 更新客服记录
 			updateServiceAllianceOnlineService(serviceAlliance);
-			
 			return null;
 		});
 
@@ -1378,8 +1375,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 * @param tagGroups
 	 * @param serviceAlliance
 	 */
-	private void updateServiceAllianceTagVals(List<AllianceTagGroupDTO> tagGroups, ServiceAlliances serviceAlliance) {
 
+	private void updateServiceAllianceTagVals(List<AllianceTagGroupDTO> tagGroups, ServiceAlliances serviceAlliance) {
 		// 首先删除该服务下的所有标签。
 		allianceTagValProvider.deleteTagValByOwnerId(serviceAlliance.getId());
 
@@ -1402,6 +1399,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 				allianceTagValProvider.createTagVal(tagVal);
 			}
 		}
+	}
+	
+	/**
+	 * 更新表单url
+	 * @param sa
+	 */
+	private void updateServiceAllianceFormModuleUrl(ServiceAlliances sa) {
+
+		// 设置moduleUrl
+		if (sa.getModuleUrl() != null && sa.getModuleUrl().contains("{id}")) {
+			String moduleUrl = sa.getModuleUrl().replace("{id}", sa.getId().toString());
+			sa.setModuleUrl(moduleUrl);
+		}
+
+		// 替换moduleUrl,替换格式如此
+		// zl://approval/create?approvalId=-1&sourceId=6&formId=1
+		replaceModuleUrl(sa);
 	}
 
 	final static Pattern pFindId = Pattern
@@ -3957,4 +3971,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
 		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
 	}
+	
+	private void checkQueryOwnerId(String ownerType, Long ownerId) {
+		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType) || null == ownerId || ownerId < 1) {
+			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+		}
+	}
+	
 }

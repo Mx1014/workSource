@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import com.everhomes.acl.*;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -53,6 +54,7 @@ import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.openapi.Contract;
@@ -69,6 +71,7 @@ import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
@@ -85,6 +88,7 @@ import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.*;
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
@@ -102,6 +106,7 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.OwnerType;
@@ -119,6 +124,10 @@ import com.everhomes.rest.organization.pm.PmMemberStatus;
 import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -389,6 +398,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private AssetService assetService;
+    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+    
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -14459,6 +14472,52 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setDtos(dtos);
         return response;
     }
+    
+    @Override
+	public List<ProjectDTO> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
+
+		// 根据type获取相应的appId
+    	namespaceId = null == namespaceId ? UserContext.getCurrentNamespaceId() : namespaceId;
+		List<ServiceModuleAppDTO> dtos = serviceModuleService.getModuleApps(namespaceId, moduleId);
+		if (CollectionUtils.isEmpty(dtos)) {
+			return null;
+		}
+		
+		ServiceModuleAppDTO targetAppDto = null;
+		for (ServiceModuleAppDTO dto : dtos) {
+			if (!StringUtils.isEmpty(dto.getInstanceConfig()) && matchCallback.match(dto.getInstanceConfig())) {
+				targetAppDto = dto;
+				break;
+			}
+		}
+
+		if (null == targetAppDto) {
+			return null;
+		}
+
+		// 获取到管理公司
+		GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+		cmd.setAppId(targetAppDto.getOriginId());
+		cmd.setProjectId(communityId);
+		OrganizationDTO orgDto = getAuthOrgByProjectIdAndAppId(cmd);
+		if (null == orgDto) {
+			return null;
+		}
+
+		// 获取管理公司下的该应用下所有项目
+		return getOrganizationProjectIdsByAppId(orgDto.getId(), moduleId, targetAppDto.getOriginId());
+	}
+	
+    @Override
+	public List<ProjectDTO> getOrganizationProjectIdsByAppId(Long organizationId, Long moduleId, Long originAppId) {
+		ListUserRelatedProjectByModuleCommand listCmd = new ListUserRelatedProjectByModuleCommand();
+		listCmd.setOrganizationId(organizationId);
+		listCmd.setModuleId(moduleId);
+		listCmd.setUserId(UserContext.currentUserId());
+		listCmd.setAppId(originAppId);
+		listCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+		return serviceModuleService.listUserRelatedProjectByModuleId(listCmd);
+	}
 
 }
 
