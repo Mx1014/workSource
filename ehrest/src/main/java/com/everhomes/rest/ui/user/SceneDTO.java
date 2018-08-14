@@ -20,7 +20,6 @@ import com.everhomes.util.StringHelper;
  * <li>communityType : 园区类型</li>
  * <li>status : 认证状态</li>
  * <li>communityId : 园区ID</li>
- * <li>sortName : 用于排序的字段(中文,取名称或别名)</li>
  * </ul>
  */
 public class SceneDTO {
@@ -37,7 +36,6 @@ public class SceneDTO {
     private Long communityId;
     private String communityName;
     private String titleName;
-    private String sortName ;
 
     public String getSceneToken() {
         return sceneToken;
@@ -50,15 +48,6 @@ public class SceneDTO {
     public String getEntityType() {
         return entityType;
     }
-
-    
-    public String getSortName() {
-		return sortName;
-	}
-
-	public void setSortName(String sortName) {
-		this.sortName = sortName;
-	}
 
 	public void setEntityType(String entityType) {
         this.entityType = entityType;

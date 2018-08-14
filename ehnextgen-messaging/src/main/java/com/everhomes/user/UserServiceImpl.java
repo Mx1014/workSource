@@ -6575,10 +6575,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		  if(sceneList != null && sceneList.size()>0)
 		  {
 			  for(SceneDTO dto : sceneList){
-				  if(!StringUtils.isBlank(dto.getAliasName())){
-					  dto.setSortName(dto.getAliasName());
-				  }else{
-					  dto.setSortName(dto.getName()); 
+				  if(StringUtils.isBlank(dto.getAliasName())){
+					  dto.setAliasName(dto.getName()); 
 				  }
 			  }
 		  }
