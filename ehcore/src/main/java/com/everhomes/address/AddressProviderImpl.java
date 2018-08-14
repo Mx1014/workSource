@@ -1,29 +1,46 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-
+import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
-import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhAddressesDao;
+import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
+import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
-
-import com.everhomes.asset.AddressIdAndName;
-
-import com.everhomes.rest.address.*;
-import org.jooq.*;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -34,30 +51,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
-import com.everhomes.server.schema.tables.records.EhAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -580,6 +579,15 @@ public class AddressProviderImpl implements AddressProvider {
             return null;
         }
         return addresses.get(0);
+    }
+
+    @Override
+    public List<Long> listThirdPartRelatedAddresses(String namespaceType, List<String> addressIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddresses.class));
+        return  context.select(Tables.EH_ADDRESSES.ID).from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN.in(addressIds))
+                .fetchInto(Long.class);
     }
 
     public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
