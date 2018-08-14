@@ -57,28 +57,6 @@ public class AppCategoryProviderImpl implements AppCategoryProvider {
 
 
     @Override
-    public List<AppCategory> listAppCategoryByAppIds(List<L>){
-        List<AppCategory> results = new ArrayList<>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhAppCategoriesRecord> query = context.selectQuery(Tables.EH_APP_CATEGORIES);
-        if(locationType != null){
-            query.addConditions(Tables.EH_APP_CATEGORIES.LOCATION_TYPE.eq(locationType));
-        }
-
-        if(parentId != null){
-            query.addConditions(Tables.EH_APP_CATEGORIES.PARENT_ID.eq(parentId));
-        }
-
-        query.addOrderBy(Tables.EH_APP_CATEGORIES.DEFAULT_ORDER.asc());
-        query.fetch().map((r) -> {
-            results.add(ConvertHelper.convert(r, AppCategory.class));
-            return null;
-        });
-        return results;
-    }
-
-
-    @Override
     public Long findMaxDefaultOrder(Byte locationType, Long parentId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         Long defaultOrder = context.select(Tables.EH_APP_CATEGORIES.DEFAULT_ORDER.max())

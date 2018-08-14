@@ -6,10 +6,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.module.AppCategoryProvider;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.module.ServiceModuleService;
+import com.everhomes.module.*;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -19,15 +16,14 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
-import com.everhomes.rest.module.AppCategoryDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.menu.*;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
@@ -99,6 +95,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private AppCategoryProvider appCategoryProvider;
 
+	@Autowired
+	private ServiceModuleEntryProvider serviceModuleEntryProvider;
+
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
 		Long userId = cmd.getUserId();
@@ -161,18 +160,20 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return webMenuDTOS;
 	}
 
-	private List<AppCategoryDTO> listUserAppCategory(Long userId, Long organizationId){
+	@Override
+	public ListUserAppCategoryResponse listUserAppCategory(ListUserAppCategoryCommand cmd){
 		//拆成两个独立的方法
 		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
 		//后面一个是根据应用id获取菜单的，这个是菜单的锅
-		List<Long> appOriginIds = listUserAppIds(userId, null, organizationId);
+		List<Long> appOriginIds = listUserAppIds(cmd.getUserId(), null, cmd.getOrganizationId());
 
 
+		List<AppCategoryDTO> dtos = listCategoryByAppIds(appOriginIds);
 
-		return null;
+		ListUserAppCategoryResponse response = new ListUserAppCategoryResponse();
+		response.setDtos(dtos);
 
-
-
+		return response;
 	}
 
 
@@ -387,13 +388,64 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 
 
-		appCategoryProvider.listAppCategories()
+		ListAppCategoryCommand cmd = new ListAppCategoryCommand();
+		cmd.setLocationType(ServiceModuleLocationType.PC_WORKPLATFORM.getCode());
+		cmd.setParentId(0L);
+
+		ListAppCategoryResponse categoryResponse = serviceModuleService.listAppCategory(cmd);
+		if(categoryResponse == null && categoryResponse.getDtos() == null && categoryResponse.getDtos().size() == 0){
+			return null;
+		}
+
+		List<AppCategoryDTO> dtos = categoryResponse.getDtos();
+
+		for (AppCategoryDTO dto: dtos){
+			setMenuToAppCategoryDto(dto, webMenus);
+		}
+
+		return dtos;
+
+	}
 
 
+	private void setMenuToAppCategoryDto(AppCategoryDTO dto, List<WebMenu> menus){
 
+		//结束遍历
+		if(dto == null || menus == null || menus.size() == 0){
+			return;
+		}
 
-		return null;
+		//非叶子节点
+		if(TrueOrFalseFlag.fromCode(dto.getLeafFlag()) != TrueOrFalseFlag.TRUE && dto.getDtos() != null){
+			for (AppCategoryDTO subDto: dto.getDtos()){
+				setMenuToAppCategoryDto(subDto, menus);
+			}
 
+			return;
+		}
+
+		//叶子节点
+		List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(null, dto.getId(), null, null, null);
+
+		if (entries == null || entries.size() == 0){
+			return;
+		}
+
+		List<WebMenuDTO> menuDtos = new ArrayList<>();
+
+		for (ServiceModuleEntry entry: entries){
+			for (WebMenu menu : menus) {
+				if(entry.getModuleId().equals(menu.getModuleId())){
+					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
+					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
+					menuDto.setAppConfig(appDTO);
+					menuDtos.add(menuDto);
+					break;
+				}
+			}
+		}
+
+		dto.setMenuDtos(menuDtos);
 	}
 
 
