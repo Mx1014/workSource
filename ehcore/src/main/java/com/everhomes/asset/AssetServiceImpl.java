@@ -5361,7 +5361,7 @@ public class AssetServiceImpl implements AssetService {
                             Date deadline = yyyyMMdd.parse(dueDayDeadline);
                             Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
                             if(dueDayCount.compareTo(0l) < 0) {
-                            	dueDayCount = 0l;
+                            	dueDayCount = null;
                             }
                             assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
                         } catch (Exception e){ continue; };
@@ -5392,8 +5392,8 @@ public class AssetServiceImpl implements AssetService {
 	                        try{
 	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
 	                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
-	                            if(dueDayCount.compareTo(0l) < 0) {
-	                            	dueDayCount = 0l;
+	                            if(dueDayCount.compareTo(0l) <= 0) {
+	                            	dueDayCount = null;
 	                            }
 	                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
 	                        } catch (Exception e){ continue; };
