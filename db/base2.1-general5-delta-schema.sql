@@ -80,6 +80,8 @@ DROP TABLE `eh_general_form_kv_configs`;
 CREATE TABLE `eh_general_form_kv_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64) NOT NULL DEFAULT '',
+  `project_id` BIGINT NOT NULL DEFAULT 0,
   `module_type` VARCHAR(64) NOT NULL,
   `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `owner_type` VARCHAR(64) NOT NULL,
