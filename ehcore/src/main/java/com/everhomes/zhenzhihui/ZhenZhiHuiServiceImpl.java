@@ -3,15 +3,22 @@ package com.everhomes.zhenzhihui;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.point.UserLevel;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserInfoDTO;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -21,8 +28,14 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
@@ -41,9 +54,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import static com.everhomes.controller.WebRequestInterceptor.setCookieInResponse;
 
@@ -53,13 +69,17 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String APPENCKEY     = "ece2d40c2badef49";
     private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
     private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999930;
+    private static final Long COMMUNITY_ID  = 240111044332063520L;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
 
+    @Autowired
     private UserService userService;
-
+    @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private OrganizationServiceImpl organizationService;
     @Override
-    public void ssoService(HttpServletRequest request, HttpServletResponse response) {
+    public Object ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
 
         if ( TICKET == null ) {
@@ -109,6 +129,36 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
                             String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
                             setCookieInResponse("token", tokenString, request, response);
+
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("");
+
+                            SceneTokenDTO sceneTokenDTO = new SceneTokenDTO();
+                            sceneTokenDTO.setUserId(user.getId());
+                            sceneTokenDTO.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
+                            List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
+                            if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
+                                sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
+                                sceneTokenDTO.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+                                builder.queryParam("communityId", COMMUNITY_ID);
+                            }else {
+                                sceneTokenDTO.setScene(SceneType.ENTERPRISE.getCode());
+                                sceneTokenDTO.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+                                sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
+                                builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
+                            }
+
+                            builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
+                            builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
+                            builder.queryParam("userId", user.getId());
+                            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                                if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect")) {
+                                    builder.queryParam(entry.getKey(), entry.getValue());
+                                }
+                            }
+                            HttpHeaders httpHeaders = new HttpHeaders();
+                            httpHeaders.setLocation(new URI(builder.build().toUriString()));
+
+                            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
                         }
                     }
                 }
@@ -117,6 +167,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO){
