@@ -1891,7 +1891,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
 			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
 		}else {
-			GeneralForm generalForm = generalFormService.mirrorGeneralForm(cmd.getFormId(), cmd.getOwnerType(), cmd.getOwnerId(), null, null);
+			GeneralForm generalForm = generalFormService.mirrorGeneralForm(cmd.getFormId(), null, null,null,null,cmd.getOwnerType(), cmd.getOwnerId());
 			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
 			request.setSourceId(generalForm.getId());
 			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
