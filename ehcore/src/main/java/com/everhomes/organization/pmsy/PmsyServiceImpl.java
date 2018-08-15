@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetPayService;
-import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.asset.DefaultAssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -41,7 +39,6 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
@@ -83,9 +80,6 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
-	
-	@Autowired
-	private AssetPayService assetPayService;
 	
 	@Autowired
     private DbProvider dbProvider;
@@ -628,6 +622,6 @@ public class PmsyServiceImpl implements PmsyService{
     	PaymentCallBackHandler handler = PlatformContext.getComponent(
     			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PM_SIYUAN_CODE);
     	//支付模块回调接口，通知支付结果
-    	assetPayService.payNotify(cmd, handler);
+    	//assetPayService.payNotify(cmd, handler);
     }
 }

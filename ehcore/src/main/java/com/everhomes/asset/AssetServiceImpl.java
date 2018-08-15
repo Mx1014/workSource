@@ -4646,7 +4646,12 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listPayeeAccounts(cmd);
+        //调接口从电商获取收款方账户
+    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    	}else {
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    	}
     }
 
 	public void payNotify(OrderPaymentNotificationCommand cmd) {

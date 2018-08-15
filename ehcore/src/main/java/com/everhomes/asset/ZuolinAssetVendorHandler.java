@@ -116,9 +116,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     private ContractServiceImpl contractService;
 
     @Autowired
-    private AssetPayService assetPayService;
-    
-    @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
 
     @Autowired
@@ -713,90 +710,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     @Override
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
-    }
-
-    @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        List<BillIdAndAmount> bills = cmd.getBills();
-        List<String> billIds = new ArrayList<>();
-        Long amountsInCents = 0l;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
-            String amountOwed = billIdAndAmount.getAmountOwed();
-            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
-            amountsInCents += amountOwedInCents.longValue();
-        }
-        //对左邻的用户，直接检查bill的状态即可
-        checkHasPaidBills(billIds);
-        //这种检查的逻辑是不对的
-//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
-//        if(checkedOrderId !=null){
-//            //重复下单的返回
-//            return null;
-//        }
-        //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        //assetProvider.saveOrderBills(bills,orderId);
-        Long payerId = Long.parseLong(cmd.getPayerId());
-        //检查下单人的类型和id，不能为空
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-//            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-//                payerId = Long.parseLong(cmd.getPayerId());
-//            }else{
-//                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-//                throw new RuntimeErrorException("individual make asset order failed");
-//            }
-            payerId = UserContext.currentUserId();
-        }
-
-        //组装command ， 请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
-        cmd2pay.setCommunityId(cmd.getCommunityId());
-//        cmd2pay.setAmount(1l);
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        cmd2pay.setNamespaceId(cmd.getNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-
-        //不填写paymentType，支持所有除了微信公众号的支付手段
-//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
-
-        //这个参数组装有什么用？
-//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-//        paymentParamsDTO.setPayType("no_credit");
-//        User user = UserContext.current().getUser();
-//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-//        cmd2pay.setPaymentParams(paymentParamsDTO);
-
-        //通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
-        if(billIds != null) {
-        	Long billId = Long.parseLong(billIds.get(0));
-        	projectName = assetProvider.getProjectNameByBillID(billId);
-        }
-        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        String billGroupName = "";
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        	billGroupName = paymentBillGroup.getName();
-        }
-        cmd2pay.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
-        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
-//        response.setAmount(String.valueOf(preOrder.getAmount()));
-//        response.setExpiredIntervalTime(15l*60l);
-//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
-//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
-//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
-//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
-//        response.setPayMethod(preOrder.getPayMethod());
-
-        return preOrder;
     }
 
     private void checkHasPaidBills(List<String> billIds) {
@@ -1987,15 +1900,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         cmd.setNamespaceId(namespaceId);
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);
-    }
-    
-    public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-    	//调接口从电商获取收款方账户
-    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
-    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
-    	}else {
-    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
-    	}
     }
     
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
