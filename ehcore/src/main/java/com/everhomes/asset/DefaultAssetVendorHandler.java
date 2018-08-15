@@ -553,7 +553,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         this.dbProvider.execute((TransactionStatus status) -> {
         	//更新eh_payment_bill_orders表
             assetProvider.updatePaymentBillOrder(purchaseOrderDTO.getBusinessOrderNumber(), purchaseOrderDTO.getPaymentStatus(),
-            		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentTime(), purchaseOrderDTO.getPaymentChannel());
+            		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentSucessTime(), purchaseOrderDTO.getPaymentChannel());
             //更新eh_payment_bills账单表、EH_PAYMENT_BILL_ITEMS账单费项表
             assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds, purchaseOrderDTO.getPaymentType());
             return null;
