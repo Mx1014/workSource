@@ -1207,9 +1207,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
         BigDecimal amout = activity.getChargePrice();
         if(amout == null){
-            createPurchaseOrderCommand.setAmount(new BigDecimal(0));
+            createPurchaseOrderCommand.setAmount(new BigDecimal(0).longValue());
         }
-        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)));
+        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
         createPurchaseOrderCommand.setAccountCode(generateAccountCode());
         createPurchaseOrderCommand.setClientAppName(cmd.getClientAppName());
@@ -6998,12 +6998,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "no activity.");
         }
         //检验支付结果和应价格是否相等
-        checkPayAmount(purchaseOrderDTO.getAmount(), activity.getChargePrice());
+        checkPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()), activity.getChargePrice());
         //支付宝回调时，可能会同时回调多次，
         roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
         roster.setPayTime(purchaseOrderDTO.getPaymentTime());
 
-        roster.setPayAmount(purchaseOrderDTO.getAmount());
+        roster.setPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()));
         roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
