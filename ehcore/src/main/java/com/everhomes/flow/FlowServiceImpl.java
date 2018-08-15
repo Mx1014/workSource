@@ -5891,6 +5891,8 @@ public class FlowServiceImpl implements FlowService {
         for (Long flowId : cmd.getFlowIds()) {
             FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
             Flow flow = flowGraph.getFlow();
+            flow.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);// 设置成 0
+
             if (cmd.getModuleType() != null) {
                 flow.setModuleType(cmd.getModuleType());
             }
