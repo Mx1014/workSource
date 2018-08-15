@@ -689,7 +689,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     private Map<String, Long> checkFilePath(String[] pathArray, Long ownerId) {
         Map<String, Long> result = new HashMap<>();
-        FileCatalog catalog = fileManagementProvider.findAllStatusFileCatalogByName(UserContext.getCurrentNamespaceId(), ownerId, pathArray[0]);
+        FileCatalog catalog = fileManagementProvider.findFileCatalogByName(UserContext.getCurrentNamespaceId(), ownerId, pathArray[0]);
         if(null == catalog){ 
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
                     "the file catalog not found.");
@@ -703,7 +703,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         Long parentId = null;
         for(int i = 1;i< pathArray.length;i++) {
-            FileContent content = fileManagementProvider.findAllStatusFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId, pathArray[i], null);
+            FileContent content = fileManagementProvider.findFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId, pathArray[i], null);
             if (null != content) {
                 parentId = content.getId();
                 if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
