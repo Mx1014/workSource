@@ -5198,9 +5198,6 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        //com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        //EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
         com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
@@ -5284,12 +5281,12 @@ public class AssetProviderImpl implements AssetProvider {
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
             String payTime = r.getValue(t2.PAYMENT_TIME).toString();
-//			try {
-//				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
-//			}catch (Exception e){
-//				payTime = null;
-//                LOGGER.error(e.toString());
-//            }
+			try {
+				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
+			}catch (Exception e){
+				payTime = null;
+                LOGGER.error(e.toString());
+            }
             dto.setPayTime(payTime);
             //获得付款人员（缴费人名称、缴费人电话）
             User userById = userProvider.findUserById(r.getValue(t2.UID));
@@ -5310,34 +5307,6 @@ public class AssetProviderImpl implements AssetProvider {
             list.add(dto);
             return null;
         });
-        //调用支付提供的接口查询订单信息
-//        List<Long> payOrderIds = new ArrayList<>();
-//        for(PaymentOrderBillDTO dto : list) {
-//        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-//        }
-//        if(LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
-//        }
-//        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
-//        if(LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
-//        }
-//        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-//        	for(int i = 0;i < payOrderDTOs.size();i++) {
-//            	for(int j = 0;j < list.size();j++) {
-//            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-//            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-//            			PaymentOrderBillDTO dto = list.get(j);
-//            			OrderDTO orderDTO = payOrderDTOs.get(i);
-//            			//dto.setAmount(AmountUtil.centToUnit(LongUtil.convert(orderDTO.getAmount())));
-//            			if(orderDTO.getPaymentType() != null) {
-//            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
-//            			}
-//            			list.set(j, dto);
-//            		}
-//            	}
-//            }
-//        }
         return list;
     }
 	
