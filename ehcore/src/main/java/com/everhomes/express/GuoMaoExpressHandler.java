@@ -14,6 +14,7 @@ import com.everhomes.express.guomao.rit.service.MailTtServiceGnPortType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -60,6 +61,9 @@ public class GuoMaoExpressHandler implements ExpressHandler{
 	
     @Autowired
 	private FlowService flowService;
+
+	@Autowired
+	private LocaleStringService localeService;
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -108,9 +112,10 @@ public class GuoMaoExpressHandler implements ExpressHandler{
 		cmd21.setReferId(expressOrder.getId());
 		cmd21.setProjectType(expressOrder.getOwnerType());
 		cmd21.setProjectId(expressOrder.getOwnerId());
-		cmd21.setTitle("国贸快递");
+		cmd21.setTitle(localeService.getLocalizedString(ExpressServiceErrorCode.SCOPE,ExpressServiceErrorCode.WORK_FLOW_NAME,"zh_CN","快递服务"));
 		cmd21.setFlowMainId(flow.getFlowMainId());
 		cmd21.setFlowVersion(flow.getFlowVersion());
+		cmd21.setContent(String.format(localeService.getLocalizedString(ExpressServiceErrorCode.SCOPE,ExpressServiceErrorCode.WORK_FLOW_NAME,"zh_CN","寄件类型：国贸快递\n订单编号：%s"),expressOrder.getOrderNo()));
 		FlowCase flowCase = flowService.createFlowCase(cmd21);
 		if(flowCase==null || flowCase.getId()==null){
 			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.ERROR_CREATE_FLOWCASE,
