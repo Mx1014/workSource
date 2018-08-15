@@ -181,7 +181,8 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             orderBill.setBillId(bill.getBillId());
             orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
             orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
-            orderBill.setGeneralOrderId(orderResponse.getOrderId());
+            orderBill.setPaymentOrderId(orderResponse.getPayResponse().getOrderId());//支付订单ID
+            orderBill.setGeneralOrderId(orderResponse.getOrderId());//统一订单ID
             orderBill.setPaymentType(orderResponse.getPaymentType());
             orderBill.setPaymentChannel(orderResponse.getPaymentChannel());
             orderBill.setPaymentOrderType(orderResponse.getPaymentOrderType());
@@ -221,6 +222,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             dto.setOrderId(orderResponse.getOrderId());//获取的是统一订单的id
         }else {
         	dto.setOrderId(orderCommandResponse.getOrderId());//获取的是支付订单的id
+        	dto.setUserId(orderResponse.getPaymentPayerId());//获取付款方id，用于对公转账下单支付系统的校验
         }
         dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
         if(orderResponse.getAmount() != null) {

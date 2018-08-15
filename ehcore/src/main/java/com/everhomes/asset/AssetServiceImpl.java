@@ -5319,7 +5319,6 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         cmd.setSourceType(SourceType.PC.getCode());
         PreOrderDTO preOrderDTO = handler.createOrder(cmd);
-        preOrderDTO.setUserId(UserContext.currentUserId());
         return preOrderDTO;
 	}
 
