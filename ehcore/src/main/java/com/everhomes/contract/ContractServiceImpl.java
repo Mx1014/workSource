@@ -794,6 +794,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		if(cmd.getSignedTime() != null) {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		} else {
+			contract.setSignedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 		if(cmd.getDepositTime() != null) {
 			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
