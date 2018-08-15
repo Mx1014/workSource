@@ -36,7 +36,10 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.engine.config.spi.ConfigurationService;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -153,8 +156,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             sceneTokenDTO.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
 
                             List<Long> moduleIds = new ArrayList<>();
-//                            moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
-                            moduleIds.add(41700L);
+                            moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
                             List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
                             if (CollectionUtils.isEmpty(serviceModuleApps)) {
                                 LOGGER.error("APP is null");
@@ -165,6 +167,14 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
                                     LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
                             String location = handler.refreshActionData(instanceConfig,sceneTokenDTO);
+                            LOGGER.info("location = {}", location);
+                            JSONObject jsonObject = (JSONObject) JSONValue.parse(location);
+                            if (jsonObject.get("url") == null) {
+                                LOGGER.error("url is null");
+                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "url is null");
+                            }
+                            String[] locations = jsonObject.get("url").toString().split("#sign_suffix");
+                            location = locations[0];
                             LOGGER.info("location = {}", location);
                             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 
