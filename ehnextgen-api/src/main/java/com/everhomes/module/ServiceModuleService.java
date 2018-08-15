@@ -76,5 +76,6 @@ public interface ServiceModuleService {
 
 	void exportServiceModuleEntries(HttpServletResponse response);
 
+	List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId);
 	void reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd);
 }

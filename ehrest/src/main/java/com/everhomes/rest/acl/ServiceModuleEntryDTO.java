@@ -18,6 +18,7 @@ import java.util.List;
  *     <li>locationType: 位置类型 {@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
  *     <li>sceneType: 场景类型 {@link com.everhomes.rest.module.ServiceModuleSceneType}</li>
  *     <li>appCategoryId: appCategoryId</li>
+ *     <li>appCategoryName: 入口分类名称</li>
  *     <li>defaultOrder: 排序</li>
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
@@ -32,6 +33,7 @@ public class ServiceModuleEntryDTO {
 	private Byte locationType;
 	private Byte sceneType;
 	private Long appCategoryId;
+	private String appCategoryName;
 	private Integer defaultOrder;
 	private String iconUri;
 	private String iconUrl;
@@ -123,6 +125,14 @@ public class ServiceModuleEntryDTO {
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
+	}
+
+	public String getAppCategoryName() {
+		return appCategoryName;
+	}
+
+	public void setAppCategoryName(String appCategoryName) {
+		this.appCategoryName = appCategoryName;
 	}
 
 	@Override

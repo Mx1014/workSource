@@ -27,7 +27,6 @@ public class AllianceOnlineServiceImpl extends AbstractChatRecordService impleme
 		if (null != onlineService) {
 			
 			//有的话就更新
-			onlineService.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 			onlineService.setUserName(userName);
 			onlineServiceProvider.updateOnlineService(onlineService);
 			return;

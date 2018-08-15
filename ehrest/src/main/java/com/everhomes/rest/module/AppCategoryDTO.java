@@ -1,5 +1,6 @@
 package com.everhomes.rest.module;
 
+import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.launchpadbase.AppDTO;
 import com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO;
 import com.everhomes.util.StringHelper;
@@ -18,6 +19,7 @@ import java.util.List;
  *     <li>dtos: 下级分类，参考{@link AppCategoryDTO}</li>
  *     <li>appDtos: appDtos，广场应用，参考{@link AppDTO}</li>
  *     <li>appCommunityConfigDtos: web端项目广场{@link AppCommunityConfigDTO}</li>
+ *     <li>menuDtos: web后台菜单{@link WebMenuDTO}</li>
  * </ul>
  */
 public class AppCategoryDTO {
@@ -42,6 +44,8 @@ public class AppCategoryDTO {
 	private List<AppDTO> appDtos;
 
 	private List<AppCommunityConfigDTO> appCommunityConfigDtos;
+
+	private List<WebMenuDTO> menuDtos;
 
 	public Long getId() {
 		return id;
@@ -122,6 +126,14 @@ public class AppCategoryDTO {
 
 	public void setAppCommunityConfigDtos(List<AppCommunityConfigDTO> appCommunityConfigDtos) {
 		this.appCommunityConfigDtos = appCommunityConfigDtos;
+	}
+
+	public List<WebMenuDTO> getMenuDtos() {
+		return menuDtos;
+	}
+
+	public void setMenuDtos(List<WebMenuDTO> menuDtos) {
+		this.menuDtos = menuDtos;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import com.everhomes.rest.news.open.CreateOpenNewsCommand;
 import com.everhomes.rest.news.open.ListOpenNewsCommand;
 import com.everhomes.rest.news.open.ListOpenNewsResponse;
 import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,8 +30,6 @@ public interface NewsService {
 	void importNews(ImportNewsCommand cmd, MultipartFile[] files);
 
 	ListNewsResponse listNews(ListNewsCommand cmd);
-
-	SearchNewsResponse searchNews(SearchNewsCommand cmd);
 
 	GetNewsDetailInfoResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd);
 

@@ -48,6 +48,21 @@ public class MenuController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /menu/listUserAppCategory</b>
+     * <p>获取园区场景的菜单</p>
+     */
+    @RequestMapping("listUserAppCategory")
+    @RestReturn(value=ListUserAppCategoryResponse.class)
+    public RestResponse listUserAppCategory(ListUserAppCategoryCommand cmd) {
+
+        ListUserAppCategoryResponse res = webMenuService.listUserAppCategory(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /menu/treeWebMenus</b>
      * <p>树状结构的菜单列表</p>
      */
