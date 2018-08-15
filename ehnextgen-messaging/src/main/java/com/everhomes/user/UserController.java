@@ -1653,7 +1653,7 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("sendVerificationCodeByPhone")
 	@RestReturn(String.class)
-	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ){
+	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ,HttpServletRequest request){
 		FindUserByPhoneCommand cmd1 = ConvertHelper.convert(cmd, FindUserByPhoneCommand.class);
 		UserDTO  user = this.userService.getUserFromPhone(cmd1);
 		if(user == null) {
@@ -1662,7 +1662,7 @@ public class UserController extends ControllerBase {
 		}
 
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		this.userService.sendVerficationCode4Point(namespaceId, user, cmd.getRegionCode(), null);
+		this.userService.sendVerficationCode4Point(namespaceId, user, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
      
     }
