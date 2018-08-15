@@ -345,5 +345,5 @@ public interface UserService {
     
     void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
 
-    PointCheckVCDTO pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd) ;
+    PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
 }

@@ -1,6 +1,6 @@
 package com.everhomes.rest.user;
 
-public class pointCheckVerificationCodeCommand {
+public class PointCheckVerificationCodeCommand {
 	
 	private Integer namespaceId ;
 	private String verificationCode ;

@@ -1674,8 +1674,8 @@ public class UserController extends ControllerBase {
 	 * @return
 	 */
 	@RequestMapping("pointCheckVerificationCode")
-	@RestReturn(UserDTO.class)
-	public RestResponse pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd){
+	@RestReturn(PointCheckVCDTO.class)
+	public RestResponse pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd){
 
 		PointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
 		RestResponse resp = new RestResponse(dto);
