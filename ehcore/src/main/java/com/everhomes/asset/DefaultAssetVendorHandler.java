@@ -113,7 +113,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
         
         BigDecimal totalAmountCents = calculateBillOrderAmount(cmd);
-        preOrderCommand.setAmount(totalAmountCents);
+        preOrderCommand.setAmount(totalAmountCents.longValue());
         
         String accountCode = generateAccountCode(cmd.getNamespaceId());
         preOrderCommand.setAccountCode(accountCode);
