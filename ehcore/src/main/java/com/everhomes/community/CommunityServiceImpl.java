@@ -3721,7 +3721,7 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setOperateType(OperateType.MANUAL.getCode());
                 } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
                     // FIXME 临时解决   2017/07/27  xq.tian
-                    dto.setOperatorName("通过公司邮箱认证");
+                    dto.setOperatorName("--");
                     dto.setOperateType(OperateType.NOT_MANUAL.getCode());
                 }
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {

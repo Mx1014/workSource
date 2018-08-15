@@ -7156,7 +7156,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dto.setOperateType(OperateType.MANUAL.getCode());
             } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
                 // FIXME 临时解决   2017/07/27  xq.tian
-                dto.setOperatorName("通过公司邮箱认证");
+                dto.setOperatorName("--");
                 dto.setOperateType(OperateType.NOT_MANUAL.getCode());
             }
             if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
