@@ -3798,94 +3798,30 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
         }
         return null;
-//        AddOrModifyRuleForBillGroupResponse response = new AddOrModifyRuleForBillGroupResponse();
-//        Long ruleId = cmd.getBillGroupRuleId();
-//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
-//                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
-//
-//        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
-//                .and(t.OWNERTYPE.eq(group.getOwnerType()))
-//                .fetch(t.CHARGING_ITEM_ID);
-//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
-//        if(ruleId == null){
-//            if(fetch.contains(cmd.getChargingItemId())){
-//                response.setFailCause(AssetPaymentConstants.CREATE_CHARGING_ITEM_FAIL);
-//                return response;
-//            }
-//            //新增 一条billGroupRule
-//            long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
-//            ruleId = nextRuleId;
-//            rule.setId(nextRuleId);
-//            rule.setBillGroupId(cmd.getBillGroupId());
-//            rule.setChargingItemId(cmd.getChargingItemId());
-//            rule.setChargingItemName(cmd.getGroupChargingItemName());
-//            rule.setChargingStandardsId(cmd.getChargingStandardId());
-//            rule.setNamespaceId(group.getNamespaceId());
-//            rule.setOwnerid(group.getOwnerId());
-//            rule.setOwnertype(group.getOwnerType());
-//            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
-//            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
-//            dao.insert(rule);
-////            response.setFailCause(AssetPaymentConstants.SAVE_SUCCESS);
-//        }else{
-//            //拿到正确的rule
-////            if(cmd.getOwnerId().longValue() == cmd.getNamespaceId().longValue()){
-//            rule = readOnlyContext.selectFrom(t)
-//                    .where(t.ID.eq(ruleId))
-//                    .fetchOneInto(PaymentBillGroupRule.class);
-////            }else{
-////                rule = readOnlyContext.selectFrom(t)
-////                        .where(t.OWNERID.eq(group.getOwnerId()))
-////                        .and(t.OWNERTYPE.eq(group.getOwnerType()))
-////                        .and(t.BROTHER_RULE_ID.eq(ruleId))
-////                        .fetchOneInto(PaymentBillGroupRule.class);
-////            }
-//            boolean workFlag = isInWorkGroupRule(rule);
-//            if(workFlag){
-//                response.setFailCause(AssetPaymentConstants.MODIFY_GROUP_RULE_UNSAFE);
-//                return response;
-//            }
-//            //如果没有关联则不修改
-//            rule.setBillGroupId(cmd.getBillGroupId());
-//            rule.setChargingItemId(cmd.getChargingItemId());
-//            rule.setChargingItemName(cmd.getGroupChargingItemName());
-//            rule.setChargingStandardsId(cmd.getChargingStandardId());
-//            rule.setNamespaceId(group.getNamespaceId());
-//            rule.setOwnerid(group.getOwnerId());
-//            rule.setOwnertype(group.getOwnerType());
-//            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
-//            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
-//            dao.update(rule);
-////            response.setFailCause(AssetPaymentConstants.MODIFY_SUCCESS);
-//        }
-//        Long nullId = null;
-//        writeContext.update(Tables.EH_PAYMENT_BILL_GROUPS)
-//                .set(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID,nullId)
-//                .where(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(cmd.getOwnerId()))
-//                .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(cmd.getOwnerType()))
-//                .execute();
-//        return response;
     }
 
     private Long insertOrUpdateBillGroupRule(AddOrModifyRuleForBillGroupCommand cmd, Long brotherRuleId, EhPaymentBillGroupsRules t, DSLContext readOnlyContext, EhPaymentBillGroupsRulesDao dao,byte deCouplingFlag, Long categoryId) {
         Long ruleId = cmd.getBillGroupRuleId();
-//        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
-//                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
-//
-//        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
-//                .and(t.OWNERTYPE.eq(group.getOwnerType()))
+//        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t, Tables.EH_PAYMENT_BILL_GROUPS)
+//                .where(t.OWNERID.eq(cmd.getOwnerId()))
+//                .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+//                .and(t.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
+//                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
 //                .fetch(t.CHARGING_ITEM_ID);
-        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t, Tables.EH_PAYMENT_BILL_GROUPS)
-                .where(t.OWNERID.eq(cmd.getOwnerId()))
-                .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
-                .and(t.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
-                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
-                .fetch(t.CHARGING_ITEM_ID);
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         if(ruleId == null){
 //            if(fetch.contains(cmd.getChargingItemId())){
 //                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.UNIQUE_BILL_ITEM_CHECK,"a bill item can only exists in one bill group for a specific community");
 //            }
+        	List<Long> chargingItemIdList = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t)
+                    .where(t.OWNERID.eq(cmd.getOwnerId()))
+                    .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+                    .and(t.BILL_GROUP_ID.eq(cmd.getBillGroupId()))
+                    .fetch(t.CHARGING_ITEM_ID);
+        	if(chargingItemIdList.contains(cmd.getChargingItemId())){
+	            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.GROUP_UNIQUE_BILL_ITEM_CHECK,"a bill item can only exists in one bill group for a specific community");
+	        }
+        	
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
             ruleId = nextRuleId;
