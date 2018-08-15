@@ -239,6 +239,44 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
+    /*#35812
+    深圳湾停车场月卡充值规则修改
+    根据用深圳湾要求，修改月卡充值规则为以下，其中软基&创投是小猫停车，生态园是科拓停车。原先在4月左右修改过一次，将三个园区的规则统一成生态园的充值规则，
+    但由于甲方当时给出的附件文档与邮件内描述内容不符，造成现在部分月份充值结果与邮件内容不符，现在需统一修改成以下描述的内容。
+    月卡（含固定车位月卡）收费及管理规则（生态园、软基、创投）
+    月卡计费周期规则：
+    当月1-28日缴费1个月的，有效期至下月对应缴费日的前一天；
+    29日及之后缴费1个月的，按下一自然月完整天数扣减缴费当月剩余使用天数计算。
+    */
+    static Timestamp getTimestampByAddDistanceMonthV2(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.SECOND, 1);
+        int today = calendar.get(Calendar.DAY_OF_MONTH);
+        if(today>28) {
+            int daysToEndOfMonth = getDaysToEndOfMonth(calendar);
+
+            //加month个月
+            calendar.add(Calendar.MONTH, month);
+            //计算最后一天
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            calendar.add(Calendar.DAY_OF_MONTH, -daysToEndOfMonth);
+        }else{
+            calendar.add(Calendar.MONTH, month);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
+        }
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
     /**
      * 中百畅停车场，要求月卡时间计算为当月时间
      * @param source
@@ -632,8 +670,8 @@ public class Utils {
         return result;
     }
 
-//    public static void main(String[] args) {
-//        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddThirtyDays(1517469829000L, 1);
-//        System.out.println(timestampByAddThirtyDays);
-//    }
+    public static void main(String[] args) {
+        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddDistanceMonthV2(1530287999000L, 1);
+        System.out.println(timestampByAddThirtyDays);
+    }
 }
