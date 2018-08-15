@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2018/3/12.
  */
@@ -43,7 +45,7 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
             ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
             listServiceModuleAppsCommand.setNamespaceId(namespaceId);
             listServiceModuleAppsCommand.setModuleId(ServiceModuleConstants.LEASE_PROJECT_MODULE);
-            ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+            ListServiceModuleAppsResponse apps = portalService.listServiceModuleApps(listServiceModuleAppsCommand);
             Byte max = 0;
             if (apps!=null && apps.getServiceModuleApps().size()>0){
                 for (ServiceModuleAppDTO r :apps.getServiceModuleApps()) {
@@ -54,7 +56,7 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
             }
             max ++;
             leaseProjectInstanceConfig.setCategoryId(max);
-            leaseProjectInstanceConfig.setHideAddressFlag((byte)0);
+            updateConfig(namespaceId,leaseProjectInstanceConfig);
             return StringHelper.toJsonString(leaseProjectInstanceConfig);
         }
     }
@@ -80,8 +82,45 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
-        return instanceConfig;
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+        LeaseProjectInstanceConfig leaseProjectInstanceConfig = (LeaseProjectInstanceConfig) StringHelper.fromJsonString(instanceConfig,LeaseProjectInstanceConfig.class);
+        if (leaseProjectInstanceConfig.getCategoryId() != null) { //不是新建的应用
+            List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigs(namespaceId, leaseProjectInstanceConfig.getCategoryId().longValue());
+            if (configs != null && configs.size() > 0)
+                for (LeasePromotionConfig config : configs) {
+                    LeasePromotionConfigType configType = LeasePromotionConfigType.fromCode(config.getConfigName());
+                    if (configType != null) {
+                        switch (configType) {
+                            case RENT_AMOUNT_FLAG:
+                                leaseProjectInstanceConfig.setRentAmountFlag(Byte.valueOf(config.getConfigValue()));
+                                break;
+                            case RENT_AMOUNT_UNIT:
+                                leaseProjectInstanceConfig.setRentAmountUnit(config.getConfigValue());
+                                break;
+                            case RENEW_FLAG:
+                                leaseProjectInstanceConfig.setRenewFlag(Byte.valueOf(config.getConfigValue()));
+                                break;
+                            case AREA_SEARCH_FLAG:
+                                leaseProjectInstanceConfig.setAreaSearchFlag(Byte.valueOf(config.getConfigValue()));
+                                break;
+                            case BUILDING_INTRODUCE_FLAG:
+                                leaseProjectInstanceConfig.setBuildingIntroduceFlag(Byte.valueOf(config.getConfigValue()));
+                                break;
+                            case DISPLAY_NAME_STR:
+                                leaseProjectInstanceConfig.setDisplayNameStr(config.getConfigValue());
+                                break;
+                            case DISPLAY_ORDER_STR:
+                                leaseProjectInstanceConfig.setDisplayOrderStr(config.getConfigValue());
+                                break;
+                            case HIDE_ADDRESS_FLAG:
+                                leaseProjectInstanceConfig.setHideAddressFlag(Byte.valueOf(config.getConfigValue()));
+                                break;
+                            default:
+                        }
+                    }
+                }
+        }
+        return StringHelper.toJsonString(leaseProjectInstanceConfig);
     }
 
     @Override

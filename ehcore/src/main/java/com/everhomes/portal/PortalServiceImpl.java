@@ -384,7 +384,7 @@ public class PortalServiceImpl implements PortalService {
 
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			if(null != handler){
-				dto.setInstanceConfig(handler.processInstanceConfig(dto.getInstanceConfig()));
+				dto.setInstanceConfig(handler.processInstanceConfig(moduleApp.getNamespaceId(),dto.getInstanceConfig()));
 			}
 		}
 
