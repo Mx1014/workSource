@@ -442,20 +442,21 @@ public class PortalServiceImpl implements PortalService {
 
 		dbProvider.execute((status) -> {
 			//主页签标志发生变化，需要对layout和item的location刷新
-			if(TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) != null && TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) != TrueOrFalseFlag.fromCode(cmd.getIndexFlag())){
+			//if(TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) != null && TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) != TrueOrFalseFlag.fromCode(cmd.getIndexFlag())){
 
-				if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) == TrueOrFalseFlag.TRUE){
-					PortalLayoutType portalLayoutType = PortalLayoutType.fromCode(portalLayout.getType());
-					if(portalLayoutType != null){
-						portalLayout.setName(portalLayoutType.getName());
-						portalLayout.setLocation(portalLayoutType.getLocation());
-					}
-				}else {
-					portalLayout.setName(EhPortalLayouts.class.getSimpleName() + portalLayout.getId());
-					portalLayout.setLocation("/" + portalLayout.getName());
+			if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) == TrueOrFalseFlag.TRUE){
+				PortalLayoutType portalLayoutType = PortalLayoutType.fromCode(portalLayout.getType());
+				if(portalLayoutType != null){
+					portalLayout.setName(portalLayoutType.getName());
+					portalLayout.setLocation(portalLayoutType.getLocation());
 				}
-				refleshItemLocation(portalLayout.getId(), portalLayout.getLocation());
+			}else {
+				portalLayout.setName(EhPortalLayouts.class.getSimpleName() + portalLayout.getId());
+				portalLayout.setLocation("/" + portalLayout.getName());
 			}
+			refleshItemLocation(portalLayout.getId(), portalLayout.getLocation());
+			//}
+
 
 			portalLayoutProvider.updatePortalLayout(portalLayout);
 			return null;
@@ -490,8 +491,12 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			for(PortalItem portalItem: portalItems){
-				portalItem.setItemLocation(location);
-				portalItemProvider.updatePortalItem(portalItem);
+
+				if(!location.equals(portalItem.getItemLocation())){
+					portalItem.setItemLocation(location);
+					portalItemProvider.updatePortalItem(portalItem);
+				}
+
 			}
 
 		}
@@ -1475,12 +1480,6 @@ public class PortalServiceImpl implements PortalService {
 			public void run() {
 				try{
 
-					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
-					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
-					// 二楼：sb事务 + 1
-					// 三楼：大师好样的，事务好了。
-					//sequenceService.syncSequence();
-
 					UserContext.setCurrentUser(user);
 					//同步和发布的时候不用预览账号
 					UserContext.current().setPreviewPortalVersionId(null);
@@ -1515,6 +1514,8 @@ public class PortalServiceImpl implements PortalService {
 						//发布item分类
 						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
 
+						//删除已有的layout
+						deleteLayoutBeforePublish(namespaceId);
 
 						for (PortalLayout layout: layouts) {
 							//发布layout
@@ -1559,6 +1560,16 @@ public class PortalServiceImpl implements PortalService {
 			}
 		});
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
+	}
+
+
+	private void deleteLayoutBeforePublish(Integer namespaceId){
+
+		assert namespaceId != null;
+
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "ServiceMarketLayout");
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "SecondServiceMarketLayout");
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "AssociationLayout");
 	}
 
 
