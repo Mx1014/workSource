@@ -45,11 +45,11 @@ public interface FileManagementProvider {
 
     FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
-    FileContent findAllStatusFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
+//    FileContent findAllStatusFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
     List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    FileCatalog findAllStatusFileCatalogByName(Integer currentNamespaceId, Long ownerId, String name);
+//    FileCatalog findAllStatusFileCatalogByName(Integer currentNamespaceId, Long ownerId, String name);
 }
