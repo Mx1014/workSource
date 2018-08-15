@@ -445,7 +445,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
 
         BigDecimal totalAmountCents = cmd.getAmount();
-        preOrderCommand.setAmount(totalAmountCents);
+        preOrderCommand.setAmount(changePayAmount(totalAmountCents));
 
 
         String accountCode = "NS"+cmd.getNamespaceId();
