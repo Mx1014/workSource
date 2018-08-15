@@ -5306,7 +5306,7 @@ public class AssetProviderImpl implements AssetProvider {
         com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t2.ORDER_NUMBER, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
+        		t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -5356,7 +5356,7 @@ public class AssetProviderImpl implements AssetProvider {
             }
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
-        	query.addConditions(t2.GENERAL_ORDER_ID.like("%" + paymentOrderNum + "%"));
+        	query.addConditions(t2.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
         query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t2.PAYMENT_TIME.desc());
