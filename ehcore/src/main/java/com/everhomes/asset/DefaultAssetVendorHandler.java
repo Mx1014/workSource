@@ -104,7 +104,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 
         // 根据订单和支付回来的报文更新业务信息
         afterBillOrderCreated(cmd, orderResponse);
-          
+        
         // 返回给客户端支付的报文
 	    return populatePreOrderDto(preOrderCommand, orderResponse);
 	}
@@ -141,7 +141,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);
         preOrderCommand.setIndustryCode(null);
-        preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        preOrderCommand.setSourceType(cmd.getSourceType());
         preOrderCommand.setOrderRemark1("物业缴费");
         //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
@@ -197,30 +197,35 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
     private PreOrderDTO populatePreOrderDto(CreatePurchaseOrderCommand preOrderCommand, PurchaseOrderCommandResponse orderResponse){
         OrderCommandResponse orderCommandResponse = orderResponse.getPayResponse();
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
-        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
-        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
-            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-            payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
-            payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
-            String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
-            payMethodDTO.setPaymentLogo(paymentLogo);
-            payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
-            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
-            if(bizPaymentParamsDTO != null) {
-                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+        //手机APP支付才需要组装支付方式，web对公转账不需要
+        if(preOrderCommand.getSourceType().equals(SourceType.MOBILE.getCode())) {
+        	List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+            List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+            String format = "{\"getOrderInfoUrl\":\"%s\"}";
+            for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+                PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+                payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+                payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+                String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+                payMethodDTO.setPaymentLogo(paymentLogo);
+                payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+                PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+                if(bizPaymentParamsDTO != null) {
+                    paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+                }
+                payMethodDTO.setPaymentParams(paymentParamsDTO);
+                payMethods.add(payMethodDTO);
             }
-            payMethodDTO.setPaymentParams(paymentParamsDTO);
-            payMethods.add(payMethodDTO);
+            dto.setPayMethod(payMethods);
+            dto.setOrderId(orderResponse.getOrderId());//获取的是统一订单的id
+        }else {
+        	dto.setOrderId(orderCommandResponse.getOrderId());//获取的是支付订单的id
         }
-        dto.setPayMethod(payMethods);
         dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
         if(orderResponse.getAmount() != null) {
             dto.setAmount(orderResponse.getAmount().longValue());
         }
-        dto.setOrderId(orderResponse.getOrderId());
         return dto;
     }
 	

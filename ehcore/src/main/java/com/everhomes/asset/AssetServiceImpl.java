@@ -41,6 +41,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
@@ -3317,7 +3318,7 @@ public class AssetServiceImpl implements AssetService {
     public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd) {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        //return handler.placeAnAssetOrder(cmd);
+        cmd.setSourceType(SourceType.MOBILE.getCode());
         return handler.createOrder(cmd);
     }
 
@@ -5313,10 +5314,12 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
-	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
+        cmd.setSourceType(SourceType.PC.getCode());
+        PreOrderDTO preOrderDTO = handler.createOrder(cmd);
+        preOrderDTO.setUserId(UserContext.currentUserId());
         return preOrderDTO;
 	}
 

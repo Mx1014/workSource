@@ -238,7 +238,12 @@ public class AssetPayServiceImplForEnt implements AssetPayServiceForEnt{
         createOrderCmd.setGoodsDescription(null);
         createOrderCmd.setIndustryName(null);
         createOrderCmd.setIndustryCode(null);
+        
+        
         createOrderCmd.setSourceType(SourceType.PC.getCode());
+        
+        
+        
         createOrderCmd.setOrderRemark1("物业缴费");
 	    createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
 	    createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));

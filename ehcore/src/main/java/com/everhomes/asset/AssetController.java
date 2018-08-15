@@ -1561,7 +1561,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      */
     @RequestMapping("payBillsForEnt")
     @RestReturn(PreOrderDTO.class)
-    public RestResponse payBillsForEnt(PlaceAnAssetOrderCommand cmd){
+    public RestResponse payBillsForEnt(CreatePaymentBillOrderCommand cmd){
         PreOrderDTO response = assetService.payBillsForEnt(cmd);
         RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);

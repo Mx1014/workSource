@@ -42,7 +42,7 @@ public class CreatePaymentBillOrderCommand {
     
     @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
-
+    
     public Integer getNamespaceId() {
         return namespaceId;
     }
