@@ -753,7 +753,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             });
         }
         response.setCatalogs(catalogs);
-        return null;
+        return response;
     }
 
     private List<FileContentDTO> listCataLogAllContents(Long catalogId, Long ownerId, Map<String, String> fileIcons) {
