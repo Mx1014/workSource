@@ -1,5 +1,6 @@
 package com.everhomes.workReport;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -126,32 +127,38 @@ public class WorkReportServiceImpl implements WorkReportService {
         Long userId = UserContext.currentUserId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-        if (report != null) {
-            //  update it.
-            if (cmd.getReportType() != null)
-                report.setReportType(cmd.getReportType());
-            report.setFormOriginId(cmd.getFormOriginId());
-            if (cmd.getFormOriginId() == 0)
-                report.setStatus(WorkReportStatus.VALID.getCode());
-            report.setFormVersion(cmd.getFormVersion());
-            report.setOperatorUserId(userId);
-            report.setOperatorName(fixUpUserName(userId, report.getOwnerId()));
-            dbProvider.execute((TransactionStatus status) -> {
-                workReportProvider.updateWorkReport(report);
-                updateWorkReportScopeMap(report.getNamespaceId(), report.getId(), cmd.getScopes());
-                return null;
-            });
+        if (report == null)
+            return null;
+        //  update it.
+        if (cmd.getReportType() != null)
+            report.setReportType(cmd.getReportType());
+        report.setValiditySetting(JSON.toJSONString(cmd.getValiditySetting()));
+        report.setReceiverMsgType(cmd.getRxMsgType());
+        if(cmd.getRxMsgSetting() != null)
+            report.setReceiverMsgSeeting(JSON.toJSONString(cmd.getRxMsgSetting()));
+        report.setAuthorMsgType(cmd.getAuMsgType());
+        if(cmd.getAuMsgSetting() != null)
+            report.setAuthorMsgSeeting(JSON.toJSONString(cmd.getAuMsgSetting()));
+        report.setFormOriginId(cmd.getFormOriginId());
+        if (cmd.getFormOriginId() == 0)
+            report.setStatus(WorkReportStatus.VALID.getCode());
+        report.setFormVersion(cmd.getFormVersion());
+        report.setOperatorUserId(userId);
+        report.setOperatorName(fixUpUserName(userId, report.getOwnerId()));
+        dbProvider.execute((TransactionStatus status) -> {
+            workReportProvider.updateWorkReport(report);
+            updateWorkReportScopeMap(report.getNamespaceId(), report.getId(), cmd.getScopes());
+            return null;
+        });
 
-            //  return back
-            WorkReportDTO dto = new WorkReportDTO();
-            dto.setReportName(report.getReportName());
-            dto.setReportType(report.getReportType());
-            dto.setReportAttribute(report.getReportAttribute());
-            dto.setFormOriginId(report.getFormOriginId());
-            dto.setFormVersion(report.getFormVersion());
-            return dto;
-        }
-        return null;
+        //  return back
+        WorkReportDTO dto = new WorkReportDTO();
+        dto.setReportName(report.getReportName());
+        dto.setReportType(report.getReportType());
+        dto.setReportAttribute(report.getReportAttribute());
+        dto.setFormOriginId(report.getFormOriginId());
+        dto.setFormVersion(report.getFormVersion());
+        return dto;
     }
 
     @Override
@@ -440,6 +447,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
+        ReportValiditySettingDTO setting = (ReportValiditySettingDTO) JSON.parse(report.getValiditySetting());
+
 
         reportVal.setNamespaceId(namespaceId);
         reportVal.setOwnerId(report.getOwnerId());
