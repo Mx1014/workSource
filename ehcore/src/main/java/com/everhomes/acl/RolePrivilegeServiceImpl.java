@@ -194,15 +194,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -2807,6 +2799,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				// 以项目分类为第一层进行递归
 				projectTrees.addAll(temp);
 				setResourceDTOs(projectTrees, projectIds, UserContext.getCurrentNamespaceId());
+
+				//把单独的项目也加进去
+				addSingleProject(projectTrees, projects, projectIds);
+
 			}else {
 				// 如果不存在项目分类，以项目为第一层进行递归
 				projects.stream().filter(r -> EntityType.COMMUNITY == EntityType.fromCode(r.getProjectType())).map(r -> {
@@ -2823,8 +2819,56 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+
 		return projectTrees;
 	}
+
+
+	//增加不属于任何分类的项目
+	private void addSingleProject(List<ProjectDTO> projectTrees, List<ProjectDTO> projects,  List<Long> projectIds){
+
+		if(projectTrees == null || projectIds == null){
+			return;
+		}
+
+		Set<Long> projectIdSet = new HashSet<>(projectIds);
+
+		//查找不再分类内的项目
+		filterSingleProjectId(projectTrees, projectIdSet);
+
+
+		List<ProjectDTO> singleProjects = new ArrayList<>();
+		for(Long projectId: projectIdSet){
+			for(ProjectDTO dto: projects){
+				if(projectId.equals(dto.getProjectId())){
+					singleProjects.add(dto);
+					break;
+				}
+			}
+		}
+
+		projectTrees.addAll(0, singleProjects);
+
+	}
+
+	private void filterSingleProjectId(List<ProjectDTO> projectTrees, Set<Long> projectIds){
+		if(projectTrees == null || projectIds == null){
+			return;
+		}
+
+		for (ProjectDTO dto: projectTrees){
+			if(projectIds.contains(dto.getProjectId())){
+				projectIds.remove(dto.getProjectId());
+			}
+
+			if(dto.getProjects() != null && dto.getProjects().size() > 0){
+				filterSingleProjectId(dto.getProjects(), projectIds);
+			}
+		}
+
+	}
+
+
 
 	/**
 	 * 获取某个公司的top管理员

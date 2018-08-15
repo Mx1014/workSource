@@ -48,7 +48,6 @@ import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
@@ -510,11 +509,11 @@ public class AssetProviderImpl implements AssetProvider {
         Byte isUploadCertificate = cmd.getIsUploadCertificate();
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
-        String customerTel = cmd.getCustomerTel();//客户手机号               
+        String customerTel = cmd.getCustomerTel();//客户手机号
         Long targetIdForEnt = cmd.getTargetIdForEnt();//对公转账是根据企业id来查询相关的所有账单，如果是对公转账则不能为空
 
         //卸货结束
-        List<ListBillsDTO> list = new ArrayList< >();
+        List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
@@ -526,13 +525,13 @@ public class AssetProviderImpl implements AssetProvider {
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));        
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
 
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
+        
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
@@ -1589,7 +1588,7 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-        //滞纳金
+        // 滞纳金
         List<BillItemDTO> fineList = new ArrayList<>();
         for(BillItemDTO item : list1){
             List<PaymentLateFine> fines = context.selectFrom(fine)
@@ -2209,7 +2208,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd){
     	//卸载参数
     	Long billId = cmd.getBillId();
     	BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
@@ -5192,6 +5191,7 @@ public class AssetProviderImpl implements AssetProvider {
         Integer paymentType = cmd.getPaymentType();
         Long billId = cmd.getBillId();
         Long categoryId = cmd.getCategoryId();//增加多入口查询条件
+        String paymentOrderNum = cmd.getPaymentOrderNum();//订单编号
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -5251,6 +5251,9 @@ public class AssetProviderImpl implements AssetProvider {
             }else if(paymentType.equals(2)){//对公转账
             	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
             }
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
+        	query.addConditions(t3.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
         query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t3.CREATE_TIME.desc());
@@ -5793,7 +5796,7 @@ public class AssetProviderImpl implements AssetProvider {
 		return projectName;
 	}
 	
-	public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
+    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         ListBillDetailVO vo = new ListBillDetailVO();
@@ -5987,7 +5990,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
 	    return isConfigSubtraction;
 	}
-
+	
 	public void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd) {
 		//对应到eh_payment_bills表中的switch字段账单属性，0:未出账单;1:已出账单
 		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -6047,5 +6050,27 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return ret;
     }
-	
+
+	public GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId) {
+		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
+		EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(t2.STATUS);
+        query.addFrom(t2);
+        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
+		query.addConditions(t3.PAYMENT_ORDER_ID.eq(orderId));
+		query.fetch().map(r -> {
+			Integer status = r.getValue(t2.STATUS);
+			if(status != null && status.equals(1)) {
+				response.setPayState(1);//EhAssetPaymentOrderBills中的status1代表支付成功
+			}else{
+				response.setPayState(0);
+			}
+			return null;
+		});
+		return response;
+	}
+
 }

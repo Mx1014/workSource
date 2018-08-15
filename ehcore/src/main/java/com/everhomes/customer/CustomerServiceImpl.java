@@ -2547,19 +2547,23 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setOrganizationId(organizationDTO.getId());
         //管理员同步过去
 //        dbProvider.execute((TransactionStatus status) -> {
-            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
-            if (untrackAdmins != null && untrackAdmins.size() > 0) {
-                untrackAdmins.forEach((r)->{
-                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
-                    cmd.setContactName(r.getContactName());
-                    cmd.setContactToken(r.getContactToken());
-                    cmd.setOrganizationId(customer.getOrganizationId());
-                    cmd.setNamespaceId(customer.getNamespaceId());
+        List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
+        if (untrackAdmins != null && untrackAdmins.size() > 0) {
+            untrackAdmins.forEach((r) -> {
+                CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                cmd.setContactName(r.getContactName());
+                cmd.setContactToken(r.getContactToken());
+                cmd.setOrganizationId(customer.getOrganizationId());
+                cmd.setNamespaceId(customer.getNamespaceId());
+                try {
                     rolePrivilegeService.createOrganizationAdmin(cmd);
-                });
+                } catch (Exception e) {
+                    LOGGER.debug("set organization admin errro organization id = {},exception ={}", cmd.getOrganizationId(), e);
+                }
+            });
 //                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
-                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            }
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        }
         refreshCustomerAdminStatus(untrackAdmins);
 //            return null;
 //        });

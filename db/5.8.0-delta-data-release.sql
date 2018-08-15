@@ -33,13 +33,13 @@ INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('activi
 UPDATE eh_locale_strings SET text = '来晚啦，活动已删除' WHERE scope = 'forum' and code = 10006;
 -- AUTHOR: 梁燕龙
 -- REMARK: 活动消息推送文案修改。
-UPDATE eh_locale_templates SET text = '${userName}报名参加了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
-UPDATE eh_locale_templates SET text = '${userName}取消了您发起的活动「${postName}」报名' WHERE scope = 'activity.notification' and code = 2;
-UPDATE eh_locale_templates SET text = '您报名参加的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
-UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${tag} 丨 ${title}」因故取消。
+UPDATE eh_locale_templates SET text = '${userName}报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
+UPDATE eh_locale_templates SET text = '${userName}取消报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 2;
+UPDATE eh_locale_templates SET text = '您报名的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
+UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${title}」因故取消。
 更多活动敬请继续关注。' WHERE scope = 'activity.notification' and code = 5;
-UPDATE eh_locale_templates SET text = '您报名的活动 「${tag} 丨 ${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
-UPDATE eh_locale_templates SET text = '「${userName}」报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
+UPDATE eh_locale_templates SET text = '您报名的活动 「${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
+UPDATE eh_locale_templates SET text = '${userName}报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的主题已被发起方改成「${newPostName}」。' WHERE scope = 'activity.notification' and code = 11;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的时间已被发起方改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 12;
 UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的地点已被发起方改成「${address}」。' WHERE scope = 'activity.notification' and code = 13;
@@ -65,8 +65,8 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41850', '0', 4180041850, '移动端管理权限', '0', now());
 
 SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('42100', '园区访客管理', '40000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
 
 update eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
 update eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
@@ -93,10 +93,83 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
 
+
 -- AUTHOR: 黄良铭  20180815
 -- REMARK: 超级管理员删除提示
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
+
+
+-- AUTHOR: jun.yan  20180813
+-- REMARK: 修改菜单目录
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16300000', '支付结算管理', '16000000', NULL, NULL, '1', '2', '/16000000/16300000', 'zuolin', '90', NULL, '2', 'system', 'classify', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16400000', '营销管理', '16000000', NULL, NULL, '1', '2', '/16000000/16400000', 'zuolin', '100', NULL, '2', 'system', 'classify', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('55000000', '支付结算管理', '40000040', NULL, NULL, '1', '2', '/40000040/55000000', 'park', '70', NULL, '2', 'system', 'classify', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('56000000', '营销管理', '40000040', NULL, NULL, '1', '2', '/40000040/56000000', 'park', '80', NULL, '2', 'system', 'classify', '2');
+
+UPDATE eh_web_menus SET parent_id = 16300000, path = '/16000000/16300000/16070000', `name` = '收款账户'  WHERE id = 16070000;
+UPDATE eh_web_menus SET parent_id = 55000000, path = '/40000040/55000000/52000000', `name` = '收款账户'  WHERE id = 52000000;
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('140000', '支付结算管理', '200', '/200/140000', '1', '2', '2', '100', '2018-08-14 14:01:29', NULL, NULL, '2018-08-14 14:01:39', '0', '0', '0', '0', '', '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('170000', '营销管理', '200', '/200/170000', '1', '2', '2', '110', '2018-08-14 14:01:33', NULL, NULL, '2018-08-14 14:01:42', '0', '0', '0', '0', '', '1', '1', 'classify');
+
+UPDATE eh_service_modules SET `name` = '收款账户', parent_id = '140000', path = '/200/140000' WHERE id = 58000;
+UPDATE eh_service_module_apps SET `name` = '收款账户' WHERE module_id = 58000;
+
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 新增企业账单菜单
+set @module_id=20500; -- 模块Id 41900（家声分配的）
+set @data_type='public-transfer';-- 前端发给你的页面跳转链接
+set @module_parent_parent_id=100;-- select * from eh_service_modules where name='企业访客'
+set @module_parent_id=50000; -- select * from eh_service_modules where name='物业缴费'
+set @path=CONCAT("/", @module_parent_parent_id,"/",@module_parent_id,"/",@module_id); -- 如：/100/50000/52100
+set @bill_module_id=(select max(id) + 1 from eh_service_modules);-- 账单管理标签页的id
+set @bill_path=CONCAT(@path,"/",@bill_module_id); -- 如：/100/50000/52100/101
+set @order_module_id=(select max(id) + 2 from eh_service_modules);-- 交易明细标签页的id
+set @order_path=CONCAT(@path,"/",@order_module_id); -- 如：/100/50000/52100/102
+-- 左邻后台菜单路径（三层）
+set @zuolin_menu_id=(select max(id) + 1 from eh_web_menus);-- 如：16032200
+set @zuolin_menu_parent_parent_id=23000000;-- select * from eh_web_menus where name='企业办公业务'
+set @zuolin_menu_parent_id=23010000; -- select * from eh_web_menus where name='OA管理' and type='zuolin'
+set @zuolin_menu_path=CONCAT("/",@zuolin_menu_parent_parent_id,"/",@zuolin_menu_parent_id,"/",@zuolin_menu_id);-- 如：/23000000/23010000/XXXX
+-- 园区后台菜单路径（三层）
+-- set @park_menu_id=(select max(id) + 2 from eh_web_menus);-- 如：16032200
+-- set @park_menu_parent_parent_id=40000010;-- select * from eh_web_menus where name='企业办公' and type='park'
+-- set @park_menu_parent_id=53000000; -- select * from eh_web_menus where name='OA管理' and type='park'
+-- set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000010/53000000/XXX
+-- 普通公司后台菜单路径（三层）
+set @organization_menu_id=(select max(id) + 3 from eh_web_menus);-- 如：16032200
+set @organization_menu_parent_parent_id=70000010;-- select * from eh_web_menus where name='企业办公' and type='organization'
+set @organization_menu_parent_id=77000000; -- select * from eh_web_menus where name='OA管理' and type='organization'
+set @organization_menu_path=CONCAT("/",@organization_menu_parent_parent_id,"/",@organization_menu_parent_id,"/",@organization_menu_id);-- 如：/40000010/53000000/XXX
+-- 新增模块 eh_service_modules
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `multiple_flag`, `module_control_type`,`category`) 
+VALUES (@module_id, '企业账单', @module_parent_id, @path, '1', '3', '2', '0', UTC_TIMESTAMP(), UTC_TIMESTAMP(), '0', '0', '0', 'community_control', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `category`) 
+VALUES (@bill_module_id, '账单管理', @module_id, @bill_path, '1', '4', '2', '0', UTC_TIMESTAMP(), '', NULL, UTC_TIMESTAMP(), '0', '0', '', '0', 'community_control','subModule');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `category`) 
+VALUES (@order_module_id, '交易明细', @module_id, @order_path, '1', '4', '2', '0', UTC_TIMESTAMP(), '', NULL, UTC_TIMESTAMP(), '0', '0', '', '0', 'community_control','subModule');
+-- 新增模块菜单 eh_web_menus
+-- 左邻后台（levle=3)
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
+VALUES (@zuolin_menu_id, '企业账单', @zuolin_menu_parent_id, NULL, @data_type, 1, 2, @zuolin_menu_path, 'zuolin', 220, @module_id, 3, 'system', 'module', NULL);
+-- 园区（levle=3)
+-- INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
+-- VALUES (@park_menu_id, '企业账单', @park_menu_parent_id, NULL, @data_type, 1, 2, @park_menu_path, 'park', 220, @module_id, 3, 'system', 'module', NULL);
+-- 普通公司（levle=3)
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) 
+VALUES (@organization_menu_id, '企业账单', @organization_menu_parent_id, NULL, @data_type, 1, 2, @organization_menu_path, 'organization', 220, @module_id, 3, 'system', 'module', NULL);
+
+-- AUTHOR: 张智伟
+-- REMARK: 企业公告分享提示文案
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'enterprise.notice', '10000', 'zh_CN', '未设置公告分享链接');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'enterprise.notice', '10001', 'zh_CN', '该公告设置了保密');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'enterprise.notice', '10002', 'zh_CN', '该公告已被删除');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'enterprise.notice', '10003', 'zh_CN', '分享链接已失效');
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('enterprise.notice.share.url', '/announcement/build/index.html?ns=%s&noticeToken=%s', '企业公告分享uri', '0', NULL, '1');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
