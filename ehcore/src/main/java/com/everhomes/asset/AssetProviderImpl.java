@@ -5198,16 +5198,16 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        //com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
+        //EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
+        //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
+        		//t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
+        		t2.BILL_ID, t2.ORDER_NUMBER, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t4.UID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
@@ -5229,10 +5229,10 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.TARGET_NAME.like("%" + targetName + "%"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
         	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
