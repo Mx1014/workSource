@@ -761,7 +761,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     /**
      * 积分发送短信用
      * @param namespaceId
-     * @param signupToken
      * @param regionCode
      * @param request
      */
