@@ -658,6 +658,21 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //			smsProvider.sendSms(number, txt,null);
         //		}
     }
+    
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param phoneNumber
+     * @param verificationCode
+     */
+    
+    private void sendVerificationCodeSms4Point(Integer namespaceId, String phoneNumber, String verificationCode) {
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+        String templateScope = SmsTemplateCode.SCOPE;
+        int templateId = SmsTemplateCode.POINT_VERIFICATION_CODE;
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+    }
 
     private String convert(String template, Map<String, String> variables, String defaultVal) {
         String pattern = "\\$\\{(.*?)\\}";
@@ -741,6 +756,49 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
         }
     }
+    
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param signupToken
+     * @param regionCode
+     * @param request
+     */
+    @Override
+    public void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) {
+    		//检查用户是否存在
+		String phone = user.getIdentifierToken() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			LOGGER.error("namespaceId or phone is null");
+			return ;
+		}
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        	if (identifier == null) {
+        		LOGGER.error("userIdentifier  is null.namespace:[{}] ;phone:[{}]",namespaceId ,phone);
+    			return ;
+        	}
+
+            this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
+            Timestamp ts = identifier.getNotifyTime();
+            //验证码过期了重新生成,没有过期则用原来的
+            if (ts == null || isVerificationExpired(ts)) {
+                String verificationCode = RandomGenerator.getRandomDigitalString(6);
+                identifier.setVerificationCode(verificationCode);
+
+                LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+            } else {
+                // TODO
+                LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());     
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+            }
+
+            identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            identifier.setRegionCode(regionCode);
+            this.userProvider.updateIdentifier(identifier);
+    }
+    
 
     @Override
     public UserLogin verifyAndLogon(VerifyAndLogonCommand cmd) {
@@ -6560,4 +6618,38 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		}
 		return null;
 	}
+    
+    
+    /**
+     * 校验验证码是否正确
+     * @param cmd
+     * @return
+     */
+    @Override
+    public pointCheckVCDTO pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd) {
+       
+    	pointCheckVCDTO returnDTO = new pointCheckVCDTO();
+        String verificationCode = cmd.getVerificationCode();
+        String phone = cmd.getPhone();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (identifier == null) {
+            LOGGER.error("User identifier not found in db, namespaceId=" + namespaceId + ", phone="+phone+",cmd=" + cmd);
+            returnDTO.setResultCode(false);
+            returnDTO.setResult("User identifier not found in db");
+            return  returnDTO;
+        }
+
+        //检查传过来的验证码跟生成保存在数据库中的相等即可
+        if (identifier.getVerificationCode() != null
+                && identifier.getVerificationCode().equals(verificationCode)) {
+        	returnDTO.setResultCode(true);
+        	return  returnDTO;
+        	
+        }
+        
+        return null;
+    }
 }

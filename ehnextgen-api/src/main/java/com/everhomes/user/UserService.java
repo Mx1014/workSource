@@ -342,4 +342,8 @@ public interface UserService {
     Byte isUserAuth();
     
     UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
+    
+    void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
+    
+    pointCheckVCDTO pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd) ;
 }

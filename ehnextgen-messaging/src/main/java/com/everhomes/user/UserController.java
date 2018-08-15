@@ -1647,6 +1647,46 @@ public class UserController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /user/sendVerificationCodeByPhone</b>
+	 * <p>给目标手机发送验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("sendVerificationCodeByPhone")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ,HttpServletRequest request){
+		FindUserByPhoneCommand cmd1 = ConvertHelper.convert(cmd, FindUserByPhoneCommand.class);
+		UserDTO  user = this.userService.getUserFromPhone(cmd1);
+		if(user == null) {
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exist");
+		}
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		this.userService.sendVerficationCode4Point(namespaceId, user, cmd.getRegionCode(), request);
+		return new RestResponse("OK");
+     
+    }
+	
+	
+	/**
+	 * <b>URL: /user/pointCheckVerificationCode</b>
+	 * <p>积分校验验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("pointCheckVerificationCode")
+	@RestReturn(UserDTO.class)
+	public RestResponse pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd){
+
+		pointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
+		RestResponse resp = new RestResponse(dto);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+     
+    }
+	
+	
+	/**
 	 * <b>URL: /user/isUserAuth</b>
 	 * <p>判断用户是否为认证用户</p>
 	 * @return
