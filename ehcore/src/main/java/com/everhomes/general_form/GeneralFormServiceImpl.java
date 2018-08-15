@@ -637,6 +637,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
         } else {
             config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType("any-module");
+            }
             config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
             generalFormKvConfigProvider.createGeneralFormKvConfig(config);
