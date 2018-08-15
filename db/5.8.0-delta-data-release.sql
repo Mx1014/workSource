@@ -93,6 +93,11 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
 
+-- AUTHOR: 黄良铭  20180815
+-- REMARK: 超级管理员删除提示
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
