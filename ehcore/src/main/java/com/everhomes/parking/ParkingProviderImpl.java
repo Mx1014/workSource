@@ -891,8 +891,8 @@ public class ParkingProviderImpl implements ParkingProvider {
                 		condition = Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status);
                 	if(null != parkingLotId)
                     	condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
-                	if(null != flowId)
-                    	condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
+//                	if(null != flowId)
+//                    	condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
 
                     count[0] = query.where(condition).fetchOneInto(Integer.class);
                     return true;
