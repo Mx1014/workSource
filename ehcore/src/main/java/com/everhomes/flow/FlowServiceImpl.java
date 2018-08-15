@@ -484,8 +484,9 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowMainId());
-        if (flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getTopId().equals(0L)) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
+        if (flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getFlowMainId().equals(0L)) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
+                    FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
         }
 
         FlowNode flowNode = this.dbProvider.execute(status -> {
