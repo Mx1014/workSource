@@ -299,9 +299,8 @@ public class DecorationAdminController extends ControllerBase {
      */
     @RequestMapping("updateApplySetting")
     @RestReturn(String.class)
-    public RestResponse updateApplySetting(@Valid UpdateIllustrationCommand cmd) {
-        cmd.setOwnerType(IllustrationType.APPLY.getCode());
-        this.decorationService.setIllustration(cmd);
+    public RestResponse updateApplySetting(@Valid UpdateApplySettingCommand cmd) {
+        this.decorationService.setApplySetting(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

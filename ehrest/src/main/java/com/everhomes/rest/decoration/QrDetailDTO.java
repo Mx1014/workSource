@@ -35,6 +35,7 @@ public class QrDetailDTO {
     private String decoratorName;
     private String decoratorPhone;
     private String decoratorCompany;
+    private String imageUrl;
     private List<DecorationFlowCaseDTO> flowCasees;
 
     public String getName() {
@@ -139,5 +140,13 @@ public class QrDetailDTO {
 
     public void setFlowCasees(List<DecorationFlowCaseDTO> flowCasees) {
         this.flowCasees = flowCasees;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

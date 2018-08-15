@@ -16,6 +16,8 @@ public interface DecorationService {
 
     void setIllustration(UpdateIllustrationCommand cmd);
 
+    void setApplySetting(UpdateApplySettingCommand cmd);
+
     DecorationWorkerDTO updateWorker(UpdateWorkerCommand cmd);
 
     ListWorkersResponse listWorkers(ListWorkersCommand cmd);

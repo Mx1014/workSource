@@ -23,15 +23,13 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.decoration.*;
+import com.everhomes.rest.decoration.PostApprovalFormCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
@@ -104,6 +102,8 @@ public class DecorationServiceImpl implements  DecorationService {
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private DecorationSMSProcessor decorationSMSProcessor;
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
 
 
     private static final SimpleDateFormat sdfyMd= new SimpleDateFormat("yyyy-MM-dd");
@@ -202,7 +202,16 @@ public class DecorationServiceImpl implements  DecorationService {
         });
     }
 
-    private void addDecorationAttachment(Long settingId,List<DecorationAttachmentDTO> attachments){
+    @Override
+    public void setApplySetting(UpdateApplySettingCommand cmd) {
+        if (cmd.getSettings() != null && cmd.getSettings().size()>0)
+            for (UpdateIllustrationCommand cmd2 : cmd.getSettings()){
+                cmd2.setOwnerType(IllustrationType.APPLY.getCode());
+                this.setIllustration(cmd2);
+            }
+    }
+
+    private void addDecorationAttachment(Long settingId, List<DecorationAttachmentDTO> attachments){
         if (attachments != null){
             attachments.forEach(r->{
                 DecorationAttachment attachment = ConvertHelper.convert(r,DecorationAttachment.class);
@@ -1021,11 +1030,34 @@ public class DecorationServiceImpl implements  DecorationService {
             dto.setName(worker.getName());
             dto.setPhone(worker.getPhone());
             dto.setWorkerType(worker.getWorkerType());
+            if (!StringUtils.isBlank(worker.getImage()))
+                dto.setImageUrl(this.contentServerService.parserUri(worker.getImage()));
         }
         DecorationRequestDTO requestDTO = convertRequest(request, ProcessorType.WORKER.getCode());
         org.springframework.beans.BeanUtils.copyProperties(requestDTO,dto);
         if (request.getStatus() != DecorationRequestStatus.CONSTRACT.getCode())
             dto.setFlowCasees(null);
+        else{//填充其他申请
+            if (dto.getFlowCasees() == null)
+                dto.setFlowCasees(new ArrayList<>());
+            ListActiveGeneralApprovalCommand cmd2 = new ListActiveGeneralApprovalCommand();
+            cmd2.setOwnerId(request.getCommunityId());
+            cmd2.setOwnerType(EntityType.COMMUNITY.getCode());
+            cmd2.setModuleId(DecorationController.moduleId);
+            cmd2.setModuleType(DecorationController.moduleType);
+            ListGeneralApprovalResponse response = generalApprovalService.listActiveGeneralApproval(cmd2);
+            List<GeneralApprovalDTO> dtos = response.getDtos();
+            if (dtos != null && dtos.size()>0)
+                for (GeneralApprovalDTO dto2 : dtos){
+                    boolean flag = dto.getFlowCasees().stream().noneMatch(r -> dto2.getApprovalName().equals(r.getApprovalName()));
+                    if (flag){
+                        DecorationFlowCaseDTO dto3 = new DecorationFlowCaseDTO();
+                        dto3.setStatus((byte)-1);
+                        dto3.setApprovalName(dto2.getApprovalName());
+                        dto.getFlowCasees().add(dto3);
+                    }
+                }
+        }
         return dto;
     }
 
