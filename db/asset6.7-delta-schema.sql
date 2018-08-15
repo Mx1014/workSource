@@ -15,7 +15,7 @@ CREATE TABLE `eh_payment_bill_orders`(
   `payment_type` INT NOT NULL DEFAULT 0 COMMENT '支付类型，由支付系统定义（参考通联），如0-未选择支付方式、1-WECHAT_APPPAY(微信APP支付)、8-ALI_SCAN_PAY(阿里扫码支付)、9-WECHAT_JS_PAY(微信公众号支付)、21-WECHAT_JS_ORG_PAY(微信公众号集团支付)',
   `payment_time` DATETIME COMMENT '支付时间（缴费时间）',
   `payment_channel` INTEGER DEFAULT 0 COMMENT '支付渠道: 0-未知、1-微信、2-支付宝、3-现金',
-  `uid` BIGINT COMMENT '缴费人id',
+  `uid` BIGINT COMMENT '缴费人',
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
