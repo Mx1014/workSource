@@ -204,11 +204,15 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
 import com.everhomes.rest.gorder.order.BusinessPayerType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.OrderErrorCode;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
+import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -337,6 +341,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -946,7 +951,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     private void populateNewRosterOrder(ActivityRoster roster, Long categoryId){
     	Long orderNo = this.onlinePayService.createBillId(DateHelper
 				.currentGMTTime().getTime());
-    	roster.setOrderNo(orderNo);
     	roster.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
     	
     	GetRosterOrderSettingCommand settingCmd = new GetRosterOrderSettingCommand();
@@ -1089,59 +1093,59 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //		return callBack;
 //	}
 
-    @Override
-    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
-        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-        if(roster == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-                    "no roster.");
-        }
-        if (roster.getPayOrderId() != null) {
-            activityProvider.deleteRoster(roster);
-            roster.setId(null);
-            roster.setPayOrderId(null);
-            Long orderNo = this.onlinePayService.createBillId(DateHelper
-                    .currentGMTTime().getTime());
-            roster.setOrderNo(orderNo);
-            activityProvider.createActivityRoster(roster);
-        }
-        Activity activity = activityProvider.findActivityById(roster.getActivityId());
-        if(activity == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-                    "no activity.");
-        }
-
-        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
-        setPreOrder(cmd,createOrderCommand,roster,activity);
-
-        PreOrderDTO callback = new PreOrderDTO();
-        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
-        callback = ConvertHelper.convert(response, PreOrderDTO.class);
-        callback.setExpiredIntervalTime(response.getExpirationMillis());
-
-        //组装支付方式
-        List<PayMethodDTO> list = new ArrayList<>();
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
-            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-            payMethodDTO.setPaymentName(p.getPaymentName());
-            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
-            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
-            payMethodDTO.setPaymentLogo(paymentLogo);
-            payMethodDTO.setPaymentType(p.getPaymentType());
-            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
-            if(bizPaymentParamsDTO != null) {
-                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
-            }
-            payMethodDTO.setPaymentParams(paymentParamsDTO);
-            list.add(payMethodDTO);
-        }
-        callback.setPayMethod(list);
-        roster.setPayOrderId(callback.getOrderId());
-        activityProvider.updateRoster(roster);
-        return callback;
-    }
+//    @Override
+//    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+//        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+//        if(roster == null){
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+//                    "no roster.");
+//        }
+//        if (roster.getPayOrderId() != null) {
+//            activityProvider.deleteRoster(roster);
+//            roster.setId(null);
+//            roster.setPayOrderId(null);
+//            Long orderNo = this.onlinePayService.createBillId(DateHelper
+//                    .currentGMTTime().getTime());
+//            roster.setOrderNo(orderNo);
+//            activityProvider.createActivityRoster(roster);
+//        }
+//        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+//        if(activity == null){
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+//                    "no activity.");
+//        }
+//
+//        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+//        setPreOrder(cmd,createOrderCommand,roster,activity);
+//
+//        PreOrderDTO callback = new PreOrderDTO();
+//        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
+//        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+//        callback.setExpiredIntervalTime(response.getExpirationMillis());
+//
+//        //组装支付方式
+//        List<PayMethodDTO> list = new ArrayList<>();
+//        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+//            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+//            payMethodDTO.setPaymentName(p.getPaymentName());
+//            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+//            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+//            payMethodDTO.setPaymentLogo(paymentLogo);
+//            payMethodDTO.setPaymentType(p.getPaymentType());
+//            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+//            if(bizPaymentParamsDTO != null) {
+//                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+//            }
+//            payMethodDTO.setPaymentParams(paymentParamsDTO);
+//            list.add(payMethodDTO);
+//        }
+//        callback.setPayMethod(list);
+//        roster.setPayOrderId(callback.getOrderId());
+//        activityProvider.updateRoster(roster);
+//        return callback;
+//    }
 
     private PurchaseOrderCommandResponse createCommonSignupOrder(CreateSignupOrderV2Command cmd) {
         //校验参数
@@ -1376,7 +1380,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     private void afterSignupOrderCreated(CreateSignupOrderV2Command cmd, PurchaseOrderCommandResponse response){
         ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         roster.setPayOrderId(response.getOrderId());
-//        roster.setOrderNo(response.getBusinessOrderNumber());
+        roster.setOrderNo(response.getBusinessOrderNumber());
         activityProvider.updateRoster(roster);
     }
 
@@ -6930,36 +6934,44 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
-        ActivitySignupOrderV2CallBackHandler handler = PlatformContext.getComponent(
-                PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
         }
         if(cmd == null || cmd.getPaymentErrorCode() != "200") {
             LOGGER.error("payNotify fail, cmd={}", cmd);
         }
-        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
-        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+
+        GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        getPurchaseOrderCommand.setAccountCode(generateAccountCode());
+        getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-GetPurchaseOrderCommand=" + GsonUtil.toJson(getPurchaseOrderCommand));
+        }
+        GetPurchaseOrderRestResponse response = orderService.getPurchaseOrder(getPurchaseOrderCommand);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-getPurchaseOrder response=" + GsonUtil.toJson(response));
+        }
+        if(response == null || !response.getErrorCode().equals(200)) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+                    "PayNotify getPurchaseOrder by bizOrderNum is error!");
+        }
+        PurchaseOrderDTO purchaseOrderDTO = response.getResponse();
+
+
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(purchaseOrderDTO.getPaymentOrderType());
         if(orderType != null) {
             switch (orderType) {
                 case PURCHACE:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                    if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.PAID.getCode()){
                         //支付成功
-                        handler.paySuccess(srvCmd);
+                       paySuccess(purchaseOrderDTO);
                     }
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
+                    if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.FAILED.getCode()){
                         //支付失败
-                        handler.payFail(srvCmd);
-                    }
-                    break;
-                case REFUND:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                        //退款成功
-                        handler.refundSuccess(srvCmd);
-                    }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                        //退款失败
-                        handler.refundFail(srvCmd);
+                        payFaild(purchaseOrderDTO);
                     }
                     break;
                 default:
@@ -6970,6 +6982,59 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
     }
 
+    private void paySuccess(PurchaseOrderDTO purchaseOrderDTO){
+        LOGGER.info("PurchaseOrderDTO paySuccess start dto = {}", StringHelper.toJsonString(purchaseOrderDTO));
+
+        ActivityRoster roster = activityProvider.findRosterByPayOrderId(purchaseOrderDTO.getId());
+        if(roster == null){
+            LOGGER.info("can not find roster by orderno = {}", purchaseOrderDTO.getId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            LOGGER.info("can not find activity by id = {}", roster.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+        //检验支付结果和应价格是否相等
+        checkPayAmount(purchaseOrderDTO.getAmount(), activity.getChargePrice());
+        //支付宝回调时，可能会同时回调多次，
+        roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
+        roster.setPayTime(purchaseOrderDTO.getPaymentTime());
+
+        roster.setPayAmount(purchaseOrderDTO.getAmount());
+        roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
+        roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
+        roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
+
+        activityProvider.updateRoster(roster);
+    }
+
+    private void payFaild(PurchaseOrderDTO purchaseOrderDTO) {
+        LOGGER.info("PurchaseOrderDTO payFail dto = {}", purchaseOrderDTO);
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.error("onlinePayBillFail");
+        ActivityRoster roster = activityProvider.findRosterByPayOrderId(purchaseOrderDTO.getId());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
+        cancelCmd.setActivityId(roster.getActivityId());
+        cancelCmd.setUserId(roster.getUid());
+        cancelCmd.setCancelType(ActivityCancelType.PAY_FAIL.getCode());
+        this.cancelSignup(cancelCmd);
+        LOGGER.info("PurchaseOrderDTO payFail end");
+    }
+    private void checkPayAmount(BigDecimal payAmount, BigDecimal chargePrice) {
+        if(payAmount == null || chargePrice == null || payAmount.longValue() != chargePrice.multiply(new BigDecimal(100)).longValue()){
+            LOGGER.error("payAmount and chargePrice is not equal.");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
+                    "payAmount and chargePrice is not equal.");
+        }
+    }
     @Override
     public void exportActivity(ExportActivityCommand cmd) {
 

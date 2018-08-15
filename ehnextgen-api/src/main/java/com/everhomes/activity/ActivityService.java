@@ -35,7 +35,7 @@ public interface ActivityService {
     //更换使用新的支付V3
 //    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
 
-    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
+//    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
 
     PreOrderDTO createUniteSignupOrder(CreateSignupOrderV2Command cmd);
 
