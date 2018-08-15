@@ -5842,6 +5842,9 @@ public class FlowServiceImpl implements FlowService {
             flowKvConfigProvider.updateFlowKvConfig(config);
         } else {
             config = ConvertHelper.convert(cmd, FlowKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType(FlowModuleType.NO_MODULE.getCode());
+            }
             config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
             config.setKey(FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
             config.setStatus(FlowCommonStatus.VALID.getCode());
