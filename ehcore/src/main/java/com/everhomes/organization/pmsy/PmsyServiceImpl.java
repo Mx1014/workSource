@@ -290,7 +290,7 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	public boolean isZuolinTest() {
 		//判断是否处于左邻测试环境，如果是，则伪造测试数据
-		String haianEnvironment = configProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.v2.asset.haian_environment", "");
+		String haianEnvironment = configProvider.getValue(999993, "pay.v2.asset.haian_environment", "");
 		if(haianEnvironment.equals("beta")) {
 			return true;
 		}

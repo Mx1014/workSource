@@ -63,7 +63,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('pay.v2.callback.url.asset', '/pmsy/payNotify', '物业缴费新支付回调接口', 999993, NULL, 0);
 	
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('pay.v2.asset.haian_environment', 'release', 'release：正式环境，beta：测试环境，以此来判断是否需要为海岸造测试数据', 0, NULL, 0);
+	VALUES ('pay.v2.asset.haian_environment', 'release', 'release：正式环境，beta：测试环境，以此来判断是否需要为海岸造测试数据', 999993, NULL, 0);
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
