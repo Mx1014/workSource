@@ -1654,6 +1654,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping("sendVerificationCodeByPhone")
 	@RestReturn(String.class)
 	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ,HttpServletRequest request){
+		LOGGER.info("sendVerificationCodeByPhone  -->  cmd:[{}]",cmd);
 		FindUserByPhoneCommand cmd1 = ConvertHelper.convert(cmd, FindUserByPhoneCommand.class);
 		UserDTO  user = this.userService.getUserFromPhone(cmd1);
 		if(user == null) {
@@ -1661,8 +1662,8 @@ public class UserController extends ControllerBase {
 					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exist");
 		}
 
-        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		this.userService.sendVerficationCode4Point(namespaceId, user, cmd.getRegionCode(), request);
+
+		this.userService.sendVerficationCode4Point(cmd.getNamespaceId(), user, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
      
     }

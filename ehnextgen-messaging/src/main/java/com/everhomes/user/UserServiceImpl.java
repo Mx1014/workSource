@@ -766,6 +766,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      */
     @Override
     public void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) {
+        LOGGER.info("sendVerficationCode4Point  -->  user:[{}]",user);
     		//检查用户是否存在
 		String phone = user.getIdentifierToken() ;
 		if(namespaceId ==null || StringUtils.isBlank(phone) ){
@@ -778,7 +779,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     			return ;
         	}
 
-            this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+        	//因为调试需要,先把这段限制去注掉
+            //this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
 
             Timestamp ts = identifier.getNotifyTime();
             //验证码过期了重新生成,没有过期则用原来的
@@ -6603,6 +6605,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      */
     @Override
     public UserDTO getUserFromPhone(FindUserByPhoneCommand cmd) {
+        LOGGER.info("getUserFromPhone  -->  cmd:[{}]",cmd);
 		Integer namespaceId = cmd.getNamespaceId();
 		String phone = cmd.getPhone() ;
 		if(namespaceId ==null || StringUtils.isBlank(phone) ){
