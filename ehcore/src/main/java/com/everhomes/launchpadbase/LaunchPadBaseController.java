@@ -121,4 +121,20 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /launchpadbase/listBulletinsCards</b>
+     * <p>获取公告板块信息</p>
+     */
+    @RequestMapping("listBulletinsCards")
+    @RestReturn(value=ListBulletinsCardsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listBulletinsCards(ListBulletinsCardsCommand cmd) {
+        ListBulletinsCardsResponse res = launchPadService.listBulletinsCards(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }

@@ -94,5 +94,9 @@ public interface LaunchPadService {
 
     OPPushHandler getOPPushHandler(Long moduleId);
 
+    BulletinsHandler getBulletinsHandler(Long moduleId);
+
     String getSceneTokenByCommunityId(Long communityId);
+
+    ListBulletinsCardsResponse listBulletinsCards(ListBulletinsCardsCommand cmd);
 }

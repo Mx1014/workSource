@@ -51,6 +51,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.Bulletins;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
@@ -2944,6 +2945,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
 	@Override
+	public BulletinsHandler getBulletinsHandler(Long moduleId) {
+		BulletinsHandler handler = null;
+
+		if(moduleId != null) {
+			String handlerPrefix = BulletinsHandler.BULLETINS_HANDLER_TYPE;
+			try {
+				handler = PlatformContext.getComponent(handlerPrefix + moduleId);
+			}catch (Exception ex){
+				LOGGER.info("OPPushHandler not exist moduleId = {}", moduleId);
+			}
+
+		}
+
+		return handler;
+	}
+
+	@Override
 	public String getSceneTokenByCommunityId(Long communityId){
 		Community community = communityProvider.findCommunityById(communityId);
 		SceneTokenDTO sceneToken = new SceneTokenDTO();
@@ -2954,5 +2972,54 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		sceneToken.setUserId(UserContext.currentUserId());
 
 		return WebTokenGenerator.getInstance().toWebToken(sceneToken);
+	}
+
+
+	@Override
+	public ListBulletinsCardsResponse listBulletinsCards(ListBulletinsCardsCommand cmd) {
+
+		ListBulletinsCardsResponse response = new ListBulletinsCardsResponse();
+
+		Bulletins bulletins = (Bulletins)StringHelper.fromJsonString(cmd.getInstanceConfig(), Bulletins.class);
+
+		//历史是园区公告，默认使用园区公告
+		if(bulletins.getModuleId() == null){
+			bulletins.setModuleId(10300L);
+		}
+
+		//处理方式
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(bulletins.getModuleId());
+		response.setModuleId(serviceModule.getId());
+		response.setClientHandlerType(serviceModule.getClientHandlerType());
+
+		BulletinsHandler bulletinsHandler = getBulletinsHandler(bulletins.getModuleId());
+		if(bulletinsHandler != null){
+			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), bulletins.getRowCount());
+			response.setCards(cards);
+
+			String itemActionData = "{}";
+			String title = serviceModule.getName();
+			if(bulletins.getAppId() != null){
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(bulletins.getAppId());
+				itemActionData = serviceModuleApp.getInstanceConfig();
+				title = serviceModuleApp.getName();
+				if(serviceModuleApp != null){
+					PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
+					if(portalPublishHandler != null){
+						itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+					}
+				}
+			}
+
+			itemActionData = refreshActionData(itemActionData);
+			response.setInstanceConfig(itemActionData);
+
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData);
+			response.setRouterPath(routerInfo.getPath());
+			response.setRouterQuery(routerInfo.getQuery());
+		}
+
+
+		return response;
 	}
 }

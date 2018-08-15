@@ -14,6 +14,8 @@ import java.util.List;
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
  *     <li>shadow: 是否有底部阴影 参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>moduleId: moduleId</li>
+ *     <li>appId: appId</li>
  * </ul>
  */
 public class Bulletins {
@@ -31,6 +33,10 @@ public class Bulletins {
     private String iconUrl;
 
     private Byte shadow;
+
+    private Long moduleId;
+
+    private Long appId;
 
     public String getItemGroup() {
         return itemGroup;
@@ -86,6 +92,22 @@ public class Bulletins {
 
     public void setShadow(Byte shadow) {
         this.shadow = shadow;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     @Override
