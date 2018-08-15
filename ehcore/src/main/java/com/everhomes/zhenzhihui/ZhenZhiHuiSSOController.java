@@ -7,6 +7,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RequireAuthentication;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ import java.net.URISyntaxException;
 public class ZhenZhiHuiSSOController extends ControllerBase{
     @Autowired
     private ZhenZhiHuiService zhenZhiHuiService;
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiSSOController.class);
+
     /**
      * <b>URL: /zhenzhihuisso/sso</b>
      * <p>圳智慧单点登录</p>
@@ -37,6 +40,7 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
             httpHeaders.setLocation(new URI(location));
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
         } catch (URISyntaxException e) {
+            LOGGER.error("redirect failed, location = {}", location);
         }
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);

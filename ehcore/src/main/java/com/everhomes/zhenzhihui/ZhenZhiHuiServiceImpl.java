@@ -2,8 +2,10 @@
 package com.everhomes.zhenzhihui;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.point.UserLevel;
@@ -19,8 +21,11 @@ import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServer;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserInfoDTO;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -61,6 +66,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +79,8 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final String charset       = "UTF-8";
 //    private static final String APPENCKEY     = "ece2d40c2badef49";
 //    private static final String SSOServiceURL = "http://w1505m3190.iok.la:56535/ZHYQ/restservices/LEAPAuthorize/attributes/query?TICKET=";
-    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 11;
-    private static final Long COMMUNITY_ID  = 240111044332061474L;
+    private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999931;
+    private static final Long COMMUNITY_ID  = 240111044332063520L;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
 
     @Autowired
@@ -84,6 +91,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private OrganizationServiceImpl organizationService;
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
     @Override
     public String ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
@@ -138,11 +148,26 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
                             setCookieInResponse("token", tokenString, request, response);
                             LOGGER.info("zhenzhihui user login,userId = {}, token = {}", user.getId(), tokenString);
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://dev19.zuolin.com/park-news-web/build/index.html?categoryId=0&title=%e6%96%b0%e9%97%bb%e8%b5%84%e8%ae%af&widget=NewsFlash&timeWidgetStyle=datetime#/newsList#sign_suffix");
-
                             SceneTokenDTO sceneTokenDTO = new SceneTokenDTO();
                             sceneTokenDTO.setUserId(user.getId());
                             sceneTokenDTO.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
+
+                            List<Long> moduleIds = new ArrayList<>();
+//                            moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
+                            moduleIds.add(41700L);
+                            List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
+                            if (CollectionUtils.isEmpty(serviceModuleApps)) {
+                                LOGGER.error("APP is null");
+                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "app is null");
+                            }
+                            String instanceConfig = serviceModuleApps.get(0).getInstanceConfig();
+                            LOGGER.info("instanceConfig = {}",instanceConfig);
+                            LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
+                                    LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
+                            String location = handler.refreshActionData(instanceConfig,sceneTokenDTO);
+                            LOGGER.info("location = {}", location);
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+
                             List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
                             if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
                                 sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
@@ -159,7 +184,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
                             for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-                                if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect")) {
+                                if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && entry.getKey().equals("TICKET")) {
                                     builder.queryParam(entry.getKey(), entry.getValue());
                                 }
                             }
