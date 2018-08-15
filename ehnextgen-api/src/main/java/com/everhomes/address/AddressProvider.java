@@ -106,7 +106,7 @@ public interface AddressProvider {
 	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
 	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
 	Integer countApartmentNumberByBuildingName(Long communityId, String buildingName);
-	Integer countRelatedEnterpriseCustomerNumber(Long buildingId);
+	Integer countRelatedEnterpriseCustomerNumber(Long communityId,String buildingName);
 	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
 	List<Address> findActiveAddressByCommunityId(Long id);
 	List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);

@@ -27,11 +27,14 @@ import com.everhomes.util.StringHelper;
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
  * <li>apartmentFloor: 楼层名称</li>
- * <li>arrangementOperationType:房源的拆分/合并计划（0：无,1：拆分,2：合并）</li>
+ * <li>arrangementOperationType:房源的拆分/合并计划操作类型：拆分（0），合并（1）</li>
  * <li>relatedContractEndDate:与该房源关联的合同的结束日期</li>
  * <li>freeArea: 可招租面积</li>
  * <li>isPassiveApartment: 在参与房源合并计划时，该房源是否是被合并的房源（0：否,1：是）</li>
  * <li>reservationInvolved: 该房源是否关联预定计划（0：否,1：是）</li>
+ * <li>individualCustomerInvolved: 该房源是否关联个人客户（0：否,1：是）</li>
+ * <li>enterpriseCustomerInvolved: 该房源是否关联企业客户（0：否,1：是）</li>
+ * 
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -59,7 +62,25 @@ public class GetApartmentDetailResponse {
 	private Byte isPassiveApartment;
 	private Byte reservationInvolved;
 	private Byte arrangementInvolved;
+	private Byte individualCustomerInvolved;
+	private Byte enterpriseCustomerInvolved;
 	
+	public Byte getIndividualCustomerInvolved() {
+		return individualCustomerInvolved;
+	}
+
+	public void setIndividualCustomerInvolved(Byte individualCustomerInvolved) {
+		this.individualCustomerInvolved = individualCustomerInvolved;
+	}
+
+	public Byte getEnterpriseCustomerInvolved() {
+		return enterpriseCustomerInvolved;
+	}
+
+	public void setEnterpriseCustomerInvolved(Byte enterpriseCustomerInvolved) {
+		this.enterpriseCustomerInvolved = enterpriseCustomerInvolved;
+	}
+
 	public Byte getArrangementInvolved() {
 		return arrangementInvolved;
 	}

@@ -69,6 +69,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerEntryInfo;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAddress;
@@ -2628,7 +2629,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setSharedArea(cmd.getSharedArea());
             address.setFreeArea(cmd.getFreeArea());
             //房源所在楼层
-            address.setApartmentFloor(cmd.getApartmentFloor().toString());
+            address.setApartmentFloor(cmd.getApartmentFloor());
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
@@ -2911,6 +2912,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         	response.setReservationInvolved((byte)1);
 		}else {
 			response.setReservationInvolved((byte)0);
+		}
+        
+        List<CustomerEntryInfo> customerEntryInfos = enterpriseCustomerProvider.findActiveCustomerEntryInfoByAddressId(address.getId());
+        if (customerEntryInfos!=null && customerEntryInfos.size()>0) {
+			response.setEnterpriseCustomerInvolved((byte)1);
+		}else {
+			response.setEnterpriseCustomerInvolved((byte)0);
+		}
+        
+        List<OrganizationOwnerAddress> organizationOwnerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(address.getNamespaceId(), address.getId());
+        if (organizationOwnerAddresses!=null && organizationOwnerAddresses.size()>0) {
+        	response.setIndividualCustomerInvolved((byte)1);
+		}else {
+			response.setIndividualCustomerInvolved((byte)0);
 		}
         
         return response;

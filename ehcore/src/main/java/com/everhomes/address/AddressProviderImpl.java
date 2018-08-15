@@ -990,16 +990,23 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public Integer countRelatedEnterpriseCustomerNumber(Long buildingId) {
+	public Integer countRelatedEnterpriseCustomerNumber(Long communityId,String buildingName) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		//SELECT count(DISTINCT(customer_id)) from eh_customer_entry_infos WHERE building_id in (1973266,1973267);
-		List<Long> customerIdList = context.selectDistinct(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID)
-											.from(Tables.EH_CUSTOMER_ENTRY_INFOS)
-											.where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(buildingId))
-											.fetchInto(Long.class);
+		List<Long> addressIds = context.select(Tables.EH_ADDRESSES.ID)
+										.from(Tables.EH_ADDRESSES)
+										.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+										.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_ADDRESSES.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
 		
-		if (customerIdList != null && customerIdList.size() > 0) {
-			return customerIdList.size();
+		List<Long> customerIds = context.selectDistinct(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID)
+										.from(Tables.EH_CUSTOMER_ENTRY_INFOS)
+										.where(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.in(addressIds))
+										.and(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		
+		if (customerIds != null && customerIds.size() > 0) {
+			return customerIds.size();
 		}
 		return 0;
 	}
@@ -1054,6 +1061,8 @@ public class AddressProviderImpl implements AddressProvider {
 		query.addFrom(Tables.EH_ADDRESSES);
 		query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
 		query.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+		//不能是未来资产
+		query.addConditions(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0));
 		query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
 		
 		if (cmd.getCommunityId() != null) {
