@@ -2877,18 +2877,23 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 		
 		address.setAreaSize(targetAddress.getAreaSize());
-		address.setRentArea(targetAddress.getRentArea());
-		address.setFreeArea(targetAddress.getFreeArea());
-		address.setChargeArea(targetAddress.getChargeArea());
+		//address.setChargeArea(targetAddress.getChargeArea());
+		//address.setRentArea(targetAddress.getRentArea());
+		//address.setFreeArea(targetAddress.getFreeArea());
 		
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
 		for (ArrangementApartmentDTO apartment : apartments) {
+			//address.setRentArea((address.getRentArea()!=null ? address.getRentArea() : (double)0) + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
+			//address.setFreeArea((address.getFreeArea()!=null ? address.getFreeArea() : (double)0) + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
+			//address.setChargeArea((address.getChargeArea()!=null ? address.getChargeArea():(double)0) + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
 			address.setAreaSize((address.getAreaSize()!=null ? address.getAreaSize() : (double)0) + (apartment.getAreaSize()!=null ? apartment.getAreaSize() : (double)0));
-			address.setRentArea((address.getRentArea()!=null ? address.getRentArea() : (double)0) + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
-			address.setFreeArea((address.getFreeArea()!=null ? address.getFreeArea() : (double)0) + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
-			address.setChargeArea((address.getChargeArea()!=null ? address.getChargeArea():(double)0) + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
 			originalIds.add(apartment.getAddressId().toString());
 		}
+		//合并后的房源，在租面积等于0，可招租面积等于建筑面积，收费面积等于建筑面积
+		address.setRentArea(0.0);
+		address.setFreeArea(address.getAreaSize());
+		address.setChargeArea(address.getAreaSize());
+		
 		Long newAddressId = addressProvider.createAddress3(address);
 		targetIds.add(newAddressId.toString());
 		//设置房源的具体状态
@@ -3171,8 +3176,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	        				//删除个人客户及企业客户的关联关系
 	        		        addressProvider.updateOrganizationAddressMapping(address.getId());
 	        		        addressProvider.updateOrganizationAddress(address.getId());
-	        		        addressProvider.updateOrganizationOwnerAddress(address.getId());
-	        		        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        		        //addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        		        //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
 	        		        subBuildingAndCommunityArea(address);
 	        			}
 	        			//未来房源成为正式房源
@@ -3195,6 +3200,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	private void subBuildingAndCommunityArea(Address address){
 		Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize - address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize - address.getAreaSize());
+        }
         if (address.getRentArea() != null) {
             Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
             building.setRentArea(buildingRentArea - address.getRentArea());
@@ -3209,13 +3221,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
             community.setSharedArea(communitySharedArea - address.getSharedArea());
         }
-        if (address.getBuildArea() != null) {
-            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
-            building.setBuildArea(buildingBuildArea - address.getBuildArea());
-
-            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
-            community.setBuildArea(communityBuildArea - address.getBuildArea());
-        }
+//        if (address.getBuildArea() != null) {
+//            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+//            building.setBuildArea(buildingBuildArea - address.getBuildArea());
+//
+//            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+//            community.setBuildArea(communityBuildArea - address.getBuildArea());
+//        }
         if (address.getChargeArea() != null) {
             Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
             building.setChargeArea(buildingChargeArea - address.getChargeArea());
@@ -3237,6 +3249,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	private void addBuildingAndCommunityArea(Address address){
 		Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize + address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize + address.getAreaSize());
+        }
         if (address.getRentArea() != null) {
             Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
             building.setRentArea(buildingRentArea + address.getRentArea());
@@ -3251,13 +3270,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
             community.setSharedArea(communitySharedArea + address.getSharedArea());
         }
-        if (address.getBuildArea() != null) {
-            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
-            building.setBuildArea(buildingBuildArea + address.getBuildArea());
-
-            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
-            community.setBuildArea(communityBuildArea + address.getBuildArea());
-        }
+//        if (address.getBuildArea() != null) {
+//            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+//            building.setBuildArea(buildingBuildArea + address.getBuildArea());
+//
+//            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+//            community.setBuildArea(communityBuildArea + address.getBuildArea());
+//        }
         if (address.getChargeArea() != null) {
             Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
             building.setChargeArea(buildingChargeArea + address.getChargeArea());
@@ -3300,8 +3319,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			//删除个人客户及企业客户的关联关系
 	        addressProvider.updateOrganizationAddressMapping(address.getId());
 	        addressProvider.updateOrganizationAddress(address.getId());
-	        addressProvider.updateOrganizationOwnerAddress(address.getId());
-	        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        //addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
 	        subBuildingAndCommunityArea(address);
 		}
 		//未来房源成为正式房源
