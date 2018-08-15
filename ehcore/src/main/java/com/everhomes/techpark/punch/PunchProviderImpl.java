@@ -69,6 +69,7 @@ import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class PunchProviderImpl implements PunchProvider {
@@ -2818,6 +2819,7 @@ public class PunchProviderImpl implements PunchProvider {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         return context.update(Tables.EH_PUNCH_LOGS).set(Tables.EH_PUNCH_LOGS.APPROVAL_STATUS, PunchStatus.NORMAL.getCode())
+        		.set(Tables.EH_PUNCH_LOGS.UPDATE_DATE, new java.sql.Date(DateHelper.currentGMTTime().getTime()))
                 .where(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
                 .and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
                 .and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
@@ -3161,6 +3163,33 @@ public class PunchProviderImpl implements PunchProvider {
         Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId);
         Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode());
         condition = condition.and(condition2);
+        condition = condition.and(condition3);
+        condition = condition.and(condition4);
+        if(null != userIds){
+        	Condition condition5 = Tables.EH_PUNCH_LOGS.USER_ID.in(userIds);
+            condition = condition.and(condition5);
+        }
+        step.where(condition);
+        List<PunchLog> result = step.orderBy(
+                Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_LOGS.USER_ID.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+                Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(), Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, PunchLog.class);
+                });
+        return result;
+
+    }
+
+    @Override
+    public List<PunchLog> listPunchLogsForOpenApi(Long ownerId, List<Long> userIds, Long startDay, Long endDay) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_PUNCH_LOGS);
+        Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(new Date(startDay), new Date(endDay))
+        		.or(Tables.EH_PUNCH_LOGS.UPDATE_DATE.between(new Date(startDay), new Date(endDay))); 
+        Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(ownerId);
+        Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(ClockCode.SUCESS.getCode()); 
         condition = condition.and(condition3);
         condition = condition.and(condition4);
         if(null != userIds){

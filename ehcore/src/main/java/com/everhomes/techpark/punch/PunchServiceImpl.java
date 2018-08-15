@@ -1509,7 +1509,8 @@ public class PunchServiceImpl implements PunchService {
      */
     private void updateSmartAlignment(PunchLog pl) {
 
-        pl.setSmartAlignment(NormalFlag.YES.getCode());
+        pl.setSmartAlignment(NormalFlag.YES.getCode()); 
+        pl.setUpdateDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
         if (pl.getId() == null) {
             punchProvider.createPunchLog(pl);
         } else {
@@ -9188,6 +9189,7 @@ public class PunchServiceImpl implements PunchService {
         if (updateNum < 1) {
             PunchLog pl = getAbnormalPunchLog(request);
             pl.setApprovalStatus(PunchStatus.NORMAL.getCode());
+            pl.setUpdateDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
             punchProvider.createPunchLog(pl);
 
         }

@@ -369,4 +369,7 @@ public interface PunchProvider {
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
 
 	Integer countpunchStatistic(String punchMonth, Long ownerId);
+
+	List<PunchLog> listPunchLogsForOpenApi(Long ownerId, List<Long> userIds, Long startDay,
+			Long endDay);
 }
