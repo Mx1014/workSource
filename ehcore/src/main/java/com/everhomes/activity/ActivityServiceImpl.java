@@ -1587,6 +1587,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             break;
                     }
                 }
+                if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
+                    signupInfoDTO.setPhone(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                }
             }
             signupInfoDTO.setValues(results);
         }
