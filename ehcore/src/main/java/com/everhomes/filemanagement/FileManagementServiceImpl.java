@@ -442,7 +442,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         	Long contentId = dto.getId();
             FileContent content = fileManagementProvider.findFileContentById(contentId);
 
-            Map<String, Long> map = checkFilePath(processPathString(content.getPath()), content.getOwnerId());
+            Map<String, Long> map = checkFilePath(dto.getPath(), content.getOwnerId());
             Long parentId = map.get("parentId");
             Long catalogId = map.get("catalogId");
             if (checkContentMoved(content, parentId, catalogId)) {
