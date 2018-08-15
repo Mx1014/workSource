@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowConditionVariable;
 import com.everhomes.flow.FormFieldProcessor;
-import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
+import com.everhomes.rest.enterpriseApproval.ComponentOverTimeValue;
 import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.enterpriseApproval.ComponentOverTimeValue;
+import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -65,7 +65,11 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
         } else if ("结束时间".equals(variable)) {
             return new FlowConditionStringVariable(overTime.getEndTime());
         } else if ("加班时长".equals(variable)) {
-            return new FlowConditionNumberVariable(overTime.getDuration());
+            if (overTime.getDurationInMinute() != null) {
+                return new FlowConditionStringVariable(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(overTime.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
+            } else {
+                return new FlowConditionStringVariable(overTime.getDuration() + "天");
+            }
         }
         return null;
     }
