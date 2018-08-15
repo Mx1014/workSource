@@ -2,7 +2,7 @@ package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
 
-public class pointCheckVCDTO {
+public class PointCheckVCDTO {
 	private Boolean resultCode ;
 	private String result ;
 	

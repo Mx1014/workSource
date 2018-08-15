@@ -6627,9 +6627,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      * @return
      */
     @Override
-    public pointCheckVCDTO pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd) {
-       
-    	pointCheckVCDTO returnDTO = new pointCheckVCDTO();
+    public PointCheckVCDTO pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd) {
+
+        PointCheckVCDTO returnDTO = new PointCheckVCDTO();
         String verificationCode = cmd.getVerificationCode();
         String phone = cmd.getPhone();
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());

@@ -1677,7 +1677,7 @@ public class UserController extends ControllerBase {
 	@RestReturn(UserDTO.class)
 	public RestResponse pointCheckVerificationCode(pointCheckVerificationCodeCommand cmd){
 
-		pointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
+		PointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
 		RestResponse resp = new RestResponse(dto);
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
