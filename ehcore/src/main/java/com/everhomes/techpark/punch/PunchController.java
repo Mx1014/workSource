@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
 import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -432,7 +433,7 @@ public class PunchController extends ControllerBase {
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
 		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-//		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

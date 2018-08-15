@@ -51,7 +51,7 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 		approvalCategory.setCreatorUid(UserContext.currentUserId() == null ? 0L : UserContext.currentUserId());
 		approvalCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		approvalCategory.setUpdateTime(approvalCategory.getCreateTime());
-		approvalCategory.setOperatorUid(UserContext.currentUserId());
+		approvalCategory.setOperatorUid(UserContext.currentUserId() == null ? 0L : UserContext.currentUserId());
 		getReadWriteDao().insert(approvalCategory);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhApprovalCategories.class, null);
 	}

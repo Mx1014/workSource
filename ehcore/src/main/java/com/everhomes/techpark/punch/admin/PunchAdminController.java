@@ -825,7 +825,7 @@ public class PunchAdminController extends ControllerBase {
     @RestReturn(value = ListPunchCountCommandResponse.class)
     public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
         Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-//        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
         ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -874,7 +874,7 @@ public class PunchAdminController extends ControllerBase {
     @RestReturn(value = ListPunchDetailsResponse.class)
     public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
         Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-//        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
         ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

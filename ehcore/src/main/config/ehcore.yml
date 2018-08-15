@@ -97,7 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -147,4 +147,14 @@ core.server.id: 1
 core.server.list: 1,2
 
 # 允许在 nashorn 中通过 Java.type 访问的类
-nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
+nashorn.class.includes:
+  java.lang.*, java.util.*, java.io.*,
+  com.everhomes.oauth2client.handler.RestCallTemplate,
+  com.everhomes.scriptengine.nashorn.NashornApiService,
+  com.everhomes.flow.FlowNashornConfigService
+
+# pay-sdk需要配置响应的环境变量才能正常使用。我们的实现方式是用spring的@value注释注入yml项目配置文件中的内容。
+#pay.appKey: 6caa8584-c723-4b7b-9aec-071b4e31418f
+#pay.secretKey: zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==
+#pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
+#pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh

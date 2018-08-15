@@ -6177,22 +6177,6 @@ public class PunchServiceImpl implements PunchService {
                 || (request.getPunchDate() != null && request.getPunchDate().equals(punchDate));
 	}
 
-    private OrganizationMemberDetails findOrganizationMemberByUIdCache(Long detailId) {
-
-        OrganizationMemberDetails member = organizationMemberByUIdCache.get().get(detailId);
-        if (null == member) {
-            member = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            organizationMemberByUIdCache.get().put(detailId, member);
-        }
-        return member;
-    }
-
-    private ThreadLocal<Map<Long, OrganizationMemberDetails>> organizationMemberByUIdCache = new ThreadLocal<Map<Long, OrganizationMemberDetails>>() {
-        protected Map<Long, OrganizationMemberDetails> initialValue() {
-            return new HashMap<>();
-        }
-    };
-
     @Override
     public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId) {
         ListPunchCountCommand cmd = new ListPunchCountCommand();
@@ -6591,11 +6575,7 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public void testDayRefreshLogs(Long runDate) {
-        Calendar calendar4 = Calendar.getInstance();
-        calendar4.set(2018, 7, 2);
-        OrganizationMemberDetails details = findOrganizationMemberDetailByCacheDetailId(39990L);
-        punchDayLogInitialize(details, 1045660L, calendar4);
-//        dayRefreshLogScheduled(new Date(runDate));
+        dayRefreshLogScheduled(new Date(runDate));
     }
     @Deprecated
     public void dayRefreshLogScheduled(Date runDate) {
@@ -6856,27 +6836,6 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setSplitDateTime(new Timestamp(punchDayLog.getPunchDate().getTime() + ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME));
         punchProvider.createPunchDayLog(punchDayLog);
     }
-
-
-
-//    /**
-//     * 刷新punCalendar 当天日数据 和 start到pun 之间的月数据
-//     *
-//     * @throws ParseException
-//     */
-//    private void punchDayLogInitialize(OrganizationMemberDetails member, Long orgId,
-//                                           Calendar punCalendar, Calendar startCalendar) throws ParseException {
-//        
-//        //刷月报
-//        //2018-5-25 刷月报改成在每天早上5点30固定刷
-//
-////        addPunchStatistics(member, orgId, startCalendar, punCalendar);
-//
-////        } catch (Exception e) {
-////            LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
-////                    + "] organization id :[" + orgId + "] ", e);
-////        }
-//    }
 
     @Override
     public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
