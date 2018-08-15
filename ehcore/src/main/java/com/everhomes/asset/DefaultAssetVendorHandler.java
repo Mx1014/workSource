@@ -185,6 +185,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             orderBill.setPaymentType(orderResponse.getPaymentType());
             orderBill.setPaymentChannel(orderResponse.getPaymentChannel());
             orderBill.setPaymentOrderType(orderResponse.getPaymentOrderType());
+            orderBill.s
             orderBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             
             billOrderList.add(orderBill);
