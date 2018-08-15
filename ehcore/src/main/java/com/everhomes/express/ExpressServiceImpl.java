@@ -373,7 +373,7 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	private String getExpressCompany(Long id) {
 		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(id);
-		return expressCompany == null ? null : expressCompany.getName();
+		return expressCompany == null ||  expressCompany.getStatus() == 1? null : expressCompany.getName();
 	}
 
 	@Override
@@ -1173,7 +1173,7 @@ public class ExpressServiceImpl implements ExpressService {
 			expressCompanyId = findTopExpressCompany(expressCompanyId).getId();
 		}
 //		owner.setNamespaceId(23456);
-		List<ExpressCompany> expressCompany = expressCompanyProvider.listExpressCompanyByOwner(owner);
+		List<ExpressCompany> expressCompany = expressCompanyProvider.listNotDeleteExpressCompanyByOwner(owner);
 		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(namespaceId,ownerType,ownerId,expressCompanyId);
 		return new ListExpressSendTypesResponse(list.stream().map(r->{
 			ExpressSendTypeDTO dto = ConvertHelper.convert(r, ExpressSendTypeDTO.class);
