@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.parking.ParkingLot;
-import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.parking.*;
 import com.everhomes.parking.chean.*;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
+import com.everhomes.parking.yinxingzhijiexiaomao.YinxingzhijieXiaomaoJsonEntity;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 //import net.sf.json.JSONObject;
 import org.slf4j.Logger;
@@ -19,9 +21,11 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST")
 public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
@@ -30,13 +34,19 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     private static final String CATEGORY_SEPARATOR = "/";
 
-    private static final String GET_TEMP_FEE = "api.aspx/calc";
+    private static final String GET_TEMP_FEE = "api.aspx/calc";//获取临时车缴费信息
 
-    private static final String PAY_TEMP_FEE = "api.aspx/commit";
+    private static final String PAY_TEMP_FEE = "api.aspx/commit";//临时车缴费
 
-    private static final String GET_MONTHCARD = "api.aspx/park.mcard.info";
+    private static final String GET_MONTHCARD = "api.aspx/park.mcard.info";//获取月卡缴费信息
 
-    private static final String GET_MONTHCARD_TYPE = "api.aspx/park.monthtariffs.get";
+    private static final String GET_MONTHCARD_TYPE = "api.aspx/park.monthtariffs.get";//获取缴费类型（车型）
+
+    private static final String OPEN_MONTHCARD = "api.aspx/pub.card.add";//新建月卡
+
+    private static final String CREATE_ORDER = "api.aspx/park.mcard.order.create";//创建月卡缴费订单
+
+    private static final String MONTHCARD_CHARGE = "api.aspx/park.mcard.charge";//月卡缴费
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -56,10 +66,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         CheanJsonEntity<CheanTempFee> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanTempFee>>(){});
 
         if (null != entity && entity.getStatus()){
-            List<CheanTempFee> list = entity.getData();
-            if(null != list && list.size() > 0){
-                tempFee = list.get(0);
-            }
+            tempFee = entity.getData();
         }
 
         ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
@@ -91,18 +98,11 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     @Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
 
-        JSONObject param = new JSONObject();
-        param.put("credentialtype", "1");
-        param.put("credential", plateNumber);
-
-        String json = this.post(param,GET_MONTHCARD);
-
-        CheanJsonEntity<CheanCard> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanCard>>(){});
+        CheanCard card = getCardInfo(plateNumber,null);
 
         List<ParkingCardDTO> resultList = new ArrayList<>();
 
-        if (entity != null && entity.getStatus()) {
-            CheanCard card = entity.getData().get(0);
+        if (card != null) {
             ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 
             // 格式yyyyMMddHHmmss
@@ -119,20 +119,9 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
             parkingCardDTO.setEndTime(endTime);
 
-            String json1 = this.post(null,GET_MONTHCARD_TYPE);
-
-            CheanJsonEntity<CheanCardType> entity1 = JSONObject.parseObject(json1,new TypeReference<CheanJsonEntity<CheanCardType>>(){});
-            if (entity1 != null && entity1.getStatus()) {
-                List<CheanCardType> types =  entity1.getData();
-                types.stream().forEach(type ->{
-                    if(type.getTariffID().equals(card.getTariffid())){
-                        parkingCardDTO.setCardTypeId(type.getTariffID());//月卡类型id
-                        parkingCardDTO.setCardType(type.getTariffName());//月卡类型名称？
-//                        parkingCardDTO.setCardName(entity.getStandardType());
-                    }
-                });
-            }
-
+//            parkingCardDTO.setCardTypeId(type.getTariffID());//月卡类型id
+            parkingCardDTO.setCardType("月卡");//月卡类型名称？
+//            parkingCardDTO.setCardName(entity.getStandardType());
 
             resultList.add(parkingCardDTO);
         }
@@ -141,14 +130,55 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
-        return null;
+
+        List<ParkingRechargeRateDTO> ratedtos = new ArrayList<>();
+
+        CheanCard card = getCardInfo(plateNumber,null);
+        if("0".equals(card.getTariffid())) {
+
+        } else{
+            JSONObject param = new JSONObject();
+            String json = post(param,GET_MONTHCARD_TYPE);
+            CheanJsonArray<CheanCardType> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonArray<CheanCardType>>(){});
+            if (null != entity && entity.getStatus()){
+                List<CheanCardType> list = entity.getData();
+                if(null != list && list.size() > 0){
+                    for (CheanCardType type:list) {
+                        if(card.getTariffid().equals(type.getTariffID())){
+                            card.setMonthlyrent(type.getCharge());
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i = 1;i <= 3;i++){
+            ParkingRechargeRateDTO cardType = new ParkingRechargeRateDTO();
+            cardType.setCardTypeId(card.getTariffid());
+//                cardType.setCardType(i + "个月");
+            cardType.setPrice(new BigDecimal(card.getMonthlyrent()).multiply(new BigDecimal(i)).setScale(2));
+            cardType.setRateName(i + "个月");
+//                  默认为一个月
+            cardType.setMonthCount(new BigDecimal(i));
+            ratedtos.add(cardType);
+        }
+
+        return ratedtos;
     }
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-//        if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
-//            return rechargeMonthlyCard(order);
-        return payTempCardFee(order);
+        if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+            if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+                return rechargeMonthlyCard(order);
+            }else if(order.getRechargeType().equals(ParkingRechargeType.TEMPORARY.getCode())) {
+                return payTempCardFee(order);
+            }
+        } else if(order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+            return openMonthCard(order);
+        }
+        LOGGER.info("unknown type = " + order.getRechargeType());
+        return false;
     }
 
     boolean payTempCardFee(ParkingRechargeOrder order){
@@ -169,9 +199,244 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return false;
     }
 
+    private boolean openMonthCard(ParkingRechargeOrder order){
+        ParkingCardRequest request;
+        if (null != order.getCardRequestId()) {
+            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+        }else {
+            request = getParkingCardRequestByOrder(order);
+        }
+        Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
+        Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
+        order.setStartPeriod(timestampStart);
+        order.setEndPeriod(timestampEnd);
+        if(addMonthCard(order, request)) {
+            updateFlowStatus(request);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean addMonthCard(ParkingRechargeOrder order, ParkingCardRequest request){
+        JSONObject param = new JSONObject();
+
+        param.put("credentialtype","1");
+        param.put("credential", order.getPlateNumber());
+        param.put("number",order.getMonthCount().toString());//缴费月数
+        param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?"7" : "5");
+
+        String json = post(param,MONTHCARD_CHARGE);
+        order.setErrorDescriptionJson(json);
+
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject data = entity.getData();
+            if(null != data && 1 == data.getIntValue("flag")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean createMonthCard(String plateNumber,String StartDate,String ExpiryDate){
+
+        JSONObject param = new JSONObject();
+        param.put("NumNo",plateNumber);
+        JSONObject park = new JSONObject();
+        park.put("StartDate", StartDate);
+        park.put("ExpiryDate",ExpiryDate);
+        param.put("Park",park);
+
+        String json = post(param,OPEN_MONTHCARD);
+
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject data = entity.getData();
+            if(null != data) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
+
+        CheanCard card = getCardInfo(order.getPlateNumber(),order.getMonthCount().intValue());
+
+        if (null != card) {
+            Timestamp timestampStart = new Timestamp(Utils.strToLong(card.getExpirydate(), Utils.DateStyle.DATE_TIME)+1000);
+            Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String validStart = sdf.format(timestampStart);
+            String validEnd = sdf.format(timestampEnd);
+
+            JSONObject param = new JSONObject();
+            param.put("credentialtype","1");
+            param.put("credential", order.getPlateNumber());
+            param.put("number",order.getMonthCount().toString());//缴费月数
+            param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?"7" : "5");
+
+            String json = post(param,MONTHCARD_CHARGE);
+
+            //将充值信息存入订单
+            order.setErrorDescriptionJson(json);
+            order.setStartPeriod(timestampStart);
+            order.setEndPeriod(timestampEnd);
+
+            CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+            if(null != entity && entity.getStatus()){
+                JSONObject data = entity.getData();
+                if(null != data && 1 == data.getIntValue("flag")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private CheanCard getCardInfo(String plateNumber,Integer month) {
+        JSONObject param = new JSONObject();
+        param.put("credentialtype", "1");
+        param.put("credential", plateNumber);
+        if(null != month)
+            param.put("number",month);
+        String json = this.post(param,GET_MONTHCARD);
+        CheanJsonEntity<CheanCard> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanCard>>(){});
+        if(null != entity && entity.getStatus()){
+            return entity.getData();
+        }
+        return null;
+    }
+
+    private String createOrder(String plateNumber,BigDecimal payMoney,String preExpireDate,String currExpireDate){
+        JSONObject param = new JSONObject();
+        param.put("credentialType", "1");
+        param.put("credential", plateNumber);
+        param.put("aeceivable", payMoney.setScale(2).toString());
+        param.put("amount", payMoney.setScale(2).toString());
+        param.put("preExpireDate", preExpireDate);
+        param.put("currExpireDate", currExpireDate);
+
+        String orderNo = null;
+        String json = this.post(param,CREATE_ORDER);
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject data = entity.getData();
+            orderNo = data.getString("orderNo");
+        }
+        return orderNo;
+    }
+
     @Override
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-        return null;
+        ListCardTypeResponse response = new ListCardTypeResponse();
+
+        List<ParkingCardRequestType> typeList = parkingProvider.listParkingCardTypes(cmd.getOwnerType(),
+                cmd.getOwnerId(), cmd.getParkingLotId());
+
+        List<ParkingCardType> cardlist = new ArrayList<>();
+        if(null != typeList)
+            cardlist = typeList.stream().map(r->{
+                ParkingCardType cardType = new ParkingCardType();
+                cardType.setTypeId(r.getCardTypeId());
+                cardType.setTypeName(r.getCardTypeName());
+                return cardType;
+            }).collect(Collectors.toList());
+        response.setCardTypes(cardlist);
+
+        return response;
+    }
+
+    @Override
+    public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+
+        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
+                cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+        Integer requestMonthCount = REQUEST_MONTH_COUNT;
+        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+        if(null != parkingFlow) {
+            requestMonthCount = parkingFlow.getRequestMonthCount();
+            requestRechargeType = parkingFlow.getRequestRechargeType();
+        }
+
+        long now = System.currentTimeMillis();
+        String opendate = DATE_FORMAT.format(new Date(now));
+        String expirydate = DATE_FORMAT.format(new Timestamp(Utils.getTimestampByAddRealMonth(now,requestMonthCount)));
+        createMonthCard(cmd.getPlateNumber(),opendate,expirydate);
+
+        OpenCardInfoDTO dto = new OpenCardInfoDTO();
+
+        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);;
+
+        String cardTypeId = parkingCardRequest.getCardTypeId();
+
+        ParkingLot lot = ConvertHelper.convert(cmd,ParkingLot.class);
+        lot.setId(cmd.getParkingLotId());
+
+//        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(lot, null, null);
+        if(null != card) {
+//
+//            ParkingRechargeRateDTO rate = null;
+//            for (ParkingRechargeRateDTO r : parkingRechargeRates) {
+//                if (r.getCardTypeId().equals(cardTypeId)) {
+//                    rate = r;
+//                    break;
+//                }
+//            }
+//
+//            if (null == rate) {
+//                return null;
+//            }
+
+//            dto = ConvertHelper.convert(rate,OpenCardInfoDTO.class);
+            dto.setOwnerId(cmd.getOwnerId());
+            dto.setOwnerType(cmd.getOwnerType());
+            dto.setParkingLotId(cmd.getParkingLotId());
+//            dto.setRateToken(rate.getRateToken());
+//            dto.setRateName(rate.getRateName());
+            dto.setCardType("月卡");
+//            dto.setMonthCount(rate.getMonthCount());
+            dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
+//            dto.setPrice(new BigDecimal(card.getMonthlyrent()).divide((new BigDecimal(requestMonthCount)), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
+            dto.setPrice(new BigDecimal(card.getMonthlyrent()));
+            dto.setPlateNumber(cmd.getPlateNumber());
+            dto.setOpenDate(now);
+//            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount, true));
+            expirydate = (null != card.getNewexpirydate() ? card.getNewexpirydate() : card.getExpirydate());
+            Long expiradateResult = null;
+            try {
+                expiradateResult = DATE_FORMAT.parse(expirydate).getTime();
+            } catch (ParseException e) {
+                LOGGER.error("parse expiry date error, date={}", expirydate);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Parse expiry date error.");
+            }
+            dto.setExpireDate(expiradateResult);
+            if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
+                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+            } else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(now);
+                int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                int today = calendar.get(Calendar.DAY_OF_MONTH);
+
+                BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
+                        .add(dto.getPrice().multiply(new BigDecimal(maxDay - today + 1))
+                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+                dto.setPayMoney(price);
+            }
+            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+
+            createOrder(dto.getPlateNumber(),dto.getPayMoney(),opendate,expirydate);
+        }
+        return dto;
     }
 
     @Override
@@ -180,7 +445,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     }
 
 
-    protected String post(Object data, String type) {
+    protected String post(JSONObject data, String type) {
 
 //        String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
         String url = "http://113.98.59.44:9022";
@@ -195,7 +460,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         String branchno = "0";
 
         String iv = DATE_FORMAT.format(new Date());
-        int nonce = (int) Math.random() * 100;
+        int nonce = (int) (Math.random() * 100);
         Map<String, Object> params = new HashMap<>();
         params.put("from",accessKeyId);
         params.put("timestamp",iv);
@@ -205,7 +470,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         try {
             LOGGER.info("The request info, url={}, not encrypt,from={},timestamp={},nonce={},branchno={},data={}", url, accessKeyId, iv, nonce, branchno, data);
             text = EncryptUtil.signing(params);
-            text = text + data;  //此处追加data进行加密
+            if(!data.isEmpty())
+                text = text + data;  //此处追加data进行加密
             LOGGER.info("encrypt text with data, text={}", text);
             sign = EncryptUtil.encode(text, key);
         } catch (Exception e) {
@@ -225,10 +491,23 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return result;
     }
 
-//    public static void main(String[] args) {
-//        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
+    public static void main(String[] args) {
+        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
 //        bean.getParkingTempFee(null,"粤BMP525");
-//
-////        LOGGER.info("amount={}",new BigDecimal("24.00"));
-//    }
+//        bean.getCardInfo("粤B32345",null);
+//      卡类型接口
+//        bean.getParkingRechargeRates(null,null,null);
+//      开卡
+//        bean.createMonthCard("粤B32345","2018-08-22 00:00:00","2018-09-22 00:00:00");
+//      下单
+//        bean.createOrder("粤BCC345",new BigDecimal(300),"2018-08-15 00:00:00","2018-10-15 00:00:00");
+//      支付
+//        ParkingRechargeOrder order = new ParkingRechargeOrder();
+//        order.setPlateNumber("粤BCC345");
+//        order.setMonthCount(new BigDecimal(2));
+//        order.setPaidType("10001");
+//        bean.addMonthCard(order,null);
+//        LOGGER.info("amount={}",new BigDecimal("24.00"));
+
+    }
 }

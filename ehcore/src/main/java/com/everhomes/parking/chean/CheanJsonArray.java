@@ -2,12 +2,12 @@ package com.everhomes.parking.chean;
 
 import java.util.List;
 
-public class CheanJsonEntity<T> {
+public class CheanJsonArray<T> {
     private Boolean status;
     private String message;
     private Integer code;
     private String time;
-    private T data;
+    private List<T> data;
     private String rowindex;
     private Integer total;
 
@@ -43,11 +43,11 @@ public class CheanJsonEntity<T> {
         this.time = time;
     }
 
-    public T getData() {
+    public List<T> getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 
