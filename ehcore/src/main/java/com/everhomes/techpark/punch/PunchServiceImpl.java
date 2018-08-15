@@ -10013,7 +10013,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
-		List<PunchLog> logs = punchProvider.listPunchLogs(cmd.getOrgId(), userIds , cmd.getBeginDate(),cmd.getEndDate());
+		List<PunchLog> logs = punchProvider.listPunchLogsForOpenApi(cmd.getOrgId(), userIds , cmd.getBeginDate(),cmd.getEndDate());
 		if(null != logs && logs.size() > 0){
 			response.setCheckinDatas(new ArrayList<>());
 			for(PunchLog pl : logs){
