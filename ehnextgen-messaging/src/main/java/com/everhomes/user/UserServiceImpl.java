@@ -669,7 +669,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private void sendVerificationCodeSms4Point(Integer namespaceId, String phoneNumber, String verificationCode) {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
         String templateScope = SmsTemplateCode.SCOPE;
-        int templateId = SmsTemplateCode.POINT_VERIFICATION_CODE;
+       // int templateId = SmsTemplateCode.POINT_VERIFICATION_CODE;
+         int templateId = SmsTemplateCode.VERIFICATION_CODE;      
         String templateLocale = UserContext.current().getUser().getLocale();
         smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
     }
