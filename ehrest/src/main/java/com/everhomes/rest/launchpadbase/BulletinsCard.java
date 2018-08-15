@@ -13,8 +13,8 @@ import java.util.List;
  *     <li>routerPath: 路由跳转路径，此处填"/detail"</li>
  *     <li>routerQuery: 路由跳转参数</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
- *     <li>title: 标题，这个字段客户端暂时没用到</li>
- *     <li>content: 内容</li>
+ *     <li>title: 标题，5.8.0版本的时候客户端仅显示标题</li>
+ *     <li>content: 内容，暂时没有到</li>
  * </ul>
  */
 public class BulletinsCard {
