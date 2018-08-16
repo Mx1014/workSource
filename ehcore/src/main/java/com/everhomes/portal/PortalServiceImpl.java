@@ -2161,7 +2161,13 @@ public class PortalServiceImpl implements PortalService {
 			item.setStatus(PortalItemStatus.ACTIVE.getCode());
 
 			portalItems.add(item);
+		}else {
+			//全部更多是关闭的，就将所有的Item设置成可见的
+			for(PortalItem portalItem: portalItems){
+				portalItem.setDisplayFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
 		}
+
 
 	}
 
