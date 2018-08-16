@@ -61,6 +61,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
@@ -71,6 +72,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
@@ -114,6 +116,9 @@ import com.everhomes.rest.community.UpdateChildProjectCommand;
 import com.everhomes.rest.community.UpdateCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CheckAuditingType;
+import com.everhomes.rest.community.admin.CheckUserAuditingAdminCommand;
+import com.everhomes.rest.community.admin.CheckUserAuditingAdminResponse;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -141,6 +146,7 @@ import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
@@ -210,6 +216,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -354,6 +361,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1668,14 +1678,17 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
         if (resourceList == null) {
             return new CommunityAuthUserAddressResponse();
         }
-        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
-
+        //不通过域空间查询，通过项目查询 add by yanlong.liang 20180723
+//        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        List<Long> communityIds = new ArrayList<>();
+        communityIds.add(cmd.getCommunityId());
         List<Group> groups = groupProvider.listGroupByCommunityIds(communityIds, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
@@ -1693,7 +1706,7 @@ public class CommunityServiceImpl implements CommunityService {
         List<GroupMemberDTO> memberDTOList;
 
         if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode())) {
-            memberDTOList = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
+            memberDTOList = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getIdentifierToken(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
         } else if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
             memberDTOList = listCommunityActiveUserAddress(cmd, communityIds, locator, pageSize);
         } else {
@@ -1706,7 +1719,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
     private List<GroupMemberDTO> listCommunityActiveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
-        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds,
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(cmd.getUserInfoKeyword(),cmd.getIdentifierToken(), cmd.getCommunityKeyword(), communityIds,
                 GroupMemberStatus.ACTIVE.getCode(), locator, pageSize);
         if (memberLogs != null) {
             return memberLogs.stream().map(r -> {
@@ -1724,6 +1737,7 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setAreaName(community.getAreaName());
                     dto.setCommunityName(community.getName());
                 }
+                dto.setOperateType(OperateType.MANUAL.getCode());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -1736,11 +1750,17 @@ public class CommunityServiceImpl implements CommunityService {
             Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
             c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
 
-            if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
+            if (StringUtils.isNotBlank(cmd.getUserInfoKeyword()) || StringUtils.isNotBlank(cmd.getIdentifierToken())) {
+            	if (cmd.getUserInfoKeyword() == null) {
+            		cmd.setUserInfoKeyword("");
+				}
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
-                Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
+//                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+                Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
+                if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
+                   condition =  condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
+                }
                 query.addConditions(condition);
             }
             if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
@@ -1758,6 +1778,9 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+        for (GroupMemberDTO groupMemberDTO : memberDTOList) {
+            groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+        }
 		if (memberDTOList != null && memberDTOList.size() > pageSize) {
 			locator.setAnchor(memberDTOList.get(memberDTOList.size() - 1).getId());
 			memberDTOList = memberDTOList.subList(0, pageSize);
@@ -1807,8 +1830,8 @@ public class CommunityServiceImpl implements CommunityService {
         return dto;
     }
 
-    private List<GroupMemberDTO> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
-        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword, communityKeyword,
+    private List<GroupMemberDTO> listCommunityRejectUserAddress(String userInfoKeyword, String identifierToken, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword,identifierToken, communityKeyword,
                 communityIds, GroupMemberStatus.REJECT.getCode(), locator, pageSize);
         if (memberLogs != null) {
             return memberLogs.stream().map(r -> {
@@ -1826,6 +1849,7 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setAreaName(community.getAreaName());
                     dto.setCommunityName(community.getName());
                 }
+                dto.setOperateType(OperateType.MANUAL.getCode());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -3609,15 +3633,19 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
-        if (resourceList == null) {
-            return response;
-        }
-        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//        if (resourceList == null) {
+//            return response;
+//        }
+        //不通过域空间查询，通过项目查询 add by yanlong.liang 20180723
+//        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        List<Long> communityIds = new ArrayList<>();
+        communityIds.add(cmd.getCommunityId());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
 			LOGGER.debug("orgs is null");
@@ -3637,7 +3665,7 @@ public class CommunityServiceImpl implements CommunityService {
         // 人员主动退出公司的记录也需要在项目管理的用户认证的已同意标签下显示 add by xq.tian 2017/07/12
         List<OrganizationMember> organizationMembers = null;
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
-            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), locator, pageSize);
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(),cmd.getIdentifierToken(), cmd.getOrgNameKeyword(), locator, pageSize);
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
@@ -3671,7 +3699,7 @@ public class CommunityServiceImpl implements CommunityService {
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
-                    cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+                    cmd.getUserInfoKeyword(), cmd.getIdentifierToken(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
 			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
 			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
@@ -3690,9 +3718,11 @@ public class CommunityServiceImpl implements CommunityService {
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");
                     dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                    dto.setOperateType(OperateType.MANUAL.getCode());
                 } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
                     // FIXME 临时解决   2017/07/27  xq.tian
-                    dto.setOperatorName("通过公司邮箱认证");
+                    dto.setOperatorName("--");
+                    dto.setOperateType(OperateType.NOT_MANUAL.getCode());
                 }
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
@@ -3714,6 +3744,9 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
+        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
 		if(null == cmd.getUserId() )
@@ -4083,6 +4116,10 @@ public class CommunityServiceImpl implements CommunityService {
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());
+						Community community = communityProvider.findCommunityById(building.getCommunityId());
+						if (community != null) {
+							buildingProject.setCommunityType(community.getCommunityType());
+						}
 						buildingProjects.add(buildingProject);
 					}
 				}
@@ -4362,8 +4399,20 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
-	
-	private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
+
+    @Override
+    public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
+        CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        if (isAuditing) {
+            response.setIsAuditing(CheckAuditingType.YES.getCode());
+        }else {
+            response.setIsAuditing(CheckAuditingType.NO.getCode());
+        }
+        return response;
+    }
+
+    private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
 			Long userId, ImportCommunityCommand cmd) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());

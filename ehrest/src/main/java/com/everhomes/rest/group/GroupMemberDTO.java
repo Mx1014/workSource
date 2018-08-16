@@ -44,6 +44,7 @@ import java.sql.Timestamp;
  *     <li>userNickName: 用户的昵称</li>
  *     <li>guildApplyDTO: guildApplyDTO 行业协会公司相关信息 {@link GuildApplyDTO}</li>
  *     <li>createTime: 成员加入group的时间</li>
+ *     <li>operateType: 审核方式,请参考{@link com.everhomes.rest.community.admin.OperateType}</li>
  * </ul>
  */
 public class GroupMemberDTO {
@@ -85,10 +86,20 @@ public class GroupMemberDTO {
 
     private String userNickName;
 
+    private Byte operateType;
+
     @ItemType(GuildApplyDTO.class)
     private GuildApplyDTO guildApplyDTO;
 
     public GroupMemberDTO() {
+    }
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
     }
 
     public Long getId() {

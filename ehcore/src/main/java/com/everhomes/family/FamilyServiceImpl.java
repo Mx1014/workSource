@@ -4,6 +4,7 @@ package com.everhomes.family;
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
@@ -32,6 +33,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.aclink.DeleteAuthByOwnerCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
@@ -147,6 +149,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private DoorAccessService doorAccessService;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -697,6 +702,13 @@ public class FamilyServiceImpl implements FamilyService {
         }
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
 
+        // 离开家庭，删除大堂门禁
+        DeleteAuthByOwnerCommand deleteAuthByOwnerCommand = new DeleteAuthByOwnerCommand();
+        deleteAuthByOwnerCommand.setNamespaceId(user.getNamespaceId());
+        deleteAuthByOwnerCommand.setOwnerId(group.getIntegralTag2());
+        deleteAuthByOwnerCommand.setOwnerType((byte)0);
+        deleteAuthByOwnerCommand.setUserId(userId);
+        this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
