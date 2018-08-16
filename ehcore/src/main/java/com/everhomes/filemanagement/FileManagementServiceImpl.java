@@ -241,6 +241,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
         dto.setName(catalog.getName());
         dto.setIconUrl(fileIcons.get(FileContentType.CATEGORY.getCode()));
         dto.setCreateTime(catalog.getCreateTime());
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+                catalog.getOperatorUid(), catalog.getOwnerId());
+        if (null != member) {
+            dto.setOperatorName(member.getContactName());
+        }
+        dto.setUpdateTime(catalog.getUpdateTime());
         return dto;
     }
 
@@ -430,6 +436,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
             content.setContentUri(cmd.getContentUri());
         }
         fileManagementProvider.createFileContent(content);
+        //更新上级目录/文件夹更新时间
+        updateParentContent(content);
         //  4.return back the dto
         dto = ConvertHelper.convert(content, FileContentDTO.class);
 
@@ -441,13 +449,14 @@ public class FileManagementServiceImpl implements  FileManagementService{
         for (FileContentDTO dto : cmd.getContents()) {
         	Long contentId = dto.getId();
             FileContent content = fileManagementProvider.findFileContentById(contentId);
-
             Map<String, Long> map = checkFilePath(dto.getPath(), content.getOwnerId());
             Long parentId = map.get("parentId");
             Long catalogId = map.get("catalogId");
             if (checkContentMoved(content, parentId, catalogId)) {
                 return;
             }else {
+                //更新上级目录/文件夹更新时间
+                updateParentContent(content);
                 fileManagementProvider.updateFileContentStatusByIds(contentId, FileManagementStatus.INVALID.getCode());
             }
         }
@@ -479,11 +488,24 @@ public class FileManagementServiceImpl implements  FileManagementService{
         } else {
             //没移动就更新
             fileManagementProvider.updateFileContent(content);
+            updateParentContent(content);
 
         }
         //  3.return back
         return ConvertHelper.convert(content, FileContentDTO.class);
     }
+    /**逐级向上更新父级文件夹和目录的更新人/更新时间*/
+    private void updateParentContent(FileContent content) {
+        if(content.getParentId() != null && !content.getParentId().equals(content.getId())){
+            FileContent parentContent = fileManagementProvider.findFileContentById(content.getParentId());
+            fileManagementProvider.updateFileContent(parentContent);
+            updateParentContent(parentContent);
+        }else{
+            FileCatalog catalog = fileManagementProvider.findFileCatalogById(content.getCatalogId());
+            fileManagementProvider.updateFileCatalog(catalog);
+        }
+    }
+
     /**
      * content和新的parentId,catalogId比较是否移动了
      * 移动了返回true,没有返回false
@@ -608,6 +630,12 @@ public class FileManagementServiceImpl implements  FileManagementService{
             if (dto.getIconUrl() == null)
                 dto.setIconUrl(fileIcons.get("other"));
         }
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+                content.getOperatorUid(), content.getOwnerId());
+        if (null != member) {
+            dto.setOperatorName(member.getContactName());
+        }
+        dto.setUpdateTime(content.getUpdateTime());
         dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
 
         return dto;
@@ -640,6 +668,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
             for (Long contentId : cmd.getContentIds()) {
             	
                 FileContent content = fileManagementProvider.findFileContentById(contentId);
+                //更新移动前的文件/文件夹更新时间
+                updateParentContent(content);
                 if (null == content) {
                     throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
                             "content can not be null.");
@@ -666,7 +696,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 } else {
                     content.setPath("/" + catalogId);
                 }
+                //更新移动后的文件/文件夹更新时间
                 fileManagementProvider.updateFileContent(content);
+                updateParentContent(content);
             }
             return null;
         });

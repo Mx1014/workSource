@@ -15,6 +15,8 @@ import java.util.List;
  * <li>iconUrl: 图标url</li>
  * <li>createTime: 创建时间</li>
  * <li>contents: 可见范围列表 参考{@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * <li>operatorName: 更新人</li>
+ * <li>updateTime: 更新时间</li>
  * </ul>
  */
 public class FileCatalogDTO {
@@ -31,7 +33,12 @@ public class FileCatalogDTO {
     private String iconUrl;
 
     private Timestamp createTime;
+
     private List<FileContentDTO> contents;
+
+    private String operatorName;
+
+    private Timestamp updateTime;
 
     public FileCatalogDTO() {
     }
@@ -95,5 +102,21 @@ public class FileCatalogDTO {
 
     public void setContents(List<FileContentDTO> contents) {
         this.contents = contents;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }
