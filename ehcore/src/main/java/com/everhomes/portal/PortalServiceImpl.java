@@ -2038,7 +2038,7 @@ public class PortalServiceImpl implements PortalService {
 				if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 					contentScopes = getAllScope();
 				}else {
-					portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+					contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
 				}
 
 				for (PortalContentScope scope: contentScopes) {
