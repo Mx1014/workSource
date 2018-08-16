@@ -327,7 +327,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
         OrderCommandResponse response = orderCommandResponse.getPayResponse();
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        PreOrderDTO dto = ConvertHelper.convert(response, PreOrderDTO.class);
         dto.setAmount(changePayAmount(cmd.getAmount()));
         List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
         if (paymentMethods != null)
@@ -341,7 +341,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     private String getPayMethodExtendInfo(){
-        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
         String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
 
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
