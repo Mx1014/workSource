@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
 public class ListApartmentsInCommunityResponse {
 	
 	private Integer totalApartmentNumber;
+	private Integer totalRelatedContractNumber;
 	private Double totalAreaSize;
 	private Double totalRentArea;
 	private Double totalFreeArea;
@@ -16,6 +17,12 @@ public class ListApartmentsInCommunityResponse {
 	List<ApartmentInfoDTO> apartments;
 	private Long nextPageAnchor;
 	
+	public Integer getTotalRelatedContractNumber() {
+		return totalRelatedContractNumber;
+	}
+	public void setTotalRelatedContractNumber(Integer totalRelatedContractNumber) {
+		this.totalRelatedContractNumber = totalRelatedContractNumber;
+	}
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

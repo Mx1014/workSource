@@ -18,7 +18,14 @@ public class ApartmentInfoDTO {
 	private Double totalRent;
 	private Double areaAveragePrice;
 	private Integer floorNumber;
+	private Integer relatedContractNumber;
 	
+	public Integer getRelatedContractNumber() {
+		return relatedContractNumber;
+	}
+	public void setRelatedContractNumber(Integer relatedContractNumber) {
+		this.relatedContractNumber = relatedContractNumber;
+	}
 	public Integer getFloorNumber() {
 		return floorNumber;
 	}
