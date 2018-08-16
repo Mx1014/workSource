@@ -80,6 +80,7 @@ public interface AddressProvider {
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
+    ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId);
 	void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
 
     String getAddressNameById(Long addressId);
@@ -91,4 +92,7 @@ public interface AddressProvider {
 	int changeAddressLivingStatus(Long id, String address, byte code);
 	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
 			String apartmentName);
+
+
+
 }

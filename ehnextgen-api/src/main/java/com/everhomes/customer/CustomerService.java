@@ -386,4 +386,6 @@ public interface CustomerService {
     List<CustomerTalentDTO> listPotentialTalent(DeleteEnterpriseCommand cmd);
 
     void updatePotentialCustomer(DeleteEnterpriseCommand cmd);
+
+    SearchEnterpriseCustomerResponse listSyncErrorCustomer(SearchEnterpriseCustomerCommand cmd);
 }

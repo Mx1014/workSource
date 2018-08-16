@@ -17,6 +17,7 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
+import com.everhomes.server.schema.tables.records.EhAllianceOnlineServiceRecord;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
 
@@ -730,6 +731,27 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
+    public ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+
+        List<ContractBuildingMapping> mappings = new ArrayList<>();
+        SelectQuery<EhContractBuildingMappingsRecord> query = context.selectQuery(Tables.EH_CONTRACT_BUILDING_MAPPINGS);
+        query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId));
+        query.addOrderBy(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CREATE_TIME.desc());
+        query.fetch().map(r ->{
+            mappings.add(ConvertHelper.convert(r, ContractBuildingMapping.class));
+            return null;
+        });
+        if(mappings == null || mappings.size() == 0) {
+            return null;
+        }
+        return mappings.get(0);
+
+    }
+
+
+    @Override
 	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractBuildingMappings.class, contractBuildingMapping.getId()));
         

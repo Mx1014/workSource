@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -100,6 +101,9 @@ public interface ContractService {
 	List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd);
 
     //add by tangcen
-	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+	List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+	default OutputStream exportOutputStreamContractListByContractList(SearchContractCommand cmd, Long taskId){return null;}
+
+	default void exportContractListByContractList(SearchContractCommand cmd){}
    
 }

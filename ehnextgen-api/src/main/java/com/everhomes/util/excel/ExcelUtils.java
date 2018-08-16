@@ -186,6 +186,24 @@ public class ExcelUtils {
             ex.printStackTrace();
         }
     }
+
+    /**
+     * 写excel.
+     *
+     * @param propertyNames 对应bean的属性名
+     * @param titleName   列名
+     * @param columnSizes   列宽
+     * @param dataList    数据
+     */
+    public ByteArrayOutputStream writeExcelOutStream(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
+        try (OutputStream out = getOutputStream();) {
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, false, columnSizes, dataList);
+            return excelStream;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
     // 重载，可以在必填项前加星号
     public void writeExcel(String[] propertyNames, String[] titleName, boolean withStar, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {

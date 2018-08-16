@@ -63,6 +63,15 @@ public class ExportEnterpriseCustomerCommand {
 
     private Byte abnormalFlag;
 
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public String getIncludedGroupIds() {
         return includedGroupIds;

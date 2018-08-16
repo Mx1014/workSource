@@ -15,6 +15,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.SyncDataTaskProvider;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.Contract;
@@ -146,6 +147,9 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     @Autowired
     private SyncDataTaskProvider syncDataTaskProvider;
 
+    @Autowired
+    private SyncDataTaskService syncDataTaskService;
+
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene) {
         Map<String, String> params= new HashMap<String,String>();
@@ -192,6 +196,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
             }
         }
+
 
     }
 
@@ -327,6 +332,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList, categoryId, contractApplicationScene);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
 
             //万一同步时间太长transaction断掉 在这里也要更新下
 //            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
@@ -425,14 +431,14 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                         Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber(), categoryId);
-                                                                                                          if (contract == null) {
+                        if (contract == null) {
 //                            dbProvider.execute((s) -> {
                                 insertContract(NAMESPACE_ID, communityId, ebeiContract, categoryId);
 //                                return true;
 //                            });
                         }else {
 //                            dbProvider.execute((s) -> {
-                            updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
+                                updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
 //                                return true;
 //                            });
                         }
@@ -669,6 +675,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setStatus(convertContractStatus(ebeiContract.getContractStatus()));
         contract.setCustomerName(ebeiContract.getCompanyName());
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
+
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
 

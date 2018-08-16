@@ -931,7 +931,12 @@ public class FieldServiceImpl implements FieldService {
                         cmd0.setTrackingUids(Collections.singletonList(Long.valueOf(exportcmd.getTrackingUids())));
                     }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    SearchEnterpriseCustomerResponse response;
+                    if(cmd0.getTaskId() != null && cmd0.getTaskId() != 0){
+                        response = customerService.listSyncErrorCustomer(cmd0);
+                    }else{
+                        response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    }
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){

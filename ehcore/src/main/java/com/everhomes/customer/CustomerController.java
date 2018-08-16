@@ -270,6 +270,23 @@ public class CustomerController extends ControllerBase {
         customerService.exportEnterpriseCustomer(cmd, response);
     }
 
+
+    /**
+     * <b>URL: /contract/exportEnterpriseCustomer</b>
+     * <p>导出数据错误日志</p>
+     */
+    @RequestMapping("exportEnterpriseCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd) {
+        contractService.exportContractListByContractList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
     /**
      * <b>URL: /customer/exportEnterpriseCustomerTemplate</b>
      * <p>导出企业客户excel模板</p>
@@ -1796,4 +1813,6 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
 }

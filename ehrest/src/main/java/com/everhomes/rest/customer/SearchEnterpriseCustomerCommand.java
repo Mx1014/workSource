@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
  *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
+ *     <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -87,6 +88,16 @@ public class SearchEnterpriseCustomerCommand {
     private String sourceType;
 
     private Byte abnormalFlag;
+
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public Long getOwnerId() {
         return ownerId;
