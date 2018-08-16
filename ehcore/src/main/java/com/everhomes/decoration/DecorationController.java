@@ -9,6 +9,7 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.decoration.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -203,6 +204,7 @@ public class DecorationController extends ControllerBase {
      */
     @RequestMapping("geQrDetail")
     @RestReturn(QrDetailDTO.class)
+    @RequireAuthentication(value = false)
     public RestResponse geQrDetail(@Valid GetLicenseCommand cmd) {
         QrDetailDTO dto = this.decorationService.getQrDetail(cmd);
         RestResponse response = new RestResponse(dto);

@@ -5,11 +5,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('45150000', '装修办理', '45000000', NULL, 'decoration-management', '1', '2', '/40000040/45000000/45150000', 'park', '2', '43000', '3', 'system', 'module', NULL);
 
 set @privilege_id = (select max(id) from eh_service_module_privileges);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4300043000, '0', '装修办理 全部权限', '装修办理 全部权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '43000', '0', 4300043000, '全部权限', '0', now());
-
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4300043010, '0', '装修办理 装修办理权限', '装修办理 装修办理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '43010', '0', 4300043010, '全部权限', '0', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '43000', '0', 4300043010, '全部权限', '0', now());
 
 set @eh_locale_templates_id = (select max(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '70', 'zh_CN', '装修申请通过', '尊敬的${decoratorName}，用户（${applyName}：${applyPhone}）提交的装修申请（${applyCompamy}）已审核通过，需尽快提交相关装修资料，请前往APP查看详情，您可以点击以下链接下载APP，并使用本机号码进行注册：${url} 。', '0');
