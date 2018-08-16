@@ -30,67 +30,67 @@ VALUES( 'activity.notification', 19, 'zh_CN', '活动报名人数不足最低限
 INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 VALUES( 'activity.notification', 20, 'zh_CN', '活动报名人数不足最低限制人数，活动取消', '您发起的活动「${subject}」由于未达到最低人数，已被自动取消。');
 INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('activity',28,'zh_CN','活动取消通知');
-UPDATE eh_locale_strings SET text = '来晚啦，活动已删除' WHERE scope = 'forum' and code = 10006;
+UPDATE eh_locale_strings SET TEXT = '来晚啦，活动已删除' WHERE scope = 'forum' AND CODE = 10006;
 -- AUTHOR: 梁燕龙
 -- REMARK: 活动消息推送文案修改。
-UPDATE eh_locale_templates SET text = '${userName}报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 1;
-UPDATE eh_locale_templates SET text = '${userName}取消报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' and code = 2;
-UPDATE eh_locale_templates SET text = '您报名的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' and code = 3;
-UPDATE eh_locale_templates SET text = '很抱歉通知您：您报名的活动「${title}」因故取消。
-更多活动敬请继续关注。' WHERE scope = 'activity.notification' and code = 5;
-UPDATE eh_locale_templates SET text = '您报名的活动 「${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' and code = 6;
-UPDATE eh_locale_templates SET text = '${userName}报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' and code = 8;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的主题已被发起方改成「${newPostName}」。' WHERE scope = 'activity.notification' and code = 11;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的时间已被发起方改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 12;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」的地点已被发起方改成「${address}」。' WHERE scope = 'activity.notification' and code = 13;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' and code = 14;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 15;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 16;
-UPDATE eh_locale_templates SET text = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' and code = 17;
+UPDATE eh_locale_templates SET TEXT = '${userName}报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' AND CODE = 1;
+UPDATE eh_locale_templates SET TEXT = '${userName}取消报名了您发起的活动「${postName}」' WHERE scope = 'activity.notification' AND CODE = 2;
+UPDATE eh_locale_templates SET TEXT = '您报名的活动「${postName}」已被管理员通过' WHERE scope = 'activity.notification' AND CODE = 3;
+UPDATE eh_locale_templates SET TEXT = '很抱歉通知您：您报名的活动「${title}」因故取消。
+更多活动敬请继续关注。' WHERE scope = 'activity.notification' AND CODE = 5;
+UPDATE eh_locale_templates SET TEXT = '您报名的活动 「${title}」 还有 ${time}就要开始了。' WHERE scope = 'activity.notification' AND CODE = 6;
+UPDATE eh_locale_templates SET TEXT = '${userName}报名了活动「${postName}」，请尽快确认。' WHERE scope = 'activity.notification' AND CODE = 8;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」的主题已被发起方改成「${newPostName}」。' WHERE scope = 'activity.notification' AND CODE = 11;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」的时间已被发起方改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' AND CODE = 12;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」的地点已被发起方改成「${address}」。' WHERE scope = 'activity.notification' AND CODE = 13;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」。' WHERE scope = 'activity.notification' AND CODE = 14;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' AND CODE = 15;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」被发起方修改，详情如下：时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' AND CODE = 16;
+UPDATE eh_locale_templates SET TEXT = '您参加的活动「${postName}」被发起方修改，详情如下：主题被改成「${newPostName}」、时间被改成「${startTime}~${endTime}」、地点被改成「${address}」。' WHERE scope = 'activity.notification' AND CODE = 17;
 
 -- AUTHOR: jiarui
 -- REMARK: 物业巡检离线包版本更新
-UPDATE eh_version_urls SET download_url = replace(download_url,'1-0-1','1-0-2') WHERE app_name = '物业巡检';
-UPDATE eh_version_urls SET info_url = replace(info_url,'1-0-1','1-0-2') where app_name = '物业巡检';
+UPDATE eh_version_urls SET download_url = REPLACE(download_url,'1-0-1','1-0-2') WHERE app_name = '物业巡检';
+UPDATE eh_version_urls SET info_url = REPLACE(info_url,'1-0-1','1-0-2') WHERE app_name = '物业巡检';
 UPDATE eh_version_urls SET target_version = '1.0.2' WHERE app_name = '物业巡检';
 
 -- AUTHOR: dengs
 -- REMARK: 访客管理1.1 移动端管理权限
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41850', '移动端管理', '41800', '/200/20000/41800/41850', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
-update eh_service_modules SET  path='/200/20000/41800/41810',level=4 WHERE id = 41810;
-update eh_service_modules SET  path='/200/20000/41800/41840',level=4 WHERE id = 41840;
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('41850', '移动端管理', '41800', '/200/20000/41800/41850', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '1', '1', NULL, '');
+UPDATE eh_service_modules SET  path='/200/20000/41800/41810',LEVEL=4 WHERE id = 41810;
+UPDATE eh_service_modules SET  path='/200/20000/41800/41840',LEVEL=4 WHERE id = 41840;
 
-set @privilege_id = (select max(id) from eh_service_module_privileges);
+SET @privilege_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4180041850, '0', '园区访客 移动端管理权限', '园区访客 移动端管理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41850', '0', 4180041850, '移动端管理权限', '0', now());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '41850', '0', 4180041850, '移动端管理权限', '0', NOW());
 
-SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
+SET @homeurl = (SELECT `value` FROM eh_configurations WHERE `name`='home.url' AND namespace_id = 0 LIMIT 1);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', NOW(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', NOW(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', NOW(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', NOW(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
 
-update eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
-update eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
+UPDATE eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
+UPDATE eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
 
 -- AUTHOR: xq.tian  20180725
 -- REMARK: 工作流 2.7
 SET @eh_locale_templates_id = (SELECT MAX(id) FROM eh_locale_templates);
-INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+INSERT INTO eh_locale_templates (id, scope, CODE, locale, description, TEXT, namespace_id)
   VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20008, 'zh_CN', '子业务流程进行中', '${serviceName} 进行中', 0);
-INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+INSERT INTO eh_locale_templates (id, scope, CODE, locale, description, TEXT, namespace_id)
   VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20009, 'zh_CN', '子流程创建成功，点击此处查看父流程详情。', '子流程创建成功，点击此处查看父流程详情', 0);
-INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+INSERT INTO eh_locale_templates (id, scope, CODE, locale, description, TEXT, namespace_id)
   VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20010, 'zh_CN', '${serviceName} 已完成', '${serviceName} 已完成', 0);
-INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+INSERT INTO eh_locale_templates (id, scope, CODE, locale, description, TEXT, namespace_id)
   VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20011, 'zh_CN', '${serviceName} 已终止', '${serviceName} 已终止', 0);
-INSERT INTO eh_locale_templates (id, scope, code, locale, description, text, namespace_id)
+INSERT INTO eh_locale_templates (id, scope, CODE, locale, description, TEXT, namespace_id)
   VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'flow', 20012, 'zh_CN', '子流程循环层级过多，流程已终止，详情请联系管理员', '子流程循环层级过多，流程已终止，详情请联系管理员', 0);
 
 SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
-INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+INSERT INTO eh_locale_strings (id, scope, CODE, locale, TEXT)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100025', 'zh_CN', '子流程异常，请检查设置');
-INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+INSERT INTO eh_locale_strings (id, scope, CODE, locale, TEXT)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100026', 'zh_CN', '请先发布新版本后再启用');
-INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+INSERT INTO eh_locale_strings (id, scope, CODE, locale, TEXT)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
 
 
@@ -120,30 +120,30 @@ UPDATE eh_service_module_apps SET `name` = '收款账户' WHERE module_id = 5800
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 新增企业账单菜单
-set @module_id=20500; -- 模块Id 41900（家声分配的）
-set @data_type='public-transfer';-- 前端发给你的页面跳转链接
-set @module_parent_parent_id=100;-- select * from eh_service_modules where name='企业访客'
-set @module_parent_id=50000; -- select * from eh_service_modules where name='物业缴费'
-set @path=CONCAT("/", @module_parent_parent_id,"/",@module_parent_id,"/",@module_id); -- 如：/100/50000/52100
-set @bill_module_id=(select max(id) + 1 from eh_service_modules);-- 账单管理标签页的id
-set @bill_path=CONCAT(@path,"/",@bill_module_id); -- 如：/100/50000/52100/101
-set @order_module_id=(select max(id) + 2 from eh_service_modules);-- 交易明细标签页的id
-set @order_path=CONCAT(@path,"/",@order_module_id); -- 如：/100/50000/52100/102
+SET @module_id=20500; -- 模块Id 41900（家声分配的）
+SET @data_type='public-transfer';-- 前端发给你的页面跳转链接
+SET @module_parent_parent_id=100;-- select * from eh_service_modules where name='企业访客'
+SET @module_parent_id=50000; -- select * from eh_service_modules where name='物业缴费'
+SET @path=CONCAT("/", @module_parent_parent_id,"/",@module_parent_id,"/",@module_id); -- 如：/100/50000/52100
+SET @bill_module_id=(SELECT MAX(id) + 1 FROM eh_service_modules);-- 账单管理标签页的id
+SET @bill_path=CONCAT(@path,"/",@bill_module_id); -- 如：/100/50000/52100/101
+SET @order_module_id=(SELECT MAX(id) + 2 FROM eh_service_modules);-- 交易明细标签页的id
+SET @order_path=CONCAT(@path,"/",@order_module_id); -- 如：/100/50000/52100/102
 -- 左邻后台菜单路径（三层）
-set @zuolin_menu_id=(select max(id) + 1 from eh_web_menus);-- 如：16032200
-set @zuolin_menu_parent_parent_id=23000000;-- select * from eh_web_menus where name='企业办公业务'
-set @zuolin_menu_parent_id=23010000; -- select * from eh_web_menus where name='OA管理' and type='zuolin'
-set @zuolin_menu_path=CONCAT("/",@zuolin_menu_parent_parent_id,"/",@zuolin_menu_parent_id,"/",@zuolin_menu_id);-- 如：/23000000/23010000/XXXX
+SET @zuolin_menu_id=(SELECT MAX(id) + 1 FROM eh_web_menus);-- 如：16032200
+SET @zuolin_menu_parent_parent_id=23000000;-- select * from eh_web_menus where name='企业办公业务'
+SET @zuolin_menu_parent_id=23010000; -- select * from eh_web_menus where name='OA管理' and type='zuolin'
+SET @zuolin_menu_path=CONCAT("/",@zuolin_menu_parent_parent_id,"/",@zuolin_menu_parent_id,"/",@zuolin_menu_id);-- 如：/23000000/23010000/XXXX
 -- 园区后台菜单路径（三层）
 -- set @park_menu_id=(select max(id) + 2 from eh_web_menus);-- 如：16032200
 -- set @park_menu_parent_parent_id=40000010;-- select * from eh_web_menus where name='企业办公' and type='park'
 -- set @park_menu_parent_id=53000000; -- select * from eh_web_menus where name='OA管理' and type='park'
 -- set @park_menu_path=CONCAT("/",@park_menu_parent_parent_id,"/",@park_menu_parent_id,"/",@park_menu_id);-- 如：/40000010/53000000/XXX
 -- 普通公司后台菜单路径（三层）
-set @organization_menu_id=(select max(id) + 3 from eh_web_menus);-- 如：16032200
-set @organization_menu_parent_parent_id=70000010;-- select * from eh_web_menus where name='企业办公' and type='organization'
-set @organization_menu_parent_id=77000000; -- select * from eh_web_menus where name='OA管理' and type='organization'
-set @organization_menu_path=CONCAT("/",@organization_menu_parent_parent_id,"/",@organization_menu_parent_id,"/",@organization_menu_id);-- 如：/40000010/53000000/XXX
+SET @organization_menu_id=(SELECT MAX(id) + 3 FROM eh_web_menus);-- 如：16032200
+SET @organization_menu_parent_parent_id=70000010;-- select * from eh_web_menus where name='企业办公' and type='organization'
+SET @organization_menu_parent_id=77000000; -- select * from eh_web_menus where name='OA管理' and type='organization'
+SET @organization_menu_path=CONCAT("/",@organization_menu_parent_parent_id,"/",@organization_menu_parent_id,"/",@organization_menu_id);-- 如：/40000010/53000000/XXX
 -- 新增模块 eh_service_modules
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `multiple_flag`, `module_control_type`,`category`) 
 VALUES (@module_id, '企业账单', @module_parent_id, @path, '1', '3', '2', '0', UTC_TIMESTAMP(), UTC_TIMESTAMP(), '0', '0', '0', 'community_control', 'module');
@@ -174,46 +174,46 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假规则 将旧版本无用的数据置为删除状态
-UPDATE eh_approval_categories SET status=0 WHERE namespace_id<>0;
+UPDATE eh_approval_categories SET STATUS=0 WHERE namespace_id<>0;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假规则 新增请假单位等字段
-UPDATE eh_approval_categories SET owner_type='organization',time_unit='HOUR',time_step=0.5,status=3,remainder_flag=0,default_order=1 WHERE approval_type=1 AND category_name='事假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='HOUR',time_step=0.5,status=3,remainder_flag=0,default_order=2 WHERE approval_type=1 AND category_name='病假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,hander_type='ANNUAL_LEAVE',remainder_flag=2,default_order=3 WHERE approval_type=1 AND category_name='年假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,hander_type='WORKING_DAY_OFF',remainder_flag=2,default_order=4 WHERE approval_type=1 AND category_name='调休' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=5 WHERE approval_type=1 AND category_name='婚假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=6 WHERE approval_type=1 AND category_name='产假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=7 WHERE approval_type=1 AND category_name='陪产假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=8 WHERE approval_type=1 AND category_name='丧假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=9 WHERE approval_type=1 AND category_name='工伤假' and namespace_id=0;
-UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=10 WHERE approval_type=1 AND category_name='路途假' and namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization',time_unit='HOUR',time_step=0.5,STATUS=3,remainder_flag=0,default_order=1 WHERE approval_type=1 AND category_name='事假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='HOUR',time_step=0.5,STATUS=3,remainder_flag=0,default_order=2 WHERE approval_type=1 AND category_name='病假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,hander_type='ANNUAL_LEAVE',remainder_flag=2,default_order=3 WHERE approval_type=1 AND category_name='年假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,hander_type='WORKING_DAY_OFF',remainder_flag=2,default_order=4 WHERE approval_type=1 AND category_name='调休' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=5 WHERE approval_type=1 AND category_name='婚假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=6 WHERE approval_type=1 AND category_name='产假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=7 WHERE approval_type=1 AND category_name='陪产假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=8 WHERE approval_type=1 AND category_name='丧假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=9 WHERE approval_type=1 AND category_name='工伤假' AND namespace_id=0;
+UPDATE eh_approval_categories SET owner_type='organization', time_unit='DAY',time_step=0.5,remainder_flag=0,default_order=10 WHERE approval_type=1 AND category_name='路途假' AND namespace_id=0;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假规则 新增四种请假类型
 SET @lastest_id = IFNULL((SELECT MAX(id) FROM `eh_approval_categories`), 1);
-INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,status,default_order,creator_uid,create_time)
+INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,STATUS,default_order,creator_uid,create_time)
 VALUE ((@lastest_id := @lastest_id + 1),0,'organization',0,1,'哺乳假','DAY',0.5,0,1,11,0,NOW());
-INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,status,default_order,creator_uid,create_time)
+INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,STATUS,default_order,creator_uid,create_time)
 VALUE ((@lastest_id := @lastest_id + 1),0,'organization',0,1,'探亲假','DAY',0.5,0,1,12,0,NOW());
-INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,status,default_order,creator_uid,create_time)
+INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,STATUS,default_order,creator_uid,create_time)
 VALUE ((@lastest_id := @lastest_id + 1),0,'organization',0,1,'看护假','DAY',0.5,0,1,13,0,NOW());
-INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,status,default_order,creator_uid,create_time)
+INSERT INTO eh_approval_categories(id,namespace_id,owner_type,owner_id,approval_type,category_name,time_unit,time_step,remainder_flag,STATUS,default_order,creator_uid,create_time)
 VALUE ((@lastest_id := @lastest_id + 1),0,'organization',0,1,'产检假','DAY',0.5,0,1,14,0,NOW());
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假规则 请假类型相关操作提示文案信息
-INSERT INTO eh_locale_strings(scope,code,locale,text)
+INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT)
 SELECT r.scope,r.code,r.locale,r.text FROM(
-SELECT 'approval' AS scope,10030 AS code,'zh_CN' AS locale,'该假期类型不存在' AS text UNION ALL
-SELECT 'approval' AS scope,10031 AS code,'zh_CN' AS locale,'该假期类型不可禁用' AS text UNION ALL
-SELECT 'approval' AS scope,10032 AS code,'zh_CN' AS locale,'假期类型不支持删除操作' AS text UNION ALL
-SELECT 'approval' AS scope,10033 AS code,'zh_CN' AS locale,'请假表单数据不完整' AS text UNION ALL
-SELECT 'approval' AS scope,10034 AS code,'zh_CN' AS locale,'该请假类型未开启，请联系管理员' AS text UNION ALL
-SELECT 'approval' AS scope,10035 AS code,'zh_CN' AS locale,'余额不足' AS text UNION ALL
-SELECT 'approval.tip.info' AS scope,10003 AS code,'zh_CN' AS locale,'请假申请已取消' AS text UNION ALL
-SELECT 'approval.tip.info' AS scope,10004 AS code,'zh_CN' AS locale,'请假申请被驳回' AS text UNION ALL
-SELECT 'approval.tip.info' AS scope,10005 AS code,'zh_CN' AS locale,'员工发起请假申请' AS text
+SELECT 'approval' AS scope,10030 AS CODE,'zh_CN' AS locale,'该假期类型不存在' AS TEXT UNION ALL
+SELECT 'approval' AS scope,10031 AS CODE,'zh_CN' AS locale,'该假期类型不可禁用' AS TEXT UNION ALL
+SELECT 'approval' AS scope,10032 AS CODE,'zh_CN' AS locale,'假期类型不支持删除操作' AS TEXT UNION ALL
+SELECT 'approval' AS scope,10033 AS CODE,'zh_CN' AS locale,'请假表单数据不完整' AS TEXT UNION ALL
+SELECT 'approval' AS scope,10034 AS CODE,'zh_CN' AS locale,'该请假类型未开启，请联系管理员' AS TEXT UNION ALL
+SELECT 'approval' AS scope,10035 AS CODE,'zh_CN' AS locale,'余额不足' AS TEXT UNION ALL
+SELECT 'approval.tip.info' AS scope,10003 AS CODE,'zh_CN' AS locale,'请假申请已取消' AS TEXT UNION ALL
+SELECT 'approval.tip.info' AS scope,10004 AS CODE,'zh_CN' AS locale,'请假申请被驳回' AS TEXT UNION ALL
+SELECT 'approval.tip.info' AS scope,10005 AS CODE,'zh_CN' AS locale,'员工发起请假申请' AS TEXT
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
 
@@ -250,7 +250,7 @@ SET b.annual_leave_history_count=t.annual_leave_history_count,b.overtime_compens
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假规则 初始化假期余额列表已请年假总计和已请调休总计
 SET @lastest_id = IFNULL((SELECT MAX(id) FROM `eh_punch_vacation_balances`), 1);
 INSERT INTO eh_punch_vacation_balances(id,namespace_id,owner_id,owner_type,user_id,detail_id,annual_leave_balance,overtime_compensation_balance,annual_leave_history_count,overtime_compensation_history_count,creator_uid,create_time,operator_uid,update_time)
-SELECT t.id,t.namespace_id,t.enterprise_id,'organization' as owner_type,t.user_id,t.detail_id,0 AS annual_leave_balance,0 AS overtime_compensation_balance,t.annual_leave_history_count,t.overtime_compensation_history_count,0 AS creator_uid,NOW() AS create_time,0 AS operator_uid,NOW() update_time FROM
+SELECT t.id,t.namespace_id,t.enterprise_id,'organization' AS owner_type,t.user_id,t.detail_id,0 AS annual_leave_balance,0 AS overtime_compensation_balance,t.annual_leave_history_count,t.overtime_compensation_history_count,0 AS creator_uid,NOW() AS create_time,0 AS operator_uid,NOW() update_time FROM
 (
 SELECT (@lastest_id := @lastest_id + 1) AS id,d.namespace_id,r.enterprise_id,r.user_id,d.id AS detail_id,
     SUM((CASE ac.category_name
@@ -309,31 +309,31 @@ INSERT INTO `eh_locale_strings` (`id`,scope,CODE,locale,TEXT) VALUE (@max_locale
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 考勤状态统计项名称定义
-INSERT INTO eh_locale_strings(scope,code,locale,text)
+INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT)
 SELECT r.scope,r.code,r.locale,r.text FROM(
-SELECT 'punch.status' AS scope,18 AS code,'zh_CN' AS locale,'迟到且缺卡' AS text UNION ALL
-SELECT 'punch.status' AS scope,19 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
-SELECT 'punch.status' AS scope,-1 AS code,'zh_CN' AS locale,'未设置规则' AS text UNION ALL
-SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text UNION ALL
-SELECT 'punch.status' AS scope,-3 AS code,'zh_CN' AS locale,'未打卡' AS text UNION ALL
-SELECT 'punch' AS scope,10300 AS code,'zh_CN' AS locale,'月报数据还没有生成' AS text UNION ALL
+SELECT 'punch.status' AS scope,18 AS CODE,'zh_CN' AS locale,'迟到且缺卡' AS TEXT UNION ALL
+SELECT 'punch.status' AS scope,19 AS CODE,'zh_CN' AS locale,'缺卡' AS TEXT UNION ALL
+SELECT 'punch.status' AS scope,-1 AS CODE,'zh_CN' AS locale,'未设置规则' AS TEXT UNION ALL
+SELECT 'punch.status' AS scope,-2 AS CODE,'zh_CN' AS locale,'未安排班次' AS TEXT UNION ALL
+SELECT 'punch.status' AS scope,-3 AS CODE,'zh_CN' AS locale,'未打卡' AS TEXT UNION ALL
+SELECT 'punch' AS scope,10300 AS CODE,'zh_CN' AS locale,'月报数据还没有生成' AS TEXT UNION ALL
 
-SELECT 'PunchStatusStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'未到' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'迟到' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,3 AS code,'zh_CN' AS locale,'早退' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,4 AS code,'zh_CN' AS locale,'正常' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,5 AS code,'zh_CN' AS locale,'休息' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,6 AS code,'zh_CN' AS locale,'旷工' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,7 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,8 AS code,'zh_CN' AS locale,'核算中' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,9 AS code,'zh_CN' AS locale,'应到' AS text UNION ALL
-SELECT 'PunchStatusStatisticsItemName' AS scope,10 AS code,'zh_CN' AS locale,'已到' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,1 AS CODE,'zh_CN' AS locale,'未到' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,2 AS CODE,'zh_CN' AS locale,'迟到' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,3 AS CODE,'zh_CN' AS locale,'早退' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,4 AS CODE,'zh_CN' AS locale,'正常' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,5 AS CODE,'zh_CN' AS locale,'休息' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,6 AS CODE,'zh_CN' AS locale,'旷工' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,7 AS CODE,'zh_CN' AS locale,'缺卡' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,8 AS CODE,'zh_CN' AS locale,'核算中' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,9 AS CODE,'zh_CN' AS locale,'应到' AS TEXT UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,10 AS CODE,'zh_CN' AS locale,'已到' AS TEXT UNION ALL
 
-SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'请假' AS text UNION ALL
-SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'外出' AS text UNION ALL
-SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,3 AS code,'zh_CN' AS locale,'出差' AS text UNION ALL
-SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,4 AS code,'zh_CN' AS locale,'加班' AS text UNION ALL
-SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,5 AS code,'zh_CN' AS locale,'打卡异常' AS text
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,1 AS CODE,'zh_CN' AS locale,'请假' AS TEXT UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,2 AS CODE,'zh_CN' AS locale,'外出' AS TEXT UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,3 AS CODE,'zh_CN' AS locale,'出差' AS TEXT UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,4 AS CODE,'zh_CN' AS locale,'加班' AS TEXT UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,5 AS CODE,'zh_CN' AS locale,'打卡异常' AS TEXT
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;
 
@@ -362,12 +362,62 @@ UPDATE eh_punch_statistics SET status_list=REPLACE(status_list,'非工作日','�
 UPDATE eh_punch_statistics s INNER JOIN
 (
 SELECT enterprise_id,user_id,REPLACE(LEFT(punch_date,7),'-','') AS punch_month,COUNT(1) AS exception_request_counts
-FROM eh_punch_exception_requests WHERE approval_attribute='ABNORMAL_PUNCH' AND status IN(0,1) GROUP BY enterprise_id,user_id,LEFT(punch_date,7)
+FROM eh_punch_exception_requests WHERE approval_attribute='ABNORMAL_PUNCH' AND STATUS IN(0,1) GROUP BY enterprise_id,user_id,LEFT(punch_date,7)
 ) e
 ON s.owner_id=e.enterprise_id AND s.user_id=e.user_id AND s.punch_month=e.punch_month
 SET s.exception_request_counts=e.exception_request_counts,s.punch_exception_request_count=e.exception_request_counts
 WHERE s.user_id>0;
 
+-- AUTHOR: 吴寒 20180816
+-- REMARK: ISSUE-33645: 考勤7.0 - 给日/月报表旧数据初始化dept_id
+-- 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_day_logs a SET  a.dept_id = 
+  (SELECT 
+    b.`organization_id`
+  FROM
+    eh_organization_members b 
+  WHERE a.`detail_id` = b.`detail_id` 
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%") 
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1) 
+WHERE a.`dept_id` IS NULL ;
+
+-- 没部门再找公司
+UPDATE eh_punch_day_logs a SET  a.dept_id = 
+   (SELECT 
+    b.`organization_id`
+  FROM
+    eh_organization_members b 
+  WHERE a.`detail_id` = b.`detail_id` 
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%") 
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_statistics a SET  a.dept_id = 
+  (SELECT 
+    b.`organization_id`
+  FROM
+    eh_organization_members b 
+  WHERE a.`detail_id` = b.`detail_id` 
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%") 
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1) 
+WHERE a.`dept_id` IS NULL ;
+
+-- 没部门再找公司
+UPDATE eh_punch_statistics a SET  a.dept_id = 
+  (SELECT 
+    b.`organization_id`
+  FROM
+    eh_organization_members b 
+  WHERE a.`detail_id` = b.`detail_id` 
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%") 
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+ 
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -376,7 +426,7 @@ WHERE s.user_id>0;
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR: 杨崇鑫
 -- REMARK: 需根据域空间配置是否显示，初始化时配置好，默认不展示
-SET @id = ifnull((SELECT MAX(id) FROM `eh_service_module_exclude_functions`),0);
+SET @id = IFNULL((SELECT MAX(id) FROM `eh_service_module_exclude_functions`),0);
 INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id := @id + 1, 1000000 , NULL, 20400, 101);
 INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id := @id + 1, 999999 , NULL, 20400, 101);
 INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id := @id + 1, 999996 , NULL, 20400, 101);
