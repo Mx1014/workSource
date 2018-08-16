@@ -1444,6 +1444,33 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
+    /**
+     * 微信端活跃记录
+     * @param loginToken
+     * @param borderId
+     * @param borderSessionId
+     * @return
+     */
+    @Override
+    public void registerWXLoginConnection(LoginToken loginToken) {
+        String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+
+        String hkeyLogin = String.valueOf(loginToken.getLoginId());
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+        UserLogin login = accessor.getMapValueObject(hkeyLogin);
+        if (login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
+            //Save loginBorderId here
+            login.setLoginBorderId(null);
+            login.setBorderSessionId(null);
+            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+            accessor.putMapValueObject(hkeyLogin, login);
+
+            // 发布用户切换出场景到前台事件   add by liangming.huang 2018/08/16
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
+
+        }
+    }
+    
     public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         String hkeyLogin = String.valueOf(loginToken.getLoginId());

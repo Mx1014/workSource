@@ -655,6 +655,26 @@ public class AdminController extends ControllerBase {
         return new RestResponse(login.toDto());
     }
     
+    /**
+     * 微信活跃注册接口
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("registerWXLogin")
+    @RestReturn(value=String.class)
+    public RestResponse registerWXLogin(@Valid RegisterWXLoginCommand cmd) {
+        String loginToken = cmd.getLoginToken();
+          
+        LOGGER.info("Register login connection.  login token: " + loginToken);
+        LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginToken, LoginToken.class);
+        if(token == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
+        
+        this.userService.registerWXLoginConnection(token);
+        
+        return new RestResponse();
+    }
+    
     @RequestMapping("unregisterLogin")
     @RestReturn(value=UserLoginDTO.class)
     public RestResponse unregisterLogin(@Valid RegisterLoginCommand cmd) {
