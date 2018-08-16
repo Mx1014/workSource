@@ -2154,7 +2154,7 @@ public class PortalServiceImpl implements PortalService {
 			item.setName(config.getAllOrMoreLabel());
 			item.setIconUri(config.getAllOrMoreIconUri());
 			item.setActionType(PortalItemActionType.ALLORMORE.getCode());
-			item.setActionData("{\"type\":\" " + config.getAllOrMoreType() + "\"}");
+			item.setActionData("{\"type\":\"" + config.getAllOrMoreType() + "\"}");
 			item.setDisplayFlag(TrueOrFalseFlag.TRUE.getCode());
 			item.setItemCategoryId(null);
 			item.setDefaultOrder(10000);
@@ -2300,6 +2300,40 @@ public class PortalServiceImpl implements PortalService {
 			portalItem.setItemGroupId(portalItemGroup.getId());
 			allItems.add(portalItem);
 		}
+
+
+		//查找开启“全部”的itemGroup
+		List<PortalItemGroup> allPortalItemGroups = portalItemGroupProvider.listPortalItemGroupByVersion(namespaceId, versionId);
+		if(allPortalItemGroups != null){
+			for(PortalItemGroup group: allPortalItemGroups){
+
+				ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(group.getInstanceConfig(), ItemGroupInstanceConfig.class);
+				if(instanceConfig != null && TrueOrFalseFlag.fromCode(instanceConfig.getAllOrMoreFlag()) == TrueOrFalseFlag.TRUE && AllOrMoreType.fromCode(instanceConfig.getAllOrMoreType()) == AllOrMoreType.ALL){
+
+					//配置了"全部"，但是原来没有“全部”类型item的ItemGroup需要加上
+					boolean exitFlag = false;
+					for(PortalItem item: allItems){
+						if(group.getId().equals(item.getItemGroupId())){
+							exitFlag = true;
+							break;
+						}
+					}
+
+					if(!exitFlag){
+
+						PortalLayout portalLayout = portalLayoutProvider.findPortalLayoutById(group.getLayoutId());
+						PortalItem portalItem = new  PortalItem();
+						portalItem.setItemLocation(portalLayout.getLocation());
+						portalItem.setGroupName(group.getName());
+						portalItem.setItemGroupId(group.getId());
+						allItems.add(portalItem);
+					}
+				}
+
+			}
+		}
+
+
 
 		for (PortalItem item: allItems) {
 
