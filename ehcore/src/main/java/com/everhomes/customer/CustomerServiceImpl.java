@@ -1135,7 +1135,7 @@ public class CustomerServiceImpl implements CustomerService {
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if (deleteCustomer) {
+        if (deleteCustomer && originalTrackingUid != null) {
             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
             return;
         }
@@ -1230,7 +1230,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationService.deleteEnterpriseById(command, false);
             }
         }
-        routeMsgForTrackingChanged(null, null, null, null
+        routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
                 , customer.getName(), null, true, cmd.getOrgId());
 
     }
@@ -3996,6 +3996,7 @@ public class CustomerServiceImpl implements CustomerService {
 //                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
                         relatedMembers.addAll(membersResponse.getMembers());
                     }
+
                 }
             });
         });
@@ -4030,7 +4031,11 @@ public class CustomerServiceImpl implements CustomerService {
     private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
         Map<Long, OrganizationMemberDTO> map = new HashMap<>();
         if (relatedMembers != null && relatedMembers.size() > 0) {
-            relatedMembers.forEach(r -> map.putIfAbsent(r.getTargetId(), r));
+            relatedMembers.forEach(r ->{
+                if(r.getTargetId() != 0) {
+                    map.putIfAbsent(r.getTargetId(), r);
+                }
+            });
             return new ArrayList<>(map.values());
         }
         return new ArrayList<>();

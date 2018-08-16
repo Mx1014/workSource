@@ -390,7 +390,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
-    
+
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 	
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
