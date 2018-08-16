@@ -82,6 +82,13 @@ public interface FlowModuleListener {
      * @param flowUserType 当前用户的身份：申请人、处理人、督办人
      */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
+	
+	/**
+     * 用于任务的详情显示
+     * @param flowCase 任务
+     * @param flowUserType 当前用户的身份：申请人、处理人、督办人
+     */
+	//List<FlowCaseEntity> onFlowCaseDetailRenderV2(FlowCase flowCase, FlowUserType flowUserType);
 
     /**
      * 当按钮被点击时触发该方法调用
