@@ -5154,7 +5154,9 @@ public class CommunityServiceImpl implements CommunityService {
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
-
+		//用于存储已经计算过的合同id
+		List<Long> contractIds = new ArrayList<>();
+		
 		for (Address address : addresses) {
 			//获取房源状态
 			byte livingStatus = AddressMappingStatus.LIVING.getCode();
@@ -5173,8 +5175,11 @@ public class CommunityServiceImpl implements CommunityService {
 			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
 			if (contracts != null && contracts.size() > 0){
 				for (Contract contract : contracts) {
-					totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
-					relatedContractNumber++;
+					if (!contractIds.contains(contract.getId())) {
+						contractIds.add(contract.getId());
+						totalRent += (contract.getRent()!=null ? contract.getRent().doubleValue() : 0);
+						relatedContractNumber++;
+					}
 				}
 				totalRent = doubleRoundHalfUp(totalRent,2);
 			}
@@ -5236,6 +5241,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	private void initListApartmentsInCommunityResponse(ListApartmentsInCommunityResponse response){
+		response.setTotalRelatedContractNumber(0);
 		response.setTotalApartmentNumber(0);
 		response.setTotalAreaSize(0.0);
 		response.setTotalRentArea(0.0);
