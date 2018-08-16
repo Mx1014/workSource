@@ -659,46 +659,7 @@ public class AdminController extends ControllerBase {
             
         return new RestResponse(login.toDto());
     }
-    
-
-    /**
-     * <b>URL: /admin/registerWXLogin</b>
-     * <p>微信活跃注册接口</p>
-     */
-    @RequestMapping("registerWXLogin")
-    @RestReturn(value=String.class)
-    public RestResponse registerWXLogin(HttpServletRequest request) {
-    	
-        Cookie loginTokenCookie = findCookieInRequest("token",request);
-        String loginToken = loginTokenCookie.getValue();
-          
-        LOGGER.info("Register login connection.  login token: " + loginToken);
-        LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginToken, LoginToken.class);
-        if(token == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
-        
-        this.userService.registerWXLoginConnection(token);
-        
-        return new RestResponse();
-    }
-    
-    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
-        List<Cookie> matchedCookies = new ArrayList<>();
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(Cookie cookie : cookies) {
-                if(cookie.getName().equals(name)) {
-                    matchedCookies.add(cookie);
-                }
-            }
-        }
-
-        if(matchedCookies.size() > 0)
-            return matchedCookies.get(matchedCookies.size() - 1);
-        return null;
-    }
-    
+      
     @RequestMapping("unregisterLogin")
     @RestReturn(value=UserLoginDTO.class)
     public RestResponse unregisterLogin(@Valid RegisterLoginCommand cmd) {

@@ -341,5 +341,5 @@ public interface UserService {
 
     Byte isUserAuth();
     
-    void registerWXLoginConnection(LoginToken loginToken);
+    void registerWXLoginConnection(HttpServletRequest request);
 }

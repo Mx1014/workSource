@@ -1452,7 +1452,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      * @return
      */
     @Override
-    public void registerWXLoginConnection(LoginToken loginToken) {
+    public void registerWXLoginConnection(HttpServletRequest request) {
+    	 Cookie loginTokenCookie = findCookieInRequest("token",request);
+         String token = loginTokenCookie.getValue();
+         LoginToken loginToken = WebTokenGenerator.getInstance().fromWebToken(token, LoginToken.class);
+         if(token == null)
+             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
+         
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 
         String hkeyLogin = String.valueOf(loginToken.getLoginId());
@@ -1471,6 +1477,20 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
     
+    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+        List<Cookie> matchedCookies = new ArrayList<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals(name)) {
+                    matchedCookies.add(cookie);
+                }
+            }
+        }
+        if(matchedCookies.size() > 0)
+            return matchedCookies.get(matchedCookies.size() - 1);
+        return null;
+    }
     public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         String hkeyLogin = String.valueOf(loginToken.getLoginId());
