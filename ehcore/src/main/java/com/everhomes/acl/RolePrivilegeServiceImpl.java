@@ -3018,7 +3018,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(EntityType.COMMUNITY == EntityType.fromCode(r.getResourceType())){
 						Community community = communityProvider.findCommunityById(r.getResourceId());
 						if(community != null){
-							dto.setProjectName(community.getName());
+                            dto.setCommunityType(community.getCommunityType());
+                            dto.setProjectName(community.getName());
 							//获取园区下的子项目
 							ListChildProjectCommand cmd = new ListChildProjectCommand();
 							cmd.setProjectType(EntityType.COMMUNITY.getCode());
@@ -3309,9 +3310,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
-	
+
+
 	/**
-	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false 
+	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false
 	 * by Janson
 	 * @param orgId
 	 * @param userId
@@ -3320,12 +3322,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public boolean checkIsSystemOrAppAdmin(Long orgId, Long userId) {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		int pageSize = 10;
-		
+
 		//判断是否是应用管理员
 		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), orgId, EntityType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		if(authorizations == null || authorizations.size() == 0) {
 			locator = new CrossShardListingLocator();
-			
+
 			//判断是否是系统管理员
 			List<OrganizationMember> members =
 					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
@@ -3336,10 +3338,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-
 	@Override
 	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 		ListServiceModuleAppsAdministratorResponse response = new ListServiceModuleAppsAdministratorResponse();
@@ -3355,7 +3356,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			pageSize = cmd.getPageSize();
 		}
 		
-		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		List<ServiceModuleAppsAuthorizationsDto> dtos = authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();
 

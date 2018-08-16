@@ -49,7 +49,7 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
 //      获取任务修改状态
         RelocationRequest bean = relocationProvider.findRelocationRequestById(flowCase.getReferId());
-        bean.setStatus(FlowCaseStatus.ABSORTED.getCode());
+        bean.setStatus(RelocationRequestStatus.CANCELED.getCode());
         relocationProvider.updateRelocationRequest(bean);
     }
 

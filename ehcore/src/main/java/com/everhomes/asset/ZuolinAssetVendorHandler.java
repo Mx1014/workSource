@@ -815,6 +815,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
      */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+
         checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
 //        //查询合同，用来聚类

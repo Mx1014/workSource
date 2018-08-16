@@ -317,6 +317,7 @@ ALTER TABLE eh_punch_exception_requests ADD COLUMN duration_minute BIGINT DEFAUL
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 新增上班缺卡次数、下班缺卡次数统计
+UPDATE eh_punch_statistics SET forgot_count=0 WHERE forgot_count IS NULL;
 ALTER TABLE eh_punch_statistics CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
 ALTER TABLE eh_punch_statistics ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
 ALTER TABLE eh_punch_statistic_files CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
@@ -339,7 +340,7 @@ ALTER TABLE eh_punch_day_logs ADD COLUMN go_out_request_count INTEGER COMMENT '�
 ALTER TABLE eh_punch_day_logs ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN overtime_request_count INTEGER COMMENT '当天加班申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN punch_exception_request_count INTEGER COMMENT '当天异常打卡申请次数';
-ALTER TABLE eh_punch_day_logs ADD COLUMN split_date_time TIMESTAMP COMMENT '当天考勤时间的分界点';
+ALTER TABLE eh_punch_day_logs ADD COLUMN split_date_time DATETIME COMMENT '当天考勤时间的分界点';
 
 ALTER TABLE eh_punch_day_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
 ALTER TABLE eh_punch_day_log_files ADD COLUMN dept_id BIGINT COMMENT '所属部门Id' AFTER enterprise_id;

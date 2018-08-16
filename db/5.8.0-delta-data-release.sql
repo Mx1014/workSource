@@ -96,8 +96,9 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 
 -- AUTHOR: 黄良铭  20180815
 -- REMARK: 超级管理员删除提示
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
-VALUES(1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
+VALUES(@b_id:= @b_id +1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
 
 
 -- AUTHOR: jun.yan  20180813
@@ -230,11 +231,11 @@ UPDATE eh_punch_vacation_balances b INNER JOIN
 (
 SELECT d.namespace_id,r.enterprise_id,r.user_id,d.id AS detail_id,
     SUM((CASE ac.category_name
-        WHEN '年假' THEN r.duration
+        WHEN '年假' THEN r.duration_day
         ELSE 0
     END)) AS annual_leave_history_count,
     SUM((CASE ac.category_name
-        WHEN '调休' THEN r.duration
+        WHEN '调休' THEN r.duration_day
         ELSE 0
     END)) AS overtime_compensation_history_count
 FROM eh_punch_exception_requests r
@@ -253,11 +254,11 @@ SELECT t.id,t.namespace_id,t.enterprise_id,'organization' as owner_type,t.user_i
 (
 SELECT (@lastest_id := @lastest_id + 1) AS id,d.namespace_id,r.enterprise_id,r.user_id,d.id AS detail_id,
     SUM((CASE ac.category_name
-        WHEN '年假' THEN r.duration
+        WHEN '年假' THEN r.duration_day
         ELSE 0
     END)) AS annual_leave_history_count,
     SUM((CASE ac.category_name
-        WHEN '调休' THEN r.duration
+        WHEN '调休' THEN r.duration_day
         ELSE 0
     END)) AS overtime_compensation_history_count
 FROM eh_punch_exception_requests r
@@ -338,6 +339,10 @@ WHERE s.id IS NULL;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 对新增的detail_id进行旧数据初始化
+UPDATE eh_punch_statistics l INNER JOIN eh_organization_member_details d ON d.organization_id=l.owner_id AND d.target_id=l.user_id
+SET l.detail_id=d.id
+WHERE d.target_id>0 AND l.detail_id IS NULL;
+
 UPDATE eh_punch_day_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
 SET l.detail_id=d.id
 WHERE d.target_id>0 AND l.detail_id IS NULL;
@@ -354,6 +359,7 @@ WHERE l.punch_organization_id IS NULL;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 将非工作日变更为休息
+UPDATE eh_locale_strings SET text='休息' WHERE scope='punch.status' AND code=17;
 UPDATE eh_punch_statistics SET status_list=REPLACE(status_list,'非工作日','休息')  WHERE status_list LIKE '%非工作日%';
 
 -- AUTHOR: 张智伟 20180813
@@ -367,6 +373,71 @@ ON s.owner_id=e.enterprise_id AND s.user_id=e.user_id AND s.punch_month=e.punch_
 SET s.exception_request_counts=e.exception_request_counts,s.punch_exception_request_count=e.exception_request_counts
 WHERE s.user_id>0;
 
+-- AUTHOR: 吴寒 20180816
+-- REMARK: ISSUE-33645: 考勤7.0 - 给日/月报表旧数据初始化dept_id
+-- REMARK: 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_day_logs a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%")
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 没部门再找公司
+UPDATE eh_punch_day_logs a SET  a.dept_id =
+   (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%")
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_statistics a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%")
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 没部门再找公司
+UPDATE eh_punch_statistics a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%")
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+ -- AUTHOR: 梁燕龙  20180816
+-- REMARK: ISSUE-34179: 用户认证v3.6
+-- 权限
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (42007, null, '查看审核列表', '用户认证查看审核列表', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (42008, null, '审核权限', '用户认证审核权限', NULL);
+
+set @mp_id = (select MAX(id) from eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '35000', '0', 42007, '查看审核列表', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '35000', '0', 42008, '审核权限', '0', NOW());
+-- 将用户认证移动到跟项目相关
+UPDATE eh_service_modules SET module_control_type = 'community_control' WHERE id =35000;
+UPDATE eh_service_module_apps SET module_control_type = 'community_control' WHERE module_id = 35000;
+UPDATE eh_authorizations SET owner_type = 'EhAll' WHERE auth_id = 35000;
+UPDATE eh_authorizations SET module_control_type = 'community_control' WHERE auth_id = 35000;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
