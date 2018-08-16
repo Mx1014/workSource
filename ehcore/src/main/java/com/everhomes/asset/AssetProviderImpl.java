@@ -6439,4 +6439,29 @@ public class AssetProviderImpl implements AssetProvider {
 		return false;
 	}
 	
+	/**
+	 * 获取费项配置的税率
+	 * @param billGroupId
+	 * @return
+	 */
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
+		final BigDecimal[] taxRate = {BigDecimal.ZERO};
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
+        EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
+        Long categoryId = findCategoryIdFromBillGroup(billGroupId);
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID,ci.TAX_RATE)
+                .from(rule,ci)
+                .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
+                .and(rule.OWNERID.eq(ci.OWNER_ID))
+                .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .and(ci.CATEGORY_ID.eq(categoryId))
+                .and(ci.CHARGING_ITEM_ID.eq(billItemId))
+                .fetch()
+                .map(r -> {
+                    taxRate[0] = r.getValue(ci.TAX_RATE);
+                    return null;});
+        return taxRate[0];
+    }
+	
 }

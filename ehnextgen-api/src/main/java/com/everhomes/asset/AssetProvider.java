@@ -395,4 +395,6 @@ public interface AssetProvider {
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
 	
 	List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 }

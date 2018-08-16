@@ -1498,7 +1498,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         datas.add(log);
                         continue bill;
                     }
-                	BigDecimal amountReceivable = null;
+                	BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
+                	BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
+                	BigDecimal taxAmount = BigDecimal.ZERO;//税额
+                	BigDecimal taxRate = BigDecimal.ZERO;//税率
+                	
                     if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("收费项目:"+headers[j]+"必填");
                         log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
@@ -1506,6 +1510,13 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         continue bill;
                     }try{
                         amountReceivable = new BigDecimal(data[j]);
+                        //issue-35830 【物业缴费6.5】收费项初始不设置税率，批量导入一条账单，修改税率，导出这条账单不含税和税额项为空
+                        //后台直接查费项对应的税率
+                        taxRate = assetProvider.getBillItemTaxRate(billGroupId, itemPojo.getId());
+                        BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+            			amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+            			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+            			taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
                     }catch (Exception e){
                         log.setErrorLog("收费项目:" + headers[j] + "数值格式不正确，应该填写保留两位小数的数字");
                         log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
@@ -1515,6 +1526,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     item.setBillItemId(itemPojo.getId());
                     item.setBillItemName(itemPojo.getName());//解决导入的时候费项名称多了*的bug
                     item.setAmountReceivable(amountReceivable);
+                    item.setAmountReceivableWithoutTax(amountReceivableWithoutTax);//应收不含税
+                    item.setTaxAmount(taxAmount);//税额
+                    item.setTaxRate(taxRate);//税率
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);
