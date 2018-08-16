@@ -1453,11 +1453,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      */
     @Override
     public void registerWXLoginConnection(HttpServletRequest request) {
+    	  LOGGER.info(request.getCookies().toString());
     	 Cookie loginTokenCookie = findCookieInRequest("token",request);
+    	 if(loginTokenCookie == null){
+    		 return ;
+    	 }
          String token = loginTokenCookie.getValue();
          LoginToken loginToken = WebTokenGenerator.getInstance().fromWebToken(token, LoginToken.class);
          if(token == null)
-             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
+             return ;
          
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 
