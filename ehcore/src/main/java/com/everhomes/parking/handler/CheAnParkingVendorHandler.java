@@ -48,6 +48,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     private static final String MONTHCARD_CHARGE = "api.aspx/park.mcard.charge";//月卡缴费
 
+    private static final String GET_CAR_LOCATION = "api.aspx/pls.car.pos.getByLP";
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
@@ -105,6 +107,12 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         if (card != null) {
             ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 
+            List<ParkingCardRequestType> cardTypes = parkingProvider.listParkingCardTypes(null,null,parkingLot.getId());
+            ParkingCardRequestType cardType = new ParkingCardRequestType();
+            if(null != cardTypes && cardTypes.size() > 0){
+                cardType = cardTypes.get(0);
+            }
+
             // 格式yyyyMMddHHmmss
             String validEnd = card.getExpirydate();
             Long endTime = Utils.strToLong(validEnd, Utils.DateStyle.DATE_TIME);
@@ -119,8 +127,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
             parkingCardDTO.setEndTime(endTime);
 
-//            parkingCardDTO.setCardTypeId(type.getTariffID());//月卡类型id
-            parkingCardDTO.setCardType("月卡");//月卡类型名称？
+            parkingCardDTO.setCardTypeId(String.valueOf(cardType.getId()));//月卡类型id
+            parkingCardDTO.setCardType(cardType.getCardTypeName());//月卡类型名称？
 //            parkingCardDTO.setCardName(entity.getStandardType());
 
             resultList.add(parkingCardDTO);
@@ -134,36 +142,73 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         List<ParkingRechargeRateDTO> ratedtos = new ArrayList<>();
 
         CheanCard card = getCardInfo(plateNumber,null);
-        if("0".equals(card.getTariffid())) {
+        List<ParkingCardRequestType> cardTypes = parkingProvider.listParkingCardTypes(null,null,parkingLot.getId());
+        ParkingCardRequestType cardType = new ParkingCardRequestType();
+        if(null != cardTypes && cardTypes.size() > 0){
+            cardType = cardTypes.get(0);
+        }
+        if(null != card){
+            if("0".equals(card.getTariffid())) {
 
-        } else{
-            JSONObject param = new JSONObject();
-            String json = post(param,GET_MONTHCARD_TYPE);
-            CheanJsonArray<CheanCardType> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonArray<CheanCardType>>(){});
-            if (null != entity && entity.getStatus()){
-                List<CheanCardType> list = entity.getData();
-                if(null != list && list.size() > 0){
-                    for (CheanCardType type:list) {
-                        if(card.getTariffid().equals(type.getTariffID())){
-                            card.setMonthlyrent(type.getCharge());
+            } else{
+                JSONObject param = new JSONObject();
+                String json = post(param,GET_MONTHCARD_TYPE);
+                CheanJsonArray<CheanCardType> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonArray<CheanCardType>>(){});
+                if (null != entity && entity.getStatus()){
+                    List<CheanCardType> list = entity.getData();
+                    if(null != list && list.size() > 0){
+                        for (CheanCardType type:list) {
+                            if(card.getTariffid().equals(type.getTariffID())){
+                                card.setMonthlyrent(type.getCharge());
+                            }
                         }
                     }
                 }
             }
+
+            for(int i = 1;i <= 3;i++){
+                ParkingRechargeRateDTO cardRate = new ParkingRechargeRateDTO();
+                cardRate.setCardTypeId(String.valueOf(cardType.getId()));
+                cardRate.setCardType(cardType.getCardTypeName());
+                cardRate.setPrice(new BigDecimal(card.getMonthlyrent()).multiply(new BigDecimal(i)).setScale(2));
+                cardRate.setRateName(i + "个月");
+//                  默认为一个月
+                cardRate.setMonthCount(new BigDecimal(i));
+                ratedtos.add(cardRate);
+            }
         }
 
-        for(int i = 1;i <= 3;i++){
-            ParkingRechargeRateDTO cardType = new ParkingRechargeRateDTO();
-            cardType.setCardTypeId(card.getTariffid());
-//                cardType.setCardType(i + "个月");
-            cardType.setPrice(new BigDecimal(card.getMonthlyrent()).multiply(new BigDecimal(i)).setScale(2));
-            cardType.setRateName(i + "个月");
-//                  默认为一个月
-            cardType.setMonthCount(new BigDecimal(i));
-            ratedtos.add(cardType);
-        }
 
         return ratedtos;
+    }
+
+    @Override
+    public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
+        ParkingCarLocationDTO dto = new ParkingCarLocationDTO();
+        JSONObject param = new JSONObject();
+        param.put("licensePlate",cmd.getPlateNumber());
+        String json = post(param,GET_CAR_LOCATION);
+
+        CheanJsonEntity<CheanLocation> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanLocation>>(){});
+
+        if(null != entity && entity.getStatus() && null != entity.getData()){
+            CheanLocation location = entity.getData();
+
+            dto.setPlateNumber(cmd.getPlateNumber());
+            dto.setOwnerType(parkingLot.getOwnerType());
+            dto.setOwnerId(parkingLot.getOwnerId());
+            dto.setParkingLotId(parkingLot.getId());
+            dto.setParkingName(parkingLot.getName());
+
+            dto.setSpaceNo(location.getParkLotName());
+//            dto.setLocation(location.getParkLotName());
+            dto.setFloorName(location.getFloorName());
+            dto.setCarImageUrl(location.getImgUrl());
+
+        }
+        return dto;
+
+
     }
 
     @Override
