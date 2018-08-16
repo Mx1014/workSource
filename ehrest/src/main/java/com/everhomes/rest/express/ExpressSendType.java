@@ -8,14 +8,16 @@ package com.everhomes.rest.express;
  * <li>EMS_STANDARD: 2，同城信筒快件</li>
  * <li>CHINA_POST_PACKAGE: 3，EMS标准快递</li>
  * <li>CITY_EMPTIES: 9，邮政快递包裹</li>
+ * <li>GUO_MAO_EXPRESS: 10，国贸快递</li>
  * </ul>
  */
 public enum ExpressSendType {
 	STANDARD((byte)1, "标准快递"),
 	CITY_EMPTIES((byte)2,"同城信筒快件"),
 	EMS_STANDARD((byte)3, "EMS标准快递"),
-	CHINA_POST_PACKAGE((byte)9,"邮政快递包裹");
-	
+	CHINA_POST_PACKAGE((byte)9,"邮政快递包裹"),
+	GUO_MAO_EXPRESS((byte)10,"国贸快递");
+
 	private byte code;
 	private String description;
 	
