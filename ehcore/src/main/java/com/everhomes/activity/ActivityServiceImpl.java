@@ -73,6 +73,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -345,6 +346,8 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -7039,28 +7042,78 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
         GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
         String fileName = "活动报名模板";
-        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
-        List<String> titleNames = new ArrayList<>();
-        List<String> propertyNames = new ArrayList<>();
-        List<Integer> titleSizes = new ArrayList<>();
-        if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
-            titleNames.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
-            for (int i = 0; i < form.getFormFields().size(); i++) {
-                titleSizes.add(20);
-            }
-            excelSettings(excelUtils, form);
+        String head = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark");
+
+        List<String> title = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(form.getFormFields())) {
+            title.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
         }else {
-            titleNames.add("手机");
-            titleSizes.add(20);
-            List<Integer> mandatoryTitle = new ArrayList<>();
-            mandatoryTitle.add(1);
-            excelUtils.setNeedMandatoryTitle(true);
-            excelUtils.setMandatoryTitle(mandatoryTitle);
-            excelUtils.setTitleRemark(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark"), (short) 18, (short) 4480);
-            excelUtils.setNeedSequenceColumn(false);
-            excelUtils.setNeedTitleRemark(true);
+            title.add("手机号码");
         }
-        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet(fileName);
+        sheet.createFreezePane(1,2,1,1);
+
+        //  1.set the header
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
+        Row headRow = sheet.createRow(0);
+        headRow.setHeight((short) (150 * 20));
+        createExcelHead(workbook, headRow, head);
+
+        //  2.set the title
+        Row titleRow = sheet.createRow(1);
+        createExcelTitle(workbook, sheet, titleRow, title);
+
+        writeHttpExcel(workbook, httpResponse, fileName);
+
+    }
+
+    private void writeHttpExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            DownloadUtil.download(out, httpResponse, fileName);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        }finally {
+            try {
+                workbook.close();
+            } catch (IOException e) {
+                LOGGER.error("export error, e = {}", e);
+            }
+        }
+    }
+
+    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook){
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setColor(IndexedColors.RED.index);
+        font.setBold(true);
+        font.setFontName("微软雅黑");
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setFont(font);
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
+    }
+
+    private void createExcelHead(XSSFWorkbook workbook, Row headRow, String head) {
+        XSSFCellStyle headStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        // font.setBold(true);
+        font.setFontName("微软雅黑");
+        headStyle.setFont(font);
+        headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headStyle.setFillForegroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex()); //  find it in the IndexedColors
+        headStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headStyle.setWrapText(true);
+
+        Cell cell = headRow.createCell(0);
+        cell.setCellStyle(headStyle);
+        cell.setCellValue(head);
     }
 
     @Override
