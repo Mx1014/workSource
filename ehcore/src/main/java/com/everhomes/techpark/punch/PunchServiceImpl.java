@@ -11263,12 +11263,7 @@ public class PunchServiceImpl implements PunchService {
         monthReportExecutorPool.execute(() -> {
             List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
             try {
-            	this.dbProvider.execute((TransactionStatus status) -> {
-            		
-	                if(members != null){
-	                	report.setPunchMemberNumber(members.size());
-	                	punchMonthReportProvider.updatePunchMonthReport(report);
-	                }
+            	this.dbProvider.execute((TransactionStatus status) -> { 
 	                setMonthReportProcess(report, 5);
                     for (int i = 0; i < members.size(); i++) {
                         try {
