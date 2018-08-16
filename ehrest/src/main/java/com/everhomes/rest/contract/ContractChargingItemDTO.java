@@ -40,10 +40,20 @@ public class ContractChargingItemDTO {
     private String chargingVariables;
     private Long chargingStartTime;
     private Long chargingExpiredTime;
+    private Long billGroupId;
+    
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
-    public String getLateFeeformula() {
+    public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
+
+	public String getLateFeeformula() {
         return lateFeeformula;
     }
 

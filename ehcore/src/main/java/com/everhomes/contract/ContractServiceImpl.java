@@ -3,6 +3,7 @@ package com.everhomes.contract;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,7 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -62,6 +65,7 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.IndividualCustomerProvider;
 import com.everhomes.customer.SyncDataTask;
 import com.everhomes.customer.SyncDataTaskService;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -96,6 +100,8 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
@@ -190,6 +196,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -812,6 +819,101 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			Contract parentContract = checkContract(contract.getParentId());
 			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
 		}
+		//重新组装变更合的计价条款税率 add ---djm issue-35984
+		if (cmd.getChargingItems() != null) {
+			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
+				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
+				List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
+						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId());
+				Long billGroupId = groupRules.get(0).getBillGroupId();
+				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
+				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
+
+				if (chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {// 单价
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+							.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						BigDecimal dj = BigDecimal.ZERO;// 单价
+						BigDecimal djbhs = BigDecimal.ZERO;// 单价不含税
+						BigDecimal mj = BigDecimal.ZERO;
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null) {
+								if (chargingVariable.getVariableIdentifier().equals("dj")) {
+									dj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+								if (chargingVariable.getVariableIdentifier().equals("mj")) {
+									mj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+							}
+						}
+						BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+						djbhs = dj.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);// 修改税率之后，重新计算不含税
+						// 重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+						ChargingVariables newChargingVariableList = new ChargingVariables();
+						newChargingVariableList.setChargingVariables(new ArrayList<>());
+						ChargingVariable djChargingVariable = new ChargingVariable();
+						djChargingVariable.setVariableIdentifier("dj");
+						djChargingVariable.setVariableName("单价(含税)");
+						djChargingVariable.setVariableValue(dj);
+						newChargingVariableList.getChargingVariables().add(djChargingVariable);
+						ChargingVariable djbhsChargingVariable = new ChargingVariable();
+						djbhsChargingVariable.setVariableIdentifier("djbhs");
+						djbhsChargingVariable.setVariableName("单价(不含税)");
+						djbhsChargingVariable.setVariableValue(djbhs);
+						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
+						ChargingVariable taxRateChargingVariable = new ChargingVariable();
+						taxRateChargingVariable.setVariableIdentifier("taxRate");
+						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableValue(taxRate);
+						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable mjChargingVariable = new ChargingVariable();
+						mjChargingVariable.setVariableIdentifier("mj");
+						mjChargingVariable.setVariableName("面积");
+						mjChargingVariable.setVariableValue(mj);
+						newChargingVariableList.getChargingVariables().add(mjChargingVariable);
+
+						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
+					}
+				} else if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+							.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						BigDecimal gdje = BigDecimal.ZERO;// 固定金额(含税)
+						BigDecimal gdjebhs = BigDecimal.ZERO;// 固定金额(不含税)
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null) {
+								if (chargingVariable.getVariableIdentifier().equals("gdje")) {
+									gdje = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+							}
+						}
+						BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+						gdjebhs = gdje.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);// 修改税率之后，重新计算不含税
+						// 重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+						ChargingVariables newChargingVariableList = new ChargingVariables();
+						newChargingVariableList.setChargingVariables(new ArrayList<>());
+						ChargingVariable gdjeChargingVariable = new ChargingVariable();
+						gdjeChargingVariable.setVariableIdentifier("gdje");
+						gdjeChargingVariable.setVariableName("固定金额(含税)");
+						gdjeChargingVariable.setVariableValue(gdje);
+						newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
+						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+						gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
+						gdjebhsChargingVariable.setVariableValue(gdjebhs);
+						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
+						ChargingVariable taxRateChargingVariable = new ChargingVariable();
+						taxRateChargingVariable.setVariableIdentifier("taxRate");
+						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableValue(taxRate);
+						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+
+						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
+					}
+				}
+			}
+		}
+
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
