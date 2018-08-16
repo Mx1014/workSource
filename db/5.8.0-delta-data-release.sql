@@ -96,8 +96,9 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 
 -- AUTHOR: 黄良铭  20180815
 -- REMARK: 超级管理员删除提示
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
-VALUES(1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
+VALUES(@b_id:= @b_id +1 , 'organization.notification',22,'zh_CN','删除超级管理员给当前超级管理员发送的消息模板' ,  '你在${organizationName}的超级管理员身份已被移除',0);
 
 
 -- AUTHOR: jun.yan  20180813
