@@ -1,14 +1,14 @@
 package com.everhomes.rest.techpark.punch.admin;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
+import com.everhomes.rest.techpark.punch.PunchOvertimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 /**
  * <ul> 
  * <li>id：考勤组的id</li>
@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeRules: 上班时间{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
  * <li>specialDays: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
  * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
+ * <li>punchOvertimeRules: 加班规则，参考{@link com.everhomes.rest.techpark.punch.PunchOvertimeRuleDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
  * <li>employeeCount: 总人数 </li>
  * <li>unSchedulingCount: 未排班人数</li>
@@ -67,6 +68,8 @@ public class PunchGroupDTO {
 
 	@ItemType(PunchSchedulingDTO.class)
 	private List<PunchSchedulingDTO> schedulings;
+
+	private List<PunchOvertimeRuleDTO> punchOvertimeRules;
 	
 	private Byte chinaHolidayFlag;
 	
@@ -243,5 +246,13 @@ public class PunchGroupDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public List<PunchOvertimeRuleDTO> getPunchOvertimeRules() {
+		return punchOvertimeRules;
+	}
+
+	public void setPunchOvertimeRules(List<PunchOvertimeRuleDTO> punchOvertimeRules) {
+		this.punchOvertimeRules = punchOvertimeRules;
 	}
 }

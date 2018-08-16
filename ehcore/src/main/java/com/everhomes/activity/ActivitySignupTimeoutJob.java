@@ -6,6 +6,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.flow.FlowServiceImpl;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.activity.ActivityConfirmType;
 import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.scheduler.RunningFlag;
@@ -19,6 +20,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -50,7 +52,17 @@ public class ActivitySignupTimeoutJob extends QuartzJobBean {
                 if (post != null && post.getEmbeddedAppId() != null && post.getEmbeddedAppId() == AppConstants.APPID_ACTIVITY) {
                     Activity activity = this.activityProivider.findSnapshotByPostId(post.getId());
                     if (activity != null) {
-                        List<ActivityRoster> rosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+                        List<ActivityRoster> rosterList = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
+                        List<ActivityRoster> rosters = new ArrayList<>();
+                        if (ActivityConfirmType.NEED_CONFIRM.getCode().equals(activity.getConfirmFlag())) {
+                            for (ActivityRoster activityRoster : rosterList) {
+                                if (ConfirmStatus.CONFIRMED.getCode().equals(activityRoster.getConfirmFlag())) {
+                                    rosters.add(activityRoster);
+                                }
+                            }
+                        }else {
+                            rosters.addAll(rosterList);
+                        }
                         if (rosters != null && post.getMinQuantity() != null && rosters.size() -1 < post.getMinQuantity()) {
                             LocalDateTime nowDateTime = LocalDateTime.now();
                             coordinationProvider.getNamedLock(CoordinationLocks.ACTIVITY_SIGNUP_TIMEOUT.getCode()).tryEnter(() -> {

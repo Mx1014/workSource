@@ -49,7 +49,7 @@ public class SceneDTO {
         return entityType;
     }
 
-    public void setEntityType(String entityType) {
+	public void setEntityType(String entityType) {
         this.entityType = entityType;
     }
 

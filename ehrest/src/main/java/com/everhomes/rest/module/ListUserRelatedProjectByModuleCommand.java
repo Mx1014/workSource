@@ -1,6 +1,7 @@
 package com.everhomes.rest.module;
 
 
+import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * <li>appId: 应用id</li>
  * <li>userId: 用户id</li>
  * <li>organizationId: 企业id</li>
- * <li>communityFetchType：查询类型</li>
+ * <li>communityFetchType：查询类型，参考{@link CommunityFetchType}</li>
  * </ul>
  */
 public class ListUserRelatedProjectByModuleCommand {
