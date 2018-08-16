@@ -506,7 +506,7 @@ INSERT INTO `eh_service_module_exclude_functions`(`id`, `namespace_id`, `communi
 -- AUTHOR: dengs
 -- REMARK: ISSUE-33347: 新增国贸快递类型，对接新支付
 SET @parent_express_company_id = 4;
-set @son_express_company_id = 10005;
+set @son_express_company_id = 10007;
 set @express_company_businesses_id = 8;
 set @ns = 999948; -- 需要修改为国贸的域空间id
 set @community_id=240111044332060225; -- todo 需要修改为国贸的园区id
