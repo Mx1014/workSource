@@ -16,11 +16,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.version.VersionRealmType;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
 //import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 //import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
@@ -81,6 +84,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.google.gson.Gson;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +99,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -655,15 +660,17 @@ public class AdminController extends ControllerBase {
         return new RestResponse(login.toDto());
     }
     
+
     /**
-     * 微信活跃注册接口
-     * @param cmd
-     * @return
+     * <b>URL: /admin/registerWXLogin</b>
+     * <p>微信活跃注册接口</p>
      */
     @RequestMapping("registerWXLogin")
     @RestReturn(value=String.class)
-    public RestResponse registerWXLogin(@Valid RegisterWXLoginCommand cmd) {
-        String loginToken = cmd.getLoginToken();
+    public RestResponse registerWXLogin(HttpServletRequest request) {
+    	
+        Cookie loginTokenCookie = findCookieInRequest("token",request);
+        String loginToken = loginTokenCookie.getValue();
           
         LOGGER.info("Register login connection.  login token: " + loginToken);
         LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginToken, LoginToken.class);
@@ -673,6 +680,23 @@ public class AdminController extends ControllerBase {
         this.userService.registerWXLoginConnection(token);
         
         return new RestResponse();
+    }
+    
+    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+        List<Cookie> matchedCookies = new ArrayList<>();
+
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals(name)) {
+                    matchedCookies.add(cookie);
+                }
+            }
+        }
+
+        if(matchedCookies.size() > 0)
+            return matchedCookies.get(matchedCookies.size() - 1);
+        return null;
     }
     
     @RequestMapping("unregisterLogin")
