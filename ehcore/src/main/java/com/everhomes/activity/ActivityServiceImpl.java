@@ -7045,7 +7045,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         String head = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark");
 
         List<String> title = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(form.getFormFields())) {
+        if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
             title.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
         }else {
             title.add("手机号码");
@@ -7056,7 +7056,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         sheet.createFreezePane(1,2,1,1);
 
         //  1.set the header
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1 > 2? title.size() -1 : 5));
         Row headRow = sheet.createRow(0);
         headRow.setHeight((short) (150 * 20));
         createExcelHead(workbook, headRow, head);
