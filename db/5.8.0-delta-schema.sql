@@ -317,6 +317,7 @@ ALTER TABLE eh_punch_exception_requests ADD COLUMN duration_minute BIGINT DEFAUL
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 新增上班缺卡次数、下班缺卡次数统计
+UPDATE eh_punch_statistics SET forgot_count=0 WHERE forgot_count IS NULL;
 ALTER TABLE eh_punch_statistics CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
 ALTER TABLE eh_punch_statistics ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
 ALTER TABLE eh_punch_statistic_files CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
