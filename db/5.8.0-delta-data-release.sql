@@ -231,11 +231,11 @@ UPDATE eh_punch_vacation_balances b INNER JOIN
 (
 SELECT d.namespace_id,r.enterprise_id,r.user_id,d.id AS detail_id,
     SUM((CASE ac.category_name
-        WHEN '年假' THEN r.duration
+        WHEN '年假' THEN r.duration_day
         ELSE 0
     END)) AS annual_leave_history_count,
     SUM((CASE ac.category_name
-        WHEN '调休' THEN r.duration
+        WHEN '调休' THEN r.duration_day
         ELSE 0
     END)) AS overtime_compensation_history_count
 FROM eh_punch_exception_requests r
@@ -254,11 +254,11 @@ SELECT t.id,t.namespace_id,t.enterprise_id,'organization' as owner_type,t.user_i
 (
 SELECT (@lastest_id := @lastest_id + 1) AS id,d.namespace_id,r.enterprise_id,r.user_id,d.id AS detail_id,
     SUM((CASE ac.category_name
-        WHEN '年假' THEN r.duration
+        WHEN '年假' THEN r.duration_day
         ELSE 0
     END)) AS annual_leave_history_count,
     SUM((CASE ac.category_name
-        WHEN '调休' THEN r.duration
+        WHEN '调休' THEN r.duration_day
         ELSE 0
     END)) AS overtime_compensation_history_count
 FROM eh_punch_exception_requests r
@@ -339,6 +339,10 @@ WHERE s.id IS NULL;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 对新增的detail_id进行旧数据初始化
+UPDATE eh_punch_statistics l INNER JOIN eh_organization_member_details d ON d.organization_id=l.owner_id AND d.target_id=l.user_id
+SET l.detail_id=d.id
+WHERE d.target_id>0 AND l.detail_id IS NULL;
+
 UPDATE eh_punch_day_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
 SET l.detail_id=d.id
 WHERE d.target_id>0 AND l.detail_id IS NULL;
@@ -355,6 +359,7 @@ WHERE l.punch_organization_id IS NULL;
 
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-33645: 考勤7.0 - 统计相关 将非工作日变更为休息
+UPDATE eh_locale_strings SET text='休息' WHERE scope='punch.status' AND code=17;
 UPDATE eh_punch_statistics SET status_list=REPLACE(status_list,'非工作日','休息')  WHERE status_list LIKE '%非工作日%';
 
 -- AUTHOR: 张智伟 20180813
@@ -367,6 +372,57 @@ FROM eh_punch_exception_requests WHERE approval_attribute='ABNORMAL_PUNCH' AND s
 ON s.owner_id=e.enterprise_id AND s.user_id=e.user_id AND s.punch_month=e.punch_month
 SET s.exception_request_counts=e.exception_request_counts,s.punch_exception_request_count=e.exception_request_counts
 WHERE s.user_id>0;
+
+-- AUTHOR: 吴寒 20180816
+-- REMARK: ISSUE-33645: 考勤7.0 - 给日/月报表旧数据初始化dept_id
+-- REMARK: 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_day_logs a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%")
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 没部门再找公司
+UPDATE eh_punch_day_logs a SET  a.dept_id =
+   (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`enterprise_id`, "%")
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 先找有没有部门,如果有就取第一个部门
+UPDATE eh_punch_statistics a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%")
+    AND b.group_type = 'DEPARTMENT'
+    AND b.`status` = 3 LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
+-- REMARK: 没部门再找公司
+UPDATE eh_punch_statistics a SET  a.dept_id =
+  (SELECT
+    b.`organization_id`
+  FROM
+    eh_organization_members b
+  WHERE a.`detail_id` = b.`detail_id`
+    AND b.group_path LIKE CONCAT("/", a.`owner_id`, "%")
+    AND b.group_type = 'ENTERPRISE'
+    AND b.`status` = 3  LIMIT 1)
+WHERE a.`dept_id` IS NULL ;
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
