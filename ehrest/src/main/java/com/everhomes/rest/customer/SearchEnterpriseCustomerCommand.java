@@ -85,6 +85,8 @@ public class SearchEnterpriseCustomerCommand {
 
     private String sourceType;
 
+    private Byte aptitudeFlagItemId;
+
     public Long getOwnerId() {
         return ownerId;
     }
@@ -295,6 +297,13 @@ public class SearchEnterpriseCustomerCommand {
         this.sourceType = sourceType;
     }
 
+    public Byte getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
+    }
 
     @Override
     public String toString() {

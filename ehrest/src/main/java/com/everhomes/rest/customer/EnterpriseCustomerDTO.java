@@ -192,7 +192,8 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Long sourceId;
     private String sourceType;
 
-    private Byte aptitudeFlag;
+    private Long aptitudeFlagItemId;
+    private String aptitudeFlagItemName;
 
     //新增的客户字段
     private Long buyOrLeaseItemId;
@@ -1444,12 +1445,20 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
         this.dropBox9ItemName = dropBox9ItemName;
     }
 
-    public Byte getAptitudeFlag() {
-        return aptitudeFlag;
+    public Long getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
     }
 
-    public void setAptitudeFlag(Byte aptitudeFlag) {
-        this.aptitudeFlag = aptitudeFlag;
+    public void setAptitudeFlagItemId(Long aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
+    }
+
+    public String getAptitudeFlagItemName() {
+        return aptitudeFlagItemName;
+    }
+
+    public void setAptitudeFlagItemName(String aptitudeFlagItemName) {
+        this.aptitudeFlagItemName = aptitudeFlagItemName;
     }
 
     @Override

@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.address.AddressProvider;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
@@ -12,6 +13,10 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.GeneralFormValsResponse;
+import com.everhomes.util.ConvertHelper;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +24,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +45,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private ServiceModuleProvider serviceModuleProvider;
     @Autowired
     private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private AddressProvider addressProvider;
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
@@ -81,7 +90,26 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(namespaceId,referId,25000l, ownerId);
         for(GeneralFormVal temp: request){
             if(temp.getFieldName().equals("客户名称")){
-                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(temp.getFieldValue()), (byte)1);
+                GeneralFormValDTO dto = ConvertHelper.convert(temp, GeneralFormValDTO.class);
+                String fieldValue = dto.getFieldValue();
+                ObjectMapper mapper = new ObjectMapper();
+                JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+                Map<String,String> urMap;
+                try {
+                    urMap = mapper.readValue(fieldValue, jvt);
+                    for (Map.Entry<String, String> entry : urMap.entrySet()) {
+                        fieldValue  = entry.getValue();
+
+                        if(entry.getKey().equals("customerName")){
+                            break;
+                        }
+
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), (byte)1);
             }
         }
 
@@ -150,8 +178,38 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     e.setEntityType(FlowCaseEntityType.LIST.getCode());
                     break;
             }
+
+            GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+            String fieldValue = dto.getFieldValue();
+            ObjectMapper mapper = new ObjectMapper();
+            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+            Map<String,String> urMap;
+            try {
+                urMap = mapper.readValue(fieldValue, jvt);
+                for (Map.Entry<String, String> entry : urMap.entrySet()) {
+                    fieldValue  = entry.getValue();
+
+                    if(entry.getKey().equals("addressId")){
+                        fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+                        break;
+                    }
+                    if(entry.getKey().equals("customerName")){
+                        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
+                        fieldValue = customer.getName();
+                        break;
+                    }
+                    if(entry.getKey().equals("text")) {
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            break;
+                        }
+                    }
+
+                }
+                e.setValue(fieldValue);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             e.setKey(val.getFieldName());
-            e.setValue(val.getFieldValue());
             entities.add(e);
         }
         return entities;

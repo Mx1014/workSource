@@ -2409,7 +2409,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         EhEnterpriseCustomers eepc = dao.findById(id);
-        eepc.setAptitudeFlag(approvalStatus);
+        eepc.setAptitudeFlagItemId(approvalStatus);
         dao.update(eepc);
 
     }
