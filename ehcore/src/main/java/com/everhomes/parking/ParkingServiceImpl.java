@@ -1281,7 +1281,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
-			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
+//			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
 			Integer tag1 = parkingLot.getFlowMode();
 			StringBuilder strBuilder = new StringBuilder();
 			List<ParkingCardRequest> list = null;
@@ -1308,14 +1308,16 @@ public class ParkingServiceImpl implements ParkingService {
 
 			list.forEach(q -> {
 				FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
-				FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-				stepDTO.setFlowCaseId(q.getFlowCaseId());
-				stepDTO.setFlowMainId(flowCase.getFlowMainId());
-				stepDTO.setFlowVersion(flowCase.getFlowVersion());
-				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-				stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-				stepDTO.setStepCount(flowCase.getStepCount());
-				flowService.processAutoStep(stepDTO);
+				if(flowCase!=null) {
+					FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+					stepDTO.setFlowCaseId(q.getFlowCaseId());
+					stepDTO.setFlowMainId(flowCase.getFlowMainId());
+					stepDTO.setFlowVersion(flowCase.getFlowVersion());
+					stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+					stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+					stepDTO.setStepCount(flowCase.getStepCount());
+					flowService.processAutoStep(stepDTO);
+				}
 			});
 
 			if(LOGGER.isDebugEnabled()) {
