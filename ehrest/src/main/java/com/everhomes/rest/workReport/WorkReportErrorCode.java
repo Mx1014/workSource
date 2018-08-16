@@ -8,5 +8,7 @@ public interface WorkReportErrorCode {
 
     int ERROR_REPORT_VAL_NOT_FOUND = 10002; //  工作汇报单不存在
 
-    int ERROR_NO_READ_PERMISSIONS = 10003;  //  没有阅读权限
+    int ERROR_NO_READ_PERMISSIONS = 10003;  //  没有阅读权限.
+
+    int ERROR_WRONG_POST_TIME = 10004;      //  提交时间未在规定范围内
 }

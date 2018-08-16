@@ -1,23 +1,18 @@
 package com.everhomes.workReport;
 
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.workReport.WorkReportType;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
 public class WorkReportUtil {
 
     public static LocalDateTime convertSettingToTime(Long rTime, Byte rType, Byte sType, String sMask, String sTime) {
-
         Instant instant = Instant.ofEpochMilli(rTime);
         ZoneId zone = ZoneId.systemDefault();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime reportTime = LocalDateTime.ofInstant(instant, zone);
         String pattern = "yyyy-MM-dd HH:mm:ss";
         int year, month, day;
@@ -29,7 +24,7 @@ public class WorkReportUtil {
                 year = reportTime.getYear();
                 month = reportTime.getMonth().getValue();
                 day = reportTime.getDayOfMonth();
-                temp = year + "-" + doubleDigit(month) + "-" + doubleDigit(day) + " " + sTime + ":" + "00";
+                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
                 break;
             case WEEK:
                 if(sType == 1)
@@ -37,7 +32,7 @@ public class WorkReportUtil {
                 year = reportTime.getYear();
                 month = reportTime.getMonth().getValue();
                 day = reportTime.getDayOfMonth() + Integer.valueOf(sMask) - 1;
-                temp = year + "-" + doubleDigit(month) + "-" + doubleDigit(day) + " " + sTime + ":" + "00";
+                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
                 break;
             case MONTH:
                 if (sType == 1)
@@ -45,19 +40,18 @@ public class WorkReportUtil {
                 year = reportTime.getYear();
                 month = reportTime.getMonth().getValue();
                 day = Integer.valueOf(sMask);
-                temp = year + "-" + doubleDigit(month) + "-" + doubleDigit(day) + " " + sTime + ":" + "00";
+                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
         }
         TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(temp);
         return LocalDateTime.from(accessor);
     }
 
-    private static String doubleDigit(int num) {
+    private static String toDoubleDigit(int num) {
         String tem = String.valueOf(num);
         if (tem.length() < 2)
             return "0" + tem;
         return tem;
     }
-
     public static void main(String[] args) {
         String pattern = "yyyy-MM-dd HH:mm:ss";
         String s = "2019-02-25 09:30:01";
@@ -76,6 +70,8 @@ public class WorkReportUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         System.out.println(formatter.format(time1));
         System.out.println(formatter.format(time2));
+        System.out.println(time1.isBefore(time2));
+
         System.out.println(formatter.format(time3));
         System.out.println(formatter.format(time4));
         System.out.println(formatter.format(time5));

@@ -31,6 +31,9 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -448,7 +451,15 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
         ReportValiditySettingDTO setting = (ReportValiditySettingDTO) JSON.parse(report.getValiditySetting());
-
+        LocalDateTime startTime = WorkReportUtil.convertSettingToTime(cmd.getReportTime(), cmd.getReportType(),
+                setting.getStartType(), setting.getStartMark(), setting.getStartTime());
+        LocalDateTime endTime = WorkReportUtil.convertSettingToTime(cmd.getReportTime(), cmd.getReportType(),
+                setting.getEndType(), setting.getEndMark(), setting.getEndTime());
+        //  whether the post time is right
+        if(!checkPostTime(LocalDateTime.now(), startTime, endTime)){
+            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME,
+                    "The post time is not in the valid range");
+        }
 
         reportVal.setNamespaceId(namespaceId);
         reportVal.setOwnerId(report.getOwnerId());
@@ -499,6 +510,16 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportId(report.getId());
         dto.setReportValId(reportValId);
         return dto;
+    }
+
+    private boolean checkPostTime(LocalDateTime postTime, LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime.isBefore(postTime) && endTime.isAfter(postTime))
+            return true;
+        if (startTime.isEqual(postTime))
+            return true;
+        if (endTime.isEqual(postTime))
+            return true;
+        return false;
     }
 
     private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
