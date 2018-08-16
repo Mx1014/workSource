@@ -1318,5 +1318,14 @@ public class ContractProviderImpl implements ContractProvider {
 		
 		return true;
 	}
+	
+	@Override
+	public Long findCategoryIdByNamespaceId(Integer namespaceId) {
+		DSLContext context = getReadOnlyContext();
+        return context.select(Tables.EH_CONTRACT_CATEGORIES.ID)
+                .from(Tables.EH_CONTRACT_CATEGORIES)
+                .where(Tables.EH_CONTRACT_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+                .fetchOne(Tables.EH_CONTRACT_CATEGORIES.ID);
+	}
 
 }

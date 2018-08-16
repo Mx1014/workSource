@@ -408,7 +408,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
 //                                dbProvider.execute((s) -> {
-                                    deleteContract(contract);
+                                    deleteContract(contract,ebeiContract.getHouseInfoList());
 //                                    return true;
 //                                });
                             }
@@ -422,7 +422,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
                                 notdeal = false;
 //                                dbProvider.execute((s) -> {
-                                    updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
+                                updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
 //                                    return true;
 //                                });
                             }
@@ -485,7 +485,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
 
-    private void deleteContract(Contract contract) {
+    private void deleteContract(Contract contract,List<EbeiContractRoomInfo> roomInfos) {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
         command.setCommunityId(contract.getCommunityId());
@@ -499,12 +499,26 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 customer.setContactAddress("");
                 customerProvider.updateEnterpriseCustomer(customer);
                 List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
-                for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
-                    deleteOrganizationAddress(organizationAddress);
+                List<Long> addressIds = listContractRelatedAddresses(roomInfos);
+                if (myOrganizationAddressList != null && addressIds != null && addressIds.size() > 0) {
+                    List<OrganizationAddress> organizationAddresses = myOrganizationAddressList
+                            .stream().filter((r) -> addressIds.contains(r.getAddressId())).collect(Collectors.toList());
+                    for (OrganizationAddress organizationAddress : organizationAddresses) {
+                        deleteOrganizationAddress(organizationAddress);
+                    }
                 }
             }
         }
 
+    }
+
+    private List<Long> listContractRelatedAddresses(List<EbeiContractRoomInfo> roomInfos) {
+        List<String> addressIds = new ArrayList<>();
+        if(roomInfos!=null && roomInfos.size()>0){
+            addressIds =  roomInfos.stream().map(EbeiContractRoomInfo::getInfoId).collect(Collectors.toList());
+            return addressProvider.listThirdPartRelatedAddresses(NamespaceAddressType.EBEI.getCode(), addressIds);
+        }
+        return new ArrayList<>();
     }
 
     private ContractService getContractService(Integer namespaceId) {

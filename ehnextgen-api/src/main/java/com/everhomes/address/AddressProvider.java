@@ -1,20 +1,17 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.util.List;
-import java.util.Map;
-
-import com.everhomes.rest.address.*;
-
 import com.everhomes.asset.AddressIdAndName;
-
-import org.jooq.Record2;
-import org.jooq.Result;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+
+import java.util.List;
+import java.util.Map;
 
 public interface AddressProvider {
     void createAddress(Address address);
@@ -94,5 +91,5 @@ public interface AddressProvider {
 			String apartmentName);
 
 
-
+    List<Long> listThirdPartRelatedAddresses(String namespaceType, List<String> addressIds);
 }
