@@ -40,6 +40,7 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
+import com.everhomes.server.schema.tables.pojos.EhDecorationRequests;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -481,9 +482,11 @@ public class DecorationServiceImpl implements  DecorationService {
             locator.setAnchor(cmd.getPageAnchor());
         }
         List<DecorationRequest> requests =  this.decorationProvider.queryUserRelateRequests(UserContext.getCurrentNamespaceId(),
-                cmd.getCommunityId(),cmd.getPhone(),pageSize+1,locator);
+                cmd.getCommunityId(),cmd.getPhone());
         if (requests == null || requests.size() == 0)
             return null;
+        List<Long> ids = requests.stream().map(EhDecorationRequests::getId).collect(Collectors.toList());
+        requests = decorationProvider.queryRequestsByIds(ids,pageSize+1,locator);
         if (requests.size()>pageSize){
             requests.remove(requests.size()-1);
             response.setNextPageAnchor(requests.get(requests.size()-1).getId());
@@ -699,6 +702,9 @@ public class DecorationServiceImpl implements  DecorationService {
                 decorationSMSProcessor.feeListGenerate(request);
             }else {
                 this.decorationProvider.deleteDecorationFeeByRequestId(cmd.getRequestId());
+                DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
+                //短信通知
+                decorationSMSProcessor.modifyFee(request);
             }
             DecorationFee fee = new DecorationFee();
             fee.setRequestId(cmd.getRequestId());
@@ -725,6 +731,9 @@ public class DecorationServiceImpl implements  DecorationService {
         if (request.getRefoundAmount() == null){
             //短信通知
             decorationSMSProcessor.refoundGenerate(request);
+        }else{
+            //短信通知
+            decorationSMSProcessor.modifyRefundFee(request);
         }
         request.setRefoundAmount(cmd.getRefoundAmount());
         request.setRefoundComment(cmd.getRefoundComment());

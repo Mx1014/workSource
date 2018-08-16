@@ -212,7 +212,7 @@ public class DecorationSMSProcessor {
         String templateLocale = RentalNotificationTemplateCode.locale;
 
         try {
-            smsProvider.sendSms(request.getNamespaceId(), request.getDecoratorPhone(), templateScope, templateId, templateLocale, variables);
+            smsProvider.sendSms(request.getNamespaceId(), worker.getPhone(), templateScope, templateId, templateLocale, variables);
         }catch (RuntimeException e){
             LOGGER.error("DecorationSMSProcessor:Wrong Phone Number:"+request.getDecoratorPhone());
         }
@@ -238,6 +238,56 @@ public class DecorationSMSProcessor {
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
         smsProvider.addToTupleList(variables, "operatorName", operatorName);
         smsProvider.addToTupleList(variables, "operatorPhone", operatorPhone);
+        try {
+            smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("DecorationSMSProcessor:Wrong Phone Number:"+request.getDecoratorPhone());
+        }
+    }
+
+    public void modifyFee(DecorationRequest request){
+        //负责人
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("name", request.getDecoratorName());
+        smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
+        smsProvider.addToTupleList(variables, "name", request.getDecoratorName());
+        int templateId = SmsTemplateCode.DECORATION_MOTIFY_FEE;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        try {
+            smsProvider.sendSms(request.getNamespaceId(), request.getDecoratorPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("DecorationSMSProcessor:Wrong Phone Number:"+request.getDecoratorPhone());
+        }
+
+        //租户
+        variables = smsProvider.toTupleList("name", request.getApplyName());
+        smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
+        smsProvider.addToTupleList(variables, "name", request.getApplyName());
+        try {
+            smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("DecorationSMSProcessor:Wrong Phone Number:"+request.getDecoratorPhone());
+        }
+    }
+
+    public void modifyRefundFee(DecorationRequest request){
+        //负责人
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("name", request.getDecoratorName());
+        smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
+        smsProvider.addToTupleList(variables, "name", request.getDecoratorName());
+        int templateId = SmsTemplateCode.DECORATION_MOTIFY_REFUND;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        try {
+            smsProvider.sendSms(request.getNamespaceId(), request.getDecoratorPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("DecorationSMSProcessor:Wrong Phone Number:"+request.getDecoratorPhone());
+        }
+
+        //租户
+        variables = smsProvider.toTupleList("name", request.getApplyName());
+        smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
+        smsProvider.addToTupleList(variables, "name", request.getApplyName());
         try {
             smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
         }catch (RuntimeException e){

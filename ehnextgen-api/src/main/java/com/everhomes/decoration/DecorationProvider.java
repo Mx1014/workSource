@@ -27,8 +27,9 @@ public interface DecorationProvider {
                                                     String address,Byte status,String keyword,Byte cancelFlag,Integer pageSize,
                                                     ListingLocator locator);
 
-    List<DecorationRequest> queryUserRelateRequests(Integer namespaceId,Long communityId,String phone,Integer pageSize,
-                                                    ListingLocator locator);
+    List<DecorationRequest> queryUserRelateRequests(Integer namespaceId,Long communityId,String phone);
+
+    List<DecorationRequest> queryRequestsByIds(List<Long> ids ,Integer pageSize, ListingLocator locator );
 
     DecorationWorker getDecorationWorkerById(Long id);
 

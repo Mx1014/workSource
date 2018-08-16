@@ -178,8 +178,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
-    public List<DecorationRequest> queryUserRelateRequests(Integer namespaceId, Long communityId, String phone, Integer pageSize,
-                                                           ListingLocator locator) {
+    public List<DecorationRequest> queryUserRelateRequests(Integer namespaceId, Long communityId, String phone) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select(Tables.EH_DECORATION_REQUESTS.fields()).from(Tables.EH_DECORATION_REQUESTS).leftOuterJoin(Tables.EH_DECORATION_WORKERS).on(
                 Tables.EH_DECORATION_REQUESTS.ID.eq(Tables.EH_DECORATION_WORKERS.REQUEST_ID));
@@ -191,37 +190,24 @@ public class DecorationProviderImpl implements  DecorationProvider {
         Condition condition2 = Tables.EH_DECORATION_REQUESTS.NAMESPACE_ID.eq(namespaceId).and(condition);
         if (communityId != null)
             condition2 = condition2.and(Tables.EH_DECORATION_REQUESTS.COMMUNITY_ID.eq(communityId));
-        if (locator != null)
-            condition2 = condition2.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
         step.where(condition2);
-        if (pageSize != null)
-            step.limit(pageSize);
+
         return step.orderBy(Tables.EH_DECORATION_REQUESTS.ID.desc()).fetch().map(r->{
             DecorationRequest request = new DecorationRequest();
             request.setId(r.getValue(Tables.EH_DECORATION_REQUESTS.ID));
-            request.setNamespaceId(r.getValue(Tables.EH_DECORATION_REQUESTS.NAMESPACE_ID));
-            request.setCommunityId(r.getValue(Tables.EH_DECORATION_REQUESTS.COMMUNITY_ID));
-            request.setCreateTime(r.getValue(Tables.EH_DECORATION_REQUESTS.CREATE_TIME));
-            request.setStartTime(r.getValue(Tables.EH_DECORATION_REQUESTS.START_TIME));
-            request.setEndTime(r.getValue(Tables.EH_DECORATION_REQUESTS.END_TIME));
-            request.setApplyUid(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_UID));
-            request.setApplyCompany(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_COMPANY));
-            request.setApplyPhone(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_PHONE));
-            request.setApplyName(r.getValue(Tables.EH_DECORATION_REQUESTS.APPLY_NAME));
-            request.setAddress(r.getValue(Tables.EH_DECORATION_REQUESTS.ADDRESS));
-            request.setDecoratorUid(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_UID));
-            request.setDecoratorCompanyId(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_COMPANY_ID));
-            request.setDecoratorCompany(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_COMPANY));
-            request.setDecoratorPhone(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE));
-            request.setDecoratorName(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_NAME));
-            request.setDecoratorQrid(r.getValue(Tables.EH_DECORATION_REQUESTS.DECORATOR_QRID));
-            request.setCancelFlag(r.getValue(Tables.EH_DECORATION_REQUESTS.CANCEL_FLAG));
-            request.setStatus(r.getValue(Tables.EH_DECORATION_REQUESTS.STATUS));
-            request.setCancelReason(r.getValue(Tables.EH_DECORATION_REQUESTS.CANCEL_REASON));
-            request.setRefoundAmount(r.getValue(Tables.EH_DECORATION_REQUESTS.REFOUND_AMOUNT));
-            request.setRefoundComment(r.getValue(Tables.EH_DECORATION_REQUESTS.REFOUND_COMMENT));
             return request;
         });
+    }
+
+    @Override
+    public List<DecorationRequest> queryRequestsByIds(List<Long> ids, Integer pageSize, ListingLocator locator) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> step = context.select().from(Tables.EH_DECORATION_REQUESTS).where(Tables.EH_DECORATION_REQUESTS.ID.in(ids));
+        if (locator != null)
+            step = step.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
+        if (pageSize != null)
+            step.limit(pageSize);
+        return step.orderBy(Tables.EH_DECORATION_REQUESTS.ID.desc()).fetch().map(r->ConvertHelper.convert(r,DecorationRequest.class));
     }
 
     @Override
