@@ -55,6 +55,7 @@ import javax.validation.constraints.NotNull;
  * <li>siteItems: 付费物资</li>
  * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
  * <li>remark: 备注显示文案</li>
+ * <li>refundTips: 退款提示</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminResponse {
@@ -126,6 +127,7 @@ public class QueryDefaultRuleAdminResponse {
 	private List<RentalOrderRuleDTO> overtimeStrategies;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+	private List<RentalRefundTipDTO> refundTips;
 
 	private Byte remarkFlag;
 	private String remark;
@@ -406,5 +408,13 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+
+	public List<RentalRefundTipDTO> getRefundTips() {
+		return refundTips;
+	}
+
+	public void setRefundTips(List<RentalRefundTipDTO> refundTips) {
+		this.refundTips = refundTips;
 	}
 }

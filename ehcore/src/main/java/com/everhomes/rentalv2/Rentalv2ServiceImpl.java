@@ -366,6 +366,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 				createPricePackages(cmd.getResourceType(), PriceRuleType.RESOURCE, rule.getSourceId(), cmd.getPricePackages());
 
+				//退款提示
+				createRentalRefundTips(cmd.getResourceType(),RuleSourceType.RESOURCE.getCode(),rule.getSourceId(),cmd.getRefundTips());
 				//close dates
 				setRentalRuleCloseDates(cmd.getCloseDates(), rule.getSourceId(), EhRentalv2Resources.class.getSimpleName(), cmd.getResourceType());
 
@@ -576,6 +578,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		response.setRefundStrategies(refundRules.stream().map(r -> ConvertHelper.convert(r, RentalOrderRuleDTO.class)).collect(Collectors.toList()));
 		response.setOvertimeStrategies(overTimeRules.stream().map(r -> ConvertHelper.convert(r, RentalOrderRuleDTO.class)).collect(Collectors.toList()));
+		//退款提示
+		List<RentalRefundTip> refundTips = rentalv2Provider.listRefundTips(rule.getResourceType(),rule.getSourceType(),id,
+				null);
+		response.setRefundTips(refundTips.stream().map(r->ConvertHelper.convert(r,RentalRefundTipDTO.class)).collect(Collectors.toList()));
 		//付费物资
 		response.setSiteItems(new ArrayList<>());
 		List<RentalItem> rsiSiteItems = rentalv2Provider
@@ -1932,14 +1938,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			List<RentalRefundTip> rentalRefundTips = rentalv2Provider.listRefundTips(rule.getResourceType(), RuleSourceType.RESOURCE.getCode(), rentalSiteId, rule.getRefundStrategy());
 			if (rentalRefundTips != null && rentalRefundTips.size() > 0)
 				return rentalRefundTips.get(0).getTips();
-			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
-				return(rentalCommonService.processResourceCustomRefundTip(rule));
-			}else if (rule.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-				String locale = UserContext.current().getUser().getLocale();
-				String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-						String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP2), locale, "");
-				return (content);
-			}
+//			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
+//				return(rentalCommonService.processResourceCustomRefundTip(rule));
+//			}else if (rule.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
+//				String locale = UserContext.current().getUser().getLocale();
+//				String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+//						String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP2), locale, "");
+//				return (content);
+//			}
 		}
 		return null;
 	}
@@ -8098,6 +8104,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			this.rentalv2Provider.updateRentalDefaultRule(rule);
 
+			if (RuleSourceType.DEFAULT.getCode().equals(rule.getSourceType())) {
+				cmd.setSourceId(rule.getId());
+			}
 			//先删除后添加
 			rentalv2Provider.deleteRentalOrderRules(rule.getResourceType(), rule.getSourceType(), rule.getId(),
 					RentalOrderHandleType.REFUND.getCode());

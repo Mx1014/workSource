@@ -370,9 +370,9 @@ public class RentalCommonServiceImpl {
                 BigDecimal amount = order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
                         .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
 
-                if (refundTip == null)
-                     processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
-                else
+//                if (refundTip == null)
+//                     processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
+//                else
                     order.setTip(refundTip);
 
                 return amount;
@@ -380,9 +380,9 @@ public class RentalCommonServiceImpl {
                 order.setTip(refundTip);
                 return order.getPaidMoney();
             }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-                if (refundTip == null)
-                    order.setTip(processOrderNotRefundTip());
-                else
+//                if (refundTip == null)
+//                    order.setTip(processOrderNotRefundTip());
+//                else
                     order.setTip(refundTip);
             }
         }
