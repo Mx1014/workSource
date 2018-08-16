@@ -233,6 +233,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -5652,8 +5653,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		//ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId())); this will invoke _exit() and kill all thead include children thread
-		inActiveTaskByPlanId(cmd.getId());
+		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
+//		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 

@@ -9,6 +9,7 @@ import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -391,4 +392,6 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
+	Map<Long, String> getGroupNames(ArrayList<Long> groupIds);
 }
