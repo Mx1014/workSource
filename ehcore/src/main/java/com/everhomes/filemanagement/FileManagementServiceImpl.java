@@ -245,6 +245,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 catalog.getOperatorUid(), catalog.getOwnerId());
         if (null != member) {
             dto.setOperatorName(member.getContactName());
+        }else{
+            dto.setOperatorName("-");
         }
         dto.setUpdateTime(catalog.getUpdateTime());
         return dto;
@@ -634,6 +636,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 content.getOperatorUid(), content.getOwnerId());
         if (null != member) {
             dto.setOperatorName(member.getContactName());
+        }else{
+            dto.setOperatorName("-");
         }
         dto.setUpdateTime(content.getUpdateTime());
         dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
