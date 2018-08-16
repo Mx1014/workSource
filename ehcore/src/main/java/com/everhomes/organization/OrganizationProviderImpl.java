@@ -140,6 +140,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -5862,4 +5863,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return users;
 	}
+
+    @Override
+    public OrganizationMember findMemberByType(Long userId, Long orgId, String type) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(type))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId, String userName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%" + userName + "%"))
+                .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
 }

@@ -66,9 +66,12 @@ public class PunchMonthReportProviderImpl implements PunchMonthReportProvider {
 	}
 
 	@Override
-	public List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, Integer pageSize, CrossShardListingLocator locator) {
+	public List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, String punchYear, Integer pageSize, CrossShardListingLocator locator) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_PUNCH_MONTH_REPORTS)
 				.where(Tables.EH_PUNCH_MONTH_REPORTS.OWNER_ID.eq(ownerId));
+		if (null != punchYear ) {
+			step = step.and(Tables.EH_PUNCH_MONTH_REPORTS.PUNCH_MONTH.like(punchYear + "%"));
+		}
 		if (null != locator && locator.getAnchor() != null) {
 			step = step.and(Tables.EH_PUNCH_MONTH_REPORTS.ID.lt(locator.getAnchor()));
 		}

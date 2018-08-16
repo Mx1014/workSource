@@ -4156,6 +4156,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.stream().filter(r -> {
             return r.getSceneToken() != null;
         }).collect(Collectors.toList());
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5265,6 +5267,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.clear();
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5303,10 +5307,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 sceneList.add(sceneDTO);
                 return null;
             }).collect(Collectors.toList());
-
+            //返回前设置排序字段
+            handleSortName(sceneList);
             return sceneList;
         } else {
-            return this.listTouristRelatedScenes();
+        	//返回前设置排序字段
+            return handleSortName(this.listTouristRelatedScenes());
         }
     }
 
@@ -6559,4 +6565,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+    /**
+     * 有简称取简称,无简称取全名
+     * @param sceneList
+     * @return
+     */
+	private List<SceneDTO> handleSortName(List<SceneDTO> sceneList ){
+	    
+		  if(sceneList != null && sceneList.size()>0)
+		  {
+			  for(SceneDTO dto : sceneList){
+				  if(StringUtils.isBlank(dto.getAliasName())){
+					  dto.setAliasName(dto.getName()); 
+				  }
+			  }
+		  }
+		  return sceneList ;
+	  }
+	
 }

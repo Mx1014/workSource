@@ -127,7 +127,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 			Date expireDate = xiaomaoCard.getEndTime();
 			long newStartTime = expireDate.getTime();
 			dto.setStartPeriod(newStartTime);
-			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonth(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonthV2(newStartTime, parkingLot.getExpiredRechargeMonthCount());
 			dto.setEndPeriod(rechargeEndTimestamp.getTime());
 			dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
 			dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.xiaomao.rateName","个月"));
@@ -592,7 +592,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 	*
 	*/
 	private final static Timestamp getCardEndTime(long expireTime, int addMounthNum) {
-		return Utils.getTimestampByAddDistanceMonth(expireTime, addMounthNum);
+		return Utils.getTimestampByAddDistanceMonthV2(expireTime, addMounthNum);
 	}
 
 	private final List<XiaomaoCardType> listCardTypes(Long parkingLot) {

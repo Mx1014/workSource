@@ -24,7 +24,15 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.Record1;
+import org.jooq.Result;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.TableLike;
+import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -350,8 +358,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 //        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
         if (versionCode == null) {
             query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
         } else {
@@ -871,6 +879,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         }
 
         return details;
+    }
+
+    @Override
+    public List<Long> distinctEnterpriseIdsFromUniongroupMemberDetails() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Long>> query = context.selectDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        return query.fetch(0, Long.class);
     }
 
     /**
