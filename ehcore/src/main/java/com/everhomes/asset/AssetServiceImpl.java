@@ -3382,7 +3382,7 @@ public class AssetServiceImpl implements AssetService {
             for(int i = 0; i < allCommunityIds.size(); i ++){
                 Long cid = allCommunityIds.get(i);
                 // 园区下brother_standard_id不为null的即为coupled
-                boolean coupled = assetProvider.checkCoupledChargingStandard(cid);
+                boolean coupled = assetProvider.checkCoupledChargingStandard(cid, cmd.getCategoryId());
                 if(coupled){
                     //耦合
                     cmd.setOwnerId(cid);

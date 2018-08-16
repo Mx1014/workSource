@@ -4343,24 +4343,16 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public boolean checkCoupledChargingStandard(Long cid) {
+    public boolean checkCoupledChargingStandard(Long cid, Long categoryId) {
         DSLContext context = getReadWriteContext();
         List<Long> bros = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID)
                 .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.OWNER_ID.eq(cid))
+                .and(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.CATEGORY_ID.eq(categoryId))
                 .fetch(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID);
         if(bros.size() < 1){
             return true;
         }
-//        Long bro = context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.BROTHER_STANDARD_ID)
-//                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES)
-//                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.CHARGING_STANDARD_ID.eq(cid))
-//                .fetchOne(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.BROTHER_STANDARD_ID);
-//        if(bro == null){
-//            return false;
-//        }else{
-//            return true;
-//        }
         return false;
     }
 
