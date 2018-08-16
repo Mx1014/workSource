@@ -1822,11 +1822,11 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		Long flowId = cmd.getFlowId();
-		if(null == flowId) {
-			LOGGER.error("FlowId cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"FlowId cannot be null.");
-		}
+//		if(null == flowId) {
+//			LOGGER.error("FlowId cannot be null.");
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"FlowId cannot be null.");
+//		}
 
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
 				parkingLot.getId(), flowId);
