@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -241,4 +242,6 @@ public interface AssetService {
 	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);	
 
 	void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 }

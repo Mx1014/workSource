@@ -5381,5 +5381,14 @@ public class AssetServiceImpl implements AssetService {
         	return false;
         }
     }
+	
+	/**
+	 * 获取费项配置的税率
+	 * @param billGroupId
+	 * @return
+	 */
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
+		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
+	}
 
 }
