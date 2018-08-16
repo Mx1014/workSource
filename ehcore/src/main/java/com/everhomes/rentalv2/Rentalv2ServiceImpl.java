@@ -4958,12 +4958,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					builder.append(name).append(":").append(parseTimeInterval(halfDayIntervals.get(0).getBeginTime())).append("-")
 							.append(parseTimeInterval(halfDayIntervals.get(0).getEndTime())).append(separate);
 					if (halfDayIntervals.size()>1) {
-						name = halfDayIntervals.get(1).getName() == null ? "下午" : halfDayIntervals.get(0).getName();
+						name = halfDayIntervals.get(1).getName() == null ? "下午" : halfDayIntervals.get(1).getName();
 						builder.append(name).append(":").append(parseTimeInterval(halfDayIntervals.get(1).getBeginTime())).append("-")
 								.append(parseTimeInterval(halfDayIntervals.get(1).getEndTime())).append(separate);
 					}
-					if (rentalType.equals(RentalType.THREETIMEADAY.getCode()) && halfDayIntervals.size()>2) {
-						name = halfDayIntervals.get(2).getName() == null ? "晚上" : halfDayIntervals.get(0).getName();
+					if ( halfDayIntervals.size()>2) {
+						name = halfDayIntervals.get(2).getName() == null ? "晚上" : halfDayIntervals.get(2).getName();
 						builder.append(name).append(":").append(parseTimeInterval(halfDayIntervals.get(2).getBeginTime())).append("-")
 								.append(parseTimeInterval(halfDayIntervals.get(2).getEndTime())).append(separate);
 					}
