@@ -1040,16 +1040,17 @@ public class DecorationServiceImpl implements  DecorationService {
         else{//填充其他申请
             if (dto.getFlowCasees() == null)
                 dto.setFlowCasees(new ArrayList<>());
-            ListActiveGeneralApprovalCommand cmd2 = new ListActiveGeneralApprovalCommand();
+            ListGeneralApprovalCommand cmd2 = new ListGeneralApprovalCommand();
             cmd2.setOwnerId(request.getCommunityId());
             cmd2.setOwnerType(EntityType.COMMUNITY.getCode());
             cmd2.setModuleId(DecorationController.moduleId);
             cmd2.setModuleType(DecorationController.moduleType);
-            ListGeneralApprovalResponse response = generalApprovalService.listActiveGeneralApproval(cmd2);
+            ListGeneralApprovalResponse response = generalApprovalService.listGeneralApproval(cmd2);
             List<GeneralApprovalDTO> dtos = response.getDtos();
             if (dtos != null && dtos.size()>0)
                 for (GeneralApprovalDTO dto2 : dtos){
                     boolean flag = dto.getFlowCasees().stream().noneMatch(r -> dto2.getApprovalName().equals(r.getApprovalName()));
+                    flag = flag && dto2.getStatus().equals(2);
                     if (flag){
                         DecorationFlowCaseDTO dto3 = new DecorationFlowCaseDTO();
                         dto3.setStatus((byte)-1);
