@@ -207,6 +207,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	public void onFlowCaseEnd(FlowCaseState ctx) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+		task.setAmount(order.getAmount());
 		task.setStatus(FlowCaseStatus.FINISHED.getCode());
 		pmTaskProvider.updateTask(task);
 		//elasticsearch更新
