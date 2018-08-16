@@ -138,6 +138,7 @@ import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -388,4 +389,8 @@ public interface CustomerService {
     void updatePotentialCustomer(DeleteEnterpriseCommand cmd);
 
     SearchEnterpriseCustomerResponse listSyncErrorCustomer(SearchEnterpriseCustomerCommand cmd);
+
+    void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd);
+
+    OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd)
 }

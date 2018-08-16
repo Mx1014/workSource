@@ -574,6 +574,19 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
+    }
+
+    @Override
     public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
         List<String> sheetNames = new ArrayList<>();
         sheetNames.add("客户信息");
@@ -4750,7 +4763,7 @@ public class CustomerServiceImpl implements CustomerService {
         params.put("trackingName", cmd.getTrackingName());
         params.put("corpIndustryItemId", cmd.getCorpIndustryItemId());
         params.put("customerCategoryId", cmd.getCustomerCategoryId());
-        params.put("cncludedGroupIds", cmd.getIncludedGroupIds());
+        params.put("includedGroupIds", cmd.getIncludedGroupIds());
         params.put("infoFLag", cmd.getInfoFLag());
         params.put("keyword", cmd.getKeyword());
         params.put("lastTrackingTime", cmd.getLastTrackingTime());

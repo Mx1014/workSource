@@ -262,23 +262,23 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/exportEnterpriseCustomer</b>
+     * <b>URL: </b>
      * <p>导出企业客户excel</p>
      */
-    @RequestMapping("exportEnterpriseCustomer")
+    @RequestMapping("exportEnterpriseCustomerss")
     public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
         customerService.exportEnterpriseCustomer(cmd, response);
     }
 
 
     /**
-     * <b>URL: /contract/exportEnterpriseCustomer</b>
-     * <p>导出数据错误日志</p>
+     * <b>URL: /customer/exportEnterpriseCustomer</b>
+     * <p>导出企业客户excel</p>
      */
     @RequestMapping("exportEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd) {
-        contractService.exportContractListByContractList(cmd);
+        customerService.exportContractListByContractList(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

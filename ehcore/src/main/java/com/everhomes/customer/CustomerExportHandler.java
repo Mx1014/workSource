@@ -8,6 +8,7 @@ import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,10 @@ import org.springframework.stereotype.Component;
 import scala.Int;
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Map;
 
 @Component
@@ -27,6 +32,9 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private CustomerService customerService;
 
 
     @Override
@@ -97,13 +105,13 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         if(params.get("customerCategoryId") != null)
             customerCategoryId = (Long) params.get("customerCategoryId");
 
-        Long cncludedGroupIds = null;
-        if(params.get("cncludedGroupIds") != null)
-            cncludedGroupIds = (Long) params.get("cncludedGroupIds");
+        String includedGroupIds = null;
+        if(params.get("includedGroupIds") != null)
+            includedGroupIds = (String) params.get("includedGroupIds");
 
-        Byte infoFLag = null;
+        Boolean infoFLag = null;
         if(params.get("infoFLag") != null)
-            infoFLag = (Byte) params.get("infoFLag");
+            infoFLag = (Boolean) params.get("infoFLag");
 
         String keyword = null;
         if(params.get("keyword") != null)
@@ -113,17 +121,68 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         if(params.get("lastTrackingTime") != null)
             lastTrackingTime = (Integer) params.get("lastTrackingTime");
 
-        Long levelId = null;
+        String levelId = null;
         if(params.get("levelId") != null)
-            levelId = (Long) params.get("levelId");
+            levelId = (String) params.get("levelId");
 
-        /*if(params.get("ownerId") != null)
+        Long ownerId = null;
+        if(params.get("ownerId") != null)
+            ownerId = (Long) params.get("ownerId");
+
+        String ownerType = null;
         if(params.get("ownerType") != null)
+            ownerType = (String) params.get("ownerType");
+
+        String propertyArea = null;
         if(params.get("propertyArea") != null)
+            propertyArea = (String) params.get("propertyArea");
+
+        String propertyUnitPrice = null;
         if(params.get("propertyUnitPrice") != null)
+            propertyUnitPrice = (String) params.get("propertyUnitPrice");
+
+        String propertyType = null;
         if(params.get("propertyType") != null)
+            propertyType = (String)params.get("propertyType");
+
+        String sortField = null;
         if(params.get("sortField") != null)
-        if(params.get("sortType") != null)*/
+            sortField = (String) params.get("sortField");
+
+        Integer sortType = null;
+        if(params.get("sortType") != null)
+            sortType = (int)params.get("sortType");
+
+
+        ExportEnterpriseCustomerCommand cmd = new ExportEnterpriseCustomerCommand();
+        cmd.setCommunityId(communityId);
+        cmd.setTaskId(task_Id);
+        cmd.setNamespaceId(namespaceId);
+        cmd.setModuleName(moduleName);
+        cmd.setTrackingUids(trackingUids);
+        cmd.setTrackingUid(trackingUid);
+        cmd.setOrgId(orgId);
+        cmd.setAbnormalFlag(abnormalFlag);
+        cmd.setAddressId(addressId);
+        cmd.setBuildingId(buildingId);
+        cmd.setAdminFlag(adminFlag);
+        cmd.setType(type);
+        cmd.setTrackingName(trackingName);
+        cmd.setCorpIndustryItemId(corpIndustryItemId);
+        cmd.setCustomerCategoryId(customerCategoryId);
+        cmd.setIncludedGroupIds(includedGroupIds);
+        cmd.setInfoFLag(infoFLag);
+        cmd.setKeyword(keyword);
+        cmd.setLastTrackingTime(lastTrackingTime);
+        cmd.setLevelId(levelId);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setPropertyArea(propertyArea);
+        cmd.setPropertyUnitPrice(propertyUnitPrice);
+        cmd.setPropertyType(propertyType);
+        cmd.setSortField(sortField);
+        cmd.setSortType(sortType);
+
 
 
         Long userId = (Long) params.get("userId");
@@ -138,16 +197,9 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
 
 
-
-        SearchContractCommand cmd = new SearchContractCommand();
-        cmd.setCommunityId(communityId);
-        cmd.setTaskId(task_Id);
-        cmd.setNamespaceId(namespaceId);
-
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        ContractService contractService = getContractService(cmd.getNamespaceId());
-        OutputStream outputStream = contractService.exportOutputStreamContractListByContractList(cmd, taskId);
+        OutputStream outputStream = customerService.exportEnterpriseCustomer(cmd);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
