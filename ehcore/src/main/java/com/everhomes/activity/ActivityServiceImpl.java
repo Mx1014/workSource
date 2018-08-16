@@ -7003,7 +7003,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
         roster.setPayTime(purchaseOrderDTO.getPaymentTime());
 
-        roster.setPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()));
+        roster.setPayAmount(activity.getChargePrice());
         roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
