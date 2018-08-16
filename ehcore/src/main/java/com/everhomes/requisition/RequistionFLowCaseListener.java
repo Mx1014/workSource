@@ -9,6 +9,8 @@ import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.GeneralFormValsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,16 +109,53 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         return null;
     }
 
-    @Override
-    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        return null;
-    }
+
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
 
     }
 
+    @Override
+    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+
+        List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(), flowCase.getReferId(), flowCase.getModuleId(), flowCase.getProjectId());
+
+
+
+
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        FlowCaseEntity e;
+
+        for(GeneralFormVal val : request){
+            e = new FlowCaseEntity();
+            switch(val.getFieldType()){
+                case "SINGLE_LINE_TEXT":
+                case "INTEGER_TEXT":
+                case "DATE":
+                case "NUMBER_TEXT":
+                case "DROP_BOX":
+                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                    break;
+                case "MULTI_LINE_TEXT":
+                    e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+                    break;
+                case "IMAGE":
+                    e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+                    break;
+                case "FILE":
+                    e.setEntityType(FlowCaseEntityType.FILE.getCode());
+                    break;
+                default:
+                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                    break;
+            }
+            e.setKey(val.getFieldName());
+            e.setValue(val.getFieldValue());
+            entities.add(e);
+        }
+        return entities;
+    }
 //    @Override
 //    public void onApplicationEvent(ContextRefreshedEvent event) {
 //        for(RequistionListener req : reqListeners){
