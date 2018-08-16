@@ -25,5 +25,6 @@ CREATE TABLE `eh_payment_bill_orders`(
 -- AUTHOR: 梁燕龙 20180815
 -- REMARK: 活动报名 统一订单
 ALTER TABLE `eh_activity_roster` MODIFY COLUMN `order_no` VARCHAR(64);
+ALTER TABLE `eh_activity_roster` MODIFY COLUMN `refund_order_no` VARCHAR(64);
 -- --------------------- SECTION END ---------------------------------------------------------
 
