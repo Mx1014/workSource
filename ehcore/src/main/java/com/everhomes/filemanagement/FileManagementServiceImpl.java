@@ -249,6 +249,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             dto.setOperatorName("-");
         }
         dto.setUpdateTime(catalog.getUpdateTime());
+        dto.setScopes(listFileCatalogScopes(UserContext.getCurrentNamespaceId(), dto.getId()));
         return dto;
     }
 
