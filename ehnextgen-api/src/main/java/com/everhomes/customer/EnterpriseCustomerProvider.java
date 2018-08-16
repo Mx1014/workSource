@@ -234,5 +234,5 @@ public interface EnterpriseCustomerProvider {
     CustomerTalent findPotentialCustomerById(Long sourceId);
     List<CustomerAdminRecord> listEnterpriseCustomerAdminRecordsByToken(Long id, String adminToken);
 
-    void updateCustomerAptitudeFlag(Long id, Byte approvalStatus);
+    void updateCustomerAptitudeFlag(Long id, Long approvalStatus);
 }

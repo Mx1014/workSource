@@ -109,7 +109,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     ex.printStackTrace();
                 }
 
-                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), (byte)1);
+                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1l);
             }
         }
 
