@@ -4,11 +4,11 @@ package com.everhomes.rest.launchpad;
 /**
  * <ul>
  *     <li>DEFAULT("Default"): 默认</li>
- *     <li>SHAPE("shape"): 滚动样式</li>
+ *     <li>SHAPE("Shape"): 滑动变形样式</li>
  * </ul>
  */
 public enum BannerStyle {
-    DEFAULT("Default"), SHAPE("shape");
+    DEFAULT("Default"), SHAPE("Shape");
 
     private String code;
 
