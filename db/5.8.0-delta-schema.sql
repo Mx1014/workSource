@@ -340,7 +340,7 @@ ALTER TABLE eh_punch_day_logs ADD COLUMN go_out_request_count INTEGER COMMENT '�
 ALTER TABLE eh_punch_day_logs ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN overtime_request_count INTEGER COMMENT '当天加班申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN punch_exception_request_count INTEGER COMMENT '当天异常打卡申请次数';
-ALTER TABLE eh_punch_day_logs ADD COLUMN split_date_time TIMESTAMP COMMENT '当天考勤时间的分界点';
+ALTER TABLE eh_punch_day_logs ADD COLUMN split_date_time DATETIME COMMENT '当天考勤时间的分界点';
 
 ALTER TABLE eh_punch_day_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
 ALTER TABLE eh_punch_day_log_files ADD COLUMN dept_id BIGINT COMMENT '所属部门Id' AFTER enterprise_id;
