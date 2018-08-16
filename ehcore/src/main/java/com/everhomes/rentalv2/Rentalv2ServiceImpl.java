@@ -767,10 +767,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					if (StringUtils.isBlank(a.getContent())) {
 
 						String locale = UserContext.current().getUser().getLocale();
-
-						String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								String.valueOf(RentalNotificationTemplateCode.RENTAL_TEXT_REMARK), locale, "");
-						rca.setContent(content);
+						if (StringUtils.isBlank(rca.getContent())) {
+							String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+									String.valueOf(RentalNotificationTemplateCode.RENTAL_TEXT_REMARK), locale, "");
+							rca.setContent(content);
+						}
 					}
 				} else if (a.getAttachmentType().equals(AttachmentType.SHOW_CONTENT.getCode())) {
 					if (StringUtils.isBlank(a.getContent())) {
@@ -1134,20 +1135,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				EhRentalv2Resources.class.getSimpleName(), cmd.getRentalSiteId(), null);
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
 
-		//删掉除物资 和 推销员的内容
+		//删掉除物资 和 推销员以外的内容
 		attachments = attachments.stream().filter(r -> r.getAttachmentType() > AttachmentType.ATTACHMENT.getCode()).collect(Collectors.toList());
-		setAttachmentsByResourceType(attachments, rs.getResourceTypeId());
+		setAttachmentsByResource(attachments, rs);
 		response.setAttachments(convertAttachments(attachments));
 
 		return response;
 	}
 
 	//根据业务设置自定义提交内容
-	private void setAttachmentsByResourceType(List<RentalConfigAttachment> attachments, Long resourceTypeId) {
-		RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(resourceTypeId);
+	private void setAttachmentsByResource(List<RentalConfigAttachment> attachments, RentalResource rs) {
+		RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
+		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 		RentalConfigAttachment attachment = new RentalConfigAttachment();
 		attachment.setAttachmentType(AttachmentType.TEXT_REMARK.getCode());
-		attachment.setMustOptions((byte)0);
+		attachment.setContent(rule.getRemark());
+		attachment.setMustOptions(rule.getRemarkFlag() == null ? (byte)0 : rule.getRemarkFlag());
 		attachments.add(attachment);
 		if (RentalV2ResourceType.SCREEN.getCode().equals(resourceType.getIdentify())) {
 			attachment = new RentalConfigAttachment();
