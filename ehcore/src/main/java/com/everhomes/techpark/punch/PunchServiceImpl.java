@@ -11261,10 +11261,10 @@ public class PunchServiceImpl implements PunchService {
         }).first().first();
 
         monthReportExecutorPool.execute(() -> {
+            List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
             try {
             	this.dbProvider.execute((TransactionStatus status) -> {
             		
-	                List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
 	                if(members != null){
 	                	report.setPunchMemberNumber(members.size());
 	                	punchMonthReportProvider.updatePunchMonthReport(report);
@@ -11285,7 +11285,7 @@ public class PunchServiceImpl implements PunchService {
             } catch (Exception e) {
                 LOGGER.error("calculate reports error!! cmd is  :" + cmd, e);
             } finally {
-                Integer count = punchProvider.countpunchStatistic(report.getPunchMonth(), report.getOwnerId());
+                Integer count = (members == null) ? 0 : members.size();
                 report.setPunchMemberNumber(count);
                 report.setProcess(100);
                 //更新完成删除redis的记录
