@@ -924,6 +924,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
+                detail.setOrganizationId(org.getId());
                 detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
                 detail.setStringTag1(customer.getCorpEmail());
                 detail.setDescription(customer.getCorpDescription());
