@@ -5475,20 +5475,45 @@ public class AssetProviderImpl implements AssetProvider {
 	
 	public IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
-        DSLContext context = getReadOnlyContext();
-        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-        Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
-        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))
+		DSLContext context = getReadOnlyContext();
+		EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+		Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
+		List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+				.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .fetchInto(PaymentChargingItemScope.class);
-        if(scopes != null && scopes.size() != 0) {
-        	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {
-			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-		}
+		if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        }else {//说明该域空间下已经有数据了
+        	scopes = context.selectFrom(t1)
+            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))//用于判断是否是使用默认配置，还是处于解耦状态
+                    .fetchInto(PaymentChargingItemScope.class);
+        	if(scopes != null && scopes.size() != 0) {
+            	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            }else {
+            	scopes = context.selectFrom(t1)
+            			.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                        .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                        .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                        .fetchInto(PaymentChargingItemScope.class);
+            	if(scopes != null && scopes.size() == 0) {
+            		scopes = context.selectFrom(t1)
+                    		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+                            .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                            .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                            .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                            .fetchInto(PaymentChargingItemScope.class);
+            		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            	}else {
+            		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            	}
+    		}
+        }
         return response;
     }
 	
@@ -5498,6 +5523,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
         List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
         		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .fetchInto(PaymentChargingStandardsScopes.class);
         if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
         	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5506,6 +5532,7 @@ public class AssetProviderImpl implements AssetProvider {
             		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
                     .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                     .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                     .fetchInto(PaymentChargingStandardsScopes.class);
         	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5522,6 +5549,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
         List<PaymentBillGroup> scopes = context.selectFrom(t1)
         		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .fetchInto(PaymentBillGroup.class);
         if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
         	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5530,6 +5558,7 @@ public class AssetProviderImpl implements AssetProvider {
             		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
                     .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                     .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                     .fetchInto(PaymentBillGroup.class);
         	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改

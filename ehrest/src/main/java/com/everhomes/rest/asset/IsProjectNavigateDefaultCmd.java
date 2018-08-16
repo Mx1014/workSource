@@ -26,6 +26,7 @@ public class IsProjectNavigateDefaultCmd {
     private String ownerType;
     @NotNull
     private Integer namespaceId;
+    private Long categoryId;
 
     @Override
     public String toString() {
@@ -62,5 +63,13 @@ public class IsProjectNavigateDefaultCmd {
 
 	public void setModuleType(String moduleType) {
 		this.moduleType = moduleType;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 }
