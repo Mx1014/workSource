@@ -2176,7 +2176,7 @@ public class PortalServiceImpl implements PortalService {
 
 		List<PortalContentScope> contentScopes = new ArrayList<>();
 		PortalContentScope scope1 = new PortalContentScope();
-		scope1.setId(0L);
+		scope1.setScopeId(0L);
 		scope1.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
 		contentScopes.add(scope1);
 
