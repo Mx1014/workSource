@@ -5,12 +5,14 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
@@ -92,6 +94,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     @Autowired
     private AddressProvider addressProvider;
 
+    @Autowired
+    private ContractProvider contractProvider;
+
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISE_CUSTOMER;
@@ -149,6 +154,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceItemId" , customer.getSourceItemId());
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
+            builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -240,6 +246,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        //是否为资质客户增加筛选
+        Byte aptitudeFlag = contractProvider.filterAptitudeCustomer(cmd.getCommunityId(),cmd.getNamespaceId());
+        if(cmd.getAptitudeFlagItemId() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", cmd.getAptitudeFlagItemId()));
+        }else if(aptitudeFlag == 1) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", CustomerAptitudeFlag.APTITUDE.getCode()));
+        }
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(addressId);
@@ -671,6 +684,24 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
             } else {
                 dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
             }
         }
 

@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -35,10 +39,6 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -61,11 +61,6 @@ import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
-import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
-import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
-import com.everhomes.server.schema.tables.daos.EhContractsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
@@ -1398,6 +1393,56 @@ public class ContractProviderImpl implements ContractProvider {
 						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
 						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 						.fetchInto(Contract.class);
+	}
+
+	@Override
+	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
+		EhEnterpriseCustomerAptitudeFlagDao dao = new EhEnterpriseCustomerAptitudeFlagDao(context.configuration());
+
+		SelectConditionStep<Record> query = context.select()
+				.from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.eq(namespaceId));
+		Record result = query.fetchAny();
+
+		if(result != null){
+			EnterpriseCustomerAptitudeFlag flag = ConvertHelper.convert(result, EnterpriseCustomerAptitudeFlag.class);
+			return flag.getValue();
+		}else{
+			LOGGER.error("the namespace and communityid not find flag");
+			return 0;
+		}
+	}
+
+	@Override
+	public EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
+		EhEnterpriseCustomerAptitudeFlagDao dao = new EhEnterpriseCustomerAptitudeFlagDao(context.configuration());
+
+		SelectConditionStep<Record> query = context.select()
+				.from(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG)
+				.where(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_ENTERPRISE_CUSTOMER_APTITUDE_FLAG.NAMESPACE_ID.eq(namespaceId));
+		Record result = query.fetchAny();
+
+		if(result != null){
+			EnterpriseCustomerAptitudeFlag flag = ConvertHelper.convert(result, EnterpriseCustomerAptitudeFlag.class);
+			flag.setValue(adptitudeFlag);
+			dao.update(flag);
+			return flag;
+		}else{
+			long id = this.dbProvider.allocPojoRecordId(EhEnterpriseCustomerAptitudeFlag.class);
+			EhEnterpriseCustomerAptitudeFlag flag2 = new EhEnterpriseCustomerAptitudeFlag();
+			flag2.setId(id);
+			flag2.setNamespaceId(namespaceId);
+			flag2.setOwnerId(ownerId);
+			flag2.setOwnerType("community");
+			flag2.setValue(adptitudeFlag);
+			dao.insert(flag2);
+			return ConvertHelper.convert(flag2, EnterpriseCustomerAptitudeFlag.class);
+
+		}
 	}
 
 }

@@ -1,6 +1,17 @@
 // @formatter:off
 package com.everhomes.contract;
 
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import com.everhomes.rest.contract.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -484,6 +495,36 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
 		List<ContractEventDTO> result = contractService.listContractEvents(cmd);
 		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /contract/filterAptitudeCustomer</b>
+	 */
+	@RequestMapping("filterAptitudeCustomer")
+	@RestReturn(value = String.class)
+	public RestResponse filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		Byte AptitudeFlag = contractService.filterAptitudeCustomer(cmd);
+		RestResponse response = new RestResponse(AptitudeFlag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /contract/updateAptitudeCustomer</b>
+	 */
+	@RequestMapping("updateAptitudeCustomer")
+	@RestReturn(value = AptitudeCustomerFlagDTO.class)
+	public RestResponse updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		AptitudeCustomerFlagDTO flag = contractService.updateAptitudeCustomer(cmd);
+		RestResponse response = new RestResponse(flag);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

@@ -46,6 +46,7 @@ import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
 public interface ContractService {
@@ -89,4 +90,12 @@ public interface ContractService {
     //add by tangcen
 	DurationParamDTO getDuration(GetDurationParamCommand cmd);
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+
+	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
+		return null;
+	}
+
+	default AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+		return null;
+	}
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -19,38 +20,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.CustomerEntryInfo;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.customer.IndividualCustomerProvider;
-import com.everhomes.customer.SyncDataTask;
-import com.everhomes.customer.SyncDataTaskService;
+import com.everhomes.customer.*;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
-import com.everhomes.gogs.GogsCommit;
-import com.everhomes.gogs.GogsConflictException;
-import com.everhomes.gogs.GogsFileNotExistException;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.gogs.*;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.openapi.ContractTemplate;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationOwner;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.openapi.*;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -61,84 +39,12 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.ChargingVariables;
-import com.everhomes.rest.asset.ContractProperty;
-import com.everhomes.rest.asset.FeeRules;
-import com.everhomes.rest.asset.PaymentExpectanciesCommand;
-import com.everhomes.rest.asset.PaymentVariable;
-import com.everhomes.rest.asset.RentAdjust;
-import com.everhomes.rest.asset.RentFree;
-import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.contract.AddContractTemplateCommand;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeType;
-import com.everhomes.rest.contract.ChargingItemVariables;
-import com.everhomes.rest.contract.ChargingVariablesDTO;
-import com.everhomes.rest.contract.CheckAdminCommand;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.contract.ContractAttachmentDTO;
-import com.everhomes.rest.contract.ContractChargingChangeDTO;
-import com.everhomes.rest.contract.ContractChargingChangeEventDTO;
-import com.everhomes.rest.contract.ContractChargingItemDTO;
-import com.everhomes.rest.contract.ContractChargingItemEventDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractEventDTO;
-import com.everhomes.rest.contract.ContractExportDetailDTO;
-import com.everhomes.rest.contract.ContractLogDTO;
-import com.everhomes.rest.contract.ContractNumberDataType;
-import com.everhomes.rest.contract.ContractParamDTO;
-import com.everhomes.rest.contract.ContractParamGroupMapDTO;
-import com.everhomes.rest.contract.ContractParamGroupType;
-import com.everhomes.rest.contract.ContractPaymentPlanDTO;
-import com.everhomes.rest.contract.ContractPaymentType;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.ContractTemplateDTO;
-import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
-import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.contract.ContractTrackingTemplateCode;
-import com.everhomes.rest.contract.ContractType;
-import com.everhomes.rest.contract.CreateContractCommand;
-import com.everhomes.rest.contract.CreatePaymentContractCommand;
-import com.everhomes.rest.contract.DeleteContractCommand;
-import com.everhomes.rest.contract.DeleteContractTemplateCommand;
-import com.everhomes.rest.contract.DenunciationContractCommand;
-import com.everhomes.rest.contract.DurationParamDTO;
-import com.everhomes.rest.contract.EntryContractCommand;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.GenerateContractNumberCommand;
-import com.everhomes.rest.contract.GenerateContractNumberRule;
-import com.everhomes.rest.contract.GetContractParamCommand;
-import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
-import com.everhomes.rest.contract.GetDurationParamCommand;
-import com.everhomes.rest.contract.GetUserGroupsCommand;
-import com.everhomes.rest.contract.ListApartmentContractsCommand;
-import com.everhomes.rest.contract.ListContractEventsCommand;
-import com.everhomes.rest.contract.ListContractTemplatesResponse;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierResponse;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
-import com.everhomes.rest.contract.ReviewContractCommand;
-import com.everhomes.rest.contract.SearchContractCommand;
-import com.everhomes.rest.contract.SetContractParamCommand;
-import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
-import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
-import com.everhomes.rest.contract.UpdateContractTemplateCommand;
-import com.everhomes.rest.contract.UpdatePaymentContractCommand;
-import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -164,19 +70,8 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.OSType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.varField.FieldItem;
 import com.everhomes.varField.FieldProvider;
@@ -198,7 +93,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -207,18 +101,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -3516,5 +3400,25 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
         return String.format(
                 "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
     }
+
+    @Override
+	public Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
+		Byte aptitudeFlag = 0;
+		aptitudeFlag = contractProvider.filterAptitudeCustomer(cmd.getOwnerId(),cmd.getNamespaceId());
+		return aptitudeFlag;
+	}
+
+	@Override
+	public AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+		if(cmd.getAptitudeFlag() != null && cmd.getNamespaceId() != null && cmd.getOwnerId() != null) {
+			EnterpriseCustomerAptitudeFlag flag = contractProvider.updateAptitudeCustomer(cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getAptitudeFlag());
+			return ConvertHelper.convert(flag, AptitudeCustomerFlagDTO.class);
+		}else{
+			LOGGER.error("the namespaceId or ownerId or flag is null ");
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+					"the namespaceId or ownerId or flag is null ");
+		}
+
+	}
 
 }
