@@ -239,7 +239,7 @@ public interface AssetService {
 
 	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
 
-	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd);
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     

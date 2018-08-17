@@ -1,5 +1,38 @@
 package com.everhomes.asset;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
+import org.jooq.Table;
+import org.jooq.UpdateQuery;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -10,18 +43,74 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
-import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.order.OrderDTO;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetItemFineType;
+import com.everhomes.rest.asset.AssetModuleType;
+import com.everhomes.rest.asset.AssetPaymentBillAttachment;
+import com.everhomes.rest.asset.AssetSubtractionType;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillGroupDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.BillingCycle;
+import com.everhomes.rest.asset.ConfigChargingItems;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateBillGroupCommand;
+import com.everhomes.rest.asset.DeleteBillGroupReponse;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ModifyBillGroupCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.SubItemDTO;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
+import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -49,33 +138,49 @@ import com.everhomes.server.schema.tables.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetPaymentOrderDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingItemScopesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsScopesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentContractReceiverDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentExemptionItemsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentFormulaDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentLateFineDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentSubtractionItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DecimalUtils;
+import com.everhomes.util.GsonUtil;
+import com.everhomes.util.IntegerUtil;
+import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
-import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 /**
  * Created by Administrator on 2017/2/20.
  */
@@ -5198,16 +5303,12 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
+        		t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
@@ -5229,41 +5330,41 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.TARGET_NAME.like("%" + targetName + "%"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
         	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
             //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
             //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
             if(paymentType.equals(0)) {//微信
-            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
-            			.or(t4.PAYMENT_TYPE.eq("7"))
-            			.or(t4.PAYMENT_TYPE.eq("9"))
-            			.or(t4.PAYMENT_TYPE.eq("12"))
-            			.or(t4.PAYMENT_TYPE.eq("21"))
+            	query.addConditions(t2.PAYMENT_TYPE.eq(1)
+            			.or(t2.PAYMENT_TYPE.eq(7))
+            			.or(t2.PAYMENT_TYPE.eq(9))
+            			.or(t2.PAYMENT_TYPE.eq(12))
+            			.or(t2.PAYMENT_TYPE.eq(21))
             	);
             }else if(paymentType.equals(1)) {//支付宝
-            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
-            			.or(t4.PAYMENT_TYPE.eq("10"))
-            			.or(t4.PAYMENT_TYPE.eq("13"))
+            	query.addConditions(t2.PAYMENT_TYPE.eq(8)
+            			.or(t2.PAYMENT_TYPE.eq(10))
+            			.or(t2.PAYMENT_TYPE.eq(13))
             	);
             }else if(paymentType.equals(2)){//对公转账
-            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
+            	query.addConditions(t2.PAYMENT_TYPE.eq(2));
             }
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
-        	query.addConditions(t3.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
+        	query.addConditions(t2.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
-        query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
-        query.addOrderBy(t3.CREATE_TIME.desc());
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
+        query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
         	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
         	dto.setBillId(r.getValue(t.ID));//账单ID
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
+        	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID
         	ListBillDetailVO listBillDetailVO = listBillDetailForPaymentV2(dto.getBillId());
         	dto.setDateStrBegin(listBillDetailVO.getDateStrBegin());
         	dto.setDateStrEnd(listBillDetailVO.getDateStrEnd());
@@ -5283,7 +5384,7 @@ public class AssetProviderImpl implements AssetProvider {
     		}
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
-            String payTime = r.getValue(t3.CREATE_TIME).toString();
+            String payTime = r.getValue(t2.PAYMENT_TIME).toString();
 			try {
 				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
 			}catch (Exception e){
@@ -5292,7 +5393,7 @@ public class AssetProviderImpl implements AssetProvider {
             }
             dto.setPayTime(payTime);
             //获得付款人员（缴费人名称、缴费人电话）
-            User userById = userProvider.findUserById(r.getValue(t4.UID));
+            User userById = userProvider.findUserById(r.getValue(t2.UID));
             if(userById != null) {
             	dto.setPayerName(userById.getNickName());
                 UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
@@ -5301,43 +5402,15 @@ public class AssetProviderImpl implements AssetProvider {
                 }
             }
             try {
-            	Integer queryPaymentType = Integer.parseInt(r.getValue(t4.PAYMENT_TYPE));
+            	Integer queryPaymentType = r.getValue(t2.PAYMENT_TYPE);
                 dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
             }catch(Exception e){
-            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t4.PAYMENT_TYPE), e);
+            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t2.PAYMENT_TYPE), e);
             }
             dto.setPaymentStatus(1);//1：已完成，0：订单异常
             list.add(dto);
             return null;
         });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			//dto.setAmount(AmountUtil.centToUnit(LongUtil.convert(orderDTO.getAmount())));
-            			if(orderDTO.getPaymentType() != null) {
-            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
-            			}
-            			list.set(j, dto);
-            		}
-            	}
-            }
-        }
         return list;
     }
 	

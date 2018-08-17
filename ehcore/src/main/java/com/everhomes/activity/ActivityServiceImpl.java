@@ -204,15 +204,18 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
 import com.everhomes.rest.gorder.order.BusinessPayerType;
 import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
 import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
 import com.everhomes.rest.gorder.order.OrderErrorCode;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.gorder.order.RefundOrderCommandResponse;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -1207,9 +1210,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
         BigDecimal amout = activity.getChargePrice();
         if(amout == null){
-            createPurchaseOrderCommand.setAmount(new BigDecimal(0));
+            createPurchaseOrderCommand.setAmount(new BigDecimal(0).longValue());
         }
-        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)));
+        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
         createPurchaseOrderCommand.setAccountCode(generateAccountCode());
         createPurchaseOrderCommand.setClientAppName(cmd.getClientAppName());
@@ -2632,17 +2635,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
-		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
-			refundV1(activity, roster, userId, refoundOrderNo);
-		}else {
-            Long orderId = refundV3(activity, roster, userId);
-            if (orderId != null) {
-                roster.setRefundPayOrderId(orderId);
-            }
+        RefundOrderCommandResponse refundOrderCommandResponse = refundActivitySignupOrder(activity, roster, userId);
+        if (refundOrderCommandResponse != null) {
+            roster.setRefundPayOrderId(refundOrderCommandResponse.getOrderId());
         }
-
 		roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
-		roster.setRefundOrderNo(refoundOrderNo);
+		roster.setRefundOrderNo(refundOrderCommandResponse.getBusinessOrderNumber());
 		roster.setRefundAmount(roster.getPayAmount());
 		roster.setRefundTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateRoster(roster);
@@ -2743,6 +2741,37 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             return refundResponse.getResponse().getOrderId();
         }
         return null;
+    }
+
+    private RefundOrderCommandResponse refundActivitySignupOrder(Activity activity, ActivityRoster roster, Long userId){
+        CreateRefundOrderCommand createRefundOrderCommand = prepareRefundCommand(roster);
+        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), StringHelper.toJsonString(refundOrderRestResponse));
+        } else{
+            LOGGER.error("Refund from vendor failed, orderNo={}, userId={}, activityId={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), StringHelper.toJsonString(refundOrderRestResponse));
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill  refound error");
+        }
+
+        return refundOrderRestResponse.getResponse();
+    }
+
+    private CreateRefundOrderCommand prepareRefundCommand(ActivityRoster roster){
+        CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        createRefundOrderCommand.setAccountCode(generateAccountCode());
+        createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
+        createRefundOrderCommand.setAmount(roster.getPayAmount().longValue());
+        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
+        createRefundOrderCommand.setCallbackUrl(getPayCallbackUrl());
+        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        return createRefundOrderCommand;
     }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
@@ -6998,12 +7027,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "no activity.");
         }
         //检验支付结果和应价格是否相等
-        checkPayAmount(purchaseOrderDTO.getAmount(), activity.getChargePrice());
+        checkPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()), activity.getChargePrice());
         //支付宝回调时，可能会同时回调多次，
         roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
         roster.setPayTime(purchaseOrderDTO.getPaymentTime());
 
-        roster.setPayAmount(purchaseOrderDTO.getAmount());
+        roster.setPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()/100));
         roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());

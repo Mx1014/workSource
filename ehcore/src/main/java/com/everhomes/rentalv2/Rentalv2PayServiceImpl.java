@@ -20,10 +20,8 @@ import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.gorder.order.*;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -329,7 +327,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
         OrderCommandResponse response = orderCommandResponse.getPayResponse();
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        PreOrderDTO dto = ConvertHelper.convert(response, PreOrderDTO.class);
         dto.setAmount(changePayAmount(cmd.getAmount()));
         List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
         if (paymentMethods != null)
@@ -343,7 +341,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     private String getPayMethodExtendInfo(){
-        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
         String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
 
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
@@ -352,27 +350,33 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public void refundOrder(RentalOrder order,Long amount) {
-        CreateOrderCommand cmd = new CreateOrderCommand();
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-        cmd.setRefundOrderId(record.getPayOrderId());
-        cmd.setBizOrderNum(record.getOrderNo().toString());
-        cmd.setAmount(amount);
+
+        CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        createRefundOrderCommand.setAccountCode("NS"+record.getNamespaceId().toString());
+        createRefundOrderCommand.setBusinessOrderNumber(record.getBizOrderNum());
+        createRefundOrderCommand.setAmount(amount);
+        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"refund.v2.callback.url.rental", "");
         String backUrl = homeUrl + contextPath + backUri;
-        cmd.setBackUrl(backUrl);
-        cmd.setAccountCode("NS"+record.getNamespaceId().toString());
-        CreateOrderRestResponse refundOrder = payServiceV2.createRefundOrder(cmd);
-        if(refundOrder != null && refundOrder.getErrorCode() != null
-                && refundOrder.getErrorCode().equals(HttpStatus.OK.value())){
+        createRefundOrderCommand.setCallbackUrl(backUrl);
+        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+
+        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
         } else{
             LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", order.getOrderNo(), order,
-                    refundOrder);
+                    refundOrderRestResponse);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
                     RentalServiceErrorCode.ERROR_REFUND_ERROR,
                     "bill refund error");
         }
+
     }
 
     private void saveOrderRecord(PreOrderCommand cmd , PurchaseOrderCommandResponse orderCommandResponse) {
@@ -380,7 +384,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         Rentalv2OrderRecord record = new Rentalv2OrderRecord();
         record.setOrderNo(cmd.getOrderId());
         record.setBizOrderNum(response.getBizOrderNum());
-        record.setPayOrderId(orderCommandResponse.getOrderId());
+        record.setPayOrderId(response.getOrderId());
         record.setAccountId(cmd.getBizPayeeId());
         record.setAmount(changePayAmount(cmd.getAmount()));
         record.setOrderCommitNonce(response.getOrderCommitNonce());
@@ -445,7 +449,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
 
         BigDecimal totalAmountCents = cmd.getAmount();
-        preOrderCommand.setAmount(totalAmountCents);
+        preOrderCommand.setAmount(changePayAmount(totalAmountCents));
 
 
         String accountCode = "NS"+cmd.getNamespaceId();

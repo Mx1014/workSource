@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetPayService;
-import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.asset.DefaultAssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -35,13 +33,13 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
@@ -83,9 +81,6 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
-	
-	@Autowired
-	private AssetPayService assetPayService;
 	
 	@Autowired
     private DbProvider dbProvider;
@@ -268,8 +263,40 @@ public class PmsyServiceImpl implements PmsyService{
 		response.setProjectId(cmd.getProjectId());
 		//按时间排序
 		Collections.sort(requests);
+		
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		if(isZuolinTest()) {
+			for(int i = 0;i < 1;i++) {
+				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setCustomerId(cmd.getCustomerId());
+				dto.setBillDateStr(1283901723L);
+				dto.setReceivableAmount(new BigDecimal("0.01"));
+				dto.setDebtAmount(new BigDecimal("0.01"));
+				totalAmount = totalAmount.add(new BigDecimal("0.01"));
+				PmsyBillsDTO newMonthlyBill = new PmsyBillsDTO();
+				newMonthlyBill.setBillDateStr(1283901723L);
+				newMonthlyBill.setMonthlyDebtAmount(new BigDecimal("0.01"));
+				newMonthlyBill.setMonthlyReceivableAmount(new BigDecimal("0.01"));
+				List<PmsyBillItemDTO> newRequests = new ArrayList<PmsyBillItemDTO>();
+				newRequests.add(dto);
+				newMonthlyBill.setRequests(newRequests);
+				requests.add(newMonthlyBill);
+			}
+			response.setTotalAmount(new BigDecimal("0.01"));
+		}
+		
 		return response;
 	}
+	
+	public boolean isZuolinTest() {
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		String haianEnvironment = configProvider.getValue(999993, "pay.v2.asset.haian_environment", "");
+		if(haianEnvironment.equals("beta")) {
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public PmsyBillsDTO getMonthlyPmBill(GetPmsyBills cmd){
 		PmsyBillsDTO mb = new PmsyBillsDTO();
@@ -511,8 +538,9 @@ public class PmsyServiceImpl implements PmsyService{
   			query.fetch().map(r -> {
         	  createPaymentBillOrderCommand.setBillGroupId(r.getValue(t.ID));
               return null;
-         });
-        
+        });
+  		createPaymentBillOrderCommand.setSourceType(SourceType.MOBILE.getCode());//手机APP支付
+  			
         return handler.createOrder(createPaymentBillOrderCommand);
 	}
 	
@@ -625,9 +653,9 @@ public class PmsyServiceImpl implements PmsyService{
     }
 	
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	PaymentCallBackHandler handler = PlatformContext.getComponent(
-    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PM_SIYUAN_CODE);
-    	//支付模块回调接口，通知支付结果
-    	assetPayService.payNotify(cmd, handler);
+		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
+        DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
+        //支付模块回调接口，通知支付结果
+        handler.payNotify(cmd);
     }
 }
