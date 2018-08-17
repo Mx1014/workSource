@@ -2636,6 +2636,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType driverType, boolean generate) {
         User user = UserContext.current().getUser();
+        Long t1 = DateHelper.currentGMTTime().getTime();
         LOGGER.info("开始获取auths" );
         ListingLocator locator = new ListingLocator();
         //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
@@ -2645,7 +2646,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
         resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
-        LOGGER.info("auths开始循环" );
+        Long t2 = DateHelper.currentGMTTime().getTime();
+        LOGGER.info("auths 获取 "+(t2-t1));
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
@@ -2672,11 +2674,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
             	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
             	//added by wh
+            	Long t3 = DateHelper.currentGMTTime().getTime();
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
                 
                 doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+                Long t4 = DateHelper.currentGMTTime().getTime();
+
+                LOGGER.info("拿一个uclbrt 的二维码"+(t4-t3));
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
