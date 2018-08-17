@@ -11512,7 +11512,7 @@ public class PunchServiceImpl implements PunchService {
  
 	@Override
 	public GetOrgCheckInDataResponse getOrgCheckInData(GetOrgCheckInDataCommand cmd) {
-		organizationMemberByUIdCache.set(new HashMap<String, OrganizationMember>());
+		
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
 		if (appNamespaceMapping == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
@@ -11536,6 +11536,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getOrgId());
 		List<PunchLog> logs = punchProvider.listPunchLogsForOpenApi(cmd.getOrgId(), userIds , cmd.getBeginDate(),cmd.getEndDate());
 		if(null != logs && logs.size() > 0){
 			response.setCheckinDatas(new ArrayList<>());
@@ -11551,13 +11552,13 @@ public class PunchServiceImpl implements PunchService {
 					dto.setLocationInfo(pl.getLocationInfo());
 					dto.setWifiInfo(pl.getWifiInfo());
 					dto.setUserId(pl.getUserId());
-					dto.setStatus(statusToString(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
+					dto.setStatus(statusToString(null, pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
 					if(null != pl.getPunchTime()){
 						dto.setCheckInTime(pl.getPunchTime().getTime());
 					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus())){
 						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
 					}
-					OrganizationMember member = findOrganizationMemberByUIdCache(pl.getUserId(),pl.getEnterpriseId());
+					OrganizationMember member = findOrganizationMemberByTargetId(members, pl.getUserId());
 					if(null != member){
 						dto.setUserName(member.getContactName());
 						dto.setContactToken(member.getContactToken());
@@ -11569,11 +11570,21 @@ public class PunchServiceImpl implements PunchService {
 				 
 			}
 		} 
-		organizationMemberByUIdCache.set(new HashMap<String, OrganizationMember>());
 		return response;
 	}
  
-    private PunchLogDTO processPunchLogDTO(PunchLog log, Map<Long, OrganizationMemberDetails> memberDetailMap, Map<String, PunchRule> punchRuleMap, Map<Long, String> dptMap, Map<Long, String> ruleMap) {
+    private OrganizationMember findOrganizationMemberByTargetId(List<OrganizationMember> members,
+			Long userId) {
+    	if(null == members || null == userId)
+		for(OrganizationMember member : members){
+			if(userId.equals(member.getTargetId())){
+				return member;
+			}
+		}
+		return null;
+	}
+
+	private PunchLogDTO processPunchLogDTO(PunchLog log, Map<Long, OrganizationMemberDetails> memberDetailMap, Map<String, PunchRule> punchRuleMap, Map<Long, String> dptMap, Map<Long, String> ruleMap) {
         PunchLogDTO dto = convertPunchLog2DTO(log);
         OrganizationMemberDetails detail = findOrganizationMemberDetailByCacheUserId(log.getEnterpriseId(), log.getUserId(), memberDetailMap);
         if (null != detail) {
