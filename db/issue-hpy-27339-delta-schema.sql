@@ -39,6 +39,13 @@ create table `eh_general_form_filter_user_map`
 alter table eh_enterprise_customers add aptitude_flag_item_id BIGINT null comment '0-无资质，1-有资质' default 0;
 alter table eh_contract_categories add aptitude_flag BIGINT null comment '0-不过滤，1-过滤' default 0;
 
+alter table eh_general_forms add operator_name varchar(64) null comment '修改人';
+alter table eh_general_forms add creater_name varchar(64) null comment '新增人';
+
+
+alter table eh_general_approvals add creater_name varchar(64) null comment '新增人';
+
+
 create table `eh_enterprise_customer_aptitude_flag`
 (
    `id`                   bigint not null,
