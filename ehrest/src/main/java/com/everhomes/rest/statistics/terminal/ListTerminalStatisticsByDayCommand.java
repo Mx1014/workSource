@@ -13,6 +13,7 @@ public class ListTerminalStatisticsByDayCommand {
 
     private Integer namespaceId;
     private String date;
+    private String startDate;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -28,6 +29,14 @@ public class ListTerminalStatisticsByDayCommand {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
     }
 
     @Override

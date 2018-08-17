@@ -49,6 +49,15 @@ public interface ParkingErrorCode {
     int ERROR_GET_RESULT = 11010; //  返回参数失败
     int ERROR_INVITE_FAILD = 12000; //  发起访邀失败
     int ERROR_GENERATE_ORDER_NO= 13000; //  生成订单编号失败
+    int ERROR_REPEATE_ACCOUNT= 14000; //  重复账号
+    int ERROR_NO_PAYEE_ACCOUNT= 14001; //  未设置收款方账号
+    int ERROR_CREATE_USER_ACCOUNT= 14002; //  创建个人付款账户失败
+    int ERROR_SELF_DEINFE= 69696; //  自定义异常描述
+    int ERROR_SPACE_IN_USE= 1862101; //  车位使用中
+    int ERROR_HUB_IN_USE= 1862102; //  HUB使用中
+
+
+    int ERROR_SELF_DEFINE= 99999; //  自定义异常
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";

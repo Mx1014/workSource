@@ -85,11 +85,17 @@ public interface FlowListenerManager {
 
     void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId);
 
-    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
+    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra);
 
     List<FlowFormDTO> listFlowForms(Flow flow);
 
     void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates);
 
 	void onFlowStateChanged(Flow flow);
+
+    void onFlowStateChanging(Flow flow);
+
+    FlowConditionVariable onFlowConditionFormVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra);
+
+    void onSubFlowEnter(FlowCaseState ctx, FlowServiceMapping mapping, Flow subFlow, CreateFlowCaseCommand cmd);
 }

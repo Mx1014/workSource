@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.util.List;
-
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -11,6 +9,9 @@ import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface UserProvider {
     void createUser(User user);
@@ -38,9 +39,12 @@ public interface UserProvider {
     List<UserIdentifier> listClaimedIdentifiersByTokens(Integer namespaceId,List<String> identifiers);
 
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
+
+    List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-
+    UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
 
     void createUserGroup(UserGroup userGroup);
@@ -176,4 +180,8 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
             String identifierToken, Integer namespaceId);
+
+    Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+
+    String getNickNameByUid(Long creatorUid);
 }

@@ -5,7 +5,7 @@ public interface FlowConstants {
     String EVALURTE_TITLE = "evaluate";
     Integer FLOW_CONFIG_VER = 0;
     Integer FLOW_CONFIG_START = 1;
-    Integer FLOW_MAX_NAME_CNT = 3;
+    Integer FLOW_MAX_NAME_CNT = 10;
     
     // 物业报修模块id
     Long PM_TASK_MODULE = 20100L;
@@ -20,6 +20,9 @@ public interface FlowConstants {
 
     //合同模块id
     Long CONTRACT_MODULE = 21200L;
+    
+    //付款模块id
+    Long PAYMENT_CONTRACT_MODULE = 21215L;
 
     // 物品搬迁模块id
     Long RELOCATION_MODULE = 49200L;

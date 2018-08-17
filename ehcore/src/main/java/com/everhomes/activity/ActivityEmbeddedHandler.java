@@ -265,7 +265,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
         
-        if(cmd.getTag() != null) {
+        if(StringUtils.isBlank(post.getTag()) && cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
 
@@ -397,6 +397,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+			cmd.setMinQuantity(post.getMinQuantity());
             //comment by tt, 已经在preProcess里面处理过了
 //            if(cmd.getCategoryId() == null) {
 //            	cmd.setCategoryId(0L);

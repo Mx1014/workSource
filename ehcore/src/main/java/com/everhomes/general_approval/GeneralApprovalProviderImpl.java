@@ -4,20 +4,21 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
-import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralApprovalsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalScopeMapRecord;
-import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
@@ -28,14 +29,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhGeneralApprovalsDao;
-import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
-import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
@@ -58,11 +54,13 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     }
 
     @Override
-    public void updateGeneralApproval(GeneralApproval obj) {
+    public GeneralApproval updateGeneralApproval(GeneralApproval obj) {
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
         obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
         dao.update(obj);
+        return obj;
     }
 
     @Override
@@ -110,20 +108,6 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     }
 
     @Override
-    public List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId) {
-        List<GeneralApprovalTemplate> results = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-        SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, GeneralApprovalTemplate.class));
-            return null;
-        });
-        return results;
-    }
-
-    @Override
     public GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
@@ -137,15 +121,16 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     }
 
     @Override
-    public GeneralApproval getGeneralApprovalByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId){
+    public GeneralApproval getGeneralApprovalByNameAndRunning(Integer namespaceId, Long moduleId, Long ownerId, String ownerType){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
         query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_TEMPLATE_ID.eq(templateId));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        if(ownerType != null) {
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        }
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
         return query.fetchAnyInto(GeneralApproval.class);
     }
 

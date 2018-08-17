@@ -2,6 +2,7 @@
 package com.everhomes.dynamicExcel;
 
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.organization.ImportFileResultLog;
 
 import java.util.List;
 import java.util.Map;
@@ -62,5 +63,5 @@ public interface DynamicExcelHandler {
      * @param params  在dynamicaService.importMultiSheet() 传递的调用者的参数
      * @param response  方法DynamicExcelService.importMultiSheet的返回，对于每一个sheet的导入结果都应该放入此返回中
      */
-    void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response);
+    void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params, Map<Object,Object> context, DynamicImportResponse response, List<ImportFileResultLog<Map<String,String>>> resultLogs);
 }

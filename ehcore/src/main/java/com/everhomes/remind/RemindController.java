@@ -11,6 +11,8 @@ import com.everhomes.rest.remind.CreateOrUpdateRemindCategoryCommand;
 import com.everhomes.rest.remind.CreateOrUpdateRemindCommand;
 import com.everhomes.rest.remind.DeleteRemindCategoryCommand;
 import com.everhomes.rest.remind.DeleteRemindCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdResponse;
 import com.everhomes.rest.remind.GetRemindCategoryColorsResponse;
 import com.everhomes.rest.remind.GetRemindCategoryCommand;
 import com.everhomes.rest.remind.GetRemindCommand;
@@ -286,6 +288,34 @@ public class RemindController extends ControllerBase {
     public RestResponse unSubscribeShareRemind(UnSubscribeShareRemindCommand cmd) {
         remindService.unSubscribeShareRemind(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /remind/triggerRemindSchedule</b>
+     * <p>手动触发提醒</p>
+     */
+    @RequestMapping("triggerRemindSchedule")
+    @RestReturn(String.class)
+    public RestResponse triggerRemindSchedule() {
+        remindService.remindSchedule();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /remind/getCurrentUserContactSimpleInfo</b>
+     * <p>获取用户档案id</p>
+     */
+    @RequestMapping("getCurrentUserContactSimpleInfo")
+    @RestReturn(GetCurrentUserDetailIdResponse.class)
+    public RestResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd) {
+        RestResponse response = new RestResponse(remindService.getCurrentUserContactSimpleInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

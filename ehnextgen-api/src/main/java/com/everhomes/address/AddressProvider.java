@@ -1,24 +1,19 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.util.List;
-import java.util.Map;
-
-import com.everhomes.rest.address.ApartmentAbstractDTO;
-
 import com.everhomes.asset.AddressIdAndName;
-import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-
-import org.jooq.Record2;
-import org.jooq.Result;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 
 public interface AddressProvider {
     void createAddress(Address address);
@@ -52,6 +47,8 @@ public interface AddressProvider {
      */
     List<Address> listAddressByIds(Integer namespaceId, List<Long> ids);
 
+    List<Address> listAddressOnlyByIds(List<Long> ids);
+
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
 	Address findActiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
@@ -82,5 +79,39 @@ public interface AddressProvider {
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
+    ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId);
 	void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
+
+    String getAddressNameById(Long addressId);
+
+    int changeAddressLivingStatus(Long addressId, Byte status);
+
+  //Byte getAddressLivingStatus(Long addressId);
+
+    Byte getAddressLivingStatus(Long addressId,String addressName);
+	int changeAddressLivingStatus(Long id, String address, byte code);
+	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
+			String apartmentName);
+	long createAddress3(Address address);
+	void createAddressArrangement(AddressArrangement arrangement);
+	AddressArrangement findActiveAddressArrangementByAddressId(Long addressId);
+	void deleteAddressArrangement(Long id);
+	AddressArrangement findAddressArrangementById(Long id);
+	AddressArrangement findActiveAddressArrangementByTargetId(Long addressId);
+	String findApartmentNameById(long addressId);
+	Byte findArrangementOperationTypeByAddressId(Long addressId);
+	List<AddressArrangement> listActiveAddressArrangementToday(Timestamp today);
+//	AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId);
+	void updateAddressArrangement(AddressArrangement arrangement);
+	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
+	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
+	Integer countApartmentNumberByBuildingName(Long communityId, String buildingName);
+	Integer countRelatedEnterpriseCustomerNumber(Long communityId,String buildingName);
+	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
+	List<Address> findActiveAddressByCommunityId(Long id);
+	List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
+	Byte getAddressLivingStatusByAddressId(Long addressId);
+	List<Address> findActiveAddressByBuildingNameAndCommunityId(String buildingName, Long communityId);
+
+    List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
 }

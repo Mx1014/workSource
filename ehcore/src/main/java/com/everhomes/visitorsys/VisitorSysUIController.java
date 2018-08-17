@@ -249,4 +249,21 @@ public class VisitorSysUIController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL:  /ui/visitorsys/checkBlackList</b>
+	 * <p>
+	 * 14.检查手机号码是否在黑名单,返回码 200是正常，1407 1408是手机号在黑名单
+	 * </p>
+	 */
+	@RequestMapping("checkBlackList")
+	@RestReturn(String.class)
+	public RestResponse checkBlackList(CheckBlackListCommand cmd) {
+		visitorSysService.checkBlackList(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

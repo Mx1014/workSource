@@ -1147,7 +1147,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (module.get(i).equals(temp.get(i)))
                 continue;
             else {
-                return ImportFileErrorType.TITLE_ERROE.getCode();
+                return ImportFileErrorType.TITLE_ERROR.getCode();
             }
         }
         return null;
@@ -1399,6 +1399,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 String payMonth = findPaymentMonth(detail.getOrganizationId());
+                if (null == payMonth)
+                	payMonth = monthSF.get().format(DateHelper.currentGMTTime());
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
             } else {
@@ -2735,11 +2737,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != r.getFileTime()) {
             dto.setFileTime(r.getFileTime().getTime());
         }
-        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getCreatorUid(), r.getOrganizationId());
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getCreatorUid(), r.getOrganizationId());
         if (null != detail) {
             dto.setCreatorName(detail.getContactName());
         }
-        detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getFileUid(), r.getOrganizationId());
+        detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getFileUid(), r.getOrganizationId());
         if (null != detail) {
             dto.setFileName(detail.getContactName());
         }
@@ -2853,7 +2855,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == uid) {
             return null;
         }
-        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, ownerId);
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, ownerId);
         if (null != detail) {
             return detail.getContactName();
         }
@@ -2923,7 +2925,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private java.sql.Date getTheFirstDate(String m) {
+    @Override
+    public java.sql.Date getTheFirstDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {
@@ -2939,8 +2942,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
         }
     }
-
-    private java.sql.Date getTheLastDate(String m) {
+    @Override
+    public java.sql.Date getTheLastDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {

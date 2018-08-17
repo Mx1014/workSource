@@ -14,4 +14,6 @@ public interface SyncDataTaskProvider {
     List<SyncDataTask> listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor);
 
     Integer countNotViewedSyncResult(Long communityId, String syncType);
+    Long createSyncErrorMsg(Integer namespaceId,  String syncType, Long ownerId, String ownerType, String errorMessage, Long taskId);
+    List<SyncDataError> listSyncErrorMsgByTaskId(Long taskId, String syncType, Long pageAnchor, Integer pageSize);
 }

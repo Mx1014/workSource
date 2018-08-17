@@ -23,6 +23,7 @@ public class TerminalDayStatisticsDTO {
 	private Long newUserNumber;
 	
 	private Long activeUserNumber;
+	private Long averageActiveUserNumber;
 
 	private Long startNumber;
 
@@ -41,6 +42,7 @@ public class TerminalDayStatisticsDTO {
 	private Long thirtyActiveUserNumber;
 
 	private Double activeRate;
+	private Double averageActiveUserChangeRate;
 
 	public String getDate() {
 		return date;
@@ -106,6 +108,14 @@ public class TerminalDayStatisticsDTO {
 		this.activeChangeRate = activeChangeRate;
 	}
 
+	public Long getAverageActiveUserNumber() {
+		return averageActiveUserNumber;
+	}
+
+	public void setAverageActiveUserNumber(Long averageActiveUserNumber) {
+		this.averageActiveUserNumber = averageActiveUserNumber;
+	}
+
 	public Double getCumulativeChangeRate() {
 		return cumulativeChangeRate;
 	}
@@ -132,6 +142,14 @@ public class TerminalDayStatisticsDTO {
 
 	public Double getActiveRate() {
 		return activeRate;
+	}
+
+	public Double getAverageActiveUserChangeRate() {
+		return averageActiveUserChangeRate;
+	}
+
+	public void setAverageActiveUserChangeRate(Double averageActiveUserChangeRate) {
+		this.averageActiveUserChangeRate = averageActiveUserChangeRate;
 	}
 
 	public void setActiveRate(Double activeRate) {

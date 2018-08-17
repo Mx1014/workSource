@@ -4,21 +4,21 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 
 /**
  * <ul>
- * <li>form: 表单对象 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
+ * <li>form: 表单 {@link com.everhomes.rest.archives.ArchivesFromsDTO}</li>
  * </ul>
  */
 public class GetArchivesFormResponse {
 
-    private GeneralFormDTO form;
+    private ArchivesFormDTO form;
 
     public GetArchivesFormResponse() {
     }
 
-    public GeneralFormDTO getForm() {
+    public ArchivesFormDTO getForm() {
         return form;
     }
 
-    public void setForm(GeneralFormDTO form) {
+    public void setForm(ArchivesFormDTO form) {
         this.form = form;
     }
 }

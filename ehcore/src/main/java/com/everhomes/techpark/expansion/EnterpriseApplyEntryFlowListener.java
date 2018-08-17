@@ -84,6 +84,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
 
 
     @Autowired
@@ -249,9 +251,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
+            LeasePromotionConfig leasePromotionConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(applyEntry.getNamespaceId(), LeasePromotionConfigType.HIDE_ADDRESS_FLAG.getCode(),
+                    applyEntry.getCategoryId());
+
             String apartmentName = defaultIfNull(leasePromotion.getApartmentName(), "");
             if (null != address) {
                 apartmentName = address.getApartmentName();
+            }
+            if (leasePromotionConfig != null && "1".equals(leasePromotionConfig.getConfigValue())) { //隐藏门牌
+                apartmentName = "";
             }
             buildingName = buildingName + apartmentName;
         } else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())) {
@@ -419,13 +427,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
 
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
-        dto.setName("test");
+        dto.setValue("test");
         dto.setDisplayName("test111");
         dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }
 
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
         FlowConditionStringVariable stringVariable = new FlowConditionStringVariable("intelligent");
         return stringVariable;
     }

@@ -12,6 +12,7 @@ import java.util.List;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.jooq.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,22 +86,22 @@ public class NewsController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /news/importNews</b>
-	 * <p>
-	 * 批量导入新闻
-	 * </p>
-	 */
-	@RequestMapping("importNews")
-	@RestReturn(String.class)
-	public RestResponse importNews(ImportNewsCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
-		newsService.importNews(cmd,files);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /news/importNews</b>
+//	 * <p>
+//	 * 批量导入新闻
+//	 * </p>
+//	 */
+//	@RequestMapping("importNews")
+//	@RestReturn(String.class)
+//	public RestResponse importNews(ImportNewsCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+//		newsService.importNews(cmd,files);
+//
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * <b>URL: /news/listNews</b>
@@ -408,6 +409,24 @@ public class NewsController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /news/getNewsQR</b>
+	 * <p>
+	 * 返回预览二维码
+	 * </p>
+	 */
+	@RequestMapping("getNewsQR")
+	@RestReturn(String.class)
+	public RestResponse getNewsQR(UpdateNewsCommand cmd) {
+		String QRCode = newsService.getNewsQR(cmd);
+		RestResponse response = new RestResponse(QRCode);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
 
 

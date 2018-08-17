@@ -1,18 +1,31 @@
 package com.everhomes.techpark.punch;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
+import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsHistoryRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsTodayRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
- 
 
 public interface PunchProvider {
 
@@ -80,9 +93,10 @@ public interface PunchProvider {
 
 	public void updatePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
-	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
-			String format);
+	public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
 
+	public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate);
+	
 	public void createPunchDayLog(PunchDayLog punchDayLog);
 
 	public void updatePunchDayLog(PunchDayLog punchDayLog);
@@ -102,8 +116,7 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay);
 
-	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
-													Long companyId, String startDay, String endDay);
+	List<PunchDayLog> listPunchDayLogsIncludeEndDay(Long detailId, Long companyId, String startDay, String endDay);
 
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay);
@@ -258,13 +271,13 @@ public interface PunchProvider {
 	Long createPunchStatistic(PunchStatistic obj);
 
 	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-			List<Long> userIds, CrossShardListingLocator locator, int i);
-  
-	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
+			List<Long> detailIds, CrossShardListingLocator locator, int i);
+
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long detailId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
-	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> detailIds, List<Long> dptIds, String startDay, String endDay,
 			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 
@@ -337,12 +350,14 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
 
+	List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestGroupByMonth(Long userId, Long enterpriseId, String punchMonth);
+
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
 
-	Integer countExceptionRequests(Long userId, String ownerType, Long ownerId, String punchMonth);
+	Integer countExceptionRequests(Long userId, Long ownerId, String punchMonth, List<Byte> statusList);
 
-	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth);
-	
+	List<ExtDTO> listAskForLeaveExtDTOs(Long userId, String ownerType, Long ownerId, String punchMonth, Map<Long, String> approvalCategoryIdNames);
+
 	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
 
 	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
@@ -357,7 +372,7 @@ public interface PunchProvider {
 
 	PunchExceptionRequest findPunchExceptionRequest(Long userId, Long enterpriseId, Date punchDate, Byte status);
 
-	List<PunchExceptionRequest> listAbonormalExceptionRequestByOwnerAndMonth(String ownerType, Long organizationId, List<String> months);
+	Map<Long, Integer> countAbonormalExceptionRequestGroupByPunchDate(Long organizationId, Long userId, String month, List<Byte> statusList);
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId,
 			Date startDate, Date endDate);
@@ -367,4 +382,76 @@ public interface PunchProvider {
 	public List<Long> listPunchLogEnterprise(String startDayString, String endDayString);
 
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
+
+	Integer countpunchStatistic(String punchMonth, Long ownerId);
+ 
+	List<PunchLog> listPunchLogsForOpenApi(Long ownerId, List<Long> userIds, Long startDay,
+			Long endDay);
+ 
+	void deletePunchLogs(Long ownerId, Date monthBegin, Date monthEnd);
+
+	void filePunchLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report);
+
+	public void deletePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd);
+
+	public void filePunchDayLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report1);
+
+	public void deletePunchDayLogs(Long ownerId, String punchMonth);
+
+	public void filePunchDayLogs(Long ownerId, String punchMonth, PunchMonthReport report1);
+
+	public PunchLog findLastPunchLog(Long userId, Long enterpriseId, Timestamp punchTime);
+
+	public List<PunchLog> listPunchLogs(List<Long> userIds, Long ownerId, String startDay,
+			String endDay, Byte exceptionStatus, Integer pageOffset, Integer pageSize);
+
+	PunchOvertimeRule getPunchOvertimeRuleById(Long id);
+
+	Long createPunchOvertimeRule(PunchOvertimeRule punchOvertimeRule);
+
+	Long updatePunchOvertimeRule(PunchOvertimeRule punchOvertimeRule);
+
+	List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status);
+
+	void deletePunchOvertimeRulesByPunchRuleId(Long punchRuleId);
+
+	List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long orgId, List<Long> deptIds,
+			String startDay, String endDay, PunchStatusStatisticsItemType itemType, Integer pageOffset, Integer pageSize);
+
+	List<PunchStatistic> listPunchSatisticsByItemTypeAndDeptIds(Long organizationId,
+			List<Long> deptIds, String queryByMonth, PunchStatusStatisticsItemType itemType,
+			Integer pageOffset, int pageSize);
+
+	List<OrganizationMemberDetails> listExceptionMembersByDate(Long organizationId, Long departmentId, Date startDate, Date endDate, GeneralApprovalAttribute approvalAttribute, Integer pageOffset, int pageSize);
+	MonthlyStatisticsByMemberRecordMapper monthlyStatisticsByMember(Long organizationId, String punchMonth, Long detailId);
+
+	MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
+
+	DailyStatisticsByDepartmentBaseRecordMapper dailyStatisticsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds, boolean isToday);
+
+	DailyPunchStatusStatisticsTodayRecordMapper dailyPunchStatusMemberCountsTodayByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	DailyPunchStatusStatisticsHistoryRecordMapper dailyPunchStatusMemberCountsHistoryByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	MonthlyPunchStatusStatisticsRecordMapper monthlyPunchStatusMemberCountsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
+
+	PunchExceptionRequestStatisticsRecordMapper dailyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	PunchExceptionRequestStatisticsRecordMapper monthlyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
+
+	List<PunchDayLog> listPunchDayLogsByApprovalAttributeAndDeptIds(Long organizationId, List<Long> deptIds, Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize);
+
+	List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize);
+
+	List<PunchDayLog> listPunchDayLogsByItemTypeAndUserId(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType);
+
+	List<PunchExceptionRequest> listExceptionRequestsByItemTypeAndDate(Long userId, Long organizationId, Date startDay, Date endDay, GeneralApprovalAttribute approvalAttribute);
+
+	void setPunchTimeRuleStatus(Long prId, Byte targetStatus);
+
+	void setPunchSchedulingsStatus(Long prId, Byte targetStatus, Date beginDate);
+
+	public Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate,
+			Long userId, Long ownerId);
+ 
 }

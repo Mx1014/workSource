@@ -57,6 +57,7 @@ import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -68,6 +69,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.GroupSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -178,10 +180,38 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private LocaleStringService localeStringService;
-    
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filter(CreateGroupCommand cmd) {
+        if (cmd == null) {
+            return;
+        }
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        Byte moduleType = (byte)4;
+        if (cmd.getClubType() != null && cmd.getClubType() ==ClubType.GUILD.getCode()) {
+            moduleType = (byte)5;
+        }
+        command.setModuleType(moduleType);
+        if (!StringUtils.isEmpty(cmd.getName())) {
+            textList.add(cmd.getName());
+        }
+        if (!StringUtils.isEmpty(cmd.getDescription())) {
+            textList.add(cmd.getDescription());
+        }
+        command.setTextList(textList);
+        command.setCommunityId(cmd.getVisibleRegionId());
+        this.sensitiveWordService.filterWords(command);
+    }
+
+
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
+        filter(cmd);
     	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
@@ -540,6 +570,8 @@ public class GroupServiceImpl implements GroupService {
     
     @Override
     public GroupDTO updateGroup(UpdateGroupCommand cmd) {
+        CreateGroupCommand createGroupCommand = ConvertHelper.convert(cmd, CreateGroupCommand.class);
+        filter(createGroupCommand);
         User operator = UserContext.current().getUser();
         long operatorUid = operator.getId();
         
@@ -635,18 +667,15 @@ public class GroupServiceImpl implements GroupService {
                 dto.setName(organization.getName());
                 dto.setMemberOf((byte)1);
 
-                OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+                OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organization.getId());
                 if (member != null && member.getStatus() != null)
                     dto.setMemberStatus(member.getStatus());
                 else
                     dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
                 // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                //if(dto.getMemberCount() == 0){
-                long count = getOrganizationMemberCount(organization.getId());
-                dto.setMemberCount(count);
-                //}
-
+                Integer count = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), organization.getId(), null);
+                dto.setMemberCount(Long.valueOf(count));
                 dto.setOrgId(organization.getId());
             }
 
@@ -808,7 +837,7 @@ public class GroupServiceImpl implements GroupService {
 
         if(listOrg != null){
             for(OrganizationDTO org : listOrg){
-                OrganizationMember org_member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+                OrganizationMember org_member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, org.getId());
                 // 过滤待审核·审核中 by lei.lv
                 if(org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()) || org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())){
                     continue;
@@ -831,11 +860,8 @@ public class GroupServiceImpl implements GroupService {
                         }
 
                         // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                        //if(dto.getMemberCount() == 0){
-                        long count = getOrganizationMemberCount(org.getId());
-                        dto.setMemberCount(count);
-                        //}
-
+                        Integer count = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), org.getId(), null);
+                        dto.setMemberCount(Long.valueOf(count));
                         dto.setOrgId(org.getId());
                         groupDtoList.add(dto);
                     } else {
@@ -937,7 +963,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
 
-    private long getOrganizationMemberCount(Long orgId){
+/*    private long getOrganizationMemberCount(Long orgId){
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(orgId);
         command.setPageSize(1);
@@ -947,7 +973,7 @@ public class GroupServiceImpl implements GroupService {
             return res.getTotalCount().longValue();
         }
         return 0;
-    }
+    }*/
 
     @Override
     public String getGroupAlias(Long groupId){
@@ -1154,7 +1180,7 @@ public class GroupServiceImpl implements GroupService {
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization");
         		}
         		
-        		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(memberId, organization.getId());
+        		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(memberId, organization.getId());
         		if(null == orgMember){
         			LOGGER.error("Group organization member not found, operatorUid = {}, groupId = {}, memberId = {}, organizationId = {}", operatorUid, groupId, memberId, organization.getId());
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization member");
@@ -3184,7 +3210,7 @@ public class GroupServiceImpl implements GroupService {
 
             Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
             if(organization != null){
-                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organization.getId());
+                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, organization.getId());
                 if(orgmember != null && orgmember.getContactName() != null){
                     groupDto.setMemberNickName(orgmember.getContactName());
                 }
@@ -3377,15 +3403,10 @@ public class GroupServiceImpl implements GroupService {
     private void deleteActiveGroupMember(Long operatorUid, GroupMember member, String reason) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {
+                //deleteGroupMember已经减了成员数，不需要再次减
                 this.groupProvider.deleteGroupMember(member);
                 this.userProvider.deleteUserGroup(operatorUid, member.getGroupId());
                 deleteUserGroupOpRequest(member.getGroupId(), member.getMemberId(), operatorUid, reason);
-                
-                Group group = this.groupProvider.findGroupById(member.getGroupId());
-                long memberCount = group.getMemberCount() - 1;
-                memberCount = (memberCount < 0) ? 0 : memberCount;
-                group.setMemberCount(memberCount);
-                this.groupProvider.updateGroup(group);
                 return null;
             });
             return null;
@@ -5472,9 +5493,34 @@ public class GroupServiceImpl implements GroupService {
 		toUser.setOperatorUid(fromUser.getMemberId());
 		groupProvider.updateGroupMember(toUser);
 	}
-	
+
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filter(CreateBroadcastCommand cmd, Long ownerId) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        Group group = groupProvider.findGroupById(ownerId);
+        Byte moduleType = (byte)4;
+        if (group != null) {
+            if (group.getClubType() ==ClubType.GUILD.getCode()) {
+                moduleType = (byte)5;
+            }
+        }
+        command.setModuleType(moduleType);
+        if (!StringUtils.isEmpty(cmd.getTitle())) {
+            textList.add(cmd.getTitle());
+        }
+        if (!StringUtils.isEmpty(cmd.getContent())) {
+            textList.add(cmd.getContent());
+        }
+        command.setTextList(textList);
+        command.setCommunityId(cmd.getCommunityId());
+        this.sensitiveWordService.filterWords(command);
+    }
+
+
 	@Override
 	public CreateBroadcastResponse createBroadcast(CreateBroadcastCommand cmd) {
+        filter(cmd,cmd.getOwnerId());
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		checkCreateBroadcastParameters(userId, cmd);

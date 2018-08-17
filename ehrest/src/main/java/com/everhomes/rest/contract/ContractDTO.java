@@ -1,14 +1,13 @@
 // @formatter:off
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -32,6 +31,8 @@ import com.everhomes.util.StringHelper;
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>rent: 合同总金额</li>
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>ContractTemplates
+ * <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
  * </ul>
  */
 public class ContractDTO {
@@ -52,6 +53,30 @@ public class ContractDTO {
 
 	private String customerName;
 	
+	private Long categoryId;
+	private Long configId;
+	// dynamic field special name
+	private String contractTypeName;
+
+	private String syncErrorMsg;
+	
+	
+	public Long getConfigId() {
+		return configId;
+	}
+
+	public void setConfigId(Long configId) {
+		this.configId = configId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
 
@@ -83,6 +108,18 @@ public class ContractDTO {
 	private String namespaceContractToken;
 
 	private Byte paymentFlag;
+	
+	@ItemType(ContractTemplateDTO.class)
+    private ContractTemplateDTO contractTemplate;
+
+
+	public ContractTemplateDTO getContractTemplate() {
+		return contractTemplate;
+	}
+
+	public void setContractTemplate(ContractTemplateDTO contractTemplate) {
+		this.contractTemplate = contractTemplate;
+	}
 
 	public Long getCategoryItemId() {
 		return categoryItemId;
@@ -284,11 +321,14 @@ public class ContractDTO {
 		this.serviceUserPhone = serviceUserPhone;
 	}
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
+	public String getContractTypeName() {
+		return contractTypeName;
 	}
 
+	public void setContractTypeName(String contractTypeName) {
+		this.contractTypeName = contractTypeName;
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -296,4 +336,18 @@ public class ContractDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public String getSyncErrorMsg() {
+		return syncErrorMsg;
+	}
+
+	public void setSyncErrorMsg(String syncErrorMsg) {
+		this.syncErrorMsg = syncErrorMsg;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 }

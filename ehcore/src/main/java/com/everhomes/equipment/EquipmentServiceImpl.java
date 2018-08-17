@@ -233,6 +233,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -573,7 +574,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			standardDto.setTemplateName(template.getName());
 //		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(),
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(standard.getOperatorUid(),
 				standard.getOwnerId());
 		if (null != member) {
 			standardDto.setOperatorName(member.getContactName());
@@ -1950,7 +1951,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (task.getExecutorId() != null && task.getExecutorId() != 0) {
 			//总公司分公司 by xiongying20170328
 			List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
+//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getExecutorId(), task.getOwnerId());
 			if (executors != null && executors.size() > 0) {
 				dto.setExecutorName(executors.get(0).getContactName());
 			}
@@ -2146,8 +2147,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 //		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 //				 && cmd.getEndTime() != null) {
-////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getReviewerId(), task.getOwnerId());
-////			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getReviewerId(), task.getOwnerId());
+////			OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getOperatorId(), task.getExecutiveGroupId());
 //			List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(task.getReviewerId());
 //			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
 //			Map<String, Object> map = new HashMap<String, Object>();
@@ -5652,8 +5653,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		//ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId())); this will invoke _exit() and kill all thead include children thread
-		inActiveTaskByPlanId(cmd.getId());
+		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
+//		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 

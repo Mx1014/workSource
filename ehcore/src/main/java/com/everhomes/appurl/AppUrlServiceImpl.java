@@ -1,5 +1,9 @@
 package com.everhomes.appurl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +15,12 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumServiceImpl;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.AppUrlDeviceDTO;
+import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.appurl.UpdateAppInfoCommand;
+import com.everhomes.rest.appurl.appInfoByNamespaceIdDTO;
+import com.everhomes.service_agreement.ServiceAgreement;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -38,7 +47,10 @@ public class AppUrlServiceImpl implements AppUrlService {
 		}
 		AppUrlDTO dto = ConvertHelper.convert(appUrls, AppUrlDTO.class);
 		dto.setLogoUrl(null);
-		
+
+		if (StringUtils.isBlank(dto.getDownloadUrl())) {
+		    dto.setDownloadUrl(null);
+        }
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{
@@ -56,5 +68,77 @@ public class AppUrlServiceImpl implements AppUrlService {
 		
 		return dto;
 	}
+	
+	@Override
+	public void createAppInfo(CreateAppInfoCommand cmd){
 
+		if(cmd != null && cmd.getDtos()!=null && cmd.getDtos().size()>1){
+			AppUrlDeviceDTO dto = cmd.getDtos().get(0);
+			if(dto.getId() != null){//存在ID则走更新路线
+				for(AppUrlDeviceDTO o : cmd.getDtos() ){
+					UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
+					uc.setId(o.getId());
+					uc.setOsType(o.getOsType());
+					uc.setDownloadUrl(o.getDownloadUrl());
+					uc.setDescription(cmd.getDescription());
+					uc.setLogoUrl(cmd.getLogoUrl());
+					uc.setName(cmd.getName());
+					uc.setNamespaceId(cmd.getNamespaceId());
+					
+					AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+					appUrlProvider.updateAppInfo(bo);
+				}
+			}else{//走新增路线
+				for(AppUrlDeviceDTO o : cmd.getDtos() ){
+					UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
+					uc.setId(o.getId());
+					uc.setOsType(o.getOsType());
+					uc.setDownloadUrl(o.getDownloadUrl());
+					uc.setDescription(cmd.getDescription());
+					uc.setLogoUrl(cmd.getLogoUrl());
+					uc.setName(cmd.getName());
+					uc.setNamespaceId(cmd.getNamespaceId());
+					
+					AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+					appUrlProvider.createAppInfo(bo);
+				}
+			}
+		}
+		
+	}
+
+	@Override
+	public void updateAppInfo(UpdateAppInfoCommand cmd) {
+		AppUrls bo = ConvertHelper.convert(cmd, AppUrls.class);	
+		appUrlProvider.updateAppInfo(bo);
+	}
+	
+	@Override
+	public appInfoByNamespaceIdDTO getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
+		
+		List<AppUrls> appUrls = appUrlProvider.findByNamespaceId(cmd.getNamespaceId());
+
+		//成都的项目没有app  
+		if(appUrls == null || appUrls.size() < 1){
+			return null;
+		}
+		appInfoByNamespaceIdDTO returnDTO = new appInfoByNamespaceIdDTO();
+		List<AppUrlDeviceDTO> listDTO = new ArrayList<AppUrlDeviceDTO>();
+		returnDTO.setDtos(listDTO);
+		for(AppUrls o : appUrls ){
+			AppUrlDeviceDTO  dto = new AppUrlDeviceDTO();
+			
+			dto.setId(o.getId());
+			dto.setOsType(o.getOsType());
+			dto.setDownloadUrl(o.getDownloadUrl());
+			returnDTO.getDtos().add(dto);
+			
+			returnDTO.setDescription(o.getDescription());
+			returnDTO.setLogoUrl(o.getLogoUrl());
+			returnDTO.setName(o.getName());
+			returnDTO.setNamespaceId(o.getNamespaceId());
+			
+		}
+		return returnDTO ;
+	}
 }

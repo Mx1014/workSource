@@ -198,7 +198,7 @@ public class CommunityAdminController extends ControllerBase {
      * <p>根据关键字查询待审核小区列表</p>
      */
     @RequestMapping("listCommunitiesByKeyword")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordAdminCommand cmd) {
     	
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -207,7 +207,7 @@ public class CommunityAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid keyword parameter");
 		}
-    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	ListCommunitiesByKeywordResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
     	RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -360,27 +360,6 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /admin/community/importBuildingData</b>
-     * <p>导入楼栋信息excel</p>
-     */
-    @RequestMapping("importBuildingData")
-    @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
-    	User manaUser = UserContext.current().getUser();
-		Long userId = manaUser.getId();
-		if(null == files || null == files[0]){
-			LOGGER.error("files is null。userId="+userId);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-					"files is null");
-		}
-//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
     /**
      * <b>URL: /admin/community/exportBuildingByCommunityId</b>
      * <p>后台管理 楼栋列表</p>
@@ -657,4 +636,90 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/importCommunityDataAdmin</b>
+     * <p>导入项目信息excel</p>
+     */
+    @RequestMapping("importCommunityDataAdmin")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importCommunityDataAdmin(ImportCommunityCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId={}",userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+        RestResponse response = new RestResponse(communityService.importCommunityDataAdmin(cmd, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /admin/community/checkUserAuditing</b>
+     * <p>判断当前用户是否有审核的权限</p>
+     */
+    @RequestMapping("checkUserAuditing")
+    @RestReturn(CheckUserAuditingAdminResponse.class)
+    public RestResponse checkUserAuditing(@Valid CheckUserAuditingAdminCommand cmd){
+        CheckUserAuditingAdminResponse checkUserAuditingAdminResponse = communityService.checkUserAuditing(cmd);
+        RestResponse response = new RestResponse(checkUserAuditingAdminResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/importBuildingData</b>
+     * <p>导入楼栋信息excel</p>
+     */
+    @RequestMapping("importBuildingData")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null.userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    
+    /**
+     * <b>URL: /admin/community/exportBuildingByKeywords</b>
+     * <p>后台管理 楼栋列表</p>
+     */
+    @RequestMapping("exportBuildingByKeywords")
+    @RestReturn(value = String.class)
+    public RestResponse exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse httpServletResponse) {
+    	communityService.exportBuildingByKeywords(cmd, httpServletResponse);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/exportApartmentsInCommunity</b>
+     * <p>导出项目下的房源信息</p>
+     */
+    @RequestMapping("exportApartmentsInCommunity")
+    @RestReturn(value = String.class)
+    public RestResponse exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd, HttpServletResponse httpServletResponse) {
+    	communityService.exportApartmentsInCommunity(cmd, httpServletResponse);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

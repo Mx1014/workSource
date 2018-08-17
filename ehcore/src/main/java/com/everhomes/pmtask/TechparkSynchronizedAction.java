@@ -135,7 +135,7 @@ public class TechparkSynchronizedAction implements Runnable{
 
 		param.put("submitUserPhone", userIdentifier.getIdentifierToken());
 
-		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, organizationId);
+		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByUIdAndOrgId(targetId, organizationId);
 
 		param.put("acquiringDept", organization.getName());
 		param.put("acquiringUser", orgMember2.getContactToken());

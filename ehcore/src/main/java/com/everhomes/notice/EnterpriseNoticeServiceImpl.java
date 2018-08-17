@@ -1,5 +1,6 @@
 package com.everhomes.notice;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -29,6 +30,7 @@ import com.everhomes.rest.notice.EnterpriseNoticeAttachmentDTO;
 import com.everhomes.rest.notice.EnterpriseNoticeContentType;
 import com.everhomes.rest.notice.EnterpriseNoticeDTO;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
+import com.everhomes.rest.notice.EnterpriseNoticeErrorCode;
 import com.everhomes.rest.notice.EnterpriseNoticePreviewDTO;
 import com.everhomes.rest.notice.EnterpriseNoticeReceiverDTO;
 import com.everhomes.rest.notice.EnterpriseNoticeReceiverType;
@@ -49,7 +51,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +141,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
                 enterpriseNoticeReceiverDTOS.add(ConvertHelper.convert(receiver, EnterpriseNoticeReceiverDTO.class));
             });
             enterpriseNoticeDTO.setReceivers(enterpriseNoticeReceiverDTOS);
+        }
+        if (EnterpriseNoticeSecretFlag.PRIVATE != EnterpriseNoticeSecretFlag.fromCode(enterpriseNotice.getSecretFlag())) {
+            enterpriseNoticeDTO.setWebShareUrl(getNoticeWebShareUrl(enterpriseNoticeId));
         }
         return enterpriseNoticeDTO;
     }
@@ -327,6 +334,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         //  set the route
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
+        actionData.setOrganizationId(notice.getOwnerId());
         actionData.setBulletinId(notice.getId());
         actionData.setBulletinTitle(notice.getTitle());
         actionData.setShowType(EnterpriseNoticeShowType.SHOW.getCode());
@@ -416,7 +424,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         ListEnterpriseNoticeResponse response = new ListEnterpriseNoticeResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), namespaceId, offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(cmd.getOrganizationId()), namespaceId, offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -435,8 +443,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     /**
      * 发给自己的、发给本部门的或者发给上级部门的公告本人均可见
      */
-    private List<EnterpriseNoticeReceiver> parseCurrentReceivers() {
-        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+    private List<EnterpriseNoticeReceiver> parseCurrentReceivers(Long organizationId) {
+        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId(), organizationId);
         if (details == null || details.getId() == null) {
             return Collections.emptyList();
         }
@@ -504,8 +512,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     }
 
     @Override
-    public boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId) {
-        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers();
+    public boolean isNoticeSendToCurrentUser(Long organizationId, Long enterpriseNoticeId) {
+        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers(organizationId);
         if (CollectionUtils.isEmpty(currentReceivers)) {
             return false;
         }
@@ -528,6 +536,36 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         return false;
     }
 
+    @Override
+    public EnterpriseNoticeDTO getSharedEnterpriseNoticeDetailInfo(String enterpriseNoticeToken) {
+        Long enterpriseNoticeId = checkNoticeToken(enterpriseNoticeToken);
+        EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(enterpriseNoticeId);
+        if (enterpriseNotice == null) {
+            throw RuntimeErrorException.errorWith(EnterpriseNoticeErrorCode.SCOPE,
+                    EnterpriseNoticeErrorCode.NOTICE_NOT_FOUND_ERROR, "");
+        }
+        EnterpriseNoticeDTO enterpriseNoticeDTO = ConvertHelper.convert(enterpriseNotice, EnterpriseNoticeDTO.class);
+        List<EnterpriseNoticeAttachment> attachments = enterpriseNoticeProvider.findEnterpriseNoticeAttachmentsByNoticeId(enterpriseNoticeId);
+
+        if (!CollectionUtils.isEmpty(attachments)) {
+            Map<String, String> fileIconUrlMap = fileService.getFileIconUrl();
+            List<EnterpriseNoticeAttachmentDTO> enterpriseNoticeAttachmentDTOS = new ArrayList<>(attachments.size());
+            attachments.forEach(enterpriseNoticeAttachment -> {
+                EnterpriseNoticeAttachmentDTO enterpriseNoticeAttachmentDTO = ConvertHelper.convert(enterpriseNoticeAttachment, EnterpriseNoticeAttachmentDTO.class);
+                enterpriseNoticeAttachmentDTO.setName(enterpriseNoticeAttachmentDTO.getContentName() + "." + enterpriseNoticeAttachmentDTO.getContentSuffix());
+                enterpriseNoticeAttachmentDTO.setIconUrl(fileIconUrlMap.get(enterpriseNoticeAttachment.getContentSuffix()));
+                enterpriseNoticeAttachmentDTOS.add(enterpriseNoticeAttachmentDTO);
+            });
+            enterpriseNoticeDTO.setAttachments(enterpriseNoticeAttachmentDTOS);
+        }
+
+        if (EnterpriseNoticeSecretFlag.PRIVATE == EnterpriseNoticeSecretFlag.fromCode(enterpriseNoticeDTO.getSecretFlag())) {
+            throw RuntimeErrorException.errorWith(EnterpriseNoticeErrorCode.SCOPE,
+                    EnterpriseNoticeErrorCode.SHARED_NOTICE_PRIVATE_ERROR, "permisstion deny");
+        }
+        return enterpriseNoticeDTO;
+    }
+
     // 当字符串超过最大限制时，将此截取到最大长度
     private String splitLongString(String original, int maxLength, boolean trim) {
         if (!StringUtils.hasText(original)) {
@@ -538,6 +576,30 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             return newString;
         }
         return newString.substring(0, maxLength);
+    }
+
+    private Long checkNoticeToken(String noticeToken) {
+        Long noticeId = WebTokenGenerator.getInstance().fromWebToken(noticeToken, Long.class);
+        if (noticeId == null) {
+            LOGGER.error("Invalid noticeToken, noticeToken={}", noticeToken);
+            throw RuntimeErrorException.errorWith(EnterpriseNoticeErrorCode.SCOPE,
+                    EnterpriseNoticeErrorCode.SHARED_NOTICE_TOKEN_INVALID, "Invalid token");
+        }
+        return noticeId;
+    }
+
+    private String getNoticeWebShareUrl(Long enterpriseNoticeId) {
+        String noticeToken = WebTokenGenerator.getInstance().toWebToken(enterpriseNoticeId);
+        String homeUrl = configurationProvider.getValue(0, ConfigConstants.HOME_URL, "");
+        String webUri = configurationProvider.getValue(0, ConfigConstants.ENTERPRISE_NOTICE_WEB_SHARE_URL,
+                "/announcement/build/index.html?ns=%s&noticeToken=%s");
+        if (!StringUtils.hasText(homeUrl) || !StringUtils.hasText(webUri)) {
+            LOGGER.error("Invalid home url or share uri, homeUrl={}, shareUrl={}", homeUrl, webUri);
+            throw RuntimeErrorException.errorWith(EnterpriseNoticeErrorCode.SCOPE,
+                    EnterpriseNoticeErrorCode.NOTICE_SHARE_URL_INVALID, "Invalid home url or share url");
+        }
+
+        return homeUrl + String.format(webUri, UserContext.getCurrentNamespaceId(), noticeToken);
     }
 
 }

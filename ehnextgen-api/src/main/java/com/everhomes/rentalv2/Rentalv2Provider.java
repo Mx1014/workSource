@@ -68,6 +68,7 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
+	List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId,Long startTime, Long endTime);
 
 	List<RentalOrder> listTargetRentalBills(Byte status);
 	
@@ -82,6 +83,8 @@ public interface Rentalv2Provider {
 	List<RentalSiteRange> findRentalSiteOwnersByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
 
 	List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
+
+	List<RentalResourceFile> findRentalSiteFilesByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
 
 	RentalItem getRentalSiteItemById(Long id);
 
@@ -115,7 +118,11 @@ public interface Rentalv2Provider {
 
 	void createRentalSitePic(RentalResourcePic detailPic);
 
+	void createRentalSiteFile(RentalResourceFile file);
+
 	void deleteRentalSitePicsBySiteId(String resourceType, Long siteId);
+
+	void deleteRentalSiteFilesBySiteId(String resourceType, Long siteId);
 
 	void deleteRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 
@@ -153,6 +160,8 @@ public interface Rentalv2Provider {
 
 	RentalRefundOrder getRentalRefundOrderByRefundNo(String refundOrderNo);
 
+	RentalRefundOrder getRentalRefundOrderByOrderNo(String orderNo);
+
 	RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId);
 
 	void createRentalResourceType(RentalResourceType rentalResourceType);
@@ -172,7 +181,7 @@ public interface Rentalv2Provider {
 
 //	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
 
-	RentalCell getRentalCellById(Long cellId);
+	RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType,String resourceType);
  
 	void deleteRentalCellsByResourceId(String resourceType, Long rentalSiteId);
 
@@ -182,16 +191,22 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
 
-	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
+	List<RentalCell> getRentalCellsByIds(String resourceType,List<Long> cellIds, Long rentalSiteId,Byte rentalType);
 
-	Double countRentalSiteBillBySiteRuleId(Long cellId);
+	List<RentalCell> getRentalCellsByRange(String resourceType,Long minId,Long maxId, Long rentalSiteId,Byte rentalType);
+
+	Double countRentalSiteBillBySiteRuleId(Long cellId,RentalResource rentalResource,Byte rentalType);
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
 
-	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
+	List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource,Long beginTime,Long endTime);
+
+	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
+
+	List<RentalCell> findCellClosedByTimeInterval(String resourceType,Long rentalSiteId,Long startTime,Long endTime);
 
 	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 
@@ -231,5 +246,13 @@ public interface Rentalv2Provider {
 
 	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
 															 Long startTime, Long endTime,Integer order);
+	String getHolidayCloseDate (Byte holidayType);
+
+	void createRefundTip(RentalRefundTip tip);
+
+	void deleteRefundTip(String resourceType, String sourceType, Long sourceId);
+
+	List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId,Byte refundStrategy);
+
 
 }

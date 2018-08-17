@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -57,6 +58,12 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
+<<<<<<< HEAD
+ *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
+=======
+ *      <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
+>>>>>>> asset_contract_multiple_entry
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -106,8 +113,28 @@ public class CreateContractCommand {
     private String remark;
     private String layout;
     private String settled;
+    private Long categoryId;
+    private Byte costGenerationMethod;
+    private Byte contractApplicationScene = 0;
+	
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
 
-    @ItemType(BuildingApartmentDTO.class)
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+    
+    
+	public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
     @ItemType(ContractChargingItemDTO.class)
@@ -121,6 +148,34 @@ public class CreateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
 
+    private Byte payorreceiveContractType;
+
+	private String generateContractNumberRule;
+
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	
+	public String getGenerateContractNumberRule() {
+		return generateContractNumberRule;
+	}
+
+	public void setGenerateContractNumberRule(String generateContractNumberRule) {
+		this.generateContractNumberRule = generateContractNumberRule;
+	}
+
+	public Byte getPayorreceiveContractType() {
+		return payorreceiveContractType;
+	}
+
+	public void setPayorreceiveContractType(Byte payorreceiveContractType) {
+		this.payorreceiveContractType = payorreceiveContractType;
+	}
+    
     public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
@@ -535,4 +590,9 @@ public class CreateContractCommand {
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

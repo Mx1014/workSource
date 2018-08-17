@@ -139,7 +139,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                 queryBuilderCallback.buildCondition(locator, query);
 
             if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_DOOR_ACCESS.ID.gt(locator.getAnchor()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
             query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
             //if count == 0 ,list all, by liuyilin 20180408 
             if(count >0){
@@ -150,8 +150,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                 return null;
             });
 
-            if(count>0 && objs.size() >= count) {
+            if(count>0 && objs.size() > count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
                 return AfterAction.done;
             } else {
                 locator.setAnchor(null);

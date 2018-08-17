@@ -3,12 +3,16 @@ package com.everhomes.rest.techpark.punch.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
+ *
  * <ul>
- * <li>annualLeaveBalanceCorrection: 年假余额调整值 正数加,负数减</li>
- * <li>overtimeCompensationBalanceCorrection: 调休余额调整值 正数加,负数减</li>
- * <li>annualLeaveBalance: 年假余额</li>
- * <li>overtimeCompensationBalance: 调休余额</li>
+ * <li>annualLeaveBalanceCorrection: 年假余额调整值 正数加,负数减,单位天</li>
+ * <li>annualLeaveBalanceCorrectionDisplay: 将天数换算成“xx天xx小时”用于前端显示</li>
+ * <li>overtimeCompensationBalanceCorrection: 调休余额调整值 正数加,负数减,单位天</li>
+ * <li>overtimeCompensationBalanceCorrectionDisplay:  将天数换算成“xx天xx小时”用于前端显示</li>
+ * <li>annualLeaveBalance: 年假余额,单位天</li>
+ * <li>annualLeaveBalanceDisplay: 将天数换算成“xx天xx小时”用于前端显示</li>
+ * <li>overtimeCompensationBalance: 调休余额,单位天</li>
+ * <li>overtimeCompensationBalanceDisplay: 将天数换算成“xx天xx小时” 用于前端显示</li>
  * <li>description: 备注</li>
  * <li>creatorName: 操作者姓名</li>
  * <li>createTime: 时间</li>
@@ -16,9 +20,13 @@ import com.everhomes.util.StringHelper;
  */
 public class VacationBalanceLogDTO {
 	private Double annualLeaveBalanceCorrection;
+	private String annualLeaveBalanceCorrectionDisplay;
 	private Double overtimeCompensationBalanceCorrection;
+	private String overtimeCompensationBalanceCorrectionDisplay;
 	private Double annualLeaveBalance;
+	private String annualLeaveBalanceDisplay;
 	private Double overtimeCompensationBalance;
+	private String overtimeCompensationBalanceDisplay;
 	private String description;
 	private String creatorName;
 	private Long createTime;
@@ -72,5 +80,35 @@ public class VacationBalanceLogDTO {
 		this.createTime = createTime;
 	}
 
-	
+	public String getAnnualLeaveBalanceCorrectionDisplay() {
+		return annualLeaveBalanceCorrectionDisplay;
+	}
+
+	public void setAnnualLeaveBalanceCorrectionDisplay(String annualLeaveBalanceCorrectionDisplay) {
+		this.annualLeaveBalanceCorrectionDisplay = annualLeaveBalanceCorrectionDisplay;
+	}
+
+	public String getOvertimeCompensationBalanceCorrectionDisplay() {
+		return overtimeCompensationBalanceCorrectionDisplay;
+	}
+
+	public void setOvertimeCompensationBalanceCorrectionDisplay(String overtimeCompensationBalanceCorrectionDisplay) {
+		this.overtimeCompensationBalanceCorrectionDisplay = overtimeCompensationBalanceCorrectionDisplay;
+	}
+
+	public String getAnnualLeaveBalanceDisplay() {
+		return annualLeaveBalanceDisplay;
+	}
+
+	public void setAnnualLeaveBalanceDisplay(String annualLeaveBalanceDisplay) {
+		this.annualLeaveBalanceDisplay = annualLeaveBalanceDisplay;
+	}
+
+	public String getOvertimeCompensationBalanceDisplay() {
+		return overtimeCompensationBalanceDisplay;
+	}
+
+	public void setOvertimeCompensationBalanceDisplay(String overtimeCompensationBalanceDisplay) {
+		this.overtimeCompensationBalanceDisplay = overtimeCompensationBalanceDisplay;
+	}
 }

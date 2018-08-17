@@ -33,6 +33,7 @@ public class PreOrderDTO {
     private String extendInfo;
     @ItemType(PayMethodDTO.class)
     private List<PayMethodDTO> payMethod;
+    private Long userId;
 
     public PreOrderDTO() {
     }
@@ -114,7 +115,15 @@ public class PreOrderDTO {
         return payMethod;
     }
 
-    public void setPayMethod(List<PayMethodDTO> payMethod) {
-        this.payMethod = payMethod;
+    public void setPayMethod(List<PayMethodDTO> list) {
+        this.payMethod = list;
     }
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }

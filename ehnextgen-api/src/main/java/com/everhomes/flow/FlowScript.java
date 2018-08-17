@@ -21,4 +21,8 @@ public class FlowScript extends EhFlowScripts {
     public Long getTopId() {
         return this.getScriptMainId() != 0L ? this.getScriptMainId() : this.getId();
     }
+
+    public String gogsPath() {
+        return this.getName() + ".js";
+    }
 }

@@ -98,6 +98,10 @@ public interface SocialSecurityService {
 
 	List<SocialSecurityEmployeeDTO> listSocialSecurityEmployees(ListSocialSecurityPaymentsCommand cmd);
 
+	java.sql.Date getTheFirstDate(String m);
+
+	java.sql.Date getTheLastDate(String m);
+
 	SocialSecurityEmployeeDTO getSocialSecurityEmployeeInfo(Long detailId);
 
 //    List<Long> listSocialSecurityEmployeeDetailIdsByPayMonth(Long ownerId, String payMonth);

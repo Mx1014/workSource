@@ -2,24 +2,46 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
-import com.everhomes.rest.address.*;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.address.ApartmentEventDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CreateApartmentCommand;
+import com.everhomes.rest.address.DeleteApartmentCommand;
+import com.everhomes.rest.address.GetApartmentDetailCommand;
+import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsResponse;
+import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.community.FindReservationsCommand;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.pm.*;
+
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.Tuple;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -206,7 +228,7 @@ public interface PropertyMgrService {
      * @param cmd 导入哪个小区的业主
      * @param file excel文件
      */
-	void importOrganizationOwners(ImportOrganizationsOwnersCommand cmd, MultipartFile[] file);
+    ImportFileTaskDTO importOrganizationOwners(ImportOrganizationsOwnersCommand cmd, MultipartFile[] file);
 
     /**
      * 列出当前用户的使用车辆
@@ -469,6 +491,22 @@ public interface PropertyMgrService {
     ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
 
     void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
+    
     DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    
     List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
+
+    void createReservation(CreateReservationCommand cmd);
+
+    List<ListReservationsDTO> listReservations(ListReservationsCommand cmd);
+
+    void updateReservation(UpdateReservationCommand cmd);
+
+    void deleteReservation(DeleteReservationCommand cmd);
+
+    void cancelReservation(CancelReservationCommand cmd);
+
+	List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd);
+
+	List<ListReservationsDTO> findReservations(FindReservationsCommand cmd);
 }

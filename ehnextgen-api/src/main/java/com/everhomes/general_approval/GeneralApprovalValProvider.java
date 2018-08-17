@@ -1,27 +1,26 @@
 package com.everhomes.general_approval;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface GeneralApprovalValProvider {
 
 	Long createGeneralApprovalVal(GeneralApprovalVal obj);
 
-	void updateGeneralApprovalVal(GeneralApprovalVal obj);
-
-	void deleteGeneralApprovalVal(GeneralApprovalVal obj);
-
-	GeneralApprovalVal getGeneralApprovalValById(Long id);
+	GeneralApprovalVal getSpecificApprovalValByFlowCaseId(Long flowCaseId, String filedType);
 
 	List<GeneralApprovalVal> queryGeneralApprovalVals(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<GeneralApprovalVal> queryGeneralApprovalValsByFlowCaseId(Long id);
 
-	GeneralApprovalVal getGeneralApprovalByFlowCaseAndFeildType(Long id, String feildType);
+	GeneralApprovalVal getGeneralApprovalByFlowCaseAndFeildType(Long id, String fieldType);
 
 	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
 
+    GeneralApprovalVal getGeneralApprovalVal(Long formOriginId, Long formVersion,
+                                             Long flowCaseId, String fieldName);
+	GeneralApprovalVal getGeneralApprovalById(Long id);
 }

@@ -8,12 +8,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 		"properties": {
 			"name":{
                 "type":"string",
-                "index_analyzer":"ansj_index", 
-                "search_analyzer":"ansj_query", 
-                "similarity":"BM25", 
-                "store":"yes"
+                "index":"not_analyzed"
             },
-			"customerName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+			"customerName":{"type":"string","index":"not_analyzed"},
             "contractNumber":{
                 "type":"string", 
                 "index":"not_analyzed",
@@ -35,6 +32,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 			"contractStartDate":{"type":"date"},
 			"contractEndDate":{"type":"date"},
 			"updateTime":{"type":"date"},
+			"categoryId":{"type":"long"},
 			"rent":{"type":"double"}
 		}
 	}

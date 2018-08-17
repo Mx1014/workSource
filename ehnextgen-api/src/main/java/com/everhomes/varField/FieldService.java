@@ -1,16 +1,30 @@
 package com.everhomes.varField;
 
 
-import java.util.List;
-
-import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/8/3.
@@ -60,4 +74,8 @@ public interface FieldService {
     List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName, Long orgId, Object params);
 
     DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+
+    ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId, Long communityId, String moduleName, String displayName, Long fieldId);
+
+    void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName);
 }

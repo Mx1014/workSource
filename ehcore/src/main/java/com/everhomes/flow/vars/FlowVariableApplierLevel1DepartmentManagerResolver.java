@@ -59,21 +59,6 @@ public class FlowVariableApplierLevel1DepartmentManagerResolver implements FlowV
             if (managerDTOS != null) {
                 return managerDTOS.stream().map(OrganizationManagerDTO::getTargetId).collect(Collectors.toList());
             }
-
-            /*List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-
-            List<OrganizationDTO> memberGroups = organizationService.getOrganizationMemberGroups(
-                    groupTypes, flowCase.getApplyUserId(), organizationId);
-
-            if (memberGroups != null) {
-                List<Long> organizationIds = memberGroups.stream().map(OrganizationDTO::getId).collect(Collectors.toList());
-                List<OrganizationManagerDTO> managers = organizationService.getOrganizationManagers(organizationIds);
-                if (managers != null) {
-                    return managers.stream().map(OrganizationManagerDTO::getTargetId).distinct().collect(Collectors.toList());
-                }
-            }*/
         }
         return new ArrayList<>();
     }

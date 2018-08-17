@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalBillId：订单id</li>
  * <li>rentalItems：商品列表，参考{@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>rentalAttachments：附件列表，参考{@link com.everhomes.rest.rentalv2.AttachmentDTO}</li>
+ * <li>fileUris：文件列表，参考{@link com.everhomes.rest.rentalv2.RentalSiteFileDTO}</li>
  * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.rest.order.PaymentType}</li>
  * </ul>
  */
@@ -27,6 +28,7 @@ public class AddRentalBillItemCommand {
 	private List<SiteItemDTO> rentalItems;
 	@ItemType(AttachmentDTO.class)
 	private List<AttachmentDTO> rentalAttachments;
+	private List<RentalSiteFileDTO> fileUris;
 
 	private String clientAppName;
 	private Integer paymentType;
@@ -138,5 +140,13 @@ public class AddRentalBillItemCommand {
 
 	public void setPaymentType(Integer paymentType) {
 		this.paymentType = paymentType;
+	}
+
+	public List<RentalSiteFileDTO> getFileUris() {
+		return fileUris;
+	}
+
+	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
+		this.fileUris = fileUris;
 	}
 }

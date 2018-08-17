@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -58,6 +59,10 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>categoryId: 合同类型多入口</li>
+ *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
+ *     <li>templateId: 合同模板id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
@@ -109,8 +114,36 @@ public class UpdateContractCommand {
     private Long createUid;
     private String layout;
     private String settled;
+    private Long categoryId;
+    private Byte costGenerationMethod;
+    private Byte contractApplicationScene = 0;
+    private Long templateId;
 
-    @ItemType(BuildingApartmentDTO.class)
+    public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+    public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+    public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
     @ItemType(ContractChargingItemDTO.class)
@@ -124,7 +157,15 @@ public class UpdateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 
@@ -548,5 +589,10 @@ public class UpdateContractCommand {
 
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

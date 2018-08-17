@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -126,6 +127,15 @@ public class UpdatePaymentContractCommand {
     private String denunciationReason;
     private Long denunciationTime;
     private Long denunciationUid;
+    
+    private Long categoryId;
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
     @ItemType(ContractPaymentPlanDTO.class)
@@ -610,4 +620,9 @@ public class UpdatePaymentContractCommand {
     public void setTreatyParticulars(String treatyParticulars) {
         this.treatyParticulars = treatyParticulars;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

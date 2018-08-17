@@ -1,14 +1,22 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -181,6 +189,69 @@ public interface AssetService {
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
+    
+    List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+    
+    /**
+     * 用于接受支付系统的回调信息
+     * @param cmd
+     */
+    void payNotify(OrderPaymentNotificationCommand cmd);
+    	
+    ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
+    
+	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
+	
+	void transferOrderPaymentType();
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
+	
+	void deleteUnsettledBillsOnContractId(Byte costGenerationMethod, Long contractId, Timestamp endTime);
+	
     //add by tangcen
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
+	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+    
+    IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
+    
+    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
+    
+    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    
+    void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
+    
+    ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
+
+	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
+	
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+
+	void testLateFine(TestLateFineCommand cmd);
+	
+	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
+
+	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
+
+	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
+
+	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+
+	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
+    
+    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
+	
+	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 }

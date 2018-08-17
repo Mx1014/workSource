@@ -244,6 +244,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
                 if(driver != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+                }else{
+                	//不传则过滤掉bus门禁 by liuyilin 20180614
+                	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.ne(DoorAccessDriverType.BUS.getCode()));
                 }
 
                 query.addConditions(c1.or(c2));
@@ -478,6 +481,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
 	            if(driver != null && !driver.isEmpty()){
 	            	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+	            }else{
+                	//不传则过滤掉bus门禁 by liuyilin 20180614
+                	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.ne(DoorAccessDriverType.BUS.getCode()));
 	            }
                 return query;
             }

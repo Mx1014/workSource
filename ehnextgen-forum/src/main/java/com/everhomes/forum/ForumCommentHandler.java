@@ -5,11 +5,14 @@ import com.everhomes.rest.comment.*;
 import com.everhomes.rest.comment.AttachmentDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,21 @@ public class ForumCommentHandler implements CommentHandler {
 	private ForumService forumService;
 	@Autowired
 	private ForumProvider forumProvider;
+	@Autowired
+	private SensitiveWordService sensitiveWordService;
+
+	//敏感词检测 --add by yanlong.liang 20180614
+	private void filterWord(AddCommentCommand cmd, Byte moduleType) {
+		List<String> textList = new ArrayList<>();
+		FilterWordsCommand command = new FilterWordsCommand();
+		command.setModuleType(moduleType);
+		if (!StringUtils.isEmpty(cmd.getContent())) {
+			textList.add(cmd.getContent());
+		}
+		command.setCommunityId(cmd.getCommunityId());
+		command.setTextList(textList);
+		this.sensitiveWordService.filterWords(command);
+	}
 
 	@Override
 	public CommentDTO addComment(AddCommentCommand cmd) {
@@ -43,7 +61,7 @@ public class ForumCommentHandler implements CommentHandler {
 			throw RuntimeErrorException.errorWith(ForumLocalStringCode.SCOPE, ForumLocalStringCode.POST_COMMENT_NOT_SUPPORT,
 					"comment not support");
 		}
-
+        filterWord(cmd, post.getModuleType());
 		NewCommentCommand forumCmd  = ConvertHelper.convert(cmd, NewCommentCommand.class);
 		forumCmd.setTopicId(ownerTokenDto.getId());
 		if(cmd.getAttachments() != null && cmd.getAttachments().size() > 0){

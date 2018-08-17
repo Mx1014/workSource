@@ -29,6 +29,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.common.TagSearchItem;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -231,7 +232,7 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
 		}
-		
+
 		// 进行权限判断
 		final Long userId = UserContext.current().getUser().getId();
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());
@@ -241,17 +242,12 @@ public class NewsServiceImpl implements NewsService {
 		news.setAuthor(cmd.getAuthor());
 		news.setCoverUri(cmd.getCoverUri());
 		news.setContentAbstract(cmd.getContentAbstract());
-		// news.setCategoryId(cmd.getCategoryId());
 		news.setContent(cmd.getContent());
 		news.setSourceDesc(cmd.getSourceDesc());
 		news.setSourceUrl(cmd.getSourceUrl());
 		news.setPhone(cmd.getPhone());
 		news.setVisibleType(cmd.getVisibleType());
-		news.setTopIndex(0L);
-		news.setTopFlag(NewsTopFlag.NONE.getCode());
-
 		news.setStatus(generateNewsStatus(cmd.getStatus()));
-		news.setDeleterUid(0L);
 
 		// 调整摘要
 		adjustNewsContentAbstract(news);
@@ -407,7 +403,7 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
-		// 权限核实 
+		// 权限核实
 		// 这里就不用projectId了，冗余了
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
 
@@ -721,7 +717,7 @@ public class NewsServiceImpl implements NewsService {
 		} else if (enumStatus == NewsStatus.DRAFT) {
 			must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.DRAFT.getCode() + "}}"));
 		}
-		
+
 		// 同一个tag对子tag取交集，不同的tag取并集
 		List<TagSearchItem> items = getTagSearchItems(namespaceId, categoryId, tagIds);
 		boolean containItems = !CollectionUtils.isEmpty(items);
@@ -757,7 +753,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// 更新tagId
 //		updateTagIds(namespaceId, tagIds);
-		
+
 		String jsonString = getSearchJson(communityId, userId, namespaceId, categoryId, keyword, tagIds, pageAnchor,
 				pageSize, status);
 
@@ -1239,7 +1235,7 @@ public class NewsServiceImpl implements NewsService {
 
 		return response;
 	}
-	
+
 	@Override
 	public GetNewsCommentResponse getNewsComment(GetNewsCommentCommand cmd) {
 
@@ -1382,7 +1378,9 @@ public class NewsServiceImpl implements NewsService {
 			if (tags != null)
 				for (NewsTagDTO dto : tags) {
 					NewsTag tag = ConvertHelper.convert(dto, NewsTag.class);
+
 					tag.setDefaultOrder(order++);
+
 					tag.setParentId(parentId);
 					tag.setNamespaceId(parentTag.getNamespaceId());
 					tag.setOwnerType(parentTag.getOwnerType());
@@ -1999,7 +1997,7 @@ public class NewsServiceImpl implements NewsService {
 	 *
 	 */
 	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long inputCategoryId) {
-		
+
 		//旧版本可能传空
 		Long categoryId = inputCategoryId == null ? 0L : inputCategoryId;
 		
@@ -2012,8 +2010,7 @@ public class NewsServiceImpl implements NewsService {
 		//获取item_group
 		PortalItemGroup group = portalItemGroupProvider.findPortalItemGroupById(groupId);
 		if (null == group) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_ITEM_GROUP_NOT_FOUND, "portal item group not found");
+			return;
 		}
 		
 		//获取模块
@@ -2021,8 +2018,7 @@ public class NewsServiceImpl implements NewsService {
 		Long moduleAppId = json.getLong("moduleAppId");
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 		
 		// 拼装renderUrl
@@ -2053,16 +2049,14 @@ public class NewsServiceImpl implements NewsService {
 		// 获取最新的版本
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
 		if (null == maxBigVersion) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_VERSION_NOT_FOUND, "protal version not exist");
+			return;
 		}
 
 		// 获取相应应用
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, maxBigVersion.getId(),
 				NEWS_MODULE_ID, "" + categoryId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 
 		// 拼装renderUrl
@@ -2081,13 +2075,12 @@ public class NewsServiceImpl implements NewsService {
 	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
 
-		String encodeTitile;
+		String encodeTitile = null;
 		try {
 			// 标题为中文时需要转码
 			encodeTitile = URLEncoder.encode(title, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+			LOGGER.error("news title name not can't be encoded :"+ title);
 		}
 
 		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
@@ -2145,7 +2138,7 @@ public class NewsServiceImpl implements NewsService {
 		//文字较长，截取默认长度
 		news.setContentAbstract(contentAbstract.substring(0, NEWS_CONTENT_ABSTRACT_DEFAULT_LEN));
 	}
-	
+
 	/**
 	 * 前端或app可能会传来父标签Id，作为查询一整个类型的条件
 	 * 这时需要将子标签都获取，作为查询条件。
@@ -2169,7 +2162,7 @@ public class NewsServiceImpl implements NewsService {
 		if (CollectionUtils.isEmpty(newsTags)) {
 			return null;
 		}
-		
+
 		// 保存tagIds至itemMap
 		for (Long tagId : newTagIds) {
 
@@ -2187,69 +2180,69 @@ public class NewsServiceImpl implements NewsService {
 				break;
 			}
 		}
-		
+
 		// 根据tagIdMap来组装筛选条件
 		return formTagSearchItems(itemMap);
 	}
-	
+
 	/**
 	 * 获取当前域名和版本下的所有标签
-	 * 
+	 *
 	 * @param parentTagId
 	 * @return
 	 */
 	private List<NewsTag> getAllNewsTags(Integer namespaceId, Long categoryId) {
 		return newsProvider.listNewsTag(namespaceId, null, null, null, null, categoryId);
 	}
-	
-	/**   
+
+	/**
 	* @Function: NewsServiceImpl.java
 	* @Description: 构造以父节点为key，孩子节点为valueList的map
 	*
 	* @version: v1.0.0
 	* @author:	 黄明波
-	* @date: 2018年6月4日 下午4:01:07 
+	* @date: 2018年6月4日 下午4:01:07
 	*
 	*/
 	private void formTagIdMap(Map<Long, List<Long>> itemMap, NewsTag newsTag, List<NewsTag> newsTags) {
-		
+
 		List<Long> valueList = null;
-		
+
 		// 如果是父亲节点，将所有孩子节点都找出来
 		if (isParentTag(newsTag)) {
-			
+
 			if (null == itemMap.get(newsTag.getId())) {
 				valueList = new ArrayList<Long>(10);
 			}
-			
+
 			// 将所有孩子节点添加上去
 			for (NewsTag tag : newsTags) {
 				if (newsTag.getId().equals(tag.getParentId())) {
 					valueList.add(tag.getId());
 				}
 			}
-			
+
 			itemMap.put(newsTag.getId(), valueList);
 			return;
 		}
-		
+
 		// 孩子节点
 		valueList = itemMap.get(newsTag.getParentId());
 		if (null == valueList) {
 			valueList = new ArrayList<Long>(10);
 		}
-		
+
 		valueList.add(newsTag.getId());
 		itemMap.put(newsTag.getParentId(), valueList);
 	}
-	
-	/**   
+
+	/**
 	* @Function: NewsServiceImpl.java
 	* @Description: 根据tagId map生成查询项
 	*
 	* @version: v1.0.0
 	* @author:	 黄明波
-	* @date: 2018年6月4日 下午4:25:58 
+	* @date: 2018年6月4日 下午4:25:58
 	*
 	*/
 	private List<TagSearchItem> formTagSearchItems(Map<Long, List<Long>> itemMap) {
@@ -2264,11 +2257,27 @@ public class NewsServiceImpl implements NewsService {
 			item.setChildTagIds(itemMap.get(parentId));
 			searchItems.add(item);
 		}
-		
+
 		return searchItems;
 	}
-	
+
 	private boolean isParentTag(NewsTag tag) {
 		return 0 == tag.getParentId();
+	}
+
+	@Override
+	public String getNewsQR(UpdateNewsCommand cmd) {
+        String url = this.configProvider.getValue("home.url","localhost") + "/html/news_text_preview.html?newsToken=";
+		String token;
+		if(null == cmd.getId()){
+			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
+			token = result.getNewsToken();
+		} else {
+			this.updateNews(cmd);
+			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+		}
+		url += token;
+
+		return url;
 	}
 }
