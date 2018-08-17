@@ -10031,7 +10031,7 @@ public class PunchServiceImpl implements PunchService {
 					dto.setStatus(statusToString(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
 					if(null != pl.getPunchTime()){
 						dto.setCheckInTime(pl.getPunchTime().getTime());
-					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(dto.getStatus())){
+					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(Byte.valueOf(dto.getStatus()))){
 						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
 					}
 					OrganizationMember member = findOrganizationMemberByUIdCache(pl.getUserId(),pl.getEnterpriseId());
