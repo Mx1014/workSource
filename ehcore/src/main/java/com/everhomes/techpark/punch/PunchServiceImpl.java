@@ -10023,17 +10023,17 @@ public class PunchServiceImpl implements PunchService {
 					if(null != pl.getPunchDate()){
 						dto.setCheckInDate(pl.getPunchDate().getTime());
 					}
-					if(null != pl.getPunchTime()){
-						dto.setCheckInTime(pl.getPunchTime().getTime());
-					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(pl.getStatus())){
-						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
-					}
 					dto.setLatitude(pl.getLatitude());
 					dto.setLongitude(pl.getLongitude());
 					dto.setLocationInfo(pl.getLocationInfo());
 					dto.setWifiInfo(pl.getWifiInfo());
 					dto.setUserId(pl.getUserId());
 					dto.setStatus(statusToString(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
+					if(null != pl.getPunchTime()){
+						dto.setCheckInTime(pl.getPunchTime().getTime());
+					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(dto.getStatus())){
+						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
+					}
 					OrganizationMember member = findOrganizationMemberByUIdCache(pl.getUserId(),pl.getEnterpriseId());
 					if(null != member){
 						dto.setUserName(member.getContactName());
