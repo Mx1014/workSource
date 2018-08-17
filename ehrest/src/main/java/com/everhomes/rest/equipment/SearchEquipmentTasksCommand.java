@@ -35,6 +35,8 @@ public class SearchEquipmentTasksCommand {
 	private Long targetId;
 	@ItemType(Long.class)
 	private List<Long> targetIds;
+
+	private String targetIdString;
 	
 	private String targetType;
 	
@@ -177,6 +179,14 @@ public class SearchEquipmentTasksCommand {
 
 	public void setTargetIds(List<Long> targetIds) {
 		this.targetIds = targetIds;
+	}
+
+	public String getTargetIdString() {
+		return targetIdString;
+	}
+
+	public void setTargetIdString(String targetIdString) {
+		this.targetIdString = targetIdString;
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.util.List;
  *  <li>ownerType: 设备备件所属组织类型，如enterprise</li>
  *  <li>targetId: 设备备件所属管理处id</li>
  *  <li>targetType: 设备备件所属管理处类型</li>
+ *  <li>targetIdString: 项目列表id   get方式</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -29,6 +30,8 @@ public class SearchEquipmentAccessoriesCommand {
 	private List<Long> targetIds;
 	
 	private String targetType;
+
+	private String targetIdString;
 	
 	private String keyword;
 	
@@ -108,5 +111,13 @@ public class SearchEquipmentAccessoriesCommand {
 
 	public void setTargetIds(List<Long> targetIds) {
 		this.targetIds = targetIds;
+	}
+
+	public String getTargetIdString() {
+		return targetIdString;
+	}
+
+	public void setTargetIdString(String targetIdString) {
+		this.targetIdString = targetIdString;
 	}
 }

@@ -1534,6 +1534,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			dtos = equipmentIds.stream().map((e) -> ConvertHelper.convert(equipmentProvider.findEquipmentById(e), EquipmentsDTO.class))
 					.collect(Collectors.toList());
 		} else {
+			cmd.setTargetIds(transferCommandForExport(cmd.getTargetIdString()));
 			SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
 			dtos = equipments.getEquipment();
 		}
@@ -1701,7 +1702,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			SearchEquipmentAccessoriesCommand cmd, HttpServletResponse response) {
 		Integer pageSize = Integer.MAX_VALUE;
 		cmd.setPageSize(pageSize);
-
+		cmd.setTargetIds(transferCommandForExport(cmd.getTargetIdString()));
 		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
 		List<EquipmentAccessoriesDTO> dtos = accessories.getAccessories();
 
@@ -1715,6 +1716,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 		this.createEquipmentAccessoriesBook(filePath, dtos);
 
 		return download(filePath, response);
+	}
+
+	private List<Long> transferCommandForExport(String targetIdString) {
+		if(StringUtils.isNotBlank(targetIdString)){
+			String[] targetIds = targetIdString.split(",");
+			return Arrays.stream(targetIds).map(Long::valueOf).collect(Collectors.toList());
+		}
+		return null;
 	}
 
 	private void createEquipmentAccessoriesBook(String path, List<EquipmentAccessoriesDTO> dtos) {
@@ -2593,6 +2602,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			SearchEquipmentTasksCommand cmd, HttpServletResponse response) {
 		Integer pageSize = Integer.MAX_VALUE;
 		cmd.setPageSize(pageSize);
+		cmd.setTargetIds(transferCommandForExport(cmd.getTargetIdString()));
 
 		ListEquipmentTasksResponse tasks = equipmentTasksSearcher.query(cmd);
 		List<EquipmentTaskDTO> dtos = tasks.getTasks();
