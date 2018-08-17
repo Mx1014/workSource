@@ -5520,7 +5520,7 @@ public class CommunityServiceImpl implements CommunityService {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
 		if (namespaces!=null && namespaces.size()>0) {
 			for (NamespaceInfoDTO namespaceInfo : namespaces) {
-				LOGGER.info("caculating community area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
+				LOGGER.info("caculating building area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
 				
 				List<Community> communities = communityProvider.findCommunitiesByNamespaceId(namespaceInfo.getId());
@@ -5545,7 +5545,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				long endTime = System.currentTimeMillis();
 				long timeCost = endTime - startTime;
-				LOGGER.info("caculating community area progress ends, namespace_id = {},namespace_name={},time_cost:{}ms",
+				LOGGER.info("caculating building area progress ends, namespace_id = {},namespace_name={},time_cost:{}ms",
 							namespaceInfo.getId(),namespaceInfo.getName(),timeCost);
 			}
 		}
