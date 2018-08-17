@@ -408,6 +408,17 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         return null;
     }
 
+    @Override
+    public void deleteFileContentByContentPath(String path) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        UpdateQuery<EhFileManagementContentsRecord> query = context.updateQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(path + "/%"));
+        query.addValue(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS, FileManagementStatus.INVALID.getCode());
+        query.execute();
+    }
+
 //    @Override
 //    public FileCatalog findAllStatusFileCatalogByName(Integer namespaceId, Long ownerId, String name) {
 //        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
