@@ -112,6 +112,7 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.ListServiceAllianceProvidersCommand;
 import com.everhomes.rest.yellowPage.ListServiceAllianceProvidersResponse;
+import com.everhomes.rest.yellowPage.ListServiceNamesCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
 import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
@@ -125,6 +126,7 @@ import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
 import com.everhomes.rest.yellowPage.ListOnlineServicesCommand;
 import com.everhomes.rest.yellowPage.ListOnlineServicesResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.NotifyTargetDTO;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
@@ -142,6 +144,7 @@ import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.ServiceAllianceProviderDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.IdNameDTO;
 import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateAllianceTagCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
@@ -158,6 +161,20 @@ import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.stat.ClickCountDTO;
+import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
+import com.everhomes.rest.yellowPage.stat.ClickStatDetailDTO;
+import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
+import com.everhomes.rest.yellowPage.stat.InterestStatDTO;
+import com.everhomes.rest.yellowPage.stat.ListClickStatCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailResponse;
+import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
+import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
+import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
+import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
@@ -187,6 +204,11 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.file.FileUtils;
+import com.everhomes.yellowPage.stat.ClickStat;
+import com.everhomes.yellowPage.stat.ClickStatDetail;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
+import com.everhomes.yellowPage.stat.ClickStatProvider;
+import com.everhomes.yellowPage.stat.ClickStatTool;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -227,6 +249,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -237,13 +260,11 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
-public class YellowPageServiceImpl implements YellowPageService {
+public class YellowPageServiceImpl implements YellowPageService { 
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageServiceImpl.class);
 
 	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-	
-	private final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
-	
+
 	@Autowired
 	private HotlineService hotlineService;
 
@@ -343,6 +364,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	LaunchPadProvider launchPadProvider;
+
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -763,6 +785,33 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (!StringUtils.isEmpty(sa.getButtonTitle())) {
 			dto.setButtonTitle(sa.getButtonTitle());
 		}
+		
+		
+		// 服务联盟跳转到审批，审批模块可控制在app端是否显示
+		if (dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl() != null
+				&& dto.getModuleUrl().contains("zl://approval/create")) {
+			boolean matches = Pattern.matches("^(.*)formId=.*$", dto.getModuleUrl());
+			if (!matches){
+				int start = dto.getModuleUrl().indexOf('?');
+				String s[] = dto.getModuleUrl().substring(start).split("&");
+				s = s[0].split("=");
+				if (s.length > 1) {
+					try {
+						Long approveId = Long.valueOf(s[1]);
+						GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
+						if (CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()) {
+//							dto.setButtonTitle(null);
+//							dto.setJumpType(JumpType.NONE.getCode());
+//							dto.setModuleUrl(null);
+							dto.setIsApprovalActive(TrueOrFalseFlag.FALSE.getCode());
+						}
+
+					} catch (Exception e) {
+					}
+				}
+			}
+		}
+		
 
 		this.processDetailUrl(dto);
 		// response.setDisplayName(serviceAlliance.getNickName());
@@ -825,7 +874,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		//检验项目id的正确性。
 		if ("community".equals(cmd.getOwnerType()) && (null == cmd.getOwnerId() || cmd.getOwnerId() < 1)) {
-			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 
 		cmd.setOwnerId(cmd.getOwnerId());
@@ -939,9 +988,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 							Long approveId = Long.valueOf(s[1]);
 							GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
 							if (CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()) {
-								dto.setButtonTitle(null);
-								dto.setJumpType(JumpType.NONE.getCode());
+//								dto.setButtonTitle(null);
+//								dto.setJumpType(JumpType.NONE.getCode());
 								dto.setModuleUrl(null);
+								dto.setIsApprovalActive(TrueOrFalseFlag.FALSE.getCode());
 							}
 
 						} catch (Exception e) {
@@ -1256,7 +1306,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		//检验项目id的正确性。
 		if (null == cmd.getOwnerId() || cmd.getOwnerId() < 1) {
-			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 
 		ServiceAlliances serviceAlliance = ConvertHelper.convert(cmd, ServiceAlliances.class);
@@ -1703,6 +1753,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
+		cmd.setPageAnchor(null);
+		cmd.setPageSize(null);
+		ListServiceAllianceCategoriesAdminResponse resp = listServiceAllianceCategoriesAdmin(cmd);
+		return resp.getDtos();
+	}
+	
+	@Override
+	public ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(
+			ListServiceAllianceCategoriesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if (cmd.getNamespaceId() != null) {
 			namespaceId = cmd.getNamespaceId();
@@ -1713,10 +1772,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			displayDestination.add(ServiceAllianceCategoryDisplayDestination.BOTH.getCode());
 		}
 
-		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(
-				cmd.getOwnerType(), cmd.getOwnerId(), namespaceId, cmd.getParentId(), CategoryAdminStatus.ACTIVE,
-				displayDestination);
-		return entityResultList.stream().map(r -> {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(locator,
+				cmd.getPageSize(), cmd.getOwnerType(), cmd.getOwnerId(), namespaceId, cmd.getParentId(),
+				CategoryAdminStatus.ACTIVE, displayDestination);
+
+		List<ServiceAllianceCategoryDTO> dtos = entityResultList.stream().map(r -> {
 			ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
 			String locale = UserContext.current().getUser().getLocale();
 			String displayCategoryName = localeStringService.getLocalizedString(
@@ -1728,6 +1790,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			dto.setSkipType(skipRule == null ? (byte) 0 : (byte) 1);
 			return dto;
 		}).collect(Collectors.toList());
+
+		// 组织返回数据
+		ListServiceAllianceCategoriesAdminResponse resp = new ListServiceAllianceCategoriesAdminResponse();
+		resp.setDtos(dtos);
+		resp.setNextPageAnchor(locator.getAnchor());
+		return resp;
 	}
 
 	@Override
@@ -2989,7 +3057,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 获取该记录
 		ServiceAllianceProvid provider = allianceProvidProvider.findServiceAllianceProvidById(cmd.getId());
 		if (provider == null) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 		}
 
 		// 校验权限
@@ -3008,7 +3076,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 获取该记录
 		ServiceAllianceProvid provider = allianceProvidProvider.findServiceAllianceProvidById(cmd.getId());
 		if (provider == null) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 			;
 		}
 
@@ -3041,14 +3109,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		// 查看模块是否开启服务商功能开关
 		if (!IsOpenAllianceProviderFunction(cmd.getProviderId())) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_FUNC_NOT_OPEN,
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_FUNC_NOT_OPEN,
 					"alliance provider function not open");
 		}
 
 		// 获取工作流信息
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
 		if (null == flowCase) {
-			throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST, "flow case not found");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST, "flow case not found");
 		}
 
 		// 进行事件保存以及工作流处理
@@ -3063,7 +3131,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			if (!CollectionUtils.isEmpty(uploads)) {
 				for (ExtraEventAttachmentDTO dto : uploads) {
 					if (StringUtils.isEmpty(dto.getFileUri())) {
-						throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FILE_NOT_VALID, "file uri not valid");
+						YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FILE_NOT_VALID, "file uri not valid");
 					}
 
 					AllianceExtraEventAttachment attch = new AllianceExtraEventAttachment();
@@ -3123,7 +3191,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			files = buildProvidersNotifyEmailAttachments(uploads);
 		} catch (IOException e) {
 			LOGGER.error("mail files save error:" + e);
-			throwError(YellowPageServiceErrorCode.ERROR_MAIL_FILES_SAVE_ERROR, "mail files save error");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_MAIL_FILES_SAVE_ERROR, "mail files save error");
 		}
 
 		// 发送邮件
@@ -3187,7 +3255,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		body.append("创建时间：").append(Utils.longToString(event.getCreateTime().getTime(), DateStyle.DATE_HOUR_MINUTE));
 		body.append(" ");
 
-		TargetDTO userDto = findUserContactById(event.getCreateUid());
+		TargetDTO userDto = organizationProvider.findUserContactByUserId( UserContext.getCurrentNamespaceId(), event.getCreateUid());
 		String userName = userDto == null ? null : userDto.getTargetName();
 		String userPhone = userDto == null ? null : userDto.getUserIdentifier();
 		body.append("创建人：").append(userName).append("（").append(userPhone).append("）");
@@ -3279,35 +3347,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 		eventDto.setTimeStamp(event.getTime().getTime());
 		eventDto.setUploads(uploads);
 		eventDto.setCreateTimeStamp(event.getCreateTime().getTime());
-		TargetDTO userDto = findUserContactById(event.getCreateUid());
-		eventDto.setCreateUserName(userDto.getTargetName());
-		eventDto.setCreateUserToken(userDto.getUserIdentifier());
-
+		TargetDTO userDto = organizationProvider.findUserContactByUserId( UserContext.getCurrentNamespaceId(), event.getCreateUid());
+		if (null != userDto) {
+			eventDto.setCreateUserName(userDto.getTargetName());
+			eventDto.setCreateUserToken(userDto.getUserIdentifier());
+		}
+	
 		return eventDto;
 	}
 
-	/**
-	 * 根据用户id获取用户的真实姓名和手机号 1.获取真实姓名。 2.没有的话获取昵称
-	 * 
-	 * @param userId
-	 * @return
-	 */
-	private TargetDTO findUserContactById(Long userId) {
-
-		TargetDTO dto = null;
-
-		OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(
-				UserContext.getCurrentNamespaceId(), userId, OrganizationType.ENTERPRISE.getCode());
-		if (null != member) {
-			dto = new TargetDTO();
-			dto.setTargetId(userId);
-			dto.setTargetName(member.getContactName());
-			dto.setUserIdentifier(member.getContactToken());
-			return dto;
-		}
-
-		return userProvider.findUserTargetById(userId);
-	}
 
 	/**
 	 * 改变工作流的执行行为
@@ -3375,7 +3423,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 保存提交人信息
 		User user = UserContext.current().getUser();
 		if (null == user) {
-			throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_APPLIER_NOT_EXIST, "applier not exist");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_APPLIER_NOT_EXIST, "applier not exist");
 		}
 		log.setFlowUserId(user.getId());
 		log.setFlowUserName(user.getNickName());
@@ -3481,18 +3529,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		return false;
-	}
-
-	/**
-	 * 默认code为YellowPageServiceErrorCode.SCOPE
-	 * 
-	 * @param errorCode
-	 *            错误码，见YellowPageServiceErrorCode
-	 * @param errorMsg
-	 *            错误信息。
-	 */
-	private void throwError(int errorCode, String errorMsg) {
-		throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE, errorCode, errorMsg);
 	}
 
 	/**
@@ -3628,12 +3664,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		AllianceTagGroupDTO group = cmd.getTagGroup();
 		if (null == group || null == group.getParentTag()) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_NOT_VALID, "alliance parent tag is null");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_NOT_VALID, "alliance parent tag is null");
 			return;
 		}
 
 		if (null == cmd.getType() || cmd.getType() <= 0) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_TYPE_NOT_VALID, "alliance tag type not valid");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_TYPE_NOT_VALID, "alliance tag type not valid");
 			return;
 		}
 
@@ -3956,5 +3992,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 		String timeHeadStr = DateUtil.dateToStr(endTime, "yyyyMMdd");
 		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
 		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
+
 	}
 }

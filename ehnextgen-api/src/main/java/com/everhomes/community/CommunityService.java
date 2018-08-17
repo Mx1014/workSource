@@ -170,4 +170,8 @@ public interface CommunityService {
 
 	void exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd, HttpServletResponse httpServletResponse);
 
+	void caculateAllCommunityArea();
+
+	void caculateAllBuildingArea();
+
 }
