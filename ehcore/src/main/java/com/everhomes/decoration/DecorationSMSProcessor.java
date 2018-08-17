@@ -250,7 +250,7 @@ public class DecorationSMSProcessor {
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("name", request.getDecoratorName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "name", request.getDecoratorName());
+
         int templateId = SmsTemplateCode.DECORATION_MOTIFY_FEE;
         String templateLocale = RentalNotificationTemplateCode.locale;
         try {
@@ -262,7 +262,7 @@ public class DecorationSMSProcessor {
         //租户
         variables = smsProvider.toTupleList("name", request.getApplyName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "name", request.getApplyName());
+
         try {
             smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
         }catch (RuntimeException e){
@@ -275,7 +275,6 @@ public class DecorationSMSProcessor {
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("name", request.getDecoratorName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "name", request.getDecoratorName());
         int templateId = SmsTemplateCode.DECORATION_MOTIFY_REFUND;
         String templateLocale = RentalNotificationTemplateCode.locale;
         try {
@@ -287,7 +286,6 @@ public class DecorationSMSProcessor {
         //租户
         variables = smsProvider.toTupleList("name", request.getApplyName());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
-        smsProvider.addToTupleList(variables, "name", request.getApplyName());
         try {
             smsProvider.sendSms(request.getNamespaceId(), request.getApplyPhone(), templateScope, templateId, templateLocale, variables);
         }catch (RuntimeException e){
