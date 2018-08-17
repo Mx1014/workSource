@@ -26,6 +26,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.order.*;
@@ -39,6 +40,12 @@ import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -160,6 +167,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public NamespaceProvider namespaceProvider;
 	@Autowired
 	private ParkingHubProvider parkingHubProvider;
+	@Autowired
+	protected GeneralOrderService orderService;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -771,7 +780,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayeeUserId());
 		parkingRechargeOrder.setInvoiceStatus((byte)0);
 		parkingRechargeOrder.setPaySource(paySource);
-		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
+
 		createOrderCommand.setAmount(amount);
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
@@ -794,18 +803,21 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
-		CreateOrderRestResponse purchaseOrder = null;
-		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
-			purchaseOrder = sdkPayService.createCustomOrder(createOrderCommand);
-		}else {
-			purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
-		}
-		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
-			LOGGER.info("purchaseOrder "+purchaseOrder);
+		CreatePurchaseOrderCommand createPurchaseOrderCommand = convertToGorderCommand(createOrderCommand);
+		CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createPurchaseOrderCommand);//统一订单
+//		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+//			purchaseOrder = sdkPayService.createCustomOrder(createOrderCommand);
+//		}else {
+//			purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+//		}
+		if(!checkOrderRestResponseIsSuccess(createOrderResp)){
+			LOGGER.info("purchaseOrderRestResponse "+createOrderResp);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"preorder failed "+StringHelper.toJsonString(purchaseOrder));
+					"preorder failed "+StringHelper.toJsonString(createOrderResp));
 		}
-		OrderCommandResponse response = purchaseOrder.getResponse();
+		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+
+		OrderCommandResponse response = orderCommandResponse.getPayResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
 		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
@@ -831,8 +843,86 @@ public class ParkingServiceImpl implements ParkingService {
 		Long expiredIntervalTime = getExpiredIntervalTime(response.getExpirationMillis());
 		preDto.setExpiredIntervalTime(expiredIntervalTime);
 		preDto.setOrderId(parkingRechargeOrder.getId());
+		parkingRechargeOrder.setBizOrderNo(response.getBizOrderNum());
+		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 //		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
+	}
+
+	/*
+    * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+      CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+    */
+	private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+		if(response != null && response.getErrorCode() != null
+				&& (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+			return true;
+		return false;
+	}
+
+	private CreatePurchaseOrderCommand convertToGorderCommand(CreateOrderCommand cmd){
+		CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+		//PaymentParamsDTO转为Map
+		Map<String, String> flattenMap = new HashMap<>();
+		StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
+
+		preOrderCommand.setAmount(cmd.getAmount());
+
+		preOrderCommand.setAccountCode(cmd.getAccountCode());
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		// 移到统一订单系统完成
+		// String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+		// preOrderCommand.setBizOrderNum(BizOrderNum);
+		BusinessPayerType payerType = BusinessPayerType.USER;
+		preOrderCommand.setBusinessPayerType(payerType.getCode());
+		preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+		String businessPayerParams = getBusinessPayerParams(UserContext.getCurrentNamespaceId());
+		preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+		// preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
+		preOrderCommand.setPaymentPayeeId(cmd.getPayeeUserId());
+
+		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+		preOrderCommand.setPaymentParams(flattenMap);
+		//preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+		preOrderCommand.setCallbackUrl(cmd.getBackUrl());
+
+		preOrderCommand.setGoodsName(cmd.getExtendInfo());
+		preOrderCommand.setGoodsDescription(null);
+		preOrderCommand.setIndustryName(null);
+		preOrderCommand.setIndustryCode(null);
+		preOrderCommand.setSourceType(cmd.getSourceType());
+		preOrderCommand.setOrderRemark1(cmd.getOrderRemark1());
+		//preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+		preOrderCommand.setOrderRemark3(cmd.getOrderRemark3());
+		preOrderCommand.setOrderRemark4(null);
+		preOrderCommand.setOrderRemark5(null);
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+		return preOrderCommand;
+	}
+
+	private String getBusinessPayerParams(Integer namespaceId) {
+
+		Long businessPayerId = UserContext.currentUserId();
+
+
+		UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, namespaceId);
+		String buyerPhone = null;
+		if(buyerIdentifier != null) {
+			buyerPhone = buyerIdentifier.getIdentifierToken();
+		}
+		// 找不到手机号则默认一个
+		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("businessPayerPhone", buyerPhone);
+		return StringHelper.toJsonString(map);
 	}
 
 	private Long getExpiredIntervalTime(Long expiration){
@@ -2110,22 +2200,32 @@ public class ParkingServiceImpl implements ParkingService {
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"支付系统订单号不存在");
 		}
-		CreateOrderCommand refundOrder = new CreateOrderCommand();
-		refundOrder.setRefundOrderId(Long.valueOf(order.getPayOrderNo()));
-		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();//todo
-		refundOrder.setBizOrderNum(generateBizOrderNum(sNamespaceId+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
-		refundOrder.setAmount(amount);
+
+
+		CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+		String systemId = configProvider.getValue(0, "gorder.system_id", "");
+		createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();
+		createRefundOrderCommand.setAccountCode(sNamespaceId);
+		if (order.getBizOrderNo() == null) //兼容
+			createRefundOrderCommand.setBusinessOrderNumber(generateBizOrderNum(sNamespaceId+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
+		else
+			createRefundOrderCommand.setBusinessOrderNumber(order.getBizOrderNo());
+		createRefundOrderCommand.setAmount(amount);
+		createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+		createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
-		refundOrder.setBackUrl(callbackurl);
-		refundOrder.setAccountCode(sNamespaceId);
-		LOGGER.info("refund order params = "+refundOrder);
-		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
-//		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
+		createRefundOrderCommand.setCallbackUrl(callbackurl);
+		createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
 
-		if(refundResponse == null || refundResponse.getErrorCode() == null || !refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+		CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+
+		if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+		} else{
 			LOGGER.error("Refund failed from vendor, cmd={}, response={}",
-					cmd, refundResponse);
+					cmd, refundOrderRestResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");

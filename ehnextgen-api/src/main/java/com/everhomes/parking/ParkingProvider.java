@@ -61,6 +61,8 @@ public interface ParkingProvider {
     
     ParkingRechargeOrder findParkingRechargeOrderById(Long id);
 
+    ParkingRechargeOrder findParkingRechargeOrderByBizOrderNum(String bizOrderNum);
+
     ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo);
 
     void updateParkingRechargeOrder(ParkingRechargeOrder order);
