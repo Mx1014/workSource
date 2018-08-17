@@ -365,6 +365,10 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd) {
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(cmd.getVersionId());
+
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		PortalLayout portalLayout = ConvertHelper.convert(cmd, PortalLayout.class);
@@ -430,6 +434,9 @@ public class PortalServiceImpl implements PortalService {
 	public PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalLayout.getVersionId());
 
 		if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) != TrueOrFalseFlag.TRUE && TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) == TrueOrFalseFlag.TRUE){
 			checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
@@ -522,6 +529,10 @@ public class PortalServiceImpl implements PortalService {
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalLayout.getVersionId());
+
 		portalLayout.setStatus(PortalLayoutStatus.INACTIVE.getCode());
 		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
@@ -568,6 +579,12 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemGroupDTO createPortalItemGroup(CreatePortalItemGroupCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getLayoutId());
+
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalLayout.getVersionId());
+
+
 		PortalItemGroup portalItemGroup = ConvertHelper.convert(cmd, PortalItemGroup.class);
 		Integer namespaceId = UserContext.getCurrentNamespaceId(portalLayout.getNamespaceId());
 		portalItemGroup.setNamespaceId(namespaceId);
@@ -591,6 +608,11 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemGroupDTO updatePortalItemGroup(UpdatePortalItemGroupCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getId());
+
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalItemGroup.getVersionId());
+
 		portalItemGroup.setLabel(cmd.getLabel());
 		portalItemGroup.setSeparatorFlag(cmd.getSeparatorFlag());
 		portalItemGroup.setSeparatorHeight(cmd.getSeparatorHeight());
@@ -608,6 +630,10 @@ public class PortalServiceImpl implements PortalService {
 	public void deletePortalItemGroup(DeletePortalItemGroupCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalItemGroup.getVersionId());
+
 		portalItemGroup.setStatus(PortalItemGroupStatus.INACTIVE.getCode());
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
@@ -716,6 +742,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd) {
 		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getItemGroupId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalItemGroup.getVersionId());
+
 		PortalLayout portalLayout = checkPortalLayout(portalItemGroup.getLayoutId());
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(portalItemGroup.getNamespaceId());
@@ -761,6 +791,10 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemDTO updatePortalItem(UpdatePortalItemCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalItem portalItem = checkPortalItem(cmd.getId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalItem.getVersionId());
+
 		if(null == PortalItemStatus.fromCode(cmd.getStatus())){
 			portalItem.setStatus(PortalItemStatus.ACTIVE.getCode());
 		}else{
@@ -791,6 +825,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void deletePortalItem(DeletePortalItemCommand cmd) {
 		PortalItem portalItem = checkPortalItem(cmd.getId());
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(portalItem.getVersionId());
+
 		portalItem.setOperatorUid(UserContext.current().getUser().getId());
 		portalItem.setStatus(PortalItemGroupStatus.INACTIVE.getCode());
 		this.dbProvider.execute((status) -> {
@@ -1468,6 +1506,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalPublishLogDTO publish(PublishCommand cmd) {
 
+
+		//正式版本保护机制，不能对正式版本做编辑和发布。
+		protectReleaseVersion(cmd.getVersionId());
+
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
@@ -1495,6 +1537,10 @@ public class PortalServiceImpl implements PortalService {
 						//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
 						//从而服务广场layout的preview和release版本的版本号一致
 						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
+
+							//正式发布时清理预览版本的状态
+							removePreviewVersionStatus(namespaceId);
+
 							//更新版本号为新的版本
 							updateVersionToNewVersion(cmd.getVersionId());
 
@@ -1562,6 +1608,25 @@ public class PortalServiceImpl implements PortalService {
 		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
 
+
+	/**
+	 * 正式版本保护机制，不能对正式版本做编辑和发布。
+	 * @param versionId
+	 */
+	private void protectReleaseVersion(Long versionId){
+
+		if(versionId == null){
+			return;
+		}
+
+		PortalVersion portalVersion = portalVersionProvider.findPortalVersionById(versionId);
+		if(portalVersion != null && PortalVersionStatus.fromCode(portalVersion.getStatus()) == PortalVersionStatus.RELEASE){
+			LOGGER.error("Page has expired, please refresh page, and edit again.");
+			throw RuntimeErrorException.errorWith(PortalErrorCode.SCOPE, PortalErrorCode.ERROR_VERSION_CONFLICT,
+					"Page has expired, please refresh page, and edit again.");
+		}
+
+	}
 
 	private void deleteLayoutBeforePublish(Integer namespaceId){
 
@@ -1662,6 +1727,32 @@ public class PortalServiceImpl implements PortalService {
 		publishVersion.setPreviewCount(0);
 
 		portalVersionProvider.updatePortalVersion(publishVersion);
+	}
+
+
+	/**
+	 * 正式发布时清理预览版本的状态
+	 * @param namespaceId
+	 */
+	private void removePreviewVersionStatus(Integer namespaceId){
+
+
+		PortalVersion previewVersion = portalVersionProvider.findPreviewVersion(namespaceId);
+
+		if(previewVersion != null){
+			previewVersion.setStatus(null);
+		}
+
+		portalVersionProvider.updatePortalVersion(previewVersion);
+
+
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+		if(releaseVersion != null){
+			releaseVersion.setPreviewCount(0);
+		}
+
+		portalVersionProvider.updatePortalVersion(releaseVersion);
+
 	}
 
 	private void publishLayout(PortalLayout layout, Long versionId, Byte publishType){

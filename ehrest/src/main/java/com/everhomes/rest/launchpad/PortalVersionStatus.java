@@ -20,10 +20,15 @@ public enum PortalVersionStatus {
         return code;
     }
 
-    public static PortalVersionStatus fromCode(byte code) {
+    public static PortalVersionStatus fromCode(Byte code) {
+
+        if(code == null){
+            return null;
+        }
+
         PortalVersionStatus[] values = PortalVersionStatus.values();
         for (PortalVersionStatus value : values) {
-            if (value.code == code) {
+            if (code.equals(value.code)) {
                 return value;
             }
         }

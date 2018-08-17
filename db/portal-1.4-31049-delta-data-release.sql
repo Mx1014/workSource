@@ -73,7 +73,7 @@ DROP PROCEDURE IF EXISTS update_url_module_function;
 
 
 
-
-
-
+-- 当前版本已被他人抢先发布
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
 
