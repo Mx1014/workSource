@@ -1265,7 +1265,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			});
 		}
-		// add by tangcen
 		if (oldApartments.size() == 0) {
 			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD, contract, null, newApartments.toString());
 		} else if (newApartments.size() < oldApartments.size()) {
@@ -3049,7 +3048,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						dto.setDeleteFlag(ContractTemplateDeleteStatus.DELETED.getCode());
 					}
 				}
-				if ("gogs".equals(dto.getContentType())) {
+				//优化性能问题，#33761 【合同管理3.0-beta】【合同管理3.0】测试一段时间，就蹦了，如下图（严重阻挡） 后面测试没有问题可以删除，现在先注释  --by dingjianmin
+				/*if ("gogs".equals(dto.getContentType())) {
 					try {
 						//查询gogs上面的数据
 						String moduleType = "ContractTemplate_" + dto.getCategoryId();
@@ -3066,8 +3066,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					} catch (Exception e){
 						LOGGER.error("Gogs OthersException .", e);
 					}
-				}
-				
+				}*/
+				dto.setContents("");
 				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);

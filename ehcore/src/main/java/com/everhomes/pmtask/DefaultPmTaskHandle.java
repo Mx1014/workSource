@@ -5,6 +5,8 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.docking.DockingMapping;
+import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.flow.FlowEvaluate;
 import com.everhomes.flow.FlowEvaluateProvider;
 import com.everhomes.flow.FlowService;
@@ -51,6 +53,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	private ServiceModuleService serviceModuleService;
 	@Autowired
 	private FlowEvaluateProvider flowEvaluateProvider;
+	@Autowired
+	private DockingMappingProvider dockingMappingProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -212,6 +216,10 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //			}
 			Category parent = categoryProvider.findCategoryById(parentId);
 			if (null == parent) {
+				DockingMapping mapping = dockingMappingProvider.findDockingMappingById(parentId);
+				if(null != mapping){
+					return response;
+				}
 				LOGGER.error("Category not found, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Category not found.");

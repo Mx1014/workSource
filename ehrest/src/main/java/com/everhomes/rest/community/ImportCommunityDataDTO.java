@@ -57,6 +57,33 @@ public class ImportCommunityDataDTO {
 	private String rentArea;
 	private Long cityId;
     private Long areaId;
+    private String longitude;//经度
+    private String latitude;//纬度
+    private String communityType;
+    
+	public String getCommunityType() {
+		return communityType;
+	}
+
+	public void setCommunityType(String communityType) {
+		this.communityType = communityType;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
 
 	public Long getCityId() {
 		return cityId;

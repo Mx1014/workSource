@@ -773,6 +773,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if (null != userIdentifier) {
 				requestorUid = userIdentifier.getOwnerUid();
 			}
+			cmd.setEnterpriseId(cmd.getOrganizationId());
 			return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 		}
 	}
@@ -867,7 +868,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
-		
+		cmd.setEnterpriseId(cmd.getOrganizationId());
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
@@ -1004,11 +1005,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+		if (namespaceId == 999983 &&
+				(this.isEbeiCategory(cmd.getTaskCategoryId()) || this.isEbeiCategory(cmd.getParentId()))) {
 			handle = PmTaskHandle.EBEI;
 		}
-		
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.listTaskCategories(cmd);
@@ -1053,125 +1054,154 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Row defaultRow = sheet.getRow(4);
 			Cell cell = defaultRow.getCell(1);
 			CellStyle style = cell.getCellStyle();
-			int size = list.size();
-			for(int i=0;i<size;i++){
-				Row tempRow = sheet.createRow(i + 4);
-				PmTaskDTO task = list.get(i);
-				Category category = null;
-				if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
-						cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-					category = createEbeiCategory();
-				} else {
-					category = checkCategory(task.getTaskCategoryId());
-				}
+			int size = 0;
+			if(null != list){
+				size = list.size();
+				for(int i=0;i<size;i++){
+					Row tempRow = sheet.createRow(i + 4);
+					PmTaskDTO task = list.get(i);
+					Category category = null;
+					if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
+							cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+						category = createEbeiCategory();
+					} else {
+						category = checkCategory(task.getTaskCategoryId());
+					}
 
-				Cell cell1 = tempRow.createCell(1);
-				cell1.setCellStyle(style);
-				cell1.setCellValue(i + 1);
-				Cell cell2 = tempRow.createCell(2);
-				cell2.setCellStyle(style);
-				cell2.setCellValue(datetimeSF.format(task.getCreateTime()));
-				Cell cell3 = tempRow.createCell(3);
-				cell3.setCellStyle(style);
-				cell3.setCellValue(task.getRequestorName());
-				Cell cell4 = tempRow.createCell(4);
-				cell4.setCellStyle(style);
-				PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
-				if(pmTask != null) {
-					cell4.setCellValue(pmTask.getAddress());
-					if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
-						Address address = addressProvider.findAddressById(pmTask.getAddressId());
-						if(null != address) {
-							cell4.setCellValue(address.getAddress());
+					Cell cell1 = tempRow.createCell(1);
+					cell1.setCellStyle(style);
+					cell1.setCellValue(i + 1);
+					Cell cell2 = tempRow.createCell(2);
+					cell2.setCellStyle(style);
+					cell2.setCellValue(datetimeSF.format(task.getCreateTime()));
+					Cell cell3 = tempRow.createCell(3);
+					cell3.setCellStyle(style);
+					cell3.setCellValue(task.getRequestorName());
+					Cell cell4 = tempRow.createCell(4);
+					cell4.setCellStyle(style);
+					PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
+					if(pmTask != null) {
+						cell4.setCellValue(pmTask.getAddress());
+						if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
+							Address address = addressProvider.findAddressById(pmTask.getAddressId());
+							if(null != address) {
+								cell4.setCellValue(address.getAddress());
+							}
+						}else {
+							Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
+							if(null != organization)
+								cell4.setCellValue(organization.getName());
 						}
-					}else {
-						Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
-						if(null != organization)
-							cell4.setCellValue(organization.getName());
 					}
-				}
 
-				Cell cell5 = tempRow.createCell(5);
-				cell5.setCellStyle(style);
-				cell5.setCellValue(task.getRequestorPhone());
-				Cell cell6 = tempRow.createCell(6);
-				cell6.setCellStyle(style);
-				cell6.setCellValue(task.getContent());
-				List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
-				int logSize = logs.size();
-				Cell cell7 = tempRow.createCell(7);
-				cell7.setCellStyle(style);
-				if(logSize != 0){
-					User user = userProvider.findUserById(logs.get(logSize-1).getTargetId());
-					if (null != user) {
-						cell7.setCellValue(user.getNickName());
+					Cell cell5 = tempRow.createCell(5);
+					cell5.setCellStyle(style);
+					cell5.setCellValue(task.getRequestorPhone());
+					Cell cell6 = tempRow.createCell(6);
+					cell6.setCellStyle(style);
+					cell6.setCellValue(task.getContent());
+					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
+					int logSize = logs.size();
+					Cell cell7 = tempRow.createCell(7);
+					cell7.setCellStyle(style);
+					if(logSize != 0){
+						User user = userProvider.findUserById(logs.get(logSize-1).getTargetId());
+						if (null != user) {
+							cell7.setCellValue(user.getNickName());
+						}
 					}
-				}
-				Cell cell8 = tempRow.createCell(8);
-				cell8.setCellStyle(style);
-				cell8.setCellValue(category.getName());
-				Cell cell9 = tempRow.createCell(9);
-				cell9.setCellStyle(style);
+					Cell cell8 = tempRow.createCell(8);
+					cell8.setCellStyle(style);
+					cell8.setCellValue(category.getName());
+					Cell cell9 = tempRow.createCell(9);
+					cell9.setCellStyle(style);
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(), "EhPmTasks", 20100L);
+					String status = "";
+					if (null != flowCase) {
+						switch (flowCase.getStatus()) {
+							case (byte) 0:
+								status = "无效";
+								break;
+							case (byte) 1:
+								status = "初始化";
+								break;
+							case (byte) 2:
+								status = "处理中";
+								break;
+							case (byte) 3:
+								status = "已取消";
+								break;
+							case (byte) 4:
+								status = "已完成";
+								break;
+							case (byte) 5:
+								status = "待评价";
+								break;
+							case (byte) 6:
+								status = "暂缓";
+								break;
+						}
+					}
+					cell9.setCellValue(status);
 
-				PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
-				cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
+					Cell cell10 = tempRow.createCell(10);
+					cell10.setCellStyle(style);
+					cell10.setCellValue(null == task.getStar() ? "-" : task.getStar());
 
-				Cell cell10 = tempRow.createCell(10);
-				cell10.setCellStyle(style);
-				cell10.setCellValue(null == task.getStar() ? "-" : task.getStar());
+					Cell cell11 = tempRow.createCell(11);
+					cell11.setCellStyle(style);
 
-				Cell cell11 = tempRow.createCell(11);
-				cell11.setCellStyle(style);
+					Cell cell12 = tempRow.createCell(12);
+					cell12.setCellStyle(style);
 
-				Cell cell12 = tempRow.createCell(12);
-				cell12.setCellStyle(style);
+					Cell cell13 = tempRow.createCell(13);
+					cell13.setCellStyle(style);
 
-				Cell cell13 = tempRow.createCell(13);
-				cell13.setCellStyle(style);
-
-				Cell cell14 = tempRow.createCell(14);
-				cell14.setCellStyle(style);
-				String feeModel = "";
-				if (null != task.getTaskCategoryId())
-					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel" + task.getTaskCategoryId(),"");
-				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
-					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
+					Cell cell14 = tempRow.createCell(14);
+					cell14.setCellStyle(style);
+					String feeModel = "";
+					if (null != cmd.getTaskCategoryId())
+						feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + cmd.getTaskCategoryId(),"");
+					if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
+						if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单
-						PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
-						if(null != order){
-							BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
-							BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
-							BigDecimal totalAmount = BigDecimal.valueOf(order.getAmount());
+							PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+							if(null != order){
+								BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+								BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+								BigDecimal totalAmount = BigDecimal.valueOf(order.getAmount());
 
 
-							cell11.setCellValue(serviceFee.movePointLeft(2).toString());
+								cell11.setCellValue(serviceFee.movePointLeft(2).toString());
 
 
-							cell12.setCellValue(productFee.movePointLeft(2).toString());
+								cell12.setCellValue(productFee.movePointLeft(2).toString());
 
-							List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
-							StringBuffer content = new StringBuffer();
-							if(null != products && products.size() > 0){
-								for (PmTaskOrderDetail r : products) {
-									BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
-									BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
-									content.append(r.getProductName() + ":");
-									content.append(price.multiply(amount).movePointLeft(2).toString() + "元");
-									content.append("(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n");
+								List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
+								StringBuffer content = new StringBuffer();
+								if(null != products && products.size() > 0){
+									for (PmTaskOrderDetail r : products) {
+										BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+										BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+										content.append(r.getProductName() + ":");
+										content.append(price.multiply(amount).movePointLeft(2).toString() + "元");
+										content.append("(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n");
+									}
 								}
+
+
+								cell13.setCellValue(content.toString());
+
+
+								cell14.setCellValue(totalAmount.movePointLeft(2).toString());
 							}
 
-
-							cell13.setCellValue(content.toString());
-
-
-							cell14.setCellValue(totalAmount.movePointLeft(2).toString());
 						}
-
 					}
-				}
 
+				}
 			}
+
 
 			Row tempRow4 = sheet.createRow(size + 4);
 			tempRow4.createCell(1).setCellValue("物业服务中心主任");
@@ -2911,7 +2941,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
-        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>6)
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>7)
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
 					"Illegal stateId");
 		PmTask task = list.get(0);
@@ -2933,6 +2963,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
+					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
 				task.setStatus(flowCaseStatus);
@@ -3836,6 +3867,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setAppId(cmd.getOriginId());
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
+		cmd1.setPageSize(99999);
 		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
 		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
 	}
@@ -4042,6 +4074,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dto.setEventLogs(logList);
 
 		flowService.processAutoStep(dto);
+	}
+
+	private boolean isEbeiCategory(Long categoryId){
+		if(null != categoryId && categoryId.equals(EbeiPmTaskHandle.EBEI_TASK_CATEGORY)){
+			return true;
+		}
+		return false;
 	}
 
 }
