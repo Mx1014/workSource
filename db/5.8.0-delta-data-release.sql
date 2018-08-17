@@ -21,6 +21,10 @@
 -- REMARK: 根据域空间判断是否展示能耗数据，测试环境初始化鼎峰汇支持展示能耗数据
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (101, 20400, 0, '账单显示用量');
 
+-- AUTHOR: jiarui
+-- REMARK: 物业巡检的早期菜单数据导致权限项目显示不全
+UPDATE  eh_service_modules SET `status` = 0 WHERE path LIKE '/200/20000/20800/%' AND `level` = 5;
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
 INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
