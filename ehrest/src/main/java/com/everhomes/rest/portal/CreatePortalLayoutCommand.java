@@ -9,7 +9,8 @@ import com.everhomes.util.StringHelper;
  *     <li>versionId: versionId</li>
  *     <li>label: 门户layout名称</li>
  *     <li>description: 门户layout描述</li>
- *     <li>layoutTemplateId: 门户layout的模板id</li>
+ *     <li>type: layout类型，1-首页，2-自定义门户，3-分页签门户，参考{@link PortalLayoutType}</li>
+ *     <li>indexFlag: 0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class CreatePortalLayoutCommand {
@@ -22,7 +23,9 @@ public class CreatePortalLayoutCommand {
 
 	private String description;
 
-	private Long layoutTemplateId;
+	private Byte type;
+
+	private Byte indexFlag;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -48,20 +51,28 @@ public class CreatePortalLayoutCommand {
 		this.description = description;
 	}
 
-	public Long getLayoutTemplateId() {
-		return layoutTemplateId;
-	}
-
-	public void setLayoutTemplateId(Long layoutTemplateId) {
-		this.layoutTemplateId = layoutTemplateId;
-	}
-
 	public Long getVersionId() {
 		return versionId;
 	}
 
 	public void setVersionId(Long versionId) {
 		this.versionId = versionId;
+	}
+
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
+
+	public Byte getIndexFlag() {
+		return indexFlag;
+	}
+
+	public void setIndexFlag(Byte indexFlag) {
+		this.indexFlag = indexFlag;
 	}
 
 	@Override

@@ -33,6 +33,10 @@
 -- REMARK: 1、备份表eh_parking_lots
 --         2、调用接口/parking/initFuncLists
 
+-- AUTHOR: 严军 2018年8月17日
+-- REMARK: 1、备份表eh_service_modules 和 eh_portal_items
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -751,6 +755,92 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '80', 'zh_CN', '装修流程被管理员在后台手动中止', '尊敬的${name}，关于${applyCompamy}的装修流程已被管理公司（${operatorName}；${operatorPhone}）中止，您可前往APP查看详情。', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '81', 'zh_CN', '管理员修改装修费用的时候', '尊敬的${name}，关于${applyCompamy}的装修费用清单有更新，请前往APP查看详情。', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '82', 'zh_CN', '管理员修改退费的时候', '尊敬的${name}，关于${applyCompamy}的装修押金退费信息有更新，请前往APP查看详情。', '0');
+
+
+
+-- AUTHOR: 严军 2018年08月17日19:22:25
+-- REMARK: issue-31049 域空间配置V1.4
+
+-- 重建服务广场模板
+DELETE from eh_portal_layout_templates;
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('1', '0', '首页', '{\"layoutName\":\"ServiceMarketLayout\",\"location\":\"/home\",\"groups\":[{\"label\":\"海报\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":1},{\"label\":\"公告\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":2,\"description\":\"\"},{\"label\":\"容器\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":3,\"description\":\"\"}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '1');
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('2', '0', '自定义门户', '{\"groups\":[{\"label\":\"容器\", \"separatorFlag\":\"0\",\"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":1,\"description\":\"\"}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '2');
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('3', '0', '分页签门户', '{\"groups\":[{\"label\":\"分页签\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Tab\",\"style\":\"1\",\"defaultOrder\":1}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '3');
+
+-- 首页（激活）
+UPDATE eh_portal_layouts SET type = 1, index_flag = 1 WHERE location = '/home' AND `name` = 'ServiceMarketLayout';
+-- 自定义门户（激活）
+UPDATE eh_portal_layouts SET type = 2, index_flag = 1 WHERE location = '/secondhome' AND `name` = 'SecondServiceMarketLayout';
+-- 分页签门户（激活）
+UPDATE eh_portal_layouts SET type = 3, index_flag = 1 WHERE location = '/association' AND `name` = 'AssociationLayout';
+
+-- 分页签门户（未激活）
+UPDATE eh_portal_layouts a SET type = 3, index_flag = 0 WHERE type IS NULL AND EXISTS ( SELECT * from  eh_portal_item_groups b WHERE a.id = b.layout_id and b.widget = 'Tab');
+
+-- 自定义门户（未激活）
+UPDATE eh_portal_layouts SET type = 2, index_flag = 0 WHERE type IS NULL;
+
+--
+DELETE FROM eh_service_modules  WHERE  id in (400, 90000, 90100, 92000, 92100, 92200)
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('400', '其他', '0', '/400', '1', '1', '2', '40', '2018-07-31 11:44:40', NULL, NULL, '2018-07-31 11:44:44', '0', '0', '0', '0', '', '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90000', '第三方服务模块', '400', '/400/90000', '1', '2', '2', '20', '2017-07-04 15:55:50', NULL, NULL, '2017-09-08 18:59:10', '0', '0', '0', '0', '', '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90100', '第三方服务模块', '90000', '/400/90000/90100', '1', '3', '2', '10', '2018-07-31 12:10:57', NULL, '14', NULL, '0', '0', '0', '1', '', '1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92000', '电商', '400', '/400/92000', '1', '2', '2', '10', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92100', '微商城', '92000', '/400/92000/92100', '1', '3', '2', '10', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', '13', '2018-07-04 17:23:33', '0', '0', '0', '1', NULL, '1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92200', '食堂', '92000', '/400/92000/92200', '1', '3', '2', '20', '2018-07-31 12:09:15', NULL, '13', '2018-07-31 12:09:25', '0', '0', '0', '1', '', '1', '1', 'module');
+
+-- 将原有的外部链接和电商改成新的模块  add by yanjun  20180811
+DROP PROCEDURE IF EXISTS update_url_module_function;
+DELIMITER //
+CREATE PROCEDURE `update_url_module_function` ()
+BEGIN
+  DECLARE aid LONG;
+  DECLARE ans INTEGER;
+  DECLARE aversionid LONG;
+	DECLARE aname VARCHAR(200);
+	DECLARE adata VARCHAR(200);
+	DECLARE atype INTEGER;
+  DECLARE amoduleid LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT id, namespace_id, version_id, label, action_data, IF(action_type = 'ZuoLinUrl', 13 , 14),  IF(action_type = 'ZuoLinUrl', 92100 , 90100) from eh_portal_items WHERE action_type = 'ThirdUrl' OR action_type = 'ZuoLinUrl';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO aid, ans, aversionid, aname, adata, atype, amoduleid;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				SET @appId = (SELECT MAX(id) + 1 from eh_service_module_apps);
+
+				INSERT INTO `eh_service_module_apps` (`id`, `namespace_id`, `version_id`, `origin_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `module_control_type`, `custom_tag`, `custom_path`, `access_control_type`) VALUES (@appId, ans, aversionid, @appId, aname, amoduleid, adata, '2', atype, NOW(), NOW(), '1', '1', 'unlimit_control', NULL, NULL, '0');
+				UPDATE eh_portal_items SET action_type = 'ModuleApp', action_data = CONCAT('{"moduleAppId":', @appId, '}') WHERE id = aid;
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_url_module_function;
+DROP PROCEDURE IF EXISTS update_url_module_function;
+
+
+
+-- 当前版本已被他人抢先发布
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- --------------------- SECTION END ---------------------------------------------------------

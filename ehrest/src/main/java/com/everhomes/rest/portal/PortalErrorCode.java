@@ -6,4 +6,6 @@ public interface PortalErrorCode {
     
     static final int ERROR_INVALID_PARAMETER = 100011;
 
+    static final int ERROR_VERSION_CONFLICT = 100021;
+
 }
