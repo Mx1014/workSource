@@ -1125,6 +1125,18 @@ public class AssetServiceImpl implements AssetService {
                                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                                         ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                         }
+                        // #31113 by-dinfjianmin
+    					if (property.getAddressId() != null) {
+    						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
+    						for (int k = 0; k < var2.size(); k++) {
+    							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+    							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
+    									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
+    								variableIdAndValue.setVariableValue(apartmentChargeArea);
+    							}
+    							var2.set(k, variableIdAndValue);
+    						}
+    					}
                         //calculate the bill items expectancies for each of the address
                         assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
                                 ,standard,formulaCondition,billingCycle,itemScope);
@@ -1138,23 +1150,7 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                                     ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
-                    // #31113 by-dinfjianmin
-					if (property.getAddressId() != null) {
-						Double apartmentChargeArea = assetProvider.getApartmentInfo(property.getAddressId(), contractId);
-						for (int k = 0; k < var2.size(); k++) {
-							VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-							if (variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null
-									&& variableIdAndValue.getVaribleIdentifier().equals("mj")) {
-								variableIdAndValue.setVariableValue(apartmentChargeArea);
-							}
-							var2.set(k, variableIdAndValue);
-						}
-					}
-					
-                    //calculate the bill items expectancies for each of the address
-                    assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
-                            ,standard,formulaCondition,billingCycle,itemScope);
-                    billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                    
                     assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
                 }
                 //先算出所有的item
