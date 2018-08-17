@@ -78,6 +78,8 @@ public class SearchUtils {
 	public static final String MESSAGE_RECORD= "messageRecord";
     public static final String VISITORSYS= "visitorsys";
 
+    public static final String GENERAL_FORM_VALS = "generalFormVals";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

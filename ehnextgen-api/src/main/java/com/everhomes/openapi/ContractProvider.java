@@ -109,11 +109,18 @@ public interface ContractProvider {
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	Boolean getContractTemplateById(Long id);
 
+
 	Double getTotalRentInCommunity(Long communityId);
 	Integer countRelatedContractNumberInBuilding(String buildingName);
 
 	Double getTotalRentInBuilding(String buildingName);
 
 	List<Contract> findContractByAddressId(Long addressId);
+
+	//合同模块筛选资质用户 by pengyu.huang
+	Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId);
+
+	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
+
 	
 }

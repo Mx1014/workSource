@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.rest.requisition.ListRequisitionsDTO;
 
 import java.util.List;
@@ -22,4 +23,5 @@ public interface RequisitionProvider {
     void changeRequisitionStatus2Target(Byte target, Long referId);
 
     String getNameById(Long requisitionId);
+
 }
