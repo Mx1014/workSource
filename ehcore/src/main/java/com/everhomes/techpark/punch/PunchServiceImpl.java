@@ -10020,11 +10020,13 @@ public class PunchServiceImpl implements PunchService {
 				try{
 					CheckInDataDTO dto = new CheckInDataDTO();
 					dto.setId(pl.getId());
-					if(null!=pl.getPunchDate()){
+					if(null != pl.getPunchDate()){
 						dto.setCheckInDate(pl.getPunchDate().getTime());
 					}
-					if(null!=pl.getPunchTime()){
+					if(null != pl.getPunchTime()){
 						dto.setCheckInTime(pl.getPunchTime().getTime());
+					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(pl.getStatus())){
+						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
 					}
 					dto.setLatitude(pl.getLatitude());
 					dto.setLongitude(pl.getLongitude());
