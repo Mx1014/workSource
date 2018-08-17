@@ -38,6 +38,10 @@ public class YellowPageController  extends ControllerBase {
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
+	@Autowired
+	private AllianceStandardService allianceStandardService;
+	
+	
 	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
@@ -718,57 +722,36 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
-    /**
-   	 * <b>URL: /yellowPage/transferPosterUriToAttachment</b> 
-   	 * <p> 图片数据迁移，将服务的首页图片保存至attachments中  </p>
-   	 */
-   	@RequestMapping("transferPosterUriToAttachment")
-   	@RestReturn(value = String.class)
-	public RestResponse transferPosterUriToAttachment(GetExtraAllianceEventCommand cmd) {
-
-		RestResponse rsp = new RestResponse();
-		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
-			return rsp;
-		}
-
-		String ret = yellowPageService.transferPosterUriToAttachment();
-		rsp.setErrorCode(ErrorCodes.SUCCESS);
-		rsp.setErrorDescription(ret);
-		return rsp;
+	/**
+	 * <b>URL: /yellowPage/getFormList</b>
+	 * <p>
+	 * 获取某个项目下的表单列表
+	 * </p>
+	 */
+	@RequestMapping("getFormList")
+	@RestReturn(GetFormListResponse.class)
+	public RestResponse getFormList(GetFormListCommand cmd){
+		GetFormListResponse resp = allianceStandardService.getFormList(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
-
-   	
-    /**
-   	 * <b>URL: /yellowPage/transferLaunchPadItems</b> 
-   	 * <p> 服务联盟web化，launch pad item迁移  </p>
-   	 */
-   	@RequestMapping("transferLaunchPadItems")
-   	@RestReturn(value = String.class)
-	public RestResponse transferLaunchPadItems(GetExtraAllianceEventCommand cmd) {
-
-		RestResponse rsp = new RestResponse();
-		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
-			return rsp;
-		}
-
-		String ret = yellowPageService.transferLaunchPadItems();
-		rsp.setErrorCode(ErrorCodes.SUCCESS);
-		rsp.setErrorDescription(ret);
-		return rsp;
-	}
-   	
-    /**
-   	 * <b>URL: /yellowPage/transferTime</b> 
-   	 */
-   	@RequestMapping("transferTime")
-   	@RestReturn(value = String.class)
-	public RestResponse transferTime(GetExtraAllianceEventCommand cmd) {
-
-		RestResponse rsp = new RestResponse();
-		String ret = yellowPageService.transferTime(cmd.getEventId());
-		rsp.setErrorCode(ErrorCodes.SUCCESS);
-		rsp.setErrorDescription(ret);
-		return rsp;
+   
+	/**
+	 * <b>URL: /yellowPage/getWorkFlowList</b>
+	 * <p>
+	 * 获取某个项目下的工作流列表
+	 * </p>
+	 */
+	@RequestMapping("getWorkFlowList")
+	@RestReturn(GetWorkFlowListResponse.class)
+	public RestResponse getWorkFlowList(GetWorkFlowListCommand cmd){
+		GetWorkFlowListResponse resp = allianceStandardService.getWorkFlowList(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
     
     

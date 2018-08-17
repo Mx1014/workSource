@@ -9,6 +9,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 public interface YellowPageService {
+	
+	public static final String SERVICE_ALLIANCE_HANDLER_NAME = "service_alliance";
 
 	YellowPageDTO getYellowPageDetail(GetYellowPageDetailCommand cmd);
 

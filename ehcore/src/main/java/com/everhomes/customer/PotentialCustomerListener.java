@@ -11,6 +11,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.approval.CommonStatus;
@@ -136,24 +137,23 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
     }
 
     private void syncServiceAlliance(LocalEvent localEvent) {
-        List<GeneralApprovalVal> valsList = new ArrayList<>();
-        valsList = (List<GeneralApprovalVal>) localEvent.getParams().get(EntityType.GENERAL_APPROVAL_VAL.getCode());
+        List<GeneralFormVal> valsList = (List<GeneralFormVal>) localEvent.getParams().get(EntityType.GENERAL_FORM_VAL.getCode());
         String allianceTextValue = null;
         String allianceSourceText = null;
         String alliancePhone = null;
         String allianceName = null;
-        for (GeneralApprovalVal generaApporvalObject : valsList) {
-            if (GeneralFormDataSourceType.USER_COMPANY.equals(GeneralFormDataSourceType.fromCode(generaApporvalObject.getFieldName()))) {
-                allianceTextValue = generaApporvalObject.getFieldStr3();
+        for (GeneralFormVal val : valsList) {
+            if (GeneralFormDataSourceType.USER_COMPANY.equals(GeneralFormDataSourceType.fromCode(val.getFieldName()))) {
+                allianceTextValue = val.getFieldValue();
             }
-            if (GeneralFormDataSourceType.SOURCE_ID.equals(GeneralFormDataSourceType.fromCode(generaApporvalObject.getFieldName()))) {
-                allianceSourceText = generaApporvalObject.getFieldStr3();
+            if (GeneralFormDataSourceType.SOURCE_ID.equals(GeneralFormDataSourceType.fromCode(val.getFieldName()))) {
+                allianceSourceText = val.getFieldValue();
             }
-            if (GeneralFormDataSourceType.USER_PHONE.equals(GeneralFormDataSourceType.fromCode(generaApporvalObject.getFieldName()))) {
-                alliancePhone = generaApporvalObject.getFieldStr3();
+            if (GeneralFormDataSourceType.USER_PHONE.equals(GeneralFormDataSourceType.fromCode(val.getFieldName()))) {
+                alliancePhone = val.getFieldValue();
             }
-            if (GeneralFormDataSourceType.USER_NAME.equals(GeneralFormDataSourceType.fromCode(generaApporvalObject.getFieldName()))) {
-                allianceName = generaApporvalObject.getFieldStr3();
+            if (GeneralFormDataSourceType.USER_NAME.equals(GeneralFormDataSourceType.fromCode(val.getFieldName()))) {
+                allianceName = val.getFieldValue();
             }
         }
         Integer namespaceId = localEvent.getContext().getNamespaceId();

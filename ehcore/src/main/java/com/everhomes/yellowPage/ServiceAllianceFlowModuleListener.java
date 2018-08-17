@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
@@ -16,7 +17,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
@@ -43,17 +43,26 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowEvaluate;
 import com.everhomes.flow.FlowModuleInfo;
+import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.ConvertHelper;
@@ -62,7 +71,7 @@ import com.everhomes.util.Tuple;
 import com.everhomes.util.file.FileUtils;
 import com.everhomes.util.pdf.PdfUtils;
 @Component
-public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
+public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
 	
 	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
@@ -80,14 +89,32 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private MessagingService messagingService;
-
-	@Autowired
-	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private GroupProvider groupProvider;
+	private GeneralApprovalProvider generalApprovalProvider;
+	
+	@Autowired
+	private GeneralApprovalValProvider generalApprovalValProvider;
+	
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
+	
+    @Autowired
+    protected GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
+    @Autowired
+    protected ContentServerService contentServerService;
+    @Autowired
+    protected ServiceModuleProvider serviceModuleProvider;
+    @Autowired
+    protected GeneralFormService generalFormService;
+    @Autowired
+    protected GeneralFormProvider generalFormProvider;
+    @Autowired
+    protected GeneralFormValProvider generalFormValProvider;
+    @Autowired
+    protected LocaleStringService localeStringService;
+    @Autowired
+    protected OrganizationProvider organizationProvider;
 	
 	@Autowired
 	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
@@ -166,25 +193,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		
-		//flowCase.getApplierOrganizationId() 在客户端没有加入公司的时候，是园区id，加入了公司，是公司id
-		OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
-		//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
-		if(ocr == null){
-			Group group = this.groupProvider.findGroupById(flowCase.getApplierOrganizationId());
-			if(group!=null){
-				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-	        	request.setOwnerId(group.getIntegralTag2());
-			}else{
-				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-	        	request.setOwnerId(flowCase.getApplierOrganizationId());
-			}
-		}else{
-			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-        	request.setOwnerId(ocr.getCommunityId());
-		}
-		
-		
+		request.setOwnerId(sa.getOwnerId());
+		request.setOwnerType(sa.getOwnerType());
 		request.setFlowCaseId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setSecondCategoryId(sa.getCategoryId());
@@ -387,6 +397,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
        if (status != null) {
    		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
+   		
 	   	List<GeneralApprovalVal> lists = generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
 	    List<PostApprovalFormItem> values = lists.stream().map(r -> {
 	         PostApprovalFormItem value = new PostApprovalFormItem();
@@ -666,4 +677,35 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	}
 
 	
+    protected GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {
+        for (GeneralFormFieldDTO val : fieldDTOs) {
+            if (val.getFieldName().equals(fieldName))
+                return val;
+        }
+        return null;
+    }
+
+    protected PostApprovalFormItem getFormFieldDTO(String string, List<PostApprovalFormItem> values) {
+        for (PostApprovalFormItem val : values) {
+            if (val.getFieldName().equals(string))
+                return val;
+        }
+        return null;
+    }
+    
+    protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+        List<FlowCaseEntity> entities = new ArrayList<>();
+        if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
+            List<GeneralApprovalVal> vals = this.generalApprovalValProvider
+                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+                    vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+            // 模板设定的字段DTOs
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
+                    GeneralFormFieldDTO.class);
+//            processEntities(entities, vals, fieldDTOs);
+
+        }
+        return entities;
+    }
 }

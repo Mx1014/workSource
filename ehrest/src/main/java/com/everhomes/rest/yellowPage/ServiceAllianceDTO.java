@@ -168,6 +168,10 @@ public class ServiceAllianceDTO {
 	
 	private String endDate;
 	
+	private Long     formId;
+	
+	private Long     flowId;
+	
 	@ItemType(AllianceTagGroupDTO.class)
 	private List<AllianceTagGroupDTO> tagGroups;
 	
@@ -544,5 +548,21 @@ public class ServiceAllianceDTO {
 
 	public void setTagGroups(List<AllianceTagGroupDTO> tagGroups) {
 		this.tagGroups = tagGroups;
+	}
+
+	public Long getFormId() {
+		return formId;
+	}
+
+	public void setFormId(Long formId) {
+		this.formId = formId;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
 	}
 }
