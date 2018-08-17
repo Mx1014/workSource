@@ -51,5 +51,7 @@ public interface FileManagementProvider {
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
+    void deleteFileContentByContentPath(String path);
+
 //    FileCatalog findAllStatusFileCatalogByName(Integer currentNamespaceId, Long ownerId, String name);
 }

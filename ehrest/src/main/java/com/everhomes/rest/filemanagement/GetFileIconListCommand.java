@@ -9,15 +9,15 @@ import com.everhomes.util.StringHelper;
  * <li>fileSuffix: 后缀名</li>
  * </ul>
  */
-public class GetFileIconCommand {
+public class GetFileIconListCommand {
 
 	private String fileSuffix;
 
-	public GetFileIconCommand() {
+	public GetFileIconListCommand() {
 
 	}
 
-	public GetFileIconCommand(String fileSuffix) {
+	public GetFileIconListCommand(String fileSuffix) {
 		super();
 		this.fileSuffix = fileSuffix;
 	}
