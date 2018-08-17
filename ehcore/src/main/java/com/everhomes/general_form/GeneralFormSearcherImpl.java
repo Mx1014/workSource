@@ -139,14 +139,14 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         fb = FilterBuilders.termFilter("namespaceId", namespaceId);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
+
+
         if(cmd.getFormOriginId() == null || cmd.getFormOriginId() == 0){
             LOGGER.error("don't config approval or don't have approval is used");
 
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"没有找到正在启用的审批或表单");
 
         }
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", namespaceId));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 
@@ -306,7 +306,13 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 builder.field("sourceType", first.getSourceType());
                 builder.field("formOriginId", first.getFormOriginId());
                 builder.field("formVersion", first.getFormVersion());
-                builder.field("approvalStatus", 0);
+                GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(first.getSourceId());
+                if(request.getApprovalStatus() == null){
+                    builder.field("approvalStatus", 0);
+                }else{
+                    builder.field("approvalStatus", request.getApprovalStatus());
+                }
+
             }
 
             for (GeneralFormVal val : generalFormVal) {

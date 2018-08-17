@@ -74,7 +74,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public GeneralForm getGeneralFormById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralForms.class));
 		GeneralForm form = context.select().from(Tables.EH_GENERAL_FORMS)
-				.where(Tables.EH_GENERAL_FORMS.ID.eq(id)).fetchAnyInto(GeneralForm.class);
+				.where(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.eq(id))
+				.orderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc()).fetchAnyInto(GeneralForm.class);
 		if(form != null)
 			return form;
 		return null;

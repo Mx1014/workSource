@@ -17,6 +17,7 @@ import java.util.List;
  * </ul>
  */
 public class SearchFormValsCommand {
+    private Long approvalId;
     private Long formOriginId;
     private Long formVersion;
     private Long ownerId;
@@ -26,6 +27,14 @@ public class SearchFormValsCommand {
     private List<SearchGeneralFormItem> conditionFields;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getApprovalId() {
+        return approvalId;
+    }
+
+    public void setApprovalId(Long approvalId) {
+        this.approvalId = approvalId;
+    }
 
     public Long getFormOriginId() {
         return formOriginId;
