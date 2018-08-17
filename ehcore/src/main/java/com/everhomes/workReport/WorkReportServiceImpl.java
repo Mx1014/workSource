@@ -1,7 +1,6 @@
 package com.everhomes.workReport;
 
 import com.alibaba.fastjson.JSON;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
@@ -30,10 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -164,11 +160,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    @Override
-    public WorkReportDTO getWorkReport(WorkReportIdCommand cmd) {
-        return null;
-    }
-
     private void updateWorkReportScopeMap(Integer namespaceId, Long reportId, List<WorkReportScopeMapDTO> scopes) {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
@@ -204,6 +195,20 @@ public class WorkReportServiceImpl implements WorkReportService {
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
         workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
+    }
+
+    @Override
+    public WorkReportDTO getWorkReport(WorkReportIdCommand cmd) {
+        WorkReport r = workReportProvider.getWorkReportById(cmd.getReportId());
+        if (r == null || cmd.getNamespaceId().intValue() != r.getNamespaceId().intValue())
+            return null;
+        WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
+        dto.setReportId(r.getId());
+        dto.setScopes(listWorkReportScopes(r.getId()));
+        dto.setValiditySetting((ReportValiditySettingDTO) JSON.parse(r.getValiditySetting()));
+        dto.setRxMsgSetting((ReportMsgSettingDTO) JSON.parse(r.getReceiverMsgSeeting()));
+        dto.setAuMsgSetting((ReportMsgSettingDTO) JSON.parse(r.getAuthorMsgSeeting()));
+        return dto;
     }
 
     @Override
@@ -435,7 +440,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     public String getUserAvatar(Long userId) {
         User user = userProvider.findUserById(userId);
         if (null != user) {
-            return contentServerService.parserUri(user.getAvatar());
+            // return contentServerService.parserUri(user.getAvatar());
+            return user.getAvatar();
         }
         return "";
     }
@@ -456,10 +462,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         LocalDateTime endTime = WorkReportUtil.convertSettingToTime(cmd.getReportTime(), cmd.getReportType(),
                 setting.getEndType(), setting.getEndMark(), setting.getEndTime());
         //  whether the post time is right
-        if(!checkPostTime(LocalDateTime.now(), startTime, endTime)){
+        if(!checkPostTime(LocalDateTime.now(), startTime, endTime))
             throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME,
                     "The post time is not in the valid range");
-        }
 
         reportVal.setNamespaceId(namespaceId);
         reportVal.setOwnerId(report.getOwnerId());
@@ -468,13 +473,15 @@ public class WorkReportServiceImpl implements WorkReportService {
         reportVal.setModuleId(report.getModuleId());
         reportVal.setModuleType(report.getModuleType());
         reportVal.setStatus(WorkReportStatus.VALID.getCode());
-        //  set the content.
         reportVal.setReportId(cmd.getReportId());
-        reportVal.setReportTime(new Timestamp(cmd.getReportTime()));
+        reportVal.setReportTime(WorkReportUtil.timestampToDate(cmd.getReportTime()));
         reportVal.setApplierUserId(user.getId());
         reportVal.setApplierName(fixUpUserName(user.getId(), cmd.getOrganizationId()));
         reportVal.setReportType(cmd.getReportType());
+        reportVal.setReceiverAvatar(getUserAvatar(cmd.getReceiverIds().get(0)));
+        reportVal.setAuthorAvatar(getUserAvatar(user.getId()));
 
+        //  set the content.
         PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
         formCommand.setNamespaceId(namespaceId);
         formCommand.setOwnerId(reportVal.getOwnerId());
@@ -492,7 +499,9 @@ public class WorkReportServiceImpl implements WorkReportService {
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                sendMessageAfterEditWorkReportVal(
+                if(ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY) {
+                    //TODO: 立即发消息
+                /*sendMessageAfterEditWorkReportVal(
                         "post",
                         reportVal.getApplierName(),
                         report.getReportName(),
@@ -500,7 +509,8 @@ public class WorkReportServiceImpl implements WorkReportService {
                         reportVal.getReportId(),
                         valId,
                         cmd.getOrganizationId(),
-                        user);
+                        user);*/
+                }
             }
             return valId;
         });
@@ -584,7 +594,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                sendMessageAfterEditWorkReportVal(
+                /*sendMessageAfterEditWorkReportVal(
                         "update",
                         reportVal.getApplierName(),
                         report.getReportName(),
@@ -592,7 +602,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                         reportVal.getReportId(),
                         reportVal.getId(),
                         cmd.getOrganizationId(),
-                        user);
+                        user);*/
             }
             return null;
         });
@@ -604,71 +614,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private void sendMessageAfterEditWorkReportVal(
-            String messageType, String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, Long organizationId, User user) {
 
-        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-        if (user != null) {
-            locale = user.getLocale();
-        }
-
-        // set the message
-        Map<String, String> model = new HashMap<>();
-        model.put("applierName", applierName);
-        model.put("reportName", reportName);
-        String content = "";
-        if (messageType.equals("post")) {
-            content = localeTemplateService.getLocaleTemplateString(
-                    Namespace.DEFAULT_NAMESPACE,
-                    WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.POST_WORK_REPORT_VAL,
-                    locale,
-                    model,
-                    "Template Not Found"
-            );
-        } else if (messageType.equals("update")) {
-            content = localeTemplateService.getLocaleTemplateString(
-                    Namespace.DEFAULT_NAMESPACE,
-                    WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL,
-                    locale,
-                    model,
-                    "Template Not Found"
-            );
-        }
-        MessageDTO message = new MessageDTO();
-        message.setBodyType(MessageBodyType.TEXT.getCode());
-        message.setBody(content);
-        message.setMetaAppId(AppConstants.APPID_DEFAULT);
-        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
-
-        //  set the route
-        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
-        actionData.setReportId(reportId);
-        actionData.setReportValId(reportValId);
-        actionData.setOrganizationId(organizationId);
-        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
-        RouterMetaObject metaObject = new RouterMetaObject();
-        metaObject.setUrl(url);
-        Map<String, String> meta = new HashMap<>();
-        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        if (messageType.equals("post"))
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "新的汇报");
-        else if (messageType.equals("update"))
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, "汇报更新");
-        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-        message.setMeta(meta);
-
-        //  send the message
-        messagingService.routeMessage(
-                User.SYSTEM_USER_LOGIN,
-                AppConstants.APPID_MESSAGING,
-                ChannelType.USER.getCode(),
-                String.valueOf(receiverId),
-                message,
-                MessagingConstants.MSG_FLAG_STORED.getCode()
-        );
-    }
 
     @Override
     public WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd) {
@@ -718,7 +664,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             dto.setReportId(report.getId());
             dto.setReportValId(reportVal.getId());
             dto.setReportType(reportVal.getReportType());
-            dto.setReportTime(reportVal.getReportTime());
+            dto.setReportTime(new Timestamp(reportVal.getReportTime().getTime()));
             dto.setValues(fields);
             dto.setReceivers(receivers);
             return dto;
@@ -789,7 +735,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportType(r.getReportType());
                 if (report != null)
                     dto.setTitle(report.getReportName());
-                dto.setReportTime(r.getReportTime());
+                dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
                 dto.setUpdateTime(r.getUpdateTime());
                 List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
                 dto.setReceivers(receivers);
@@ -846,7 +792,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportType(r.getReportType());
                 if (report != null)
                     dto.setTitle(report.getReportName());
-                dto.setReportTime(r.getReportTime());
+                dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
                 dto.setReadStatus(r.getReadStatus());
                 dto.setApplierName(r.getApplierName());
                 dto.setUpdateTime(r.getUpdateTime());
@@ -915,7 +861,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportValId(reportVal.getId());
         dto.setReportId(reportVal.getReportId());
         dto.setReportType(reportVal.getReportType());
-        dto.setReportTime(reportVal.getReportTime());
+        dto.setReportTime(new Timestamp(reportVal.getReportTime().getTime()));
         dto.setTitle(report.getReportName());
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());

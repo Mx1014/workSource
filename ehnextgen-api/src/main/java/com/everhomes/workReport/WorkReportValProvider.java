@@ -1,8 +1,6 @@
 package com.everhomes.workReport;
 
 import com.everhomes.rest.workReport.ListWorkReportsValCommand;
-import org.jooq.Record;
-import org.jooq.RecordMapper;
 
 import java.util.List;
 

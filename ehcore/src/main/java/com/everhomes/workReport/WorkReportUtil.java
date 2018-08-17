@@ -3,6 +3,7 @@ package com.everhomes.workReport;
 import com.everhomes.rest.workReport.WorkReportType;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +53,14 @@ public class WorkReportUtil {
             return "0" + tem;
         return tem;
     }
+
+    public static java.sql.Date timestampToDate(Long timestamp){
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDate date = LocalDateTime.ofInstant(instant, zone).toLocalDate();
+        return java.sql.Date.valueOf(date);
+    }
+
     public static void main(String[] args) {
         String pattern = "yyyy-MM-dd HH:mm:ss";
         String s = "2019-02-25 09:30:01";

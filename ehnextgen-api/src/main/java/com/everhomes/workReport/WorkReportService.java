@@ -1,6 +1,5 @@
 package com.everhomes.workReport;
 
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.workReport.*;
 
 public interface WorkReportService {

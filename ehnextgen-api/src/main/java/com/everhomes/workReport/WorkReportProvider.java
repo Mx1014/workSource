@@ -1,6 +1,5 @@
 package com.everhomes.workReport;
 
-import com.everhomes.rest.workReport.WorkReportDTO;
 
 import java.util.List;
 
