@@ -3334,8 +3334,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		StringBuffer apartments = new StringBuffer();
 
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
-			apartments.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "  面积："
-					+ apartment.getChargeArea() + "，"); 
+			apartments.append(apartment.getBuildingName() + "-" + apartment.getApartmentName()/* + "  面积："
+					+ apartment.getChargeArea()*/ + "，"); 
 		}
 		e.setValue((apartments.toString()).substring(0, (apartments.toString()).length()-1));
 		entities.add(e);
@@ -3394,7 +3394,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				chargingItemeE = new FlowCaseEntity();
 				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
 				chargingItemeE.setKey("应用资产");
-				chargingItemeE.setValue(apartmentVariable.toString());
+				chargingItemeE.setValue((apartmentVariable.toString()).substring(0, (apartmentVariable.toString()).length()-1));
 				chargingItemEntities.add(chargingItemeE); 
 			}
 			e.setChargingItemEntities(chargingItemEntities);
