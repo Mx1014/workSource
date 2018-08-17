@@ -44,6 +44,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
     private PortalService portalService;
 
     @Autowired
+    private FileProvider fileProvider;
+
+    @Autowired
     private ContentServerService contentServerService;
 
     @Autowired
@@ -461,6 +464,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 //更新上级目录/文件夹更新时间
                 updateParentContent(content);
                 fileManagementProvider.updateFileContentStatusByIds(contentId, FileManagementStatus.INVALID.getCode());
+                if (FileContentType.fromCode(content.getContentType()) == FileContentType.FOLDER) {
+                    fileManagementProvider.deleteFileContentByContentPath(content.getPath());
+                }
+
             }
         }
     }
@@ -771,9 +778,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
-		return new GetFileIconResponse(fileService.findUrlByFileType(cmd.getFileSuffix()));
-	}
+	public GetFileIconListResponse getFileIconList() {
+        List<FileIcon> results = fileProvider.listFileIcons();
+        return new GetFileIconListResponse(results.stream().map(r -> ConvertHelper.convert(r, FileIconDTO.class)).collect(Collectors.toList()));
+    }
 
     @Override
     public ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd) {
