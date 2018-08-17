@@ -374,9 +374,7 @@ public interface AssetProvider {
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
-	void transferOrderPaymentType();
-
-    PaymentLateFine findLastedFine(Long id);
+	void transferOrderPaymentType();    
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
