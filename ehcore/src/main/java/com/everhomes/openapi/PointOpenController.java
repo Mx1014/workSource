@@ -5,8 +5,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.point.PointService;
+import com.everhomes.point.rpc.PointServiceRPCRest;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.point.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,12 @@ public class PointOpenController extends ControllerBase {
 
     @Autowired
     private PointService pointService;
+    
+    @Autowired
+    private PointServiceRPCRest pointServiceRPCRest;
+    
+
+ 
 
     private static final RestResponse SUCCESS = new RestResponse() {
         {
@@ -44,7 +52,8 @@ public class PointOpenController extends ControllerBase {
     @RestReturn(PointScoreDTO.class)
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
-        PointScoreDTO dto = pointService.getUserPointForOpenAPI(cmd);
+       // PointScoreDTO dto = pointService.getUserPointForOpenAPI(cmd);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
         return success(dto);
     }
 

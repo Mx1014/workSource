@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -22,12 +23,12 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
-public class PointServerRestService {
+public class PointServerRPCRestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PointServerRestService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PointServerRPCRestService.class);
 
-    @Autowired
-    private RestTemplate template;
+  /*  @Autowired
+    private RestTemplate template;*/
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -50,6 +51,10 @@ public class PointServerRestService {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(60000);
+        factory.setReadTimeout(60000);
+        RestTemplate  template = new RestTemplate(factory);
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
         ResponseEntity<? extends RestResponseBase> responseEntity = template.exchange(requestEntity, responseType);
 
@@ -72,7 +77,7 @@ public class PointServerRestService {
         if (!url.endsWith("/"))
             sb.append("/");
 
-        sb.append("evh/");
+        sb.append("point/");
 
         if (relativeUri.startsWith("/"))
             sb.append(relativeUri.substring(1));
