@@ -648,4 +648,9 @@ ADD COLUMN `cell_id`  bigint(20) NULL AFTER `id`;
 -- REMARK: 锁掌柜门禁对接
 ALTER TABLE `eh_aclinks` CHANGE `string_tag1` `string_tag1` VARCHAR(1024) ;
 
+
+-- AUTHOR: 邓爽 2018年7月5日22:04:25
+-- REMARK: issue-26616 停车缴费V6.6（UE优化）
+ALTER TABLE `eh_parking_lots` ADD COLUMN `func_list` TEXT COMMENT '此停车场对接的功能列表Json,如["tempfee","monthRecharge"]';
+
 -- --------------------- SECTION END ---------------------------------------------------------
