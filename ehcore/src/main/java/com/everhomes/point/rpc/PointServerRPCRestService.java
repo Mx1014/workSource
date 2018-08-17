@@ -63,7 +63,7 @@ public class PointServerRPCRestService {
             LOGGER.debug("coreserver rest call, response = {}", responseEntity.toString());
         }
         RestResponseBase responseBase = responseEntity.getBody();
-
+        LOGGER.debug("responseBase = {}", responseBase);
         if (responseBase != null &&
                 (responseBase.getErrorCode().intValue() == 200 || responseBase.getErrorCode().intValue() == 201)) {
             return (T) responseBase;

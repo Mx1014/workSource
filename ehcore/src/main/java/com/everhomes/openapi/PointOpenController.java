@@ -53,7 +53,7 @@ public class PointOpenController extends ControllerBase {
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
        // PointScoreDTO dto = pointService.getUserPointForOpenAPI(cmd);
-        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);    
         return success(dto);
     }
 
