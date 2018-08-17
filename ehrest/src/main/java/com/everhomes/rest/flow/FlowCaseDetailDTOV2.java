@@ -38,9 +38,12 @@ import java.util.List;
  *     <li>rejectCount: rejectCount</li>
  *     <li>title: title</li>
  *     <li>organizationId: 公司id</li>
+ *     <li>currentNodeFormOriginId: 当前节点的表单id</li>
+ *     <li>currentNodeFormVersion: 当前节点的表单version</li>
  *     <li>entities: 实体的详细信息 {@link com.everhomes.rest.flow.FlowCaseEntity}</li>
  *     <li>lanes: 泳道列表 {@link com.everhomes.rest.flow.FlowLaneLogDTO}</li>
  *     <li>buttons: 按钮详情 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
+ *     <li>moreButtons: moreButtons {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
  * </ul>
  */
 public class FlowCaseDetailDTOV2 {
@@ -75,6 +78,10 @@ public class FlowCaseDetailDTOV2 {
     private String title;
     private Long organizationId;
     private Long communityId;
+
+    private Long currentNodeFormOriginId;
+    private Long currentNodeFormVersion;
+
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities = new ArrayList<>();
 
@@ -356,6 +363,22 @@ public class FlowCaseDetailDTOV2 {
 
     public void setMoreButtons(List<FlowButtonDTO> moreButtons) {
         this.moreButtons = moreButtons;
+    }
+
+    public Long getCurrentNodeFormOriginId() {
+        return currentNodeFormOriginId;
+    }
+
+    public void setCurrentNodeFormOriginId(Long currentNodeFormOriginId) {
+        this.currentNodeFormOriginId = currentNodeFormOriginId;
+    }
+
+    public Long getCurrentNodeFormVersion() {
+        return currentNodeFormVersion;
+    }
+
+    public void setCurrentNodeFormVersion(Long currentNodeFormVersion) {
+        this.currentNodeFormVersion = currentNodeFormVersion;
     }
 
     @Override

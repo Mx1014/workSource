@@ -48,6 +48,8 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
+import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -85,6 +87,7 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -98,6 +101,8 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
@@ -111,6 +116,7 @@ import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeType;
+import com.everhomes.rest.contract.ChargingItemVariables;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
 import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractApplicationScene;
@@ -142,6 +148,7 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EnterpriseContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
@@ -150,6 +157,7 @@ import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GenerateContractNumberRule;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
@@ -220,6 +228,44 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import javax.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component(ContractService.CONTRACT_PREFIX + "")
@@ -821,6 +867,101 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			Contract parentContract = checkContract(contract.getParentId());
 			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
 		}
+		//重新组装变更合的计价条款税率 add ---djm issue-35984
+		if (cmd.getChargingItems() != null) {
+			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
+				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
+				List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
+						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId());
+				Long billGroupId = groupRules.get(0).getBillGroupId();
+				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
+				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
+
+				if (chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {// 单价
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+							.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						BigDecimal dj = BigDecimal.ZERO;// 单价
+						BigDecimal djbhs = BigDecimal.ZERO;// 单价不含税
+						BigDecimal mj = BigDecimal.ZERO;
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null) {
+								if (chargingVariable.getVariableIdentifier().equals("dj")) {
+									dj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+								if (chargingVariable.getVariableIdentifier().equals("mj")) {
+									mj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+							}
+						}
+						BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+						djbhs = dj.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);// 修改税率之后，重新计算不含税
+						// 重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+						ChargingVariables newChargingVariableList = new ChargingVariables();
+						newChargingVariableList.setChargingVariables(new ArrayList<>());
+						ChargingVariable djChargingVariable = new ChargingVariable();
+						djChargingVariable.setVariableIdentifier("dj");
+						djChargingVariable.setVariableName("单价(含税)");
+						djChargingVariable.setVariableValue(dj.toString());
+						newChargingVariableList.getChargingVariables().add(djChargingVariable);
+						ChargingVariable djbhsChargingVariable = new ChargingVariable();
+						djbhsChargingVariable.setVariableIdentifier("djbhs");
+						djbhsChargingVariable.setVariableName("单价(不含税)");
+						djbhsChargingVariable.setVariableValue(djbhs.toString());
+						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
+						ChargingVariable taxRateChargingVariable = new ChargingVariable();
+						taxRateChargingVariable.setVariableIdentifier("taxRate");
+						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableValue(taxRate.toString());
+						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable mjChargingVariable = new ChargingVariable();
+						mjChargingVariable.setVariableIdentifier("mj");
+						mjChargingVariable.setVariableName("面积");
+						mjChargingVariable.setVariableValue(mj.toString());
+						newChargingVariableList.getChargingVariables().add(mjChargingVariable);
+
+						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
+					}
+				} else if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+							.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						BigDecimal gdje = BigDecimal.ZERO;// 固定金额(含税)
+						BigDecimal gdjebhs = BigDecimal.ZERO;// 固定金额(不含税)
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null) {
+								if (chargingVariable.getVariableIdentifier().equals("gdje")) {
+									gdje = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue()+""));
+								}
+							}
+						}
+						BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+						gdjebhs = gdje.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);// 修改税率之后，重新计算不含税
+						// 重新组装Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_VARIABLES的值
+						ChargingVariables newChargingVariableList = new ChargingVariables();
+						newChargingVariableList.setChargingVariables(new ArrayList<>());
+						ChargingVariable gdjeChargingVariable = new ChargingVariable();
+						gdjeChargingVariable.setVariableIdentifier("gdje");
+						gdjeChargingVariable.setVariableName("固定金额(含税)");
+						gdjeChargingVariable.setVariableValue(gdje.toString());
+						newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
+						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+						gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
+						gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
+						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
+						ChargingVariable taxRateChargingVariable = new ChargingVariable();
+						taxRateChargingVariable.setVariableIdentifier("taxRate");
+						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableValue(taxRate.toString());
+						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+
+						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
+					}
+				}
+			}
+		}
+
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1033,6 +1174,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
 		adjusts.forEach(adjust -> {
 			RentAdjust rentAdjust = new RentAdjust();
+			rentAdjust.setBillGroupId(adjust.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			rentAdjust.setStart(new Date(adjust.getChangeStartTime()));
 			rentAdjust.setEnd(new Date(adjust.getChangeExpiredTime()));
 			rentAdjust.setAdjustType(adjust.getChangeMethod());
@@ -1067,6 +1209,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<RentFree> rentFrees = new ArrayList<>();
 		frees.forEach(free -> {
 			RentFree rentFree = new RentFree();
+			rentFree.setBillGroupId(free.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			rentFree.setChargingItemId(free.getChargingItemId());
 			rentFree.setStartDate(new Date(free.getChangeStartTime()));
 			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
@@ -1092,6 +1235,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
 			FeeRules feeRule = new FeeRules();
+			feeRule.setBillGroupId(chargingItem.getBillGroupId());//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
 			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
 			feeRule.setLateFeeStandardId(chargingItem.getLateFeeStandardId());
@@ -1265,6 +1409,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			});
 		}
+		// add by tangcen
 		if (oldApartments.size() == 0) {
 			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD, contract, null, newApartments.toString());
 		} else if (newApartments.size() < oldApartments.size()) {
@@ -1279,6 +1424,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		return totalSize.doubleValue();
 	}
+
 
 	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
 		//没有id的，增加
@@ -1642,6 +1788,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 
 		contractProvider.updateContract(contract);
+		
+		//add by tangcen
+		//将父合同中关联的未出账单记为无效账单
+		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
+		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))){
+			contract.setCostGenerationMethod(null);
+			Contract parentContract = checkContract(contract.getParentId());
+			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+			contractProvider.updateContract(parentContract);
+//			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
+//				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+//			}
+		}
+
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
@@ -1702,6 +1862,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
+		contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
@@ -1907,9 +2068,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
-				parentContract.setStatus(ContractStatus.HISTORY.getCode());
-				contractProvider.updateContract(parentContract);
-				contractSearcher.feedDoc(parentContract);
+				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
+				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+					
+					if(cmd.getCategoryId() == null){
+			            cmd.setCategoryId(0l);
+			        }else {
+			        	// 转换
+			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			            cmd.setCategoryId(assetCategoryId);
+					}
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), cmd.getCategoryId(), cmd.getNamespaceId());
+					parentContract.setRent(totalAmount);
+				}
 
 				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
 					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
@@ -1946,7 +2118,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 				}
-				
+				parentContract.setStatus(ContractStatus.HISTORY.getCode());
+				contractProvider.updateContract(parentContract);
+				contractSearcher.feedDoc(parentContract);
 			}
 		}
 	}
@@ -2182,9 +2356,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		if(dto.getDenunciationUid() != null) {
 			User denunciactionName = userProvider.findUserById(dto.getDenunciationUid());
-			if(denunciactionName != null) {
-				dto.setDenunciationName(denunciactionName.getNickName());
+			if (denunciactionName!=null) {
+				OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(denunciactionName.getId());
+				if(organizationMember != null) {
+					dto.setDenunciationName(organizationMember.getContactName());
+				}else{
+					dto.setDenunciationName(denunciactionName.getNickName());
+				}
 			}
+			
 		}
 
 		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
@@ -2255,6 +2435,74 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
 			if(contractTemplateParent != null) {
 				dto.setTemplateName(contractTemplateParent.getName());
+			}
+		}
+		
+		if (ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			dto.setCostGenerationMethod(parentContract.getCostGenerationMethod());
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(parentContract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+				for (int i = 0; i < chargingItems.size(); i++) {
+					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
+					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+					Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+					String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,chargingItems.get(i).getChargingItemId());
+					if(chargingItems.get(i).getChargingStartTime() != null){
+						String endTimeByDay = "";
+						String endTimeByPeriod = "";
+						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
+							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId(), chargingItems.get(i).getChargingItemId());
+						}else {
+							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,parentContract.getId(), chargingItems.get(i).getChargingItemId());
+						}
+						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+					}
+					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
+			}
+		}
+		
+		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+				for (int i = 0; i < chargingItems.size(); i++) {
+					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
+					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+					Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+					String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,chargingItems.get(i).getChargingItemId());
+					if(chargingItems.get(i).getChargingStartTime() != null){
+						String endTimeByDay = "";
+						String endTimeByPeriod = "";
+						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
+							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
+						}else {
+							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
+							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
+						}
+						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+					}
+					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
 			}
 		}
 		
@@ -2443,7 +2691,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					changeDTO.setChangeExpiredTime(change.getChangeExpiredTime().getTime());
 				}
 				processContractChargingChangeAddresses(changeDTO);
-
+				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+				if(changeDTO.getBillGroupId() != null) {
+					PaymentBillGroup group = assetProvider.getBillGroupById(changeDTO.getBillGroupId());
+					if(group != null) {
+						changeDTO.setBillGroupName(group.getName());
+					}
+				}
 				if(ChangeType.ADJUST.equals(ChangeType.fromStatus(change.getChangeType()))) {
 					adjusts.add(changeDTO);
 				} else if(ChangeType.FREE.equals(ChangeType.fromStatus(change.getChangeType()))) {
@@ -2515,6 +2769,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				itemDto.setLateFeeStandardName(lateFeeStandardName);
 				String lateFeeformula = assetProvider.findFormulaByChargingStandardId(itemDto.getLateFeeStandardId());
 				itemDto.setLateFeeformula(lateFeeformula);
+				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+				if(itemDto.getBillGroupId() != null) {
+					PaymentBillGroup group = assetProvider.getBillGroupById(itemDto.getBillGroupId());
+					if(group != null) {
+						itemDto.setBillGroupName(group.getName());
+					}
+				}
 				processContractChargingItemAddresses(itemDto);
 
 				return itemDto;
@@ -2659,6 +2920,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			task.setOwnerId(community.getId());
 			task.setType(SyncDataTaskType.CONTRACT.getCode());
 			task.setCreatorUid(UserContext.currentUserId());
+			task.setLockKey(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
 			syncDataTaskService.executeTask(() -> {
 				SyncDataResponse response = new SyncDataResponse();
 				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId());
@@ -2718,6 +2980,47 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
+
+		DurationParamDTO dto = new DurationParamDTO();
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
+		if (chargingItems != null && chargingItems.size() > 0) {
+			List<ChargingItemVariables> chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
+			for (int i = 0; i < chargingItems.size(); i++) {
+				// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
+				ChargingItemVariables chargingPaymentTypeVariable = new ChargingItemVariables();
+				// 根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(cmd.getCommunityId(), cmd.getNamespaceId(), assetCategoryId,
+						chargingItems.get(i).getChargingItemId());
+
+				if (chargingItems.get(i).getChargingStartTime() != null) {
+					String endTimeByDay = "";
+					String endTimeByPeriod = "";
+					chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
+					chargingPaymentTypeVariable
+							.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+					if (EndTimeByDayTimestamp.after(chargingItems.get(i).getChargingExpiredTime())) {
+						endTimeByDay = yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId(), chargingItems.get(i).getChargingItemId());
+					} else {
+						endTimeByDay = yyyyMMdd.format(EndTimeByDayTimestamp);
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId(), chargingItems.get(i).getChargingItemId());
+					}
+					chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
+					chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
+					chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
+				}
+
+				dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+			}
+		}
+		return dto;
 	}
 
 	@Override

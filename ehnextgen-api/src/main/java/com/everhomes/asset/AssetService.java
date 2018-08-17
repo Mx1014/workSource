@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -205,6 +207,8 @@ public interface AssetService {
 
 	void saveInstanceConfig(long categoryId, String ret);
 	
+	void deleteUnsettledBillsOnContractId(Byte costGenerationMethod, Long contractId, Timestamp endTime);
+	
     //add by tangcen
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 
@@ -215,8 +219,8 @@ public interface AssetService {
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
-	
-	ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
+    
+    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
@@ -233,4 +237,20 @@ public interface AssetService {
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
 	void testLateFine(TestLateFineCommand cmd);
+	
+	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
+
+	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
+
+	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
+
+	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+
+	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
+    
+    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
+	
+	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 }

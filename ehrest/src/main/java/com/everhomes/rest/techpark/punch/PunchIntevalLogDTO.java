@@ -9,6 +9,7 @@ import java.util.List;
  * <ul>
  * <li>punchIntervalNo：第几个打卡时间段</li>
  * <li>status： 班次打卡状态</li>
+ * <li>statusString： 班次打卡状态文字</li>
  * <li>punchLogs：打卡记录列表 参考{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
  * </ul>
@@ -20,6 +21,7 @@ public class PunchIntevalLogDTO {
     @ItemType(PunchLogDTO.class)
     private List<PunchLogDTO> punchLogs;
     private String status;
+    private String statusString;
     private Byte smartAlignment;
 
     @Override
@@ -62,5 +64,15 @@ public class PunchIntevalLogDTO {
 
 	public void setSmartAlignment(Byte smartAlignment) {
 		this.smartAlignment = smartAlignment;
+	}
+
+
+	public String getStatusString() {
+		return statusString;
+	}
+
+
+	public void setStatusString(String statusString) {
+		this.statusString = statusString;
 	}
 }

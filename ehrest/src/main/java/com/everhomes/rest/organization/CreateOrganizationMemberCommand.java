@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
  * <li>必填：organizationId，targetType。注册用户：targetId，memberGroup。未注册：memberGroup，contactType，contactToken，contactName</li>
+ * <li>email: 邮箱</li>
  * </ul>
  */
 public class CreateOrganizationMemberCommand {
@@ -39,8 +40,18 @@ public class CreateOrganizationMemberCommand {
 	private String employeeNo;
 	
 	private Long groupId;
-	
-	public CreateOrganizationMemberCommand() {
+
+	private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public CreateOrganizationMemberCommand() {
     }
 	
 	public Long getOrganizationId() {

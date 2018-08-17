@@ -4,8 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.flow.*;
-import com.everhomes.general_approval.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowModuleInfo;
+import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
@@ -14,10 +23,33 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.enterpriseApproval.*;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.enterpriseApproval.ComponentAbnormalPunchValue;
+import com.everhomes.rest.enterpriseApproval.ComponentAskForLeaveValue;
+import com.everhomes.rest.enterpriseApproval.ComponentBusinessTripValue;
+import com.everhomes.rest.enterpriseApproval.ComponentDismissApplicationValue;
+import com.everhomes.rest.enterpriseApproval.ComponentEmployApplicationValue;
+import com.everhomes.rest.enterpriseApproval.ComponentGoOutValue;
+import com.everhomes.rest.enterpriseApproval.ComponentOverTimeValue;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalStringCode;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowFormDTO;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
@@ -63,6 +95,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Autowired
     LocaleStringService localeStringService;
 
+    @Autowired
+    private FlowService flowService;
+
     private DecimalFormat decimalFormat = new DecimalFormat("0.000");
 
     private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -107,7 +142,8 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER, "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
+        StringBuilder content = new StringBuilder(localeStringService.getLocalizedString(
+                EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER, "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
         List<FlowCaseEntity> entities = processCreatingEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
@@ -207,7 +243,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ASK_FOR_LEAVE_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(decimalFormat.format(leaveValue.getDuration()) + " 天");
+        e.setValue(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(leaveValue.getDuration(), "天", "小时"));
         entities.add(3, e);
     }
 
@@ -249,7 +285,11 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.OVERTIME_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(decimalFormat.format(overTimeValue.getDuration()) + " 天");
+        if (overTimeValue.getDurationInMinute() != null) {
+            e.setValue(PunchDayParseUtils.parseHourMinuteDisplayStringZeroWithUnit(overTimeValue.getDurationInMinute() * 60 * 1000, "小时", "分钟"));
+        } else {
+            e.setValue(overTimeValue.getDuration() + "天");
+        }
         entities.add(2, e);
     }
 
@@ -400,7 +440,14 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         List<FlowCaseEntity> entities = new ArrayList<>();
         if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
             List<GeneralApprovalVal> vals = this.generalApprovalValProvider
-                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+                    .queryGeneralApprovalValsByFlowCaseId(flowCase.getRootFlowCaseId());
+            if (vals.size() == 0) {
+                vals = this.generalApprovalValProvider
+                        .queryGeneralApprovalValsByFlowCaseId(flowCase.getSubFlowRootFlowCaseId());
+            }
+            if (vals.size() == 0) {
+                return new ArrayList<>();
+            }
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
             // 模板设定的字段DTOs

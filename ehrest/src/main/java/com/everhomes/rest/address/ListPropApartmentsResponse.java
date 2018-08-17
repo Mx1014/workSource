@@ -10,15 +10,15 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>aptCount: 公寓总数</li>
- * <li>userCount: 小区入住的总用户总数</li>
- * <li>liveCount: 业主自住总数</li>
- * <li>rentCount: 出租总数</li>
- * <li>freeCount: 待租总数</li>
- * <li>saledCount: 已售总数</li>
- * <li>unsaleCount: 待售总数</li>
- * <li>defaultCount: 其他未知总数</li>
- * <li>resultList: 门牌列表，参考{@link com.everhomes.rest.organization.pm.PropFamilyDTO}</li>
+ * 	<li>aptCount: 公寓总数</li>
+ * 	<li>userCount: 小区入住的总用户总数</li>
+ * 	<li>liveCount: 业主自住总数</li>
+ * 	<li>rentCount: 出租总数</li>
+ * 	<li>freeCount: 待租总数</li>
+ * 	<li>saledCount: 已售总数</li>
+ * 	<li>unsaleCount: 待售总数</li>
+ * 	<li>defaultCount: 其他未知总数</li>
+ * 	<li>resultList: 门牌列表，参考{@link com.everhomes.rest.organization.pm.PropFamilyDTO}</li>
  * </ul>
  */
 public class ListPropApartmentsResponse {

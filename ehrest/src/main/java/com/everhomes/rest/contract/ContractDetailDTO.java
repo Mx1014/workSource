@@ -67,6 +67,7 @@ import com.everhomes.rest.flow.FlowCaseEntity;
  *     <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
  *     <li>templateId: 合同模板id</li>
  *     <li>templateName: 合同模板名称</li>
+ *     <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -150,10 +151,59 @@ public class ContractDetailDTO {
     private Byte paymentFlag;
     private Long templateId;
     private String templateName;
+    //add by tangcen 2018年6月13日21:16:10
+    private Byte costGenerationMethod;
+    private String startTime;
+	private String endTimeByPeriod;
+	private String endTimeByDay;
+	
+	@ItemType(ChargingItemVariables.class)
+    private List<ChargingItemVariables> chargingPaymentTypeVariables;
+	
+    public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
+		return chargingPaymentTypeVariables;
+	}
 
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> price;
-    @ItemType(ContractChargingChangeDTO.class)
+    
+	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
+		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
+	}
+
+	public String getEndTimeByPeriod() {
+		return endTimeByPeriod;
+	}
+
+	public void setEndTimeByPeriod(String endTimeByPeriod) {
+		this.endTimeByPeriod = endTimeByPeriod;
+	}
+
+	public String getEndTimeByDay() {
+		return endTimeByDay;
+	}
+
+	public void setEndTimeByDay(String endTimeByDay) {
+		this.endTimeByDay = endTimeByDay;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+	@ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;

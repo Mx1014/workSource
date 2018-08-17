@@ -20,5 +20,7 @@ public interface GeneralApprovalValProvider {
 
 	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
 
+    GeneralApprovalVal getGeneralApprovalVal(Long formOriginId, Long formVersion,
+                                             Long flowCaseId, String fieldName);
 	GeneralApprovalVal getGeneralApprovalById(Long id);
 }

@@ -1,9 +1,9 @@
 package com.everhomes.flow;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.util.StringHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +17,7 @@ import java.util.List;
  *     <li>eventType: 本次事件类型 {@link com.everhomes.rest.flow.FlowEventType}</li>
  *     <li>operatorId: operatorId</li>
  *     <li>eventLogs: 事件跟踪</li>
+ *     <li>flowTargetId: 目标节点 id</li>
  * </ul>
  */
 public class FlowAutoStepDTO {
@@ -28,7 +29,7 @@ public class FlowAutoStepDTO {
     private Long stepCount;
     private String autoStepType;
     private String eventType;
-    private Long flowTargetId;
+    private Long targetNodeId;
     private Long operatorId;
     private Long subjectId;
 
@@ -83,12 +84,12 @@ public class FlowAutoStepDTO {
         this.autoStepType = autoStepType;
     }
 
-    public Long getFlowTargetId() {
-        return flowTargetId;
+    public Long getTargetNodeId() {
+        return targetNodeId;
     }
 
-    public void setFlowTargetId(Long flowTargetId) {
-        this.flowTargetId = flowTargetId;
+    public void setTargetNodeId(Long targetNodeId) {
+        this.targetNodeId = targetNodeId;
     }
 
     public Long getOperatorId() {
@@ -121,6 +122,13 @@ public class FlowAutoStepDTO {
 
     public void setEventLogs(List<FlowEventLog> eventLogs) {
         this.eventLogs = eventLogs;
+    }
+
+    public void addLog(FlowEventLog log) {
+        if (this.eventLogs == null) {
+            this.eventLogs = new ArrayList<>();
+        }
+        this.eventLogs.add(log);
     }
 
     @Override

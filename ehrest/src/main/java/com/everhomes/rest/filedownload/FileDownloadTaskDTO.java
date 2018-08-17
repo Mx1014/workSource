@@ -31,6 +31,7 @@ import java.sql.Timestamp;
  *     <li>executeStartTime: 任务开始执行时间</li>
  *     <li>uploadFileStartTime: 开始上传文件时间</li>
  *     <li>uploadFileFinishTime: 上传文件结束时间</li>
+ *     <li>downloadTimes: 下载次数</li>
  * </ul>
  */
 public class FileDownloadTaskDTO {
@@ -58,6 +59,7 @@ public class FileDownloadTaskDTO {
     Timestamp executeStartTime;
     Timestamp uploadFileStartTime;
     Timestamp uploadFileFinishTime;
+    Integer downloadTimes;
 
     public Long getId() {
         return id;
@@ -249,6 +251,14 @@ public class FileDownloadTaskDTO {
 
     public void setUploadFileFinishTime(Timestamp uploadFileFinishTime) {
         this.uploadFileFinishTime = uploadFileFinishTime;
+    }
+
+    public Integer getDownloadTimes() {
+        return downloadTimes;
+    }
+
+    public void setDownloadTimes(Integer downloadTimes) {
+        this.downloadTimes = downloadTimes;
     }
 
     @Override

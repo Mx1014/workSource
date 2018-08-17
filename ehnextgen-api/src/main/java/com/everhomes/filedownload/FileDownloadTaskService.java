@@ -29,4 +29,21 @@ public interface FileDownloadTaskService{
      * @return
      */
     CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops, Long taskId);
+
+    /**
+     * 查询是否所有下载任务都为已阅读
+     * @return
+     */
+    GetFileDownloadReadStatusResponse getFileDownloadReadStatus();
+
+    /**
+     * 查看下载任务后，将所有未阅读的下载任务置为已阅读.
+     */
+    void updateFileDownloadReadStatus();
+
+    /**
+     * 更新下载次数
+     * @param cmd
+     */
+    void updateFileDownloadTimes(UpdateDownloadTimesCommand cmd);
 }

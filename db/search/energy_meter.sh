@@ -40,7 +40,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeter" -d '
             "type" : "long"
           },
           "name" : {
-            "type" : "string"
+            "type" : "string",
+            "index":"not_analyzed"
           },
           "operatorName" : {
             "type" : "string"

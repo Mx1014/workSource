@@ -1,11 +1,54 @@
 
 package com.everhomes.asset;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
-import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -15,7 +58,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -28,12 +70,18 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.*;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -41,6 +89,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
@@ -59,7 +108,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -80,41 +128,39 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractCategories;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
+import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.pojos.EhPaymentLateFine;
+import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.CalculatorUtil;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CopyUtils;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DecimalUtils;
+import com.everhomes.util.IntegerUtil;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 //import com.everhomes.contract.ContractService;
 
@@ -217,8 +263,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ContractServiceImpl contractService;
-
-
+    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+    
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -618,6 +666,11 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+            // 转换
+             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+             cmd.setCategoryId(assetCategoryId);
+         }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
     }
 
@@ -834,8 +887,8 @@ public class AssetServiceImpl implements AssetService {
             }
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
-        }
-        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
+        }        
+        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
     }
     
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -938,122 +991,149 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
+    	
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
+        List<Long> categoryIdList = assetProvider.getOriginIdFromMappingAppForEnergy(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         // 转categoryId
-        Long categoryId = assetProvider.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
-        if(categoryId == null){
-            categoryId = 0l;
-        }
-        Long contractId = cmd.getContractId();
-        String contractNum = cmd.getContractNum();
-        // generated a record in eh_payment_contract_receiver to indicate that the process is in working
-        assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
-        try{
-            SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
-            //获得所有计价条款包裹
-            List<FeeRules> feesRules = cmd.getFeesRules();
-            //list pre defined for bills items, bills, contract receivers etc. billItemExpectancies
-            // are for the creation of bill items, while uniquerRecorder are for bills only.
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-            List<EhPaymentBills> billList = new ArrayList<>();
-            List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
-            List<BillItemsExpectancy> billItemsExpectancies = new ArrayList<>();
-            Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder = new HashMap<>();
-            //遍历计价条款包裹
-            feeRule:for(int i = 0; i < feesRules.size(); i++) {
-                //获取单一包裹
-                FeeRules rule = feesRules.get(i);
-                //获得包裹中的地址包裹, named var1
-                List<ContractProperty> var1 = rule.getProperties();
-                //获得标准, inside formula can be found, together with variables in feerule, amont of bills can be calculated
-                EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
-                PaymentChargingItemScope itemScope = assetProvider.findChargingItemScope(rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
-                Set<String> varIdens = new HashSet<>();
-                //获得formula的额外内容,阶梯和区间公式的补充
-                List<PaymentFormula> formulaCondition = null;
-                if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
-                    formulaCondition = assetProvider.getFormulas(standard.getId());
-                    for(int m = 0; m < formulaCondition.size(); m ++){
-                        varIdens.add(formulaCondition.get(m).getConstraintVariableIdentifer());
-                    }
-                }
-                //获得standard公式, and find all the variables inside this formula, store inside a set named varIdens
-                String formula = null;
-                if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
-                    formulaCondition = assetProvider.getFormulas(standard.getId());
-                    if(formulaCondition!=null){
-                        if(formulaCondition.size()>1){
-                            LOGGER.error("the bill standard id is ={}, formula size is ={} which is more than one!"
-                                   , standard.getId(), formulaCondition.size());
+        for(Long categoryId : categoryIdList) {
+        	if(categoryId == null){
+                categoryId = 0l;
+            }
+            Long contractId = cmd.getContractId();
+            String contractNum = cmd.getContractNum();
+            // generated a record in eh_payment_contract_receiver to indicate that the process is in working
+            assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
+            try{
+                SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
+                //获得所有计价条款包裹
+                List<FeeRules> feesRules = cmd.getFeesRules();
+                //list pre defined for bills items, bills, contract receivers etc. billItemExpectancies
+                // are for the creation of bill items, while uniquerRecorder are for bills only.
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+                List<EhPaymentBills> billList = new ArrayList<>();
+                List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
+                List<BillItemsExpectancy> billItemsExpectancies = new ArrayList<>();
+                Map<BillDateAndGroupId,BillItemsExpectancy> uniqueRecorder = new HashMap<>();
+                //遍历计价条款包裹
+                feeRule:for(int i = 0; i < feesRules.size(); i++) {
+                    //获取单一包裹
+                    FeeRules rule = feesRules.get(i);
+                    //获得包裹中的地址包裹, named var1
+                    List<ContractProperty> var1 = rule.getProperties();
+                    //获得标准, inside formula can be found, together with variables in feerule, amont of bills can be calculated
+                    EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
+                    PaymentChargingItemScope itemScope = assetProvider.findChargingItemScope(rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
+                    Set<String> varIdens = new HashSet<>();
+                    //获得formula的额外内容,阶梯和区间公式的补充
+                    List<PaymentFormula> formulaCondition = null;
+                    if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
+                        formulaCondition = assetProvider.getFormulas(standard.getId());
+                        for(int m = 0; m < formulaCondition.size(); m ++){
+                            varIdens.add(formulaCondition.get(m).getConstraintVariableIdentifer());
                         }
-                        PaymentFormula paymentFormula = formulaCondition.get(0);
-                        formula = paymentFormula.getFormulaJson();
-                    }else{
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
-                                ,"formula cannot be found, standard id is "+standard.getId()+"");
                     }
-                }
-                char[] formularChars = formula.toCharArray();
-                int index = 0;
-                int start = 0;
-                while(index < formularChars.length){
-                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'
-                            ||formularChars[index]=='/'||index == formularChars.length-1){
-                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
-                        if(!IntegerUtil.hasDigit(var)){
-                            varIdens.add(var);
+                    //获得standard公式, and find all the variables inside this formula, store inside a set named varIdens
+                    String formula = null;
+                    if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
+                        formulaCondition = assetProvider.getFormulas(standard.getId());
+                        if(formulaCondition!=null){
+                            if(formulaCondition.size()>1){
+                                LOGGER.error("the bill standard id is ={}, formula size is ={} which is more than one!"
+                                       , standard.getId(), formulaCondition.size());
+                            }
+                            PaymentFormula paymentFormula = formulaCondition.get(0);
+                            formula = paymentFormula.getFormulaJson();
+                        }else{
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
+                                    ,"formula cannot be found, standard id is "+standard.getId()+"");
                         }
-                        start = index+1;
                     }
-                    index++;
-                }
-                //判断是否公式中存在的var，计价条款却没给，此时可能时滞后计算（例如能耗无法签约时给出用量），不进行计算
-                int varIdenNum = 0;
-                List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
-                for ( int k = 0; k < variableIdAndValueList.size(); k++){
-                    VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                    if(variableIdAndValue.getVariableValue() == null){
+                    char[] formularChars = formula.toCharArray();
+                    int index = 0;
+                    int start = 0;
+                    while(index < formularChars.length){
+                        if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'
+                                ||formularChars[index]=='/'||index == formularChars.length-1){
+                            String var = formula.substring(start,index==formula.length()-1?index+1:index);
+                            if(!IntegerUtil.hasDigit(var)){
+                                varIdens.add(var);
+                            }
+                            start = index+1;
+                        }
+                        index++;
+                    }
+                    //判断是否公式中存在的var，计价条款却没给，此时可能时滞后计算（例如能耗无法签约时给出用量），不进行计算
+                    int varIdenNum = 0;
+                    List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
+                    for ( int k = 0; k < variableIdAndValueList.size(); k++){
+                        VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                        if(variableIdAndValue.getVariableValue() == null){
+                            continue feeRule;
+                        }
+                        if(varIdens.contains(variableIdAndValue.getVaribleIdentifier())){
+                            varIdenNum++;
+                        }
+                    }
+                    if(varIdenNum!=varIdens.size()){
                         continue feeRule;
                     }
-                    if(varIdens.contains(variableIdAndValue.getVaribleIdentifier())){
-                        varIdenNum++;
+                    //获得包裹中的数据包
+                    List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
+                    //获得standard时间设置, reference enum BillingCycle.java
+                    Byte billingCycle = standard.getBillingCycle();
+                    //获得groupRule的时间设置, this time stands for the timing of charging items to be generated
+//                    /**
+//                     * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
+//                     */
+//                    PaymentBillGroupRule groupRule = null;
+//                    PaymentBillGroup group = null;
+//                    List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
+//                            ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+//                    //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
+//                    for(PaymentBillGroupRule pgr : groupRules){
+//                        group = assetProvider.getBillGroupById(pgr.getBillGroupId());
+//                        if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
+//                            groupRule = pgr;
+//                            break;
+//                        }
+//                    }
+                    /**
+                     * 将一个费项只能进入一个账单组的限制去掉，因为存在一种场景，一个园区下签的租金合同，部分客户是按月收，部分客户按季收。需建多个租金账单组，将2种计价条款的产生的租金费用分别进入2个组内。
+                     */
+                    PaymentBillGroupRule groupRule = null;
+                    PaymentBillGroup group = null;
+                    List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
+                    		,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId(),rule.getBillGroupId());
+                    if(groupRules != null && groupRules.size() !=0) {
+                    	groupRule = groupRules.get(0);
                     }
-                }
-                if(varIdenNum!=varIdens.size()){
-                    continue feeRule;
-                }
-                //获得包裹中的数据包
-                List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
-                //获得standard时间设置, reference enum BillingCycle.java
-                Byte billingCycle = standard.getBillingCycle();
-                //获得groupRule的时间设置, this time stands for the timing of charging items to be generated
-                /**
-                 * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
-                 */
-                PaymentBillGroupRule groupRule = null;
-                PaymentBillGroup group = null;
-                List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
-                        ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-                //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
-                for(PaymentBillGroupRule pgr : groupRules){
-                    group = assetProvider.getBillGroupById(pgr.getBillGroupId());
-                    if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
-                        groupRule = pgr;
-                        break;
+                    group = assetProvider.getBillGroupById(rule.getBillGroupId());
+                    
+                    if(group == null || groupRule == null){
+                        throw new RuntimeException("bill group or grouprule is null");
                     }
-                }
-                if(group == null || groupRule == null){
-                    throw new RuntimeException("bill group or grouprule is null");
-                }
-                Byte balanceDateType = group.getBalanceDateType();
-                //开始循环地址包裹
-                for(int j = 0; j < var1.size(); j ++){
-                    List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
-                    //从地址包裹中获得一个地址
-                    ContractProperty property = var1.get(j);
+                    Byte balanceDateType = group.getBalanceDateType();
+                    //开始循环地址包裹
+                    for(int j = 0; j < var1.size(); j ++){
+                        List<BillItemsExpectancy> billItemsExpectancies_inner = new ArrayList<>();
+                        //从地址包裹中获得一个地址
+                        ContractProperty property = var1.get(j);
+                        //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                        BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
+                        if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
+                                assetProvider.deleteContractPayment(contractId);
+                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                        }
+                        //calculate the bill items expectancies for each of the address
+                        assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
+                                ,standard,formulaCondition,billingCycle,itemScope);
+                        billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                    }
+
                     //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
-                    BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
-                    if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
+                    BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
+                    if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
                             assetProvider.deleteContractPayment(contractId);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                                     ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
@@ -1075,236 +1155,250 @@ public class AssetServiceImpl implements AssetService {
                     assetFeeHandler(billItemsExpectancies_inner,var2,formula,groupRule,group,rule,standardBillingCycle,cmd,property
                             ,standard,formulaCondition,billingCycle,itemScope);
                     billItemsExpectancies.addAll(billItemsExpectancies_inner);
+                    assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
                 }
+                //先算出所有的item
+                for(int g = 0; g < billItemsExpectancies.size(); g++){
+                    BillItemsExpectancy exp = billItemsExpectancies.get(g);
+                    // build a billItem
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setCategoryId(categoryId);
+                    ContractProperty property = exp.getProperty();
+                    PaymentBillGroup group = exp.getGroup();
+                    PaymentChargingItemScope itemScope = exp.getItemScope();
+                    PaymentBillGroupRule groupRule = exp.getGroupRule();
+                    List<VariableIdAndValue> variableIdAndValueList = exp.getVariableIdAndValueList();//获取计价条款包裹
+                    //资产
+                    item.setAddressId(property.getAddressId());
+                    item.setBuildingName(property.getBuldingName());
+                    item.setApartmentName(property.getApartmentName());
+                    item.setPropertyIdentifer(property.getPropertyName());
+                    //金额
+                    //add #30669 增加负数校验
 
-                //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
-                BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
-                if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
-                        assetProvider.deleteContractPayment(contractId);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                                ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                    item.setAmountOwed(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
+                    item.setAmountReceivable(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
+                    item.setAmountReceived(new BigDecimal("0"));
+                    //关联和显示
+                    item.setBillGroupId(group.getId());
+                    item.setChargingItemName(itemScope != null ?itemScope.getProjectLevelName() == null?groupRule.getChargingItemName():itemScope.getProjectLevelName():groupRule.getChargingItemName());
+                    item.setChargingItemsId(groupRule.getChargingItemId());
+                    //滞纳金id关联
+                    item.setLateFineStandardId(exp.getLateFineStandardId());
+                    //日期
+                    item.setDateStr(exp.getBillDateStr());
+                    item.setDateStrBegin(sdf_dateStrD.format(exp.getDateStrBegin()));
+                    item.setDateStrEnd(sdf_dateStrD.format(exp.getDateStrEnd()));
+                    item.setDateStrDue(exp.getBillDateDue());
+                    item.setDueDayDeadline(exp.getBillDateDeadline());
+                    item.setDateStrGeneration(exp.getBillDateGeneration());
+                    //归档字段
+                    item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillItems.class)));
+                    item.setBillGroupRuleId(groupRule.getId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setNamespaceId(cmd.getNamesapceId());
+                    item.setOwnerType(cmd.getOwnerType());
+                    item.setOwnerId(cmd.getOwnerId());
+                    item.setTargetType(cmd.getTargetType());
+                    item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
+                    item.setContractIdType(cmd.getContractIdType());
+                    item.setContractNum(cmd.getContractNum());
+                    item.setTargetName(cmd.getTargetName());
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    //保存用量 ：物业缴费6.1 add by 杨崇鑫
+                	for (int k = 0; k < variableIdAndValueList.size(); k++){
+                		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
+                			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
+                		}
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("taxRate")) {
+                			//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
+                			BigDecimal taxRate = new BigDecimal(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : "0");
+                			item.setTaxRate(taxRate);
+                			taxRate = taxRate.divide(new BigDecimal(100));
+                			BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;
+                			amountReceivableWithoutTax = item.getAmountReceivable().divide(BigDecimal.ONE.add(taxRate), 2, BigDecimal.ROUND_HALF_UP);
+                			item.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+                			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+                			BigDecimal taxAmount = item.getAmountReceivable().subtract(amountReceivableWithoutTax);
+                			item.setTaxAmount(taxAmount);
+                			item.setAmountOwedWithoutTax(amountReceivableWithoutTax);
+                			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
+                		}
+                	}
+                    //放到数组中去
+                    billItemsList.add(item);
                 }
-                assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
-            }
-            //先算出所有的item
-            for(int g = 0; g < billItemsExpectancies.size(); g++){
-                BillItemsExpectancy exp = billItemsExpectancies.get(g);
-                // build a billItem
-                PaymentBillItems item = new PaymentBillItems();
-                item.setCategoryId(categoryId);
-                ContractProperty property = exp.getProperty();
-                PaymentBillGroup group = exp.getGroup();
-                PaymentChargingItemScope itemScope = exp.getItemScope();
-                PaymentBillGroupRule groupRule = exp.getGroupRule();
-                //资产
-                item.setAddressId(property.getAddressId());
-                item.setBuildingName(property.getBuldingName());
-                item.setApartmentName(property.getApartmentName());
-                item.setPropertyIdentifer(property.getPropertyName());
-                //金额
-                //add #30669 增加负数校验
-
-                item.setAmountOwed(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
-                item.setAmountReceivable(DecimalUtils.negativeValueFilte(exp.getAmountReceivable()));
-                item.setAmountReceived(new BigDecimal("0"));
-                //关联和显示
-                item.setBillGroupId(group.getId());
-                item.setChargingItemName(itemScope != null ?itemScope.getProjectLevelName() == null?groupRule.getChargingItemName():itemScope.getProjectLevelName():groupRule.getChargingItemName());
-                item.setChargingItemsId(groupRule.getChargingItemId());
-                //滞纳金id关联
-                item.setLateFineStandardId(exp.getLateFineStandardId());
-                //日期
-                item.setDateStr(exp.getBillDateStr());
-                item.setDateStrBegin(sdf_dateStrD.format(exp.getDateStrBegin()));
-                item.setDateStrEnd(sdf_dateStrD.format(exp.getDateStrEnd()));
-                item.setDateStrDue(exp.getBillDateDue());
-                item.setDueDayDeadline(exp.getBillDateDeadline());
-                item.setDateStrGeneration(exp.getBillDateGeneration());
-                //归档字段
-                item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillItems.class)));
-                item.setBillGroupRuleId(groupRule.getId());
-                item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                item.setCreatorUid(UserContext.currentUserId());
-                item.setNamespaceId(cmd.getNamesapceId());
-                item.setOwnerType(cmd.getOwnerType());
-                item.setOwnerId(cmd.getOwnerId());
-                item.setTargetType(cmd.getTargetType());
-                item.setTargetId(cmd.getTargetId());
-                item.setContractId(cmd.getContractId());
-                item.setContractIdType(cmd.getContractIdType());
-                item.setContractNum(cmd.getContractNum());
-                item.setTargetName(cmd.getTargetName());
-                item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                //放到数组中去
-                billItemsList.add(item);
-            }
-            //再算bill
-            for(Map.Entry<BillDateAndGroupId, BillItemsExpectancy> entry : uniqueRecorder.entrySet()){
-                BillItemsExpectancy exp = entry.getValue();
-                EhPaymentBills newBill = new PaymentBills();
-                Long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                if(nextBillId == 0){
-                    nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                }
-                newBill.setId(nextBillId);
-                newBill.setCategoryId(categoryId);
-                PaymentBillGroup group = exp.getGroup();
-                //周期时间
-                newBill.setDateStr(exp.getBillDateStr());
-                newBill.setDateStrBegin(exp.getBillCycleStart());
-                newBill.setDateStrEnd(exp.getBillCycleEnd());
-                newBill.setDateStrDue(exp.getBillDateDue());
-                newBill.setDueDayDeadline(exp.getBillDateDeadline());
-                //归档字段
-                newBill.setBillGroupId(group.getId());
-                newBill.setNamespaceId(cmd.getNamesapceId());
-                newBill.setNoticetel(cmd.getNoticeTel());
-                newBill.setOwnerId(cmd.getOwnerId());
-                newBill.setContractId(cmd.getContractId());
-                newBill.setContractIdType(cmd.getContractIdType());
-                newBill.setContractNum(cmd.getContractNum());
-                newBill.setTargetName(cmd.getTargetName());
-                newBill.setOwnerType(cmd.getOwnerType());
-                newBill.setTargetType(cmd.getTargetType());
-                newBill.setTargetId(cmd.getTargetId());
-                newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                newBill.setCreatorId(UserContext.currentUserId());
-                newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                newBill.setNoticeTimes(0);
-                //初始化 钱
-                newBill.setAmountOwed(new BigDecimal("0"));
-                newBill.setAmountReceivable(new BigDecimal("0"));
-                newBill.setAmountReceived(new BigDecimal("0"));
-                newBill.setAmountSupplement(new BigDecimal("0"));
-                newBill.setAmountExemption(new BigDecimal("0"));
-                //这儿生成的状态的状态都是无效，（注意，入场时添加判断时间，从3变成已出而非未出）
-                newBill.setSwitch((byte)3);
-                //初始化账单状态（未缴，缴清）
-                newBill.setStatus((byte)0);
-                //设定缴费状态（正常，欠费）
-                Date today = newClearedCalendar().getTime();
-                Date x_v = null;
-                try{
-                    String dueDayDeadline = newBill.getDueDayDeadline();
-                    x_v = sdf_dateStrD.parse(dueDayDeadline);
-                    if(today.compareTo(x_v)!=-1){
-                        newBill.setChargeStatus((byte)1);
-                    }else{
-                        newBill.setChargeStatus((byte)0);
+                //再算bill
+                for(Map.Entry<BillDateAndGroupId, BillItemsExpectancy> entry : uniqueRecorder.entrySet()){
+                    BillItemsExpectancy exp = entry.getValue();
+                    EhPaymentBills newBill = new PaymentBills();
+                    Long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                    if(nextBillId == 0){
+                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                     }
-                }catch (Exception e){
-                    newBill.setChargeStatus((byte)0);
-                    LOGGER.error("date str parse failed, parsed object is due day deadline from newBill = {}, e={}", newBill,e);
-                }
-                try{
-                    x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
-                    if(today.compareTo(x_v)!=-1){
-                        newBill.setNextSwitch((byte)1);
-                        if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
-                            newBill.setSwitch((byte)1);
-                        }
-                    }else{
-                        if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
-                            newBill.setSwitch((byte)0);
-                            newBill.setNextSwitch((byte)1);
-                        }else{
-                            newBill.setNextSwitch((byte)0);
-                        }
-                    }
-                }catch (Exception e){
-                    newBill.setNextSwitch((byte)0);
-                    LOGGER.error("date str parse failed, parsed object is DateStrDue from newBill = {}, e={}", newBill,e);
-                }
-                for(int k = 0 ; k < billItemsList.size(); k ++){
-                    EhPaymentBillItems item = billItemsList.get(k);
-                    Date dateGeneration = null;
-                    Date billCycleEnd = null;
-                    Date billCycleStart = null;
+                    newBill.setId(nextBillId);
+                    newBill.setCategoryId(categoryId);
+                    PaymentBillGroup group = exp.getGroup();
+                    //周期时间
+                    newBill.setDateStr(exp.getBillDateStr());
+                    newBill.setDateStrBegin(exp.getBillCycleStart());
+                    newBill.setDateStrEnd(exp.getBillCycleEnd());
+                    newBill.setDateStrDue(exp.getBillDateDue());
+                    newBill.setDueDayDeadline(exp.getBillDateDeadline());
+                    //归档字段
+                    newBill.setBillGroupId(group.getId());
+                    newBill.setNamespaceId(cmd.getNamesapceId());
+                    newBill.setNoticetel(cmd.getNoticeTel());
+                    newBill.setOwnerId(cmd.getOwnerId());
+                    newBill.setContractId(cmd.getContractId());
+                    newBill.setContractIdType(cmd.getContractIdType());
+                    newBill.setContractNum(cmd.getContractNum());
+                    newBill.setTargetName(cmd.getTargetName());
+                    newBill.setOwnerType(cmd.getOwnerType());
+                    newBill.setTargetType(cmd.getTargetType());
+                    newBill.setTargetId(cmd.getTargetId());
+                    newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    newBill.setCreatorId(UserContext.currentUserId());
+                    newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    newBill.setNoticeTimes(0);
+                    //初始化 钱
+                    newBill.setAmountOwed(new BigDecimal("0"));
+                    newBill.setAmountReceivable(new BigDecimal("0"));
+                    newBill.setAmountReceived(new BigDecimal("0"));
+                    newBill.setAmountSupplement(new BigDecimal("0"));
+                    newBill.setAmountExemption(new BigDecimal("0"));
+                    //这儿生成的状态的状态都是无效，（注意，入场时添加判断时间，从3变成已出而非未出）
+                    newBill.setSwitch((byte)3);
+                    //初始化账单状态（未缴，缴清）
+                    newBill.setStatus((byte)0);
+                    //设定缴费状态（正常，欠费）
+                    Date today = newClearedCalendar().getTime();
+                    Date x_v = null;
                     try{
-                        dateGeneration = sdf_dateStrD.parse(item.getDateStrGeneration());
-                        billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
-                        billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
+                        String dueDayDeadline = newBill.getDueDayDeadline();
+                        x_v = sdf_dateStrD.parse(dueDayDeadline);
+                        if(today.compareTo(x_v)!=-1){
+                            newBill.setChargeStatus((byte)1);
+                        }else{
+                            newBill.setChargeStatus((byte)0);
+                        }
                     }catch (Exception e){
-                        LOGGER.error("date parsed error for bill item list , e= {}",e);
-                        continue;
+                        newBill.setChargeStatus((byte)0);
+                        LOGGER.error("date str parse failed, parsed object is due day deadline from newBill = {}, e={}", newBill,e);
                     }
-                    //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
-                    if(entry.getKey().getBillGroupId().longValue() == item.getBillGroupId() &&
-                            (
-                                    dateGeneration.compareTo(billCycleEnd)!=1 && dateGeneration.compareTo(billCycleStart) != -1
-                            ) &&
-                            item.getBillId()==null )
-                    {
-                        newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
-                        newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
-                        item.setBillId(newBill.getId());
+                    try{
+                        x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
+                        if(today.compareTo(x_v)!=-1){
+                            newBill.setNextSwitch((byte)1);
+                            if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
+                                newBill.setSwitch((byte)1);
+                            }
+                        }else{
+                            if(cmd.getIsEffectiveImmediately().byteValue() == (byte)1){
+                                newBill.setSwitch((byte)0);
+                                newBill.setNextSwitch((byte)1);
+                            }else{
+                                newBill.setNextSwitch((byte)0);
+                            }
+                        }
+                    }catch (Exception e){
+                        newBill.setNextSwitch((byte)0);
+                        LOGGER.error("date str parse failed, parsed object is DateStrDue from newBill = {}, e={}", newBill,e);
                     }
+                    for(int k = 0 ; k < billItemsList.size(); k ++){
+                        EhPaymentBillItems item = billItemsList.get(k);
+                        Date dateGeneration = null;
+                        Date billCycleEnd = null;
+                        Date billCycleStart = null;
+                        try{
+                            dateGeneration = sdf_dateStrD.parse(item.getDateStrGeneration());
+                            billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
+                            billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
+                        }catch (Exception e){
+                            LOGGER.error("date parsed error for bill item list , e= {}",e);
+                            continue;
+                        }
+                        //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内,item还没有billId，item符合group和账期的要求
+                        if(entry.getKey().getBillGroupId().longValue() == item.getBillGroupId() &&
+                                (
+                                        dateGeneration.compareTo(billCycleEnd)!=1 && dateGeneration.compareTo(billCycleStart) != -1
+                                ) &&
+                                item.getBillId()==null )
+                        {
+                            newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
+                            newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
+                            item.setBillId(newBill.getId());
+                        }
+                    }
+                    //更新状态
+                    if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
+                        newBill.setStatus((byte)1);
+                    }
+                    billList.add(newBill);
                 }
-                //更新状态
-                if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
-                    newBill.setStatus((byte)1);
+                //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
+                PaymentContractReceiver entity = new PaymentContractReceiver();
+                entity.setContractId(cmd.getContractId());
+                entity.setContractIdType(cmd.getContractIdType());
+                entity.setContractNum(cmd.getContractNum());
+
+
+                long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+                if(nextSequence==0l){
+                    nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
                 }
-                billList.add(newBill);
-            }
-            //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
-            PaymentContractReceiver entity = new PaymentContractReceiver();
-            entity.setContractId(cmd.getContractId());
-            entity.setContractIdType(cmd.getContractIdType());
-            entity.setContractNum(cmd.getContractNum());
+                entity.setId(nextSequence);
+                entity.setNamespaceId(cmd.getNamesapceId());
+                entity.setNoticeTel(cmd.getNoticeTel());
+                entity.setOwnerId(cmd.getOwnerId());
+                entity.setOwnerType(cmd.getOwnerType());
+                entity.setStatus((byte)0);
+                entity.setTargetId(cmd.getTargetId());
+                entity.setTargetType(cmd.getTargetType());
+                entity.setTargetName(cmd.getTargetName());
+                contractDateList.add(entity);
 
 
-            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            if(nextSequence==0l){
-                nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            }
-            entity.setId(nextSequence);
-            entity.setNamespaceId(cmd.getNamesapceId());
-            entity.setNoticeTel(cmd.getNoticeTel());
-            entity.setOwnerId(cmd.getOwnerId());
-            entity.setOwnerType(cmd.getOwnerType());
-            entity.setStatus((byte)0);
-            entity.setTargetId(cmd.getTargetId());
-            entity.setTargetType(cmd.getTargetType());
-            entity.setTargetName(cmd.getTargetName());
-            contractDateList.add(entity);
+                if(billItemsList.size()<1 || contractDateList.size()<1){
+                    upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
+                    return;
+                }
 
+                LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+                if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                    upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
+                    return;
+                }
+                this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
 
-            if(billItemsList.size()<1 || contractDateList.size()<1){
-                upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
-                return;
-            }
-
-            LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
-            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                upodateBillStatusOnContractStatusChange(cmd.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
-                return;
-            }
-            this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
-
-                this.dbProvider.execute((TransactionStatus status) -> {
-                    assetProvider.saveBillItems(billItemsList);
-                    assetProvider.saveBills(billList);
-                    assetProvider.saveContractVariables(contractDateList);
+                    this.dbProvider.execute((TransactionStatus status) -> {
+                        assetProvider.saveBillItems(billItemsList);
+                        assetProvider.saveBills(billList);
+                        assetProvider.saveContractVariables(contractDateList);
+                        return null;
+                    });
                     return null;
                 });
-                return null;
-            });
-            LOGGER.error("插入完成");
-            assetProvider.setInworkFlagInContractReceiverWell(contractId);
-            // 重新计算
-            for(EhPaymentBills bill : billList){
-                assetProvider.reCalBillById(bill.getId());
+                LOGGER.error("插入完成");
+                assetProvider.setInworkFlagInContractReceiverWell(contractId);
+                // 重新计算
+                for(EhPaymentBills bill : billList){
+                    assetProvider.reCalBillById(bill.getId());
+                }
+                LOGGER.error("工作flag完成");
+                //得到金额总和并更新到eh_contracts表中 by steve
+                BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(), null, null);
+                assetProvider.setRent(cmd.getContractId(),totalAmount);
+                
+            }catch(Exception e){
+                assetProvider.deleteContractPayment(contractId);
+                LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
+                LOGGER.error("failed calculation", e);
             }
-            LOGGER.error("工作flag完成");
-            //得到金额总和并更新到eh_contracts表中 by steve
-            BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
-            assetProvider.setRent(cmd.getContractId(),totalAmount);
-            
-        }catch(Exception e){
-            assetProvider.deleteContractPayment(contractId);
-            LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
-            LOGGER.error("failed calculation", e);
-        }
+        }    
     }
 
     @Override
@@ -1482,6 +1576,7 @@ public class AssetServiceImpl implements AssetService {
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
+            obj.setVariableIdAndValueList(var2);//保存计价条款的包裹，以便后面使用
             obj.setProperty(property);
             obj.setGroupRule(groupRule);
             obj.setGroup(group);
@@ -1558,13 +1653,19 @@ public class AssetServiceImpl implements AssetService {
             a.setTime(d.getTime());
         }
 
-        //拆卸调组的包裹
+        //拆卸调租的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){
             outter:for(int i = 0; i < rentAdjusts.size(); i ++){
                 RentAdjust rent = rentAdjusts.get(i);
-                //是否对应一个资源和收费项，不对应则不进行调组
+                //是否对应一个资源和收费项，不对应则不进行调租
                 List<ContractProperty> rentProperties = rent.getProperties();
+                //是否对应同一个账单组ID，不对应不进行调租(物业缴费V6.3 签合同选择计价条款前，先选择账单组)
+                Long rentBillGroupId = rent.getBillGroupId();
+                Long feeBillGroupId = rule.getBillGroupId();
+                if(!rentBillGroupId.equals(feeBillGroupId)){
+                	continue outter;
+                }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){
@@ -1578,8 +1679,8 @@ public class AssetServiceImpl implements AssetService {
                         continue outter;
                     }
                 }
-                //进行调组
-                //调组的时间区间,收费项的计费时间区间为
+                //进行调租
+                //调租的时间区间,收费项的计费时间区间为
                 Calendar start = newClearedCalendar();
                 start.setTime(rent.getStart());
                 Calendar end = newClearedCalendar();
@@ -1666,6 +1767,12 @@ public class AssetServiceImpl implements AssetService {
             outter:for(int i = 0; i < rentFrees.size(); i ++){
                 RentFree rent = rentFrees.get(i);
                 List<ContractProperty> rentProperties = rent.getProperties();
+                //是否对应同一个账单组ID，不对应不进行调租(物业缴费V6.3 签合同选择计价条款前，先选择账单组)
+                Long rentBillGroupId = rent.getBillGroupId();
+                Long feeBillGroupId = rule.getBillGroupId();
+                if(!rentBillGroupId.equals(feeBillGroupId)){
+                	continue outter;
+                }
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){
@@ -2954,6 +3061,7 @@ public class AssetServiceImpl implements AssetService {
         Byte hasPay = 1;
         //是否显示上传凭证按钮（add by tangcen）
         Byte hasUploadCertificate = 0;
+        Byte hasEnergy = 0;//默认不展示能耗
 
         Boolean[] remarkCheckList = new Boolean[3];
         remarkCheckList[0] = false;
@@ -2984,6 +3092,8 @@ public class AssetServiceImpl implements AssetService {
                 hasPay = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
                 hasUploadCertificate = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
+            	hasEnergy = view.getHasView();
             }
         }
         //用数据库配置的方式替代了
@@ -3015,6 +3125,7 @@ public class AssetServiceImpl implements AssetService {
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
         dto.setHasUploadCertificate(hasUploadCertificate);
+        dto.setHasEnergy(hasEnergy);
         return dto;
     }
 
@@ -3331,7 +3442,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds, cmd.getCategoryId());
+        assetProvider.configChargingItems(cmd, communityIds);
     }
 
     private List<Long> getAllCommunity(Integer namespaceId,boolean includeNamespace) {
@@ -3367,7 +3478,7 @@ public class AssetServiceImpl implements AssetService {
             for(int i = 0; i < allCommunityIds.size(); i ++){
                 Long cid = allCommunityIds.get(i);
                 // 园区下brother_standard_id不为null的即为coupled
-                boolean coupled = assetProvider.checkCoupledChargingStandard(cid);
+                boolean coupled = assetProvider.checkCoupledChargingStandard(cid, cmd.getCategoryId());
                 if(coupled){
                     //耦合
                     cmd.setOwnerId(cid);
@@ -4626,6 +4737,108 @@ public class AssetServiceImpl implements AssetService {
 		return judgeAppShowPayResponse;
 	}
 	
+	//add by tangcen 2018年6月21日17:02:54
+	/**
+	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+	 * contractId:要处理的合同id
+	 * endTime:合同实际结束时间
+	 */
+	@Override
+	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		String endTimeStr = yyyyMMdd.format(endTime);
+		
+		if (costGenerationMethod == (byte)0) {//按计费周期
+			PaymentBills bill = assetProvider.findLastBill(contractId);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
+			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
+			if (firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+			}
+		}else if (costGenerationMethod == (byte)1) {//按实际天数
+			PaymentBills bill = assetProvider.findLastBill(contractId);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
+			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
+			if (firstBillItemToDelete != null && firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+				PaymentBills lastBill = assetProvider.findLastBill(contractId);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(lastBill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				lastBill.setAmountReceivable(new BigDecimal(0));
+				lastBill.setAmountReceived(new BigDecimal(0));
+				lastBill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					lastBill.setAmountReceivable(lastBill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					lastBill.setAmountReceived(lastBill.getAmountReceived().add(billItem.getAmountReceived()));
+					lastBill.setAmountOwed(lastBill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(lastBill);
+			}
+		}
+	}
+	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
+	private void dealUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		for (PaymentBillItems billItem : billItems) {
+			try {
+				Date dateBegin = yyyyMMdd.parse(billItem.getDateStrBegin());
+				Date dateEnd = yyyyMMdd.parse(billItem.getDateStrEnd());
+				if (dateEnd.getTime() >= endTime.getTime()) {
+					int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+					int actualPeriod = daysBetween_date(dateBegin,endTime);
+					billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
+					billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
+					billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
+					String actualDateStrEnd = yyyyMMdd.format(endTime);
+					billItem.setDateStrEnd(actualDateStrEnd);
+				}
+			} catch (ParseException e) {
+				if(LOGGER.isDebugEnabled()) {
+		            LOGGER.error("parse date error!");
+		        }
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "parse date error once");
+			}
+		}
+	}
+	//add by tangcen 2018年6月12日
+	private BigDecimal calculateFee(int agreedPeriod, int actualPeriod, BigDecimal amount) {
+		BigDecimal factor1 = new BigDecimal(actualPeriod);
+		BigDecimal factor2 = new BigDecimal(agreedPeriod);
+		BigDecimal factor = factor1.divide(factor2,4,BigDecimal.ROUND_FLOOR);
+		return amount.multiply(factor).setScale(2, BigDecimal.ROUND_FLOOR);
+	}
+
 	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
@@ -4707,7 +4920,7 @@ public class AssetServiceImpl implements AssetService {
 		if (contractList!=null && contractList.size()>0) {
 			for (Contract contract : contractList) {
 				if (contract.getRent()==null) {
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), null, null);
 			        assetProvider.setRent(contract.getId(),totalAmount);
 				}
 			}
@@ -4726,12 +4939,6 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "either assetCategoryId or contractCategory is null");
-        }
-        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
-        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
-        if(existAsset || existContract){
-             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                    "asset category or contract category already exist in mapping schema");
         }
         Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
         mapping.setAssetCategoryId(cmd.getAssetCategoryId());
@@ -4823,40 +5030,41 @@ public class AssetServiceImpl implements AssetService {
        }else{
            dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
        }
-       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
+       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
     }
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
-    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
+//    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
     	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
         List<String> billIds = new ArrayList<>();
         Long amountsInCents = 0l;
+        Float sumAmountOwed = 0f;
         StringBuffer orderExplain = new StringBuffer();//订单说明，如：2017-06物业费、2017-06租金
         for(PaymentBillRequest paymentBillRequest : paymentBillRequests){
             billIds.add(String.valueOf(paymentBillRequest.getBillId()));
             String amountOwed = String.valueOf(paymentBillRequest.getAmountOwed());
             Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
             amountsInCents += amountOwedInCents.longValue();
+            sumAmountOwed += Float.parseFloat(amountOwed);
             orderExplain.append(paymentBillRequest.getDateStr() + paymentBillRequest.getBillGroupName() + "、");
         }
         //对左邻的用户，直接检查bill的状态即可
         checkHasPaidBills(billIds);
         //如果账单为新的，则进行存储
-        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
-        String clientAppName = "Web对公转账";
-        Long communityId = null;
-        String contactNum = cmd.getContractNum();
-        String openid = null;
-        String payerName = cmd.getPayerName();
-        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
-        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
-        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,order.getId());
-        
+//        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
+//        String clientAppName = "Web对公转账";
+//        Long communityId = null;
+//        String contactNum = cmd.getContractNum();
+//        String openid = null;
+//        String payerName = cmd.getPayerName();
+//        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
+//        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+//        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+//        assetProvider.saveOrderBills(bills,order.getId());
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
         
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒
-        String date = format.format(order.getCreateTime());
+        String date = format.format(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		publicTransferBillRespForEnt.setOrderCreateTime(date);
         //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
         //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
@@ -4865,7 +5073,7 @@ public class AssetServiceImpl implements AssetService {
         if(orderExplain != null && orderExplain.length() != 0) {
         	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
         }
-        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents/100l));
+        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(sumAmountOwed).setScale(2, BigDecimal.ROUND_HALF_UP));
         return publicTransferBillRespForEnt;
     }
     
@@ -4915,7 +5123,8 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
 	}
 	
-	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response){
+	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response, Integer namespaceId, Long communityId, Long moduleId){
+		
 		Calendar c = newClearedCalendar();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -4953,9 +5162,32 @@ public class AssetServiceImpl implements AssetService {
         for(BillItemDTO billItemDTO : billItemDTOList){
         	if(billItemDTO.getBillItemId() != null) {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
-                titleName.add(billItemDTO.getBillItemName()+"(元)");
+                titleName.add(billItemDTO.getBillItemName()+"(含税)");
                 titleSize.add(20);
-                //增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-withoutTax");
+                titleName.add(billItemDTO.getBillItemName()+"(不含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-taxAmount");
+                titleName.add(billItemDTO.getBillItemName()+"税额");
+                titleSize.add(20);
+                //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                if(isShowEnergy(namespaceId, communityId, moduleId)) {
+                	//判断该域空间下是否显示用量
+                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                        propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（吨）");
+                        titleSize.add(20);
+                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（度）");
+                        titleSize.add(20);
+    				}
+                }
+				//增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
                 propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
                 titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
                 titleSize.add(30);
@@ -4963,6 +5195,9 @@ public class AssetServiceImpl implements AssetService {
         }
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
+        titleSize.add(20);
+        propertyNames.add("dueDayCount");
+        titleName.add("欠费天数");
         titleSize.add(20);
         propertyNames.add("amountExemption");
         titleName.add("减免金额");
@@ -5003,7 +5238,10 @@ public class AssetServiceImpl implements AssetService {
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
             	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal amountRecivableWithoutTax = BigDecimal.ZERO;//导出增加不含税字段
+            	BigDecimal taxAmount = BigDecimal.ZERO;//导出增加税额字段
             	BigDecimal lateFineAmount = BigDecimal.ZERO;
+            	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
         			//如果费项ID相等
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
@@ -5023,6 +5261,12 @@ public class AssetServiceImpl implements AssetService {
         				}else {
         					//如果费项是一样的，那么导出的时候，对费项做相加
             				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+            				if(billItemDTO2.getAmountReceivableWithoutTax() != null) {
+            					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
+            				}
+            				if(billItemDTO2.getTaxAmount() != null) {
+            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
+            				}
             				//根据减免费项配置重新计算待收金额
             				long billId = Long.parseLong(dto.getBillId());
                             Long charingItemId = billItemDTO.getBillItemId();
@@ -5030,14 +5274,22 @@ public class AssetServiceImpl implements AssetService {
                             if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
                             	amountRecivable = BigDecimal.ZERO;//修复issue-33462
                             }
+        				}        			
+        				//增加用量
+        				if(billItemDTO2.getEnergyConsume() != null) {
+        					energyConsume = energyConsume.add(new BigDecimal(billItemDTO2.getEnergyConsume()));
         				}
         			}
         		}
         		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-withoutTax", amountRecivableWithoutTax.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-taxAmount", taxAmount.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
         		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
         		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
             }
             detail.put("addresses", dto.getAddresses());
+            detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
             //导出增加减免（总和）、减免备注、增收（总和）、增收备注
             if(listBillDetailVO != null) {
             	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
@@ -5243,5 +5495,141 @@ public class AssetServiceImpl implements AssetService {
 			}
     	}
     }
+    
+    public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
+        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+        mapping.setId(nextSequence);
+        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "either assetCategoryId or contractCategory is null");
+        }
+        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
+        if(existAsset){
+        	//如果已经存在就是更新
+        	UpdateAnAppMappingCommand updateAnAppMappingCommand = ConvertHelper.convert(cmd, UpdateAnAppMappingCommand.class);
+        	updateAnAppMapping(updateAnAppMappingCommand);
+        }else {
+        	//如果不存在就是新增
+        	createAnAppMapping(cmd);
+        }
+    }
+
+	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+		assetProvider.updatePaymentBillSwitch(cmd);
+	}
+
+	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+		assetProvider.updatePaymentBillStatus(cmd);
+	}
+	
+	//判断该域空间下是否显示用量
+	public boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId) {
+    	//修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+        ListServiceModulefunctionsCommand cmd = new ListServiceModulefunctionsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setCommunityId(communityId);
+        cmd.setModuleId(moduleId);
+        List<Long> serviceModulefunctionList = serviceModuleService.listServiceModulefunctions(cmd);
+        if(serviceModulefunctionList.contains(101L)) {//判断是否显示用量
+        	return true;
+        }else {
+        	return false;
+        }
+    }
+	
+	/**
+	 * 定时任务：每天晚上12点定时计算一下欠费天数并更新！(账单组的最晚还款日（eh_payment_bills ： due_day_deadline）)
+	 */
+	@Scheduled(cron = "0 0 0 * * ?")
+    public void updateBillDueDayCountOnTime() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+            	Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+                            if(dueDayCount.compareTo(0l) < 0) {
+                            	dueDayCount = null;
+                            }
+                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                }
+            });
+        }
+    }
+	
+	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				Date today = yyyyMMdd.parse(cmd.getDate());
+				coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+	            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+	            	Long nextPageAnchor = 0l;
+	                while(nextPageAnchor != null){
+	                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+	                    List<PaymentBills> bills = res.getBills();
+	                    //更新账单
+	                    for(PaymentBills bill : bills){
+	                        String dueDayDeadline = bill.getDueDayDeadline();
+	                        try{
+	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+	                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+	                            if(dueDayCount.compareTo(0l) <= 0) {
+	                            	dueDayCount = null;
+	                            }
+	                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+	                        } catch (Exception e){ continue; };
+	                    }
+	                    nextPageAnchor = res.getNextPageAnchor();
+	                }
+	            });
+			} catch (ParseException e1) {
+				LOGGER.error("please input yyyy-MM-dd");
+			}
+        }
+    }
+	
+	
+
+	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
+        return preOrderDTO;
+	}
+
+	public GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd) {
+		//查询eh_payment_order_records表，获取支付状态
+		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
+		return response;
+	}
+	
+	/**
+	 * 获取费项配置的税率
+	 * @param billGroupId
+	 * @return
+	 */
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
+		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
+	}
 
 }

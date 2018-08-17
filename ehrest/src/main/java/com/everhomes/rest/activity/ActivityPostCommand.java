@@ -37,6 +37,7 @@ import com.everhomes.util.StringHelper;
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>maxQuantity: 限制人数</li>
+ * <li>minQuantity: 最低限制人数</li>
  * <li>categoryId: 活动类型id（入口id)</li>
  * <li>contentCategoryId: 主题分类id</li>
  * <li>forumId: 论坛ID</li>
@@ -89,6 +90,7 @@ public class ActivityPostCommand{
     private Byte videoState;
     
     private Integer maxQuantity;
+    private Integer minQuantity;
     
     //added by xiongying
     private Long categoryId;
@@ -119,6 +121,14 @@ public class ActivityPostCommand{
 
     private Long organizationId;
 
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
 
     public String getPosterUrl() {
         return posterUrl;

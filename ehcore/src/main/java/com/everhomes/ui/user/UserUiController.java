@@ -18,18 +18,25 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,13 +74,19 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd ,HttpServletRequest request) {
         List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(cmd);
+        //add by liangming.huang 20180816
+        //添加用户活跃记录,为微信端作的,由于时间紧急,先加在这里吧.本来写好接口让微信端调用的/admin/registerWXLogin
+        this.userService.registerWXLoginConnection(request);
+        
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     } 
+    
+   
 
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
@@ -84,22 +97,22 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
- 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+// 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 
  	    List<SceneContactDTO> dtos = null;
-		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			//	兼容老版本的app by sf.yan 20161020
-			if(null == cmd.getOrganizationId()){
-				cmd.setOrganizationId(sceneToken.getEntityId());
-			}
+			//	去除场景 by ryan 14/08/2018
+//			if(null == cmd.getOrganizationId()){
+//				cmd.setOrganizationId(sceneToken.getEntityId());
+//			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
 /*			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
 			    command.setVisibleFlag(VisibleFlag.ALL.getCode());*/
-			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
-			List<OrganizationContactDTO> members = res.getMembers();
+			ListOrganizationContactCommandResponse res1 = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res1.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -119,9 +132,9 @@ public class UserUiController extends ControllerBase {
 				}).collect(Collectors.toList());
 			}
 
-		}
+//		}
 
-		List<FamilyMemberDTO> resp = null;
+		/*List<FamilyMemberDTO> resp = null;
 		//	仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
 		if (UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType()))
 			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
@@ -142,7 +155,7 @@ public class UserUiController extends ControllerBase {
 				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
 				return dto;
 			}).collect(Collectors.toList());
- 	    }
+ 	    }*/
  	    
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);

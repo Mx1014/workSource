@@ -29,7 +29,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
@@ -52,11 +51,13 @@ import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractDTO;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
@@ -118,9 +119,6 @@ public class ZJContractHandler implements ContractService{
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private FieldProvider fieldProvider;
 
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
@@ -809,7 +807,12 @@ public class ZJContractHandler implements ContractService{
 		return null;
 	}
 
-
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
