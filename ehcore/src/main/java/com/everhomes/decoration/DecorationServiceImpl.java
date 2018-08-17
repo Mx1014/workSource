@@ -1059,7 +1059,7 @@ public class DecorationServiceImpl implements  DecorationService {
             if (dtos != null && dtos.size()>0)
                 for (GeneralApprovalDTO dto2 : dtos){
                     boolean flag = dto.getFlowCasees().stream().noneMatch(r -> dto2.getApprovalName().equals(r.getApprovalName()));
-                    flag = flag && dto2.getStatus().equals(2);
+                    flag = flag && dto2.getStatus().equals((byte)2);
                     if (flag){
                         DecorationFlowCaseDTO dto3 = new DecorationFlowCaseDTO();
                         dto3.setStatus((byte)-1);
