@@ -438,6 +438,32 @@ UPDATE eh_service_modules SET module_control_type = 'community_control' WHERE id
 UPDATE eh_service_module_apps SET module_control_type = 'community_control' WHERE module_id = 35000;
 UPDATE eh_authorizations SET owner_type = 'EhAll' WHERE auth_id = 35000;
 UPDATE eh_authorizations SET module_control_type = 'community_control' WHERE auth_id = 35000;
+
+-- AUTHOR: 唐岑 2018年8月17日10:31:31
+-- REMARK: 导入房源信息时，添加提示信息
+-- REMARK: ISSUE-31926: 资产V3.1，资产管理重构
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '20007', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20016', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10201', 'zh_CN', '楼宇名称已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30001', 'zh_CN', '建筑面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30002', 'zh_CN', '收费面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30003', 'zh_CN', '在租面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30004', 'zh_CN', '可招租面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30005', 'zh_CN', '楼层不在该楼宇楼层范围内');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10012', 'zh_CN', '楼宇编号已存在');
+
+-- AUTHOR: 唐岑 2018年8月17日10:31:31
+-- REMARK: 房源执行拆分合并计划时，添加提示信息
+-- REMARK: ISSUE-30697: 资产V3.2，新增拆分合并功能
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '1', 'zh_CN', '房源拆分计划', '${originalIds}被拆分成${targetIds}', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '2', 'zh_CN', '房源合并计划', '${originalIds}被合并成${targetIds}', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '3', 'zh_CN', '新（中文）', '新', '0');
+
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20014', 'zh_CN', '可招租面积只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20015', 'zh_CN', '拆分/合并计划产生的未来房源已关联合同，删除失败');
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
