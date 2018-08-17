@@ -2,9 +2,11 @@ package com.everhomes.rest.contract;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowCaseEntity;
 
 /**
  * <ul>
@@ -162,6 +164,9 @@ public class ContractDetailDTO {
 		return chargingPaymentTypeVariables;
 	}
 
+    @ItemType(FlowCaseEntity.class)
+    private List<FlowCaseEntity> price;
+    
 	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
 		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
 	}
@@ -203,7 +208,25 @@ public class ContractDetailDTO {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
     
-    public String getTemplateName() {
+    List<FlowCaseEntity> entities = new ArrayList<>();
+
+	public List<FlowCaseEntity> getEntities() {
+		return entities;
+	}
+
+	public void setEntities(List<FlowCaseEntity> entities) {
+		this.entities = entities;
+	}
+
+	public List<FlowCaseEntity> getPrice() {
+		return price;
+	}
+
+	public void setPrice(List<FlowCaseEntity> price) {
+		this.price = price;
+	}
+
+	public String getTemplateName() {
 		return templateName;
 	}
 

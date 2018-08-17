@@ -14,6 +14,22 @@
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
 -- REMARK: 1、执行接口/community/caculateAllCommunityArea（该接口计算时间非常长）
 --         2、执行接口/community/caculateAllBuildingArea（该接口计算时间非常长）
+
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (仓库管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 warehouse_material.sh warehouse.sh warehouse_stock_log.sh warehouse_stock.sh es的结构
+--         2、 同步  /warehouse/syncWarehouseIndex
+--         3、同步/warehouse/syncWarehouseMaterialCategoryIndex
+--         4、同步/warehouse/syncWarehouseMaterialsIndex
+--         5、同步/warehouse/syncWarehouseRequestMaterialIndex
+--         6、同步/warehouse/syncWarehouseStockIndex
+--         7、同步/warehouse/syncWarehouseStockLogIndex
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (能耗管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 energy_meter.sh es上的结构
+--         2、同步 /energy/syncEnergyMeterIndex
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -492,7 +508,15 @@ SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10020', 'zh_CN', '此账单组中已存在该费项');
 
 
-
+-- AUTHOR: 丁建民
+-- REMARK: 仓库管理V2.3（库存导入导出功能） issue-34335
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10027', 'zh_CN', '物品编号不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10028', 'zh_CN', '库存不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10029', 'zh_CN', '所属仓库不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10030', 'zh_CN', '库存请输入大于的0整数');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10031', 'zh_CN', '物品编号和名称不能匹配');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10032', 'zh_CN', '填写分类与物品分类不一致');
 
 
 -- AUTHOR: huangmingbo 2018.08.03

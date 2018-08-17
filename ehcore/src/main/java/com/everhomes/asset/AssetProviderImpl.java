@@ -19,6 +19,7 @@ import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -6539,6 +6540,15 @@ public class AssetProviderImpl implements AssetProvider {
 	    return isConfigSubtraction;
 	}
 	
+	@Override
+    public Double getApartmentInfo(Long addressId, Long contractId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.AREA_SIZE)
+                .from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+                .where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
+                .fetchOne(0,Double.class);
+    }
 	public void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd) {
 		//对应到eh_payment_bills表中的switch字段账单属性，0:未出账单;1:已出账单
 		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());

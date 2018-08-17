@@ -6,7 +6,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/warehouseStock" -d '
 {
     "warehouseStock": {
         "properties": {
-            "name":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+            "name":{"type":"string", "index":"not_analyzed"},
             "materialNumber":{"type":"string", "index":"not_analyzed"},
             "namespaceId":{"type":"integer"},
             "ownerId":{"type":"long"},

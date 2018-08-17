@@ -52,6 +52,7 @@ ehcore_custom.yml
 ehtest-integration/src/test/config/ehcore.properties
 ehcore/src/main/config/ehcore_custom.yml
 ehcore/src/test/config/ehcore_custom.yml
+ehcore/src/main/config/ehcore_custom_1.yml
 
 ehborder/pom.xml
 ehcore/pom.xml
