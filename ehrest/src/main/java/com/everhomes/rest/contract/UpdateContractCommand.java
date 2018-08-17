@@ -60,6 +60,7 @@ import java.util.List;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型多入口</li>
+ *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
  *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  *     <li>templateId: 合同模板id</li>
  * </ul>
@@ -114,8 +115,8 @@ public class UpdateContractCommand {
     private String layout;
     private String settled;
     private Long categoryId;
+    private Byte costGenerationMethod;
     private Byte contractApplicationScene = 0;
-    
     private Long templateId;
 
     public Long getTemplateId() {
@@ -126,7 +127,15 @@ public class UpdateContractCommand {
 		this.templateId = templateId;
 	}
 
-	public Byte getContractApplicationScene() {
+    public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+    public Byte getContractApplicationScene() {
 		return contractApplicationScene;
 	}
 

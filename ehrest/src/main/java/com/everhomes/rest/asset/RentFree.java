@@ -18,6 +18,7 @@ import java.util.List;
  * <li>endDate:截止日期</li>
  * <li>properties:应用资源</li>
  * <li>remark:备注</li>
+ * <li>billGroupId : 账单组id</li>
  *</ul>
  */
 public class RentFree {
@@ -28,6 +29,7 @@ public class RentFree {
     @ItemType(String.class)
     private List<ContractProperty> properties;
     private String remark;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 
     public Long getChargingItemId() {
         return chargingItemId;
@@ -76,4 +78,12 @@ public class RentFree {
     public void setProperties(List<ContractProperty> properties) {
         this.properties = properties;
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

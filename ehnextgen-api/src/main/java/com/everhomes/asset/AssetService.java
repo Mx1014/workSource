@@ -207,6 +207,8 @@ public interface AssetService {
 
 	void saveInstanceConfig(long categoryId, String ret);
 	
+	void deleteUnsettledBillsOnContractId(Byte costGenerationMethod, Long contractId, Timestamp endTime);
+	
     //add by tangcen
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 
@@ -249,4 +251,6 @@ public interface AssetService {
     void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
+	
+	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 }

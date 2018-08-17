@@ -19,6 +19,8 @@ import java.math.BigDecimal;
  * <li>dueDateStr:付款日期</li>
  * <li>amountReceivableWithoutTax:应收不含税</li>
  * <li>taxAmount:税额</li>
+ * <li>billGroupId : 账单组id</li>
+ * <li>billGroupName : 账单组名称</li>
  *</ul>
  */
 public class PaymentExpectancyDTO {
@@ -34,6 +36,8 @@ public class PaymentExpectancyDTO {
     private Long billItemId;
     
     private Long chargingItemId;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
+    private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
     
 	public Long getChargingItemId() {
 		return chargingItemId;
@@ -133,5 +137,21 @@ public class PaymentExpectancyDTO {
 
 	public void setTaxAmount(BigDecimal taxAmount) {
 		this.taxAmount = taxAmount;
+	}
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
 	}
 }

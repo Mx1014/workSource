@@ -108,7 +108,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
+    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId, Long billGroupId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -347,7 +347,24 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
-
+	
+	void deleteUnsettledBillsOnContractId(Long contractId, List<Long> billIds);
+	
+	PaymentBills getFirstUnsettledBill(Long id);
+	
+	List<PaymentBillItems> findBillItemsByBillId(Long billId);
+	
+	void updatePaymentBills(PaymentBills bill);
+	
+	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
+	
+	void deleteUnsettledBills(Long contractId, String endTimeStr);
+	
+	PaymentBills findLastBill(Long contractId);
+	
+	String findEndTimeByPeriod(String endTimeStr, Long contractId, Long chargingItemId);
+    
+    PaymentLateFine findLastedFine(Long id);
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
@@ -402,4 +419,12 @@ public interface AssetProvider {
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
+	
+	void updateBillDueDayCount(Long billId, Long dueDayCount);
+	
+    PaymentBillItems findFirstBillItemToDelete(Long contractId, String endTimeStr);
+    
+	PaymentBills findBillById(Long billId);
+	
+	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 }
