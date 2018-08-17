@@ -780,7 +780,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
     @Override
 	public GetFileIconListResponse getFileIconList() {
         List<FileIcon> results = fileProvider.listFileIcons();
-        return new GetFileIconListResponse(results.stream().map(r -> ConvertHelper.convert(r, FileIconDTO.class)).collect(Collectors.toList()));
+        return new GetFileIconListResponse(results.stream().map(r -> {
+            FileIconDTO dto = ConvertHelper.convert(r, FileIconDTO.class);
+            dto.setIconUri(contentServerService.parserUri(r.getIconUri()));
+            return dto;}).collect(Collectors.toList()));
+        
     }
 
     @Override
