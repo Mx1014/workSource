@@ -659,7 +659,7 @@ public class AdminController extends ControllerBase {
             
         return new RestResponse(login.toDto());
     }
-      
+    
     @RequestMapping("unregisterLogin")
     @RestReturn(value=UserLoginDTO.class)
     public RestResponse unregisterLogin(@Valid RegisterLoginCommand cmd) {
