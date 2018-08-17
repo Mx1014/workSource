@@ -1,2 +1,0 @@
-SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10020', 'zh_CN', '此账单组中已存在该费项');
