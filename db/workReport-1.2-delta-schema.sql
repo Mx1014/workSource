@@ -10,4 +10,4 @@ ALTER TABLE `eh_work_reports` ADD COLUMN `icon_uri` VARCHAR(1024) COMMENT 'the i
 ALTER TABLE `eh_work_report_vals` ADD COLUMN `receiver_avatar` VARCHAR(1024) COMMENT 'the avatar of the fisrt receiver' AFTER `report_type`;
 ALTER TABLE `eh_work_report_vals` ADD COLUMN `author_avatar` VARCHAR(1024) COMMENT 'the avatar of the author' AFTER `receiver_avatar`;
 
-ALTER TABLE `eh_work_report_vals` ALTER COLUMN `report_time` DATE COMMENT 'the target time of the report';
+ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the target time of the report';
