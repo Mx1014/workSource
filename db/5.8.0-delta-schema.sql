@@ -456,37 +456,6 @@ ALTER TABLE `eh_buildings` ADD COLUMN `free_area` double NULL DEFAULT NULL COMME
 ALTER TABLE `eh_communities` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
 ALTER TABLE `eh_addresses` ADD COLUMN `is_future_apartment` tinyint NULL DEFAULT 0 COMMENT '未来房源标记（0：否，1：是）';
 
--- AUTHOR: 杨崇鑫  20180724
--- REMARK: 物业缴费V6.5所需新增的字段
--- REMARK: 修改域空间发布保存相关应用配置
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_originId` BIGINT(20) COMMENT '合同管理应用的originId';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_changeFlag` TINYINT COMMENT '是否走合同变更，1、0';
--- REMARK: 修改域空间发布保存相关应用配置
-ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率';
--- REMARK: 账单表：增加应收不含税字段,税额字段：tax_amount
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
-
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
-
--- AUTHOR: 杨崇鑫
--- REMARK: 物业缴费V6.3 （欠费时间筛选、费项进多账单组）
-ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_count` BIGINT COMMENT '欠费天数' after due_day_deadline;
--- REMARK: 因为新增计价条款时先选组再选费项，故查看合同概览时在收费项目前多加一列字段。概览中前4个Tab均需要在收费项目前多加一列账单组。
-ALTER TABLE `eh_contract_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
-ALTER TABLE `eh_contract_charging_changes` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
-
--- AUTHOR: 丁建民
--- REMARK: 合同2.8
-ALTER TABLE `eh_contracts` ADD COLUMN `cost_generation_method`  tinyint DEFAULT NULL COMMENT '合同截断时的费用收取方式，0：按计费周期，1：按实际天数';
-
-
 -- ------------------------------
 -- 每日统计表     add by mingbo.huang  2018/07/25
 -- ------------------------------
@@ -532,5 +501,40 @@ CREATE TABLE `eh_alliance_stat_details` (
   KEY `i_eh_owner_id` (`owner_id`),
   KEY `i_eh_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户的点击明细';
+
+
+
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5所需新增的字段
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_originId` BIGINT(20) COMMENT '合同管理应用的originId';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_changeFlag` TINYINT COMMENT '是否走合同变更，1、0';
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率';
+-- REMARK: 账单表：增加应收不含税字段,税额字段：tax_amount
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 （欠费时间筛选、费项进多账单组）
+ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_count` BIGINT COMMENT '欠费天数' after due_day_deadline;
+-- REMARK: 因为新增计价条款时先选组再选费项，故查看合同概览时在收费项目前多加一列字段。概览中前4个Tab均需要在收费项目前多加一列账单组。
+ALTER TABLE `eh_contract_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+ALTER TABLE `eh_contract_charging_changes` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同2.8
+ALTER TABLE `eh_contracts` ADD COLUMN `cost_generation_method`  tinyint DEFAULT NULL COMMENT '合同截断时的费用收取方式，0：按计费周期，1：按实际天数';
+
+
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
