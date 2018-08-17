@@ -198,6 +198,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -232,7 +233,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12423,19 +12426,19 @@ public class PunchServiceImpl implements PunchService {
 
 
     @Override
-    public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate){
-        String homeUrl = configurationProvider.getValue("home.url", "");
+    public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate, HttpServletRequest request){
+        String homeUrl = request.getHeader("Host");
         return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate +"#sign_suffix";
     }
     @Override
-    public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
+    public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request){
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
         if(null == pr){
         	throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
         }
-    	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate()));
+    	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate(), request));
     }
     
     @Override
