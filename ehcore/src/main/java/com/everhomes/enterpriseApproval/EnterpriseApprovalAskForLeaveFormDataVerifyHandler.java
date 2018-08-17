@@ -75,7 +75,7 @@ public class EnterpriseApprovalAskForLeaveFormDataVerifyHandler implements Gener
                 throwError(ApprovalServiceErrorCode.APPROVAL_CATEGORY_VACATION_BALANCE_LIMIT_ERROR);
             }
         }
-        if ("WORKING_DAY_OFF".equals(approvalCategory)) {
+        if ("WORKING_DAY_OFF".equals(approvalCategory.getHanderType())) {
             if (Double.compare(value.getDuration(), punchVacationBalance.getOvertimeCompensationBalance()) > 0) {
                 throwError(ApprovalServiceErrorCode.APPROVAL_CATEGORY_VACATION_BALANCE_LIMIT_ERROR);
             }

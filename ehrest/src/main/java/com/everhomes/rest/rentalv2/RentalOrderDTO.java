@@ -74,6 +74,7 @@ public class RentalOrderDTO {
 	private BigDecimal refundAmount;
 
 	private Byte status;
+	private String scene;
 
 	private String customObject;
 
@@ -319,4 +320,11 @@ public class RentalOrderDTO {
 		this.payMode = payMode;
 	}
 
+	public String getScene() {
+		return scene;
+	}
+
+	public void setScene(String scene) {
+		this.scene = scene;
+	}
 }

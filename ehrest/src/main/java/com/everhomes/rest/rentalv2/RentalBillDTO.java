@@ -110,10 +110,13 @@ public class RentalBillDTO {
 	@ItemType(BillAttachmentDTO.class)
 	private List<BillAttachmentDTO> billAttachments;
 
+	private List<RentalSiteFileDTO> fileUris;
+
 	private Byte toastFlag;
 	private String confirmationPrompt;
 	private Long flowCaseId;
 	private String resourceType;
+	private String scene;
 	private String customObject;
 
 	private Byte holidayOpenFlag;
@@ -122,6 +125,8 @@ public class RentalBillDTO {
 	private List<Long> specialCloseDate;
 	private String refundTip;
 	private String openTime;
+	private Byte remarkFlag;
+	private String remark;
 	private Long appId;
 
 	@Override
@@ -570,5 +575,37 @@ public class RentalBillDTO {
 
 	public void setOpenTime(String openTime) {
 		this.openTime = openTime;
+	}
+
+	public String getScene() {
+		return scene;
+	}
+
+	public void setScene(String scene) {
+		this.scene = scene;
+	}
+
+	public List<RentalSiteFileDTO> getFileUris() {
+		return fileUris;
+	}
+
+	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
+		this.fileUris = fileUris;
+	}
+
+	public Byte getRemarkFlag() {
+		return remarkFlag;
+	}
+
+	public void setRemarkFlag(Byte remarkFlag) {
+		this.remarkFlag = remarkFlag;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 }
