@@ -438,6 +438,14 @@ UPDATE eh_service_modules SET module_control_type = 'community_control' WHERE id
 UPDATE eh_service_module_apps SET module_control_type = 'community_control' WHERE module_id = 35000;
 UPDATE eh_authorizations SET owner_type = 'EhAll' WHERE auth_id = 35000;
 UPDATE eh_authorizations SET module_control_type = 'community_control' WHERE auth_id = 35000;
+
+
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5初始化收费项税率为0
+update eh_payment_charging_item_scopes set tax_rate=0;
+
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
