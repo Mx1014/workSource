@@ -110,6 +110,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -160,6 +161,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public void createOrganization(Organization organization) {
@@ -5977,4 +5981,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         return results;
     }
+    
+	
+	/**
+	 * 根据用户id获取用户的真实姓名和手机号 1.获取真实姓名。 2.没有的话获取昵称
+	 * 
+	 * @param userId
+	 * @return
+	 */
+    @Override
+	public TargetDTO findUserContactByUserId(Integer namespaceId, Long userId) {
+
+		TargetDTO dto = null;
+		OrganizationMember member = findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId,
+				userId, OrganizationType.ENTERPRISE.getCode());
+		if (null != member) {
+			dto = new TargetDTO();
+			dto.setTargetId(userId);
+			dto.setTargetName(member.getContactName());
+			dto.setUserIdentifier(member.getContactToken());
+			return dto;
+		}
+
+		return userProvider.findUserTargetById(userId);
+	}
 }

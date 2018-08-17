@@ -20,7 +20,15 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
 import com.itextpdf.text.Chapter;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -106,5 +114,17 @@ public class YellowPageUtils {
 			}
 		}
 	}
-
+	
+	/**
+	 * 默认code为YellowPageServiceErrorCode.SCOPE
+	 * 
+	 * @param errorCode
+	 *            错误码，见YellowPageServiceErrorCode
+	 * @param errorMsg
+	 *            错误信息。
+	 */
+	public static void throwError(int errorCode, String errorMsg) {
+		throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE, errorCode, errorMsg);
+	}
+	
 }
