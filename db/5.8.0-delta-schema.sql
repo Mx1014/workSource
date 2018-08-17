@@ -644,5 +644,8 @@ ADD COLUMN `size`  varchar(64) NULL  AFTER `name`;
 ALTER TABLE `eh_rentalv2_cells`
 ADD COLUMN `cell_id`  bigint(20) NULL AFTER `id`;
 
+-- AUTHOR: 吴寒
+-- REMARK: 锁掌柜门禁对接
+ALTER TABLE `eh_aclinks` CHANGE `string_tag1` `string_tag1` VARCHAR(1024) ;
 
 -- --------------------- SECTION END ---------------------------------------------------------

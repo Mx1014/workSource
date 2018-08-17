@@ -5,12 +5,9 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.RestResponse;
-<<<<<<< HEAD
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
 import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
-=======
 import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
->>>>>>> 5.8.0
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
 import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
