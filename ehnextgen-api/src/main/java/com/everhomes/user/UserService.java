@@ -340,4 +340,6 @@ public interface UserService {
             Map<String, String[]> paramMap);
 
     Byte isUserAuth();
+    
+    void registerWXLoginConnection(HttpServletRequest request);
 }

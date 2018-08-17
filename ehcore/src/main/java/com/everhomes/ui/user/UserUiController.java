@@ -18,18 +18,25 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,13 +74,19 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd ,HttpServletRequest request) {
         List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(cmd);
+        //add by liangming.huang 20180816
+        //添加用户活跃记录,为微信端作的,由于时间紧急,先加在这里吧.本来写好接口让微信端调用的/admin/registerWXLogin
+        this.userService.registerWXLoginConnection(request);
+        
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     } 
+    
+   
 
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
