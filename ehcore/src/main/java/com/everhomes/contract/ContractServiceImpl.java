@@ -3389,7 +3389,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				StringBuffer apartmentVariable = new StringBuffer();
 				contractDetailDTO.getChargingItems().get(i).getApartments();
 				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
-					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "， ");
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "，");
 				}
 				chargingItemeE = new FlowCaseEntity();
 				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());

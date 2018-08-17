@@ -385,7 +385,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 				StringBuffer apartmentVariable = new StringBuffer();
 				contractDetailDTO.getChargingItems().get(i).getApartments();
 				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
-					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "， ");
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "，");
 				}
 				
 				e = new FlowCaseEntity();
