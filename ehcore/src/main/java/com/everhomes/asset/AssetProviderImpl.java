@@ -4303,45 +4303,23 @@ public class AssetProviderImpl implements AssetProvider {
         // todo change the way to examine bill group validation, if not bill and not valid contract, work flag should be false
         boolean workFlag = true;
         DSLContext context = getReadOnlyContext();
-        EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
-        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        //issue-35885 【物业缴费6.3】存在一个待发起合同，关联“账单组A”，删除后，修改合同修改计价条款页面，添加免租计划，显示数字
+        //只要关联了合同（包括草稿合同）就不能删除账单组，也不能修改其中的费项。
         //看是否关联了合同
-
-        // 合同的状态需要限定 by wentian 2018/5/22
+        EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
-                .from(t)
-                .where(t.OWNER_ID.eq(rule.getOwnerid()))
-                .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
-                .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
-                .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
-                .fetch(t.CONTRACT_ID);
+              .from(t)
+              .where(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
+              .and(t.BILL_GROUP_ID.eq(rule.getBillGroupId()))
+              .and(t.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+              .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
-            for(Long cid : fetch1){
-                //合同是否为正常
-              if(contractProvider.isNormal(cid)){
-                 return true;
-              }
-            }
-            // 和isNOrmal重复了
-//            Long correlatedContractId = fetch1.get(0);
-//            Byte contractStatus = contractProvider.findContractById(correlatedContractId).getStatus();
-//            ContractStatus status = ContractStatus.fromStatus(contractStatus);
-//            switch (status){
-//                case INVALID:
-//                   workFlag = false;
-//                case INACTIVE:
-//                    workFlag = false;
-//                case DENUNCIATION:
-//                    workFlag = false;
-//                case EXPIRED:
-//                    workFlag = false;
-//                case HISTORY:
-//                    workFlag = false;
-//            }
-        }else{
-            workFlag = false;
+        	return true;
+        }else {
+        	workFlag = false;
         }
         //先看是否产生了账单
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
         List<Long> fetch = context.select(bills.ID)
                 .from(bills)
                 .where(bills.BILL_GROUP_ID.eq(rule.getBillGroupId()))
