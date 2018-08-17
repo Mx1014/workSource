@@ -18,6 +18,8 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
 import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
@@ -91,7 +93,6 @@ public interface ContractService {
     //add by tangcen
 	DurationParamDTO getDuration(GetDurationParamCommand cmd);
 
-
 	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
 		return null;
 	}
@@ -100,10 +101,13 @@ public interface ContractService {
 		return null;
 	}
 
-	List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
 	default OutputStream exportOutputStreamContractListByContractList(SearchContractCommand cmd, Long taskId){return null;}
 
 	default void exportContractListByContractList(SearchContractCommand cmd){}
    
 
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+
+	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
+   
 }

@@ -25,7 +25,35 @@ public class ListParkingCardRequestsCommand {
     private String plateNumber;
     private Long pageAnchor;
     private Integer pageSize;
-    
+
+    private Long currentPMId;
+    private Long currentProjectId;
+    private Long appId;
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
     public ListParkingCardRequestsCommand() {
     }
 

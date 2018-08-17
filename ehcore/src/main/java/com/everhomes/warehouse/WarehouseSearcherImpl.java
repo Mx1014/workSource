@@ -6,6 +6,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehousesCommand;
@@ -119,17 +120,27 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
     @Override
     public SearchWarehousesResponse query(SearchWarehousesCommand cmd) {
-        //不再校验
-//        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_VIEW,cmd.getOwnerId());
+    	//界面报空指针，加入参数校验
+    	if (cmd.getOwnerId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getName())
+            /*qb = QueryBuilders.multiMatchQuery(cmd.getName())
                     .field("name", 5.0f)
                     .field("name.pinyin_prefix", 2.0f)
                     .field("name.pinyin_gram", 1.0f);
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("name");*/
+        	String pattern = "*" + cmd.getName() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("name", pattern));
+
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("name");
@@ -138,7 +149,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
+        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
         //增加园区id的筛选 by wentian
         fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 

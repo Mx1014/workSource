@@ -1,5 +1,8 @@
 package com.everhomes.rest.flow;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -22,6 +25,17 @@ public class FlowCaseEntity {
 		this.key = key;
 		this.value = value;
 		this.entityType = entityType;
+	}
+	
+	@ItemType(FlowCaseEntity.class)
+    private List<FlowCaseEntity> chargingItemEntities;
+	
+	public List<FlowCaseEntity> getChargingItemEntities() {
+		return chargingItemEntities;
+	}
+
+	public void setChargingItemEntities(List<FlowCaseEntity> chargingItemEntities) {
+		this.chargingItemEntities = chargingItemEntities;
 	}
 
 	public String getKey() {

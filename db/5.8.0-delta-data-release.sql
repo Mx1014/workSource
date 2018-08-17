@@ -14,6 +14,25 @@
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
 -- REMARK: 1、执行接口/community/caculateAllCommunityArea（该接口计算时间非常长）
 --         2、执行接口/community/caculateAllBuildingArea（该接口计算时间非常长）
+
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (仓库管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 warehouse_material.sh warehouse.sh warehouse_stock_log.sh warehouse_stock.sh es的结构
+--         2、 同步  /warehouse/syncWarehouseIndex
+--         3、同步/warehouse/syncWarehouseMaterialCategoryIndex
+--         4、同步/warehouse/syncWarehouseMaterialsIndex
+--         5、同步/warehouse/syncWarehouseRequestMaterialIndex
+--         6、同步/warehouse/syncWarehouseStockIndex
+--         7、同步/warehouse/syncWarehouseStockLogIndex
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (能耗管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 energy_meter.sh es上的结构
+--         2、同步 /energy/syncEnergyMeterIndex
+
+-- AUTHOR: dengs 2018年8月17日
+-- REMARK: 1、备份表eh_parking_lots
+--         2、调用接口/parking/initFuncLists
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -492,7 +511,15 @@ SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10020', 'zh_CN', '此账单组中已存在该费项');
 
 
-
+-- AUTHOR: 丁建民
+-- REMARK: 仓库管理V2.3（库存导入导出功能） issue-34335
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10027', 'zh_CN', '物品编号不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10028', 'zh_CN', '库存不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10029', 'zh_CN', '所属仓库不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10030', 'zh_CN', '库存请输入大于的0整数');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10031', 'zh_CN', '物品编号和名称不能匹配');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10032', 'zh_CN', '填写分类与物品分类不一致');
 
 
 -- AUTHOR: huangmingbo 2018.08.03
@@ -677,6 +704,27 @@ SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
 INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室10','会议室10','会议室10',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050370','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
 SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
 INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室10','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"002","roomNo":"A10"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- AUTHOR: dengs 2018年8月17日
+-- REMARK: issue-26616 停车缴费V6.6（UE优化）
+DELETE from eh_service_modules WHERE id in (40810,40820,40830,40840);
+DELETE from eh_acl_privileges WHERE id in (4080040810,4080040820,4080040830,4080040840);
+DELETE from eh_service_module_privileges WHERE module_id in (40810,40820,40830,40840);
+
+SELECT * from eh_service_modules WHERE id in (40800,40810,40820,40830,40840);
+SELECT * from eh_acl_privileges WHERE id in (4080040800,4080040810,4080040820,4080040830,4080040840);
+SELECT * from eh_service_module_privileges WHERE module_id in (40800,40810,40820,40830,40840);
+
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40810', '申请管理', '40800', '/200/40000/40800/40810', '1', '4', '2', '61', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40820', '订单记录', '40800', '/200/40000/40800/40820', '1', '4', '2', '62', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040810, '0', '停车缴费 申请管理', '停车缴费 申请管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40810', '0', 4080040810, '申请管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040820, '0', '停车缴费 订单记录', '停车缴费 订单记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40820', '0', 4080040820, '订单记录权限', '0', now());
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
