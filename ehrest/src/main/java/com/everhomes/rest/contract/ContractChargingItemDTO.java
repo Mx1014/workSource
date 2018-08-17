@@ -42,20 +42,11 @@ public class ContractChargingItemDTO {
     private String chargingVariables;
     private Long chargingStartTime;
     private Long chargingExpiredTime;
-    private Long billGroupId;
     
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
     private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
     private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
-
-    public Long getBillGroupId() {
-		return billGroupId;
-	}
-
-	public void setBillGroupId(Long billGroupId) {
-		this.billGroupId = billGroupId;
-	}
 
 	public String getLateFeeformula() {
         return lateFeeformula;
