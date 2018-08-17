@@ -3782,7 +3782,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			PurchaseOrderCommandResponse response = sendCreatePreOrderRequest(paycmd);
 
 			//5、保存订单信息
-			afterBillOrderCreated(response);
+			afterBillOrderCreated(order,response);
 
 			//4、组装支付方式
 			preOrderDTO = populatePreOrderDto(response);
@@ -3929,9 +3929,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return false;
 	}
 
-	protected void afterBillOrderCreated(PurchaseOrderCommandResponse orderResponse) {
+	protected void afterBillOrderCreated(PmTaskOrder order, PurchaseOrderCommandResponse orderResponse) {
 		OrderCommandResponse payResponse = orderResponse.getPayResponse();
-		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(Long.valueOf(orderResponse.getBusinessOrderNumber()));
+		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(order.getId());
 		record.setBizOrderNum(payResponse.getBizOrderNum());
 		record.setPayOrderId(payResponse.getOrderId());
 		record.setOrderCommitNonce(payResponse.getOrderCommitNonce());

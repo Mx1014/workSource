@@ -30,5 +30,9 @@ ALTER TABLE `eh_activity_roster` MODIFY COLUMN `refund_order_no` VARCHAR(64);
 -- AUTHOR: 郑思挺 20180816
 -- REMARK: 停车 保存biz_order_no
 ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `biz_order_no`  varchar(64) NULL AFTER `order_no`;
+
+-- AUTHOR: 马世亨 20180817
+-- REMARK: 物业报修 保存统一订单系统id
+ALTER TABLE `eh_pm_task_orders` ADD COLUMN `general_order_id` varchar(64) NULL COMMENT '统一订单系统订单id';
 -- --------------------- SECTION END ---------------------------------------------------------
 
