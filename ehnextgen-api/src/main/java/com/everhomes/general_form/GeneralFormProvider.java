@@ -65,6 +65,10 @@ public interface GeneralFormProvider {
      */
     List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId,  Long moduleId, Long ownerId);
 
+    GeneralForm getGeneralFormByApproval(Long formOriginId, Long formVersion);
+
+    GeneralFormVal getGeneralFormValByCustomerId(Integer namespaceId, Long customerId,  Long moduleId, Long ownerId);
+
 
     List<GeneralFormVal> listGeneralForm();
 

@@ -78,22 +78,23 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		if(form != null)
 			return form;
 		return null;
-		/*
-		try {
-			GeneralForm[] result = new GeneralForm[1];
-			DSLContext context = this.dbProvider.getDslContext(AccessSpec
-					.readWriteWith(EhGeneralForms.class));
 
-			result[0] = .map((r) -> {
-						return ConvertHelper.convert(r, GeneralForm.class);
-					});
-
-			return result[0];
-		} catch (Exception ex) {
-			// fetchAny() maybe return null
-			return null;
-		}*/
 	}
+
+
+	@Override
+	public GeneralForm getGeneralFormByApproval(Long formOriginId, Long formVersion) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralForms.class));
+		GeneralForm form = context.select().from(Tables.EH_GENERAL_FORMS)
+				.where(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.eq(formOriginId))
+				.and(Tables.EH_GENERAL_FORMS.FORM_VERSION.eq(formVersion))
+				.fetchAnyInto(GeneralForm.class);
+		if(form != null)
+			return form;
+		return null;
+
+	}
+
 
 	@Override
 	public List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
@@ -288,6 +289,30 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		query.addConditions(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
 		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
+	}
+
+	@Override
+	public GeneralFormVal getGeneralFormValByCustomerId(Integer namespaceId, Long customerId,  Long moduleId, Long ownerId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
+
+		GeneralFormVal[] result = new GeneralFormVal[1];
+
+		try {
+			result[0] = context.select().from(Tables.EH_GENERAL_FORM_VALS)
+				.where(Tables.EH_GENERAL_FORM_VALS.MODULE_ID.eq(moduleId))
+				.and(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_GENERAL_FORM_VALS.FIELD_VALUE.eq("{\"customerName\":" + customerId +"}"))
+				.and(Tables.EH_GENERAL_FORM_VALS.FIELD_NAME.eq("客户名称")).fetchAny().map((r) -> {
+					return ConvertHelper.convert(r, GeneralFormVal.class);
+				});
+		} catch (Exception ex) {
+			// fetchAny() maybe return null
+			ex.printStackTrace();
+			return null;
+		}
+
+		return result[0];
 	}
 
 

@@ -7,6 +7,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.Flow;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.RestResponse;
@@ -185,6 +186,22 @@ public class RequisitionController extends ControllerBase {
     @RestReturn(value=GeneralApprovalDTO.class)
     public RestResponse getApprovalRunningForm(GetApprovalRunningFormCommond cmd) {
         GeneralApprovalDTO dto = requisitionService.getApprovalRunningForm(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /requisition/getGeneralFormByCustomerId</b>
+     * <p>根据传入的用户ID，获取该用户的请示单</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getGeneralFormByCustomerId")
+    @RestReturn(value=Long.class)
+    public RestResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd) {
+        Long dto = requisitionService.getGeneralFormByCustomerId(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

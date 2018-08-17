@@ -2,6 +2,7 @@ package com.everhomes.general_form;
 
 import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -11,6 +12,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -135,8 +137,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        fb = FilterBuilders.termFilter("formOriginId", cmd.getFormOriginId());
+
+        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
+        if(cmd.getFormOriginId() == null || cmd.getFormOriginId() == 0){
+            LOGGER.error("don't config approval or don't have approval is used");
+
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"没有找到正在启用的审批或表单");
+
+        }
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", namespaceId));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));

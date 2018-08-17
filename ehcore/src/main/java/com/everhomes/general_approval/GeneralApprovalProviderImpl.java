@@ -16,6 +16,7 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalScopeMap;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -54,6 +55,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public GeneralApproval updateGeneralApproval(GeneralApproval obj) {
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
         obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhGeneralApprovalsDao dao = new EhGeneralApprovalsDao(context.configuration());
@@ -125,7 +127,9 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
         query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        if(ownerType != null) {
+            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(GeneralApprovalStatus.RUNNING.getCode()));
         return query.fetchAnyInto(GeneralApproval.class);
     }
