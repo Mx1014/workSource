@@ -1002,7 +1002,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-												Long startTime, Long endTime, String tag1, String tag2,String keyword, Long pageAnchor ,
+												Long startTime, Long endTime, String tag1, String tag2,String vendorType,String keyword, Long pageAnchor ,
 												Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
@@ -1027,6 +1027,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
+		if (null != vendorType)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.VENDOR_TYPE.equal(vendorType));
 		if (null != keyword)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
 					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
