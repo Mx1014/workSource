@@ -372,4 +372,15 @@ public interface PrivilegeConstants {
 
     // ------- 启动广告权限 --------
     long LAUNCHAD_ALL = 1090010000L;
+
+    // ------- 园区访客权限 --------
+    long VISITORSYS_BOOKING_MANAGEMENT = 4180041810L;//预约管理权限
+    long VISITORSYS_VISITOR_MANAGEMENT = 4180041820L;//访客管理权限
+    long VISITORSYS_DEV_MANAGEMENT = 4180041840L;//设备管理权限
+    long VISITORSYS_MODILE_MAMAGEMENT = 4180041850L;//移动端管理权限
+
+    // -----------用户认证-------------
+    long AUTHENTIFICATION_LIST_VIEW = 42007; //查看用户认证列表
+    long AUTHENTIFICATION_AUDITING = 42008;; // 审核权限
+    // ----------用户认证 END----------------
 }

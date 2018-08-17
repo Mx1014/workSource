@@ -1,5 +1,8 @@
 package com.everhomes.flow.vars;
 
+import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowVariableTextResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,27 +11,13 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component("flow-variable-text-remind-prefix-processors-phone")
-public class FlowVarsTextRemindPrefixAllProcessorsPhone extends FlowVarsTextTrackerPrefixAllProcessorsPhone {
+public class FlowVarsTextRemindPrefixAllProcessorsPhone implements FlowVariableTextResolver {
 
-	/*@Autowired
-	FlowService flowService;
-	
-	@Autowired
-	FlowEventLogProvider flowEventLogProvider;
-	
-	@Override
-	public String variableTextRender(FlowCaseState ctx, String variable) {
-        List<Long> userIds = variableUserResolve(ctx, null, null, null, null, 10);
-        String text = "";
-        for (int i = 0; i < userIds.size() && i < 3; i++) {
-            UserInfo ui = flowService.getUserInfoInContext(ctx, userIds.get(i));
-            if (ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
-                text += ui.getPhones().get(0) + ", ";
-            }
-        }
-        if (text.length() > 2) {
-            text = text.substring(0, text.length() - 2);
-        }
-        return text;
-    }*/
+    @Autowired
+    private FlowVarsTextTrackerPrefixAllProcessorsPhone flowVarsTextTrackerPrefixAllProcessorsPhone;
+
+    @Override
+    public String variableTextRender(FlowCaseState ctx, String variable) {
+        return flowVarsTextTrackerPrefixAllProcessorsPhone.variableTextRender(ctx, variable);
+    }
 }

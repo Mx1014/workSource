@@ -140,6 +140,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -2084,6 +2085,53 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, String identifierToken, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
+        List<OrganizationMember> result = new ArrayList<>();
+        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+        Condition condition = t1.field("id").gt(0L).and(t1.field("namespace_id").eq(namespaceId));
+
+        Condition cond = t1.field("organization_id").eq(orgCommoand.getId()).and(t1.field("status").eq(orgCommoand.getStatus()));
+
+        if (!StringUtils.isEmpty(keywords)) {
+            Condition cond1 = t1.field("contact_name").like("%" + keywords + "%");
+            cond = cond.and(cond1);
+        }
+
+        if (!StringUtils.isEmpty(identifierToken)) {
+            Condition cond1 = t1.field("contact_token").eq(identifierToken);
+            cond = cond.and(cond1);
+        }
+        if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+            cond = cond.and(t1.field("target_id").ne(0L));
+            cond = cond.and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
+        }
+
+        if (null != visibleFlag) {
+            cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+        }
+
+        condition = condition.and(cond);
+        if (null != locator && null != locator.getAnchor()) {
+            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+        }
+
+        result = context.select().from(t1).where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, OrganizationMember.class);
+                });
+        if (null != locator)
+            locator.setAnchor(null);
+
+        if (result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+        return result;
+    }
+
+    @Override
     public Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<OrganizationMember> result = new ArrayList<>();
@@ -2992,6 +3040,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                     return true;
                 });
         return ea;
+    }
+
+    @Override
+    public List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
+            List<Long> organizationIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+        query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.in(organizationIds));
+        query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.ne(OrganizationAddressStatus.INACTIVE.getCode()));
+        List<OrganizationAddress> list = query.fetch().map(r -> ConvertHelper.convert(r, OrganizationAddress.class));
+
+        return list;
     }
 
 
@@ -3940,6 +4000,43 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String identifierToken, String keywords, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
+        if (userInfoKeyword != null) {
+            String keyword = "%" + userInfoKeyword + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME.like(keyword)
+                    .or(Tables.EH_USERS.NICK_NAME.like(keyword)));
+        }
+        if (identifierToken != null) {
+            String keyword = "%" + identifierToken + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TOKEN.like(keyword));
+        }
+        if (keywords != null) {
+            String keyword = "%" + keywords + "%";
+            query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
+        query.addLimit(pageSize + 1);
+
+        List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+        if (list != null && list.size() > pageSize) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list = list.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
+    }
+
+    @Override
     public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds, Byte operationType) {
         List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -3959,7 +4056,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword,String identifierToken, String orgNameKeyword, List<Long> orgIds,
                                                                Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
@@ -3979,12 +4076,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (!StringUtils.isEmpty(userInfoKeyword)) {
             String keyword = "%" + userInfoKeyword + "%";
 
-            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
-
-            cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword)).or(Tables.EH_USERS.NICK_NAME.like(keyword));
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword).or(Tables.EH_USERS.NICK_NAME.like(keyword));
             query.addConditions(cond);
         }
 
+        if (!StringUtils.isEmpty(identifierToken)) {
+            String keyword = "%" + identifierToken + "%";
+
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
+            query.addConditions(cond);
+        }
         if (!StringUtils.isEmpty(orgNameKeyword)) {
             String keyword = "%" + orgNameKeyword + "%";
             query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
@@ -5391,7 +5492,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
 
         if (null != locator && null != locator.getAnchor())
-            condition = condition.and(t1.field("detail_id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("detail_id").le(locator.getAnchor()));
 
         Organization org = findOrganizationById(listCommand.getOrganizationId());
 
@@ -5479,8 +5580,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(null);
 
         if (result.size() >= pageSize) {
-            result.remove(result.size() - 1);
             locator.setAnchor(result.get(result.size() - 1).getDetailId());
+            result.remove(result.size() - 1);
         }
         return result;
     }
@@ -5850,4 +5951,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return users;
 	}
+
+    @Override
+    public OrganizationMember findMemberByType(Long userId, Long orgId, String type) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(type))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId, String userName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%" + userName + "%"))
+                .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
 }

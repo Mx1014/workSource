@@ -14,6 +14,7 @@ package com.everhomes.rest.flow;
  * <li>supervise: 督办</li>
  * <li>suspend_step: 暂缓</li>
  * <li>abort_suspend_step: 取消暂缓</li>
+ * <li>sub_flow_reject_step: 子流程</li>
  * </ul>
  * @author janson
  *
@@ -33,6 +34,7 @@ public enum FlowStepType {
     SUPERVISE("supervise"),
     SUSPEND_STEP("suspend_step"),
     ABORT_SUSPEND_STEP("abort_suspend_step"),
+    SUB_FLOW_REJECT_STEP("sub_flow_reject_step"),
     ;
 
 	private String code;

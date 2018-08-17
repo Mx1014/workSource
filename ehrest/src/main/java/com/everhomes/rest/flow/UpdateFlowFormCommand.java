@@ -4,23 +4,33 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>flowId: flowId</li>
+ *     <li>entityType: 实体类型, 工作流实体为 flow, 节点实体为 flow_node</li>
+ *     <li>entityId: 实体 id</li>
  *     <li>formOriginId: formOriginId</li>
  *     <li>formVersion: formVersion</li>
  * </ul>
  */
 public class UpdateFlowFormCommand {
 
-    private Long flowId;
+    private String entityType;
+    private Long entityId;
     private Long formOriginId;
     private Long formVersion;
 
-    public Long getFlowId() {
-        return flowId;
+    public String getEntityType() {
+        return entityType;
     }
 
-    public void setFlowId(Long flowId) {
-        this.flowId = flowId;
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
+    public Long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
     }
 
     public Long getFormOriginId() {

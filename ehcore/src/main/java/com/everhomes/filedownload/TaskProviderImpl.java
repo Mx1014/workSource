@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.filedownload.AllReadStatus;
 import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -13,8 +14,10 @@ import com.everhomes.server.schema.tables.daos.EhTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhTasks;
 import com.everhomes.server.schema.tables.records.EhTasksRecord;
 import com.everhomes.util.ConvertHelper;
+import javafx.scene.control.Tab;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -148,6 +151,32 @@ public class TaskProviderImpl implements TaskProvider {
         if(result == null){
             result = new ArrayList<>();
         }
+
+        return result;
+    }
+
+    @Override
+    public Integer countNotAllReadStatus(Long userId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer count = context.select(DSL.count(Tables.EH_TASKS.ID))
+                .from(Tables.EH_TASKS)
+                .where(Tables.EH_TASKS.READ_STATUS.eq(AllReadStatus.NOTALLREAD.getCode()))
+                .and(Tables.EH_TASKS.USER_ID.eq(userId))
+                .fetchOne(DSL.count(Tables.EH_TASKS.ID));
+        return count;
+    }
+
+    @Override
+    public List<Task> listNotReadStatusTasks(Long userId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhTasksRecord> query = context.selectQuery(Tables.EH_TASKS);
+        query.addConditions(Tables.EH_TASKS.READ_STATUS.eq(AllReadStatus.NOTALLREAD.getCode())
+                .and(Tables.EH_TASKS.USER_ID.eq(userId)));
+        List<Task> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Task.class));
+            return null;
+        });
 
         return result;
     }

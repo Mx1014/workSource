@@ -24,6 +24,8 @@ public interface PunchServiceErrorCode {
 
     static final int ERROR_CANNOT_UPDATE_MONTH = 10012;//月报不能更新
 
+    int ERROR_MONTH_STATISTICS_WAITTING_GENERATE = 10300;  // 月报统计还没有生成
+
     static final int ERROR_PUNCH_TOKEN_TIMEOUT = 10100;  //token过期了,返回首页
 
 

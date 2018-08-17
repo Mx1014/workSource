@@ -58,6 +58,7 @@ import com.everhomes.util.StringHelper;
  *     <li>endTime: 结束时间</li>
  *     <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  *     <li>maxQuantity: 限制人数</li>
+ *     <li>minQuantity: 最低限制人数</li>
  *     <li>contentUrl: 内容链接</li>
  *     <li>groupId: 俱乐部id</li>
  *     <li>groupName: 俱乐部名称</li>
@@ -173,6 +174,8 @@ public class PostDTO {
 
     private Integer maxQuantity;
 
+    private Integer minQuantity;
+
     private String contentUrl;
 
     private Long groupId;
@@ -198,6 +201,14 @@ public class PostDTO {
     private Byte moduleType;
 
     private Long moduleCategoryId;
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
 
     public Long getGroupId() {
         return groupId;
