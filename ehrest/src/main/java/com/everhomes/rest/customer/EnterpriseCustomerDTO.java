@@ -82,6 +82,7 @@ import java.util.List;
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty: 联系人职务</li>
  *     <li>signedUpCount: 注册人数</li>
+ *     <li>syncErrorMsg: 获取错误日志结果</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -243,6 +244,9 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String dropBox8ItemName;
     private String dropBox9ItemName;
 
+
+    private String syncErrorMsg;
+
     @ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> enterpriseAdmins;
     @ItemType(CustomerEntryInfoDTO.class)
@@ -251,6 +255,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
 
+
+    public String getSyncErrorMsg() {
+        return syncErrorMsg;
+    }
+
+    public void setSyncErrorMsg(String syncErrorMsg) {
+        this.syncErrorMsg = syncErrorMsg;
+    }
 
     public Long getEnterpriseId() {
         return enterpriseId;

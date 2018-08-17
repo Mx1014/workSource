@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -89,7 +90,7 @@ public interface ContractService {
 
     //add by tangcen
 	DurationParamDTO getDuration(GetDurationParamCommand cmd);
-	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+
 
 	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
 		return null;
@@ -98,4 +99,11 @@ public interface ContractService {
 	default AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
 		return null;
 	}
+
+	List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+	default OutputStream exportOutputStreamContractListByContractList(SearchContractCommand cmd, Long taskId){return null;}
+
+	default void exportContractListByContractList(SearchContractCommand cmd){}
+   
+
 }

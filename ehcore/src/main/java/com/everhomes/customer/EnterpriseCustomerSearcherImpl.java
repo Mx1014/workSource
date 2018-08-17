@@ -14,6 +14,7 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -253,15 +254,22 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }else if(aptitudeFlag == 1) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", CustomerAptitudeFlag.APTITUDE.getCode()));
         }
-        if (cmd.getAddressId() != null) {
-            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
-            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
-        }
-        if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
-            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+
+        if(cmd.getAbnormalFlag() != null && cmd.getAbnormalFlag() == 1){
+           fb = FilterBuilders.andFilter(fb, FilterBuilders.missingFilter("addressId"));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+
+        }else {
+            if (cmd.getAddressId() != null) {
+                MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+                qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+            }
+            if (cmd.getBuildingId() != null) {
+                MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+                qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+            }
         }
 
         if(cmd.getCustomerCategoryId() != null)
@@ -275,7 +283,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
-        
+
         /*//查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){

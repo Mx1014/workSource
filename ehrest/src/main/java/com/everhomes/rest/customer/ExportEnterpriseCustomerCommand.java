@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * Created by ying.xiong on 2018/2/5.
  */
+
 public class ExportEnterpriseCustomerCommand {
     private String moduleName;
 
@@ -59,6 +60,18 @@ public class ExportEnterpriseCustomerCommand {
     private Long corpIndustryItemId;
 
     private Boolean infoFLag ;
+
+    private Byte abnormalFlag;
+
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public String getIncludedGroupIds() {
         return includedGroupIds;
@@ -276,6 +289,14 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setInfoFLag(Boolean infoFLag) {
         this.infoFLag = infoFLag;
+    }
+
+    public Byte getAbnormalFlag() {
+        return abnormalFlag;
+    }
+
+    public void setAbnormalFlag(Byte abnormalFlag) {
+        this.abnormalFlag = abnormalFlag;
     }
 
     @Override

@@ -42,6 +42,7 @@ public class ContractExportDetailDTO {
 	private String buildings;
 	private String apartments;
 	private BigDecimal rent;
+	private String syncErrorMsg;
 	private String status;
 	public String getContractNumber() {
 		return contractNumber;
@@ -97,5 +98,12 @@ public class ContractExportDetailDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
+	public String getSyncErrorMsg() {
+		return syncErrorMsg;
+	}
+
+	public void setSyncErrorMsg(String syncErrorMsg) {
+		this.syncErrorMsg = syncErrorMsg;
+	}
 }

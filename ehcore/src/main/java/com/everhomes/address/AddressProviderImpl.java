@@ -13,12 +13,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.rest.address.AddressAdminStatus;
-import com.everhomes.rest.address.AddressArrangementStatus;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentAbstractDTO;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
@@ -57,11 +52,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -762,6 +753,27 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
+    public ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+
+        List<ContractBuildingMapping> mappings = new ArrayList<>();
+        SelectQuery<EhContractBuildingMappingsRecord> query = context.selectQuery(Tables.EH_CONTRACT_BUILDING_MAPPINGS);
+        query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId));
+        query.addOrderBy(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CREATE_TIME.desc());
+        query.fetch().map(r ->{
+            mappings.add(ConvertHelper.convert(r, ContractBuildingMapping.class));
+            return null;
+        });
+        if(mappings == null || mappings.size() == 0) {
+            return null;
+        }
+        return mappings.get(0);
+
+    }
+
+
+    @Override
 	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractBuildingMappings.class, contractBuildingMapping.getId()));
         

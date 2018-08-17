@@ -6,6 +6,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
+import com.everhomes.archives.ArchivesEmployeesExportTaskHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
@@ -23,6 +24,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.gogs.*;
@@ -39,14 +41,18 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.archives.ArchivesExcelLocaleString;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.ChargingVariables;
+
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -94,10 +100,12 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -237,6 +245,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	
 	@Autowired
     private UserService userService;
+
+	@Autowired
+	private TaskService taskService;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -2693,9 +2704,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
 			if (communities != null) {
 				for (Community community : communities) {
+					//查询categoryid
+					Long categoryId =null;
+					try {
+						categoryId = contractProvider.findCategoryIdByNamespaceId(community.getNamespaceId());
+					} catch (Exception e) {
+						LOGGER.info("contractAutoSync community get categoryId " + categoryId.toString());
+					}
 					SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
 					command.setNamespaceId(community.getNamespaceId());
 					command.setCommunityId(community.getId());
+					command.setCategoryId(categoryId);
+					command.setContractApplicationScene((byte) 0);
 					syncContractsFromThirdPart(command, false);
 				}
 			}
@@ -2728,7 +2748,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_SYNC, cmd.getOrgId(), cmd.getCommunityId());
 		}
 
-
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null) {
 			return "0";
@@ -2737,8 +2756,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(syncCount > 0) {
 			return "1";
 		}
-
-		String version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+		String version;
+		if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
+			SyncCustomersCommand cmd2 = ConvertHelper.convert(cmd, SyncCustomersCommand.class);
+			String cusResponse = customerService.syncEnterpriseCustomers(cmd2, false);
+			if(cusResponse.equals("1")){
+				return "1";
+			}
+			version = "0";
+		}else {
+			version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
+		}
 		ThirdPartContractHandler contractHandler = PlatformContext.getComponent(ThirdPartContractHandler.CONTRACT_PREFIX + cmd.getNamespaceId());
 		if(contractHandler != null) {
 			SyncDataTask task = new SyncDataTask();
@@ -2747,9 +2775,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			task.setType(SyncDataTaskType.CONTRACT.getCode());
 			task.setCreatorUid(UserContext.currentUserId());
 			task.setLockKey(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
-			syncDataTaskService.executeTask(() -> {
+			SyncDataTask dataTask = syncDataTaskService.executeTask(() -> {
 				SyncDataResponse response = new SyncDataResponse();
-				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId());
+				contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), cmd.getContractApplicationScene());
 				return response;
 			}, task);
 
@@ -2883,6 +2911,85 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
     public Long findContractCategoryIdByContractId(Long contractId) {
 		return contractProvider.findContractCategoryIdByContractId(contractId);
     }
+
+	@Override
+	public void exportContractListByContractList(SearchContractCommand cmd) {
+		//  export with the file download center
+		Map<String, Object> params = new HashMap<>();
+		//  the value could be null if it is not exist
+		params.put("namespaceId", cmd.getNamespaceId());
+		params.put("communityId", cmd.getCommunityId());
+		params.put("categoryId", cmd.getCategoryId());
+		params.put("task_Id", cmd.getTaskId());
+		String fileName = String.format("合同异常数据导出",  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+    public OutputStream exportOutputStreamContractListByContractList(SearchContractCommand cmd, Long taskId){
+		cmd.setPageSize(10000);
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		//动态字段
+		List<ContractDTO> contractListDTO = syncDataTaskService.listContractErrorMsg(cmd);
+
+		taskService.updateTaskProcess(taskId, 20);
+
+
+		ListFieldCommand command = ConvertHelper.convert(cmd, ListFieldCommand.class);
+		command.setModuleName("contract");
+		command.setGroupPath(null);
+		//页面上所有的动态字段
+		String[] propertyNamesAll = {"contractNumber","name","contractType","contractStartDate","contractEndDate","customerId","apartments","status","rent","syncErrorMsg"};
+		List<FieldDTO> dtos = fieldService.listFields(command);
+		// 属性字段
+		String[] fieldpropertyNames = new String[dtos.size() + 2];
+		for (int i = 0; i < dtos.size(); i++) {
+			fieldpropertyNames[i] = dtos.get(i).getFieldName();
+		}
+		fieldpropertyNames[fieldpropertyNames.length - 2] = "rent";
+		fieldpropertyNames[fieldpropertyNames.length - 1] = "syncErrorMsg";
+
+		List propertyNamesListAll = Arrays.asList(propertyNamesAll); // 将数组转化为list
+		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
+
+		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a))
+				.collect(Collectors.toList());
+		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
+		// 标题
+		String[] titleNames = new String[ExcelPropertyNames.length];
+		for (int i = 0; i < ExcelPropertyNames.length; i++) {
+			for (int j = 0; j < dtos.size(); j++) {
+				if (ExcelPropertyNames[i].equals(dtos.get(j).getFieldName())) {
+					titleNames[i] = dtos.get(j).getFieldDisplayName();
+				}
+			}
+		}
+		titleNames[titleNames.length - 2] = "租赁总额";
+		titleNames[titleNames.length - 1] = "错误信息";
+		int[] titleSizes = new int[ExcelPropertyNames.length + 2];
+		for (int i = 0; i < ExcelPropertyNames.length; i++) {
+			titleSizes[i] = 30;
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		taskService.updateTaskProcess(taskId, 50);
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not exist.");
+		}
+		if (contractListDTO != null && contractListDTO.size() > 0) {
+			String fileName = String.format("合同信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(null, fileName, "合同信息");
+			List<ContractExportDetailDTO> data = contractListDTO.stream().map(this::convertToExportDetail)
+					.collect(Collectors.toList());
+			taskService.updateTaskProcess(taskId, 80);
+			return excelUtils.getOutputStream(ExcelPropertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+		}
+	}
     
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override

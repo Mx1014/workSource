@@ -252,6 +252,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return result;
     }
 
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
     @Override
     public EnterpriseCustomer findById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

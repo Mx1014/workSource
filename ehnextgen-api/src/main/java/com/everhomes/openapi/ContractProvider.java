@@ -67,7 +67,7 @@ public interface ContractProvider {
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
-	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId);
 	List<Contract> listContractsByAddressId(Long addressId);
 
     String findContractIdByThirdPartyId(String contractId, String code);
@@ -109,7 +109,6 @@ public interface ContractProvider {
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	Boolean getContractTemplateById(Long id);
 
-
 	Double getTotalRentInCommunity(Long communityId);
 	Integer countRelatedContractNumberInBuilding(String buildingName);
 
@@ -121,6 +120,8 @@ public interface ContractProvider {
 	Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId);
 
 	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
+
+	Long findCategoryIdByNamespaceId(Integer namespaceId);
 
 	
 }

@@ -16,6 +16,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
@@ -55,6 +56,7 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -75,6 +77,9 @@ public class ContractController extends ControllerBase {
 
 	@Autowired
 	private ContractSearcher contractSearcher;
+
+	@Autowired
+	private SyncDataTaskService syncDataTaskService;
 	
 	/**
 	 * <p>1.合同列表</p>
@@ -500,6 +505,7 @@ public class ContractController extends ControllerBase {
 		return response;
 	}
 
+
 	/**
 	 * <b>URL: /contract/filterAptitudeCustomer</b>
 	 */
@@ -516,6 +522,20 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /contract/listSyncErrorMsg</b>
+	 * <p>查看导入数据错误日志</p>
+	 */
+	@RequestMapping("listSyncErrorMsg")
+	@RestReturn(value = ListSyncDataErrorMsgResponse.class,collection=true)
+	public RestResponse listSyncErrorMsg(ListSyncErrorMsgCommand cmd) {
+		ListSyncDataErrorMsgResponse result = syncDataTaskService.listSyncErrorMsg(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /contract/updateAptitudeCustomer</b>
 	 */
 	@RequestMapping("updateAptitudeCustomer")
@@ -525,6 +545,20 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(namespaceId);
 		AptitudeCustomerFlagDTO flag = contractService.updateAptitudeCustomer(cmd);
 		RestResponse response = new RestResponse(flag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /contract/exportContractSyncErrorMsg</b>
+	 * <p>导出数据错误日志</p>
+	 */
+	@RequestMapping("exportContractSyncErrorMsg")
+	@RestReturn(value = String.class)
+	public RestResponse exportContractSyncErrorMsg(@Valid SearchContractCommand cmd) {
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.exportContractListByContractList(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

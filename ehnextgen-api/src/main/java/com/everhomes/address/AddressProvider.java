@@ -79,6 +79,7 @@ public interface AddressProvider {
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
+    ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId);
 	void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
 
     String getAddressNameById(Long addressId);
