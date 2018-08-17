@@ -9115,10 +9115,15 @@ public class PunchServiceImpl implements PunchService {
 	            	}
 	        	}
         	}
+        	//在今天之后的工作日也要组装intervals
+        	if(PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(DateHelper.currentGMTTime())){
+        		response = processWorkdayPunchIntervalDTO(response, ptr, punchLogs, statusList, approvalStatus);        		
+        	}
             //找到用户当日申请列表
             List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
             response.setRequestDTOs(requestDTOs);
         }
+        
 //		}
         //旧版本兼容性处理
         oldVersionProcess(response, cmd);
