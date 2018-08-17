@@ -14,9 +14,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAppUrlsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceAgreementDao;
 import com.everhomes.server.schema.tables.pojos.EhAppUrls;
-import com.everhomes.server.schema.tables.pojos.EhServiceAgreement;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -68,4 +66,15 @@ public class AppUrlProviderImpl implements AppUrlProvider {
 		
 	}
 
+	@Override
+	public List<AppUrls> findByNamespaceId(Integer namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<AppUrls> urls = context.select().from(Tables.EH_APP_URLS)
+            .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(namespaceId))
+            .fetch().map((record)-> {
+                return ConvertHelper.convert(record, AppUrls.class);
+            });
+        return urls;
+	}
 }

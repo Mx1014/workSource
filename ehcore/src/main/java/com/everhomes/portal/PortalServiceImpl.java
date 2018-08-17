@@ -1374,6 +1374,9 @@ public class PortalServiceImpl implements PortalService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null, cmd.getVersionId());
 
+		checkPublishParam(cmd);
+
+
 		//生成版本发布log
 		PortalPublishLog portalPublishLog = createNewPortalPublishLog(cmd.getNamespaceId(), user, cmd.getVersionId());
 
@@ -1469,6 +1472,24 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
+	private void checkPublishParam(PublishCommand cmd){
+		if(cmd.getVersionId() == null){
+			LOGGER.error("invalid parameter, please refresh page and try again. cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameter, please refresh page and try again.");
+		}
+
+		PortalVersion portalVersion = portalVersionProvider.findPortalVersionById(cmd.getVersionId());
+
+		if(portalVersion == null || !portalVersion.getNamespaceId().equals(cmd.getNamespaceId())){
+			LOGGER.error("invalid parameter, please refresh page and try again. cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameter, please refresh page and try again.");
+		}
+
+
+	}
+
 	private PortalPublishLog createNewPortalPublishLog(Integer namespaceId, User user, Long versionId){
 		PortalPublishLog portalPublishLog = new PortalPublishLog();
 
@@ -1497,6 +1518,16 @@ public class PortalServiceImpl implements PortalService {
 				String customTag = handler.getCustomTag(app.getNamespaceId(), app.getModuleId(), app.getInstanceConfig());
 				app.setCustomTag(customTag);
 				serviceModuleAppProvider.updateServiceModuleApp(app);
+			}
+		}
+		
+		/**
+	     * 所有应用发布完成之后，再给各个应用发送一个通知
+	     */
+		for(ServiceModuleApp app: apps){
+			PortalPublishHandler handler = getPortalPublishHandler(app.getModuleId());
+			if(null != handler){
+				handler.afterAllAppPulish(app);
 			}
 		}
 

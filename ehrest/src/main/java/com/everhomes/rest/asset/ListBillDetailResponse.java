@@ -25,6 +25,7 @@ import java.util.List;
  * <li>certificateNote:客户上传缴费凭证后的留言</li>
  * <li>billStatus:账单缴费状态（0：未缴，1：已缴）</li>
  * <li>uploadCertificateDTOList:上传的所有缴费凭证的图片地址</li>
+ * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  *</ul>
  */
 public class ListBillDetailResponse {
@@ -49,6 +50,8 @@ public class ListBillDetailResponse {
     private Byte billStatus;
 	@ItemType(UploadCertificateDTO.class)
 	private List<UploadCertificateDTO> uploadCertificateDTOList;
+	//新增附件
+    private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 	
     public Byte getBillStatus() {
 		return billStatus;
@@ -202,5 +205,13 @@ public class ListBillDetailResponse {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
+		return assetPaymentBillAttachmentList;
+	}
+
+	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
+		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
 	}
 }

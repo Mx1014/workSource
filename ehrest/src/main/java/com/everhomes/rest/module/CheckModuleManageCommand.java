@@ -25,12 +25,12 @@ public class CheckModuleManageCommand {
     @NotNull
     private Long organizationId;
 
-    @NotNull
+    // @NotNull
     private Long moduleId;
 
     private Long appId;
 
-    @NotNull
+    // @NotNull
     private Long userId;
 
 

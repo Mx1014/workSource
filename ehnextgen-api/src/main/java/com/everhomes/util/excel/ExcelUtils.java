@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class ExcelUtils {
 
     private HttpServletResponse response;
+    private HttpServletRequest request;
 
     // 文件名
     private String fileName = "export";
@@ -82,6 +84,14 @@ public class ExcelUtils {
 
 
     public ExcelUtils(HttpServletResponse response, String fileName, String sheetName) {
+        this.response = response;
+        this.sheetName = sheetName;
+        this.fileName = fileName;
+        workbook = new XSSFWorkbook();
+    }
+    
+    public ExcelUtils(HttpServletRequest request, HttpServletResponse response, String fileName, String sheetName) {
+    	this.request = request;
         this.response = response;
         this.sheetName = sheetName;
         this.fileName = fileName;
@@ -233,11 +243,27 @@ public class ExcelUtils {
         }
     }
 
-    private void buildResponse() throws UnsupportedEncodingException {
-        fileName = fileName + ".xlsx";
-        response.setContentType("application/msexcel");
-        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-    }
+	private void buildResponse() throws UnsupportedEncodingException {
+
+		// 设置文件返回类型
+		fileName = fileName + ".xlsx";
+		response.setContentType("application/msexcel");
+
+		// 默认处理
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+
+		if (null == request) {
+			return;
+		}
+		
+		String Agent = request.getHeader("User-Agent");
+		if (null != Agent && (Agent.toLowerCase().indexOf("firefox") != -1)) {
+			//对火狐做特殊处理
+			response.setHeader("Content-Disposition",
+					String.format("attachment;filename*=utf-8'zh_cn'%s", URLEncoder.encode(fileName, "utf-8")));
+		}
+	}
 
     private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, boolean withStarAhead, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
         Sheet sheet = workbook.createSheet(this.sheetName);

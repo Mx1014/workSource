@@ -50,7 +50,8 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 	@Autowired
 	private BusBridgeProvider busBridgeProvider;
-
+	@Autowired
+	private ParkingService parkingService;
 	private String transferOrderNo(String bizOrderNum) {
 		String[] split = bizOrderNum.split(ParkingServiceImpl.BIZ_ORDER_NUM_SPILT);
 		if(split.length==3){
@@ -85,7 +86,8 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 			Long payTime = System.currentTimeMillis();
 			Timestamp payTimeStamp = new Timestamp(payTime);
 
-			String vendorName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
+			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 			//先将状态置为已付款
@@ -94,6 +96,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {

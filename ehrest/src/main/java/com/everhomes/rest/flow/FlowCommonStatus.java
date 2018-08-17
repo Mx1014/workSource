@@ -2,14 +2,14 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
- *     <li>INACTIVE((byte) 0): INACTIVE</li>
+ *     <li>INVALID((byte) 0): INVALID</li>
  *     <li>WAITING_FOR_APPROVAL((byte) 1): WAITING_FOR_APPROVAL</li>
- *     <li>ACTIVE((byte) 2): ACTIVE</li>
+ *     <li>VALID((byte) 2): VALID</li>
  * </ul>
  */
 public enum FlowCommonStatus {
 
-    INACTIVE((byte) 0), WAITING_FOR_APPROVAL((byte) 1), ACTIVE((byte) 2);
+    INVALID((byte) 0), WAITING_FOR_APPROVAL((byte) 1), VALID((byte) 2);
 
     private Byte code;
 

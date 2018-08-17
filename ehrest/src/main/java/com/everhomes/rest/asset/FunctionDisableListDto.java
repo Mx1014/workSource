@@ -9,6 +9,8 @@ public class FunctionDisableListDto {
     private Byte hasContractView;
     //是否显示上传凭证的按钮(add by tangcen)
     private Byte hasUploadCertificate;
+    //是否显示能耗
+    private Byte hasEnergy;
 
     public Byte getHasPay() {
         return hasPay;
@@ -32,6 +34,14 @@ public class FunctionDisableListDto {
 
 	public void setHasUploadCertificate(Byte hasUploadCertificate) {
 		this.hasUploadCertificate = hasUploadCertificate;
+	}
+
+	public Byte getHasEnergy() {
+		return hasEnergy;
+	}
+
+	public void setHasEnergy(Byte hasEnergy) {
+		this.hasEnergy = hasEnergy;
 	}
     
 }

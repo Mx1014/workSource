@@ -5,12 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>  
+* <li>userId: 用户Id 非必填,查询别人的时候填</li>
 * <li>enterpriseId：long 企业Id</li> 
 * <li>queryTime：long 查询时间戳-查询当下的状态不用传这个参数</li> 
 * </ul>
 */
 public class ListPunchMonthStatusCommand {
- 
+
+    private Long userId; 
     private Long enterpriseId; 
     private Long queryTime;
      @Override
@@ -32,6 +34,14 @@ public class ListPunchMonthStatusCommand {
 
 	public void setQueryTime(Long queryTime) {
 		this.queryTime = queryTime;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
  
 

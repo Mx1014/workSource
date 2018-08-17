@@ -13,7 +13,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.appurl.UpdateAppInfoCommand;
+import com.everhomes.rest.appurl.appInfoByNamespaceIdDTO;
 import com.everhomes.util.RequireAuthentication;
 
 @RestController
@@ -34,7 +34,7 @@ public class AppUrlController extends ControllerBase {
 	
 	/**
      * <b>URL: /appUrl/createAppInfo</b>
-     * <p>新增appurl信息</p>
+     * <p>保存appurl信息</p>
      */
 	@RequestMapping("createAppInfo")
     @RestReturn(value=String.class)
@@ -48,15 +48,15 @@ public class AppUrlController extends ControllerBase {
 	}
 	
 	/**
-     * <b>URL: /appUrl/updateAppInfo</b>
-     * <p>更新appurl信息</p>
+     * <b>URL: /appUrl/getAppInfoByNamespaceId</b>
+     * <p>通过namespaceId 查询appurl信息</p>
      */
-	@RequestMapping("updateAppInfo")
-    @RestReturn(value=String.class)
-	public RestResponse updateAppInfo(UpdateAppInfoCommand  cmd) {
+	@RequestMapping("getAppInfoByNamespaceId")
+    @RestReturn(value=appInfoByNamespaceIdDTO.class)
+	public RestResponse getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
 
-	    this.appUrlService.updateAppInfo(cmd);
-		RestResponse response = new RestResponse();
+		appInfoByNamespaceIdDTO dto = this.appUrlService.getAppInfoByNamespaceId(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
         return response;

@@ -15,6 +15,7 @@ import java.util.List;
  * <li>datestr:账期</li>
  * <li>showBillDetailForClientDTOList:账单列表，参考{@link com.everhomes.rest.asset.ShowBillDetailForClientDTO}</li>
  * <li>isUploadCertificate:是否上传了缴费凭证（0：否，1：是）</li>
+ * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  *</ul>
  */
 public class ShowBillDetailForClientResponse {
@@ -25,6 +26,8 @@ public class ShowBillDetailForClientResponse {
     private List<ShowBillDetailForClientDTO> showBillDetailForClientDTOList;
     //添加是否上传了缴费凭证的字段
     private  Byte isUploadCertificate;
+    //新增附件字段
+    private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     
     public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -74,4 +77,12 @@ public class ShowBillDetailForClientResponse {
     public void setDatestr(String datestr) {
         this.datestr = datestr;
     }
+
+	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
+		return assetPaymentBillAttachmentList;
+	}
+
+	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
+		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
+	}
 }

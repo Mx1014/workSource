@@ -9,6 +9,7 @@ import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
+    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId, Long billGroupId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -119,7 +120,7 @@ public interface AssetProvider {
 
     void deleteContractPayment(Long contractId);
 
-    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId);
+    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId);
 
     void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 
@@ -168,7 +169,7 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds, Long categoryId);
+    void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
@@ -229,7 +230,7 @@ public interface AssetProvider {
 
     void updateChargingStandardByCreating(String standardName,String instruction, Long chargingStandardId, Long ownerId, String ownerType);
 
-    boolean checkCoupledChargingStandard(Long cid);
+    boolean checkCoupledChargingStandard(Long cid, Long categoryId);
 
     void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId);
 
@@ -267,7 +268,7 @@ public interface AssetProvider {
 
     String getAddressStrByIds(List<Long> collect);
 
-    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId);
+    BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId, Long categoryId, Integer namespaceId);
 
     List<ListAllBillsForClientDTO> listAllBillsForClient(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte status, Long billGroupId);
 
@@ -346,7 +347,24 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
-
+	
+	void deleteUnsettledBillsOnContractId(Long contractId, List<Long> billIds);
+	
+	PaymentBills getFirstUnsettledBill(Long id);
+	
+	List<PaymentBillItems> findBillItemsByBillId(Long billId);
+	
+	void updatePaymentBills(PaymentBills bill);
+	
+	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
+	
+	void deleteUnsettledBills(Long contractId, String endTimeStr);
+	
+	PaymentBills findLastBill(Long contractId);
+	
+	String findEndTimeByPeriod(String endTimeStr, Long contractId, Long chargingItemId);
+    
+    PaymentLateFine findLastedFine(Long id);
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
@@ -356,9 +374,7 @@ public interface AssetProvider {
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
-	void transferOrderPaymentType();
-
-    PaymentLateFine findLastedFine(Long id);
+	void transferOrderPaymentType();    
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
@@ -382,8 +398,6 @@ public interface AssetProvider {
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
     
-    AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
-    
     ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 	
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -391,4 +405,24 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+
+	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
+	
+	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
+	
+	List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId);
+	
+	Map<Long, String> getGroupNames(ArrayList<Long> groupIds);
+    
+	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
+	
+	void updateBillDueDayCount(Long billId, Long dueDayCount);
+	
+    PaymentBillItems findFirstBillItemToDelete(Long contractId, String endTimeStr);
+    
+	PaymentBills findBillById(Long billId);
+	
+	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 }

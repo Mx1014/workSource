@@ -44,6 +44,8 @@ public class ParkingOrderEmbeddedV1Handler implements OrderEmbeddedHandler{
 	@Autowired
 	private LocalBus localBus;
 	@Autowired
+	private ParkingService parkingService;
+	@Autowired
 	private LocaleStringService localeService;
 
 	@Autowired
@@ -79,7 +81,8 @@ public class ParkingOrderEmbeddedV1Handler implements OrderEmbeddedHandler{
 			Long payTime = System.currentTimeMillis();
 			Timestamp payTimeStamp = new Timestamp(payTime);
 
-			String vendorName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
+			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 			//先将状态置为已付款
@@ -87,6 +90,7 @@ public class ParkingOrderEmbeddedV1Handler implements OrderEmbeddedHandler{
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
 				order.setPaidTime(payTimeStamp);
 				order.setPaidType(cmd.getVendorType());
+				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {

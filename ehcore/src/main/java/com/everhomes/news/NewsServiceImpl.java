@@ -242,17 +242,12 @@ public class NewsServiceImpl implements NewsService {
 		news.setAuthor(cmd.getAuthor());
 		news.setCoverUri(cmd.getCoverUri());
 		news.setContentAbstract(cmd.getContentAbstract());
-		// news.setCategoryId(cmd.getCategoryId());
 		news.setContent(cmd.getContent());
 		news.setSourceDesc(cmd.getSourceDesc());
 		news.setSourceUrl(cmd.getSourceUrl());
 		news.setPhone(cmd.getPhone());
 		news.setVisibleType(cmd.getVisibleType());
-		news.setTopIndex(0L);
-		news.setTopFlag(NewsTopFlag.NONE.getCode());
-
 		news.setStatus(generateNewsStatus(cmd.getStatus()));
-		news.setDeleterUid(0L);
 
 		// 调整摘要
 		adjustNewsContentAbstract(news);
@@ -2015,8 +2010,7 @@ public class NewsServiceImpl implements NewsService {
 		//获取item_group
 		PortalItemGroup group = portalItemGroupProvider.findPortalItemGroupById(groupId);
 		if (null == group) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_ITEM_GROUP_NOT_FOUND, "portal item group not found");
+			return;
 		}
 		
 		//获取模块
@@ -2024,8 +2018,7 @@ public class NewsServiceImpl implements NewsService {
 		Long moduleAppId = json.getLong("moduleAppId");
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 		
 		// 拼装renderUrl
@@ -2056,16 +2049,14 @@ public class NewsServiceImpl implements NewsService {
 		// 获取最新的版本
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
 		if (null == maxBigVersion) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_VERSION_NOT_FOUND, "protal version not exist");
+			return;
 		}
 
 		// 获取相应应用
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, maxBigVersion.getId(),
 				NEWS_MODULE_ID, "" + categoryId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 
 		// 拼装renderUrl
@@ -2084,13 +2075,12 @@ public class NewsServiceImpl implements NewsService {
 	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
 
-		String encodeTitile;
+		String encodeTitile = null;
 		try {
 			// 标题为中文时需要转码
 			encodeTitile = URLEncoder.encode(title, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+			LOGGER.error("news title name not can't be encoded :"+ title);
 		}
 
 		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");

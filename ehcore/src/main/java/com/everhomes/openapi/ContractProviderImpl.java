@@ -87,6 +87,9 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+
 @Component
 public class ContractProviderImpl implements ContractProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContractProviderImpl.class);
@@ -111,6 +114,9 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void createContract(Contract contract) {
@@ -1094,19 +1100,29 @@ public class ContractProviderImpl implements ContractProvider {
 						}
 						//处理 退约经办人 字段
 						if("denunciationUid".equals(field.getFieldName())){
-							//用户可能不在组织架构中 所以用nickname
-				            if (objNew!=null) {
+							//查找组织架构中的contact_name
+				            if (objNew != null) {
 				            	User userNew = userProvider.findUserById((Long)objNew);
-				            	if(userNew != null) {
-					            	newData = userNew.getNickName();
-					            }
+								if (userNew != null) {
+									OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(userNew.getId());
+									if(organizationMember != null) {
+										newData = organizationMember.getContactName();
+									}else{
+										newData = userNew.getNickName();
+									}
+								}
 							}
-				            if (objOld!=null) {
+				            if (objOld != null) {
 				            	User userOld = userProvider.findUserById((Long)objOld);
-					            if(userOld != null) {
-					            	oldData = userOld.getNickName();
-					            }
-							}
+								if (userOld != null) {
+									OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(userOld.getId());
+									if(organizationMember != null) {
+										oldData = organizationMember.getContactName();
+									}else{
+										oldData = userOld.getNickName();
+									}
+								}
+				            }
 						}
 						//templateId
 						if("templateId".equals(field.getFieldName())){
@@ -1316,6 +1332,72 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 		
 		return true;
+	}
+
+	@Override
+	public Double getTotalRentInCommunity(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Double> rentList = context.select(Tables.EH_CONTRACTS.RENT)
+										.from(Tables.EH_CONTRACTS)
+										.where(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Double.class);
+		Double result = 0.0;
+		for (Double rent : rentList) {
+			result += (rent != null ? rent : 0.0);
+		}
+		return result;
+	}
+
+	@Override
+	public Integer countRelatedContractNumberInBuilding(String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.leftOuterJoin(Tables.EH_CONTRACTS)
+										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		if (contractIds!=null && contractIds.size()>0) {
+			return contractIds.size();
+		}
+		return 0;
+	}
+
+	@Override
+	public Double getTotalRentInBuilding(String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.leftOuterJoin(Tables.EH_CONTRACTS)
+										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		
+		List<Double> rentList =  context.select(Tables.EH_CONTRACTS.RENT)
+										.from(Tables.EH_CONTRACTS)
+										.where(Tables.EH_CONTRACTS.ID.in(contractIds))
+										.fetchInto(Double.class);
+		Double result = 0.0;
+		for (Double rent : rentList) {
+			result += (rent != null ? rent : 0.0);
+		}
+		return result;
+	}
+
+	@Override
+	public List<Contract> findContractByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return 	 context.select()
+						.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+						.leftOuterJoin(Tables.EH_CONTRACTS)
+						.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+						.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+						.fetchInto(Contract.class);
 	}
 
 }

@@ -5,16 +5,42 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
-import com.everhomes.flow.*;
-import com.everhomes.general_approval.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalFlowCaseAdditionalFieldDTO;
+import com.everhomes.general_approval.GeneralApprovalFormDataVerifyHandler;
+import com.everhomes.general_approval.GeneralApprovalFormHandler;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalService;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GeneralFormRenderType;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -109,6 +135,11 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
                 form.setStatus(GeneralFormStatus.RUNNING.getCode());
                 this.generalFormProvider.updateGeneralForm(form);
             }
+
+            // 数据前置校验
+            GeneralApprovalFormDataVerifyHandler dataVerifyHandler = getGeneralApprovalFormDataVerifyHandler(ga);
+            dataVerifyHandler.verify(cmd);
+
             CreateFlowCaseCommand caseCommand = new CreateFlowCaseCommand();
             caseCommand.setApplyUserId(userId);
             caseCommand.setReferType(FlowReferType.APPROVAL.getCode());
@@ -153,7 +184,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
             //added by wh 建立了审批单之后
 
-            EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(flowCase.getReferId());
+            EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
             LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
             handler.onApprovalCreated(flowCase);
 
@@ -194,6 +225,17 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         return Long.valueOf(result.toString());
     }
 
+    private GeneralApprovalFormDataVerifyHandler getGeneralApprovalFormDataVerifyHandler(GeneralApproval ga) {
+        if (ga != null) {
+            GeneralApprovalFormDataVerifyHandler handler = PlatformContext.getComponent(GeneralApprovalFormDataVerifyHandler.GENERAL_APPROVAL_FORM_DATA_VERIFY_PREFIX
+                    + ga.getApprovalAttribute());
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return PlatformContext.getComponent(EnterpriseApprovalFormDataVerifyDefaultHandler.ENTERPRISE_APPROVAL_FORM_DATA_VERIFY);
+    }
+
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         //  get the basic data
@@ -217,7 +259,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
         //  extra process
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(approvalId);
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
+        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
         handler.processFormFields(fieldDTOs, cmd);
 
 
@@ -239,12 +282,12 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(cmd.getSourceId());
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
         return handler.getGeneralFormReminder(cmd);
     }
 
-    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(Long referId) {
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
+    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(GeneralApproval ga) {
         if (ga != null) {
             EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
                     + ga.getApprovalAttribute());
