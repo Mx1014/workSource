@@ -21,6 +21,10 @@
 -- REMARK: 根据域空间判断是否展示能耗数据，测试环境初始化鼎峰汇支持展示能耗数据
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (101, 20400, 0, '账单显示用量');
 
+-- AUTHOR: jiarui
+-- REMARK: 物业巡检的早期菜单数据导致权限项目显示不全
+UPDATE  eh_service_modules SET `status` = 0 WHERE path LIKE '/200/20000/20800/%' AND `level` = 5;
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
 INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
@@ -446,6 +450,32 @@ update eh_payment_charging_item_scopes set tax_rate=0;
 
 
 
+
+-- AUTHOR: 唐岑 2018年8月17日10:31:31
+-- REMARK: 导入房源信息时，添加提示信息
+-- REMARK: ISSUE-31926: 资产V3.1，资产管理重构
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '20007', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20016', 'zh_CN', '楼层数填写格式错误，楼层数只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10201', 'zh_CN', '楼宇名称已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30001', 'zh_CN', '建筑面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30002', 'zh_CN', '收费面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30003', 'zh_CN', '在租面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30004', 'zh_CN', '可招租面积不能为负数');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '30005', 'zh_CN', '楼层不在该楼宇楼层范围内');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'community', '10012', 'zh_CN', '楼宇编号已存在');
+
+-- AUTHOR: 唐岑 2018年8月17日10:31:31
+-- REMARK: 房源执行拆分合并计划时，添加提示信息
+-- REMARK: ISSUE-30697: 资产V3.2，新增拆分合并功能
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '1', 'zh_CN', '房源拆分计划', '${originalIds}被拆分成${targetIds}', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '2', 'zh_CN', '房源合并计划', '${originalIds}被合并成${targetIds}', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'address.arrangement', '3', 'zh_CN', '新（中文）', '新', '0');
+
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20014', 'zh_CN', '可招租面积只能为数字');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20015', 'zh_CN', '拆分/合并计划产生的未来房源已关联合同，删除失败');
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

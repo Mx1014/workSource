@@ -1,5 +1,6 @@
 package com.everhomes.address.admin;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CorrectAddressCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -111,19 +113,6 @@ public class AddressAdminController extends ControllerBase {
 //        return response;
 //    }
     
-    /**
-     * <b>URL: /admin/address/importParkAddressData</b>
-     * @param files 上传的文件
-     * @return 上传的结果
-     */
-    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
-    @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-    	RestResponse response = new RestResponse(addressService.importParkAddressData(cmd, files[0]));
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-    	response.setErrorDescription("OK");
-    	return response;
-    }
     
     /**
      * <b>URL: /admin/address/importAddressInfos</b>
@@ -143,5 +132,34 @@ public class AddressAdminController extends ControllerBase {
         return response;
     }
     
-
+    //导入楼栋下的房源信息
+    /**
+     * <b>URL: /admin/address/importParkAddressData</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    	RestResponse response = new RestResponse(addressService.importParkAddressData(cmd, files[0]));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    //下载楼栋下的房源信息
+    /**
+     * <b>URL: /admin/address/exportApartmentsInBuilding</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="exportApartmentsInBuilding")
+    @RestReturn(value=String.class)
+    public RestResponse exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse) {
+    	addressService.exportApartmentsInBuilding(cmd,httpServletResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

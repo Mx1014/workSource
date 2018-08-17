@@ -24,21 +24,30 @@ public class ImportBuildingDataDTO {
 	private String name;
 	private String buildingNumber;
 	private String aliasName;
+	private String floorNumber;
 	private String address;
 	private String longitudeLatitude;
-	private String trafficDescription;
 	private String contactor;
 	private String phone;
-	private String areaSize;
 	private String description;
+	private String trafficDescription;
+	//private String areaSize;
 	//private String namespaceBuildingType;
 	//private String namespaceBuildingToken;
 	
+	public String getFloorNumber() {
+		return floorNumber;
+	}
 
+
+	public void setFloorNumber(String floorNumber) {
+		this.floorNumber = floorNumber;
+	}
+
+	
 	public String getName() {
 		return name;
 	}
-
 
 	public void setName(String name) {
 		this.name = name;
@@ -112,16 +121,6 @@ public class ImportBuildingDataDTO {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
-	}
-
-
-	public String getAreaSize() {
-		return areaSize;
-	}
-
-
-	public void setAreaSize(String areaSize) {
-		this.areaSize = areaSize;
 	}
 
 

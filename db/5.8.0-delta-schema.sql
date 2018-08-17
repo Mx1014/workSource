@@ -138,6 +138,21 @@ CREATE TABLE `eh_approval_category_init_logs` (
   KEY `i_eh_owner_id` (`namespace_id`,`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='记录每个公司是否已经初始化了请假列表，避免重复初始化';
 
+-- AUTHOR: 黄良铭
+-- REMARK: #31347 #33785  保存用户当前所在场景
+CREATE TABLE `eh_user_current_scene` (
+  `id` BIGINT(32) NOT NULL COMMENT '主键',
+  `uid` BIGINT(32) NOT NULL COMMENT '用户ID',
+  `namespace_id` INT(11) DEFAULT NULL COMMENT '域空间ID',
+  `community_id` BIGINT(32) DEFAULT NULL COMMENT '园区ID',
+  `community_type` TINYINT(4) DEFAULT NULL COMMENT '园区类型',
+  `create_time` DATETIME DEFAULT NULL ,
+  `update_time` DATETIME DEFAULT NULL ,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- END
+
+
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假类型 新增历史已请年假总和、调休总和（上线时做一次数据初始化）
 ALTER TABLE eh_punch_vacation_balances ADD COLUMN annual_leave_history_count DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '已请年假总和，单位天' AFTER annual_leave_balance;
@@ -410,6 +425,36 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `express_target` TINYINT COMMENT '0:�
 ALTER TABLE `eh_express_orders`	ADD COLUMN `express_remark` TEXT COMMENT '备注 国贸快递专用';
 ALTER TABLE `eh_express_orders`	ADD COLUMN `pay_dto` TEXT COMMENT '支付2.0下单详情';
 
+-- AUTHOR: 唐岑 2018年8月17日10:37:50
+-- REMARK: ISSUE-31926: 资产V3.1，资产管理重构
+ALTER TABLE `eh_buildings` ADD COLUMN `floor_number` int(11) DEFAULT NULL COMMENT '该楼栋的楼层数目';
+ALTER TABLE `eh_buildings` DROP INDEX `u_eh_community_id_name`;
+ALTER TABLE `eh_buildings` ADD INDEX `u_eh_community_id_name` (`community_id`, `name`) USING BTREE ;
+ALTER TABLE `eh_buildings` MODIFY COLUMN `building_number` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '楼栋编号';
+
+-- AUTHOR: 唐岑 2018年8月17日10:37:50
+-- REMARK: ISSUE-30697: 资产V3.2，新增拆分合并功能
+CREATE TABLE `eh_address_arrangement` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `address_id` bigint(20) DEFAULT NULL COMMENT '要执行拆分/合并计划的房源id',
+  `original_id` varchar(2048) DEFAULT NULL COMMENT '被拆分的房源id或者被合并的房源id（以json数组方式存储）',
+  `target_id` varchar(2048) DEFAULT NULL COMMENT '拆分后产生的房源id或者合并后产生的房源id（以json数组方式存储）',
+  `operation_type` tinyint(4) DEFAULT NULL COMMENT '操作类型：拆分（0），合并（1）',
+  `date_begin` datetime NOT NULL COMMENT '拆分合并计划的生效日期',
+  `operation_flag` tinyint(4) DEFAULT NULL COMMENT '计划是否执行标志（0：否，1：是）',
+  `status` tinyint(255) DEFAULT NULL COMMENT '计划状态',
+  `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT '域空间id',
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_uid` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房源拆分/合并计划表';
+
+ALTER TABLE `eh_addresses` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_communities` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_addresses` ADD COLUMN `is_future_apartment` tinyint NULL DEFAULT 0 COMMENT '未来房源标记（0：否，1：是）';
 
 -- AUTHOR: 杨崇鑫  20180724
 -- REMARK: 物业缴费V6.5所需新增的字段

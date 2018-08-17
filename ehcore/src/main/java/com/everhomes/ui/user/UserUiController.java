@@ -97,22 +97,22 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
- 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+// 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 
  	    List<SceneContactDTO> dtos = null;
-		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			//	兼容老版本的app by sf.yan 20161020
-			if(null == cmd.getOrganizationId()){
-				cmd.setOrganizationId(sceneToken.getEntityId());
-			}
+			//	去除场景 by ryan 14/08/2018
+//			if(null == cmd.getOrganizationId()){
+//				cmd.setOrganizationId(sceneToken.getEntityId());
+//			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
 /*			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
 			    command.setVisibleFlag(VisibleFlag.ALL.getCode());*/
-			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
-			List<OrganizationContactDTO> members = res.getMembers();
+			ListOrganizationContactCommandResponse res1 = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res1.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -132,9 +132,9 @@ public class UserUiController extends ControllerBase {
 				}).collect(Collectors.toList());
 			}
 
-		}
+//		}
 
-		List<FamilyMemberDTO> resp = null;
+		/*List<FamilyMemberDTO> resp = null;
 		//	仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
 		if (UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType()))
 			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
@@ -155,7 +155,7 @@ public class UserUiController extends ControllerBase {
 				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
 				return dto;
 			}).collect(Collectors.toList());
- 	    }
+ 	    }*/
  	    
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);
