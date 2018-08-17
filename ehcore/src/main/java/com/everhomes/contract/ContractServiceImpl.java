@@ -8,6 +8,7 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -58,6 +59,8 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
@@ -190,6 +193,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
