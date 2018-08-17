@@ -11,6 +11,9 @@
 -- REMARK: 执行search 下脚本 enter_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
+-- AUTHOR: 唐岑 2018年8月17日15:13:14
+-- REMARK: 1、执行接口/community/caculateAllCommunityArea（该接口计算时间非常长）
+--         2、执行接口/community/caculateAllBuildingArea（该接口计算时间非常长）
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
