@@ -11,6 +11,8 @@ public class CreateAnAppMappingCommand {
     private Long contractCategoryId;
     private Byte energyFlag;
     private Integer namespaceId;
+    private Long contractOriginId;
+    private Byte contractChangeFlag;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -43,4 +45,20 @@ public class CreateAnAppMappingCommand {
     public void setEnergyFlag(Byte energyFlag) {
         this.energyFlag = energyFlag;
     }
+
+	public Long getContractOriginId() {
+		return contractOriginId;
+	}
+
+	public void setContractOriginId(Long contractOriginId) {
+		this.contractOriginId = contractOriginId;
+	}
+
+	public Byte getContractChangeFlag() {
+		return contractChangeFlag;
+	}
+
+	public void setContractChangeFlag(Byte contractChangeFlag) {
+		this.contractChangeFlag = contractChangeFlag;
+	}
 }

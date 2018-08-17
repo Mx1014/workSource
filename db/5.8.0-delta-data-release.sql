@@ -443,6 +443,14 @@ UPDATE eh_service_module_apps SET module_control_type = 'community_control' WHER
 UPDATE eh_authorizations SET owner_type = 'EhAll' WHERE auth_id = 35000;
 UPDATE eh_authorizations SET module_control_type = 'community_control' WHERE auth_id = 35000;
 
+
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5初始化收费项税率为0
+update eh_payment_charging_item_scopes set tax_rate=0;
+
+
+
+
 -- AUTHOR: 唐岑 2018年8月17日10:31:31
 -- REMARK: 导入房源信息时，添加提示信息
 -- REMARK: ISSUE-31926: 资产V3.1，资产管理重构

@@ -1,11 +1,54 @@
 
 package com.everhomes.asset;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
-import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -15,7 +58,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -28,7 +70,11 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.*;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.NamespaceResourceService;
@@ -61,7 +107,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -82,41 +127,39 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractCategories;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
+import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.pojos.EhPaymentLateFine;
+import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.CalculatorUtil;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CopyUtils;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DecimalUtils;
+import com.everhomes.util.IntegerUtil;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 //import com.everhomes.contract.ContractService;
 
@@ -1089,6 +1132,7 @@ public class AssetServiceImpl implements AssetService {
                     PaymentBillGroup group = exp.getGroup();
                     PaymentChargingItemScope itemScope = exp.getItemScope();
                     PaymentBillGroupRule groupRule = exp.getGroupRule();
+                    List<VariableIdAndValue> variableIdAndValueList = exp.getVariableIdAndValueList();//获取计价条款包裹
                     //资产
                     item.setAddressId(property.getAddressId());
                     item.setBuildingName(property.getBuldingName());
@@ -1128,23 +1172,27 @@ public class AssetServiceImpl implements AssetService {
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    
                     //保存用量 ：物业缴费6.1 add by 杨崇鑫
-                    //创建费项的时候，根据"chargingItemId": 是否相等，判断是否该费项是否有用量数据！
-                    for(int i = 0; i < feesRules.size(); i++) {
-                    	//获取单一包裹
-                        FeeRules rule = feesRules.get(i);
-                        if(rule != null && rule.getChargingItemId() != null && rule.getChargingItemId().equals(item.getChargingItemsId())) {
-                        	List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
-                        	for ( int k = 0; k < variableIdAndValueList.size(); k++){
-                        		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                        		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
-                        			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
-                        		}
-                        	}
-                        }
-                    }
-                    	
+                	for (int k = 0; k < variableIdAndValueList.size(); k++){
+                		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
+                			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
+                		}
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("taxRate")) {
+                			//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
+                			BigDecimal taxRate = new BigDecimal(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : "0");
+                			item.setTaxRate(taxRate);
+                			taxRate = taxRate.divide(new BigDecimal(100));
+                			BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;
+                			amountReceivableWithoutTax = item.getAmountReceivable().divide(BigDecimal.ONE.add(taxRate), 2, BigDecimal.ROUND_HALF_UP);
+                			item.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+                			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+                			BigDecimal taxAmount = item.getAmountReceivable().subtract(amountReceivableWithoutTax);
+                			item.setTaxAmount(taxAmount);
+                			item.setAmountOwedWithoutTax(amountReceivableWithoutTax);
+                			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
+                		}
+                	}
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1493,6 +1541,7 @@ public class AssetServiceImpl implements AssetService {
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
+            obj.setVariableIdAndValueList(var2);//保存计价条款的包裹，以便后面使用
             obj.setProperty(property);
             obj.setGroupRule(groupRule);
             obj.setGroup(group);
@@ -3346,7 +3395,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds, cmd.getCategoryId());
+        assetProvider.configChargingItems(cmd, communityIds);
     }
 
     private List<Long> getAllCommunity(Integer namespaceId,boolean includeNamespace) {
@@ -4742,12 +4791,6 @@ public class AssetServiceImpl implements AssetService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "either assetCategoryId or contractCategory is null");
         }
-        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
-        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
-        if(existAsset || existContract){
-             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                    "asset category or contract category already exist in mapping schema");
-        }
         Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
         mapping.setAssetCategoryId(cmd.getAssetCategoryId());
         mapping.setContractCategoryId(cmd.getContractCategoryId());
@@ -4970,7 +5013,13 @@ public class AssetServiceImpl implements AssetService {
         for(BillItemDTO billItemDTO : billItemDTOList){
         	if(billItemDTO.getBillItemId() != null) {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
-                titleName.add(billItemDTO.getBillItemName()+"(元)");
+                titleName.add(billItemDTO.getBillItemName()+"(含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-withoutTax");
+                titleName.add(billItemDTO.getBillItemName()+"(不含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-taxAmount");
+                titleName.add(billItemDTO.getBillItemName()+"税额");
                 titleSize.add(20);
                 //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
                 if(isShowEnergy(namespaceId, communityId, moduleId)) {
@@ -5037,6 +5086,8 @@ public class AssetServiceImpl implements AssetService {
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
             	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal amountRecivableWithoutTax = BigDecimal.ZERO;//导出增加不含税字段
+            	BigDecimal taxAmount = BigDecimal.ZERO;//导出增加税额字段
             	BigDecimal lateFineAmount = BigDecimal.ZERO;
             	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
@@ -5058,6 +5109,12 @@ public class AssetServiceImpl implements AssetService {
         				}else {
         					//如果费项是一样的，那么导出的时候，对费项做相加
             				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+            				if(billItemDTO2.getAmountReceivableWithoutTax() != null) {
+            					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
+            				}
+            				if(billItemDTO2.getTaxAmount() != null) {
+            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
+            				}
             				//根据减免费项配置重新计算待收金额
             				long billId = Long.parseLong(dto.getBillId());
                             Long charingItemId = billItemDTO.getBillItemId();
@@ -5073,6 +5130,8 @@ public class AssetServiceImpl implements AssetService {
         			}
         		}
         		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-withoutTax", amountRecivableWithoutTax.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-taxAmount", taxAmount.toString());
         		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
         		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
         		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
@@ -5102,7 +5161,7 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
-        excel.writeExcel(propertyNames,titleName,titleSize,dataList);	
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
 	}
 	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -5284,7 +5343,26 @@ public class AssetServiceImpl implements AssetService {
     	}
     }
     
-    public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+    public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
+        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+        mapping.setId(nextSequence);
+        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "either assetCategoryId or contractCategory is null");
+        }
+        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
+        if(existAsset){
+        	//如果已经存在就是更新
+        	UpdateAnAppMappingCommand updateAnAppMappingCommand = ConvertHelper.convert(cmd, UpdateAnAppMappingCommand.class);
+        	updateAnAppMapping(updateAnAppMappingCommand);
+        }else {
+        	//如果不存在就是新增
+        	createAnAppMapping(cmd);
+        }
+    }
+
+	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
 
@@ -5318,6 +5396,15 @@ public class AssetServiceImpl implements AssetService {
 		//查询eh_payment_order_records表，获取支付状态
 		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
 		return response;
+	}
+	
+	/**
+	 * 获取费项配置的税率
+	 * @param billGroupId
+	 * @return
+	 */
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
+		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 
 }

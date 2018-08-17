@@ -169,7 +169,7 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds, Long categoryId);
+    void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
@@ -400,4 +400,6 @@ public interface AssetProvider {
 	Map<Long, String> getGroupNames(ArrayList<Long> groupIds);
     
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 }
