@@ -19,7 +19,8 @@ create table `eh_general_form_val_requests`
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
 
-
+-- AUTHOR: huangpengyu  20180717
+-- REMARK: 将表单筛选字段与客户关联起来
 create table `eh_general_form_filter_user_map`
 (
    `id`                   bigint not null,
@@ -45,7 +46,8 @@ alter table eh_general_forms add creater_name varchar(64) null comment '新增�
 
 alter table eh_general_approvals add creater_name varchar(64) null comment '新增人';
 
-
+-- AUTHOR: huangpengyu  20180811
+-- REMARK: 增加合同过滤客户配置项
 create table `eh_enterprise_customer_aptitude_flag`
 (
    `id`                   bigint not null,
