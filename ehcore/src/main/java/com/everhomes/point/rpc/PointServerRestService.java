@@ -1,28 +1,30 @@
 package com.everhomes.point.rpc;
 
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.RestResponseBase;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
-
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.RestResponseBase;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+
 public class PointServerRestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CoreServerRestService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PointServerRestService.class);
 
     @Autowired
     private RestTemplate template;
@@ -36,8 +38,8 @@ public class PointServerRestService {
             Map<String, String> map = new HashMap<>();
             StringHelper.toStringMap(null, param, map);
 
-            String appKey = configProvider.getValue("server.core.appKey", "");
-            String secretKey = configProvider.getValue("server.core.secretKey", "");
+            String appKey = configProvider.getValue("server.point.appKey", "");
+            String secretKey = configProvider.getValue("server.point.secretKey", "");
 
             map.put("appKey", appKey);
             String signature = SignatureHelper.computeSignature(map, secretKey);
@@ -65,7 +67,7 @@ public class PointServerRestService {
     }
 
     private String getRestUri(String relativeUri) {
-        String url = configProvider.getValue("server.core.url", "");
+        String url = configProvider.getValue("server.point.url", "");
         StringBuilder sb = new StringBuilder(url);
         if (!url.endsWith("/"))
             sb.append("/");
