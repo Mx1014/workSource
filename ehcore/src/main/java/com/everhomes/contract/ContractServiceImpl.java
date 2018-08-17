@@ -9,6 +9,7 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
@@ -708,7 +709,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
 				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
 				List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
-						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId());
+						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId(), null);
 				Long billGroupId = groupRules.get(0).getBillGroupId();
 				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
 				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
