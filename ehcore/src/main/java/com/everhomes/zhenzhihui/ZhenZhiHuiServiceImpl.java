@@ -156,6 +156,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             sceneTokenDTO.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
 
                             List<Long> moduleIds = new ArrayList<>();
+                            LOGGER.info("zhenzhihuiDTO = {}", zhenZhiHuiUserInfoDTO);
                             moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
                             List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
                             if (CollectionUtils.isEmpty(serviceModuleApps)) {
