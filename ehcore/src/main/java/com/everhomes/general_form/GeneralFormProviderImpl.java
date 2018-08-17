@@ -17,9 +17,12 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
@@ -56,6 +59,10 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 	@Override
 	public void updateGeneralForm(GeneralForm obj) {
+		if(StringUtils.isBlank(obj.getOperatorName())){
+			User user = UserContext.current().getUser();
+			obj.setOperatorName(user.getNickName());
+		}
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec
 				.readWriteWith(EhGeneralForms.class));
 		EhGeneralFormsDao dao = new EhGeneralFormsDao(context.configuration());
