@@ -594,5 +594,40 @@ create table `eh_enterprise_customer_aptitude_flag`
 -- REMARK: ISSUE-33577 增加update_time 给punch_logs表(为金蝶对接接口提供)
 ALTER TABLE eh_punch_logs ADD COLUMN `update_date` DATE ;
 
+-- AUTHOR: 郑思挺
+-- REMARK: 资源预约3.6.2
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `remark_flag`  tinyint(4) NULL COMMENT '备注是否必填 0否 1是' AFTER `overtime_strategy`,
+ADD COLUMN `remark`  varchar(255) NULL COMMENT '备注显示文案' AFTER `remark_flag`;
+
+ALTER TABLE `eh_rentalv2_time_interval`
+ADD COLUMN `amorpm`  tinyint(4) NULL AFTER `time_step`,
+ADD COLUMN `name`  varchar(10) NULL AFTER `amorpm`;
+
+
+CREATE TABLE `eh_rentalv2_refund_tips` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int NOT NULL ,
+`source_type`  varchar(20) NULL ,
+`source_id`  bigint(20) NULL ,
+`refund_strategy`  tinyint(4) NULL ,
+`tips`  varchar(255) NULL ,
+`resource_type`  varchar(20) NULL ,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- AUTHOR: 郑思挺
+-- REMARK: 资源预约3.6
+ALTER TABLE eh_rentalv2_resource_pics rename eh_rentalv2_site_resources;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `type`  varchar(64) NULL DEFAULT 'pic' AFTER `owner_type`;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `name`  varchar(64) NULL  AFTER `type`;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `size`  varchar(64) NULL  AFTER `name`;
+
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `cell_id`  bigint(20) NULL AFTER `id`;
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
