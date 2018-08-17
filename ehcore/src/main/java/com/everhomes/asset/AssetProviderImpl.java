@@ -3540,10 +3540,10 @@ public class AssetProviderImpl implements AssetProvider {
 	                	for(ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
 	                		if(chargingVariable.getVariableIdentifier() != null) {
 	                			if(chargingVariable.getVariableIdentifier().equals("dj")) {
-	                				dj = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                				dj = new BigDecimal(chargingVariable.getVariableValue());
 	                			}
 	                			if(chargingVariable.getVariableIdentifier().equals("mj")) {
-	                				mj = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                				mj = new BigDecimal(chargingVariable.getVariableValue());
 	                			}
 	                		}
 	                	}
@@ -3555,22 +3555,22 @@ public class AssetProviderImpl implements AssetProvider {
 	                	ChargingVariable djChargingVariable = new ChargingVariable();
 	                	djChargingVariable.setVariableIdentifier("dj");
 	                	djChargingVariable.setVariableName("单价(含税)");
-	                	djChargingVariable.setVariableValue(dj);
+	                	djChargingVariable.setVariableValue(dj.toString());
 	                	newChargingVariableList.getChargingVariables().add(djChargingVariable);
 	                	ChargingVariable djbhsChargingVariable = new ChargingVariable();
 	                	djbhsChargingVariable.setVariableIdentifier("djbhs");
 	                	djbhsChargingVariable.setVariableName("单价(不含税)");
-	                	djbhsChargingVariable.setVariableValue(djbhs);
+	                	djbhsChargingVariable.setVariableValue(djbhs.toString());
 	                	newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
 	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
 	                	taxRateChargingVariable.setVariableName("税率");
-	                	taxRateChargingVariable.setVariableValue(taxRate);
+	                	taxRateChargingVariable.setVariableValue(taxRate.toString());
 	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
 	                	ChargingVariable mjChargingVariable = new ChargingVariable();
 	                	mjChargingVariable.setVariableIdentifier("mj");
 	                	mjChargingVariable.setVariableName("面积");
-	                	mjChargingVariable.setVariableValue(mj);
+	                	mjChargingVariable.setVariableValue(mj.toString());
 	                	newChargingVariableList.getChargingVariables().add(mjChargingVariable);
 	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	                	if(tableName.equals("EH_DEFAULT_CHARGING_ITEMS")) {
@@ -3600,7 +3600,7 @@ public class AssetProviderImpl implements AssetProvider {
 	                	for(ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
 	                		if(chargingVariable.getVariableIdentifier() != null) {
 	                			if(chargingVariable.getVariableIdentifier().equals("gdje")) {
-	                				gdje = BigDecimal.valueOf((double) chargingVariable.getVariableValue());
+	                				gdje = new BigDecimal(chargingVariable.getVariableValue());
 	                			}
 	                		}
 	                	}
@@ -3612,17 +3612,17 @@ public class AssetProviderImpl implements AssetProvider {
 	                	ChargingVariable gdjeChargingVariable = new ChargingVariable();
 	                	gdjeChargingVariable.setVariableIdentifier("gdje");
 	                	gdjeChargingVariable.setVariableName("固定金额(含税)");
-	                	gdjeChargingVariable.setVariableValue(gdje);
+	                	gdjeChargingVariable.setVariableValue(gdje.toString());
 	                	newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
 	                	ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
 	                	gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
 	                	gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
-	                	gdjebhsChargingVariable.setVariableValue(gdjebhs);
+	                	gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
 	                	newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
 	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
 	                	taxRateChargingVariable.setVariableName("税率");
-	                	taxRateChargingVariable.setVariableValue(taxRate);
+	                	taxRateChargingVariable.setVariableValue(taxRate.toString());
 	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
 	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	                	if(tableName.equals("EH_DEFAULT_CHARGING_ITEMS")) {

@@ -10,14 +10,7 @@ import com.everhomes.util.StringHelper;
 public class ChargingVariable {
 	private String variableIdentifier;
 	private String variableName;
-	private Object variableValue;
-	
-	public Object getVariableValue() {
-		return variableValue;
-	}
-	public void setVariableValue(Object variableValue) {
-		this.variableValue = variableValue;
-	}
+	private String variableValue;
 	
 	@Override
     public String toString() {
@@ -34,6 +27,12 @@ public class ChargingVariable {
 	}
 	public void setVariableName(String variableName) {
 		this.variableName = variableName;
+	}
+	public String getVariableValue() {
+		return variableValue;
+	}
+	public void setVariableValue(String variableValue) {
+		this.variableValue = variableValue;
 	}
 	
 }
