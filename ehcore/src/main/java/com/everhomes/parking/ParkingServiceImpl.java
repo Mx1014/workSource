@@ -760,9 +760,10 @@ public class ParkingServiceImpl implements ParkingService {
 			paySource = ParkingPaySourceType.QRCODE.getCode();
 //			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
 		}
-		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
-				sNamespaceId, (userTarget==null||userTarget.getUserIdentifier()==null)?"12000001802":userTarget.getUserIdentifier(), null, null, null);
-		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+
+//		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+//				sNamespaceId, (userTarget==null||userTarget.getUserIdentifier()==null)?"12000001802":userTarget.getUserIdentifier(), null, null, null);
+//		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		//保存支付方id
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
