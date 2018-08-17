@@ -95,6 +95,7 @@ public class UclbrtHttpClient {
 	
 	@SuppressWarnings("deprecation")
 	public static String TestFuncXML(String protocol,String  ip,String  port,String  communityNo,String  buildNo, String floorNo, String roomNo, String accSid,String  token,String areaCode,String mobile,String begTime,String endTime){
+		LOGGER.info("ucl 开始注册房卡 " );
 		String l= getInfoXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,begTime,endTime);
 		LOGGER.info("ucl 注册 xml " + l);
 		String roomID = null;
