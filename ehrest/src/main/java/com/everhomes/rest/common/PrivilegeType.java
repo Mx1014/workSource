@@ -16,7 +16,9 @@ public enum PrivilegeType {
 	/*********服务联盟**********/
 	SERVICE_MANAGE(4050040520L, "服务联盟-服务管理"), 
 	APPLY_RECORD(4050040540L,  "服务联盟-申请记录"), 
-	INFO_NOTIFY(4050040530L, "服务联盟-消息通知");
+	INFO_NOTIFY(4050040530L, "服务联盟-消息通知"),
+	USER_BEHAVIOUR_STAT(4050040550L, "服务联盟-用户行为统计");
+	
 
 	private long code;
 	private String info; // 说明

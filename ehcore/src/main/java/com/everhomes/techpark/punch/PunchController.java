@@ -64,12 +64,14 @@ import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
 import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
 import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
@@ -701,8 +703,8 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getUserPunchRuleInfoUrl")
 	@RestReturn(GetUserPunchRuleInfoUrlResponse.class)
-	public RestResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
-		GetUserPunchRuleInfoUrlResponse resp = punchService.getUserPunchRuleInfoUrl(cmd);
+	public RestResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request){
+		GetUserPunchRuleInfoUrlResponse resp = punchService.getUserPunchRuleInfoUrl(cmd, request);
 		return new RestResponse(resp);
 	}
 	

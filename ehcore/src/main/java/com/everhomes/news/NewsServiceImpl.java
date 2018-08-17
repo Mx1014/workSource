@@ -242,17 +242,12 @@ public class NewsServiceImpl implements NewsService {
 		news.setAuthor(cmd.getAuthor());
 		news.setCoverUri(cmd.getCoverUri());
 		news.setContentAbstract(cmd.getContentAbstract());
-		// news.setCategoryId(cmd.getCategoryId());
 		news.setContent(cmd.getContent());
 		news.setSourceDesc(cmd.getSourceDesc());
 		news.setSourceUrl(cmd.getSourceUrl());
 		news.setPhone(cmd.getPhone());
 		news.setVisibleType(cmd.getVisibleType());
-		news.setTopIndex(0L);
-		news.setTopFlag(NewsTopFlag.NONE.getCode());
-
 		news.setStatus(generateNewsStatus(cmd.getStatus()));
-		news.setDeleterUid(0L);
 
 		// 调整摘要
 		adjustNewsContentAbstract(news);
