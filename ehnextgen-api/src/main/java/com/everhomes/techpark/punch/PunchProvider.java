@@ -384,7 +384,10 @@ public interface PunchProvider {
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
 
 	Integer countpunchStatistic(String punchMonth, Long ownerId);
-
+ 
+	List<PunchLog> listPunchLogsForOpenApi(Long ownerId, List<Long> userIds, Long startDay,
+			Long endDay);
+ 
 	void deletePunchLogs(Long ownerId, Date monthBegin, Date monthEnd);
 
 	void filePunchLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report);
@@ -450,4 +453,5 @@ public interface PunchProvider {
 
 	public Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate,
 			Long userId, Long ownerId);
+ 
 }

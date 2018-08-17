@@ -583,4 +583,31 @@ public class CommunityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /community/caculateAllCommunityArea</b>
+     * <p>计算所有园区的各个面积（建筑面积、在租面积、收费面积、可招租面积）</p>
+     */
+    @RequestMapping("caculateAllCommunityArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateAllCommunityArea() {
+    	this.communityService.caculateAllCommunityArea();
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/caculateAllBuildingArea</b>
+     * <p>计算所有楼宇的各个面积（建筑面积、在租面积、收费面积、可招租面积）</p>
+     */
+    @RequestMapping("caculateAllBuildingArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateAllBuildingArea() {
+    	this.communityService.caculateAllBuildingArea();
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

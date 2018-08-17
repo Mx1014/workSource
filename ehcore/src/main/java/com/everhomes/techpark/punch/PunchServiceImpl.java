@@ -43,6 +43,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
@@ -76,6 +78,9 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.openapi.CheckInDataDTO;
+import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
 import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.ImportFileErrorType;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -162,6 +167,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -198,6 +204,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -232,7 +239,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -335,6 +344,9 @@ public class PunchServiceImpl implements PunchService {
     @Autowired
     private GeneralApprovalService generalApprovalService;
 
+	@Autowired
+	private AppNamespaceMappingProvider appNamespaceMappingProvider;
+	
     @Autowired
     private ContentServerService contentServerService;
     @Autowired
@@ -1841,7 +1853,8 @@ public class PunchServiceImpl implements PunchService {
      */
     private void updateSmartAlignment(PunchLog pl) {
 
-        pl.setSmartAlignment(NormalFlag.YES.getCode());
+        pl.setSmartAlignment(NormalFlag.YES.getCode()); 
+        pl.setUpdateDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
         if (pl.getId() == null) {
             punchProvider.createPunchLog(pl);
         } else {
@@ -10486,6 +10499,7 @@ public class PunchServiceImpl implements PunchService {
         if (updateNum < 1) {
             PunchLog pl = getAbnormalPunchLog(request);
             pl.setApprovalStatus(PunchStatus.NORMAL.getCode());
+            pl.setUpdateDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
             punchProvider.createPunchLog(pl);
 
         }
@@ -11495,7 +11509,70 @@ public class PunchServiceImpl implements PunchService {
         
 		return response;
 	}
-
+ 
+	@Override
+	public GetOrgCheckInDataResponse getOrgCheckInData(GetOrgCheckInDataCommand cmd) {
+		organizationMemberByUIdCache.set(new HashMap<String, OrganizationMember>());
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"not exist app namespace mapping");
+		}
+		GetOrgCheckInDataResponse response = new GetOrgCheckInDataResponse();
+		
+		List<Long> userIds = null;
+		if(null != cmd.getUserId()){
+			userIds = new ArrayList<>();
+			userIds.add(cmd.getUserId());
+		}
+		else if(StringUtils.isNotEmpty(cmd.getUserContactToken())){
+			List<EhOrganizationMembers> organizationMembers = organizationProvider.listOrganizationMemberByToken(cmd.getUserContactToken());
+			if(null != organizationMembers){
+				userIds = new ArrayList<>();
+				for(EhOrganizationMembers member : organizationMembers){
+					if(member.getTargetId() != null && !member.getTargetId().equals(0L)){
+						userIds.add(member.getTargetId());
+					}
+				}
+			}
+		}
+		List<PunchLog> logs = punchProvider.listPunchLogsForOpenApi(cmd.getOrgId(), userIds , cmd.getBeginDate(),cmd.getEndDate());
+		if(null != logs && logs.size() > 0){
+			response.setCheckinDatas(new ArrayList<>());
+			for(PunchLog pl : logs){
+				try{
+					CheckInDataDTO dto = new CheckInDataDTO();
+					dto.setId(pl.getId());
+					if(null != pl.getPunchDate()){
+						dto.setCheckInDate(pl.getPunchDate().getTime());
+					}
+					dto.setLatitude(pl.getLatitude());
+					dto.setLongitude(pl.getLongitude());
+					dto.setLocationInfo(pl.getLocationInfo());
+					dto.setWifiInfo(pl.getWifiInfo());
+					dto.setUserId(pl.getUserId());
+					dto.setStatus(statusToString(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus()));
+					if(null != pl.getPunchTime()){
+						dto.setCheckInTime(pl.getPunchTime().getTime());
+					}else if(PunchStatus.NORMAL == PunchStatus.fromCode(pl.getApprovalStatus() == null ? pl.getStatus() : pl.getApprovalStatus())){
+						dto.setCheckInTime(pl.getPunchDate().getTime() + (pl.getShouldPunchTime() == null ? pl.getRuleTime() : pl.getShouldPunchTime()));
+					}
+					OrganizationMember member = findOrganizationMemberByUIdCache(pl.getUserId(),pl.getEnterpriseId());
+					if(null != member){
+						dto.setUserName(member.getContactName());
+						dto.setContactToken(member.getContactToken());
+					}
+					response.getCheckinDatas().add(dto);
+				}catch(Exception e){
+					LOGGER.error("pl " + StringHelper.toJsonString(pl) + " 出问题了!", e);
+				}
+				 
+			}
+		} 
+		organizationMemberByUIdCache.set(new HashMap<String, OrganizationMember>());
+		return response;
+	}
+ 
     private PunchLogDTO processPunchLogDTO(PunchLog log, Map<Long, OrganizationMemberDetails> memberDetailMap, Map<String, PunchRule> punchRuleMap, Map<Long, String> dptMap, Map<Long, String> ruleMap) {
         PunchLogDTO dto = convertPunchLog2DTO(log);
         OrganizationMemberDetails detail = findOrganizationMemberDetailByCacheUserId(log.getEnterpriseId(), log.getUserId(), memberDetailMap);
@@ -12423,19 +12500,19 @@ public class PunchServiceImpl implements PunchService {
 
 
     @Override
-    public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate){
-        String homeUrl = configurationProvider.getValue("home.url", "");
+    public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate, HttpServletRequest request){
+        String homeUrl = request.getHeader("Host");
         return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate +"#sign_suffix";
     }
     @Override
-    public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
+    public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request){
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
         if(null == pr){
         	throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
         }
-    	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate()));
+    	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate(), request));
     }
     
     @Override
@@ -12558,4 +12635,5 @@ public class PunchServiceImpl implements PunchService {
         }
         refreshMonthReport(initMonth);
     }
+
 }

@@ -455,4 +455,144 @@ ALTER TABLE `eh_addresses` ADD COLUMN `free_area` double NULL DEFAULT NULL COMME
 ALTER TABLE `eh_buildings` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
 ALTER TABLE `eh_communities` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
 ALTER TABLE `eh_addresses` ADD COLUMN `is_future_apartment` tinyint NULL DEFAULT 0 COMMENT '未来房源标记（0：否，1：是）';
+
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5所需新增的字段
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_originId` BIGINT(20) COMMENT '合同管理应用的originId';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_changeFlag` TINYINT COMMENT '是否走合同变更，1、0';
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率';
+-- REMARK: 账单表：增加应收不含税字段,税额字段：tax_amount
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 （欠费时间筛选、费项进多账单组）
+ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_count` BIGINT COMMENT '欠费天数' after due_day_deadline;
+-- REMARK: 因为新增计价条款时先选组再选费项，故查看合同概览时在收费项目前多加一列字段。概览中前4个Tab均需要在收费项目前多加一列账单组。
+ALTER TABLE `eh_contract_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+ALTER TABLE `eh_contract_charging_changes` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同2.8
+ALTER TABLE `eh_contracts` ADD COLUMN `cost_generation_method`  tinyint DEFAULT NULL COMMENT '合同截断时的费用收取方式，0：按计费周期，1：按实际天数';
+
+
+-- ------------------------------
+-- 每日统计表     add by mingbo.huang  2018/07/25
+-- ------------------------------
+CREATE TABLE `eh_alliance_stat` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `type` bigint(20) NOT NULL COMMENT '服务联盟类型id',
+  `owner_id` bigint(20) NOT NULL COMMENT '所属项目id',
+  `category_id` bigint(20) NOT NULL COMMENT '服务类型id',
+  `service_id` bigint(20) DEFAULT NULL COMMENT '服务id',
+  `click_type` tinyint(4) NOT NULL COMMENT '点击类型： 3-进入详情 4-点击提交 5-点击咨询 6-点击分享 20-提交申请',
+  `click_count` bigint(20) NOT NULL DEFAULT '0' COMMENT '点击总数/提交申请次数',
+  `click_date` date NOT NULL COMMENT '点击日期',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '该记录创建时间',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_click_date` (`click_date`),
+  KEY `i_eh_service_id` (`service_id`),
+  KEY `i_eh_category_id` (`category_id`),
+  KEY `i_eh_owner_id` (`owner_id`),
+  KEY `i_eh_type` (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统计各个服务每天的各类型用户行为点击数。';
+
+-- ------------------------------
+-- 用户点击明细表     add by mingbo.huang  2018/07/25
+-- ------------------------------
+CREATE TABLE `eh_alliance_stat_details` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `type` bigint(20) NOT NULL COMMENT '服务联盟类型id',
+  `owner_id` bigint(20) NOT NULL COMMENT '所属项目id',
+  `category_id` bigint(20) NOT NULL COMMENT '服务类型id',
+  `service_id` bigint(20) DEFAULT NULL COMMENT '服务id',
+  `user_id` bigint(20) NOT NULL,
+  `user_name` varchar(64) DEFAULT NULL,
+  `user_phone` varchar(20) DEFAULT NULL,
+  `click_type` tinyint(4) NOT NULL COMMENT '点击类型：1-首页点击服务 3-进入详情 4-点击提交 5-点击咨询 6-点击分享',
+  `click_time` bigint(20) NOT NULL COMMENT '点击时间戳',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录生成时间',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_service_id` (`service_id`),
+  KEY `i_eh_category_id` (`category_id`),
+  KEY `i_eh_click_time` (`click_time`),
+  KEY `i_eh_owner_id` (`owner_id`),
+  KEY `i_eh_type` (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户的点击明细';
+
+-- AUTHOR: huangpengyu  20180709
+-- REMARK: 此功能将所有不需要走审批的表单字段关联起来
+create table `eh_general_form_val_requests`
+(
+   `id`                   bigint not null,
+   `organization_id`      bigint comment 'organization_id',
+   `owner_id`             bigint comment 'owner_id',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   `module_id`            bigint comment 'module_id',
+   `module_type`          varchar(64) comment 'module_type',
+   `source_id`            bigint comment 'source_id',
+   `source_type`          varchar(64) comment 'source_type',
+	 `approval_status`      tinyint comment '该表单的审批状态,0-待发起，1-审批中，2-审批通过，3-审批终止' default 0,
+	 `status`               tinyint comment '该表单的状态，0-删除，1-生效' default 1,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
+
+-- AUTHOR: huangpengyu  20180717
+-- REMARK: 将表单筛选字段与客户关联起来
+create table `eh_general_form_filter_user_map`
+(
+   `id`                   bigint not null,
+   `owner_id`             bigint comment 'owner_id' not null,
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+   `module_type`          varchar(64) comment 'module_type' ,
+	 `form_origin_id`				bigint comment '关联的表id' not null,
+	 `form_version`					bigint comment '关联的表version' not null,
+   `field_name`           varchar(64) comment '被选中的字段名' not null,
+	 `user_uuid`						varchar(128) comment '当前登录的用户用于获取字段' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
+
+
+alter table eh_enterprise_customers add aptitude_flag_item_id BIGINT null comment '0-无资质，1-有资质' default 0;
+
+alter table eh_general_forms add operator_name varchar(64) null comment '修改人';
+alter table eh_general_forms add creater_name varchar(64) null comment '新增人';
+
+
+alter table eh_general_approvals add creater_name varchar(64) null comment '新增人';
+
+-- AUTHOR: huangpengyu  20180811
+-- REMARK: 增加合同过滤客户配置项
+create table `eh_enterprise_customer_aptitude_flag`
+(
+   `id`                   bigint not null,
+   `value`             		TINYINT not null comment '是否筛选，1-筛选，0-不筛选' default 0,
+	 `owner_id`           	bigint not null comment 'communityId',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_customer_aptitude_flag in dev mode';
+
+
+-- AUTHOR: 吴寒
+-- REMARK: ISSUE-33577 增加update_time 给punch_logs表(为金蝶对接接口提供)
+ALTER TABLE eh_punch_logs ADD COLUMN `update_date` DATE ;
+
+
 -- --------------------- SECTION END ---------------------------------------------------------

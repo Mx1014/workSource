@@ -678,4 +678,5 @@ public interface OrganizationProvider {
     OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
+	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
 }

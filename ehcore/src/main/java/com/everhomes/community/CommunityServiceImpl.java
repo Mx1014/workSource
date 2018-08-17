@@ -199,6 +199,7 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -5175,8 +5176,6 @@ public class CommunityServiceImpl implements CommunityService {
 				initBuildingData(building);
 				List<Address> addresses = addressProvider.findActiveAddressByBuildingNameAndCommunityId(building.getName(),community.getId());
 				for (Address address : addresses) {
-					//address.setBuildingId(building.getId());
-					//building.setAptCount(building.getAptCount() + 1);
 					building.setAreaSize(building.getAreaSize() + (address.getAreaSize() != null ? address.getAreaSize() : 0.0));
 					building.setRentArea(building.getRentArea() + (address.getRentArea() != null ? address.getRentArea() : 0.0));
 					building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
@@ -5482,6 +5481,74 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
 		}
 		return dto;
+	}
+	
+	@Override
+	public void caculateAllCommunityArea() {
+		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+		if (namespaces!=null && namespaces.size()>0) {
+			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				LOGGER.info("caculating community area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
+				long startTime = System.currentTimeMillis();
+				
+				List<Community> communities = communityProvider.findCommunitiesByNamespaceId(namespaceInfo.getId());
+				if (communities!=null && communities.size()>0) {
+					for (Community community : communities) {
+						initCommunityData(community);
+						List<Address> addresses = addressProvider.findActiveAddressByCommunityId(community.getId());
+						for (Address address : addresses) {
+							community.setAptCount(community.getAptCount() + 1);
+							community.setAreaSize(community.getAreaSize() + (address.getAreaSize() != null ? address.getAreaSize() : 0.0));
+							community.setRentArea(community.getRentArea() + (address.getRentArea() != null ? address.getRentArea() : 0.0));
+							community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
+							community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
+							community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+						}
+						communityProvider.updateCommunity(community);
+					}
+				}
+				long endTime = System.currentTimeMillis();
+				long timeCost = endTime - startTime;
+				LOGGER.info("caculating community area progress ends, namespace_id = {},namespace_name={},time_cost:{}ms",
+							namespaceInfo.getId(),namespaceInfo.getName(),timeCost);
+			}
+		}
+	}
+	
+	@Override
+	public void caculateAllBuildingArea() {
+		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+		if (namespaces!=null && namespaces.size()>0) {
+			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				LOGGER.info("caculating building area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
+				long startTime = System.currentTimeMillis();
+				
+				List<Community> communities = communityProvider.findCommunitiesByNamespaceId(namespaceInfo.getId());
+				if (communities!=null && communities.size()>0) {
+					for (Community community : communities) {
+						List<Building> buildings = communityProvider.findBuildingsByCommunityId(community.getId());
+						if (buildings!=null && buildings.size()>0) {
+							for (Building building : buildings) {
+								initBuildingData(building);
+								List<Address> addresses = addressProvider.findActiveAddressByBuildingNameAndCommunityId(building.getName(),community.getId());
+								for (Address address : addresses) {
+									building.setAreaSize(building.getAreaSize() + (address.getAreaSize() != null ? address.getAreaSize() : 0.0));
+									building.setRentArea(building.getRentArea() + (address.getRentArea() != null ? address.getRentArea() : 0.0));
+									building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
+									building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
+									building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+								}
+								communityProvider.updateBuilding(building);
+							}
+						}
+					}
+				}
+				long endTime = System.currentTimeMillis();
+				long timeCost = endTime - startTime;
+				LOGGER.info("caculating building area progress ends, namespace_id = {},namespace_name={},time_cost:{}ms",
+							namespaceInfo.getId(),namespaceInfo.getName(),timeCost);
+			}
+		}
 	}
 	
 }

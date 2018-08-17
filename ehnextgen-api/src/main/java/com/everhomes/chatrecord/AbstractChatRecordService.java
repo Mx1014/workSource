@@ -257,7 +257,7 @@ public abstract class AbstractChatRecordService implements ChatRecordService{
 		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
 
 		// 获取页码数据
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getMaxPageSize(configProvider, cmd.getPageSize());
 
 		// 设置锚点
 		ListingLocator locator = new ListingLocator();
@@ -301,7 +301,7 @@ public abstract class AbstractChatRecordService implements ChatRecordService{
 		List<String> dataList = new ArrayList<String>(1000);
 		for (ChatGroupDTO group : dtoList) {
 			// 获取聊天记录
-			List<ChatRecordDTO> chatRecordList = getChatRecordList(pageSize, new ListingLocator(), namespaceId,
+			List<ChatRecordDTO> chatRecordList = getChatRecordList(null, new ListingLocator(), namespaceId,
 					group.getServicer(), group.getCustomer());
 			if (CollectionUtils.isEmpty(chatRecordList)) {
 				continue;
@@ -387,7 +387,7 @@ public abstract class AbstractChatRecordService implements ChatRecordService{
 
 		// 获取客服发送列表
 		Long anchor = locator.getAnchor();
-		int pageSize = null == inputPageSize ? 0 : inputPageSize;
+		int pageSize = null == inputPageSize ? 5000 : inputPageSize;
 		List<MessageRecord> servicerList = messageProvider.listMessageRecords(pageSize + 1, locator, (l, q) -> {
 			return buildChatRecordQuery(l, q, pageSize + 1, namespaceId, servicerDto.getTargetId(),
 					customerDto.getTargetId());

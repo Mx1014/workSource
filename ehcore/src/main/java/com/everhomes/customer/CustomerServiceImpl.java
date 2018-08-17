@@ -253,6 +253,7 @@ import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.scheduler.RunningFlag;
@@ -866,6 +867,15 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
             } else {
                 dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
             }
         }
 
@@ -4643,6 +4653,7 @@ public class CustomerServiceImpl implements CustomerService {
         //add service alliance categories
         ListServiceAllianceCategoriesCommand command = new ListServiceAllianceCategoriesCommand();
         command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        
         List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(command);
         if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
             serviceAllianceCategories.forEach((r) -> {

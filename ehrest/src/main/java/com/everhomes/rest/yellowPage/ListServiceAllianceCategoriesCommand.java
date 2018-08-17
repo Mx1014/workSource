@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
  *  <li> destination: 输出终端 1：客户端 2：浏览器</li>
+ *  <li> pageAnchor: 锚点</li>
+ *  <li> pageSize: 每页大小</li>
  * </ul>
  */
 public class ListServiceAllianceCategoriesCommand {
@@ -22,6 +24,10 @@ public class ListServiceAllianceCategoriesCommand {
 	private Long ownerId;
 
 	private Byte destination;
+	
+	private Long pageAnchor;
+	
+	private Integer pageSize;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -67,4 +73,20 @@ public class ListServiceAllianceCategoriesCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
 }

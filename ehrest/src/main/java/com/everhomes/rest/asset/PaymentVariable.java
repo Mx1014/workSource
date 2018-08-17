@@ -14,19 +14,29 @@ import java.math.BigDecimal;
  * <li>variableIdentifier:变量标识，有id标识的作用</li>
  * <li>variableName:变量名称</li>
  * <li>variableValue:变量值</li>
+ * <li>variablePlaceholder:默认提示</li>
  *</ul>
  */
 public class PaymentVariable {
     private String variableIdentifier;
     private String variableName;
     private BigDecimal variableValue;
+    private String variablePlaceholder ;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public String getVariableIdentifier() {
+    public String getVariablePlaceholder() {
+		return variablePlaceholder;
+	}
+
+	public void setVariablePlaceholder(String variablePlaceholder) {
+		this.variablePlaceholder = variablePlaceholder;
+	}
+
+	public String getVariableIdentifier() {
         return variableIdentifier;
     }
 

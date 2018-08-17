@@ -11,6 +11,9 @@
 -- REMARK: 执行search 下脚本 enter_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
+-- AUTHOR: 唐岑 2018年8月17日15:13:14
+-- REMARK: 1、执行接口/community/caculateAllCommunityArea（该接口计算时间非常长）
+--         2、执行接口/community/caculateAllBuildingArea（该接口计算时间非常长）
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -443,6 +446,14 @@ UPDATE eh_service_module_apps SET module_control_type = 'community_control' WHER
 UPDATE eh_authorizations SET owner_type = 'EhAll' WHERE auth_id = 35000;
 UPDATE eh_authorizations SET module_control_type = 'community_control' WHERE auth_id = 35000;
 
+
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5初始化收费项税率为0
+update eh_payment_charging_item_scopes set tax_rate=0;
+
+
+
+
 -- AUTHOR: 唐岑 2018年8月17日10:31:31
 -- REMARK: 导入房源信息时，添加提示信息
 -- REMARK: ISSUE-31926: 资产V3.1，资产管理重构
@@ -468,6 +479,106 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20014', 'zh_CN', '可招租面积只能为数字');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20015', 'zh_CN', '拆分/合并计划产生的未来房源已关联合同，删除失败');
+
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同退约提示信息(来自合同2.8)
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10012', 'zh_CN', '合同关联的账单不存在');
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10020', 'zh_CN', '此账单组中已存在该费项');
+
+
+
+
+
+-- AUTHOR: huangmingbo 2018.08.03
+-- REMARK: 服务联盟v3.5 埋点统计
+SET @event_display_name = '服务联盟埋点统计';
+SET @event_name = 'service_alliance_click';
+SET @eh_stat_events_id = (SELECT MAX(id) FROM eh_stat_events);
+INSERT INTO eh_stat_events (id, namespace_id, event_scope, event_type, event_name, event_version, event_display_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_events_id := @eh_stat_events_id + 1), 0, 1, 1, @event_name, '1.0', @event_display_name, 2, null, null, null, null);
+
+
+SET @eh_stat_event_params_id = (SELECT MAX(id) FROM eh_stat_event_params);
+INSERT INTO eh_stat_event_params (id, namespace_id, event_scope, event_type, event_version, multiple, event_name, param_type, param_key, param_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_event_params_id := @eh_stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'service_alliance_click', 1, 'service_id', 'service_id', 2, null, null, null, null);
+INSERT INTO eh_stat_event_params (id, namespace_id, event_scope, event_type, event_version, multiple, event_name, param_type, param_key, param_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_event_params_id := @eh_stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'service_alliance_click', 1, 'category_id', 'category_id', 2, null, null, null, null);
+INSERT INTO eh_stat_event_params (id, namespace_id, event_scope, event_type, event_version, multiple, event_name, param_type, param_key, param_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_event_params_id := @eh_stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'service_alliance_click', 1, 'user_id', 'user_id', 2, null, null, null, null);
+INSERT INTO eh_stat_event_params (id, namespace_id, event_scope, event_type, event_version, multiple, event_name, param_type, param_key, param_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_event_params_id := @eh_stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'service_alliance_click', 1, 'click_type', 'click_type', 2, null, null, null, null);
+INSERT INTO eh_stat_event_params (id, namespace_id, event_scope, event_type, event_version, multiple, event_name, param_type, param_key, param_name, status, creator_uid, update_uid, create_time, update_time)
+VALUES ((@eh_stat_event_params_id := @eh_stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'service_alliance_click', 1, 'community_id', 'community_id', 2, null, null, null, null);
+
+-- 错误信息
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11200', 'zh_CN', '获取统计信息时type为null');
+
+-- 权限
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id+1), 40550, 0, 4050040550, '用户行为统计', 0, '2018-03-31 22:18:44');
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4050040550, 0, '服务联盟 用户行为统计', '服务联盟 用户行为统计', NULL);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES (40550, '用户行为统计权限', 40500, '/200/120000/40500/40550', 1, 4, 2, 3, '2018-03-31 22:18:44', NULL, NULL, '2018-03-31 22:18:44', 0, 1, '1', NULL, '', 1, 1, 'subModule');
+
+
+-- AUTHOR: 黄鹏宇 2018年8月17日16:26:43
+-- REMARK: 请示单默认表单以及企业客户是否为资质客户字段
+
+set @eecid=(select max(id)+1 from `eh_var_fields`);
+set @eeciId=(select max(id)+1 from `eh_var_field_items`);
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'aptitudeFlagItemId', '资质客户', 'Long', 10, '/1/10/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
+  INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '是', 1, 2, 1, sysdate(), NULL, NULL, 1);
+set @eeciId=(select max(id)+1 from `eh_var_field_items`);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '否', 2, 2, 1, sysdate(), NULL, NULL, 0);
+
+
+
+set @id=(select max(id)+1 from `eh_general_form_templates`) ;
+INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`,  `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `create_time` ) VALUES (@id, 11, 0, 0, 'EhOrganizations', 25000, 'requisition', '请示单',  0, 'DEFAULT_JSON', '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼栋门牌",
+	"fieldDisplayName": "楼栋门牌",
+	"fieldExtra": "{}",
+	"fieldName": "楼栋门牌",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]',1, 1,SYSDATE()) ;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

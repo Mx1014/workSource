@@ -12,6 +12,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.module.GetServiceModuleCommand;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -27,6 +28,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,22 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageProviderImpl.class);
+	
+	private final com.everhomes.server.schema.tables.EhServiceAlliances SA_TABLE = Tables.EH_SERVICE_ALLIANCES;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAlliances> SA_CLASS = com.everhomes.server.schema.tables.EhServiceAlliances.class;
+
+	private final com.everhomes.server.schema.tables.EhServiceAllianceCategories SA_TYPE_TABLE = Tables.EH_SERVICE_ALLIANCE_CATEGORIES;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAllianceCategories> SA_TYPE_CLASS = com.everhomes.server.schema.tables.EhServiceAllianceCategories.class;
+
+	
+	private final com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords SA_COMMITS_TABLE = Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords> SA_COMMITS_CLASS = com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords.class;
+
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -547,7 +561,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public List<ServiceAllianceCategories> listChildCategories(
+	public List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
+		return listChildCategories(null, null, ownerType, ownerId, namespaceId, parentId, status, displayDestination);
+	}
+	
+	@Override
+	public List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
 			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
@@ -578,10 +597,17 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
 		}
+		
+		if (null != locator && null != locator.getAnchor()) {
+			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ID.ge(locator.getAnchor()));
+		}
+		
+        query.addConditions(condition);
+        
+    	if (null != pageSize) {
+			query.addLimit(pageSize+1);
+		}
 
-        if(condition != null) {
-        	query.addConditions(condition);
-        }
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query child categories, sql=" + query.getSQL());
@@ -592,6 +618,16 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	result.add(ConvertHelper.convert(record, ServiceAllianceCategories.class));
             return null;
         });
+        
+		if (null != locator) {
+			int size = result.size();
+			if (null != pageSize && size > pageSize) {
+				locator.setAnchor(result.get(size - 1).getId());
+				result.remove(size - 1);
+			} else {
+				locator.setAnchor(null);
+			}
+		}
         
         return result;
 	}
@@ -1278,5 +1314,59 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
 		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
 	}
+
+
+	@Override
+	public List<ServiceAndTypeNameDTO> listServiceNames(Long type, Long ownerId, Long categoryId) {
+		
+		Condition condition = SA_TABLE.PARENT_ID.eq(type).and(SA_TABLE.PARENT_ID.ne(0L));
+		if (null != ownerId) {
+			condition = condition.and(SA_TABLE.OWNER_ID.eq(ownerId));
+		}
+		
+		if (null != categoryId) {
+			condition = condition.and(SA_TABLE.CATEGORY_ID.eq(categoryId));
+		}
+		
+		condition = condition.and(SA_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+		
+		return readOnlyContext()
+		.select(SA_TABLE.ID, SA_TABLE.NAME, SA_TABLE.CATEGORY_ID, SA_TABLE.SERVICE_TYPE)
+		.from(SA_TABLE)
+		.where(condition)
+		.fetch()
+		.map(r->{
+			ServiceAndTypeNameDTO dto = new ServiceAndTypeNameDTO();
+			dto.setId(r.getValue(SA_TABLE.ID));
+			dto.setName(r.getValue(SA_TABLE.NAME));
+			dto.setServiceTypeId(r.getValue(SA_TABLE.CATEGORY_ID));
+			dto.setServiceTypeName(r.getValue(SA_TABLE.SERVICE_TYPE));
+			return dto;
+		});
+	}
+	
+	@Override
+	public List<IdNameDTO> listServiceTypeNames(Long type) {
+		
+		return readOnlyContext()
+		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME)
+		.from(SA_TYPE_TABLE)
+		.where(
+				(SA_TYPE_TABLE.PARENT_ID.eq(type)
+				.or(SA_TYPE_TABLE.ID.eq(type)))
+				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
+		.fetch()
+		.map(r->{
+			IdNameDTO dto = new IdNameDTO();
+			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
+			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
+			return dto;
+		});
+	}
+	
+	private DSLContext readOnlyContext() {
+		return dbProvider.getDslContext(AccessSpec.readOnly());
+	}
+	
 	
 }
