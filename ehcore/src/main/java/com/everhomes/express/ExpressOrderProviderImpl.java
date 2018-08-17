@@ -101,7 +101,7 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 		}
 		
 		return step.and(condition.getPageAnchor() == null ? DSL.trueCondition() : Tables.EH_EXPRESS_ORDERS.ID.lt(condition.getPageAnchor()))
-				.orderBy(Tables.EH_EXPRESS_ORDERS.ID.desc())
+				.orderBy(Tables.EH_EXPRESS_ORDERS.CREATE_TIME.desc())
 				.limit(condition.getPageSize()+1)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, ExpressOrder.class));

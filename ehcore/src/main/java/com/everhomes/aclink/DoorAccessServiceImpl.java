@@ -5183,4 +5183,38 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		da.setDoorType(doorType);
 		doorAccessProvider.updateDoorAccess(da);
 	}
+
+	@Override
+	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd) {
+		if(cmd.getOwnerType() == DoorAccessOwnerType.ENTERPRISE.getCode()){
+			deleteAuthWhenLeaveFromOrg(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getUserId());
+			return ;
+		}
+    	User user = userProvider.findUserById(cmd.getUserId());
+        if(null == user){
+            LOGGER.info("user is null userId=" + cmd.getUserId());
+            return;
+        }
+		ListingLocator locator = new ListingLocator();
+		int count = 100;
+		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, cmd.getUserId(), cmd.getOwnerId(), cmd.getOwnerType(), count);
+		if(doorAuths == null || doorAuths.size() == 0) {
+			LOGGER.info("doorAuths not found, ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
+			return;
+		}
+		
+		do {
+			for(DoorAuth doorAuth : doorAuths) {
+				doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+			}
+			doorAuthProvider.updateDoorAuth(doorAuths);
+		
+			if(locator.getAnchor() != null) {
+				doorAuths = doorAuthProvider.queryValidDoorAuths(locator, cmd.getUserId(), cmd.getOwnerId(), cmd.getOwnerType(), count);
+			}
+			
+		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
+    	
+    	LOGGER.info("delete all auths ok! ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
+	}
 }

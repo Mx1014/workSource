@@ -150,4 +150,6 @@ public interface PmTaskService {
 
 	void payNotify(OrderPaymentNotificationCommand cmd);
 
+//	List<PayOrderDTO> listBills(ListBillsCommand cmd);
+
 }

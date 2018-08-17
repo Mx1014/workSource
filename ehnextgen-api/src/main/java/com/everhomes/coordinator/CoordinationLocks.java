@@ -15,6 +15,7 @@ public enum CoordinationLocks {
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
     UPDATE_PUNCH_MONTH_REPORT("punch.month.report.update"),
+    VACATION_BALANCE_UPDATE("vacation.balance.update"),
     REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
@@ -30,6 +31,7 @@ public enum CoordinationLocks {
     UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
     CREATE_NEW_ORG("org.create"),
     UPDATE_APPROVAL_CATEGORY("update_approval_category"),
+    INIT_APPROVAL_CATEGORY("init_approval_category"),
     UPDATE_APPROVAL_RULE("update_approval_rule"),
     UPDATE_APPROVAL_FLOW("update_approval_flow"),
     UPDATE_APPROVAL_REQUEST("update_approval_request"),
@@ -142,8 +144,13 @@ public enum CoordinationLocks {
     ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
     VISITOR_SYS_CONFIG("visitor_sys_config"),
+
     VISITOR_SYS_LOCATION("visitor_sys_location"),
-    ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout");
+    ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
+
+    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
+
+
 
     private String code;
 

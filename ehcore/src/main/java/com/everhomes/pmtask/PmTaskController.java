@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import com.everhomes.entity.EntityType;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
 import com.everhomes.pmtask.zhuzong.ZhuzongCreateTask;
 import com.everhomes.pmtask.zhuzong.ZhuzongTaskDetail;
@@ -1012,5 +1013,19 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+//    /**
+//     * <b>URL: /pmtask/listBills</b>
+//     * <p>支付</p>
+//     */
+//    @RequestMapping("listBills")
+//    @RestReturn(value = PayOrderDTO.class,collection = true)
+//    public RestResponse listBills(ListBillsCommand cmd){
+//        List<PayOrderDTO> response = pmTaskService.listBills(cmd);
+//        RestResponse restResponse = new RestResponse(response);
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 
 }

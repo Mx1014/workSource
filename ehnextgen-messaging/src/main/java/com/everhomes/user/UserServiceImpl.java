@@ -1444,6 +1444,62 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
+    /**
+     * 微信端活跃记录
+     * @param loginToken
+     * @param borderId
+     * @param borderSessionId
+     * @return
+     */
+    @Override
+    public void registerWXLoginConnection(HttpServletRequest request) {
+    	/*if(request == null){
+    		LOGGER.info("request is null ");
+    	}else{
+    		LOGGER.info(request.toString());
+    	}*/	 
+    	 Cookie loginTokenCookie = findCookieInRequest("token",request);
+    	 if(loginTokenCookie == null){
+    		 LOGGER.info("loginTokenCookie is null ");
+    		 return ;
+    	 }
+         String token = loginTokenCookie.getValue();
+         LoginToken loginToken = WebTokenGenerator.getInstance().fromWebToken(token, LoginToken.class);
+         if(token == null)
+             return ;
+         
+        String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+
+        String hkeyLogin = String.valueOf(loginToken.getLoginId());
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+        UserLogin login = accessor.getMapValueObject(hkeyLogin);
+        if (login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
+            //Save loginBorderId here
+            login.setLoginBorderId(null);
+            login.setBorderSessionId(null);
+            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+            accessor.putMapValueObject(hkeyLogin, login);
+
+            // 发布用户切换出场景到前台事件   add by liangming.huang 2018/08/16
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
+
+        }
+    }
+    
+    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+        List<Cookie> matchedCookies = new ArrayList<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals(name)) {
+                    matchedCookies.add(cookie);
+                }
+            }
+        }
+        if(matchedCookies.size() > 0)
+            return matchedCookies.get(matchedCookies.size() - 1);
+        return null;
+    }
     public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         String hkeyLogin = String.valueOf(loginToken.getLoginId());
@@ -4156,6 +4212,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.stream().filter(r -> {
             return r.getSceneToken() != null;
         }).collect(Collectors.toList());
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5265,6 +5323,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.clear();
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5303,10 +5363,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 sceneList.add(sceneDTO);
                 return null;
             }).collect(Collectors.toList());
-
+            //返回前设置排序字段
+            handleSortName(sceneList);
             return sceneList;
         } else {
-            return this.listTouristRelatedScenes();
+        	//返回前设置排序字段
+            return handleSortName(this.listTouristRelatedScenes());
         }
     }
 
@@ -6559,4 +6621,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+    /**
+     * 有简称取简称,无简称取全名
+     * @param sceneList
+     * @return
+     */
+	private List<SceneDTO> handleSortName(List<SceneDTO> sceneList ){
+	    
+		  if(sceneList != null && sceneList.size()>0)
+		  {
+			  for(SceneDTO dto : sceneList){
+				  if(StringUtils.isBlank(dto.getAliasName())){
+					  dto.setAliasName(dto.getName()); 
+				  }
+			  }
+		  }
+		  return sceneList ;
+	  }
+	
 }

@@ -203,10 +203,10 @@ public class CommunityController extends ControllerBase {
      * <p>根据域查询小区</p>
      */
     @RequestMapping("listCommunitiesByNamespaceId")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByNamespaceId(ListComunitiesByKeywordAdminCommand cmd) {
     	
-    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	ListCommunitiesByKeywordResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
     	RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -332,9 +332,9 @@ public class CommunityController extends ControllerBase {
      * <p>根据域,城市，区县，分类，关键字查询小区</p>
      */
     @RequestMapping("listCommunitiesByCategory")
-    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    @RestReturn(value=ListCommunitiesByKeywordResponse.class)
     public RestResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
-    	ListCommunitiesByKeywordCommandResponse resp = communityService.listCommunitiesByCategory(cmd);
+    	ListCommunitiesByKeywordResponse resp = communityService.listCommunitiesByCategory(cmd);
         RestResponse response =  new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -439,6 +439,148 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-
     }
+    
+    /**
+     * <b>URL: /community/listBuildingsByKeywords</b>
+     * <p>按照楼栋信息、关键字搜索搜索楼栋，分页</p>
+     */
+    @RequestMapping("listBuildingsByKeywords")
+    @RestReturn(value=ListBuildingsByKeywordsResponse.class)
+    public RestResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd) {
+    	ListBuildingsByKeywordsResponse result = this.communityService.listBuildingsByKeywords(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/getCommunityStatistics</b>
+     * <p>获取园区的统计信息</p>
+     */
+    @RequestMapping("getCommunityStatistics")
+    @RestReturn(value=CommunityStatisticsDTO.class)
+    public RestResponse getCommunityStatistics(GetCommunityStatisticsCommand cmd) {
+    	CommunityStatisticsDTO result = this.communityService.getCommunityStatistics(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    } 
+    
+    /**
+     * <b>URL: /community/getCommunityDetail</b>
+     * <p>获取园区的详细信息</p>
+     */
+    @RequestMapping("getCommunityDetail")
+    @RestReturn(value=CommunityDetailDTO.class)
+    public RestResponse getCommunityDetail(GetCommunityDetailCommand cmd) {
+    	CommunityDetailDTO result = this.communityService.getCommunityDetail(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    //（新增接口，添加一些字段，在租面积之类的，同时处理园区的分类问题）
+    /**
+     * <b>URL: /community/updateCommunityAndCategory</b>
+     * <p>修改园区信息</p>
+     */
+    @RequestMapping("updateCommunityAndCategory")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityAndCategory(UpdateCommunityNewCommand cmd) {
+    	this.communityService.updateCommunityAndCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/getBuildingStatistics</b>
+     * <p>获取楼栋的统计信息</p>
+     */
+    @RequestMapping("getBuildingStatistics")
+    @RestReturn(value=BuildingStatisticsDTO.class)
+    public RestResponse getBuildingStatistics(GetBuildingStatisticsCommand cmd) {
+    	BuildingStatisticsDTO result = this.communityService.getBuildingStatistics(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/listApartmentsInCommunity</b>
+     * <p>获取园区的房源信息</p>
+     */
+    @RequestMapping("listApartmentsInCommunity")
+    @RestReturn(value=ListApartmentsInCommunityResponse.class)
+    public RestResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
+    	ListApartmentsInCommunityResponse result = this.communityService.listApartmentsInCommunity(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/getFloorRange</b>
+     * <p>获取楼层查询范围</p>
+     */
+    @RequestMapping("getFloorRange")
+    @RestReturn(value=FloorRangeDTO.class)
+    public RestResponse getFloorRange(GetFloorRangeCommand cmd) {
+    	FloorRangeDTO result = this.communityService.getFloorRange(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/changeBuildingOrder</b>
+     * <p>更新楼层的排序</p>
+     */
+    @RequestMapping("changeBuildingOrder")
+    @RestReturn(value=String.class)
+    public RestResponse changeBuildingOrder(ChangeBuildingOrderCommand cmd) {
+    	this.communityService.changeBuildingOrder(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
+     * <b>URL: /community/caculateCommunityArea</b>
+     * <p>计算园区各个面积</p>
+     */
+    @RequestMapping("caculateCommunityArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateCommunityArea(CaculateCommunityAreaCommand cmd) {
+    	this.communityService.caculateCommunityArea(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/caculateBuildingArea</b>
+     * <p>计算楼栋各个面积</p>
+     */
+    @RequestMapping("caculateBuildingArea")
+    @RestReturn(value=String.class)
+    public RestResponse caculateBuildingArea(CaculateBuildingAreaCommand cmd) {
+    	this.communityService.caculateBuildingArea(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

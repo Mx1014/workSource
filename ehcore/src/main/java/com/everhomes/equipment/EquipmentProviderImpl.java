@@ -2960,7 +2960,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         tasks =  query.fetchInto(EquipmentInspectionTasks.class);
         if(tasks.size()>pageSize){
             tasks.remove(tasks.size()-1);
-            locator.setAnchor(tasks.get(tasks.size()).getId());
+            locator.setAnchor(tasks.get(tasks.size()-1).getId());
         }else {
             locator.setAnchor(null);
         }

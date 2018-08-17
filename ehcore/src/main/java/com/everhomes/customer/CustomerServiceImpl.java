@@ -54,6 +54,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -924,6 +925,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
+                detail.setOrganizationId(org.getId());
                 detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
                 detail.setStringTag1(customer.getCorpEmail());
                 detail.setDescription(customer.getCorpDescription());
@@ -1134,7 +1136,7 @@ public class CustomerServiceImpl implements CustomerService {
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if (deleteCustomer) {
+        if (deleteCustomer && originalTrackingUid != null) {
             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
             return;
         }
@@ -1229,7 +1231,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationService.deleteEnterpriseById(command, false);
             }
         }
-        routeMsgForTrackingChanged(null, null, null, null
+        routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
                 , customer.getName(), null, true, cmd.getOrgId());
 
     }
@@ -2753,6 +2755,13 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
+                
+                if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
+                	dto.setAddressExists((byte)1);
+				}else {
+					dto.setAddressExists((byte)0);
+				}
+                
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -2767,7 +2776,6 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setBuildingId(building.getId());
             }
         }
-
         return dto;
     }
 
@@ -3995,6 +4003,7 @@ public class CustomerServiceImpl implements CustomerService {
 //                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
                         relatedMembers.addAll(membersResponse.getMembers());
                     }
+
                 }
             });
         });
@@ -4029,7 +4038,11 @@ public class CustomerServiceImpl implements CustomerService {
     private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
         Map<Long, OrganizationMemberDTO> map = new HashMap<>();
         if (relatedMembers != null && relatedMembers.size() > 0) {
-            relatedMembers.forEach(r -> map.putIfAbsent(r.getTargetId(), r));
+            relatedMembers.forEach(r ->{
+                if(r.getTargetId() != 0) {
+                    map.putIfAbsent(r.getTargetId(), r);
+                }
+            });
             return new ArrayList<>(map.values());
         }
         return new ArrayList<>();

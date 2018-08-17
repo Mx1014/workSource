@@ -230,7 +230,7 @@ public interface AssetProvider {
 
     void updateChargingStandardByCreating(String standardName,String instruction, Long chargingStandardId, Long ownerId, String ownerType);
 
-    boolean checkCoupledChargingStandard(Long cid);
+    boolean checkCoupledChargingStandard(Long cid, Long categoryId);
 
     void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId);
 
@@ -390,7 +390,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
-    
+
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 	
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);

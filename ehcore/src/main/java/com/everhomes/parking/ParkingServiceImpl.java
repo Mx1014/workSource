@@ -723,13 +723,6 @@ public class ParkingServiceImpl implements ParkingService {
 			amount = 1L;
 		}
 		String extendInfo = null;
-		if(parkingLot!=null){
-			Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
-			if(community!=null){
-				//项目：$项目名称$；停车场：$停车场名称$
-				extendInfo ="项目："+community.getName()+"；停车场："+parkingLot.getName();
-			}
-		}
 //		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 //		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 //				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
@@ -737,8 +730,22 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
+			if(parkingLot!=null){
+				Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+				if(community!=null){
+					//$停车场名称$
+					extendInfo = parkingLot.getName()+"（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）";
+				}
+			}
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
+			if(parkingLot!=null){
+				Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+				if(community!=null){
+					//$停车场名称$
+					extendInfo = parkingLot.getName()+"（临时车：" + parkingRechargeOrder.getPlateNumber() + "）";
+				}
+			}
 		}
 		User user = UserContext.current().getUser();
 		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed

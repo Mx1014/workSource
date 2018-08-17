@@ -277,7 +277,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
-        final Integer stickCount = cmd.getPageSize();  //  置顶数跟随页码大小变化 at 31/07/2018
+        final Integer stickCount = cmd.getPageSize();  //  由于页码大小支持多种模式，故置顶数从页码取 at 01/08/2018
 
         //  保存置顶人员
         List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);

@@ -29,5 +29,6 @@ public interface ExpressHandler {
 	 * 国贸项目EMS快递状态回调
 	 */
 	void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String,String> params);
-	
+
+    default void afterCreateOrder(ExpressOrder expressOrder, ExpressCompany expressCompany){};
 }
