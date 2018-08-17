@@ -138,6 +138,21 @@ CREATE TABLE `eh_approval_category_init_logs` (
   KEY `i_eh_owner_id` (`namespace_id`,`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='记录每个公司是否已经初始化了请假列表，避免重复初始化';
 
+-- AUTHOR: 黄良铭
+-- REMARK: #31347 #33785  保存用户当前所在场景
+CREATE TABLE `eh_user_current_scene` (
+  `id` BIGINT(32) NOT NULL COMMENT '主键',
+  `uid` BIGINT(32) NOT NULL COMMENT '用户ID',
+  `namespace_id` INT(11) DEFAULT NULL COMMENT '域空间ID',
+  `community_id` BIGINT(32) DEFAULT NULL COMMENT '园区ID',
+  `community_type` TINYINT(4) DEFAULT NULL COMMENT '园区类型',
+  `create_time` DATETIME DEFAULT NULL ,
+  `update_time` DATETIME DEFAULT NULL ,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- END
+
+
 -- AUTHOR: 张智伟 20180813
 -- REMARK: ISSUE-29760: 考勤5.0 - 请假类型 新增历史已请年假总和、调休总和（上线时做一次数据初始化）
 ALTER TABLE eh_punch_vacation_balances ADD COLUMN annual_leave_history_count DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '已请年假总和，单位天' AFTER annual_leave_balance;
