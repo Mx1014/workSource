@@ -5,14 +5,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 家庭Id</li>
- * <li>name: 家庭名称</li>
- * <li>memberCount: 家庭成员数</li>
- * <li>address: 家庭所在地址详情</li>
- * <li>addressId: 地址信息</li>
- * <li>livingStatus: 地址状态, 详见{@link com.everhomes.rest.organization.pm.PmMemberStatus}</li>
- * <li>owed: 是否欠费 , 详见{@link com.everhomes.rest.organization.pm.OwedType}</li>
- * <li>reservationInvolved: 是否被预定业务占用</li>
+ * 	<li>id: 家庭Id</li>
+ * 	<li>name: 家庭名称</li>
+ * 	<li>memberCount: 家庭成员数</li>
+ * 	<li>address: 家庭所在地址详情</li>
+ * 	<li>addressId: 地址信息</li>
+ * 	<li>livingStatus: 地址状态, 详见{@link com.everhomes.rest.organization.pm.PmMemberStatus}</li>
+ * 	<li>owed: 是否欠费 , 详见{@link com.everhomes.rest.organization.pm.OwedType}</li>
+ * 	<li>reservationInvolved: 是否被预定业务占用</li>
+ * 	<li>buildingName: 楼栋名称</li>
+ * 	<li>communityName: 项目名称</li>
  * </ul>
  */
 public class PropFamilyDTO {
@@ -25,7 +27,97 @@ public class PropFamilyDTO {
     private Byte livingStatus;
     private String enterpriseName;
     private Double areaSize;
+    private Double rentArea;
+    private Double freeArea;
+    private Double chargeArea;
     private Byte reservationInvolved;
+    private Long relatedContractEndDate;
+    private Long relatedAddressArrangementBeginDate;
+    private Byte isFutureApartment;
+    private Byte arrangementInvolved;
+    private String buildingName;
+    private String communityName;
+    private Long reservationId;
+    
+	public Long getReservationId() {
+		return reservationId;
+	}
+
+	public void setReservationId(Long reservationId) {
+		this.reservationId = reservationId;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+	public Byte getArrangementInvolved() {
+		return arrangementInvolved;
+	}
+
+	public void setArrangementInvolved(Byte arrangementInvolved) {
+		this.arrangementInvolved = arrangementInvolved;
+	}
+
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Long getRelatedContractEndDate() {
+		return relatedContractEndDate;
+	}
+
+	public void setRelatedContractEndDate(Long relatedContractEndDate) {
+		this.relatedContractEndDate = relatedContractEndDate;
+	}
+
+	public Byte getIsFutureApartment() {
+		return isFutureApartment;
+	}
+
+	public void setIsFutureApartment(Byte isFutureApartment) {
+		this.isFutureApartment = isFutureApartment;
+	}
+
+	public Long getRelatedAddressArrangementBeginDate() {
+		return relatedAddressArrangementBeginDate;
+	}
+
+	public void setRelatedAddressArrangementBeginDate(Long relatedAddressArrangementBeginDate) {
+		this.relatedAddressArrangementBeginDate = relatedAddressArrangementBeginDate;
+	}
 
 	public Byte getReservationInvolved() {
 		return reservationInvolved;
@@ -56,7 +148,6 @@ public class PropFamilyDTO {
 		this.owed = owed;
 	}
 
-
 	public Long getId() {
         return id;
     }
@@ -73,7 +164,6 @@ public class PropFamilyDTO {
         this.name = name;
     }
 
-  
     public Long getMemberCount() {
 		return memberCount;
 	}
@@ -89,8 +179,6 @@ public class PropFamilyDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
-
 
 	public Long getAddressId() {
 		return addressId;
@@ -108,8 +196,6 @@ public class PropFamilyDTO {
 		this.livingStatus = livingStatus;
 	}
 	
-	
-
 	public String getEnterpriseName() {
 		return enterpriseName;
 	}

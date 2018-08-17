@@ -2425,4 +2425,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
                 .fetchInto(CustomerAdminRecord.class);
     }
+
+
+	@Override
+	public List<CustomerEntryInfo> findActiveCustomerEntryInfoByAddressId(Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        return query.fetchInto(CustomerEntryInfo.class);
+    }
 }

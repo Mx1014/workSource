@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  *
  */
-public class ListCommunitiesByKeywordCommandResponse {
+public class ListCommunitiesByKeywordResponse {
 	
 	private Long nextPageAnchor;
 	

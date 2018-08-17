@@ -1164,7 +1164,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments,Byte contractApplicationScene) {
-		//add by tangcen
 		List<String> oldApartments = new ArrayList<>();
 		List<String> newApartments = new ArrayList<>();
 		//没有id的，增加
@@ -1174,7 +1173,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
-				//add by tangcen
 				oldApartments.add(apartment.getApartmentName());
 			});
 		}
@@ -1198,7 +1196,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
-				//add by tangcen
 				newApartments.add(buildingApartment.getApartmentName());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
@@ -1240,9 +1237,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
-				//记录合同日志 by tangcen
-				//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
-
 				if(!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					//26058  已售的状态不变

@@ -503,7 +503,7 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
-        //应用id，多入口区分账单 by wentian 2018/5/25
+        // 应用id，多入口区分账单 by wentian 2018/5/25
         Long categoryId = cmd.getCategoryId();
         Integer paymentType = cmd.getPaymentType();
         Byte isUploadCertificate = cmd.getIsUploadCertificate();
@@ -622,7 +622,7 @@ public class AssetProviderImpl implements AssetProvider {
             return null;});
         return list;
     }
-
+    
     @Override
     public List<BillDTO> listBillItems(Long billId, String targetName, int pageNum, Integer pageSize) {
         List<BillDTO> dtos = new ArrayList<>();
