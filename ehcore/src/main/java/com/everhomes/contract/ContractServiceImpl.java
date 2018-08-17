@@ -44,6 +44,7 @@ import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.archives.ArchivesExcelLocaleString;
 import com.everhomes.rest.asset.*;
 
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;

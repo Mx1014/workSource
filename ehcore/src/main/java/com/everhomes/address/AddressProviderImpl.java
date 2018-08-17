@@ -29,6 +29,7 @@ import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
