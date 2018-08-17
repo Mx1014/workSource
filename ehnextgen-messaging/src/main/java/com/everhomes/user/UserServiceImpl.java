@@ -1453,13 +1453,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
      */
     @Override
     public void registerWXLoginConnection(HttpServletRequest request) {
-    	if(request == null){
+    	/*if(request == null){
     		LOGGER.info("request is null ");
     	}else{
     		LOGGER.info(request.toString());
-    	}	 
+    	}*/	 
     	 Cookie loginTokenCookie = findCookieInRequest("token",request);
     	 if(loginTokenCookie == null){
+    		 LOGGER.info("loginTokenCookie is null ");
     		 return ;
     	 }
          String token = loginTokenCookie.getValue();
