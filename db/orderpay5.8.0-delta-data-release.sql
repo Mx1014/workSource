@@ -44,6 +44,11 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.system_id', '10', '由支付系统分配的业务系统ID', 0, NULL, 0);
+
+-- AUTHOR: 马世亨 20180817
+-- REMARK: 增加统一订单错误码
+	INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+	VALUES ((@locale_string_id := @locale_string_id + 1), 'pmtask', '10019', 'zh_CN', '找不到账单');
 	
 -- --------------------- SECTION END ---------------------------------------------------------
 

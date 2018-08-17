@@ -84,6 +84,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
@@ -3820,12 +3821,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
 		preOrderCommand.setCallbackUrl(getPayCallbackUrl());
 //		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
-		preOrderCommand.setGoodsName(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		preOrderCommand.setGoodsName(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getMsg()));
 		preOrderCommand.setGoodsDescription(null);
 		preOrderCommand.setIndustryName(null);
 		preOrderCommand.setIndustryCode(null);
 		preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
-		preOrderCommand.setOrderRemark1(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		preOrderCommand.setOrderRemark1(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getMsg()));
 		preOrderCommand.setOrderRemark2(String.valueOf(order.getId()));
 		preOrderCommand.setOrderRemark3(String.valueOf(task.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
@@ -3975,88 +3976,171 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return dto;
 	}
 
-	@Override
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
-        }
-        //if(cmd == null || cmd.getPaymentErrorCode() != "200") {
-        if(cmd == null) {
-            LOGGER.error("payNotify fail, cmd={}", cmd);
-        }
-        //检查订单是否存在
-//        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
-		PmTaskOrder orderRecord = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
-        if(orderRecord == null){
-            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "can not find order record");
-        }
-        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
-        cmd.setOrderId(orderRecord.getId());
-        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
-        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
-        if(orderType != null) {
-            switch (orderType) {
-                case PURCHACE:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                        //支付成功
-						String BizOrderNum = cmd.getBizOrderNum();
-						Integer idx = BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getV2code());
-						if(idx > -1){
-							Long orderId = Long.valueOf(BizOrderNum.substring(idx + 3));
-							PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(orderId);
-							order.setStatus((byte)1);
-							pmTaskProvider.updatePmTaskOrder(order);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+		}
+		if(cmd == null) {
+			LOGGER.error("payNotify fail, cmd={}", cmd);
+		}
+		//检查订单是否存在
+		PmTaskOrder paymentBillOrder = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
+		if(paymentBillOrder == null){
+			LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"can not find order record");
+		}
 
-							FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-							FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getTaskId(),"EhPmTasks",20100L);
-							FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
-							flowCase = tree.getLeafNodes().get(0).getFlowCase();
-							LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
-							if(null == flowCase){
-								LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
-								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-										"can not find flowcase");
-							}
-							stepDTO.setFlowCaseId(flowCase.getId());
-							stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-							stepDTO.setFlowMainId(flowCase.getFlowMainId());
-							stepDTO.setFlowVersion(flowCase.getFlowVersion());
-							stepDTO.setStepCount(flowCase.getStepCount());
-							stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-							stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
-							flowService.processAutoStep(stepDTO);
+		GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+		String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
+		getPurchaseOrderCommand.setAccountCode(accountCode);
+		getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("payNotify-GetPurchaseOrderCommand=" + GsonUtil.toJson(getPurchaseOrderCommand));
+		}
+		GetPurchaseOrderRestResponse response = orderService.getPurchaseOrder(getPurchaseOrderCommand);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("payNotify-getPurchaseOrder response=" + GsonUtil.toJson(response));
+		}
+		if(response == null || !response.getErrorCode().equals(200)) {
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.PAYMENT_ORDER_NOT_EXIST,
+					"PayNotify getPurchaseOrder by bizOrderNum is error!");
+		}
+		PurchaseOrderDTO purchaseOrderDTO = response.getResponse();
+		if(purchaseOrderDTO != null) {
+			com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(purchaseOrderDTO.getPaymentOrderType());
+			if(orderType != null) {
+				switch (orderType) {
+					case PURCHACE:
+						if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.PAID.getCode()){
+							//支付成功
+							paySuccess(purchaseOrderDTO);
 						}
-                    }
-//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-//                        //支付失败
-//                        handler.payFail(srvCmd);
-//                    }
-                    break;
-//                case REFUND:
-//                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-//                        //退款成功
-//                        handler.refundSuccess(srvCmd);
-//                    }
-//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-//                        //退款失败
-//                        handler.refundFail(srvCmd);
-//                    }
-//                    break;
-                default:
-                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
-            }
-        }else {
-            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
-        }
+						break;
+					default:
+						LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+				}
+			}else {
+				LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+			}
+		}
+
+
+	}
+
+	public void paySuccess(PurchaseOrderDTO purchaseOrderDTO) {
+		LOGGER.error("default payment success call back, purchaseOrderDTO={}", purchaseOrderDTO);
+
+		String BizOrderNum = purchaseOrderDTO.getBusinessOrderNumber();
+		Integer idx = BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getV2code());
+		if(idx > -1){
+//			Long orderId = Long.valueOf(BizOrderNum.substring(idx + 3));
+			PmTaskOrder order = pmTaskProvider.findPmTaskOrderByBizOrderNum(BizOrderNum);
+			order.setStatus((byte)1);
+			pmTaskProvider.updatePmTaskOrder(order);
+
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getTaskId(),"EhPmTasks",20100L);
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+			flowCase = tree.getLeafNodes().get(0).getFlowCase();
+//			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+			if(null == flowCase){
+				LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"can not find flowcase");
+			}
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+			flowService.processAutoStep(stepDTO);
+		}
+
 	}
 
 //	@Override
-//	public List<PayOrderDTO> listBills(ListBillsCommand cmd) {
-//		List<OrderDTO> orders = payService.listPayOrderByIds(cmd.getIds());
-//		return orders.stream().map(r->ConvertHelper.convert(r,PayOrderDTO.class)).collect(Collectors.toList());
+//	public void payNotify(OrderPaymentNotificationCommand cmd) {
+//        if(LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+//        }
+//        //if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+//        if(cmd == null) {
+//            LOGGER.error("payNotify fail, cmd={}", cmd);
+//        }
+//        //检查订单是否存在
+////        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
+//		PmTaskOrder orderRecord = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
+//        if(orderRecord == null){
+//            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "can not find order record");
+//        }
+//        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+//        cmd.setOrderId(orderRecord.getId());
+//        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+//        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+//        if(orderType != null) {
+//            switch (orderType) {
+//                case PURCHACE:
+//                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+//                        //支付成功
+//						String BizOrderNum = cmd.getBizOrderNum();
+//						Integer idx = BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getV2code());
+//						if(idx > -1){
+//							Long orderId = Long.valueOf(BizOrderNum.substring(idx + 3));
+//							PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(orderId);
+//							order.setStatus((byte)1);
+//							pmTaskProvider.updatePmTaskOrder(order);
+//
+//							FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//							FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getTaskId(),"EhPmTasks",20100L);
+//							FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+//							flowCase = tree.getLeafNodes().get(0).getFlowCase();
+//							LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+//							if(null == flowCase){
+//								LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
+//								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//										"can not find flowcase");
+//							}
+//							stepDTO.setFlowCaseId(flowCase.getId());
+//							stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+//							stepDTO.setFlowMainId(flowCase.getFlowMainId());
+//							stepDTO.setFlowVersion(flowCase.getFlowVersion());
+//							stepDTO.setStepCount(flowCase.getStepCount());
+//							stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//							stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+//							flowService.processAutoStep(stepDTO);
+//						}
+//                    }
+////                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+////                        //支付失败
+////                        handler.payFail(srvCmd);
+////                    }
+//                    break;
+////                case REFUND:
+////                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+////                        //退款成功
+////                        handler.refundSuccess(srvCmd);
+////                    }
+////                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+////                        //退款失败
+////                        handler.refundFail(srvCmd);
+////                    }
+////                    break;
+//                default:
+//                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+//            }
+//        }else {
+//            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+//        }
 //	}
+
 
 	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){
 	    List<PmTaskStatSubDTO> datalist = this.getStatByCategory(cmd);
