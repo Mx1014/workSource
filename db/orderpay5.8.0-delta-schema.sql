@@ -26,5 +26,9 @@ CREATE TABLE `eh_payment_bill_orders`(
 -- REMARK: 活动报名 统一订单
 ALTER TABLE `eh_activity_roster` MODIFY COLUMN `order_no` VARCHAR(64);
 ALTER TABLE `eh_activity_roster` MODIFY COLUMN `refund_order_no` VARCHAR(64);
+
+-- AUTHOR: 郑思挺 20180816
+-- REMARK: 停车 保存biz_order_no
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `biz_order_no`  varchar(64) NULL AFTER `order_no`;
 -- --------------------- SECTION END ---------------------------------------------------------
 
