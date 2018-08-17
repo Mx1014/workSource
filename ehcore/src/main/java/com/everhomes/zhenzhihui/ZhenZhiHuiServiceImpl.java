@@ -158,11 +158,13 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             List<Long> moduleIds = new ArrayList<>();
                             LOGGER.info("zhenzhihuiDTO = {}", zhenZhiHuiUserInfoDTO);
                             moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
+                            LOGGER.info("moduleId = {}", moduleIds);
                             List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
                             if (CollectionUtils.isEmpty(serviceModuleApps)) {
                                 LOGGER.error("APP is null");
                                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "app is null");
                             }
+                            LOGGER.info("ServiceModuleApp = {}", serviceModuleApps.get(0));
                             String instanceConfig = serviceModuleApps.get(0).getInstanceConfig();
                             LOGGER.info("instanceConfig = {}",instanceConfig);
                             LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
