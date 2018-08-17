@@ -22,4 +22,5 @@ public interface ContractErrorCode {
     int ERROR_CONTRACTTEMPLATENAME_EXIST = 10010; //合同模板名称已存在
     int ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST = 10011; //合同模板不存在
 
+    int ERROR_CONTRACT_BILL_NOT_EXIST = 10012;//合同关联的账单不存在
 }

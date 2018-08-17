@@ -22,11 +22,11 @@ import java.util.List;
  *     <li>sortField: 排序字段名</li>
  		<li>trackingUid: 跟进人uid</li>
  *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户 现在换成 1：无  2：有跟进人  3：无跟进人</li>
- *     
  *     <li>lastTrackingTime: 最近跟进时间（天）</li>
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
  *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
+ *     <li>aptitudeFlag : 是否筛选资质客户</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -84,6 +84,8 @@ public class SearchEnterpriseCustomerCommand {
     private Long sourceItemId;
 
     private String sourceType;
+
+    private Byte aptitudeFlagItemId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -293,6 +295,14 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
+    }
+
+    public Byte getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
     }
 
     @Override

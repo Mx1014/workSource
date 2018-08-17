@@ -1,6 +1,9 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -12,6 +15,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -30,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,9 +78,11 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
-
-//    @Autowired
-//    private ContractService contractService;
+    @Autowired
+    private AssetService assetService;
+    
+    @Autowired
+	private AssetProvider assetProvider;
 
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
@@ -161,14 +168,33 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contractSearcher.feedDoc(contract);
                 //记录合同事件日志，by tangcen
         		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-              //查询企业客户信息，客户状态会由已成交客户变为历史客户
-        		if (contract.getCustomerType()==0) {
-        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-        			enterpriseCustomer.setLevelItemId(7L);
-        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
+            	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+	                 //查询企业客户信息，客户状态会由已成交客户变为历史客户
+	           		 if (contract.getCustomerType()==0) {
+	           			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+	           			enterpriseCustomer.setLevelItemId(7L);
+	           			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+	           			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+	           		 }
+				} 
+            	//add by tangcen 退约合同审批通过后，对该合同未出的账单进行处理
+        		if (contract.getCostGenerationMethod()!=null) {
+        			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+        			
+        			if(contract.getCategoryId() == null){
+        				contract.setCategoryId(0l);
+			        }else {
+			        	// 转换
+			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			            contract.setCategoryId(assetCategoryId);
+					}
+        			
+        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+        			contract.setRent(totalAmount);
+        			contractProvider.updateContract(contract);
+                    contractSearcher.feedDoc(contract);
         		}
             }
         }

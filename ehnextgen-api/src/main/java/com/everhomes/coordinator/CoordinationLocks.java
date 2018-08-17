@@ -100,6 +100,7 @@ public enum CoordinationLocks {
     PAY_CREATE_PREORDER("pay.create.preorder"),
 
     BILL_STATUS_UPDATE("bill.status.update"),
+    BILL_DUEDAYCOUNT_UPDATE("bill.duedaycount.update"),//欠费天数
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
     SYNC_THIRD_CONTRACT("sync.third.contract"),
     SYNC_THIRD_CUSTOMER("sync.third.customer"),

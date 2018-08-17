@@ -3,6 +3,7 @@ package com.everhomes.asset;
 
 
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.util.StringHelper;
 
 /**
  * Created by Wentian Wang on 2017/8/18.
@@ -10,4 +11,9 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 
 public class PaymentBills extends EhPaymentBills {
     private static final long serialVersionUID = 2064402606016531922L;
+    
+    @Override
+    public String toString() {
+    	return StringHelper.toJsonString(this);
+    }
 }
