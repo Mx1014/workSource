@@ -3932,6 +3932,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	protected void afterBillOrderCreated(PmTaskOrder order, PurchaseOrderCommandResponse orderResponse) {
 		OrderCommandResponse payResponse = orderResponse.getPayResponse();
 		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(order.getId());
+		record.setPayOrderId(orderResponse.getOrderId());
 		record.setBizOrderNum(payResponse.getBizOrderNum());
 		record.setPayOrderId(payResponse.getOrderId());
 		record.setOrderCommitNonce(payResponse.getOrderCommitNonce());
