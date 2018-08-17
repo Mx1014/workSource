@@ -486,4 +486,8 @@ ALTER TABLE `eh_contract_charging_changes` ADD COLUMN `bill_group_id` BIGINT COM
 -- REMARK: 合同2.8
 ALTER TABLE `eh_contracts` ADD COLUMN `cost_generation_method`  tinyint DEFAULT NULL COMMENT '合同截断时的费用收取方式，0：按计费周期，1：按实际天数';
 
+-- AUTHOR: 吴寒
+-- REMARK: ISSUE-33577 增加update_time 给punch_logs表(为金蝶对接接口提供)
+ALTER TABLE eh_punch_logs ADD COLUMN `update_date` DATE ;
+
 -- --------------------- SECTION END ---------------------------------------------------------
