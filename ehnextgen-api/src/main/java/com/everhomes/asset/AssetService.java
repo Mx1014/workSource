@@ -13,6 +13,9 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -243,4 +246,7 @@ public interface AssetService {
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
+    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+	
+	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 }
