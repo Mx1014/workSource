@@ -3383,7 +3383,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					
 					chargingItemeE = new FlowCaseEntity();
 					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
-					chargingItemeE.setKey("截至日期");
+					chargingItemeE.setKey("截止日期");
 					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
 					chargingItemEntities.add(chargingItemeE);  
 				}
