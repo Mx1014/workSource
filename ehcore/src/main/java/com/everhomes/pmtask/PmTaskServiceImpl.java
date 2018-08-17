@@ -43,6 +43,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
@@ -82,6 +83,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
@@ -106,10 +109,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -177,6 +177,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+
+	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmTaskServiceImpl.class);
 	@Autowired
@@ -232,13 +234,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private PayService payService;
 	@Autowired
-    private PayProvider payProvider;
-	@Autowired
 	private ContentServerService contentServerService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	private FlowEventLogProvider flowEventLogProvider;
+	@Autowired
+	protected GeneralOrderService orderService;
 
 
 	@Value("${server.contextPath:}")
@@ -3358,9 +3360,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		this.FlowStepOrderDetailsOperate(taskId,user.getId(),user.getNickName(),FlowStepType.APPROVE_STEP.getCode());
-//		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-//		handler.createOrderDetails(taskId,user.getId(),user.getNickName());
 
 	}
 
@@ -3555,59 +3554,183 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return result;
 	}
 
+//	@Override
+//	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
+//
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+//        PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
+//        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(),"EhPmTasks",20100L);
+//        FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+//        flowCase = tree.getLeafNodes().get(0).getFlowCase();
+//        PreOrderDTO preOrderDTO = null;
+//
+////      费用确认修改报修单状态
+////		task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+////		task.setAmount(order.getAmount());
+////		pmTaskProvider.updateTask(task);
+////		pmTaskSearch.feedDoc(task);
+//
+//        Long taskCategoryId;
+//        if(flowCase.getModuleType().equals(FlowModuleType.NO_MODULE.getCode())){
+//            if(999983 == namespaceId){
+//                taskCategoryId = 1L;
+//            }else{
+//                taskCategoryId = 6L;
+//            }
+//        }else{
+//            taskCategoryId = 9L;
+//        }
+//        PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
+////		Integer feeModel = configProvider.getIntValue(namespaceId,"pmtask.feeModel." + taskCategoryId,0);
+//        if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
+//            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//            LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+//            if(null == flowCase){
+//                LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                        "can not find flowcase");
+//            }
+//            stepDTO.setFlowCaseId(flowCase.getId());
+//            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+//            stepDTO.setFlowMainId(flowCase.getFlowMainId());
+//            stepDTO.setFlowVersion(flowCase.getFlowVersion());
+//            stepDTO.setStepCount(flowCase.getStepCount());
+//            stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//            stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+//            flowService.processAutoStep(stepDTO);
+//        }else{
+//
+//			PayUserDTO payUser = null;
+//            if(null == pmTaskConfig.getPaymentAccount() || 0 == pmTaskConfig.getPaymentAccount()){
+//                LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
+//                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+//                        "暂未绑定收款账户");
+//            } else {
+//				List<Long> payUserIds = new ArrayList<>();
+//				payUserIds.add(pmTaskConfig.getPaymentAccount());
+//				List<PayUserDTO> payUsers = payService.listPayUsersByIds(payUserIds);
+//				if(null != payUsers && payUsers.size() > 0){
+//					payUser = payUsers.get(0);
+//					if(0 == payUser.getRegisterStatus().intValue()){
+//						LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
+//						throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+//								"暂未绑定收款账户");
+//					}
+//				}
+//			}
+//            if(null != order.getBizOrderNum()){
+//                preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
+//                ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
+//                        cmd.getClientAppName());
+//                List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+//                if (paymentMethods != null)
+//                    preOrderDTO.setPayMethod(paymentMethods.stream().map(r->{
+//                        PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+//                        convert.setExtendInfo(getPayMethodExtendInfo());
+//                        return convert;
+//                    }).collect(Collectors.toList()));
+//                return preOrderDTO;
+//            }
+//            //1、检查买方（付款方）是否有会员，无则创建
+//            User userById = userProvider.findUserById(UserContext.currentUserId());
+//            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), namespaceId);
+//            String userIdenify = null;
+//            if(userIdentifier != null) {
+//                userIdenify = userIdentifier.getIdentifierToken();
+//            }
+//            PayUserDTO payUserDTO = checkAndCreatePaymentUser(userById.getId().toString(), "NS" + namespaceId.toString(), userIdenify, null, null, null);
+//            if(payUserDTO != null) {
+//                cmd.setPayerId(payUserDTO.getId());
+//            }else {
+//                LOGGER.error("payerUserId no find, cmd={}", cmd);
+//                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//                        "payerUserId no find");
+//            }
+//
+//            //2、收款方是否有会员，无则报错
+//            Long payeeUserId = pmTaskConfig.getPaymentAccount();
+//            if(payeeUserId == null) {
+//                LOGGER.error("payeeUserId no find, cmd={}", cmd);
+//                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//                        "payeeUserId no find");
+//            }
+//
+//            //3、组装报文，发起下单请求
+//            Long amount = order.getAmount();
+//            cmd.setOrderId(order.getId());
+//            CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
+//            cmdPay.setPayeeUserId(payeeUserId);
+//            cmdPay.setAmount(amount);
+//            CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
+//            if(!response.getErrorCode().equals(200)) {
+//                LOGGER.error("create order fail");
+//                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+//                        "create order fail");
+//            }
+//
+//            //4、组装支付方式
+//            preOrderDTO = orderCommandResponseToDto(response.getResponse());
+//            preOrderDTO.setAmount(amount);
+//            preOrderDTO.setOrderId(order.getId());
+//
+//            //5、保存订单信息
+//            saveOrderRecord(order.getId(), response.getResponse());
+//
+//
+//        }
+//        //6、返回
+//        return preOrderDTO;
+//
+//	}
+
 	@Override
 	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-        PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
-        PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
-        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(),"EhPmTasks",20100L);
-        FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
-        flowCase = tree.getLeafNodes().get(0).getFlowCase();
-        PreOrderDTO preOrderDTO = null;
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
+		order.setClientAppName(cmd.getClientAppName());
+		FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(),"EhPmTasks",20100L);
+		FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+		flowCase = tree.getLeafNodes().get(0).getFlowCase();
+		PreOrderDTO preOrderDTO = null;
 
-//      费用确认修改报修单状态
-//		task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-//		task.setAmount(order.getAmount());
-//		pmTaskProvider.updateTask(task);
-//		pmTaskSearch.feedDoc(task);
-
-        Long taskCategoryId;
-        if(flowCase.getModuleType().equals(FlowModuleType.NO_MODULE.getCode())){
-            if(999983 == namespaceId){
-                taskCategoryId = 1L;
-            }else{
-                taskCategoryId = 6L;
-            }
-        }else{
-            taskCategoryId = 9L;
-        }
-        PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
-//		Integer feeModel = configProvider.getIntValue(namespaceId,"pmtask.feeModel." + taskCategoryId,0);
-        if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
-            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-            LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
-            if(null == flowCase){
-                LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "can not find flowcase");
-            }
-            stepDTO.setFlowCaseId(flowCase.getId());
-            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-            stepDTO.setFlowMainId(flowCase.getFlowMainId());
-            stepDTO.setFlowVersion(flowCase.getFlowVersion());
-            stepDTO.setStepCount(flowCase.getStepCount());
-            stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-            stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
-            flowService.processAutoStep(stepDTO);
-        }else{
+		Long taskCategoryId;
+		if(flowCase.getModuleType().equals(FlowModuleType.NO_MODULE.getCode())){
+			if(999983 == namespaceId){
+				taskCategoryId = 1L;
+			}else{
+				taskCategoryId = 6L;
+			}
+		}else{
+			taskCategoryId = 9L;
+		}
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
+		if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
+			if(null == flowCase){
+				LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"can not find flowcase");
+			}
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+			flowService.processAutoStep(stepDTO);
+		}else{
 
 			PayUserDTO payUser = null;
-            if(null == pmTaskConfig.getPaymentAccount() || 0 == pmTaskConfig.getPaymentAccount()){
-                LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
-                        "暂未绑定收款账户");
-            } else {
+			if(null == pmTaskConfig.getPaymentAccount() || 0 == pmTaskConfig.getPaymentAccount()){
+				LOGGER.error("暂未绑定收款账户,ownerId={}", task.getOwnerId());
+				throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+						"暂未绑定收款账户");
+			} else {
 				List<Long> payUserIds = new ArrayList<>();
 				payUserIds.add(pmTaskConfig.getPaymentAccount());
 				List<PayUserDTO> payUsers = payService.listPayUsersByIds(payUserIds);
@@ -3620,69 +3743,235 @@ public class PmTaskServiceImpl implements PmTaskService {
 					}
 				}
 			}
-            if(null != order.getBizOrderNum()){
-                preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
-                ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
-                        cmd.getClientAppName());
-                List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
-                if (paymentMethods != null)
-                    preOrderDTO.setPayMethod(paymentMethods.stream().map(r->{
-                        PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-                        convert.setExtendInfo(getPayMethodExtendInfo());
-                        return convert;
-                    }).collect(Collectors.toList()));
-                return preOrderDTO;
-            }
-            //1、检查买方（付款方）是否有会员，无则创建
-            User userById = userProvider.findUserById(UserContext.currentUserId());
-            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), namespaceId);
-            String userIdenify = null;
-            if(userIdentifier != null) {
-                userIdenify = userIdentifier.getIdentifierToken();
-            }
-            PayUserDTO payUserDTO = checkAndCreatePaymentUser(userById.getId().toString(), "NS" + namespaceId.toString(), userIdenify, null, null, null);
-            if(payUserDTO != null) {
-                cmd.setPayerId(payUserDTO.getId());
-            }else {
-                LOGGER.error("payerUserId no find, cmd={}", cmd);
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                        "payerUserId no find");
-            }
+			if(null != order.getBizOrderNum()){
+				preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
+				ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
+						cmd.getClientAppName());
+				List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+				if (paymentMethods != null)
+					preOrderDTO.setPayMethod(paymentMethods.stream().map(r->{
+						PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+						convert.setExtendInfo(getPayMethodExtendInfo());
+						return convert;
+					}).collect(Collectors.toList()));
+				return preOrderDTO;
+			}
+			//1、检查买方（付款方）是否有会员，无则创建
+			User userById = userProvider.findUserById(UserContext.currentUserId());
+			UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), namespaceId);
+			String userIdenify = null;
+			if(userIdentifier != null) {
+				userIdenify = userIdentifier.getIdentifierToken();
+			}
+			order.setPayerType(BusinessPayerType.USER.getCode());
+			order.setPayerId(String.valueOf(userById.getId()));
 
-            //2、收款方是否有会员，无则报错
-            Long payeeUserId = pmTaskConfig.getPaymentAccount();
-            if(payeeUserId == null) {
-                LOGGER.error("payeeUserId no find, cmd={}", cmd);
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                        "payeeUserId no find");
-            }
+			//2、收款方是否有会员，无则报错
+			Long payeeUserId = pmTaskConfig.getPaymentAccount();
+			if(payeeUserId == null) {
+				LOGGER.error("payeeUserId no find, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+						"payeeUserId no find");
+			}
+			order.setPayeeType(PaymentAccountType.fromCode(pmTaskConfig.getPaymentAccountType()));
+			order.setPayeeId(String.valueOf(payeeUserId));
 
-            //3、组装报文，发起下单请求
-            Long amount = order.getAmount();
-            cmd.setOrderId(order.getId());
-            CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
-            cmdPay.setPayeeUserId(payeeUserId);
-            cmdPay.setAmount(amount);
-            CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
-            if(!response.getErrorCode().equals(200)) {
-                LOGGER.error("create order fail");
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                        "create order fail");
-            }
+			CreatePurchaseOrderCommand paycmd = preparePaymentBillOrder(task,order);
 
-            //4、组装支付方式
-            preOrderDTO = orderCommandResponseToDto(response.getResponse());
-            preOrderDTO.setAmount(amount);
-            preOrderDTO.setOrderId(order.getId());
+			//3、组装报文，发起下单请求
+			PurchaseOrderCommandResponse response = sendCreatePreOrderRequest(paycmd);
 
-            //5、保存订单信息
-            saveOrderRecord(order.getId(), response.getResponse());
+			//5、保存订单信息
+			afterBillOrderCreated(response);
 
+			//4、组装支付方式
+			preOrderDTO = populatePreOrderDto(response);
 
-        }
-        //6、返回
-        return preOrderDTO;
+		}
+		//6、返回
+		return preOrderDTO;
 
+	}
+
+	protected CreatePurchaseOrderCommand preparePaymentBillOrder(PmTask task, PmTaskOrder order) {
+		CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+
+		preOrderCommand.setAmount(order.getAmount());
+
+		String accountCode = generateAccountCode(order.getNamespaceId());
+		preOrderCommand.setAccountCode(accountCode);
+		preOrderCommand.setClientAppName(order.getClientAppName());
+
+		preOrderCommand.setBusinessOrderType(BusinessOrderType.PMTASK_CODE.getCode());
+		// 移到统一订单系统完成
+		// String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+		// preOrderCommand.setBizOrderNum(BizOrderNum);
+
+		preOrderCommand.setBusinessPayerType(order.getPayerType());
+		preOrderCommand.setBusinessPayerId(order.getPayerId());
+		String businessPayerParams = getBusinessPayerParams(order);
+		preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+		preOrderCommand.setPaymentPayeeType(order.getPayeeType());
+		preOrderCommand.setPaymentPayeeId(Long.valueOf(order.getPayeeId()));
+
+//		preOrderCommand.setExtendInfo(genPaymentExtendInfo(cmd, billGroup));
+//		preOrderCommand.setPaymentParams(getPaymentParams(cmd, billGroup));
+		preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+		preOrderCommand.setCallbackUrl(getPayCallbackUrl());
+//		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+		preOrderCommand.setGoodsName(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		preOrderCommand.setGoodsDescription(null);
+		preOrderCommand.setIndustryName(null);
+		preOrderCommand.setIndustryCode(null);
+		preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+		preOrderCommand.setOrderRemark1(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		preOrderCommand.setOrderRemark2(String.valueOf(order.getId()));
+		preOrderCommand.setOrderRemark3(String.valueOf(task.getOwnerId()));
+		preOrderCommand.setOrderRemark4(null);
+		preOrderCommand.setOrderRemark5(null);
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+		return preOrderCommand;
+	}
+
+	private String generateAccountCode(Integer namespaceId) {
+		StringBuilder strBuilder = new StringBuilder();
+
+		strBuilder.append("NS");
+		strBuilder.append(namespaceId);
+
+		return strBuilder.toString();
+	}
+
+	/**
+	 * 获取付款方的额外参数信息，比如当个人帐号下单时，必须绑定一个手机号，此时手机号为额外信息；
+	 * 如果是企业作为付款方，可能需要更多额外信息（目前未实现企业付款）；
+	 * @return 取付款方的额外参数信息
+	 */
+	protected String getBusinessPayerParams(PmTaskOrder order) {
+		OwnerType businessPayerType = OwnerType.fromCode(order.getPayerType());
+		if(businessPayerType == OwnerType.ORGANIZATION) {
+			// TODO: 未考虑企业帐号支付，先全部认为是个人帐号支付
+		}
+		businessPayerType = OwnerType.USER;
+
+		// 如果参数中的付款方ID不正确，则使用当前用户ID
+		String businessPayerIdStr = order.getPayerId();
+		Long businessPayerId = UserContext.currentUserId();
+		try {
+			businessPayerId = Long.parseLong(businessPayerIdStr);
+		} catch (Exception e) {
+			// 不打印堆栈，因为businessPayerIdStr很可能没有
+			LOGGER.error("Payer user id invalid in parameter, current user id will be used, orgPayerId={}, currentUserId={}", businessPayerIdStr, businessPayerId);
+		}
+
+		UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, order.getNamespaceId());
+		String buyerPhone = null;
+		if(buyerIdentifier != null) {
+			buyerPhone = buyerIdentifier.getIdentifierToken();
+		}
+		// 找不到手机号则默认一个
+		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("businessPayerPhone", buyerPhone);
+		return StringHelper.toJsonString(map);
+	}
+
+	private String getPayCallbackUrl() {
+		String configKey = "pay.v2.callback.url.pmtask";
+		String backUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
+		if(backUrl == null || backUrl.trim().length() == 0) {
+			LOGGER.error("Payment callback url empty, configKey={}", configKey);
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAY_CALLBACK_URL_EMPTY,
+					"Payment callback url empty");
+		}
+
+		if(!backUrl.toLowerCase().startsWith("http")) {
+			String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+			backUrl = homeUrl + CONTEXT_PATH + backUrl;
+		}
+
+		return backUrl;
+	}
+
+	protected PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
+		CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+		if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+			String scope = OrderErrorCode.SCOPE;
+			int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+			String description = "Failed to create order";
+			if(createOrderResp != null) {
+				code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+				scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+				description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+			}
+			throw RuntimeErrorException.errorWith(scope, code, description);
+		}
+
+		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+
+		return orderCommandResponse;
+	}
+
+	/*
+ * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+   CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+ */
+	private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+		if(response != null && response.getErrorCode() != null
+				&& (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+			return true;
+		return false;
+	}
+
+	protected void afterBillOrderCreated(PurchaseOrderCommandResponse orderResponse) {
+		OrderCommandResponse payResponse = orderResponse.getPayResponse();
+		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(Long.valueOf(orderResponse.getBusinessOrderNumber()));
+		record.setBizOrderNum(payResponse.getBizOrderNum());
+		record.setPayOrderId(payResponse.getOrderId());
+		record.setOrderCommitNonce(payResponse.getOrderCommitNonce());
+		record.setOrderCommitTimestamp(payResponse.getOrderCommitTimestamp());
+		record.setOrderCommitToken(payResponse.getOrderCommitToken());
+		record.setOrderCommitUrl(payResponse.getOrderCommitUrl());
+		record.setPayInfo(payResponse.getPayInfo());
+		this.pmTaskProvider.updatePmTaskOrder(record);
+	}
+
+	private PreOrderDTO populatePreOrderDto(PurchaseOrderCommandResponse orderResponse){
+		OrderCommandResponse orderCommandResponse = orderResponse.getPayResponse();
+		PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+
+		List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+		List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+			PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+			payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+			payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+			String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+			payMethodDTO.setPaymentLogo(paymentLogo);
+			payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+			if(bizPaymentParamsDTO != null) {
+				paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+			}
+			payMethodDTO.setPaymentParams(paymentParamsDTO);
+			payMethods.add(payMethodDTO);
+		}
+		dto.setPayMethod(payMethods);
+		dto.setOrderId(orderResponse.getOrderId());//获取的是统一订单的id
+
+		dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+		if(orderResponse.getAmount() != null) {
+			dto.setAmount(orderResponse.getAmount().longValue());
+		}
+		return dto;
 	}
 
 	@Override
@@ -4111,7 +4400,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		FlowCaseTree flowCaseTrees = flowService.getProcessingFlowCaseTree(mainFlowCase.getId());
 		List<FlowCaseTree> flowCases = flowCaseTrees.getLeafNodes();
 		FlowCase flowCase = flowCases.get(flowCases.size() - 1).getFlowCase();
-		LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+//		LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 		FlowAutoStepDTO dto = new FlowAutoStepDTO();
 		dto.setAutoStepType(stepType);
 		dto.setEventType(FlowEventType.STEP_MODULE.getCode());
