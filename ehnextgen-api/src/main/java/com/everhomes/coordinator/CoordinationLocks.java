@@ -141,10 +141,13 @@ public enum CoordinationLocks {
     MEETING_ROOM_RESOURCE_RECOVERY("meeting_room_resource_recovery"),
     MEETING_REMIND("meeting_remind"),
 
+    PORTAL_PUBLISH("portal.publish"),
+
     ARCHIVES_CONFIGURATION("archives_configuration"),
     ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
     VISITOR_SYS_CONFIG("visitor_sys_config"),
+	
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
