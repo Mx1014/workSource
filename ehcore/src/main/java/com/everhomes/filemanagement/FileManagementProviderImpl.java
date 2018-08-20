@@ -7,6 +7,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.filemanagement.FileManagementStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -38,6 +40,9 @@ import java.util.List;
 public class FileManagementProviderImpl implements FileManagementProvider {
 
     @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -64,7 +69,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void updateFileCatalog(FileCatalog catalog) {
         catalog.setOperatorUid(UserContext.currentUserId());
         catalog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		catalog.getOperatorUid(), catalog.getOwnerId());
+        if (null != member) {
+        	catalog.setOperatorName(member.getContactName());
+        }else{
+        	catalog.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementCatalogsDao dao = new EhFileManagementCatalogsDao(context.configuration());
         dao.update(catalog);
@@ -307,7 +318,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void updateFileContent(FileContent content) {
         content.setOperatorUid(UserContext.currentUserId());
         content.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+                content.getOperatorUid(), content.getOwnerId());
+        if (null != member) {
+        	content.setOperatorName(member.getContactName());
+        }else{
+        	content.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementContentsDao dao = new EhFileManagementContentsDao(context.configuration());
         dao.update(content);

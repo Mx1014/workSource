@@ -248,13 +248,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         dto.setName(catalog.getName());
         dto.setIconUrl(fileIcons.get(FileContentType.CATEGORY.getCode()));
         dto.setCreateTime(catalog.getCreateTime());
-        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
-                catalog.getOperatorUid(), catalog.getOwnerId());
-        if (null != member) {
-            dto.setOperatorName(member.getContactName());
-        }else{
-            dto.setOperatorName("-");
-        }
+        dto.setOperatorName(catalog.getOperatorName());
         dto.setUpdateTime(catalog.getUpdateTime());
         dto.setScopes(listFileCatalogScopes(UserContext.getCurrentNamespaceId(), dto.getId()));
         return dto;
@@ -647,14 +641,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
             dto.setIconUrl(fileIcons.get(content.getContentSuffix()));
             if (dto.getIconUrl() == null)
                 dto.setIconUrl(fileIcons.get("other"));
-        }
-        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
-                content.getOperatorUid(), content.getOwnerId());
-        if (null != member) {
-            dto.setOperatorName(member.getContactName());
-        }else{
-            dto.setOperatorName("-");
-        }
+        } 
         dto.setUpdateTime(content.getUpdateTime());
         dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
 
