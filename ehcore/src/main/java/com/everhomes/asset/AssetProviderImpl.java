@@ -3769,20 +3769,14 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(standard)
                     .where(standard.ID.eq(chargingStandardId))
                     .execute();
-//            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
-//                    .from(standardScope)
-//                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-//                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
-            //if(bro!=null){
             //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
             //只要做了删除动作，那么该项目下的配置全部解耦
-                context.update(standardScope)
-                        .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                        .where(standardScope.OWNER_ID.eq(ownerId))
-                        .and(standardScope.OWNER_TYPE.eq(ownerType))
-                        .and(standardScope.CATEGORY_ID.eq(categoryId))
-                        .execute();
-            //}
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .and(standardScope.CATEGORY_ID.eq(categoryId))
+                    .execute();
             context.delete(standardScope)
                     .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
                     .execute();
@@ -6738,5 +6732,23 @@ public class AssetProviderImpl implements AssetProvider {
         		.execute();
 		
 	}
+	
+	public boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId) {
+        DSLContext context = getReadOnlyContext();
+        //issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
+        //只要关联了合同（包括草稿合同）就不能删除标准
+        //看是否关联了合同
+        EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        List<Long> fetch1 = context.select(t.CONTRACT_ID)
+              .from(t)
+              .where(t.NAMESPACE_ID.eq(namespaceId))
+              .and(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
+              .fetch(t.CONTRACT_ID);
+        if(fetch1.size()>0){
+        	return true;
+        }else {
+        	return false;
+        }
+    }
 
 }

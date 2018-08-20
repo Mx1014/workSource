@@ -427,4 +427,6 @@ public interface AssetProvider {
 	PaymentBills findBillById(Long billId);
 	
 	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
+	
+	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 }
