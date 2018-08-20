@@ -880,7 +880,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if (html == null || html == "") {
 			return html = "";
 		} else {
-			html = html.replaceAll("<.*?>", " ").replaceAll("", "");
+			html = html.replaceAll("<.*?>", " ").replaceAll(" ", "");
 			html = html.replaceAll("<.*?", "");
 			return html;
 		}
@@ -5119,6 +5119,8 @@ public class CommunityServiceImpl implements CommunityService {
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);			
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
+					dto.setDescription(parseHtml(dto.getDescription()));
+					dto.setTrafficDescription(parseHtml(dto.getTrafficDescription()));
 					return dto;
 				}
 			).collect(Collectors.toList());
