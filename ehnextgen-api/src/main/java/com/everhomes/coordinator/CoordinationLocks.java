@@ -148,8 +148,9 @@ public enum CoordinationLocks {
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
-    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
+    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
 
 
     private String code;
