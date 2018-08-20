@@ -29,9 +29,11 @@ import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.requisition.*;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -242,7 +244,7 @@ public class RequisitionServiceImpl implements RequisitionService{
     @Override
     public void updateRequisitionApprovalActiveStatus(UpdateRequisitionActiveStatusCommond cmd){
         GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getId());
-        String operatorName = getUserContactNameByUserId(UserContext.currentUserId());
+
 
         if(cmd.getStatus() != null) {
             approval.setStatus(cmd.getStatus());
@@ -255,7 +257,7 @@ public class RequisitionServiceImpl implements RequisitionService{
                     if(oldRunning != null){
                             generalApprovalProvider.updateGeneralApproval(oldRunning);
                     }
-                    approval.setOperatorName(operatorName);
+
                     generalApprovalProvider.updateGeneralApproval(approval);
                     return null;
                 });
@@ -327,4 +329,13 @@ public class RequisitionServiceImpl implements RequisitionService{
                     "namespaceId,communityId,customerId cannot be null.");
         }
     }
+
+    private String getContractNameByUserId(Long userId, Long organizationId) {
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
+        if (member != null) {
+            return member.getContactName();
+        }
+        return UserContext.current().getUser().getNickName();
+    }
+
 }

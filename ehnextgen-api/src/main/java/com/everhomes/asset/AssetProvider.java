@@ -4,6 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.asset.*;
 import com.everhomes.server.schema.tables.pojos.*;
 
@@ -405,6 +406,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 	

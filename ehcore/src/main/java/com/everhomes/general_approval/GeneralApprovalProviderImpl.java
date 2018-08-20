@@ -16,9 +16,11 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalScopeMap;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalScopeMapRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
@@ -55,6 +57,10 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
 
     @Override
     public GeneralApproval updateGeneralApproval(GeneralApproval obj) {
+        if(StringUtils.isBlank(obj.getOperatorName())){
+            User user = UserContext.current().getUser();
+            obj.setOperatorName(user.getNickName());
+        }
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
         obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -105,6 +111,10 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
         obj.setUpdateTime(new Timestamp(l2));
+        if(StringUtils.isBlank(obj.getOperatorName())){
+            User user = UserContext.current().getUser();
+            obj.setOperatorName(user.getNickName());
+        }
     }
 
     @Override

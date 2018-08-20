@@ -4,11 +4,11 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>id: 门户layout的id</li>
- * <li>label: 门户layout名称</li>
- * <li>description: 门户layout描述</li>
+ * <ul>
+ *     <li>id: 门户layout的id</li>
+ *     <li>label: 门户layout名称</li>
+ *     <li>description: 门户layout描述</li>
+ *     <li>indexFlag: 主页签激活标志0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class UpdatePortalLayoutCommand {
@@ -19,18 +19,7 @@ public class UpdatePortalLayoutCommand {
 
 	private String description;
 
-
-
-	public UpdatePortalLayoutCommand() {
-
-	}
-
-	public UpdatePortalLayoutCommand(Long id, String label, String description) {
-		super();
-		this.id = id;
-		this.label = label;
-		this.description = description;
-	}
+	private Byte indexFlag;
 
 	public Long getId() {
 		return id;
@@ -54,6 +43,14 @@ public class UpdatePortalLayoutCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Byte getIndexFlag() {
+		return indexFlag;
+	}
+
+	public void setIndexFlag(Byte indexFlag) {
+		this.indexFlag = indexFlag;
 	}
 
 	@Override
