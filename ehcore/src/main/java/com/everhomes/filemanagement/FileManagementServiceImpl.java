@@ -692,7 +692,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 }
 
                 //  1.whether the name has been used
-                String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), content.getCatalogId(),
+                String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), catalogId,
                         parentId, content.getContentName(), content.getContentSuffix());
                 content.setContentName(contentName);
 
@@ -706,7 +706,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                     }
                     content.setPath(parentContent.getPath() + "/" + contentId);
                 } else {
-                    content.setPath("/" + catalogId);
+                    content.setPath("/" + contentId);
                 }
                 //更新移动后的文件/文件夹更新时间
                 fileManagementProvider.updateFileContent(content);
