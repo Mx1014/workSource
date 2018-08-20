@@ -24,6 +24,7 @@ public class FeeRules {
     @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
     private Long lateFeeStandardId;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 
     public Long getLateFeeStandardId() {
         return lateFeeStandardId;
@@ -85,4 +86,12 @@ public class FeeRules {
     public void setVariableIdAndValueList(List<VariableIdAndValue> variableIdAndValueList) {
         this.variableIdAndValueList = variableIdAndValueList;
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

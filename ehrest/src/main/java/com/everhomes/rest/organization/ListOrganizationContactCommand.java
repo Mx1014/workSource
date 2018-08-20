@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>contractPartyId:合同主体</li>
  *     <li>workPlaceId:工作地点</li>
  *     <li>enterpriseId:公司id</li>
+ *     <li>identifierToken: 手机号</li>
  * </ul>
  */
 public class ListOrganizationContactCommand {
@@ -65,6 +66,16 @@ public class ListOrganizationContactCommand {
     private Integer namespaceId;
 
     private Long enterpriseId;
+
+    private String identifierToken;
+
+    public String getIdentifierToken() {
+        return identifierToken;
+    }
+
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

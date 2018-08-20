@@ -89,7 +89,7 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
                 cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
-                cmd.getTag2(),cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 
         if(null == bills){
             bills = new ArrayList<>();

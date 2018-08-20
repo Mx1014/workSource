@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>category: 审批类别，参考{@link com.everhomes.rest.approval.ApprovalCategoryDTO}</li>
+ * <li>category: 请假类别，参考{@link com.everhomes.rest.approval.ApprovalCategoryDTO}</li>
  * </ul>
  */
 public class CreateApprovalCategoryResponse {

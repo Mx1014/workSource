@@ -659,6 +659,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
+        //根据合同应用的categoryId去查找对应的缴费应用的categoryId
+		cmd.setCategoryId(assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE));
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         
         Contract contract = contractProvider.findContractById(cmd.getContractId());
@@ -725,6 +727,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
      */
     @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+
         checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
 //        //查询合同，用来聚类
@@ -1117,7 +1120,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         "5、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
                         "6、企业客户需填写与系统内客户管理一致的企业名称，个人客户需填写与系统内个人客户资料一致的楼栋门牌，否则会导致无法定位客户。\n" +
                         "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12。\n" +
-                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。", (short)13, (short)2500)
+                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。\n" +
+                        "9、各费项所填的金额都为含税金额", (short)13, (short)3000)
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
@@ -1412,7 +1416,11 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         datas.add(log);
                         continue bill;
                     }
-                	BigDecimal amountReceivable = null;
+                	BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
+                	BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
+                	BigDecimal taxAmount = BigDecimal.ZERO;//税额
+                	BigDecimal taxRate = BigDecimal.ZERO;//税率
+                	
                     if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("收费项目:"+headers[j]+"必填");
                         log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
@@ -1420,6 +1428,13 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         continue bill;
                     }try{
                         amountReceivable = new BigDecimal(data[j]);
+                        //issue-35830 【物业缴费6.5】收费项初始不设置税率，批量导入一条账单，修改税率，导出这条账单不含税和税额项为空
+                        //后台直接查费项对应的税率
+                        taxRate = assetProvider.getBillItemTaxRate(billGroupId, itemPojo.getId());
+                        BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+            			amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+            			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+            			taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
                     }catch (Exception e){
                         log.setErrorLog("收费项目:" + headers[j] + "数值格式不正确，应该填写保留两位小数的数字");
                         log.setCode(AssetBillImportErrorCodes.AMOUNT_INCORRECT);
@@ -1429,6 +1444,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     item.setBillItemId(itemPojo.getId());
                     item.setBillItemName(itemPojo.getName());//解决导入的时候费项名称多了*的bug
                     item.setAmountReceivable(amountReceivable);
+                    item.setAmountReceivableWithoutTax(amountReceivableWithoutTax);//应收不含税
+                    item.setTaxAmount(taxAmount);//税额
+                    item.setTaxRate(taxRate);//税率
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);

@@ -24,4 +24,6 @@ public class AssetErrorCodes {
     /** 缴费订单创建失败 */
     static final int BILL_ORDER_CREATION_FAILED = 10011;
 
+    
+    static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
 }

@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import java.math.BigDecimal;
+
 /**
  * Created by Wentian Wang on 2017/10/19.
  */
@@ -8,12 +10,13 @@ package com.everhomes.rest.asset;
  *<ul>
  * <li>chargingItemId:收费项目id</li>
  * <li>projectChargingItemName:园区自定义的收费项目名字</li>
+ * <li>taxRate:税率</li>
  *</ul>
  */
 public class ConfigChargingItems {
     private Long chargingItemId;
     private String projectChargingItemName;
-
+    private BigDecimal taxRate;
 
     public Long getChargingItemId() {
         return chargingItemId;
@@ -30,4 +33,12 @@ public class ConfigChargingItems {
     public void setProjectChargingItemName(String projectChargingItemName) {
         this.projectChargingItemName = projectChargingItemName;
     }
+
+	public BigDecimal getTaxRate() {
+		return taxRate;
+	}
+
+	public void setTaxRate(BigDecimal taxRate) {
+		this.taxRate = taxRate;
+	}
 }

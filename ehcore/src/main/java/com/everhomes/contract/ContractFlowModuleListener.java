@@ -1,6 +1,9 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -12,6 +15,8 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -25,15 +30,18 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.Tuple;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/8/21.
@@ -45,9 +53,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private FlowService flowService;
-
-    /*@Autowired
-    private UserProvider userProvider;*/
 
     @Autowired
     private ContractProvider contractProvider;
@@ -73,9 +78,11 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
-
-//    @Autowired
-//    private ContractService contractService;
+    @Autowired
+    private AssetService assetService;
+    
+    @Autowired
+	private AssetProvider assetProvider;
 
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
@@ -138,9 +145,19 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
-    }
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
+		}
+		FlowCase flowCase = ctx.getFlowCase();
+		if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
+			// 审批驳回开始节点，更新合同的状态为待发起 -- djm
+			Contract contract = contractProvider.findContractById(flowCase.getReferId());
+			contract.setStatus(ContractStatus.WAITING_FOR_LAUNCH.getCode());
+			contractProvider.updateContract(contract);
+			contractSearcher.feedDoc(contract);
+		}
+	}
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
@@ -161,14 +178,33 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contractSearcher.feedDoc(contract);
                 //记录合同事件日志，by tangcen
         		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-              //查询企业客户信息，客户状态会由已成交客户变为历史客户
-        		if (contract.getCustomerType()==0) {
-        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-        			enterpriseCustomer.setLevelItemId(7L);
-        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
+            	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+	                 //查询企业客户信息，客户状态会由已成交客户变为历史客户
+	           		 if (contract.getCustomerType()==0) {
+	           			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+	           			enterpriseCustomer.setLevelItemId(7L);
+	           			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+	           			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+	           		 }
+				} 
+            	//add by tangcen 退约合同审批通过后，对该合同未出的账单进行处理
+        		if (contract.getCostGenerationMethod()!=null) {
+        			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+        			
+        			if(contract.getCategoryId() == null){
+        				contract.setCategoryId(0l);
+			        }else {
+			        	// 转换
+			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			            contract.setCategoryId(assetCategoryId);
+					}
+        			
+        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+        			contract.setRent(totalAmount);
+        			contractProvider.updateContract(contract);
+                    contractSearcher.feedDoc(contract);
         		}
             }
         }
@@ -194,61 +230,214 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
-
-    @Override
+    
+    @SuppressWarnings("unchecked")
+	@Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        FindContractCommand cmd = new FindContractCommand();
-        cmd.setId(flowCase.getReferId());
-        cmd.setNamespaceId(flowCase.getNamespaceId());
-        cmd.setCommunityId(flowCase.getProjectId());
+		FindContractCommand cmd = new FindContractCommand();
+		cmd.setId(flowCase.getReferId());
+		cmd.setNamespaceId(flowCase.getNamespaceId());
+		cmd.setCommunityId(flowCase.getProjectId());
+		cmd.setCategoryId(flowCase.getOwnerId());
 
-        ContractService contractService = getContractService(flowCase.getNamespaceId());
-        ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+		ContractService contractService = getContractService(flowCase.getNamespaceId());
+		ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+		//需要在后面添加数据，所以放到后面
+		//flowCase.setCustomObject(JSONObject.toJSONString(contractDetailDTO));
 
-        flowCase.setCustomObject(JSONObject.toJSONString(contractDetailDTO));
+		List<FlowCaseEntity> entities = new ArrayList<>();
+		FlowCaseEntity e;
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey("合同编号");
+		e.setValue(contractDetailDTO.getContractNumber());
+		entities.add(e);
 
-        List<FlowCaseEntity> entities = new ArrayList<>();
-        FlowCaseEntity e;
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("合同名称");
+		e.setValue(contractDetailDTO.getName());
+		entities.add(e);
 
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-        e.setKey("合同编号");
-        e.setValue(contractDetailDTO.getContractNumber());
-        entities.add(e);
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("客户名称");
+		e.setValue(contractDetailDTO.getCustomerName());
+		entities.add(e);
 
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("合同名称");
-        e.setValue(contractDetailDTO.getName());
-        entities.add(e);
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("合同开始时间");
+		e.setValue(timeToStr(contractDetailDTO.getContractStartDate()));
+		entities.add(e);
 
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("客户名称");
-        e.setValue(contractDetailDTO.getCustomerName());
-        entities.add(e);
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("合同结束时间");
+		e.setValue(timeToStr(contractDetailDTO.getContractEndDate()));
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("经办人");
+		e.setValue(contractDetailDTO.getCreatorName());
+		entities.add(e);
 
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("合同开始时间");
-        e.setValue(timeToStr(contractDetailDTO.getContractStartDate()));
-        entities.add(e);
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("签约日期");
+		e.setValue(timeToStr(contractDetailDTO.getSignedTime()));
+		entities.add(e);
 
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("合同资产");
+		StringBuffer apartments = new StringBuffer();
 
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("合同结束时间");
-        e.setValue(timeToStr(contractDetailDTO.getContractEndDate()));
-        entities.add(e);
+		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
+			apartments.append(apartment.getBuildingName() + "-" + apartment.getApartmentName()/*+ "  面积："
+					+ apartment.getChargeArea()*/ + "，"); 
+		}
+		e.setValue((apartments.toString()).substring(0, (apartments.toString()).length()-1));
+		entities.add(e);
 
-        return entities;
-    }
+		List<FlowCaseEntity> entities1 = new ArrayList<>();
+		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
+			List<FlowCaseEntity> chargingItemEntities = new ArrayList<>();
+			FlowCaseEntity chargingItemeE;
+			
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
+			e.setKey("计价条款");
+			e.setValue(" ");
+			
+			// 计价条款json 转对象
+			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
+				contractDetailDTO.getChargingItems().get(i).getChargingVariables();
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("收费项目");
+				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getChargingItemName());
+				chargingItemEntities.add(chargingItemeE);
+				Map json = (Map) JSONObject.parse(contractDetailDTO.getChargingItems().get(i).getChargingVariables());
+				StringBuffer FormulaVariable = new StringBuffer();
+				for (Object map : json.entrySet()) {
+					List<Map<String, String>> ChargingVariables = (List<Map<String, String>>) ((Map.Entry) map).getValue();
+					for (int j = 0; j < ChargingVariables.size(); j++) {
+						FormulaVariable.append( ChargingVariables.get(j).get("variableName") + "："
+								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
+					}
+				}
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("计费公式");
+				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
+				chargingItemEntities.add(chargingItemeE);
+				
+				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("起计日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					chargingItemEntities.add(chargingItemeE);
+					
+					chargingItemeE = new FlowCaseEntity();
+					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+					chargingItemeE.setKey("截止日期");
+					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
+					chargingItemEntities.add(chargingItemeE);  
+				}
+				// 添加应用的资产
+				StringBuffer apartmentVariable = new StringBuffer();
+				contractDetailDTO.getChargingItems().get(i).getApartments();
+				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "， ");
+				}
+				chargingItemeE = new FlowCaseEntity();
+				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
+				chargingItemeE.setKey("应用资产");
+				chargingItemeE.setValue(apartmentVariable.toString());
+				chargingItemEntities.add(chargingItemeE); 
+			}
+			e.setChargingItemEntities(chargingItemEntities);
+			entities1.add(e);
+		}
+		//app使用
+		contractDetailDTO.setEntities(entities);
+		contractDetailDTO.setPrice(entities1);
+		flowCase.setCustomObject(JSONObject.toJSONString(contractDetailDTO));
+		
+		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
+			
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("计价条款");
+			e.setValue(" ");
+			entities.add(e);
+			
+			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.LIST.getCode());
+				e.setKey("收费项目");
+				e.setValue(contractDetailDTO.getChargingItems().get(i).getChargingItemName());
+				entities.add(e);
+				
+				Map json = (Map) JSONObject.parse(contractDetailDTO.getChargingItems().get(i).getChargingVariables());
+				StringBuffer FormulaVariable = new StringBuffer();
+				for (Object map : json.entrySet()) {
+					List<Map<String, String>> ChargingVariables = (List<Map<String, String>>) ((Map.Entry) map).getValue();
+					for (int j = 0; j < ChargingVariables.size(); j++) {
+						FormulaVariable.append( ChargingVariables.get(j).get("variableName") + "："
+								+ String.valueOf(ChargingVariables.get(j).get("variableValue")));
+					}
+				}
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.LIST.getCode());
+				e.setKey("计费公式");
+				e.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
+				entities.add(e);
+				
+				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("起计日期");
+					e.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
+					entities.add(e);
+					
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("截至日期");
+					e.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
+					entities.add(e);
+				}
+				// 添加应用的资产
+				StringBuffer apartmentVariable = new StringBuffer();
+				contractDetailDTO.getChargingItems().get(i).getApartments();
+				for (BuildingApartmentDTO apartment : contractDetailDTO.getChargingItems().get(i).getApartments()) {
+					apartmentVariable.append(apartment.getBuildingName() + "-" + apartment.getApartmentName() + "，");
+				}
+				
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.LIST.getCode());
+				e.setKey("应用资产");
+				e.setValue((apartmentVariable.toString()).substring(0, (apartmentVariable.toString()).length()-1));
+				entities.add(e);
+			}
+		}
+		return entities;
+	}
+    
     private ContractService getContractService(Integer namespaceId) {
         String handler = configurationProvider.getValue(namespaceId, "contractService", "");
         return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(time);
+    }
+    private String timeToStr2(Long time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(time);
     }

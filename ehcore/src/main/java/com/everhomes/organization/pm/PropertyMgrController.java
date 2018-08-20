@@ -8,17 +8,20 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -2242,7 +2245,21 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
 		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
 	}
-	// TODO: 2018/6/12 done
+
+	/**
+	 * <p>查找预定计划</p>
+	 * <b>URL: /pm/findReservations</b>
+	 */
+	@RequestMapping("findReservations")
+	@RestReturn(value = ListReservationsDTO.class, collection = true)
+	public RestResponse findReservations(FindReservationsCommand cmd){
+	    List<ListReservationsDTO> list = propertyMgrService.findReservations(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <p>list all reservations given addresses</p>
 	 * <b>URL: /pm/listReservations</b>
@@ -2257,7 +2274,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	// TODO: 2018/6/12
 	/**
 	 * <p>create a reservation on a given address for a given enterprise customer</p>
 	 * <b>URL: /pm/createReservation</b>
@@ -2270,7 +2286,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-		// TODO: 2018/6/12
+	
 	/**
 	 * <p>update a reservation </p>
 	 * <b>URL: /pm/updateReservation</b>
@@ -2283,7 +2299,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	// TODO: 2018/6/12 done
+
 	/**
 	 * <p>delete an reservation</p>
 	 * <b>URL: /pm/deleteReservation</b>
@@ -2297,7 +2313,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	// TODO: 2018/6/13
 	/**
 	 * <p>cancel an reservation</p>
 	 * <b>URL: /pm/cancelReservation</b>
@@ -2310,4 +2325,20 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+//	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
+//	/**
+//	 * <p>展示房源日志</p>
+//	 * <b>URL: /pm/listApartmentEvents</b>
+//	 */
+//	@RequestMapping("listApartmentEvents")
+//	@RestReturn(value = ApartmentEventDTO.class, collection = true)
+//	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
+//	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
+//		RestResponse response = new RestResponse(result);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
 }

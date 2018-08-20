@@ -314,8 +314,12 @@ public class RentalCommonServiceImpl {
     }
 
     public BigDecimal calculateRefundAmount(RentalOrder order, Long now) {
-
         if (null != order.getRefundStrategy()) {
+            List<RentalRefundTip> tips = rentalv2Provider.listRefundTips(order.getResourceType(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(),
+                    order.getRefundStrategy());
+            String refundTip = null;
+            if (tips != null && tips.size()>0)
+                refundTip = tips.get(0).getTips();
             if (order.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
                 RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
                         order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
@@ -366,13 +370,20 @@ public class RentalCommonServiceImpl {
                 BigDecimal amount = order.getPaidMoney().multiply(new BigDecimal(orderRule.getFactor()))
                         .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
 
-                processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
+//                if (refundTip == null)
+//                     processOrderCustomRefundTip(order, outerRules, innerRules, orderRule, amount);
+//                else
+                    order.setTip(refundTip);
 
                 return amount;
             }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
+                order.setTip(refundTip);
                 return order.getPaidMoney();
             }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-                order.setTip(processOrderNotRefundTip());
+//                if (refundTip == null)
+//                    order.setTip(processOrderNotRefundTip());
+//                else
+                    order.setTip(refundTip);
             }
         }
 

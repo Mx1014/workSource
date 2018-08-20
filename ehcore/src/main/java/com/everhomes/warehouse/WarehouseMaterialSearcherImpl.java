@@ -144,7 +144,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
-        if(cmd.getMaterialNumber() != null) {
+        if(cmd.getMaterialNumber() != null && cmd.getMaterialNumber().length()>0) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

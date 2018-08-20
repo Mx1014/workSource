@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 地址id</li>
  * <li>livingStatus: 是否在户, 不在, 在</li>
  * <li>authType: 认证类型, 已认证, 未认证</li>
+ * <li>addressExists: 该关联房源是否存在（1：存在，0：不存在）</li>
  * </ul>
  */
 public class OrganizationOwnerAddressDTO {
@@ -21,14 +22,20 @@ public class OrganizationOwnerAddressDTO {
     private String livingStatus;
     private String authType;
     private String livingDate;
-
     private Byte apartmentLivingStatus;
-
     private Double chargeArea;
-
     private String orientation;
+    private Byte addressExists;
+    
+    public Byte getAddressExists() {
+		return addressExists;
+	}
 
-    public String getOrientation() {
+	public void setAddressExists(Byte addressExists) {
+		this.addressExists = addressExists;
+	}
+
+	public String getOrientation() {
         return orientation;
     }
 

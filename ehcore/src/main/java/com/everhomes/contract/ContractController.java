@@ -1,10 +1,22 @@
 // @formatter:off
 package com.everhomes.contract;
 
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import com.everhomes.rest.contract.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
@@ -17,11 +29,15 @@ import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
@@ -42,6 +58,7 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -62,6 +79,9 @@ public class ContractController extends ControllerBase {
 
 	@Autowired
 	private ContractSearcher contractSearcher;
+
+	@Autowired
+	private SyncDataTaskService syncDataTaskService;
 	
 	/**
 	 * <p>1.合同列表</p>
@@ -458,6 +478,21 @@ public class ContractController extends ControllerBase {
 	
 	//查看合同日志  by tangcen
 	/**
+	 * <b>URL: /contract/getDuration</b>
+	 * <p>查找合同截断时的账单时间段</p>
+	 */
+	@RequestMapping("getDuration")
+	@RestReturn(value = DurationParamDTO.class)
+	public RestResponse getDuration(GetDurationParamCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		DurationParamDTO res = contractService.getDuration(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /contract/listContractEvents</b>
 	 * <p>查看合同日志</p>
 	 */
@@ -470,5 +505,77 @@ public class ContractController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+
+	/**
+	 * <b>URL: /contract/filterAptitudeCustomer</b>
+	 */
+	@RequestMapping("filterAptitudeCustomer")
+	@RestReturn(value = String.class)
+	public RestResponse filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		Byte AptitudeFlag = contractService.filterAptitudeCustomer(cmd);
+		RestResponse response = new RestResponse(AptitudeFlag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /contract/listSyncErrorMsg</b>
+	 * <p>查看导入数据错误日志</p>
+	 */
+	@RequestMapping("listSyncErrorMsg")
+	@RestReturn(value = ListSyncDataErrorMsgResponse.class,collection=true)
+	public RestResponse listSyncErrorMsg(ListSyncErrorMsgCommand cmd) {
+		ListSyncDataErrorMsgResponse result = syncDataTaskService.listSyncErrorMsg(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /contract/updateAptitudeCustomer</b>
+	 */
+	@RequestMapping("updateAptitudeCustomer")
+	@RestReturn(value = AptitudeCustomerFlagDTO.class)
+	public RestResponse updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		AptitudeCustomerFlagDTO flag = contractService.updateAptitudeCustomer(cmd);
+		RestResponse response = new RestResponse(flag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /contract/exportContractSyncErrorMsg</b>
+	 * <p>导出数据错误日志</p>
+	 */
+	@RequestMapping("exportContractSyncErrorMsg")
+	@RestReturn(value = String.class)
+	public RestResponse exportContractSyncErrorMsg(@Valid SearchContractCommand cmd) {
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.exportContractListByContractList(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /contract/EnterpriseContractDetail</b>
+	 * <p>企业客户APP获取合同详情</p>
+	 */
+	@RequestMapping("EnterpriseContractDetail")
+	@RestReturn(EnterpriseContractDTO.class)
+	public RestResponse EnterpriseContractDetail(EnterpriseContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
+		return new RestResponse(detail);
 	}
 }

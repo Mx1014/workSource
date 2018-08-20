@@ -9,8 +9,11 @@ import com.everhomes.rest.customer.SyncDataTaskStatus;
 import com.everhomes.rest.customer.SyncResultViewedFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhSyncDataErrorsDao;
 import com.everhomes.server.schema.tables.daos.EhSyncDataTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhSyncDataErrors;
 import com.everhomes.server.schema.tables.pojos.EhSyncDataTasks;
+import com.everhomes.server.schema.tables.records.EhSyncDataErrorsRecord;
 import com.everhomes.server.schema.tables.records.EhSyncDataTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -115,5 +118,47 @@ public class SyncDataTaskProviderImpl implements SyncDataTaskProvider {
                 .and(Tables.EH_SYNC_DATA_TASKS.STATUS.eq(SyncDataTaskStatus.EXCEPTION.getCode()))
                 .and(Tables.EH_SYNC_DATA_TASKS.VIEW_FLAG.eq(SyncResultViewedFlag.NOT_VIEWED.getCode()))
                 .fetchAny().value1();
+    }
+
+    @Override
+    public Long createSyncErrorMsg(Integer namespaceId,  String syncType, Long ownerId, String ownerType, String errorMessage, Long taskId){
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSyncDataErrors.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhSyncDataTasks.class));
+        EhSyncDataErrorsDao dao = new EhSyncDataErrorsDao(context.configuration());
+        EhSyncDataErrors err = new EhSyncDataErrors();
+        err.setId(id);
+        err.setErrorMessage(errorMessage);
+        err.setNamespaceId(namespaceId);
+        err.setSyncType(syncType);
+        err.setOwnerId(ownerId);
+        err.setOwnerType(ownerType);
+        err.setTaskId(taskId);
+        //task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.insert(err);
+        return id;
+    }
+
+
+    @Override
+    public List<SyncDataError> listSyncErrorMsgByTaskId(Long taskId, String syncType, Long pageAnchor, Integer pageSize){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhSyncDataErrorsRecord> query = context.selectQuery(Tables.EH_SYNC_DATA_ERRORS);
+        query.addConditions(Tables.EH_SYNC_DATA_ERRORS.TASK_ID.eq(taskId));
+        query.addConditions(Tables.EH_SYNC_DATA_ERRORS.SYNC_TYPE.eq(syncType));
+
+        if(pageAnchor != null) {
+            query.addConditions(Tables.EH_SYNC_DATA_ERRORS.ID.le(pageAnchor));
+        }
+
+        query.addOrderBy(Tables.EH_SYNC_DATA_ERRORS.ID.desc());
+        query.addLimit(pageSize);
+
+        List<SyncDataError> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, SyncDataError.class));
+            return null;
+        });
+
+        return result;
     }
 }

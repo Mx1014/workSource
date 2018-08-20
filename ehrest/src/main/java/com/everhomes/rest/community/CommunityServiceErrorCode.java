@@ -32,6 +32,9 @@ public interface CommunityServiceErrorCode {
 
 	static final int ERROR_COMMUNITY_TYPE = 10107;//园区分类不能为空
 	static final int ERROR_COMMUNITY_TYPE_CONTENT = 10108;//园区分类内容填写错误
+
+	static final int ERROR_BUILDING_NAME_EXIST = 10201;//楼宇名称已存在
+
 	
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;
@@ -39,4 +42,5 @@ public interface CommunityServiceErrorCode {
     int ERROR_PHONE_EMPTY = 20004;
     int ERROR_LATITUDE_LONGITUDE = 20005;
     int ERROR_AREASIZE_FORMAT = 20006;
+    int ERROR_FLOORNUMBER_FORMAT = 20007;//楼层数填写格式错误
 }

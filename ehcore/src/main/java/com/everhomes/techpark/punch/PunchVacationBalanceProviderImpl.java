@@ -1,14 +1,6 @@
 // @formatter:off
 package com.everhomes.techpark.punch;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -18,9 +10,21 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchVacationBalancesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchVacationBalances;
+import com.everhomes.server.schema.tables.records.EhPunchVacationBalancesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class PunchVacationBalanceProviderImpl implements PunchVacationBalanceProvider {
@@ -80,6 +84,24 @@ public class PunchVacationBalanceProviderImpl implements PunchVacationBalancePro
 			return null;
 		}
 		return ConvertHelper.convert(record, PunchVacationBalance.class);
+	}
+
+	@Override
+	public List<PunchVacationBalance> findPunchVacationBalanceByDetailIds(List<Long> detailIds) {
+		if (CollectionUtils.isEmpty(detailIds)) {
+			return Collections.emptyList();
+		}
+		DSLContext context = getReadOnlyContext();
+		SelectQuery<EhPunchVacationBalancesRecord> query = context.selectQuery(Tables.EH_PUNCH_VACATION_BALANCES);
+		query.addConditions(Tables.EH_PUNCH_VACATION_BALANCES.DETAIL_ID.in(detailIds));
+
+		Result<EhPunchVacationBalancesRecord> result = query.fetch();
+		if (result == null || result.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return result.map(r -> {
+			return ConvertHelper.convert(r, PunchVacationBalance.class);
+		});
 	}
 
 	private EhPunchVacationBalancesDao getReadWriteDao() {
