@@ -1545,7 +1545,7 @@ public class PortalServiceImpl implements PortalService {
 							protectReleaseVersion(cmd.getVersionId());
 						}catch (Exception ex){
 							portalPublishLog.setStatus(PortalPublishLogStatus.FAILING.getCode());
-							String localizedString = localeStringService.getLocalizedString(PortalErrorCode.SCOPE, String.valueOf(PortalErrorCode.ERROR_VERSION_CONFLICT), null, null);
+							String localizedString = localeStringService.getLocalizedString(PortalErrorCode.SCOPE, String.valueOf(PortalErrorCode.ERROR_VERSION_CONFLICT), UserContext.current().getUser().getLocale(), null);
 							portalPublishLog.setContentData(localizedString);
 							portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 						}
