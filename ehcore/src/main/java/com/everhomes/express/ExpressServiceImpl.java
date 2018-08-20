@@ -12,23 +12,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.express.*;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
@@ -45,6 +56,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.express.guomao.pay.PayResponse;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
@@ -148,6 +160,12 @@ public class ExpressServiceImpl implements ExpressService {
 	public com.everhomes.paySDK.api.PayService sdkPayService;
 	@Autowired
 	public ExpressPayeeAccountProvider accountProvider;
+	
+    @Autowired
+    protected GeneralOrderService orderService;
+	
+	@Value("${server.contextPath:}")
+	private String contextPath;
 
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -506,9 +524,15 @@ public class ExpressServiceImpl implements ExpressService {
 			if (expressOrder == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
 			}
-			if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
+			
+			//加一个开关，方便在beta环境测试
+			boolean flag = configProvider.getBooleanValue("beta.express.order.amount", false);
+			if (!flag) {
+				if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
+				}
 			}
+
 			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
@@ -1382,44 +1406,99 @@ public class ExpressServiceImpl implements ExpressService {
 		});
 
 		createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
-
-		Long amount = expressOrder.getPaySummary().multiply(new BigDecimal(100)).longValue();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		User user = UserContext.current().getUser();
-		String sNamespaceId = BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
-		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
-		ListBizPayeeAccountDTO payerDto = accountProvider.createPersonalPayUserIfAbsent(user.getId() + "",
-				sNamespaceId, (userTarget == null || userTarget.getUserIdentifier() == null) ? "12000001802" : userTarget.getUserIdentifier(), null, null, null);
-		List<ExpressPayeeAccount> payeeAccounts = accountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,
-				expressOrder.getOwnerType(), expressOrder.getOwnerId());
-		if (payeeAccounts == null || payeeAccounts.size() == 0) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"未设置收款方账号");
+		
+		
+		// 3、收款方是否有会员，无则报错
+		Long bizPayeeId = getOrderPayeeAccount(cmd);
+		List<PayUserDTO> payUserDTOs = sdkPayService
+				.listPayUsersByIds(Stream.of(bizPayeeId).collect(Collectors.toList()));
+		if (payUserDTOs == null || payUserDTOs.size() == 0) {
+			LOGGER.error("payeeUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001, "暂未绑定收款账户");
 		}
-		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
-		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId, OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(), expressOrder.getId()));
-		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
-		createOrderCommand.setPayerUserId(payerDto.getAccountId());
-		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
-		createOrderCommand.setAmount(amount);
-		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
-		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
-		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
-		String homeurl = configProvider.getValue("home.url", "");
-		String callbackurl = String.format(configProvider.getValue("express.pay.callBackUrl", "%s/evh/express/notifyExpressOrderPaymentV2"), homeurl);
-		createOrderCommand.setBackUrl(callbackurl);
-		createOrderCommand.setOrderRemark1(configProvider.getValue("express.pay.OrderRemark1", "快递订单"));
 
-		LOGGER.info("createPurchaseOrder params" + createOrderCommand);
-		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
-		if (purchaseOrder == null || 200 != purchaseOrder.getErrorCode() || purchaseOrder.getResponse() == null) {
-			LOGGER.info("purchaseOrder " + purchaseOrder);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"preorder failed " + StringHelper.toJsonString(purchaseOrder));
-		}
-		OrderCommandResponse response = purchaseOrder.getResponse();
+		// 4、组装报文，发起下单请求
+		PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd, expressOrder, bizPayeeId);
+
+		// 5、组装支付方式
+		PreOrderDTO preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+
+		// 6、保存订单信息
+		expressOrder.setPayDto(StringHelper.toJsonString(preOrderDTO));
+		expressOrder.setGeneralOrderId(orderCommandResponse.getPayResponse().getBizOrderNum());
+		expressOrderProvider.updateExpressOrder(expressOrder);
+	
+		return preOrderDTO;
+	}
+	
+	private void oldMethod() {
+//
+//		Long amount = expressOrder.getPaySummary().multiply(new BigDecimal(100)).longValue();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//
+//		User user = UserContext.current().getUser();
+//		String sNamespaceId = BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
+//		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+//		ListBizPayeeAccountDTO payerDto = accountProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+//				sNamespaceId, (userTarget == null || userTarget.getUserIdentifier() == null) ? "12000001802" : userTarget.getUserIdentifier(), null, null, null);
+//		List<ExpressPayeeAccount> payeeAccounts = accountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,
+//				expressOrder.getOwnerType(), expressOrder.getOwnerId());
+//		if (payeeAccounts == null || payeeAccounts.size() == 0) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"未设置收款方账号");
+//		}
+//		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+//		createOrderCommand.setAccountCode(sNamespaceId);
+//		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId, OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(), expressOrder.getId()));
+//		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
+//		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+//		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+//		createOrderCommand.setAmount(amount);
+//		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+//		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+//		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
+//		String homeurl = configProvider.getValue("home.url", "");
+//		String callbackurl = String.format(configProvider.getValue("express.pay.callBackUrl", "%s/evh/express/notifyExpressOrderPaymentV2"), homeurl);
+//		createOrderCommand.setBackUrl(callbackurl);
+//		createOrderCommand.setOrderRemark1(configProvider.getValue("express.pay.OrderRemark1", "快递订单"));
+//
+//		LOGGER.info("createPurchaseOrder params" + createOrderCommand);
+//		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+//		if (purchaseOrder == null || 200 != purchaseOrder.getErrorCode() || purchaseOrder.getResponse() == null) {
+//			LOGGER.info("purchaseOrder " + purchaseOrder);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"preorder failed " + StringHelper.toJsonString(purchaseOrder));
+//		}
+//		OrderCommandResponse response = purchaseOrder.getResponse();
+//		PreOrderDTO preDto = ConvertHelper.convert(response, PreOrderDTO.class);
+//		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+//		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+//		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//		if (paymentMethods != null) {
+//			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod -> {
+//				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+//				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+//				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+//				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+//				payMethodDTO.setPaymentLogo(paymentLogo);
+//				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+//				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+//				if (bizPaymentParamsDTO != null) {
+//					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+//				}
+//				payMethodDTO.setPaymentParams(paymentParamsDTO);
+//
+//				return payMethodDTO;
+//			}).collect(Collectors.toList()));
+//		}
+//		expressOrder.setPayDto(StringHelper.toJsonString(preDto));
+//		expressOrderProvider.updateExpressOrder(expressOrder);
+	}
+	
+	private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse,
+			PayExpressOrderCommandV2 cmd) {
+		OrderCommandResponse response = orderCommandResponse.getPayResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response, PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
 		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
@@ -1442,9 +1521,92 @@ public class ExpressServiceImpl implements ExpressService {
 				return payMethodDTO;
 			}).collect(Collectors.toList()));
 		}
-		expressOrder.setPayDto(StringHelper.toJsonString(preDto));
-		expressOrderProvider.updateExpressOrder(expressOrder);
+
 		return preDto;
+	}
+
+	private PurchaseOrderCommandResponse createOrder(PayExpressOrderCommandV2 cmd, ExpressOrder expressOrder, Long bizPayeeId) {
+		
+		 CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(cmd, expressOrder, bizPayeeId);
+	        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+	        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+	            String scope = OrderErrorCode.SCOPE;
+	            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+	            String description = "Failed to create order";
+	            if(createOrderResp != null) {
+	                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+	                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+	                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+	            }
+	            throw RuntimeErrorException.errorWith(scope, code, description);
+	        }
+
+	        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+	        return orderCommandResponse;
+	}
+
+	private CreatePurchaseOrderCommand preparePaymentBillOrder(PayExpressOrderCommandV2 cmd, ExpressOrder expressOrder,  Long bizPayeeId) {
+		
+        CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+
+        preOrderCommand.setAmount(changePayAmount(expressOrder.getPaySummary()));
+
+        String accountCode = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();
+        preOrderCommand.setAccountCode(accountCode);
+        preOrderCommand.setClientAppName(cmd.getClientAppName());
+        preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getV2code());
+        // 移到统一订单系统完成
+        // String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        BusinessPayerType payerType = BusinessPayerType.USER;
+//        preOrderCommand.setBusinessOrderNumber(generateBizOrderNum(accountCode,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
+        preOrderCommand.setBusinessPayerType(payerType.getCode());
+        preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+//        String businessPayerParams = getBusinessPayerParams(cmd);
+//        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+       // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
+        preOrderCommand.setPaymentPayeeId(bizPayeeId); //不知道填什么
+
+//        preOrderCommand.setPaymentParams(flattenMap);
+        //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+//        String homeUrl = "http://10.1.110.51:9092";
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.express", "/express/notifyExpressOrderPaymentV2");
+        String backUrl = homeUrl + contextPath + backUri;
+        preOrderCommand.setCallbackUrl(backUrl);
+        preOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+        preOrderCommand.setGoodsName("快递订单");
+        preOrderCommand.setGoodsDescription(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+        preOrderCommand.setIndustryName(null);
+        preOrderCommand.setIndustryCode(null);
+        preOrderCommand.setSourceType(SourceType.PC.getCode());
+        preOrderCommand.setOrderRemark1(configProvider.getValue("express.pay.OrderRemark1", "快递订单"));
+        //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+        preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
+        preOrderCommand.setOrderRemark4(null);
+        preOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+        return preOrderCommand;
+    }
+	
+    private Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
+	private Long getOrderPayeeAccount(PayExpressOrderCommandV2 cmd) {
+		ExpressPayeeAccount account = accountProvider.getPayeeAccountByOwner(UserContext.getCurrentNamespaceId(),
+				cmd.getOwnerType(), cmd.getOwnerId());
+		if (account == null) {
+			return null;
+		}
+
+		return account.getPayeeId();
 	}
 
 	private String generateBizOrderNum(String sNamespaceId, String pycode, Long id) {
@@ -1476,10 +1638,17 @@ public class ExpressServiceImpl implements ExpressService {
 					"invaild ordertype,"+cmd.getOrderType());
 		}
 		if(cmd.getOrderType() == 3) {
-			Long orderNo = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));
+			
+			//根据统一订单生成的支付编号获得记录
+			ExpressOrder order = expressOrderProvider.findExpressOrderByBizOrderNum(cmd.getBizOrderNum());
+			if(order == null){
+				LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the order not found.");
+			}
 
 			SrvOrderPaymentNotificationCommand notificationCommand  =  new SrvOrderPaymentNotificationCommand();
-			notificationCommand.setOrderId(orderNo);
+			notificationCommand.setOrderId(order.getId());
 			notificationCommand.setAmount(cmd.getAmount());
 			parkingV2EmbeddedV2Handler.paySuccess(notificationCommand);
 
@@ -1568,4 +1737,15 @@ public class ExpressServiceImpl implements ExpressService {
 		return convert;
 
 	}
+	
+    /*
+     * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+       CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+     */
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
 }

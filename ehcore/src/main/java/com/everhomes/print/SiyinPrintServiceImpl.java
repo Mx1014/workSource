@@ -772,7 +772,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         preOrderCommand.setIndustryName(null);
         preOrderCommand.setIndustryCode(null);
         preOrderCommand.setSourceType(SourceType.PC.getCode());
-        preOrderCommand.setOrderRemark1("云打印");
+        preOrderCommand.setOrderRemark1(configProvider.getValue("siyinprint.pay.OrderRemark1","云打印"));
         //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
         preOrderCommand.setOrderRemark4(null);
