@@ -6,7 +6,7 @@ package com.everhomes.rest.techpark.expansion;
  * <li>ownerType：ownerType</li>
  * <li>ownerId：ownerId</li>
  * <li>sourceType：类型</li>
- * <li>formId：要复制的id</li>
+ * <li>organizationId：管理公司id</li>
  * </ul>
  */
 public class OpenCustomRequestFormCommand {
@@ -19,7 +19,7 @@ public class OpenCustomRequestFormCommand {
 
     private Long categoryId;
 
-    private Long formId;
+    private Long organizationId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -61,11 +61,11 @@ public class OpenCustomRequestFormCommand {
         this.categoryId = categoryId;
     }
 
-    public Long getFormId() {
-        return formId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setFormId(Long formId) {
-        this.formId = formId;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

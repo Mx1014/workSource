@@ -527,8 +527,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=LeaseFormRequestDTO.class)
 	public RestResponse openCustomRequestForm(@Valid OpenCustomRequestFormCommand cmd) {
 
-		LeaseFormRequestDTO dto = enterpriseApplyEntryService.openCustomRequestForm(cmd);
-		RestResponse response = new RestResponse(dto);
+		enterpriseApplyEntryService.openCustomRequestForm(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 

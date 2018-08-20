@@ -1879,7 +1879,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public LeaseFormRequestDTO openCustomRequestForm(OpenCustomRequestFormCommand cmd) {
+	public void openCustomRequestForm(OpenCustomRequestFormCommand cmd) {
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
@@ -1887,18 +1887,40 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
 		}
-		if (cmd.getFormId() == null){ //sourceId值为空
+
+		OpenCustomRequestFormCommand cmd2 = ConvertHelper.convert(cmd,OpenCustomRequestFormCommand.class);
+		cmd2.setSourceType(EntityType.LEASE_PROJECT.getCode());
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+		Long formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_BUILDING.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_PROMOTION.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+
+	}
+
+	private void copyCustomRequestForm(OpenCustomRequestFormCommand cmd,Long formId){
+
+		if (formId == null){ //sourceId值为空
 			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
 			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
 		}else {
-			GeneralForm generalForm = generalFormService.mirrorGeneralForm(cmd.getFormId(), null, null,null,null,cmd.getOwnerType(), cmd.getOwnerId());
+			GeneralForm generalForm = generalFormService.mirrorGeneralForm(formId, null, null,null,null,cmd.getOwnerType(), cmd.getOwnerId());
 			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
 			request.setSourceId(generalForm.getId());
 			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
 		}
-		GetLeasePromotionRequestFormCommand cmd2 = ConvertHelper.convert(cmd,GetLeasePromotionRequestFormCommand.class);
-
-		return getLeasePromotionRequestForm(cmd2);
 	}
 
 	@Override
