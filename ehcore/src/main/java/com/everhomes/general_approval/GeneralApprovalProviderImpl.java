@@ -111,6 +111,10 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
         obj.setUpdateTime(new Timestamp(l2));
+        if(StringUtils.isBlank(obj.getOperatorName())){
+            User user = UserContext.current().getUser();
+            obj.setOperatorName(user.getNickName());
+        }
     }
 
     @Override
