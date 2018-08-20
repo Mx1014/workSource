@@ -1798,6 +1798,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+		//发送信息
+		sendMessageAfterChangeOrganizationAdmin(
+				ConvertHelper.convert(member, OrganizationContactDTO.class),
+				OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+				OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+		);
+		
 		return processOrganizationContactDTO(member);
 	}
 
@@ -2274,14 +2281,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				&& member.getTargetId() != null){
 			//默认取企业管理员的信息模板
 			int targerCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
+			int otherCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE ;
 			//如果是超级管理员,那改为超级管理员的模板
 			if(adminPrivilegeId == PrivilegeConstants.ORGANIZATION_SUPER_ADMIN){
 				 targerCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
+				 otherCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE ;
 			}
 			sendMessageAfterChangeOrganizationAdmin(
 					ConvertHelper.convert(member, OrganizationContactDTO.class),
 					targerCode,
-					OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+					otherCode
 			);
 		}
 
