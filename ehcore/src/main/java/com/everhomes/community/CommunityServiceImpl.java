@@ -4855,7 +4855,7 @@ public class CommunityServiceImpl implements CommunityService {
         	dto.setBuildingId(r.getId());
         	dto.setBuildingName(r.getName());
         	//在租合同数
-        	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName());
+        	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName(),r.getCommunityId());
         	dto.setRelatedContractNumber(relatedContractNumber);
         	
         	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName());
@@ -5061,7 +5061,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setApartmentNumber(apartmentNumber);
 		
 		//在租合同数
-		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName());
+		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName(),building.getCommunityId());
     	dto.setRelatedContractNumber(relatedContractNumber);
     	
     	//在租实时均价

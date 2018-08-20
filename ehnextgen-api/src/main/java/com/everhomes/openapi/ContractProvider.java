@@ -110,7 +110,7 @@ public interface ContractProvider {
 	Boolean getContractTemplateById(Long id);
 
 	Double getTotalRentInCommunity(Long communityId);
-	Integer countRelatedContractNumberInBuilding(String buildingName);
+	Integer countRelatedContractNumberInBuilding(String buildingName,Long communityId);
 
 	Double getTotalRentInBuilding(String buildingName);
 

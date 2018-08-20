@@ -1356,15 +1356,30 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public Integer countRelatedContractNumberInBuilding(String buildingName) {
+	public Integer countRelatedContractNumberInBuilding(String buildingName,Long communityId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		//issue-36117:门牌只有一个，在租合同却有134份
+		//因为在EH_CONTRACT_BUILDING_MAPPINGS只存了building_name,没有community_id,
+		//因此在查询时,有可能不同的community里有同名的building,导致查到的contract数量不准，会多查
+		List<Long> addressIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+										.fetchInto(Long.class);
+		
+		List<Long> addressIdsInCommunity = context.select(Tables.EH_ADDRESSES.ID)
+													.from(Tables.EH_ADDRESSES)
+													.where(Tables.EH_ADDRESSES.ID.in(addressIds))
+													.and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+													.fetchInto(Long.class);
+		
 		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.leftOuterJoin(Tables.EH_CONTRACTS)
 										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
-										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdsInCommunity))
 										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
+										
 		if (contractIds!=null && contractIds.size()>0) {
 			return contractIds.size();
 		}
