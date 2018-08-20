@@ -324,9 +324,40 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 
 			return dto;
-		}).collect(Collectors.toList());
+		}).filter(dto->!(requestType != ParkingSourceRequestType.BACKGROUND && isColseAllFunction(dto))).collect(Collectors.toList());
 
 		return parkingLotList;
+	}
+
+	private boolean isColseAllFunction(ParkingLotDTO dto) {
+		GetParkingBussnessStatusCommand convert = ConvertHelper.convert(dto, GetParkingBussnessStatusCommand.class);
+		convert.setParkingLotId(dto.getId());
+		GetParkingBussnessStatusResponse bussnessStatusResponse = getParkingBussnessStatus(convert);
+		if(bussnessStatusResponse==null){
+			return false;
+		}
+		for (ParkingFuncDTO funcDTO : bussnessStatusResponse.getDockingFuncLists()) {
+			ParkingConfigFlag parkingConfigFlag = ParkingConfigFlag.fromCode(funcDTO.getEnableFlag());
+			if(parkingConfigFlag == ParkingConfigFlag.SUPPORT){
+				return false;
+			}
+		}
+
+		for (ParkingFuncDTO funcDTO : bussnessStatusResponse.getFuncLists()) {
+			ParkingConfigFlag parkingConfigFlag = ParkingConfigFlag.fromCode(funcDTO.getEnableFlag());
+			if(parkingConfigFlag == ParkingConfigFlag.SUPPORT){
+				return false;
+			}
+		}
+		ParkingConfigFlag enableMonthCard = ParkingConfigFlag.fromCode(bussnessStatusResponse.getEnableMonthCard());
+		Byte monthCardFlow = bussnessStatusResponse.getMonthCardFlow();
+		if(monthCardFlow!=null) {
+			ParkingRequestFlowType flowType = ParkingRequestFlowType.fromCode(Integer.valueOf(monthCardFlow));
+			if (enableMonthCard == ParkingConfigFlag.SUPPORT && flowType != ParkingRequestFlowType.FORBIDDEN) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

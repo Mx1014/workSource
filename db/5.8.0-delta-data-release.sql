@@ -96,7 +96,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 
 SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
 
 update eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
 update eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
@@ -831,7 +831,11 @@ DROP PROCEDURE IF EXISTS update_url_module_function;
 set @id = (select MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
 
+-- 黄鹏宇 2018年8月20日
+-- 科兴同步按钮
 
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43960, 21200, 43960, '企业客户管理 全量同步权限');
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43970, 21100, 43970, '合同管理 全量同步权限');
 
 
 

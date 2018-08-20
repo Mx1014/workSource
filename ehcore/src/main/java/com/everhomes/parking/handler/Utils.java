@@ -251,7 +251,6 @@ public class Utils {
     static Timestamp getTimestampByAddDistanceMonthV2(Long source,int month){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(source);
-        calendar.add(Calendar.SECOND, 1);
         int today = calendar.get(Calendar.DAY_OF_MONTH);
         if(today>28) {
             int daysToEndOfMonth = getDaysToEndOfMonth(calendar);
@@ -267,6 +266,7 @@ public class Utils {
 
             calendar.add(Calendar.DAY_OF_MONTH, -daysToEndOfMonth);
         }else{
+            calendar.add(Calendar.SECOND, 1);
             calendar.add(Calendar.MONTH, month);
             calendar.set(Calendar.HOUR_OF_DAY, 23);
             calendar.set(Calendar.MINUTE, 59);
@@ -671,7 +671,7 @@ public class Utils {
     }
 
     public static void main(String[] args) {
-        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddDistanceMonthV2(1530287999000L, 1);
+        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddDistanceMonthV2(1564329599000L, 1);
         System.out.println(timestampByAddThirtyDays);
     }
 }
