@@ -1,6 +1,8 @@
 package com.everhomes.filemanagement;
 
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModuleService;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 @Component
 public class FileManagementServiceImpl implements  FileManagementService{
 
+    @Autowired
+    private CoordinationProvider coordinationProvider;
     @Autowired
     private FileManagementProvider fileManagementProvider;
 
@@ -751,37 +755,47 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         Long parentId = null;
         for(int i = 1;i< pathArray.length;i++) {
-            FileContent content = fileManagementProvider.findFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId, pathArray[i], null);
-            if (null != content) {
-                parentId = content.getId();
-                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
-                    content.setStatus(FileManagementStatus.VALID.getCode());
-                    fileManagementProvider.updateFileContent(content);
-                }
-            }else{
-            	content = new FileContent();
-                content.setNamespaceId(catalog.getNamespaceId());
-                content.setOwnerId(catalog.getOwnerId());
-                content.setOwnerType(catalog.getOwnerType());
-                content.setCatalogId(catalog.getId());
-                content.setParentId(parentId);
-                if (parentId != null){
-                	FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
-                    content.setPath(parentContent.getPath());
-                    }
-                else
-                    content.setPath("");
-                content.setContentType(FileContentType.FOLDER.getCode());
-                content.setContentName(pathArray[i]);
-                fileManagementProvider.createFileContent(content);
-                parentId = content.getId();
-            }
+        	final Long parentId1 = parentId;
+        	final int i1 = i;
+        	parentId = this.coordinationProvider.getNamedLock(CoordinationLocks.FILE_CONTENT_CHECK.getCode() + getCheckLockKey(catalog.getId(),parentId,pathArray[i])).enter(() -> {
+                Long first = null;
+	            FileContent content = fileManagementProvider.findFileContentByName(UserContext.getCurrentNamespaceId(), ownerId, catalog.getId(), parentId1, pathArray[i1], null);
+	            if (null != content) {
+	            	first = content.getId();
+	                if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
+	                    content.setStatus(FileManagementStatus.VALID.getCode());
+	                    fileManagementProvider.updateFileContent(content);
+	                }
+	            }else{
+	            	content = new FileContent();
+	                content.setNamespaceId(catalog.getNamespaceId());
+	                content.setOwnerId(catalog.getOwnerId());
+	                content.setOwnerType(catalog.getOwnerType());
+	                content.setCatalogId(catalog.getId());
+	                content.setParentId(parentId1);
+	                if (parentId1 != null){
+	                	FileContent parentContent = fileManagementProvider.findFileContentById(parentId1);
+	                    content.setPath(parentContent.getPath());
+	                    }
+	                else
+	                    content.setPath("");
+	                content.setContentType(FileContentType.FOLDER.getCode());
+	                content.setContentName(pathArray[i1]);
+	                fileManagementProvider.createFileContent(content);
+	                first = content.getId();
+	            }
+	            return first;
+            }).first();
         }
         result.put("parentId", parentId);
         return result;
     }
 
-    @Override
+    private String getCheckLockKey(Long catalogId, Long parentId, String contentName) {
+		return catalogId + "-" + parentId + "-" + StringUtils.substring(contentName, 0, 8);
+	}
+
+	@Override
 	public GetFileIconListResponse getFileIconList() {
         List<FileIcon> results = fileProvider.listFileIcons();
         return new GetFileIconListResponse(results.stream().map(r -> {
