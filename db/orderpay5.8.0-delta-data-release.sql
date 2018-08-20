@@ -53,6 +53,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- AUTHOR: huangmingbo
 -- REMARK: 增加统一订单配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.siyinprint', '/siyinprint/notifySiyinprintOrderPaymentV2', '打印缴费新支付回调接口', 0, NULL, 0);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.express', '/express/notifyExpressOrderPaymentV2', '快递缴费新支付回调接口', 0, NULL, 0);
 	
 -- --------------------- SECTION END ---------------------------------------------------------
 
