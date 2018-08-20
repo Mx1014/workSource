@@ -75,7 +75,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         Byte abnormalFlag = null;
         if(params.get("abnormalFlag") != null)
-            abnormalFlag = (Byte) params.get("abnormalFlag");
+            abnormalFlag = Byte.valueOf(String.valueOf(params.get("abnormalFlag")));
 
         Long addressId = null;
         if(params.get("addressId") != null)
@@ -83,7 +83,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         Byte adminFlag = null;
         if(params.get("adminFlag") != null)
-            adminFlag = (Byte) params.get("adminFlag");
+            adminFlag = Byte.valueOf(String.valueOf(params.get("adminFlag")));
 
         Long buildingId = null;
         if(params.get("buildingId") != null)
@@ -91,7 +91,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         Integer type = null;
         if(params.get("type") != null)
-            type = (int) params.get("type");
+            type = Integer.valueOf(String.valueOf(params.get("type")));
 
         String trackingName = null;
         if(params.get("trackingName") != null)
@@ -100,6 +100,10 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         Long corpIndustryItemId = null;
         if(params.get("corpIndustryItemId") != null)
             corpIndustryItemId = (Long) params.get("corpIndustryItemId");
+
+        Byte aptitudeFlagItemId = null;
+        if(params.get("aptitudeFlagItemId") != null)
+            aptitudeFlagItemId = Byte.valueOf(String.valueOf(params.get("aptitudeFlagItemId")));
 
         Long customerCategoryId = null;
         if(params.get("customerCategoryId") != null)
@@ -119,7 +123,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         Integer lastTrackingTime = null;
         if(params.get("lastTrackingTime") != null)
-            lastTrackingTime = (Integer) params.get("lastTrackingTime");
+            lastTrackingTime = Integer.valueOf(String.valueOf(params.get("lastTrackingTime")));
 
         String levelId = null;
         if(params.get("levelId") != null)
@@ -151,7 +155,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         Integer sortType = null;
         if(params.get("sortType") != null)
-            sortType = (int)params.get("sortType");
+            sortType = Integer.valueOf(String.valueOf(params.get("sortType")));
 
 
         ExportEnterpriseCustomerCommand cmd = new ExportEnterpriseCustomerCommand();
@@ -164,6 +168,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         cmd.setOrgId(orgId);
         cmd.setAbnormalFlag(abnormalFlag);
         cmd.setAddressId(addressId);
+        cmd.setAptitudeFlagItemId(aptitudeFlagItemId);
         cmd.setBuildingId(buildingId);
         cmd.setAdminFlag(adminFlag);
         cmd.setType(type);
@@ -184,7 +189,6 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         cmd.setSortType(sortType);
 
 
-
         Long userId = (Long) params.get("userId");
 
         //  set the basic data
@@ -199,7 +203,7 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        OutputStream outputStream = customerService.exportEnterpriseCustomer(cmd);
+        OutputStream outputStream = customerService.exportEnterpriseCustomerWihtOutPrivilege(cmd);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

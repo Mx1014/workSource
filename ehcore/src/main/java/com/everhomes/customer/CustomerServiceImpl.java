@@ -4785,6 +4785,7 @@ public class CustomerServiceImpl implements CustomerService {
         params.put("buildingId", cmd.getBuildingId());
         params.put("type", cmd.getType());
         params.put("trackingName", cmd.getTrackingName());
+        params.put("aptitudeFlagItemId" ,cmd.getAptitudeFlagItemId());
         params.put("corpIndustryItemId", cmd.getCorpIndustryItemId());
         params.put("customerCategoryId", cmd.getCustomerCategoryId());
         params.put("includedGroupIds", cmd.getIncludedGroupIds());
@@ -4800,9 +4801,22 @@ public class CustomerServiceImpl implements CustomerService {
         params.put("sortField", cmd.getSortField());
         params.put("sortType", cmd.getSortType());
         params.put("task_Id", cmd.getTaskId());
-        String fileName = String.format("合同异常数据导出",  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+        String fileName = String.format("企业客户数据导出",  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+
+    @Override
+    public OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
     }
 
 }
