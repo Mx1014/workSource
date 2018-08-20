@@ -3586,8 +3586,14 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-        DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-        byte deCouplingFlag = 1;
+    	//issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
+        //只要关联了合同（包括草稿合同）就不能删除标准
+    	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
+    	if(workFlag){
+    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
+        }
+    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
+    	byte deCouplingFlag = 1;
         // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
