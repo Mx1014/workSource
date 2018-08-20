@@ -543,6 +543,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
                                                String name, String suffix) {
+    	return setContentNameAutomatically(namespaceId, ownerId, catalogId, parentId, name, suffix, null);
     }
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
             String name, String suffix, Long originContentId) {
