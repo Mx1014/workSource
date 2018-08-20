@@ -13,7 +13,9 @@ import com.everhomes.util.StringHelper;
 
 public enum AclinkCustomField {
     AUTH_LINGLING_DOOR_ID("integral_tag1", "integralTag1", Tables.EH_DOOR_AUTH.INTEGRAL_TAG1),
-    AUTH_LINGLING_SDK_KEY("string_tag2", "stringTag1", Tables.EH_DOOR_AUTH.STRING_TAG2);
+    AUTH_LINGLING_SDK_KEY("string_tag2", "stringTag1", Tables.EH_DOOR_AUTH.STRING_TAG2),
+    /**锁掌柜 APP对接使用的参数(用以远程创建/获取房卡)*/
+    AUTH_UCLBRT_PARAMES("string_tag1", "stringTag1", Tables.EH_ACLINKS.STRING_TAG1);
     
     private String fieldName;
     private String propertyName;

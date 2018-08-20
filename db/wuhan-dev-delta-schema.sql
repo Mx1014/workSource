@@ -1,0 +1,1 @@
+ALTER TABLE `eh_aclinks` CHANGE `string_tag1` `string_tag1` VARCHAR(1024) ;

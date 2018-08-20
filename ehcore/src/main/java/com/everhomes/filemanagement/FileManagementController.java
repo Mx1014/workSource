@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/fileManagement")
 public class FileManagementController extends ControllerBase {
@@ -186,13 +184,13 @@ public class FileManagementController extends ControllerBase {
 	}
 
     /**
-     * <p>根据后缀查询文件图标</p>
-     * <b>URL: /fileManagement/getFileIcon</b>
+     * <p>根据后缀查询文件图标列表</p>
+     * <b>URL: /fileManagement/getFileIconList</b>
      */
-    @RequestMapping("getFileIcon")
-    @RestReturn(GetFileIconResponse.class)
-    public RestResponse getFileIcon(GetFileIconCommand cmd){
-        return new RestResponse(fileManagementService.getFileIcon(cmd));
+    @RequestMapping("getFileIconList")
+    @RestReturn(GetFileIconListResponse.class)
+    public RestResponse getFileIconList(){
+        return new RestResponse(fileManagementService.getFileIconList());
     }
 
     /**
