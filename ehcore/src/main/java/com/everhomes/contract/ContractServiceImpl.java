@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.locale.LocaleTemplateService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -373,6 +374,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Autowired
 	private TaskService taskService;
+
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -3059,7 +3061,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		params.put("communityId", cmd.getCommunityId());
 		params.put("categoryId", cmd.getCategoryId());
 		params.put("task_Id", cmd.getTaskId());
-		String fileName = String.format("合同异常数据导出" +  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		String fileName = String.format(localeStringService.getLocalizedString("contract.export","1",UserContext.current().getUser().getLocale(),"") +  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}

@@ -4801,7 +4801,7 @@ public class CustomerServiceImpl implements CustomerService {
         params.put("sortField", cmd.getSortField());
         params.put("sortType", cmd.getSortType());
         params.put("task_Id", cmd.getTaskId());
-        String fileName = String.format("企业客户数据导出" + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+        String fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }

@@ -840,10 +840,19 @@ INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `ex
 
 
 
+-- 黄鹏宇 2018年8月20日
+-- 本地化导出标题
+
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'enterpriseCustomer.export', '1', 'zh_CN', '企业客户数据导出');
+
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'contract.export', '1', 'zh_CN', '合同异常数据导出');
 
 
-
-
+-- 黄鹏宇 2018年8月20日
+-- 替换
+UPDATE `eh_general_form_templates` SET `namespace_id` = 0 WHERE `form_name` = '请示单';
 
 
 
