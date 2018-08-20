@@ -350,9 +350,12 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 		ParkingConfigFlag enableMonthCard = ParkingConfigFlag.fromCode(bussnessStatusResponse.getEnableMonthCard());
-		ParkingRequestFlowType flowType = ParkingRequestFlowType.fromCode(Integer.valueOf(bussnessStatusResponse.getMonthCardFlow()));
-		if(enableMonthCard == ParkingConfigFlag.SUPPORT && flowType != ParkingRequestFlowType.FORBIDDEN){
-			return false;
+		Byte monthCardFlow = bussnessStatusResponse.getMonthCardFlow();
+		if(monthCardFlow!=null) {
+			ParkingRequestFlowType flowType = ParkingRequestFlowType.fromCode(Integer.valueOf(monthCardFlow));
+			if (enableMonthCard == ParkingConfigFlag.SUPPORT && flowType != ParkingRequestFlowType.FORBIDDEN) {
+				return false;
+			}
 		}
 		return true;
 	}
