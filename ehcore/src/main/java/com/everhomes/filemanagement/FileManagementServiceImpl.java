@@ -44,6 +44,9 @@ public class FileManagementServiceImpl implements  FileManagementService{
     private PortalService portalService;
 
     @Autowired
+    private FileProvider fileProvider;
+
+    @Autowired
     private ContentServerService contentServerService;
 
     @Autowired
@@ -461,6 +464,10 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 //更新上级目录/文件夹更新时间
                 updateParentContent(content);
                 fileManagementProvider.updateFileContentStatusByIds(contentId, FileManagementStatus.INVALID.getCode());
+                if (FileContentType.fromCode(content.getContentType()) == FileContentType.FOLDER) {
+                    fileManagementProvider.deleteFileContentByContentPath(content.getPath());
+                }
+
             }
         }
     }
@@ -536,8 +543,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
                                                String name, String suffix) {
-        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId,
-                name, suffix);
+    }
+    private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
+            String name, String suffix, Long originContentId) {
+        FileContent content = fileManagementProvider.findFileContentByNameNotEqId(namespaceId, ownerId, catalogId, parentId,
+                name, suffix, null);
         if (content != null) {
             List<String> allNames = fileManagementProvider.listFileContentNames(namespaceId, ownerId, catalogId, parentId,
                     name, suffix);
@@ -554,8 +564,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
 
     private void checkFileContentName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name,
                                       String suffix, Long contentId) {
-        FileContent content = fileManagementProvider.findFileContentByName(namespaceId, ownerId, catalogId, parentId,
-                name, suffix);
+        FileContent content = fileManagementProvider.findFileContentByNameNotEqId(namespaceId, ownerId, catalogId, parentId,
+                name, suffix, contentId);
         if (content != null) {
             if (content.getId().longValue() != contentId.longValue())
                 throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_NAME_ALREADY_EXISTS,
@@ -683,7 +693,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                     content.setStatus(FileManagementStatus.VALID.getCode());
                     fileManagementProvider.updateFileContent(content);
                 }
-
+                content.setCatalogId(catalogId);
                 //  1.whether the name has been used
                 String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), catalogId,
                         parentId, content.getContentName(), content.getContentSuffix());
@@ -771,9 +781,14 @@ public class FileManagementServiceImpl implements  FileManagementService{
     }
 
     @Override
-	public GetFileIconResponse getFileIcon(GetFileIconCommand cmd) {
-		return new GetFileIconResponse(fileService.findUrlByFileType(cmd.getFileSuffix()));
-	}
+	public GetFileIconListResponse getFileIconList() {
+        List<FileIcon> results = fileProvider.listFileIcons();
+        return new GetFileIconListResponse(results.stream().map(r -> {
+            FileIconDTO dto = ConvertHelper.convert(r, FileIconDTO.class);
+            dto.setIconUri(contentServerService.parserUri(r.getIconUri()));
+            return dto;}).collect(Collectors.toList()));
+        
+    }
 
     @Override
     public ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd) {

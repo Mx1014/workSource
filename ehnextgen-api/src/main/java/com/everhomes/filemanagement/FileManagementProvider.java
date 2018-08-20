@@ -51,5 +51,8 @@ public interface FileManagementProvider {
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
 
+	FileContent findFileContentByNameNotEqId(Integer namespaceId, Long ownerId, Long catalogId,
+			Long parentId, String name, String suffix, Long originContentId);
+
 //    FileCatalog findAllStatusFileCatalogByName(Integer currentNamespaceId, Long ownerId, String name);
 }
