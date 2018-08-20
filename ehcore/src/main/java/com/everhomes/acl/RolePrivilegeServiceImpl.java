@@ -178,6 +178,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -191,6 +192,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -2000,15 +2002,46 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	                "non-privileged.");
 	    }
 	    
+	    if(cmd.getOwnerId() == null) {
+			cmd.setOwnerId(cmd.getOrganizationId());
+			cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+	    }
+	    
 		dbProvider.execute((TransactionStatus status) -> {
-			// 删除原来的超管权限
+			List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(UserContext.current().getUser().getId());
+			String token = null;
+			List<String> phones = identifiers.stream().filter((r) -> {
+	            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;
+	        }).map((r) -> {
+	        	return r.getIdentifierToken();
+	        }).collect(Collectors.toList());
+			if(phones.size() > 0) {
+				token = phones.get(0);
+			}
+	        
+			if(token != null && (cmd.getReservePrivilege() == null || cmd.getReservePrivilege().equals(TrueOrFalseFlag.FALSE.getCode()))) {
+				//删除旧的管理员
+				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+
+				OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), token);
+				List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
+				if(detail != null){
+					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+					for (RoleAssignment roleAssignment: roleAssignments) {
+						if(roleIds.contains(roleAssignment.getRoleId())){
+							aclProvider.deleteRoleAssignment(roleAssignment.getId());
+						}
+					}
+				}
+			}
+			
+			// 删除原来此人的超管权限
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
-				long ownerId = cmd.getOwnerId() != null ? cmd.getOrganizationId() : 0;
-				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), ownerId, detail.getTargetType(), detail.getTargetId());
+				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
 					for (RoleAssignment roleAssignment: roleAssignments) {
 						if(roleIds.contains(roleAssignment.getRoleId())){
 							aclProvider.deleteRoleAssignment(roleAssignment.getId());
@@ -2907,8 +2940,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	            if (org.getAdminTargetId() != null && !org.getAdminTargetId().equals(0l)) {
 	                return org.getAdminTargetId();
 	            } else {
-	                //设置默认超级管理员
-	                if(members != null && members.size() > 0) {
+	                //不再设置默认超级管理员
+	                /* if(members != null && members.size() > 0) {
 	                    for(int i = members.size()-1; i >= 0; i--) {
 	                    	//reverse order
 	                    	OrganizationMember mb = members.get(i);
@@ -2920,7 +2953,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	                            
 	                    }
 	                    
-	                }
+	                } */
+	                
 	            }
 	        }
 	        return null;
@@ -3018,7 +3052,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(EntityType.COMMUNITY == EntityType.fromCode(r.getResourceType())){
 						Community community = communityProvider.findCommunityById(r.getResourceId());
 						if(community != null){
-							dto.setProjectName(community.getName());
+                            dto.setCommunityType(community.getCommunityType());
+                            dto.setProjectName(community.getName());
 							//获取园区下的子项目
 							ListChildProjectCommand cmd = new ListChildProjectCommand();
 							cmd.setProjectType(EntityType.COMMUNITY.getCode());
@@ -3309,9 +3344,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
-	
+
+
 	/**
-	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false 
+	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false
 	 * by Janson
 	 * @param orgId
 	 * @param userId
@@ -3320,12 +3356,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public boolean checkIsSystemOrAppAdmin(Long orgId, Long userId) {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		int pageSize = 10;
-		
+
 		//判断是否是应用管理员
 		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), orgId, EntityType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		if(authorizations == null || authorizations.size() == 0) {
 			locator = new CrossShardListingLocator();
-			
+
 			//判断是否是系统管理员
 			List<OrganizationMember> members =
 					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
@@ -3336,10 +3372,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-
 	@Override
 	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 		ListServiceModuleAppsAdministratorResponse response = new ListServiceModuleAppsAdministratorResponse();
@@ -3355,7 +3390,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			pageSize = cmd.getPageSize();
 		}
 		
-		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), cmd.getModuleId(), IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		List<ServiceModuleAppsAuthorizationsDto> dtos = authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();
 

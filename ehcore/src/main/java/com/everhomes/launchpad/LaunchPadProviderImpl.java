@@ -14,6 +14,7 @@ import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
+import com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord;
 import com.everhomes.user.UserContext;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -458,7 +459,24 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return list;
 	}
 
-    @Override
+
+	@Override
+	public void deleteLaunchPadLayout(Integer namespaceId, String name) {
+
+		assert namespaceId != null;
+		assert name != null;
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLaunchPadLayouts.class));
+		DeleteQuery<EhLaunchPadLayoutsRecord> query = context.deleteQuery(Tables.EH_LAUNCH_PAD_LAYOUTS);
+		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name));
+		query.execute();
+	}
+
+
+
+
+	@Override
     public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));

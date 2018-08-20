@@ -602,7 +602,7 @@ public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cm
     return response;
 }
 
-// this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改，一个账单组不能重复收费项目id       4
+// this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改 
 /**
  * <p>为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改</p>
  * <b>URL: /asset/addOrModifyRuleForBillGroup</b>
@@ -1399,7 +1399,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return restResponse;
     }
     
-    /*
+    /**
      * <p>计算天企汇历史合同的租赁总额字段接口</p>
      * <b>URL: /asset/calculateRentForContract</b>
      */
@@ -1643,6 +1643,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     @RestReturn(value = String.class)
     public RestResponse batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
         assetService.batchUpdateBillsToPaid(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>仅用于测试手动测试欠费天数</p>
+     * <b>URL: /asset/testUpdateBillDueDayCountOnTime</b>
+     */
+    @RequestMapping("testUpdateBillDueDayCountOnTime")
+    @RestReturn(value = String.class)
+    public RestResponse testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+        assetService.testUpdateBillDueDayCountOnTime(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

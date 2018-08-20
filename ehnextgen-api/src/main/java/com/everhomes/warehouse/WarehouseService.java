@@ -1,5 +1,6 @@
 package com.everhomes.warehouse;
 
+import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
@@ -53,4 +54,7 @@ public interface WarehouseService {
     void deleteRequest(DeleteRequestCommand cmd);
 
     ListMaterialLogsBySupplierResponse listMaterialLogsBySupplier(ListMaterialLogsBySupplierCommand cmd);
+    
+	void exportStocksByCommunityId(SearchWarehouseStocksCommand cmd, HttpServletResponse httpServletResponse);
+	ImportFileTaskDTO importStocksData(ImportStocksCommand cmd, MultipartFile multipartFile);
 }

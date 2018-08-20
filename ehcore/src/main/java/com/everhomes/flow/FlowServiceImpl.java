@@ -5987,6 +5987,9 @@ public class FlowServiceImpl implements FlowService {
         if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
+        if (flowCase.getProjectId() != null) {
+        	dto.setCommunityId(flowCase.getProjectId());
+        }
 
         FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
         stepDTO.setEventType(FlowEventType.BUTTON_FIRED.getCode());

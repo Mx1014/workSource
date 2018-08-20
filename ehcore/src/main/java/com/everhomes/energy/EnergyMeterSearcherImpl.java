@@ -213,6 +213,18 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         }
 
         List<FilterBuilder> filterBuilders = new ArrayList<>();
+        //编号精确搜索 by xiongying20170525
+        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+            /*TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
+            filterBuilders.add(meterNumberTermFilter);*/
+        	//支持模糊搜索 --by djm 缺陷 #34940
+            String pattern = "*" + cmd.getMeterNumber() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("meterNumber", pattern));
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("meterNumber");
+        }
 //        //编号精确搜索 by xiongying20170525
 //        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
 //            TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());

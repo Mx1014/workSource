@@ -10,6 +10,9 @@ import com.everhomes.statistics.event.step.EventStatPortalStatStep;
 import com.everhomes.statistics.event.step.EventStatProcessContentLogStep;
 import com.everhomes.statistics.event.step.EventStatStep;
 import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
+import com.everhomes.yellowPage.stat.ClickStatProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,7 +50,13 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
 
     @Autowired
     private StatEventStatisticProvider statEventStatisticProvider;
+    
+    @Autowired
+    ClickStatProvider clickStatProvider;
 
+    @Autowired
+    ClickStatDetailProvider clickStatDetailProvider;
+    
     private final List<StatEventStep> steps = new LinkedList<>();
 
     @Override
@@ -129,6 +139,10 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
             statEventPortalStatisticProvider.deleteEventPortalStatByDate(date);
             statEventStatisticProvider.deleteEventStatByDate(date);
             statEventTaskLogProvider.deleteEventTaskLogByDate(date);
+            
+            //服务联盟埋点统计删除
+            clickStatProvider.deleteStat(date);
+            clickStatDetailProvider.deleteStatDetail(date);
         }
     }
 
@@ -162,8 +176,8 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
     }
 
     public void executeTask(StatExecuteEventTaskCommand cmd) {
-        LocalDate startDate = LocalDate.parse(cmd.getStartDate(), DateTimeFormatter.BASIC_ISO_DATE);
-        LocalDate endDate = LocalDate.parse(cmd.getEndDate(), DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate startDate = LocalDate.parse(cmd.getStartDate(), DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDate endDate = LocalDate.parse(cmd.getEndDate(), DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         if (startDate.isAfter(endDate)) {
             LocalDate tmp = startDate;

@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
+ *     <li>categoryId: 合同应用id</li>
  *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
@@ -23,6 +24,16 @@ public class EntryContractCommand {
     private Integer namespaceId;
     
     private Byte contractApplicationScene = 0;
+    
+    private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 
     public Byte getContractApplicationScene() {
 		return contractApplicationScene;

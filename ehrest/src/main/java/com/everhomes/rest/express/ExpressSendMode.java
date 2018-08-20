@@ -6,12 +6,14 @@ package com.everhomes.rest.express;
  * <ul>
  * <li>SELF: 1，服务点自寄</li>
  * <li>VISIT: 2，快递员上门收件</li>
+ * <li>STATISTICS: 3，统计用,不用寄取（国贸快递专有）</li>
  * </ul>
  */
 public enum ExpressSendMode {
 	SELF((byte)1, "服务点自寄"),
-	VISIT((byte)2, "快递员上门收件");
-	
+	VISIT((byte)2, "快递员上门收件"),
+	STATISTICS((byte)3, "统计用,不用寄取");
+
 	private byte code;
 	private String desc;
 	
