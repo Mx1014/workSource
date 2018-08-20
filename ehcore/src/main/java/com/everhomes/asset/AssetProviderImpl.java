@@ -3338,14 +3338,25 @@ public class AssetProviderImpl implements AssetProvider {
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
-//                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-                Boolean coupled = true;
-                if(cid.longValue() != namespaceId.longValue()){
-                    coupled = checkCoupling(cid,ownerType, categoryId);
-                }
-                if(coupled){
-                    de_coupling = 0;
-                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
+//                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+//                Boolean coupled = true;
+//                if(cid.longValue() != namespaceId.longValue()){
+//                    coupled = checkCoupling(cid,ownerType, categoryId);
+//                }
+//                if(coupled){
+//                    de_coupling = 0;
+//                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
+//                }
+                
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cid);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	de_coupling = 0;
+                	configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
                 }
             }
         }else{
@@ -3354,21 +3365,21 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
-    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
-        DSLContext context = getReadOnlyContext();
-        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
-                .from(itemScope)
-                .where(itemScope.OWNER_TYPE.eq(ownerType))
-                .and(itemScope.OWNER_ID.eq(communityId))
-                .and(itemScope.CATEGORY_ID.eq(categoryId))
-                .fetch(itemScope.DECOUPLING_FLAG);
-        for(int i = 0; i < flags.size(); i ++){
-            if(flags.get(i).byteValue() == (byte)1){
-                return false;
-            }
-        }
-        return true;
-    }
+//    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
+//        DSLContext context = getReadOnlyContext();
+//        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
+//                .from(itemScope)
+//                .where(itemScope.OWNER_TYPE.eq(ownerType))
+//                .and(itemScope.OWNER_ID.eq(communityId))
+//                .and(itemScope.CATEGORY_ID.eq(categoryId))
+//                .fetch(itemScope.DECOUPLING_FLAG);
+//        for(int i = 0; i < flags.size(); i ++){
+//            if(flags.get(i).byteValue() == (byte)1){
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -3864,14 +3875,14 @@ public class AssetProviderImpl implements AssetProvider {
             }else {
             	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
             	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-            	isProjectNavigateDefaultCmd.setModuleType(AssetModuleType.GROUPS.getCode());
-            	isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-            	isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-            	isProjectNavigateDefaultCmd.setOwnerType(cmd.getOwnerType());
-            	IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetService.isProjectNavigateDefault(isProjectNavigateDefaultCmd);
-            	if(isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {//1：代表使用默认配置，那么需要同步
-                    InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-            	}
+                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+                }
             }
             return nextGroupId;
         }
@@ -5996,7 +6007,11 @@ public class AssetProviderImpl implements AssetProvider {
                             .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                             .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                             .fetchInto(PaymentChargingItemScope.class);
-            		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		if(scopes.size() > 0) {
+            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}else {
+            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}
             	}else {
             		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
             	}
@@ -6008,26 +6023,47 @@ public class AssetProviderImpl implements AssetProvider {
 	public IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
-        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
-        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
-        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .fetchInto(PaymentChargingStandardsScopes.class);
-        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .fetchInto(PaymentChargingStandardsScopes.class);
-        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
-        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        	}else {
-        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        	}
-        }
+		EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
+		List<PaymentChargingItemScope> itemScopes = context.selectFrom(t)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .fetchInto(PaymentChargingItemScope.class);
+		if(itemScopes != null && itemScopes.size() == 0) {
+			response.setDefaultStatus((byte)0);//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
+		}else {
+			EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+	        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
+	        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                .fetchInto(PaymentChargingStandardsScopes.class);
+	        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+	        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        }else {//说明该域空间下已经有数据了
+	        	scopes = context.selectFrom(t1)
+	            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                    .fetchInto(PaymentChargingStandardsScopes.class);
+	        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
+	        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        	}else {
+	        		scopes = context.selectFrom(t1)
+		            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+		                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+		                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+		                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+		                    .fetchInto(PaymentChargingStandardsScopes.class);
+	        		if(scopes.size() > 0) {
+            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}else {
+            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}
+	        	}
+	        }
+		}
         return response;
 	}
 	
