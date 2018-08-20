@@ -6158,7 +6158,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         Organization org = checkOrganization(cmd.getOrganizationId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
 
         List<Long> departmentIds = cmd.getDepartmentIds();
 
