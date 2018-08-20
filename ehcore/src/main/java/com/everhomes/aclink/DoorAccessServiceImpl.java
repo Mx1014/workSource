@@ -2633,6 +2633,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType driverType, boolean generate) {
+    	Long t0 = DateHelper.currentGMTTime().getTime();
         User user = UserContext.current().getUser();
 
         ListingLocator locator = new ListingLocator();
@@ -2643,7 +2644,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
         resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
-        
+        Long tUcl = 0L;
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
@@ -2673,8 +2674,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
-                
+                Long t1 = DateHelper.currentGMTTime().getTime();
                 doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+                Long t2 = DateHelper.currentGMTTime().getTime();
+                LOGGER.debug("一次请求耗时" +(t2 - t1));
+                tUcl += t2 - t1;
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
@@ -2707,7 +2711,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
            
             }
-            
+        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0));
+        LOGGER.debug("UCL请求时间" + (tUcl));
         return resp;              
      }
     
