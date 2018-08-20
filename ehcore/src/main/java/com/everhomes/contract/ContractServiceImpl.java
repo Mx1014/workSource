@@ -3059,7 +3059,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		params.put("communityId", cmd.getCommunityId());
 		params.put("categoryId", cmd.getCategoryId());
 		params.put("task_Id", cmd.getTaskId());
-		String fileName = String.format("合同异常数据导出",  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		String fileName = String.format("合同异常数据导出" +  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
