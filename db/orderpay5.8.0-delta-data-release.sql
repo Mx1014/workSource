@@ -49,6 +49,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- REMARK: 增加统一订单错误码
 	INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ((@locale_string_id := @locale_string_id + 1), 'pmtask', '10019', 'zh_CN', '找不到账单');
+
+-- AUTHOR: huangmingbo
+-- REMARK: 增加统一订单配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.siyinprint', '/siyinprint/notifySiyinprintOrderPaymentV2', '打印缴费新支付回调接口', 0, NULL, 0);
 	
 -- --------------------- SECTION END ---------------------------------------------------------
 
