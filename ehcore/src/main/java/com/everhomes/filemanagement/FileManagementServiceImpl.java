@@ -548,7 +548,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
     private String setContentNameAutomatically(Integer namespaceId, Long ownerId, Long catalogId, Long parentId,
             String name, String suffix, Long originContentId) {
         FileContent content = fileManagementProvider.findFileContentByNameNotEqId(namespaceId, ownerId, catalogId, parentId,
-                name, suffix, null);
+                name, suffix, originContentId);
         if (content != null) {
             List<String> allNames = fileManagementProvider.listFileContentNames(namespaceId, ownerId, catalogId, parentId,
                     name, suffix);
