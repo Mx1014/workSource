@@ -1889,6 +1889,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		OpenCustomRequestFormCommand cmd2 = ConvertHelper.convert(cmd,OpenCustomRequestFormCommand.class);
+		UpdateLeasePromotionRequestFormCommand closeCmd = ConvertHelper.convert(cmd,UpdateLeasePromotionRequestFormCommand.class);
+		//先删除所有表单
+		closeCustomRequestForm(closeCmd);
+		
 		cmd2.setSourceType(EntityType.LEASE_PROJECT.getCode());
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
