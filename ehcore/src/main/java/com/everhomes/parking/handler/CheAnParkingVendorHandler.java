@@ -29,7 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "CHEAN")
 public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheAnParkingVendorHandler.class);
