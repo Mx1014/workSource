@@ -438,6 +438,19 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
+	 * <p>删除选择过的合同模板</p>
+	 * <b>URL: /contract/setPrintContractTemplate</b>
+	 */
+	@RequestMapping("deletePrintContractTemplate")
+	@RestReturn(String.class)
+	public RestResponse deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.deletePrintContractTemplate(cmd);
+		return new RestResponse();
+	}
+	
+	/**
 	 * <p>获取合同详情，以及模板详情信息</p>
 	 * <b>URL: /contract/getContractTemplateDetail</b>
 	 */

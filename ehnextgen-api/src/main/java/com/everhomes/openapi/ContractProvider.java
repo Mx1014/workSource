@@ -107,6 +107,7 @@ public interface ContractProvider {
 	ContractTemplate findContractTemplateById(Long id);
 	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, String name, Long pageAnchor, Integer pageSize);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
+	//void deletePrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId);
 	Boolean getContractTemplateById(Long id);
 
 	Double getTotalRentInCommunity(Long communityId);
@@ -122,6 +123,8 @@ public interface ContractProvider {
 	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
 
 	Long findCategoryIdByNamespaceId(Integer namespaceId);
+
+	
 
 	
 }

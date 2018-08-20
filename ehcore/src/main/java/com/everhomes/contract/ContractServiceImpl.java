@@ -3808,4 +3808,25 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
         return sdf.format(time);
     }
 
+	@Override
+	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		if (cmd.getContractId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		//1删除合同模板映射,只有待发起，草稿合同能修改
+		Contract contract = checkContract(cmd.getContractId());
+		if(!ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			LOGGER.error("contract is not approve qualitied! id: {}", cmd.getId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+					"contract is not approve qualitied!");
+		}
+		contract.setTemplateId(null);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+	}
+
 }

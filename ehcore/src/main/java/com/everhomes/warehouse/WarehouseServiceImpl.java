@@ -1732,6 +1732,12 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             //返回requisitionId
             dto.setRequisitionId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
+            // #36197 领用管理不显示领用人 -- by djm
+            User user = userProvider.findUserById(requestMaterial.getRequestId());
+			if(user != null) {
+				dto.setRequestUserName(user.getNickName());
+			}
+            
             repeadFilter.add(requestMaterial.getRequestId());
             requestDTOs.add(dto);
         }
@@ -1930,6 +1936,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                             dto.setRequestUserName(members.get(0).getContactName());
                         }
                     }
+                    // #36197 领用管理不显示领用人 -- by djm
+                    User user = userProvider.findUserById(request.getRequestUid());
+        			if(user != null) {
+        				dto.setRequestUserName(user.getNickName());
+        			}
                 }
                 requestDTOs.add(dto);
             });
