@@ -1,7 +1,6 @@
 package com.everhomes.point.rpc;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,21 +8,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.point.GetUserPointCommand;
 import com.everhomes.rest.point.ListPointLogsCommand;
 import com.everhomes.rest.point.ListPointLogsResponse;
 import com.everhomes.rest.point.PointLogDTO;
 import com.everhomes.rest.point.PointScoreDTO;
-import com.everhomes.util.ConvertHelper;
+import com.everhomes.rest.point.PublishEventCommand;
 
 @Service
 public class PointServiceRPCRest extends PointServerRPCRestService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PointServiceRPCRest.class);
 	
+	/**
+	 * 获取用户积分
+	 * @param cmd
+	 * @return
+	 */
 	public PointScoreDTO getUserPoint(GetUserPointCommand cmd) {  
    	
     	RestResponse resp =
@@ -49,31 +51,63 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
     	return null ;
     }
 
-	public ListPointLogsResponse getUserPointLogs(ListPointLogsCommand cmd) {  
-	   	
-    	RestResponse resp =
-                call(URIConstants.POINTLOGS_LISTUSERPOINTLOGS_URL, cmd, RestResponse.class);
-    	if(resp == null){
-    		return null ;
-    	}
-    	Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
-    	if(map !=null){
-    		//LOGGER.info(resp.getResponseObject().toString());
-    		ListPointLogsResponse response  = new ListPointLogsResponse();
-    		Integer nextPageAnchor =map.get("nextPageAnchor")==null?null:(Integer)map.get("nextPageAnchor");
-    		response.setNextPageAnchor(nextPageAnchor==null?null:nextPageAnchor.longValue());
-    		response.setLogs(null);
-    		
-    		List<PointLogDTO> logs = map.get("logs")==null?null:(List<PointLogDTO>)map.get("logs");
-    		if(logs != null){
-    			response.setLogs(logs);
-    		}
-    		
-        	return response ;
-    	}
-    	
-    	return null ;
-    }
+	/**
+	 * 查询用户积分获取
+	 * @param cmd
+	 * @return
+	 */
+	
+	    public ListPointLogsResponse  getUserPointLogs(ListPointLogsCommand cmd){  
+		   	
+	    	RestResponse resp =
+	                call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+	    	if(resp == null){
+	    		return null ;
+	    	}
+	    	Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
+	    	if(map !=null){
+	    		//LOGGER.info(resp.getResponseObject().toString());
+	    		ListPointLogsResponse response  = new ListPointLogsResponse();
+	    		Integer nextPageAnchor =map.get("nextPageAnchor")==null?null:(Integer)map.get("nextPageAnchor");
+	    		response.setNextPageAnchor(nextPageAnchor==null?null:nextPageAnchor.longValue());
+	    		
+	    		List<PointLogDTO> logs = map.get("logs")==null?null:(List<PointLogDTO>)map.get("logs");
+	    		if(logs != null){
+	    			response.setLogs(logs);
+	    		}
+	    		
+	        	return response ;
+	    	}
+	    	
+	    	return null ;
+	    }
+	    
+	    /**
+	     * 积分消费
+	     * @param cmd
+	     * @return
+	     */
+	    public boolean publishPointCostEvent(PublishEventCommand cmd) {  
+		   	
+	    	RestResponse resp =
+	                call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+	    	if(resp == null){
+	    		return false ;
+	    	}
+	    	Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
+	    	if(map !=null){
+	    		try{
+	    			Boolean result = (Boolean)map.get("result");
+	    			LOGGER.info(map.toString());
+	    			return result ;
+	    		}catch(Exception e){
+	    			LOGGER.info(map.toString());
+	    			return false ;
+	    		}   		   	    	
+	    	}
+	    	
+	    	return false ;
+	    }
 
 
 }
