@@ -34,5 +34,10 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `biz_order_no`  varchar(64) 
 -- AUTHOR: 马世亨 20180817
 -- REMARK: 物业报修 保存统一订单系统id
 ALTER TABLE `eh_pm_task_orders` ADD COLUMN `general_order_id` varchar(64) NULL COMMENT '统一订单系统订单id';
+
+-- AUTHOR: huangmingbo 0820
+-- REMARK: 云打印 保存统一订单系统id
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `general_order_id` VARCHAR(64) NULL COMMENT '统一订单系统订单编号' ;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
