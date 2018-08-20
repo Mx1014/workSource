@@ -97,9 +97,17 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
                 continue;
             }
             if(ParkingBusinessType.CAR_NUM == type){
-                return ParkingCurrentInfoType.CAR_NUM.getCode();
+                ParkingConfigFlag flag = ParkingConfigFlag.fromCode(dto.getEnableFlag());
+                if(flag == ParkingConfigFlag.SUPPORT){
+                    return ParkingCurrentInfoType.CAR_NUM.getCode();
+                }
+                return ParkingCurrentInfoType.NONE.getCode();
             }else if(ParkingBusinessType.FREE_PLACE == type){
-                return ParkingCurrentInfoType.FREE_PLACE.getCode();
+                ParkingConfigFlag flag = ParkingConfigFlag.fromCode(dto.getEnableFlag());
+                if(flag == ParkingConfigFlag.SUPPORT){
+                    return ParkingCurrentInfoType.FREE_PLACE.getCode();
+                }
+                return ParkingCurrentInfoType.NONE.getCode();
             }else{
                 return dto.getEnableFlag();
             }
