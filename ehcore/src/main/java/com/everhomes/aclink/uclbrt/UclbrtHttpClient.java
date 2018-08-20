@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.techpark.punch.PunchConstants;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -42,16 +43,19 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.aclink.DoorAccessServiceImpl;
 import com.everhomes.rest.aclink.UclbrtParamsDTO;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
  * @author uclbrt
  *
  */
+@Component
 public class UclbrtHttpClient {
 
 	@Autowired
