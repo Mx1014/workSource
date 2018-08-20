@@ -6,17 +6,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
-import com.everhomes.rest.common.Router;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
@@ -57,6 +53,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private WorkReportMessageService workReportMessageService;
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
@@ -457,9 +456,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
         ReportValiditySettingDTO setting = (ReportValiditySettingDTO) JSON.parse(report.getValiditySetting());
-        LocalDateTime startTime = WorkReportUtil.convertSettingToTime(cmd.getReportTime(), cmd.getReportType(),
+        LocalDateTime startTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
                 setting.getStartType(), setting.getStartMark(), setting.getStartTime());
-        LocalDateTime endTime = WorkReportUtil.convertSettingToTime(cmd.getReportTime(), cmd.getReportType(),
+        LocalDateTime endTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
                 setting.getEndType(), setting.getEndMark(), setting.getEndTime());
         //  whether the post time is right
         if(!checkPostTime(LocalDateTime.now(), startTime, endTime))
@@ -490,35 +489,25 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setCurrentOrganizationId(cmd.getOrganizationId());
         formCommand.setValues(cmd.getValues());
 
-        Long reportValId = dbProvider.execute((TransactionStatus status) -> {
-            Long valId = workReportValProvider.createWorkReportVal(reportVal);
-            formCommand.setSourceId(valId);
+        dbProvider.execute((TransactionStatus status) -> {
+            Long reportValId = workReportValProvider.createWorkReportVal(reportVal);
+            formCommand.setSourceId(reportValId);
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, valId, receiverId, user.getId(), cmd.getOrganizationId());
+                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportValId, receiverId, user.getId(), cmd.getOrganizationId());
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                if(ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY) {
-                    //TODO: 立即发消息
-                /*sendMessageAfterEditWorkReportVal(
-                        "post",
-                        reportVal.getApplierName(),
-                        report.getReportName(),
-                        receiverId,
-                        reportVal.getReportId(),
-                        valId,
-                        cmd.getOrganizationId(),
-                        user);*/
-                }
+                if(ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY)
+                    workReportMessageService.postWorkReportMessage(report, reportVal, receiverId, user);
             }
-            return valId;
+            return null;
         });
 
         //  return back.
         WorkReportValDTO dto = new WorkReportValDTO();
         dto.setReportId(report.getId());
-        dto.setReportValId(reportValId);
+        dto.setReportValId(reportVal.getId());
         return dto;
     }
 
