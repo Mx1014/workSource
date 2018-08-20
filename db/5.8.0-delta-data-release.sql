@@ -831,7 +831,11 @@ DROP PROCEDURE IF EXISTS update_url_module_function;
 set @id = (select MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
 
+-- 黄鹏宇 2018年8月20日
+-- 科兴同步按钮
 
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43960, 21200, 43960, '企业客户管理 全量同步权限');
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43970, 21100, 43970, '合同管理 全量同步权限');
 
 
 
