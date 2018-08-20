@@ -781,7 +781,7 @@ UPDATE eh_portal_layouts a SET type = 3, index_flag = 0 WHERE type IS NULL AND E
 UPDATE eh_portal_layouts SET type = 2, index_flag = 0 WHERE type IS NULL;
 
 --
-DELETE FROM eh_service_modules  WHERE  id in (400, 90000, 90100, 92000, 92100, 92200)
+DELETE FROM eh_service_modules  WHERE  id in (400, 90000, 90100, 92000, 92100, 92200);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('400', '其他', '0', '/400', '1', '1', '2', '40', '2018-07-31 11:44:40', NULL, NULL, '2018-07-31 11:44:44', '0', '0', '0', '0', '', '1', '1', 'classify');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90000', '第三方服务模块', '400', '/400/90000', '1', '2', '2', '20', '2017-07-04 15:55:50', NULL, NULL, '2017-09-08 18:59:10', '0', '0', '0', '0', '', '1', '1', 'classify');
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90100', '第三方服务模块', '90000', '/400/90000/90100', '1', '3', '2', '10', '2018-07-31 12:10:57', NULL, '14', NULL, '0', '0', '0', '1', '', '1', '1', 'module');
@@ -798,7 +798,7 @@ BEGIN
   DECLARE ans INTEGER;
   DECLARE aversionid LONG;
 	DECLARE aname VARCHAR(200);
-	DECLARE adata VARCHAR(200);
+	DECLARE adata VARCHAR(10240);
 	DECLARE atype INTEGER;
   DECLARE amoduleid LONG;
   DECLARE done INT DEFAULT FALSE;
@@ -831,7 +831,11 @@ DROP PROCEDURE IF EXISTS update_url_module_function;
 set @id = (select MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
 
+-- 黄鹏宇 2018年8月20日
+-- 科兴同步按钮
 
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43960, 21200, 43960, '企业客户管理 全量同步权限');
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43970, 21100, 43970, '合同管理 全量同步权限');
 
 
 
