@@ -24,6 +24,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -4312,11 +4313,15 @@ public class AssetProviderImpl implements AssetProvider {
         //只要关联了合同（包括草稿合同）就不能删除账单组，也不能修改其中的费项。
         //看是否关联了合同
         EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        EhContracts t2 = Tables.EH_CONTRACTS.as("t2");
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
-              .from(t)
+              .from(t,t2)
               .where(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
               .and(t.BILL_GROUP_ID.eq(rule.getBillGroupId()))
               .and(t.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+              //issue-36219 修复“【物业缴费6.3】当把账单组关联的合同全部删除掉时，账单组还是不能删除”，如果合同处于已删除状态，合同展示列表不会展示，此时账单组应该可以删除
+              .and(t.CONTRACT_ID.eq(t2.ID))
+              .and(t2.STATUS.notEqual(ContractStatus.INACTIVE.getCode()))
               .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
         	return true;
