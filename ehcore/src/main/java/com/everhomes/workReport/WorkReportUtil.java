@@ -62,7 +62,7 @@ public class WorkReportUtil {
         return java.sql.Date.valueOf(date);
     }
 
-    public static String displayReportTime(Byte rType, java.sql.Date rTime) {
+    static String displayReportTime(Byte rType, java.sql.Date rTime) {
         DateTimeFormatter mdFormat = DateTimeFormatter.ofPattern("M月d日");
         DateTimeFormatter ymFormat = DateTimeFormatter.ofPattern("yyyy年M月");
 //        DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("MM月dd日");

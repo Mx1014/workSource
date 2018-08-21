@@ -34,10 +34,11 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
             locale = user.getLocale();
         }
 
+        //  1.get the content
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        //  1.get the content
+        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -55,6 +56,37 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
         //  3.send it
         sendMessage(content, receiverId, actionData, "新的汇报");
+    }
+
+    @Override
+    public void updateWorkReportMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user){
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if (user != null) {
+            locale = user.getLocale();
+        }
+
+        //  1.get the content
+        Map<String, String> model = new HashMap<>();
+        model.put("applierName", reportVal.getApplierName());
+        model.put("reportName", report.getReportName());
+        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime()));
+        String content = localeTemplateService.getLocaleTemplateString(
+                Namespace.DEFAULT_NAMESPACE,
+                WorkReportNotificationTemplateCode.SCOPE,
+                WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL,
+                locale,
+                model,
+                "Template Not Found"
+        );
+
+        //  2.get the route
+        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
+        actionData.setReportId(reportVal.getReportId());
+        actionData.setReportValId(reportVal.getId());
+        actionData.setOrganizationId(reportVal.getOrganizationId());
+
+        //  3.send it
+        sendMessage(content, receiverId, actionData, "汇报更新");
     }
 
     private void sendMessage(String content, Long receiverId, WorkReportDetailsActionData actionData, String title){
@@ -92,14 +124,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         if (messageType.equals("post")) {
             content =
         } else if (messageType.equals("update")) {
-            content = localeTemplateService.getLocaleTemplateString(
-                    Namespace.DEFAULT_NAMESPACE,
-                    WorkReportNotificationTemplateCode.SCOPE,
-                    WorkReportNotificationTemplateCode.UPDATE_WORK_REPORT_VAL,
-                    locale,
-                    model,
-                    "Template Not Found"
-            );
+
         }
     }*/
 }

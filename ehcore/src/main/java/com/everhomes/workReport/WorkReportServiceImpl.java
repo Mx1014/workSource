@@ -583,15 +583,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                /*sendMessageAfterEditWorkReportVal(
-                        "update",
-                        reportVal.getApplierName(),
-                        report.getReportName(),
-                        receiverId,
-                        reportVal.getReportId(),
-                        reportVal.getId(),
-                        cmd.getOrganizationId(),
-                        user);*/
+                workReportMessageService.updateWorkReportMessage(report, reportVal, receiverId, user);
             }
             return null;
         });
