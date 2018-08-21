@@ -478,7 +478,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         reportVal.setApplierName(fixUpUserName(user.getId(), cmd.getOrganizationId()));
         reportVal.setReportType(cmd.getReportType());
         reportVal.setReceiverAvatar(getUserAvatar(cmd.getReceiverIds().get(0)));
-        reportVal.setAuthorAvatar(getUserAvatar(user.getId()));
+        reportVal.setApplierAvatar(getUserAvatar(user.getId()));
 
         //  set the content.
         PostGeneralFormValCommand formCommand = new PostGeneralFormValCommand();
