@@ -838,6 +838,20 @@ INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `ex
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43970, 21100, 43970, '合同管理 全量同步权限');
 
 
+-- AUTHOR: 黄良铭
+-- REMARK: 超级管理员维护时的消息模板
+UPDATE  eh_locale_templates s SET s.text='${userName}（${contactToken}）的${organizationName}企业管理员身份已被移除。' 
+WHERE s.scope='organization.notification' AND s.code=20;
+
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',23,'zh_CN','添加超级管理员给当前超级管理员发送的消息模板' ,  '您已成为${organizationName}的超级管理员',0);
+
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',24,'zh_CN','删除超级管理员给其他超级管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}超级管理员身份已被移除',0);
+
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',25,'zh_CN','添加超级管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的超级管理员',0);
 
 
 -- 黄鹏宇 2018年8月20日
