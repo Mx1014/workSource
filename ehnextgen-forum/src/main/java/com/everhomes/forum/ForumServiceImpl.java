@@ -3563,7 +3563,7 @@ public class ForumServiceImpl implements ForumService {
         }
         if (post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
             int code = ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED;
-            if (post.getContentCategory() != null && post.getContentCategory() == PrivilegeConstants.BLACKLIST_NOTICE_POST) {
+            if (post.getContentCategory() != null && post.getContentCategory() == CategoryConstants.CATEGORY_ID_NOTICE) {
                 code = ForumServiceErrorCode.ERROR_ANNOUNCEMENT_DELETED;
             }
             LOGGER.error("Forum post is deleted, operatorId=" + operatorId + ", forumId=" + forumId
@@ -5720,8 +5720,9 @@ public class ForumServiceImpl implements ForumService {
         
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
     }
-    
-    private ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
+
+    @Override
+    public ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
     	pageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
     	CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(pageAnchor);

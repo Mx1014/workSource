@@ -8,8 +8,10 @@ import com.everhomes.rest.announcement.AnnouncementDTO;
 import com.everhomes.rest.announcement.CreateAnnouncementCommand;
 import com.everhomes.rest.announcement.DeleteAnnouncementCommand;
 import com.everhomes.rest.announcement.GetAnnouncementCommand;
+import com.everhomes.rest.announcement.ListAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementResponse;
 import com.everhomes.rest.announcement.QueryAnnouncementCommand;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
@@ -52,6 +54,7 @@ public class AnnouncementServiceImpl implements AnnouncementService{
     public AnnouncementDTO createAnnouncement(CreateAnnouncementCommand cmd) {
         List<Long> communityIds = cmd.getVisibleRegionIds();
         NewTopicCommand newTopicCommand = ConvertHelper.convert(cmd, NewTopicCommand.class);
+        newTopicCommand.setContentCategory(CategoryConstants.CATEGORY_ID_NOTICE);
         PostDTO postDTO = this.organizationService.createTopic(newTopicCommand);
         if (TrueOrFalseFlag.TRUE.getCode().equals(cmd.getNoticeUserFlag())) {
             sendMessageToUserWhenCreateAnnouncement(cmd.getNamespaceId(), communityIds, postDTO);
@@ -60,9 +63,25 @@ public class AnnouncementServiceImpl implements AnnouncementService{
     }
 
     @Override
-    public ListAnnouncementResponse queryAnnouncementByCategory(QueryAnnouncementCommand cmd) {
-        QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
-        ListPostCommandResponse listPostCommandResponse = this.forumService.queryOrganizationTopics(command);
+    public AnnouncementDTO getAnnouncement(GetAnnouncementCommand cmd) {
+        GetTopicCommand getTopicCommand = new GetTopicCommand();
+        getTopicCommand.setTopicId(cmd.getAnnouncementId());
+        getTopicCommand.setCommunityId(cmd.getCommunityId());
+        PostDTO postDTO = this.forumService.getTopic(getTopicCommand);
+        return ConvertHelper.convert(postDTO, AnnouncementDTO.class);
+    }
+
+    @Override
+    public void deleteAnnouncement(DeleteAnnouncementCommand cmd) {
+        this.forumService.deletePost(cmd.getForumId(), cmd.getAnnouncementId(), null, null, null);
+    }
+
+    @Override
+    public ListAnnouncementResponse listAnnouncement(ListAnnouncementCommand cmd) {
+        List<Long> communityIds = new ArrayList<>();
+        communityIds.add(cmd.getCommunityId());
+        List<Long> organizationIds = new ArrayList<>();
+        ListPostCommandResponse listPostCommandResponse = this.forumService.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
         ListAnnouncementResponse response = ConvertHelper.convert(listPostCommandResponse, ListAnnouncementResponse.class);
         List<AnnouncementDTO> dtos = new ArrayList<>();
         if (!CollectionUtils.isEmpty(listPostCommandResponse.getPosts())) {
@@ -73,18 +92,6 @@ public class AnnouncementServiceImpl implements AnnouncementService{
         }
         response.setAnnouncementDTOs(dtos);
         return response;
-    }
-
-    @Override
-    public AnnouncementDTO getAnnouncement(GetAnnouncementCommand cmd) {
-        GetTopicCommand getTopicCommand = ConvertHelper.convert(cmd, GetTopicCommand.class);
-        PostDTO postDTO = this.forumService.getTopic(getTopicCommand);
-        return ConvertHelper.convert(postDTO, AnnouncementDTO.class);
-    }
-
-    @Override
-    public void deleteAnnouncement(DeleteAnnouncementCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
     }
 
     private void sendMessageToUserWhenCreateAnnouncement(Integer namespaceId, List<Long> communityIds, PostDTO postDTO) {

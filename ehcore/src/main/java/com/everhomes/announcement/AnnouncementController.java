@@ -9,6 +9,7 @@ import com.everhomes.rest.announcement.AnnouncementDTO;
 import com.everhomes.rest.announcement.CreateAnnouncementCommand;
 import com.everhomes.rest.announcement.DeleteAnnouncementCommand;
 import com.everhomes.rest.announcement.GetAnnouncementCommand;
+import com.everhomes.rest.announcement.ListAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementResponse;
 import com.everhomes.rest.announcement.QueryAnnouncementCommand;
 import com.everhomes.util.RequireAuthentication;
@@ -37,21 +38,6 @@ public class AnnouncementController extends ControllerBase {
     public RestResponse newOrgTopic(@Valid CreateAnnouncementCommand cmd) {
         AnnouncementDTO announcementDTO = this.announcementService.createAnnouncement(cmd);
         RestResponse response = new RestResponse(announcementDTO);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /announcement/queryAnnouncementByCategory</b>
-     * <p>查询公告列表</p>
-     */
-    @RequestMapping("queryAnnouncementByCategory")
-    @RestReturn(value = ListAnnouncementResponse.class)
-    @RequireAuthentication(false)
-    public RestResponse queryAnnouncementByCategory(QueryAnnouncementCommand cmd) {
-        ListAnnouncementResponse cmdResponse = announcementService.queryAnnouncementByCategory(cmd);
-        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -87,4 +73,18 @@ public class AnnouncementController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /announcement/listAnnouncement</b>
+     * <p>查询公告</p>
+     */
+    @RequestMapping("listAnnouncement")
+    @RestReturn(value=ListAnnouncementResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAnnouncement(ListAnnouncementCommand cmd) {
+        ListAnnouncementResponse res = announcementService.listAnnouncement(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
