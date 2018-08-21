@@ -29,6 +29,8 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +134,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     public ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
-        QueryBuilder qb = null;
+        QueryBuilder qb = QueryBuilders.matchAllQuery();
+
+
 
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
@@ -202,9 +206,16 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        builder.addSort("id", SortOrder.DESC);
+        builder.addSort(SortBuilders.fieldSort("id").order(SortOrder.DESC));
 
-        SearchResponse rsp = builder.execute().actionGet();
+        SearchResponse rsp = null;
+        try {
+            rsp = builder.execute().actionGet();
+        }catch (Exception e){
+            LOGGER.error("execute the es has failed");
+
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,"执行es查询失败");
+        }
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("GeneralFormValSearcherImpl query builder: {}, rsp: {}", builder, rsp);

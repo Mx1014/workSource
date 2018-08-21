@@ -258,7 +258,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormTemplates.class));
 			result[0] = context.select().from(Tables.EH_GENERAL_FORM_TEMPLATES)
 					.where(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId))
-					.and(Tables.EH_GENERAL_FORM_TEMPLATES.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_GENERAL_FORM_TEMPLATES.NAMESPACE_ID.eq(namespaceId)
+							.or(Tables.EH_GENERAL_FORM_TEMPLATES.NAMESPACE_ID.eq(0)))
 					.orderBy(Tables.EH_GENERAL_FORM_TEMPLATES.VERSION.desc()).fetchAny().map((r) -> {
 						return ConvertHelper.convert(r, GeneralFormTemplate.class);
 					});
