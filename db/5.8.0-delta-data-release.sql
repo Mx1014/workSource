@@ -872,6 +872,11 @@ UPDATE `eh_general_form_templates` SET `namespace_id` = 0 WHERE `form_name` = '�
 -- REMARK: 启用“工作汇报”的普通公司菜单
 UPDATE eh_web_menus set `status` = 2 WHERE id = 72070000;
 
+-- AUTHOR: 吴寒 2018年8月21日
+-- REMARK: 增加中文
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'punch.time', 'nextDay', 'zh_CN', '次日');
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

@@ -1,7 +1,6 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
@@ -284,11 +283,13 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		e.setValue(contractDetailDTO.getCreatorName());
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("签约日期");
-		e.setValue(timeToStr(contractDetailDTO.getSignedTime()));
-		entities.add(e);
+		if (contractDetailDTO.getSignedTime() != null) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("签约日期");
+			e.setValue(timeToStr(contractDetailDTO.getSignedTime()));
+			entities.add(e);
+		}
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());

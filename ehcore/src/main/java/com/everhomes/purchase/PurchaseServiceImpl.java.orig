@@ -252,7 +252,10 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setAmount(item.getPurchaseQuantity());
                 stock.setCommunityId(order.getCommunityId());
                 stock.setCreateTime(DateUtils.currentTimestamp());
+<<<<<<< HEAD
+=======
                 //#36190 采购成功后入库，更新时间显示问题 by --djm
+>>>>>>> 156eab3c8f86cc925d493f1fac21a3140e522e8d
                 stock.setUpdateTime(DateUtils.currentTimestamp());
                 stock.setCreatorUid(order.getCreateUid());
                 stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(

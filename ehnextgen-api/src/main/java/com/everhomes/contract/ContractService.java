@@ -109,5 +109,6 @@ public interface ContractService {
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
 
 	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
+	void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd);
    
 }
