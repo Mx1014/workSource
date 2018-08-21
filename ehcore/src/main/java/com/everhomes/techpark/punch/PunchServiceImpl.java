@@ -9115,8 +9115,8 @@ public class PunchServiceImpl implements PunchService {
 	            	}
 	        	}
         	}
-        	//在今天之后的工作日也要组装intervals
-        	if(PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(DateHelper.currentGMTTime())){
+        	//在今天之后的工作日也要组装intervals modify by wh:包括今天,所以只要大于今天0点0分0秒0毫秒
+        	if(PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(PunchDateUtils.getDateBeginDate(DateHelper.currentGMTTime()))){
         		response = processWorkdayPunchIntervalDTO(response, ptr, punchLogs, statusList, approvalStatus);        		
         	}
             //找到用户当日申请列表
@@ -12488,7 +12488,7 @@ public class PunchServiceImpl implements PunchService {
             	if(null != pLog){
             		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
             		dto.setDescription(localeStringService.getLocalizedString(PunchConstants.PUNCH_PUNCHTYPE_SCOPE, String.valueOf(r.getPunchType()), PunchConstants.locale, "")
-            				+ " " + df.format(pLog.getRuleTime()));
+            				+ " " + ruleTimeToString(pLog.getRuleTime()));
             	}
                 break;
             default:
@@ -12496,6 +12496,29 @@ public class PunchServiceImpl implements PunchService {
         }
         return dto;
     }
+
+	private String ruleTimeToString(Long ruleTime) {
+		StringBuilder sb = new StringBuilder();
+		long time = ruleTime;
+        time = time / 1000;
+        int hour = Integer.valueOf((time / 3600) + "");
+        if (hour > 24){
+        	hour = hour - 24;
+        	sb.append(localeStringService.getLocalizedString(PunchConstants.PUNCH_TIME_SCOPE, PunchConstants.NEXT_DAY, PunchConstants.locale, "次日"));
+        }
+        if (hour < 10) {
+            sb.append("0");
+        }
+        sb.append(hour);
+        sb.append(":");
+        time = time % 3600;
+        int min = Integer.valueOf((time / 60) + ""); 
+        if (min < 10) {
+            sb.append("0");
+        }
+        sb.append(min);  
+        return sb.toString(); 
+	}
 
 	private Map<String, String> getExceptionBeginEndTimeMap(PunchExceptionRequest r) {
 		Map<String, String> map = new HashMap<String, String>();

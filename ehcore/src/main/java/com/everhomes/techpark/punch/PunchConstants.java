@@ -92,7 +92,10 @@ public class PunchConstants {
 	public static final int GO_OUT_TEMPLATE_TITLE = 2;
 	public static final int GO_OUT_TEMPLATE_CONTENT = 3;
 	
-	
+
 	/** punchType的scope "punch.punchType"  */
 	public static final String PUNCH_PUNCHTYPE_SCOPE ="punch.punchType";
+	/** punchType的scope "punch.time"  */
+	public static final String PUNCH_TIME_SCOPE ="punch.time";
+	public static final String NEXT_DAY ="nextDay";
 }
