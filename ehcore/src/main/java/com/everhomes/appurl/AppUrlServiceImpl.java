@@ -73,7 +73,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 	public void createAppInfo(CreateAppInfoCommand cmd){
 
 		if(cmd != null && cmd.getDtos()!=null && cmd.getDtos().size()>1){
-			AppUrlDeviceDTO dto = cmd.getDtos().get(0);
+			/*AppUrlDeviceDTO dto = cmd.getDtos().get(0);
 			if(dto.getId() != null){//存在ID则走更新路线
 				for(AppUrlDeviceDTO o : cmd.getDtos() ){
 					UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
@@ -102,6 +102,24 @@ public class AppUrlServiceImpl implements AppUrlService {
 					AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
 					appUrlProvider.createAppInfo(bo);
 				}
+			}*/
+			for(AppUrlDeviceDTO o : cmd.getDtos() ){
+				UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
+				uc.setId(o.getId());
+				uc.setOsType(o.getOsType());
+				uc.setDownloadUrl(o.getDownloadUrl());
+				uc.setDescription(cmd.getDescription());
+				uc.setLogoUrl(cmd.getLogoUrl());
+				uc.setName(cmd.getName());
+				uc.setNamespaceId(cmd.getNamespaceId());
+				
+				AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+				if(bo.getId() != null){//存在ID则走更新路线
+					appUrlProvider.updateAppInfo(bo);
+				}else{//走新增路线
+					appUrlProvider.createAppInfo(bo);
+				}
+				
 			}
 		}
 		
