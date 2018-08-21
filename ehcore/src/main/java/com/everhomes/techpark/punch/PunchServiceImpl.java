@@ -204,7 +204,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -241,7 +240,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -5896,9 +5894,13 @@ public class PunchServiceImpl implements PunchService {
 
     private void refreshPunchDayLog(Long userId, Long companyId, Calendar start, Calendar end) {
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, companyId);
+        Date today = PunchDateUtils.getDateBeginDate(new Date());
         while (!start.after(end)) {
-
             try {
+                if (PunchDateUtils.getDateBeginDate(start.getTime()).after(today)) {
+                    // 未来的日期不刷新日报
+                    return;
+                }
                 PunchDayLog newPunchDayLog = new PunchDayLog();
                 this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode() + userId).enter(() -> {
                     PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndUserId(userId,
