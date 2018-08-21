@@ -84,6 +84,8 @@ public class UclbrtHttpClient {
 	
 	@SuppressWarnings("deprecation")
 	public String TestFuncXML(String protocol,String  ip,String  port,String  communityNo,String  buildNo, String floorNo, String roomNo, String accSid,String  token,String areaCode,String mobile,String begTime,String endTime){
+		//所有跟ucl的请求共用一套手机号
+		mobile = "13480251015";
 		String key = getRoomIdByRedisKey(communityNo, buildNo, floorNo, roomNo);
 		ValueOperations<String, String> valueOperations = getValueOperations(key);
 		String roomID = valueOperations.get(key);
