@@ -1475,7 +1475,7 @@ public class AssetServiceImpl implements AssetService {
             noticeConfig.setNoticeObjs(StringHelper.toJsonString(config.getNoticeObjs()));
             toSaveConfigs.add(noticeConfig);
         }
-        assetProvider.autoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), toSaveConfigs);
+        assetProvider.autoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryId(), toSaveConfigs);
     }
 
     private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope) {
