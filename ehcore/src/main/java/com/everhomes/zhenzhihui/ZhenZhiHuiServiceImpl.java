@@ -74,6 +74,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.everhomes.controller.WebRequestInterceptor.setCookieInResponse;
 
@@ -102,6 +103,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         String TICKET = request.getParameter("TICKET");
         String serviceUrl = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.url", "");
         String appkey = configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID, "zhenzhihui.appkey", "");
+        String homeUrl = configurationProvider.getValue(0, "home.url","");
         if ( TICKET == null ) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "TICKET is null.");
@@ -167,38 +169,32 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             LOGGER.info("ServiceModuleApp = {}", serviceModuleApps.get(0));
                             String instanceConfig = serviceModuleApps.get(0).getInstanceConfig();
                             LOGGER.info("instanceConfig = {}",instanceConfig);
-                            LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
-                                    LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
-                            String location = handler.refreshActionData(instanceConfig,sceneTokenDTO);
-                            LOGGER.info("location = {}", location);
-                            JSONObject jsonObject = (JSONObject) JSONValue.parse(location);
-                            if (jsonObject.get("url") == null) {
-                                LOGGER.error("url is null");
-                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "url is null");
-                            }
-                            String[] locations = jsonObject.get("url").toString().split("#sign_suffix");
-                            location = locations[0];
-                            LOGGER.info("location = {}", location);
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+
+                            JSONObject jsonObject = (JSONObject) JSONValue.parse(instanceConfig);
+
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
+                                    homeUrl+ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getUrl());
 
                             List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
                             if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
                                 sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
                                 builder.queryParam("communityId", COMMUNITY_ID);
+                                builder.queryParam("entityType",UserCurrentEntityType.COMMUNITY.getCode());
                             }else {
                                 sceneTokenDTO.setScene(SceneType.ENTERPRISE.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
                                 sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
                                 builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
+                                builder.queryParam("entityType",UserCurrentEntityType.ORGANIZATION.getCode());
                             }
                             LOGGER.info("sceneToken = {}", sceneTokenDTO);
                             builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
-                            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-                                if (!entry.getKey().equals("token") && !entry.getKey().equals("redirect") && entry.getKey().equals("TICKET")) {
-                                    builder.queryParam(entry.getKey(), entry.getValue());
+                            for (Object key : jsonObject.keySet()) {
+                                if (!key.toString().equals("url")) {
+                                    builder.queryParam(key.toString(), jsonObject.get(key));
                                 }
                             }
                             LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , builder.build().toUriString());
