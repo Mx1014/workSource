@@ -204,9 +204,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
         dto.setReportId(r.getId());
         dto.setScopes(listWorkReportScopes(r.getId()));
-        dto.setValiditySetting((ReportValiditySettingDTO) JSON.parse(r.getValiditySetting()));
-        dto.setRxMsgSetting((ReportMsgSettingDTO) JSON.parse(r.getReceiverMsgSeeting()));
-        dto.setAuMsgSetting((ReportMsgSettingDTO) JSON.parse(r.getAuthorMsgSeeting()));
+        dto.setValiditySetting(JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class));
+        dto.setRxMsgSetting(JSON.parseObject(r.getReceiverMsgSeeting(), ReportMsgSettingDTO.class));
+        dto.setAuMsgSetting(JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class));
         return dto;
     }
 
@@ -455,7 +455,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
-        ReportValiditySettingDTO setting = (ReportValiditySettingDTO) JSON.parse(report.getValiditySetting());
+        ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
         LocalDateTime startTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
                 setting.getStartType(), setting.getStartMark(), setting.getStartTime());
         LocalDateTime endTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
