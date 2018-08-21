@@ -9115,8 +9115,8 @@ public class PunchServiceImpl implements PunchService {
 	            	}
 	        	}
         	}
-        	//在今天之后的工作日也要组装intervals
-        	if(PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(DateHelper.currentGMTTime())){
+        	//在今天之后的工作日也要组装intervals modify by wh:包括今天,所以只要大于今天0点0分0秒0毫秒
+        	if(PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(getDateBeginDate(DateHelper.currentGMTTime()))){
         		response = processWorkdayPunchIntervalDTO(response, ptr, punchLogs, statusList, approvalStatus);        		
         	}
             //找到用户当日申请列表
@@ -9130,6 +9130,39 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 
+    /**
+     * <p>取这天开始的时间</p>
+     *
+     *
+     * @param calendar  要取时间的日期
+     * @return calendar:这天0点0分0秒0毫秒 <code>null</code> if Exception
+     */
+    public static Calendar getDateBeginCalendar(Calendar calendar){
+        if (null == calendar) {
+            return null;
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        return calendar;
+    }
+
+    /**
+     * <p>取这天开始的时间</p>
+     *
+     *
+     * @param date  要取时间的日期
+     * @return date:这天0点0分0秒0毫秒 <code>null</code> if Exception
+     */
+    public static Date getDateBeginDate(Date date){
+        Calendar calendar = Calendar.getInstance();
+        if (null == date) {
+            return null;
+        }
+        calendar.setTime(date);
+        return getDateBeginCalendar(calendar).getTime();
+    }
     private void oldVersionProcess(GetPunchDayStatusResponse response, GetPunchDayStatusCommand cmd) {
     	if(UserContext.current() != null && UserContext.current().getVersion() != null){
             Version appVersion = Version.fromVersionString(UserContext.current().getVersion());
