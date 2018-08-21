@@ -1772,27 +1772,36 @@ public class PunchServiceImpl implements PunchService {
                     if (isTimeIntervalFullCovered(offDutyLog.getPunchTime(), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
-                        return;
+                    } else {
+                        offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+                        updateSmartAlignment(offDutyLog);
                     }
+                    return;
                 }
                 // 午休期间打下班卡
                 if (offDutyLog.getPunchTime().getTime() >= offDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()) {
                     if (isTimeIntervalFullCovered(new Date(offDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
-                        return;
+                    } else {
+                        offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+                        updateSmartAlignment(offDutyLog);
                     }
+                    return;
                 }
                 // 上班之后，午休之前打下班卡
                 if (!isTimeIntervalFullCovered(new Date(Math.max(latestOnDutyTimeLong, offDutyLog.getPunchTime().getTime())), new Date(offDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
+                    offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+                    updateSmartAlignment(offDutyLog);
                     return;
                 }
                 if (isTimeIntervalFullCovered(new Date(offDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
-                    return;
                 }
-
+                offDutyLog.setApprovalStatus(PunchStatus.LEAVEEARLY.getCode());
+                updateSmartAlignment(offDutyLog);
+                return;
             }
             if (isTimeIntervalFullCovered(new Date(Math.max(latestOnDutyTimeLong, offDutyLog.getPunchTime().getTime())), new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
@@ -1892,26 +1901,36 @@ public class PunchServiceImpl implements PunchService {
                     if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), onDutyLog.getPunchTime(), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
-                        return;
+                    } else {
+                        onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
+                        updateSmartAlignment(onDutyLog);
                     }
+                    return;
                 }
                 // 在午休期间打卡
                 if (onDutyLog.getPunchTime().getTime() <= onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()) {
                     if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(onDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
                         onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                         updateSmartAlignment(onDutyLog);
-                        return;
+                    } else {
+                        onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
+                        updateSmartAlignment(onDutyLog);
                     }
+                    return;
                 }
                 // 午休之后打上班卡，那么请假需要覆盖早上的区间同时覆盖下午打卡前的区间
                 if (!isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(onDutyLog.getPunchDate().getTime() + ptr.getNoonLeaveTimeLong()), approvalTimeIntervalsThisInterval)) {
+                    onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
+                    updateSmartAlignment(onDutyLog);
                     return;
                 }
                 if (isTimeIntervalFullCovered(new Date(onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
-                    return;
                 }
+                onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
+                updateSmartAlignment(onDutyLog);
+                return;
             }
             // 无中午休息的场景
             if (isTimeIntervalFullCovered(new Date(latestOnDutyTimeLong), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
