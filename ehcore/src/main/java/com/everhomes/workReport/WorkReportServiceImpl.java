@@ -778,7 +778,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReadStatus(r.getReadStatus());
                 dto.setApplierName(r.getApplierName());
                 dto.setUpdateTime(r.getUpdateTime());
-                dto.setIconUrl(contentServerService.parserUri(r.getAuthorAvatar()));
+                dto.setIconUrl(contentServerService.parserUri(r.getApplierAvatar()));
                 reportVals.add(dto);
             });
         }
