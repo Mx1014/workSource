@@ -252,6 +252,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setAmount(item.getPurchaseQuantity());
                 stock.setCommunityId(order.getCommunityId());
                 stock.setCreateTime(DateUtils.currentTimestamp());
+                stock.setUpdateTime(DateUtils.currentTimestamp());
                 stock.setCreatorUid(order.getCreateUid());
                 stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
                         EhWarehouseStocks.class
