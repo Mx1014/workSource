@@ -4745,7 +4745,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
         DSLContext writeContext = getReadWriteContext();
         EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
         EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
@@ -4754,6 +4754,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(noticeConfig.NAMESPACE_ID.eq(namespaceId))
                     .and(noticeConfig.OWNER_TYPE.eq(ownerType))
                     .and(noticeConfig.OWNER_ID.eq(ownerId))
+                    .and(noticeConfig.CATEGORY_ID.eq(categoryId))//修复issue-35688 “【物业缴费】自动催缴设置，没有做多入口”的bug
                     .execute();
             noticeConfigDao.insert(toSaveConfigs);
             return null;
