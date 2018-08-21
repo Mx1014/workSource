@@ -12488,7 +12488,7 @@ public class PunchServiceImpl implements PunchService {
             	if(null != pLog){
             		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
             		dto.setDescription(localeStringService.getLocalizedString(PunchConstants.PUNCH_PUNCHTYPE_SCOPE, String.valueOf(r.getPunchType()), PunchConstants.locale, "")
-            				+ " " + df.format(pLog.getRuleTime()));
+            				+ " " + ruleTimeToString(pLog.getRuleTime()));
             	}
                 break;
             default:
@@ -12496,6 +12496,25 @@ public class PunchServiceImpl implements PunchService {
         }
         return dto;
     }
+
+	private String ruleTimeToString(Long ruleTime) {
+		StringBuilder sb = new StringBuilder();
+		long time = ruleTime;
+        time = time / 1000;
+        int hour = Integer.valueOf((time / 3600) + "");
+        if (hour < 10) {
+            sb.append("0");
+        }
+        sb.append(hour);
+        sb.append(":");
+        time = time % 3600;
+        int min = Integer.valueOf((time / 60) + ""); 
+        if (min < 10) {
+            sb.append("0");
+        }
+        sb.append(min);  
+        return sb.toString(); 
+	}
 
 	private Map<String, String> getExceptionBeginEndTimeMap(PunchExceptionRequest r) {
 		Map<String, String> map = new HashMap<String, String>();
