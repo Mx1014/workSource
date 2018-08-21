@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,8 +75,11 @@ public class UclbrtHttpClient {
 	}
 
 	public String getQrCode(UclbrtParamsDTO paramsDTO, String mobile) {
-		//默认有效期到28年12月12日12分12秒
-		return getQrCode(paramsDTO, mobile, "", "3812121212");
+		//默认有效期到四个月后
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MONTH, 4);
+		String endTimeString = new SimpleDateFormat("yyMMddHHmm").format(calendar.getTime());
+		return getQrCode(paramsDTO, mobile, "", endTimeString);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -118,6 +122,9 @@ public class UclbrtHttpClient {
 		Document doc = null;
 		qr = getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
 		LOGGER.info("ucl 获取验证码 xml " + qr);
+		//如果获取到的是html页面,说明roomId失效了,返回null
+		if(qr.contains("<html xmlns"))
+			return null;
 		try {
 			doc = DocumentHelper.parseText(qr);
 			Element rootElt = doc.getRootElement();
@@ -225,7 +232,7 @@ public class UclbrtHttpClient {
 	}
 
 	
-	public static CloseableHttpClient createHttpsClient() throws Exception {
+	public CloseableHttpClient createHttpsClient() throws Exception {
 		X509TrustManager x509mgr = new X509TrustManager() {
 			@Override
 			public void checkClientTrusted(X509Certificate[] xcs, String string) {
