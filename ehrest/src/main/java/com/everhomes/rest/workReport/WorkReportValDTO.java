@@ -27,7 +27,7 @@ import java.util.List;
  * <li>iconUrl: 图标url</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
- * <li>ownerToken: 实体标识(对接评论模块)</ldii>
+ * <li>ownerToken: 实体标识(对接评论模块)</li>
  * </ul>
  */
 public class WorkReportValDTO {
