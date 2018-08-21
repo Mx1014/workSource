@@ -854,6 +854,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 替换
 UPDATE `eh_general_form_templates` SET `namespace_id` = 0 WHERE `form_name` = '请示单';
 
+-- AUTHOR: 严军 2018年08月21日10:22:25
+-- REMARK: 启用“工作汇报”的普通公司菜单
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72070000;
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
