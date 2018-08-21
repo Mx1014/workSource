@@ -313,10 +313,10 @@ public class ParkingServiceImpl implements ParkingService {
 					Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 					LOGGER.info("parking main flow, flow={}", mainFlow);
 					//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
-					if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
-						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
-						dto.setFlowId(null);
-					}
+//					if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+//						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+//						dto.setFlowId(null);
+//					}
 				}
 			}
 			if(requestType == ParkingSourceRequestType.BACKGROUND){
@@ -3385,10 +3385,10 @@ public class ParkingServiceImpl implements ParkingService {
 				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 				LOGGER.info("parking main flow, flow={}", mainFlow);
 				//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
-				if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
-					dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
-					dto.setFlowId(null);
-				}
+//				if (null != mainFlow && mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+//					dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+//					dto.setFlowId(null);
+//				}
 			}
 		}
 		return dto;
@@ -3565,11 +3565,11 @@ public class ParkingServiceImpl implements ParkingService {
 					Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 					LOGGER.info("parking main flow, flow={}", mainFlow);
 					//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
-					if (null != mainFlow) {
-						if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
-							parkingLotConfig.setMonthCardFlag(ParkingConfigFlag.SUPPORT.getCode());
-						}
-					}
+//					if (null != mainFlow) {
+//						if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+//							parkingLotConfig.setMonthCardFlag(ParkingConfigFlag.SUPPORT.getCode());
+//						}
+//					}
 				}
 				parkingLot.setFuncList(array.toString());
 				parkingLot.setConfigJson(parkingLotConfig.toString());
