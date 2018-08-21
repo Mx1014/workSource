@@ -115,16 +115,4 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
     }
-
-    /*private void sendMessageAfterEditWorkReportVal(
-            String messageType, String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, Long organizationId, User user) {
-
-        // set the message
-        "";
-        if (messageType.equals("post")) {
-            content =
-        } else if (messageType.equals("update")) {
-
-        }
-    }*/
 }

@@ -721,6 +721,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
                 dto.setReceivers(receivers);
                 dto.setReceiverNames(convertReceiversToNames(receivers));
+                dto.setIconUrl(contentServerService.parserUri(r.getReceiverAvatar()));
                 reportVals.add(dto);
             });
         }
@@ -777,6 +778,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReadStatus(r.getReadStatus());
                 dto.setApplierName(r.getApplierName());
                 dto.setUpdateTime(r.getUpdateTime());
+                dto.setIconUrl(contentServerService.parserUri(r.getAuthorAvatar()));
                 reportVals.add(dto);
             });
         }
