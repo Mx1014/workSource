@@ -13,7 +13,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import scala.Int;
+//import scala.Int;
 
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
