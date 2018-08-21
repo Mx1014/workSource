@@ -1731,6 +1731,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
 
+		//查询公司模板
+		if (request == null)
+			request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
 		if (null == dto) {
