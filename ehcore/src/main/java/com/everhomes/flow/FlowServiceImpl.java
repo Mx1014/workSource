@@ -1574,7 +1574,7 @@ public class FlowServiceImpl implements FlowService {
     }
 
     private void updateFlowVersion(Flow flow) {
-        Flow snapshotFlow = flowProvider.getSnapshotFlowById(flow.getTopId());
+        Flow snapshotFlow = flowProvider.getSnapshotFlowById(flow.getId());
         if (snapshotFlow != null) {
             flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
         } else {
