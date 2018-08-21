@@ -124,7 +124,7 @@ public class UclbrtHttpClient {
 		String xmlString = null;
 		Document doc = null;
 		xmlString = getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
-		LOGGER.info("ucl 获取验证码 xml " + qr);
+		LOGGER.info("ucl 获取验证码 xml " + xmlString);
 		//如果获取到的是html页面,说明roomId失效了,返回null
 		if(xmlString.contains("<html xmlns"))
 			return null;
