@@ -18,7 +18,7 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR: 黄良铭
--- REMARK: 积分所需配置表
+-- REMARK: 积分所需配置表 及菜单
 SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
@@ -28,7 +28,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
  VALUES(@b_id:= @b_id +1,'server.point.appKey','476fba87-dd1b-4ab9-ad6a-ca598a889c91','the point appKey','0',NULL,NULL);
 
---菜单
+
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(16022500 ,'积分银行',11000000,NULL,'integral-bank',1,2,'/16000000/16020000/16022500','zuolin',120,4800,3,'system','module',NULL);
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
