@@ -12502,6 +12502,10 @@ public class PunchServiceImpl implements PunchService {
 		long time = ruleTime;
         time = time / 1000;
         int hour = Integer.valueOf((time / 3600) + "");
+        if (hour > 24){
+        	hour = hour - 24;
+        	sb.append(localeStringService.getLocalizedString(PunchConstants.PUNCH_TIME_SCOPE, PunchConstants.NEXT_DAY, PunchConstants.locale, "次日"));
+        }
         if (hour < 10) {
             sb.append("0");
         }
