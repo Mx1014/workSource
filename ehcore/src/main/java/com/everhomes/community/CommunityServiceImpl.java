@@ -5203,12 +5203,29 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 		
+		long startTime01 = System.currentTimeMillis();
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
+		long endTime01 = System.currentTimeMillis();
+		long timeCost01 = endTime01 - startTime01;
+		LOGGER.info("timeCost01:{}ms",timeCost01);
+		
+		long startTime02 = System.currentTimeMillis();
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		long endTime02 = System.currentTimeMillis();
+		long timeCost02 = endTime02 - startTime02;
+		LOGGER.info("timeCost02:{}ms",timeCost02);
+		
+		long startTime03 = System.currentTimeMillis();
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+		long endTime03 = System.currentTimeMillis();
+		long timeCost03 = endTime03 - startTime03;
+		LOGGER.info("timeCost03:{}ms",timeCost03);
+		
+		
 		//用于存储已经计算过的合同id
 		List<Long> contractIds = new ArrayList<>();
 		
+		long startTime04 = System.currentTimeMillis();
 		for (Address address : addresses) {
 			//获取房源状态
 			byte livingStatus = AddressMappingStatus.LIVING.getCode();
@@ -5235,42 +5252,46 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				totalRent = doubleRoundHalfUp(totalRent,2);
 			}
-			if (address.getRentArea() != null && address.getRentArea() > 0) {
-				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
-	    	}
+//			if (address.getRentArea() != null && address.getRentArea() > 0) {
+//				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
+//	    	}
 			//按在租实时均价筛选
-			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
-				continue;
-			}
-			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
-				continue;
-			}
-			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus,areaAveragePrice,totalRent,relatedContractNumber);
+//			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
+//				continue;
+//			}
+//			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
+//				continue;
+//			}
+			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,null,livingStatus,areaAveragePrice,totalRent,relatedContractNumber);
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
 		}
+		long endTime04 = System.currentTimeMillis();
+		long timeCost04 = endTime04 - startTime04;
+		LOGGER.info("timeCost04:{}ms",timeCost04);
 		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
-		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
-		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
-		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
-		int size = 0;
-		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
-			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
-				apartmentsForOnePage.add(apartmentInfoDTO);
-				size ++;
-				if (size > pageSize) {
-					break;
-				}
-			}
-		}
-		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
-			if (size > pageSize) {
-				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
-				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
-			}
-			result.setApartments(apartmentsForOnePage);
-		}
+//		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
+//		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
+//		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
+//		int size = 0;
+//		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
+//			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
+//				apartmentsForOnePage.add(apartmentInfoDTO);
+//				size ++;
+//				if (size > pageSize) {
+//					break;
+//				}
+//			}
+//		}
+//		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
+//			if (size > pageSize) {
+//				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
+//				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+//			}
+//			result.setApartments(apartmentsForOnePage);
+//		}
 		
+		result.setApartments(apartments);
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
 		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
@@ -5302,11 +5323,11 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setTotalRent(0.0);
 	}
 	
-	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus,double areaAveragePrice,double totalRent,int relatedContractNumber){
+	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,String communityName,byte livingStatus,double areaAveragePrice,double totalRent,int relatedContractNumber){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
 		Community community = communityProvider.findCommunityById(address.getCommunityId());
-		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-		dto.setFloorNumber(building.getFloorNumber());
+		//Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+		//dto.setFloorNumber(building.getFloorNumber());
 		dto.setCommunityId(address.getCommunityId());
 		dto.setCommunityName(community.getName());
 		dto.setAddressId(address.getId());
