@@ -1,75 +1,5 @@
 package com.everhomes.approval;
 
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors; 
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component; 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javassist.runtime.DotClass;
-
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.joda.time.Hours;
-import org.omg.CORBA.PRIVATE_MEMBER;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import ch.qos.logback.classic.Logger;
- 
-
-
-
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
@@ -90,7 +20,6 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
@@ -100,6 +29,22 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -525,7 +470,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	private PunchTimeRuleDTO processTimeRuleDTO(PunchTimeRule dayPunchTimeRule) {
 		//TODO : PUNCH 3.0 xiugai
 		PunchTimeRuleDTO dto = null;
-		if(null != dayPunchTimeRule){
+		if (null != dayPunchTimeRule && dayPunchTimeRule.getId() != null && dayPunchTimeRule.getId() > 0) {
 			dto = ConvertHelper.convert(dayPunchTimeRule, PunchTimeRuleDTO.class); 
 			dto.setAfternoonArriveTime(null!=dayPunchTimeRule.getAfternoonArriveTimeLong()?dayPunchTimeRule.getAfternoonArriveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getAfternoonArriveTime()));
 			dto.setNoonLeaveTime(null!=dayPunchTimeRule.getNoonLeaveTimeLong()?dayPunchTimeRule.getNoonLeaveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getNoonLeaveTime()));
@@ -1213,7 +1158,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					Date fromTime = startCalendar.getTime();
 					startCalendar.add(Calendar.MONTH, 1);
 					startCalendar.set(Calendar.DAY_OF_MONTH, startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-					PunchTimeRule ptr = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule, startCalendar.getTime(),approvalRequest.getCreatorUid()) ; 
+					PunchTimeRule ptr = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule, startCalendar.getTime(),approvalRequest.getCreatorUid()) ;
 					Long startEarlyTimeLong = null!=ptr.getStartEarlyTimeLong()?ptr.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(ptr.getStartEarlyTime());
 					//把结束时间定位为下一个月第一天的上班时间前一小时
 					startCalendar.set(Calendar.HOUR,(int) (startEarlyTimeLong/3600000)-1);

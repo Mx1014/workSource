@@ -2,6 +2,8 @@
 package com.everhomes.rest.asset;
 
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>chargingItemName: 收费项目名称</li>
  * <li>projectChargingItemName: 园区收费项目名称</li>
  * <li>isSelected: 是否被选中，1:是;0:否;</li>
+ * <li>taxRate:税率</li>
  *</ul>
  */
 public class ListChargingItemsDTO {
@@ -17,6 +20,7 @@ public class ListChargingItemsDTO {
     private String chargingItemName;
     private String projectChargingItemName;
     private Byte isSelected;
+    private BigDecimal taxRate;
 
     public ListChargingItemsDTO() {
     }
@@ -57,5 +61,13 @@ public class ListChargingItemsDTO {
     public void setIsSelected(Byte isSelected) {
         this.isSelected = isSelected;
     }
+
+	public BigDecimal getTaxRate() {
+		return taxRate;
+	}
+
+	public void setTaxRate(BigDecimal taxRate) {
+		this.taxRate = taxRate;
+	}
 
 }

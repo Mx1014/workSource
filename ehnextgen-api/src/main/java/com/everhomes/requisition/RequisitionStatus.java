@@ -4,7 +4,7 @@ package com.everhomes.requisition;
  * Created by Wentian on 2018/2/5.
  */
 public enum RequisitionStatus {
-    HANDLING((byte)1), FINISH((byte)2), CANCELED((byte)3);
+    WAIT((byte)0), HANDLING((byte)1), FINISH((byte)2), CANCELED((byte)3);
     private byte code;
     RequisitionStatus(byte code){
         this.code = code;

@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
@@ -35,7 +36,8 @@ public class EhPunchExceptionRequestMapper implements RecordMapper<Record, EhPun
         post.setPunchType(r.getValue((Field<Byte>)r.field("punch_type")));
         post.setBeginTime(r.getValue((Field<Timestamp>)r.field("begin_time")));
         post.setEndTime(r.getValue((Field<Timestamp>)r.field("end_time")));
-        post.setDuration(r.getValue((Field<Double>)r.field("duration")));
+        post.setDurationDay(r.getValue((Field<BigDecimal>)r.field("duration_day")));
+        post.setDurationMinute(r.getValue((Field<Long>)r.field("duration_minute")));
         post.setCategoryId(r.getValue((Field<Long>)r.field("category_id")));
         post.setApprovalAttribute(r.getValue((Field<String>)r.field("approval_attribute")));
         return post;

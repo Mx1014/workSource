@@ -34,14 +34,14 @@ public class FormFieldAbnormalPunchProcessor implements FormFieldProcessor {
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("异常日期");
-        dto.setName("异常日期");
+        dto.setValue("异常日期");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("异常班次");
-        dto.setName("异常班次");
+        dto.setValue("异常班次");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 

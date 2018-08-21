@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  *     <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  *     <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  *     <li>maxQuantity: 限制人数</li>
+ *     <li>minQuantity: 最低限制人数</li>
  *     <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *     <li>tag: 帖子标签</li>
  *     <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
@@ -112,6 +113,8 @@ public class NewTopicCommand {
     private Byte mediaDisplayFlag;
 
     private Integer maxQuantity;
+
+    private Integer minQuantity;
 
     private Byte status;
 
@@ -431,6 +434,13 @@ public class NewTopicCommand {
         this.moduleCategoryId = moduleCategoryId;
     }
 
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
 
     @Override
     public String toString() {

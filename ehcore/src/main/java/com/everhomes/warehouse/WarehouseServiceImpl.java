@@ -1,5 +1,8 @@
 package com.everhomes.warehouse;
 
+import com.everhomes.community.Building;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -17,7 +20,12 @@ import com.everhomes.purchase.PurchaseService;
 import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingExportDetailDTO;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -26,6 +34,8 @@ import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -45,6 +55,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.commons.lang.StringUtils;
@@ -62,6 +73,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -70,8 +84,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -143,7 +161,16 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private FlowCaseProvider flowCaseProvider;
-
+    
+    @Autowired
+	private CommunityProvider communityProvider;
+    
+    @Autowired
+	private OrganizationService organizationService;
+    
+    @Autowired
+    private WarehouseService warehouseService;
+    
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
@@ -568,12 +595,31 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
+		// 增加必要的参数校验
+    	if (cmd.getStocks() == null) {
+    		LOGGER.error("Amount cannot be empty.");
+			throw errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST,
+					"WarehouseMaterial cannot be empty.");
+		} else {
+			for (WarehouseMaterialStock stock : cmd.getStocks()) {
+				if (stock.getAmount() == null) {
+					LOGGER.error("Amount cannot be empty.");
+					throw errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_AMOUNT_EMPTY,
+							"Amount cannot be empty.");
+				}
+				if (stock.getWarehouseId() == null) {
+					LOGGER.error("WarehouseName cannot be empty.");
+					throw errorWith(WarehouseServiceErrorCode.SCOPE,
+							WarehouseServiceErrorCode.ERROR_WAREHOUSENAME_EMPTY, "WarehouseName cannot be empty.");
+				}
+			}
+		}
         if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_INSTOCK, cmd.getOwnerId()); } else if (cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()) {
             checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_OUTSTOCK, cmd.getOwnerId());
         }
         WarehouseOrder order = null;
-        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode()){
+        if(cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_IN.getCode() || cmd.getRequestType().byteValue() == WarehouseStockRequestType.STOCK_OUT.getCode()){
              //增加普通入库单
             order = ConvertHelper.convert(cmd, WarehouseOrder.class);
             long warehouseOrderId = this.sequenceProvider.getNextSequence(NameMapper
@@ -1686,6 +1732,12 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             //返回requisitionId
             dto.setRequisitionId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
+            // #36197 领用管理不显示领用人 -- by djm
+            User user = userProvider.findUserById(requestMaterial.getRequestId());
+			if(user != null) {
+				dto.setRequestUserName(user.getNickName());
+			}
+            
             repeadFilter.add(requestMaterial.getRequestId());
             requestDTOs.add(dto);
         }
@@ -1884,6 +1936,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                             dto.setRequestUserName(members.get(0).getContactName());
                         }
                     }
+                    // #36197 领用管理不显示领用人 -- by djm
+                    User user = userProvider.findUserById(request.getRequestUid());
+        			if(user != null) {
+        				dto.setRequestUserName(user.getNickName());
+        			}
                 }
                 requestDTOs.add(dto);
             });
@@ -1906,4 +1963,236 @@ public class WarehouseServiceImpl implements WarehouseService {
                     "check app privilege error");
         }
     }
+
+	@Override
+	public void exportStocksByCommunityId(SearchWarehouseStocksCommand cmd, HttpServletResponse response) {
+		cmd.setPageSize(10000);
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
+        
+        SearchWarehouseStocksResponse stocks = warehouseStockSearcher.query(cmd);
+        List<WarehouseStockDTO> stockDTOs = stocks.getStockDTOs();
+        
+        if (stockDTOs != null && stockDTOs.size() > 0) {
+			String fileName = String.format("库存信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "库存信息");
+			List<WarehouseStockExportDetailDTO> data = stockDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			/*excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+                    "2、请在表格里面逐行录入数据，若连续10行内容为空，录入数据不再被识别。建议一次最多导入400条信息。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、带有星号（*）的红色字段为必填项。\n" +
+                    "5、请注意：\n" +
+                    "		1）填写的物品信息与物品分类需要匹配，若不匹配会导致导入不成功。\n" +
+                    "		2）一次导入物品编码不可重复，如果导入时一个编码导入多条，数量则会累加。\n" +
+                    "		3）必填信息如果不导入，则该条数据导入失败。\n" +
+                    "		4）物品编号与名称、分类编码、所属仓库等需要为系统中存在的，如果在系统不存在，则该条信息导入失败。\n" +
+                    "		5）导入操作为刷新物品库存而非增加，导入后会新增一条入库记录。（限制导入的库存数必须大于等于现有库存，否则导入不成功）\n" +
+                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);*/
+			String[] propertyNames = {"materialNumber", "materialName", "categoryName", "amount", "unitName", "supplierName", "warehouseName", "updateTime"};
+			String[] titleNames = {"物品编号", "物品名称", "物品分类", "库存", "单位", "供应商", "仓库名称", "更新时间"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(WarehouseServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+	
+	private WarehouseStockExportDetailDTO convertToExportDetail(WarehouseStockDTO dto) {
+		WarehouseStockExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, WarehouseStockExportDetailDTO.class);
+		return exportDetailDTO;
+	}
+
+	@Override
+	public ImportFileTaskDTO importStocksData(ImportStocksCommand cmd, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(cmd.getCommunityId());
+			task.setType(ImportFileTaskType.WAREHOUSESTOCK.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportStocksDataDTO> datas = handleImportStocksData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportStocksDataDTO>> results = importStocksData(datas, userId, cmd);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+	
+	private List<ImportFileResultLog<ImportStocksDataDTO>> importStocksData(List<ImportStocksDataDTO> datas,
+			Long userId, ImportStocksCommand cmd) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
+		List<ImportFileResultLog<ImportStocksDataDTO>> list = new ArrayList<>();
+		for (ImportStocksDataDTO data : datas) {
+			ImportFileResultLog<ImportStocksDataDTO> log = checkData(data, cmd);
+			if (log != null) {
+				list.add(log);
+				continue;
+			}
+			try {
+				UpdateWarehouseStockCommand updateWarehouseStock = ConvertHelper.convert(cmd, UpdateWarehouseStockCommand.class);
+				WarehouseMaterialStock stocks = new WarehouseMaterialStock();
+				stocks.setWarehouseId(data.getWarehouse().getId());
+				stocks.setMaterialId(data.getMaterial().getId());
+				stocks.setAmount(Long.valueOf(data.getAmount()));
+				List<WarehouseMaterialStock> stocksList = new ArrayList<WarehouseMaterialStock>();
+				stocksList.add(stocks);
+				updateWarehouseStock.setStocks(stocksList);
+				updateWarehouseStock.setRequestType((byte) 0);
+				updateWarehouseStock.setServiceType((byte) 4);
+				
+				warehouseService.updateWarehouseStock(updateWarehouseStock);
+			} catch (NumberFormatException e) {
+				LOGGER.error("ImportStocks error...");
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
+	
+	private ImportFileResultLog<ImportStocksDataDTO> checkData(ImportStocksDataDTO data, ImportStocksCommand cmd) {
+		ImportFileResultLog<ImportStocksDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
+		
+		if (StringUtils.isEmpty(data.getMaterialNumber())) {
+			log.setCode(WarehouseServiceErrorCode.ERROR_MATERIALNUMBE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("MaterialNumbe cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getAmount())) {
+			log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Amount cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getWarehouseName())) {
+			log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSENAME_EMPTY);
+			log.setData(data);
+			log.setErrorLog("WarehouseName cannot be empty");
+			return log;
+		}
+		//正则校验数字
+		if (StringUtils.isNotEmpty(data.getAmount())) {
+			String reg = "^\\+?[1-9][0-9]*$";
+			if(!Pattern.compile(reg).matcher(data.getAmount()).find()){
+				log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_FORMAT);
+				log.setData(data);
+				log.setErrorLog("Amount format is error");
+				return log;
+			}
+		}
+		//校验物品信息是否存在
+		if (StringUtils.isNotEmpty(data.getMaterialNumber())) {
+			//查询物品
+			SearchWarehouseMaterialsCommand searchWarehouseMaterialsDTO = ConvertHelper.convert(cmd, SearchWarehouseMaterialsCommand.class);
+			searchWarehouseMaterialsDTO.setMaterialNumber(data.getMaterialNumber());
+			searchWarehouseMaterialsDTO.setNamespaceId((long)cmd.getNamespaceId());
+			SearchWarehouseMaterialsResponse materialsResponse = warehouseMaterialSearcher.query(searchWarehouseMaterialsDTO);
+			List<WarehouseMaterialDTO> materials = materialsResponse.getMaterialDTOs();
+			if (materials.size()<1) {
+				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST);
+				log.setData(data);
+				log.setErrorLog("Material not exist");
+				return log;
+			}
+			if (StringUtils.isNotEmpty(data.getMaterialName())) {
+				if (!data.getMaterialName().equals(materials.get(0).getName())) {
+					log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBERANDNAME_NOT_MATCH);
+					log.setData(data);
+					log.setErrorLog("Number and Name not match");
+					return log;
+				}
+			}
+			if (StringUtils.isNotEmpty(data.getCategoryName())) {
+				if (!data.getCategoryName().equals(materials.get(0).getCategoryName())) {
+					log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_CATEGORYNAME_NOT_MATCH);
+					log.setData(data);
+					log.setErrorLog("CategoryName and Name not match");
+					return log;
+				}
+			}
+			
+			data.setMaterial(materials.get(0));
+		}
+		//校验仓库是否存在
+		if (StringUtils.isNotEmpty(data.getWarehouseName())) {
+			//查询仓库
+			SearchWarehousesCommand searchWarehousesDTO = ConvertHelper.convert(cmd, SearchWarehousesCommand.class);
+			searchWarehousesDTO.setName(data.getWarehouseName());
+			SearchWarehousesResponse warehousesResponse = warehouseSearcher.query(searchWarehousesDTO);
+			List<WarehouseDTO> warehouses = warehousesResponse.getWarehouseDTOs();
+			if (warehouses.size()<1) {
+				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST);
+				log.setData(data);
+				log.setErrorLog("WarehouseName not exist");
+				return log;
+			}
+			data.setWarehouse(warehouses.get(0));
+		}
+		
+		return null;
+	}
+	
+	private List<ImportStocksDataDTO> handleImportStocksData(List resultList) {
+		List<ImportStocksDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE())) {
+				ImportStocksDataDTO data = new ImportStocksDataDTO();
+				data.setMaterialNumber(trim(r.getA()));
+				data.setMaterialName(trim(r.getB()));
+				data.setCategoryName(trim(r.getC()));
+				data.setAmount(trim(r.getD()));
+				data.setWarehouseName(trim(r.getE()));
+				//data.setSupplierName(trim(r.getF()));
+				list.add(data);
+			}
+		}
+		return list;
+	}
+	
+	private String trim(String string) {
+		if (string != null) {
+			return string.trim();
+		}
+		return "";
+	}
 }

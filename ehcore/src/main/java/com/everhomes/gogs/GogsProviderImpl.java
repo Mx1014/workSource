@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -40,6 +41,19 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     private static final Logger LOGGER = LoggerFactory.getLogger(GogsProviderImpl.class);
 
     private final static ResponseErrorHandler ERROR_HANDLER = new ErrorHandler();
+
+    private RestTemplate restTemplate;
+
+    {
+        restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(ERROR_HANDLER);
+
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(1000);
+        requestFactory.setReadTimeout(1000);
+
+        restTemplate.setRequestFactory(requestFactory);
+    }
 
     private String gogsToken;
     private String gogsAdmin;
@@ -151,15 +165,8 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     }
 
     private <T> ResponseEntity<T> restCall(HttpMethod method, String api, Object param, Class<T> responseType) {
-        RestTemplate template = new RestTemplate();
-        template.setErrorHandler(ERROR_HANDLER);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.put(HttpHeaders.AUTHORIZATION, Collections.singletonList("token " + gogsToken));
-        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_UTF8.toString()));
-
-        String body = param != null ? StringHelper.toJsonString(param) : "";
         try {
+            String body = param != null ? StringHelper.toJsonString(param) : "";
             URI uri = new URI(gogsServer + api);
 
             if (method == HttpMethod.GET) {
@@ -167,14 +174,17 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
                 body = "";
             }
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.put(HttpHeaders.AUTHORIZATION, Collections.singletonList("token " + gogsToken));
+            headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_UTF8.toString()));
+
             RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, method, uri);
-            ResponseEntity<T> responseEntity = template.exchange(requestEntity, responseType);
+            ResponseEntity<T> responseEntity = restTemplate.exchange(requestEntity, responseType);
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("gogs rest call, request = {}", requestEntity.toString());
                 LOGGER.debug("gogs rest call, response = {}", responseEntity.toString());
             }
-
             return responseEntity;
         } catch (URISyntaxException e) {
             throw new RuntimeException("URI syntax exception", e);

@@ -176,7 +176,7 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
     	LOGGER.debug("onFlowConditionVariableRender");
     	return null;
     }

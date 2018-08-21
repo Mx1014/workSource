@@ -111,13 +111,16 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 	}
 
 	@Override
-	public List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+	public List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,String businessType) {
 		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
 				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.STATUS.eq((byte)2));
 		if(parkingLotId!=null){
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
+		}
+		if(businessType!=null){
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSINESS_TYPE.eq(businessType));
 		}
 		return getReadOnlyContext().select().from(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
 				.where(condition)

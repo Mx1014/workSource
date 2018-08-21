@@ -163,6 +163,21 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查询主页签类型layout</p>
+	 * <b>URL: /portal/findIndexPortalLayout</b>
+	 */
+	@RequestMapping("findIndexPortalLayout")
+	@RestReturn(PortalLayoutDTO.class)
+	public RestResponse findIndexPortalLayout(FindIndexPortalLayoutCommand cmd){
+		PortalLayoutDTO dto = portalService.findIndexPortalLayout(cmd);
+
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <p>7.修改门户layout</p>
 	 * <b>URL: /portal/updatePortalLayout</b>
 	 */

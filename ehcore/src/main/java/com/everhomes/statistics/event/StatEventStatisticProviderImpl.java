@@ -114,7 +114,10 @@ public class StatEventStatisticProviderImpl implements StatEventStatisticProvide
         return getStatEventStatistics(context, orderByIdDescTable, portalStatIdList, fields);
     }
 
-    private List<StatEventStatistic> getStatEventStatistics(DSLContext context, Table<EhStatEventStatisticsRecord> orderByIdDescTable, SelectConditionStep<Record1<Long>> portalStatIdList, List<Field<?>> fields) {
+    private List<StatEventStatistic> getStatEventStatistics(DSLContext context,
+                                                            Table<EhStatEventStatisticsRecord> orderByIdDescTable,
+                                                            SelectConditionStep<Record1<Long>> portalStatIdList,
+                                                            List<Field<?>> fields) {
         return context.select(fields)
                 .from(orderByIdDescTable)
                 .where(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID).in(portalStatIdList))

@@ -34,6 +34,7 @@ import java.math.BigDecimal;
  * <li>dateStrEnd:账单结束时间，参与排序</li>
  * <li>customerTel:客户手机号</li>
  * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
+ * <li>dueDayCount:欠费天数</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -59,13 +60,14 @@ public class ListBillsDTO {
     private String payStatus;
     // introduce invoice num for bill display. by wentian 2018/4/16 on earth
     private String invoiceNum;
-    // introduce paymentType for bill display by steve 2018/5/16 on earth
     private Integer paymentType;
 
     private String dateStrBegin;
     private String dateStrEnd;
     private String customerTel;
     private String addresses;
+    
+    private Long dueDayCount;//欠费天数
 
     public Integer getPaymentType() {
 		return paymentType;
@@ -289,5 +291,13 @@ public class ListBillsDTO {
 
 	public void setAddresses(String addresses) {
 		this.addresses = addresses;
+	}
+
+	public Long getDueDayCount() {
+		return dueDayCount;
+	}
+
+	public void setDueDayCount(Long dueDayCount) {
+		this.dueDayCount = dueDayCount;
 	}
 }
