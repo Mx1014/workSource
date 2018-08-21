@@ -848,9 +848,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getChargingItems() != null) {
 			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
 				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
-				List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
+				/*List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
 						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId(), null);
-				Long billGroupId = groupRules.get(0).getBillGroupId();
+				Long billGroupId = groupRules.get(0).getBillGroupId();*/
+				Long billGroupId = cmd.getChargingItems().get(i).getBillGroupId();
 				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
 				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
 
