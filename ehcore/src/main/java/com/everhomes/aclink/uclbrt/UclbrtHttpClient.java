@@ -121,14 +121,15 @@ public class UclbrtHttpClient {
 
 	private String getQrCodeRequest(String protocol, String ip, String port, String communityNo, String buildNo, String floorNo, String roomNo, String accSid, String token, String areaCode, String mobile, String roomID) {
 		String qr= null;
+		String xmlString = null;
 		Document doc = null;
-		qr = getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
+		xmlString = getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
 		LOGGER.info("ucl 获取验证码 xml " + qr);
 		//如果获取到的是html页面,说明roomId失效了,返回null
-		if(qr.contains("<html xmlns"))
+		if(xmlString.contains("<html xmlns"))
 			return null;
 		try {
-			doc = DocumentHelper.parseText(qr);
+			doc = DocumentHelper.parseText(xmlString);
 			Element rootElt = doc.getRootElement();
 			Iterator iter = rootElt.elementIterator("baseImg");
 			if(iter.hasNext()){
