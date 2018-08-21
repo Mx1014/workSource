@@ -637,9 +637,16 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormPrintTemplateDTO createGeneralFormPrintTemplate(AddGeneralFormPrintTemplateCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getOwnerId());
+        if (form == null) {
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getOwnerId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
+                    "generalForm is null");
+        }
         GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
-        generalFormPrintTemplate.setOwnerType("EhGeneralForm");
-
+        generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
+        generalFormPrintTemplate.setOwnerId(form.getId());
         //使用gogs存储合同内容
         //1.建仓库 不同应用建立不同仓库
         try {
@@ -667,8 +674,16 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormPrintTemplateDTO updateGeneralFormPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getOwnerId());
+        if (form == null) {
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getOwnerId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
+                    "generalForm is null");
+        }
         GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
         generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
+        generalFormPrintTemplate.setOwnerId(form.getId());
         boolean isNewFile = false;
         GeneralFormPrintTemplate oldTemplate = generalFormProvider.getGeneralFormPrintTemplateById(cmd.getId());
         if (!oldTemplate.getName().equals(cmd.getName())) {
@@ -714,9 +729,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormPrintTemplateDTO getGeneralFormPrintTemplate(GetGeneralFormPrintTemplateCommand cmd) {
-        GeneralForm generalForm = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion());
+        GeneralForm generalForm = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
         if (generalForm == null) {
-            LOGGER.error("generalForm is null,formOriginId = {}, formVersion = {}", cmd.getFormOriginId(), cmd.getFormVersion());
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getFormOriginId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
                     "generalForm is null");
         }

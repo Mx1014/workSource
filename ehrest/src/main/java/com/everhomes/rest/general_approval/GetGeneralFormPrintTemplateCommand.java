@@ -10,7 +10,6 @@ package com.everhomes.rest.general_approval;
 public class GetGeneralFormPrintTemplateCommand {
     private Integer namespaceId;
     private Long formOriginId;
-    private Long formVersion;
 
     public GetGeneralFormPrintTemplateCommand() {
 		super();
@@ -19,7 +18,6 @@ public class GetGeneralFormPrintTemplateCommand {
 	public GetGeneralFormPrintTemplateCommand(Long formOriginId, Long formVersion) {
 		super();
 		this.formOriginId = formOriginId;
-		this.formVersion = formVersion;
 	}
 
     public Integer getNamespaceId() {
@@ -36,13 +34,5 @@ public class GetGeneralFormPrintTemplateCommand {
 
     public void setFormOriginId(Long formOriginId) {
         this.formOriginId = formOriginId;
-    }
-
-    public Long getFormVersion() {
-        return formVersion;
-    }
-
-    public void setFormVersion(Long formVersion) {
-        this.formVersion = formVersion;
     }
 }
