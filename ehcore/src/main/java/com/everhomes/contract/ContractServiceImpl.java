@@ -2657,8 +2657,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			List<ContractChargingChangeDTO> frees = new ArrayList<>();
 			contractChargingChanges.forEach(change -> {
 				ContractChargingChangeDTO changeDTO = ConvertHelper.convert(change, ContractChargingChangeDTO.class);
-				String itemName = assetProvider.findChargingItemNameById(change.getChargingItemId());
-				changeDTO.setChargingItemName(itemName);
+//				String itemName = assetProvider.findChargingItemNameById(change.getChargingItemId());
+//				changeDTO.setChargingItemName(itemName);
+				//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,change.getChargingItemId());
+				changeDTO.setChargingItemName(projectChargingItemName);
 				if(change.getChangeStartTime() != null) {
 					changeDTO.setChangeStartTime(change.getChangeStartTime().getTime());
 				}
