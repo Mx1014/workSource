@@ -11852,9 +11852,9 @@ public class PunchServiceImpl implements PunchService {
 	    return results;
     }
     @Override
-    public String getAdjustRuleUrl(){
-        String homeUrl = configurationProvider.getValue("home.url", "");
-        return homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
+    public String getAdjustRuleUrl(HttpServletRequest request){
+        String homeUrl = request.getHeader("Host");
+        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
     }
 
     private Integer getPunchStatisticCountByItemType(PunchDayLog pdl, PunchStatusStatisticsItemType itemType) {
@@ -12518,7 +12518,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate, HttpServletRequest request){
         String homeUrl = request.getHeader("Host");
-        return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate +"#sign_suffix";
+        return "http://" + homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate +"#sign_suffix";
     }
     @Override
     public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request){
