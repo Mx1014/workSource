@@ -2,15 +2,24 @@
 package com.everhomes.announcement;
 
 import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.forum.ForumService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.announcement.AnnouncementDTO;
 import com.everhomes.rest.announcement.CreateAnnouncementCommand;
+import com.everhomes.rest.announcement.DeleteAnnouncementCommand;
+import com.everhomes.rest.announcement.GetAnnouncementCommand;
+import com.everhomes.rest.announcement.ListAnnouncementResponse;
+import com.everhomes.rest.announcement.QueryAnnouncementCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CronDateUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +45,9 @@ public class AnnouncementServiceImpl implements AnnouncementService{
     @Autowired
     private ScheduleProvider scheduleProvider;
 
+    @Autowired
+    private ForumService forumService;
+
     @Override
     public AnnouncementDTO createAnnouncement(CreateAnnouncementCommand cmd) {
         List<Long> communityIds = cmd.getVisibleRegionIds();
@@ -44,6 +57,34 @@ public class AnnouncementServiceImpl implements AnnouncementService{
             sendMessageToUserWhenCreateAnnouncement(cmd.getNamespaceId(), communityIds, postDTO);
         }
         return ConvertHelper.convert(postDTO, AnnouncementDTO.class);
+    }
+
+    @Override
+    public ListAnnouncementResponse queryAnnouncementByCategory(QueryAnnouncementCommand cmd) {
+        QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
+        ListPostCommandResponse listPostCommandResponse = this.forumService.queryOrganizationTopics(command);
+        ListAnnouncementResponse response = ConvertHelper.convert(listPostCommandResponse, ListAnnouncementResponse.class);
+        List<AnnouncementDTO> dtos = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(listPostCommandResponse.getPosts())) {
+            listPostCommandResponse.getPosts().stream().forEach(r -> {
+                AnnouncementDTO announcementDTO = ConvertHelper.convert(r, AnnouncementDTO.class);
+                dtos.add(announcementDTO);
+            });
+        }
+        response.setAnnouncementDTOs(dtos);
+        return response;
+    }
+
+    @Override
+    public AnnouncementDTO getAnnouncement(GetAnnouncementCommand cmd) {
+        GetTopicCommand getTopicCommand = ConvertHelper.convert(cmd, GetTopicCommand.class);
+        PostDTO postDTO = this.forumService.getTopic(getTopicCommand);
+        return ConvertHelper.convert(postDTO, AnnouncementDTO.class);
+    }
+
+    @Override
+    public void deleteAnnouncement(DeleteAnnouncementCommand cmd) {
+        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
     }
 
     private void sendMessageToUserWhenCreateAnnouncement(Integer namespaceId, List<Long> communityIds, PostDTO postDTO) {
