@@ -19,7 +19,7 @@ public enum ZhenZhiHuiServer {
     ENTRANCE_GUARD(1021,"大堂门禁",41010L,""),
     BANNER(1022,"广告banner",10400L,""),
     NOTICE_MANAGE(1023,"公告管理",10300L,""),
-    ACTIVITY(1024,"官方活动",10600L,""),
+    ACTIVITY(1024,"官方活动",10600L,"/activity/build/index.html#/listPage"),
     NEWS(1025,"园区快讯",10800L,""),
     MAIL_LIST(1026,"通讯录",50100L,""),
     CARD_ATTENDANCE(1027,"打卡考勤",50600L,""),
