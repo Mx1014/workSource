@@ -938,8 +938,12 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("exportActivitySignupTemplate")
     @RestReturn(value = String.class)
     public RestResponse exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse){
-        activityService.exportActivitySignupTemplate(cmd,httpResponse);
-        return new RestResponse();
+        ExportSignupInfoCommand command = ConvertHelper.convert(cmd, ExportSignupInfoCommand.class);
+        activityService.exportSignupInfo(command,httpResponse);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 
     /**
