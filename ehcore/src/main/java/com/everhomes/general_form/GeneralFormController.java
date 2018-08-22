@@ -99,6 +99,8 @@ public class GeneralFormController extends ControllerBase {
 
 		return response;
 	}
+
+
 	
 	/**
      * <b>URL: /general_form/listDefaultFields</b>
@@ -136,7 +138,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("deleteGeneralFormVal")
 	@RestReturn(value=Long.class)
 	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
-		Long id = generalFormService.deleteGeneralFormVal(cmd);
+		Long id = generalFormService.deleteGeneralForm(cmd);
 		RestResponse response = new RestResponse(id);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

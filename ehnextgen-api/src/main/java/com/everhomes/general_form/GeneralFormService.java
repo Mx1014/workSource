@@ -62,6 +62,8 @@ public interface GeneralFormService {
 
 	Long deleteGeneralFormVal(PostGeneralFormValCommand cmd);
 
+	Long deleteGeneralForm(PostGeneralFormValCommand cmd);
+
 	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
 

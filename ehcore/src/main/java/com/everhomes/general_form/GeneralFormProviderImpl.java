@@ -272,16 +272,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormVal(String ownerType, String sourceType, Integer namespaceId, Long currentOrganizationId, Long ownerId, Long sourceId){
+	public void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId){
 		try {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 			context.delete(Tables.EH_GENERAL_FORM_VALS)
 					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.ORGANIZATION_ID.eq(currentOrganizationId))
 					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
 					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType))
-					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_TYPE.eq(ownerType))
 					.execute();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -327,15 +324,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 	@Override
-	public Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
+	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long approvalId){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
         generalFormValRequests.setOwnerType(ownerType);
         generalFormValRequests.setNamespaceId(namespaceId);
-        generalFormValRequests.setSourceId(sourceId);
-        generalFormValRequests.setSourceType(sourceType);
+        generalFormValRequests.setModuleId(moduleId);
+		generalFormValRequests.setModuleType(moduleType);
+        generalFormValRequests.setSourceId(approvalId);
+        generalFormValRequests.setSourceType("approval");
 		generalFormValRequests.setApprovalStatus((byte)0);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());

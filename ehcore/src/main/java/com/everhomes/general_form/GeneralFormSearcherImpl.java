@@ -29,6 +29,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -153,6 +154,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("moduleId", cmd.getModuleId()));
+        if(cmd.getApprovalId() != null && cmd.getApprovalId() != 0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("approvalId", cmd.getApprovalId()));
+        }
 
         // if(cmd.getDisplayFields().size() > 0){
         //     List<String> displayFieldNames = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
@@ -223,23 +228,34 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         List<Long> ids = getIds(rsp);
         ListGeneralFormValResponse response = new ListGeneralFormValResponse();
 
+
+        SearchHit[] tempHits = rsp.getHits().getHits();
+        SearchHit[] hits;
+
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
+            hits = new SearchHit[tempHits.length-1];
+            System.arraycopy(tempHits, 0, hits, 0, tempHits.length - 1);
+        }else{
+            hits = tempHits;
         }
 
         
 
         List<Map<String, Object>> fieldVals = new ArrayList<>();
-        for (SearchHit hit : rsp.getHits().getHits()) {
+        for (SearchHit hit : hits) {
             Object sourceIdObj = hit.getSource().get("sourceId");
             Object ownerIdObj = hit.getSource().get("ownerId");
             Object moduleIdObj = hit.getSource().get("moduleId");
+            Object formOriginIdObj = hit.getSource().get("formOriginId");
+            Object formVersionObj = hit.getSource().get("formVersion");
             if (sourceIdObj != null && ownerIdObj != null) {
                 // GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(UserContext.getCurrentNamespaceId(), Long.valueOf(sourceIdObj.toString()), Long.valueOf(ownerIdObj.toString()));
                 Long sourceId = Long.valueOf(sourceIdObj.toString());
                 Long moduleId = Long.valueOf(moduleIdObj.toString());
                 Long ownerId = Long.valueOf(ownerIdObj.toString());
+                Long formOriginId = Long.valueOf(formOriginIdObj.toString());
+                Long formVersion = Long.valueOf(formVersionObj.toString());
                 List<GeneralFormVal> vals = generalFormProvider.getGeneralFormVal(namespaceId, sourceId, moduleId, ownerId);
                 Map<String, Object> returnMap = new HashMap<>();
                 for (GeneralFormVal val : vals) {
@@ -279,7 +295,8 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 if(request != null)
                     returnMap.put("approvalStatus",request.getApprovalStatus());
                 returnMap.put("sourceId", sourceId);
-
+                returnMap.put("formVersion", formVersion);
+                returnMap.put("formOriginId", formOriginId);
                 fieldVals.add(returnMap);
             }
         }
@@ -318,10 +335,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 builder.field("formOriginId", first.getFormOriginId());
                 builder.field("formVersion", first.getFormVersion());
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(first.getSourceId());
-                if(request.getApprovalStatus() == null){
-                    builder.field("approvalStatus", 0);
-                }else{
-                    builder.field("approvalStatus", request.getApprovalStatus());
+                if(request != null) {
+                    if (request.getApprovalStatus() == null) {
+                        builder.field("approvalStatus", 0);
+                    } else {
+                        builder.field("approvalStatus", request.getApprovalStatus());
+                    }
+                    if(request.getSourceId() != null){
+                        builder.field("approvalId", request.getSourceId());
+                    }
                 }
 
             }

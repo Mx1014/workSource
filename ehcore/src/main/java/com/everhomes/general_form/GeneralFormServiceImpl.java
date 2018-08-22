@@ -663,9 +663,26 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
+            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getRequisitionId());
+            //generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
+            generalFormSearcher.deleteById(cmd.getRequisitionId());
+            return cmd.getSourceId();
+        }else{
+            LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
+                    + cmd.getCurrentOrganizationId() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,currentOrganizationId,ownerId,sourceId cannot be null.");
+        }
+
+    }
+
+
+    @Override
+    public Long deleteGeneralForm(PostGeneralFormValCommand cmd){
+        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
             //generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
-            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getSourceId(), (byte)0);
-            generalFormSearcher.deleteById(cmd.getSourceId());
+            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
+            generalFormSearcher.deleteById(cmd.getRequisitionId());
             return cmd.getSourceId();
         }else{
             LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
@@ -701,7 +718,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         Long sourceId = this.dbProvider.execute((status) -> {
             Long source_id;
             if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null) {
-                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), cmd.getApprovalId());
             }else{
                 LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                         + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());

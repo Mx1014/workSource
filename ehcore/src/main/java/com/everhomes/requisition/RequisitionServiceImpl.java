@@ -284,6 +284,17 @@ public class RequisitionServiceImpl implements RequisitionService{
     }
 
     @Override
+    public GeneralFormDTO getSelectedRequisitionForm(GetSelectedRequisitionFormCommand cmd){
+        if(cmd.getFormVersion() != null && cmd.getFormOriginId() != null)
+            return ConvertHelper.convert(generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion()), GeneralFormDTO.class);
+        else{
+            LOGGER.error("the form Id can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the form Id can not find");
+        }
+    }
+
+    @Override
     public Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd){
         Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType());
         if(flow != null){
