@@ -25,7 +25,7 @@ import java.util.List;
  * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
  * <li>reportTimeText: 汇报时间(显示)</li>
- * <li>validText: 截止时间(显示)</>
+ * <li>validText: 截止时间(显示)</li>
  * <li>validitySetting: 提交时间设置</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
@@ -33,7 +33,6 @@ import java.util.List;
  * </ul>
  */
 public class WorkReportValDTO {
-
 
     //  common
     private Long reportValId;
