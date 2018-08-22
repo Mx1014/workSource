@@ -58,6 +58,8 @@ import java.util.List;
  *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
  *  <li>startDate : 用于policydeclare样式 开始日期 格式yyyy-MM-dd</li>
  *  <li>endDate : 用于policydeclare样式 结束日期 格式 yyyy-MM-dd</li>
+ *  <li>formId : 表单id</li>
+ *  <li>flowId : 工作流id</li>
  *  <li>tagGroups : 该服务的筛选组列表(list) {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO}</li>
  * </ul>
  */
