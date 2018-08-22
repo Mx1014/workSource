@@ -56,7 +56,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         catalog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         catalog.setOperatorUid(catalog.getCreatorUid());
         catalog.setUpdateTime(catalog.getCreateTime());
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		catalog.getOperatorUid(), catalog.getOwnerId());
+        if (null != member) {
+        	catalog.setOperatorName(member.getContactName());
+        }else{
+        	catalog.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementCatalogsDao dao = new EhFileManagementCatalogsDao(context.configuration());
         dao.insert(catalog);
@@ -286,7 +292,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         content.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         content.setOperatorUid(content.getCreatorUid());
         content.setUpdateTime(content.getCreateTime());
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		content.getOperatorUid(), content.getOwnerId());
+        if (null != member) {
+        	content.setOperatorName(member.getContactName());
+        }else{
+        	content.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementContentsDao dao = new EhFileManagementContentsDao(context.configuration());
         dao.insert(content);
