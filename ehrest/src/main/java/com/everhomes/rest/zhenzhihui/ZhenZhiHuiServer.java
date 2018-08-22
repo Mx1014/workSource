@@ -58,7 +58,7 @@ public enum ZhenZhiHuiServer {
 
     public static ZhenZhiHuiServer fromStatus(Integer code) {
         for(ZhenZhiHuiServer v : ZhenZhiHuiServer.values()) {
-            if(v.getCode() == code)
+            if(v.getCode().equals(code))
                 return v;
         }
         return null;
