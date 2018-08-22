@@ -380,6 +380,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -398,6 +399,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -6158,7 +6160,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         Organization org = checkOrganization(cmd.getOrganizationId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
 
         List<Long> departmentIds = cmd.getDepartmentIds();
 
@@ -6779,11 +6781,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-
-    private void joinOrganizationAfterOperation(OrganizationMember member) {
+/**
+ * 
+ * @param member
+ * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息 
+ */
+    private void joinOrganizationAfterOperation(OrganizationMember member ,Boolean notSendMsgFlag) {
         userSearcher.feedDoc(member);
 
-        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER) {
+        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+        		&& (notSendMsgFlag==null ||!notSendMsgFlag)) {
             sendMessageForContactApproved(member);
         }
 
@@ -7629,7 +7636,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken) {
+    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName
+    								, String contactToken ,Boolean notSendMsgFlag) {
 
         if (null == contactToken) {
             LOGGER.error("contactToken can not be empty.");
@@ -7724,7 +7732,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
         if (sendMsgFlag) {
-            joinOrganizationAfterOperation(member);
+            joinOrganizationAfterOperation(member,notSendMsgFlag);
         }
         return member;
     }
@@ -11288,7 +11296,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //是往公司添加新成员就需要发消息
                 if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
                     organizationMember.setOrganizationId(enterpriseId);
-                    joinOrganizationAfterOperation(organizationMember);
+                    joinOrganizationAfterOperation(organizationMember,null);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
