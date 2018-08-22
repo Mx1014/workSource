@@ -7035,39 +7035,68 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
     }
-
     @Override
     public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
         GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
         getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
         GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
         String fileName = "活动报名模板";
-        String head = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark");
-
-        List<String> title = new ArrayList<>();
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
+        List<String> titleNames = new ArrayList<>();
+        List<String> propertyNames = new ArrayList<>();
+        List<Integer> titleSizes = new ArrayList<>();
         if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
-            title.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
+            titleNames.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
+            for (int i = 0; i < form.getFormFields().size(); i++) {
+                titleSizes.add(20);
+            }
+            excelSettings(excelUtils, form);
         }else {
-            title.add("手机号码");
+            titleNames.add("手机");
+            titleSizes.add(20);
+            List<Integer> mandatoryTitle = new ArrayList<>();
+            mandatoryTitle.add(1);
+            excelUtils.setNeedMandatoryTitle(true);
+            excelUtils.setMandatoryTitle(mandatoryTitle);
+            excelUtils.setTitleRemark(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark"), (short) 18, (short) 4480);
+            excelUtils.setNeedSequenceColumn(false);
+            excelUtils.setNeedTitleRemark(true);
         }
-
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet(fileName);
-        sheet.createFreezePane(1,2,1,1);
-
-        //  1.set the header
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1 > 2? title.size() -1 : 5));
-        Row headRow = sheet.createRow(0);
-        headRow.setHeight((short) (150 * 20));
-        createExcelHead(workbook, headRow, head);
-
-        //  2.set the title
-        Row titleRow = sheet.createRow(1);
-        createExcelTitle(workbook, sheet, titleRow, title);
-
-        writeHttpExcel(workbook, httpResponse, fileName);
-
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
     }
+
+//    @Override
+//    public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
+//        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+//        getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
+//        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+//        String fileName = "活动报名模板";
+//        String head = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark");
+//
+//        List<String> title = new ArrayList<>();
+//        if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
+//            title.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
+//        }else {
+//            title.add("手机号码");
+//        }
+//
+//        XSSFWorkbook workbook = new XSSFWorkbook();
+//        Sheet sheet = workbook.createSheet(fileName);
+//        sheet.createFreezePane(1,2,1,1);
+//
+//        //  1.set the header
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1 > 2? title.size() -1 : 5));
+//        Row headRow = sheet.createRow(0);
+//        headRow.setHeight((short) (150 * 20));
+//        createExcelHead(workbook, headRow, head);
+//
+//        //  2.set the title
+//        Row titleRow = sheet.createRow(1);
+//        createExcelTitle(workbook, sheet, titleRow, title);
+//
+//        writeHttpExcel(workbook, httpResponse, fileName);
+//
+//    }
 
     private void writeHttpExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
         try {
