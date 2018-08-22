@@ -307,10 +307,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
-        if(addMonthCard(order, request)) {
+        if(createMonthCard(request.getPlateNumber(),DATE_FORMAT.format(timestampStart),DATE_FORMAT.format(timestampEnd))){
             updateFlowStatus(request);
             return true;
         }
+//        if(addMonthCard(order, request)) {
+//            updateFlowStatus(request);
+//            return true;
+//        }
         return false;
     }
 
@@ -463,14 +467,86 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             requestRechargeType = parkingFlow.getRequestRechargeType();
         }
 
+        OpenCardInfoDTO dto = new OpenCardInfoDTO();
+        String cardTypeId = parkingCardRequest.getCardTypeId();
+
+        ParkingLot lot = ConvertHelper.convert(cmd,ParkingLot.class);
+        lot.setId(cmd.getParkingLotId());
+
+        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(lot, null, null);
+        if(null != parkingRechargeRates && !parkingRechargeRates.isEmpty()) {
+
+            ParkingRechargeRateDTO rate = null;
+            for(ParkingRechargeRateDTO r: parkingRechargeRates) {
+                if(r.getCardTypeId().equals(cardTypeId)) {
+                    rate = r;
+                    break;
+                }
+            }
+
+            if (null == rate) {
+                return null;
+            }
+//            dto = ConvertHelper.convert(rate,OpenCardInfoDTO.class);
+            dto.setOwnerId(cmd.getOwnerId());
+            dto.setOwnerType(cmd.getOwnerType());
+            dto.setParkingLotId(cmd.getParkingLotId());
+            dto.setRateToken(rate.getRateToken());
+            dto.setRateName(rate.getRateName());
+            dto.setCardType(rate.getCardType());
+            dto.setMonthCount(rate.getMonthCount());
+//            dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
+            dto.setPrice(rate.getPrice().divide(rate.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
+
+            dto.setPlateNumber(cmd.getPlateNumber());
+            long now = System.currentTimeMillis();
+            dto.setOpenDate(now);
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
+            if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
+//                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+                dto.setPayMoney(new BigDecimal(0.01));
+            }else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(now);
+                int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                int today = calendar.get(Calendar.DAY_OF_MONTH);
+
+                BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount))
+                        .add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+                dto.setPayMoney(price);
+            }
+            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+        }
+
+        return dto;
+    }
+
+    public OpenCardInfoDTO getOpenCardInfo1(GetOpenCardInfoCommand cmd) {
+
+        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
+                cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+        Integer requestMonthCount = REQUEST_MONTH_COUNT;
+        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+        if(null != parkingFlow) {
+            requestMonthCount = parkingFlow.getRequestMonthCount();
+            requestRechargeType = parkingFlow.getRequestRechargeType();
+        }
+
         long now = System.currentTimeMillis();
         String opendate = DATE_FORMAT.format(new Date(now));
-        String expirydate = DATE_FORMAT.format(new Timestamp(Utils.getTimestampByAddRealMonth(now,requestMonthCount)));
+        String expirydate = DATE_FORMAT.format(Utils.getTimestampByAddNatureMonth(now,requestMonthCount));
         createMonthCard(cmd.getPlateNumber(),opendate,expirydate);
 
         OpenCardInfoDTO dto = new OpenCardInfoDTO();
 
-        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);;
+        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
 
         String cardTypeId = parkingCardRequest.getCardTypeId();
 

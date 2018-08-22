@@ -231,10 +231,10 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	@Override
 	public void payCallBack(OrderPaymentNotificationCommand cmd) {
 		//检查签名
-		if(!PayUtil.verifyCallbackSignature(cmd)){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sign verify faild");
-		}
+//		if(!PayUtil.verifyCallbackSignature(cmd)){
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"sign verify faild");
+//		}
 
 		// * RAW(0)：
 		// * SUCCESS(1)：支付成功
