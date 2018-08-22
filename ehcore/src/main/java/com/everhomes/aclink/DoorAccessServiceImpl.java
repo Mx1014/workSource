@@ -131,7 +131,9 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
-    
+
+    @Autowired
+    UclbrtHttpClient uclbrtHttpClient;
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
@@ -2584,7 +2586,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
-        	qr.setQrCodeKey(UclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
+        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
         	}
