@@ -184,30 +184,23 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
                                 urlStr.append("communityId=").append(COMMUNITY_ID).append("&");
                                 urlStr.append("entityType=").append(UserCurrentEntityType.COMMUNITY.getCode()).append("&");
-                                builder.queryParam("communityId", COMMUNITY_ID);
-                                builder.queryParam("entityType",UserCurrentEntityType.COMMUNITY.getCode());
                             }else {
                                 sceneTokenDTO.setScene(SceneType.ENTERPRISE.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
                                 sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
                                 urlStr.append("organizationId=").append(sceneTokenDTO.getEntityId()).append("&");
                                 urlStr.append("entityType=").append(UserCurrentEntityType.ORGANIZATION.getCode()).append("&");
-                                builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
-                                builder.queryParam("entityType",UserCurrentEntityType.ORGANIZATION.getCode());
                             }
                             LOGGER.info("sceneToken = {}", sceneTokenDTO);
                             String tokenStr = WebTokenGenerator.getInstance().toWebToken(sceneTokenDTO);
                             urlStr.append("ns=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
                                     .append("namespaceId=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
                                     .append("userId=").append(user.getId()).append("&")
-                                    .append("sceneToken=").append(tokenStr).append("&");
-                            builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
-                            builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
-                            builder.queryParam("userId", user.getId());
+                                    .append("sceneToken=").append(tokenStr).append("&")
+                                    .append("communityId=").append(COMMUNITY_ID).append("&");
                             for (Object key : jsonObject.keySet()) {
                                 if (!key.toString().equals("url") && !key.toString().equals("categoryDTOList")) {
                                     urlStr.append(key.toString()).append("=").append(jsonObject.get(key)).append("&");
-                                    builder.queryParam(key.toString(), jsonObject.get(key));
                                 }
                             }
                             String url = urlStr.toString().substring(0,urlStr.toString().length()-1);
