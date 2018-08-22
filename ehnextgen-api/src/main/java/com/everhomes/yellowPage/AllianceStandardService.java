@@ -4,7 +4,8 @@ import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
 import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
 import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
-import com.everhomes.rest.yellowPage.UpdateProjectConfigFlagCommand;
+import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
+import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
 
 public interface AllianceStandardService {
 
@@ -12,8 +13,9 @@ public interface AllianceStandardService {
 
 	GetWorkFlowListResponse getWorkFlowList(GetWorkFlowListCommand cmd);
 
-	void updateServiceAllianceConfigFlag(UpdateProjectConfigFlagCommand cmd);
-
-	void updateCategoryConfigFlag(UpdateProjectConfigFlagCommand cmd);
-
+	void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
+	
+	void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
+	
+	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
 }

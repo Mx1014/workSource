@@ -6,7 +6,8 @@ import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
 import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
 import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
-import com.everhomes.rest.yellowPage.UpdateProjectConfigFlagCommand;
+import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
+import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
 
 @Component
 public class AllianceStandardServiceImpl implements AllianceStandardService{
@@ -24,15 +25,23 @@ public class AllianceStandardServiceImpl implements AllianceStandardService{
 	}
 
 	@Override
-	public void updateServiceAllianceConfigFlag(UpdateProjectConfigFlagCommand cmd) {
+	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void updateCategoryConfigFlag(UpdateProjectConfigFlagCommand cmd) {
+	public void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 }

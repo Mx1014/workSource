@@ -175,8 +175,6 @@ public class ServiceAllianceDTO {
 	
 	private Long     flowId;
 	
-	private Byte isGeneralConfig;
-	
 	@ItemType(AllianceTagGroupDTO.class)
 	private List<AllianceTagGroupDTO> tagGroups;
 	
@@ -569,13 +567,5 @@ public class ServiceAllianceDTO {
 
 	public void setFlowId(Long flowId) {
 		this.flowId = flowId;
-	}
-
-	public Byte getIsGeneralConfig() {
-		return isGeneralConfig;
-	}
-
-	public void setIsGeneralConfig(Byte isGeneralConfig) {
-		this.isGeneralConfig = isGeneralConfig;
 	}
 }

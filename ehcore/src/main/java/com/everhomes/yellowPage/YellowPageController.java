@@ -766,15 +766,15 @@ public class YellowPageController  extends ControllerBase {
 	}
     
 	/**
-	 * <b>URL: /yellowPage/updateServiceAllianceConfigFlag</b>
+	 * <b>URL: /yellowPage/enableSelfDefinedConfig</b>
 	 * <p>
-	 * 开启联盟主页项目配置
+	 * 开启自定义配置
 	 * </p>
 	 */
-	@RequestMapping("updateServiceAllianceConfigFlag")
+	@RequestMapping("enableSelfDefinedConfig")
 	@RestReturn(String.class)
-	public RestResponse updateServiceAllianceConfigFlag(UpdateProjectConfigFlagCommand cmd){
-		allianceStandardService.updateServiceAllianceConfigFlag(cmd);
+	public RestResponse enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd){
+		allianceStandardService.enableSelfDefinedConfig(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -782,19 +782,33 @@ public class YellowPageController  extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /yellowPage/updateCategoryConfigFlag</b>
+	 * <b>URL: /yellowPage/disableSelfDefinedConfig</b>
 	 * <p>
-	 * 开启联盟样式的项目配置
+	 * 关闭自定义配置
 	 * </p>
 	 */
-	@RequestMapping("updateCategoryConfigFlag")
+	@RequestMapping("disableSelfDefinedConfig")
 	@RestReturn(String.class)
-	public RestResponse updateCategoryConfigFlag(UpdateProjectConfigFlagCommand cmd){
-		allianceStandardService.updateCategoryConfigFlag(cmd);
+	public RestResponse disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd){
+		allianceStandardService.disableSelfDefinedConfig(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
+	
+	/**
+	 * <b>URL: /yellowPage/getSelfDefinedState</b>
+	 * <p>
+	 * 获取自定义配置状态
+	 * </p>
+	 */
+	@RequestMapping("disableSelfDefinedConfig")
+	@RestReturn(GetSelfDefinedStateResponse.class)
+	public RestResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd){
+		RestResponse response = new RestResponse(allianceStandardService.getSelfDefinedState(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
