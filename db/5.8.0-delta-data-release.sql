@@ -896,6 +896,16 @@ UPDATE eh_web_menus set `status` = 2 WHERE id = 72070000;
 set @id = (select max(id)+1 from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'punch.time', 'nextDay', 'zh_CN', '次日');
 
+-- AUTHOR: 杨崇鑫  20180822
+-- REMARK: 物业缴费V6.5 数据迁移账单组
+update eh_contract_charging_items as aaa inner join (
+select t2.ccid, d.namespace_id, d.charging_item_id,d.charging_standards_id, d.ownerId,d.bill_group_id  from (
+select t.ccid, t.namespace_id, t.charging_item_id, t.charging_standard_id, t.community_id, t.category_id, c.asset_category_id from (
+select a.id as ccid, a.namespace_id, a.charging_item_id,a.charging_standard_id, b.community_id, b.category_id from eh_contract_charging_items a left join eh_contracts b on a.contract_id=b.id ) as t
+left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id ) as t2
+left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
+) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
