@@ -739,8 +739,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 generalForm.getId(),FORM_PRINT_TEMPLATE_OWNER_TYPE);
         if (generalFormPrintTemplate == null) {
             LOGGER.error("generalFormPrintTemplate in namespace {} not exist!", UserContext.getCurrentNamespaceId());
-            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
-                    "generalFormGogsFileNotExist not exist");
+            return null;
         }
         String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
         GogsRepo repo = gogsRepo(UserContext.getCurrentNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
