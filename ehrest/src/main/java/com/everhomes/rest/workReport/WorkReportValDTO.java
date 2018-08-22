@@ -15,6 +15,7 @@ import java.util.List;
  * <li>reportId: 工作汇报id</li>
  * <li>title: 标题</li>
  * <li>reportType: 汇报类型</li>
+ * <li>reportTypeText: 汇报类型(显示)</li>
  * <li>applierName: 申请人姓名</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
@@ -42,6 +43,8 @@ public class WorkReportValDTO {
     private String title;
 
     private Byte reportType;
+
+    private String reportTypeText;
 
     private String applierName;
 
@@ -112,6 +115,14 @@ public class WorkReportValDTO {
 
     public void setReportType(Byte reportType) {
         this.reportType = reportType;
+    }
+
+    public String getReportTypeText() {
+        return reportTypeText;
+    }
+
+    public void setReportTypeText(String reportTypeText) {
+        this.reportTypeText = reportTypeText;
     }
 
     public String getApplierName() {
