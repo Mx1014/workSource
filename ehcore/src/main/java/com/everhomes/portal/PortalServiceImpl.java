@@ -1589,7 +1589,7 @@ public class PortalServiceImpl implements PortalService {
 							publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
 
 							//删除已有的layout
-							deleteLayoutBeforePublish(namespaceId);
+							deleteLayoutBeforePublish(namespaceId, cmd.getPublishType());
 
 							for (PortalLayout layout: layouts) {
 								//发布layout
@@ -1661,13 +1661,13 @@ public class PortalServiceImpl implements PortalService {
 
 	}
 
-	private void deleteLayoutBeforePublish(Integer namespaceId){
+	private void deleteLayoutBeforePublish(Integer namespaceId, Byte publishType){
 
 		assert namespaceId != null;
 
-		launchPadProvider.deleteLaunchPadLayout(namespaceId, "ServiceMarketLayout");
-		launchPadProvider.deleteLaunchPadLayout(namespaceId, "SecondServiceMarketLayout");
-		launchPadProvider.deleteLaunchPadLayout(namespaceId, "AssociationLayout");
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "ServiceMarketLayout", publishType);
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "SecondServiceMarketLayout", publishType);
+		launchPadProvider.deleteLaunchPadLayout(namespaceId, "AssociationLayout", publishType);
 	}
 
 
