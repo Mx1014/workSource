@@ -747,6 +747,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
 		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
+
+        //增加版本功能，默认找正式版本，有特别标识的找该版本功能
+        condition = condition.and(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 		if(sceneType != null){
 			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
 		}
@@ -759,7 +763,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		if(condition != null)
 			step.where(condition);
 
-		Record record = step.fetchOne();
+		Record record = step.fetchAny();
 
 		if(record != null){
 			return ConvertHelper.convert(record, LaunchPadItem.class);

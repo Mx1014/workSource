@@ -63,6 +63,8 @@ public class ExportEnterpriseCustomerCommand {
 
     private Byte abnormalFlag;
 
+    private Byte aptitudeFlagItemId;
+
     private Long taskId;
 
     public Long getTaskId() {
@@ -297,6 +299,14 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setAbnormalFlag(Byte abnormalFlag) {
         this.abnormalFlag = abnormalFlag;
+    }
+
+    public Byte getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
     }
 
     @Override

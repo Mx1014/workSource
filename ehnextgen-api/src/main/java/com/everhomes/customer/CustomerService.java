@@ -393,4 +393,6 @@ public interface CustomerService {
     void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd);
 
     OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd);
+
+    OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd);
 }

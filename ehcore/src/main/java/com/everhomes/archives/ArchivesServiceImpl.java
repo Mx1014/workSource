@@ -192,14 +192,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
-                TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
-                transferCommand.setOrganizationId(cmd.getOrganizationId());
-                transferCommand.setDetailIds(cmd.getDetailIds());
-                transferCommand.setDepartmentIds(cmd.getDepartmentIds());
-                transferCommand.setJobPositionIds(cmd.getJobPositionIds());
-                transferCommand.setJobLevelIds(cmd.getJobLevelIds());
+                TransferArchivesEmployeesCommand tCommand = new TransferArchivesEmployeesCommand();
+                tCommand.setNamespaceId(cmd.getNamespaceId());
+                tCommand.setOrganizationId(cmd.getOrganizationId());
+                tCommand.setDetailIds(cmd.getDetailIds());
+                tCommand.setDepartmentIds(cmd.getDepartmentIds());
+                tCommand.setJobPositionIds(cmd.getJobPositionIds());
+                tCommand.setJobLevelIds(cmd.getJobLevelIds());
                 //  调整部门、岗位、职级并同步到detail表
-                organizationService.transferOrganizationPersonels(transferCommand);
+                organizationService.transferOrganizationPersonels(tCommand);
             }
             return null;
         });

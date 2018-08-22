@@ -24,6 +24,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -3338,14 +3339,25 @@ public class AssetProviderImpl implements AssetProvider {
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
-//                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-                Boolean coupled = true;
-                if(cid.longValue() != namespaceId.longValue()){
-                    coupled = checkCoupling(cid,ownerType, categoryId);
-                }
-                if(coupled){
-                    de_coupling = 0;
-                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
+//                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+//                Boolean coupled = true;
+//                if(cid.longValue() != namespaceId.longValue()){
+//                    coupled = checkCoupling(cid,ownerType, categoryId);
+//                }
+//                if(coupled){
+//                    de_coupling = 0;
+//                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
+//                }
+                
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cid);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	de_coupling = 0;
+                	configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
                 }
             }
         }else{
@@ -3354,21 +3366,21 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
-    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
-        DSLContext context = getReadOnlyContext();
-        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
-                .from(itemScope)
-                .where(itemScope.OWNER_TYPE.eq(ownerType))
-                .and(itemScope.OWNER_ID.eq(communityId))
-                .and(itemScope.CATEGORY_ID.eq(categoryId))
-                .fetch(itemScope.DECOUPLING_FLAG);
-        for(int i = 0; i < flags.size(); i ++){
-            if(flags.get(i).byteValue() == (byte)1){
-                return false;
-            }
-        }
-        return true;
-    }
+//    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
+//        DSLContext context = getReadOnlyContext();
+//        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
+//                .from(itemScope)
+//                .where(itemScope.OWNER_TYPE.eq(ownerType))
+//                .and(itemScope.OWNER_ID.eq(communityId))
+//                .and(itemScope.CATEGORY_ID.eq(categoryId))
+//                .fetch(itemScope.DECOUPLING_FLAG);
+//        for(int i = 0; i < flags.size(); i ++){
+//            if(flags.get(i).byteValue() == (byte)1){
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
     private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -3758,20 +3770,14 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(standard)
                     .where(standard.ID.eq(chargingStandardId))
                     .execute();
-//            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
-//                    .from(standardScope)
-//                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-//                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
-            //if(bro!=null){
             //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
             //只要做了删除动作，那么该项目下的配置全部解耦
-                context.update(standardScope)
-                        .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                        .where(standardScope.OWNER_ID.eq(ownerId))
-                        .and(standardScope.OWNER_TYPE.eq(ownerType))
-                        .and(standardScope.CATEGORY_ID.eq(categoryId))
-                        .execute();
-            //}
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .and(standardScope.CATEGORY_ID.eq(categoryId))
+                    .execute();
             context.delete(standardScope)
                     .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
                     .execute();
@@ -3864,14 +3870,14 @@ public class AssetProviderImpl implements AssetProvider {
             }else {
             	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
             	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-            	isProjectNavigateDefaultCmd.setModuleType(AssetModuleType.GROUPS.getCode());
-            	isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-            	isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-            	isProjectNavigateDefaultCmd.setOwnerType(cmd.getOwnerType());
-            	IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetService.isProjectNavigateDefault(isProjectNavigateDefaultCmd);
-            	if(isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {//1：代表使用默认配置，那么需要同步
-                    InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-            	}
+                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+                }
             }
             return nextGroupId;
         }
@@ -4307,11 +4313,15 @@ public class AssetProviderImpl implements AssetProvider {
         //只要关联了合同（包括草稿合同）就不能删除账单组，也不能修改其中的费项。
         //看是否关联了合同
         EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        EhContracts t2 = Tables.EH_CONTRACTS.as("t2");
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
-              .from(t)
+              .from(t,t2)
               .where(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
               .and(t.BILL_GROUP_ID.eq(rule.getBillGroupId()))
               .and(t.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+              //issue-36219 修复“【物业缴费6.3】当把账单组关联的合同全部删除掉时，账单组还是不能删除”，如果合同处于已删除状态，合同展示列表不会展示，此时账单组应该可以删除
+              .and(t.CONTRACT_ID.eq(t2.ID))
+              .and(t2.STATUS.notEqual(ContractStatus.INACTIVE.getCode()))
               .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
         	return true;
@@ -4497,6 +4507,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
+                //issue-36209 修复“【物业缴费6.3】在物业缴费建3个租金组，分别关联收费项之后，新增计价条款页面，收费项重复显示了3次”的bug
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(cmd.getBillGroupId())) 
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
                 // add category filter by wentian sama
@@ -4740,7 +4752,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
+    public void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs) {
         DSLContext writeContext = getReadWriteContext();
         EhPaymentNoticeConfig noticeConfig = Tables.EH_PAYMENT_NOTICE_CONFIG.as("noticeConfig");
         EhPaymentNoticeConfigDao noticeConfigDao = new EhPaymentNoticeConfigDao(writeContext.configuration());
@@ -4749,6 +4761,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(noticeConfig.NAMESPACE_ID.eq(namespaceId))
                     .and(noticeConfig.OWNER_TYPE.eq(ownerType))
                     .and(noticeConfig.OWNER_ID.eq(ownerId))
+                    .and(noticeConfig.CATEGORY_ID.eq(categoryId))//修复issue-35688 “【物业缴费】自动催缴设置，没有做多入口”的bug
                     .execute();
             noticeConfigDao.insert(toSaveConfigs);
             return null;
@@ -5996,7 +6009,11 @@ public class AssetProviderImpl implements AssetProvider {
                             .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                             .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                             .fetchInto(PaymentChargingItemScope.class);
-            		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		if(scopes.size() > 0) {
+            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}else {
+            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}
             	}else {
             		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
             	}
@@ -6008,26 +6025,47 @@ public class AssetProviderImpl implements AssetProvider {
 	public IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
-        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
-        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
-        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .fetchInto(PaymentChargingStandardsScopes.class);
-        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .fetchInto(PaymentChargingStandardsScopes.class);
-        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
-        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        	}else {
-        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        	}
-        }
+		EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
+		List<PaymentChargingItemScope> itemScopes = context.selectFrom(t)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .fetchInto(PaymentChargingItemScope.class);
+		if(itemScopes != null && itemScopes.size() == 0) {
+			response.setDefaultStatus((byte)0);//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
+		}else {
+			EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+	        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
+	        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                .fetchInto(PaymentChargingStandardsScopes.class);
+	        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+	        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        }else {//说明该域空间下已经有数据了
+	        	scopes = context.selectFrom(t1)
+	            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                    .fetchInto(PaymentChargingStandardsScopes.class);
+	        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
+	        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        	}else {
+	        		scopes = context.selectFrom(t1)
+		            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+		                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+		                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+		                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+		                    .fetchInto(PaymentChargingStandardsScopes.class);
+	        		if(scopes.size() > 0) {
+            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}else {
+            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+            		}
+	        	}
+	        }
+		}
         return response;
 	}
 	
@@ -6702,5 +6740,23 @@ public class AssetProviderImpl implements AssetProvider {
         		.execute();
 		
 	}
+	
+	public boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId) {
+        DSLContext context = getReadOnlyContext();
+        //issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
+        //只要关联了合同（包括草稿合同）就不能删除标准
+        //看是否关联了合同
+        EhContractChargingItems t = Tables.EH_CONTRACT_CHARGING_ITEMS.as("t");
+        List<Long> fetch1 = context.select(t.CONTRACT_ID)
+              .from(t)
+              .where(t.NAMESPACE_ID.eq(namespaceId))
+              .and(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
+              .fetch(t.CONTRACT_ID);
+        if(fetch1.size()>0){
+        	return true;
+        }else {
+        	return false;
+        }
+    }
 
 }

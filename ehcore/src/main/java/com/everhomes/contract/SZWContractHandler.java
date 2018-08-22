@@ -313,5 +313,11 @@ public class SZWContractHandler implements ContractService{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
