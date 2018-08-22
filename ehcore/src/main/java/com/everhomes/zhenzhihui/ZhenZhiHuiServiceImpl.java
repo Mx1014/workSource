@@ -174,9 +174,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
 
                             JSONObject jsonObject = (JSONObject) JSONValue.parse(instanceConfig);
 
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
                                     homeUrl+ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getUrl());
-
+                            LOGGER.info("init url = {}",builder.toUriString());
                             List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
                             if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
                                 sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
