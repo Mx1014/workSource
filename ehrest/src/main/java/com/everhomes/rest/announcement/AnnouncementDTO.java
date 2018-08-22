@@ -14,46 +14,43 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 帖子或评论ID</li>
- *     <li>uuid: 帖子或评论UUID</li>
+ *     <li>id: 公告ID</li>
+ *     <li>uuid: 公告UUID</li>
  *     <li>namespaceId: 域空间ID</li>
  *     <li>creatorUid: 创建者ID</li>
  *     <li>creatorNickName: 创建者在圈内的昵称</li>
  *     <li>creatorAvatar: 创建者在圈内的头像URI</li>
  *     <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  *     <li>creatorAdminFlag: 创建者是否为圈的管理员</li>
- *     <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
- *     <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  *     <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  *     <li>visibleRegionId: 区域范围类型对应的ID</li>
  *     <li>visibleRegionIds: 区域范围类型对应的IDs。新版的活动发布时出现了范围的概念，比如“园区A、园区C和小区A”。visibleRegionId和visibleRegionIds只传一个</li>
  *     <li>communityId: 用户当前小区ID</li>
- *     <li>subject: 帖子或评论标题</li>
- *     <li>contentType: 帖子或评论内容类型，{@link com.everhomes.rest.forum.PostContentType}</li>
- *     <li>content: 帖子或评论内容</li>
+ *     <li>subject: 公告标题</li>
+ *     <li>contentType: 公告内容类型，{@link com.everhomes.rest.announcement.AnnouncementContentType}</li>
+ *     <li>content: 公告内容</li>
  *     <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.rest.app.AppConstants}</li>
  *     <li>embeddedId: 内嵌对象ID</li>
  *     <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
- *     <li>childCount: 孩子数目，如帖子下的评论数目</li>
- *     <li>likeCount: 帖子或评论赞的数目</li>
- *     <li>dislikeCount: 帖子或评论踩的数目</li>
+ *     <li>childCount: 孩子数目，如公告下的评论数目</li>
+ *     <li>likeCount: 公告赞的数目</li>
+ *     <li>dislikeCount: 公告踩的数目</li>
  *     <li>viewCount: 浏览的数目</li>
- *     <li>updateTime: 帖子或评论更新时间</li>
- *     <li>createTime: 帖子或评论创建时间</li>
- *     <li>attachments: 帖子或评论的附件信息，参见{@link AttachmentDTO}</li>
+ *     <li>updateTime: 公告更新时间</li>
+ *     <li>createTime: 公告创建时间</li>
+ *     <li>attachments: 公告的附件信息，参见{@link AttachmentDTO}</li>
  *     <li>likeFlag: 是否点赞，参见{@link UserLikeType}</li>
- *     <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
+ *     <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.announcement.AnnouncementFavoriteFlag}</li>
  *     <li>shareUrl: 分享链接</li>
- *     <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
- *     <li>publishStatus: 帖子发布状态，{@link com.everhomes.rest.forum.TopicPublishStatus}</li>
+ *     <li>privateFlag: 公告是否公开标记，应用场景：发给物业、政府相关部门的公告默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.announcement.AnnouncementPrivacy}</li>
+ *     <li>publishStatus: 公告发布状态，{@link com.everhomes.rest.announcement.AnnouncementPublishStatus}</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
  *     <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  *     <li>contentUrl: 内容链接</li>
  *     <li>ownerToken: ownerToken</li>
- *     <li>forumEntryId: 论坛应用入口Id</li>
- *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
- *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
+ *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link com.everhomes.rest.announcement.AnnouncementInteractFlag}</li>
+ *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link com.everhomes.rest.announcement.AnnouncementStickFlag}</li>
  *	   <li>stickTime: 置顶时间</li>
  * </ul>
  */
@@ -73,10 +70,6 @@ public class AnnouncementDTO {
     private String creatorAvatarUrl;
 
     private Byte creatorAdminFlag;
-
-    private String creatorTag;
-
-    private String targetTag;
 
     private Byte visibleRegionType;
 
@@ -140,8 +133,6 @@ public class AnnouncementDTO {
     private String groupName;
 
     private String ownerToken;
-
-    private Long forumEntryId;
 
     private Byte interactFlag;
 	
@@ -243,21 +234,6 @@ public class AnnouncementDTO {
 
     public void setCreatorAdminFlag(Byte creatorAdminFlag) {
         this.creatorAdminFlag = creatorAdminFlag;
-    }
-
-    public String getCreatorTag() {
-        return creatorTag;
-    }
-
-    public void setCreatorTag(String creatorTag) {
-        this.creatorTag = creatorTag;
-    }
-    public String getTargetTag() {
-        return targetTag;
-    }
-
-    public void setTargetTag(String targetTag) {
-        this.targetTag = targetTag;
     }
 
     public Byte getVisibleRegionType() {
@@ -466,14 +442,6 @@ public class AnnouncementDTO {
 
     public void setVisibleRegionIds(List<Long> visibleRegionIds) {
         this.visibleRegionIds = visibleRegionIds;
-    }
-
-    public Long getForumEntryId() {
-        return forumEntryId;
-    }
-
-    public void setForumEntryId(Long forumEntryId) {
-        this.forumEntryId = forumEntryId;
     }
 
     public Byte getInteractFlag() {
