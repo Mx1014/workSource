@@ -4543,6 +4543,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
 							Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
 				order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+				rentalv2Provider.updateRentalBill(order);
 			}
 		}
 
