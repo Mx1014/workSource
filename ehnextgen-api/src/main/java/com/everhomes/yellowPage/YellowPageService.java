@@ -104,6 +104,6 @@ public interface YellowPageService {
 
 	String transferTime(Long parentId);
 
-
+	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
 
 }

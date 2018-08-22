@@ -156,6 +156,17 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
+    
+    /**
+	 * <b>URL: /yellowPage/listServiceAllianceCategoriesAdmin</b> 
+	 * <p> 列出服务联盟类型，后台使用 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listServiceAllianceCategoriesAdmin")
+	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
+	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesAdmin(cmd));
+	}
 
     /**
 	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
@@ -754,5 +765,36 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
     
+	/**
+	 * <b>URL: /yellowPage/updateServiceAllianceConfigFlag</b>
+	 * <p>
+	 * 开启联盟主页项目配置
+	 * </p>
+	 */
+	@RequestMapping("updateServiceAllianceConfigFlag")
+	@RestReturn(String.class)
+	public RestResponse updateServiceAllianceConfigFlag(UpdateProjectConfigFlagCommand cmd){
+		allianceStandardService.updateServiceAllianceConfigFlag(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/updateCategoryConfigFlag</b>
+	 * <p>
+	 * 开启联盟样式的项目配置
+	 * </p>
+	 */
+	@RequestMapping("updateCategoryConfigFlag")
+	@RestReturn(String.class)
+	public RestResponse updateCategoryConfigFlag(UpdateProjectConfigFlagCommand cmd){
+		allianceStandardService.updateCategoryConfigFlag(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
 }

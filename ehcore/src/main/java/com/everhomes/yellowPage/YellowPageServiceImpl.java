@@ -131,6 +131,7 @@ import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
 import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
 import com.everhomes.rest.yellowPage.ListOnlineServicesCommand;
 import com.everhomes.rest.yellowPage.ListOnlineServicesResponse;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.NotifyTargetDTO;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
@@ -1720,6 +1721,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
+		
+		cmd.setPageAnchor(null);
+		cmd.setPageSize(null);
+		ListServiceAllianceCategoriesAdminResponse resp = listServiceAllianceCategoriesAdmin(cmd);
+		return resp.getDtos();
+	}
+	
+	@Override
+	public ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(
+			ListServiceAllianceCategoriesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if (cmd.getNamespaceId() != null) {
 			namespaceId = cmd.getNamespaceId();
@@ -1730,10 +1741,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			displayDestination.add(ServiceAllianceCategoryDisplayDestination.BOTH.getCode());
 		}
 
-		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(
-				cmd.getOwnerType(), cmd.getOwnerId(), namespaceId, cmd.getParentId(), CategoryAdminStatus.ACTIVE,
-				displayDestination);
-		return entityResultList.stream().map(r -> {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(locator,
+				cmd.getPageSize(), cmd.getOwnerType(), cmd.getOwnerId(), namespaceId, cmd.getParentId(),
+				CategoryAdminStatus.ACTIVE, displayDestination);
+
+		List<ServiceAllianceCategoryDTO> dtos = entityResultList.stream().map(r -> {
 			ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
 			String locale = UserContext.current().getUser().getLocale();
 			String displayCategoryName = localeStringService.getLocalizedString(
@@ -1745,7 +1759,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 			dto.setSkipType(skipRule == null ? (byte) 0 : (byte) 1);
 			return dto;
 		}).collect(Collectors.toList());
+
+		// 组织返回数据
+		ListServiceAllianceCategoriesAdminResponse resp = new ListServiceAllianceCategoriesAdminResponse();
+		resp.setDtos(dtos);
+		resp.setNextPageAnchor(locator.getAnchor());
+		return resp;
 	}
+
 
 	@Override
 	public ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
