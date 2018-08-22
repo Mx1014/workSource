@@ -107,7 +107,7 @@ public class FlowProviderImpl implements FlowProvider {
 
         List<Flow> list = query.fetch().map((r) -> RecordHelper.convert(r, Flow.class));
 
-        if (list.size() >= count && count > 0) {
+        if (list.size() > count && count > 0) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list.remove(list.size() - 1);
         } else {

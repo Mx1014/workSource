@@ -63,7 +63,7 @@ public interface EnterpriseApplyEntryService {
 
 	LeaseFormRequest getFormRequestByCommunityId(Integer namespaceId,Long communityId,String sourceType,Long categoryId);
 
-	LeaseFormRequestDTO openCustomRequestForm(OpenCustomRequestFormCommand cmd);
+	void openCustomRequestForm(OpenCustomRequestFormCommand cmd);
 
 	void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd);
 	
