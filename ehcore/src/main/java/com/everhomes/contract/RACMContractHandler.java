@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 
 @Component(ContractService.CONTRACT_PREFIX + "999929")
-public class RACMContractHandler extends ContractServiceImpl {
+public class RACMContractHandler extends DefaultContractServiceImpl {
 
     @Override
     public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag) {
