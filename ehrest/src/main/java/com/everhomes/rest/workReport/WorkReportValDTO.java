@@ -15,18 +15,18 @@ import java.util.List;
  * <li>reportId: 工作汇报id</li>
  * <li>title: 标题</li>
  * <li>reportType: 汇报类型</li>
- * <li>reportTypeText: 汇报类型(显示)</li>
+ * <li>reportTypeText: 汇报类型(显示文本)</li>
  * <li>applierName: 申请人姓名</li>
  * <li>updateTime: 修改时间</li>
  * <li>createTime: 创建时间</li>
- * <li>receiverNames: 接收人姓名(外部快速显示)</li>
+ * <li>receiverNames: 接收人姓名(显示文本)</li>
  * <li>iconUrl: 图标url</li>
  * <li>applierUserId: 申请人id</li>
  * <li>applierUserAvatar: 申请人头像</li>
  * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
- * <li>reportTimeText: 汇报时间(显示)</li>
- * <li>validText: 截止时间(显示)</li>
+ * <li>reportTimeText: 汇报时间(显示文本)</li>
+ * <li>validText: 截止时间(显示文本)</li>
  * <li>validitySetting: 提交时间设置</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
