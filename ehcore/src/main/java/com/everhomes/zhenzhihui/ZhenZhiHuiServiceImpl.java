@@ -196,9 +196,11 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                 builder.queryParam("entityType",UserCurrentEntityType.ORGANIZATION.getCode());
                             }
                             LOGGER.info("sceneToken = {}", sceneTokenDTO);
+                            String tokenStr = WebTokenGenerator.getInstance().toWebToken(sceneTokenDTO);
                             urlStr.append("ns=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
                                     .append("namespaceId=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
-                                    .append("userId=").append(user.getId()).append("&");
+                                    .append("userId=").append(user.getId()).append("&")
+                                    .append("sceneToken=").append(tokenStr).append("&");
                             builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
