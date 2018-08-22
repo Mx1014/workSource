@@ -205,7 +205,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportId(r.getId());
         dto.setScopes(listWorkReportScopes(r.getId()));
         dto.setValiditySetting(JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class));
+        dto.setRxMsgType(r.getReceiverMsgType());
         dto.setRxMsgSetting(JSON.parseObject(r.getReceiverMsgSeeting(), ReportMsgSettingDTO.class));
+        dto.setAuMsgType(r.getAuthorMsgType());
         dto.setAuMsgSetting(JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class));
         return dto;
     }
@@ -816,7 +818,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         WorkReport report = workReportProvider.getWorkReportById(reportVal.getReportId());
 
-        /** update the status **/
+        /* update the status */
         WorkReportValReceiverMap receiverMap = workReportValProvider.getWorkReportValReceiverByReceiverId(
                 namespaceId, reportVal.getId(), currentUserId);
         //  check the receiver except applier.
@@ -828,7 +830,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             workReportValProvider.updateWorkReportValReceiverMap(receiverMap);
         }
 
-        /** get the result **/
+        /* get the result */
         //  1) get receivers.
         List<SceneContactDTO> receivers = listWorkReportValReceivers(cmd.getReportValId());
         //  2) get the field values which has been post by the user.
