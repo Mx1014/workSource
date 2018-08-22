@@ -775,4 +775,13 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-�
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
 
+
+
+
+-- 2018年8月22日
+-- 新增在request表单中存储该表单的formOriginId和formVersion
+alter table eh_general_form_val_requests add form_origin_id BIGINT null comment '该表单所属的表单模板id';
+alter table eh_general_form_val_requests add form_version BIGINT null comment '该表单所属的表单模板version';
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
