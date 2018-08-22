@@ -12,26 +12,27 @@ import java.util.List;
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>reportId: 工作汇报id</li>
  * <li>reportName: 工作汇报名称</li>
+ * <li>reportType: 工作汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
+ * <li>formOriginId: 关联表单id</li>
+ * <li>formVersion: 关联表单版本</li>
+ * <li>validitySetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportValiditySettingDTO}</li>
  * <li>status: 汇报状态 0-无效 1-未启用 2-启用 参考{@link com.everhomes.rest.workReport.WorkReportStatus}</li>
  * <li>scopes: 可见范围 参考{@link WorkReportScopeMapDTO}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改 {@link com.everhomes.rest.workReport.AttitudeFlag}</li>
  * <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
- * <li>reportType: 工作汇报类型 0-每日 1-每周 2-每月 参考{@link com.everhomes.rest.workReport.WorkReportType}</li>
  * <li>reportAttribute: 工作汇报属性 例如：比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.workReport.WorkReportAttribute}</li>
- * <li>formOriginId: 关联表单id</li>
- * <li>formVersion: 关联表单版本</li>
- * <li>validitySetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportValiditySettingDTO}</li>
  * <li>rxMsgType: 接收提醒类型 0-即时 1-汇总</li>
  * <li>rxMsgSetting: 接收时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
  * <li>auMsgType: 提交提醒类型 0-不提醒 1-提醒</li>
  * <li>auMsgSetting: 提交时间设置 参考{@link com.everhomes.rest.workReport.ReportMsgSettingDTO}</li>
+ * <li>updateInfo: 最后编辑信息</li>
  * <li>iconUri: 图标uri</li>
  * <li>iconUrl: 图标url</li>
- * <li>updateInfo: 最后编辑信息</li>
  * </ul>
  */
 public class WorkReportDTO {
 
+    //  common
     private Long organizationId;
 
     private Long moduleId;
@@ -42,6 +43,15 @@ public class WorkReportDTO {
 
     private String reportName;
 
+    private Byte reportType;
+
+    private Long formOriginId;
+
+    private Long formVersion;
+
+    private ReportValiditySettingDTO validitySetting;
+
+    //  web
     private Byte status;
 
     @ItemType(WorkReportScopeMapDTO.class)
@@ -51,15 +61,7 @@ public class WorkReportDTO {
 
     private Byte deleteFlag;
 
-    private Byte reportType;
-
     private String reportAttribute;
-
-    private Long formOriginId;
-
-    private Long formVersion;
-
-    private ReportValiditySettingDTO validitySetting;
 
     private Byte rxMsgType;
 
@@ -69,13 +71,14 @@ public class WorkReportDTO {
 
     private ReportMsgSettingDTO auMsgSetting;
 
-    private String iconUri;
-
-    private String iconUrl;
-
     private Timestamp updateTime;
 
     private String updateInfo;
+
+    //  app
+    private String iconUri;
+
+    private String iconUrl;
 
     public WorkReportDTO() {
     }
@@ -120,6 +123,38 @@ public class WorkReportDTO {
         this.reportName = reportName;
     }
 
+    public Byte getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(Byte reportType) {
+        this.reportType = reportType;
+    }
+
+    public Long getFormOriginId() {
+        return formOriginId;
+    }
+
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
+    }
+
+    public Long getFormVersion() {
+        return formVersion;
+    }
+
+    public void setFormVersion(Long formVersion) {
+        this.formVersion = formVersion;
+    }
+
+    public ReportValiditySettingDTO getValiditySetting() {
+        return validitySetting;
+    }
+
+    public void setValiditySetting(ReportValiditySettingDTO validitySetting) {
+        this.validitySetting = validitySetting;
+    }
+
     public Byte getStatus() {
         return status;
     }
@@ -152,44 +187,12 @@ public class WorkReportDTO {
         this.deleteFlag = deleteFlag;
     }
 
-    public Byte getReportType() {
-        return reportType;
-    }
-
-    public void setReportType(Byte reportType) {
-        this.reportType = reportType;
-    }
-
     public String getReportAttribute() {
         return reportAttribute;
     }
 
     public void setReportAttribute(String reportAttribute) {
         this.reportAttribute = reportAttribute;
-    }
-
-    public Long getFormOriginId() {
-        return formOriginId;
-    }
-
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
-    }
-
-    public Long getFormVersion() {
-        return formVersion;
-    }
-
-    public void setFormVersion(Long formVersion) {
-        this.formVersion = formVersion;
-    }
-
-    public ReportValiditySettingDTO getValiditySetting() {
-        return validitySetting;
-    }
-
-    public void setValiditySetting(ReportValiditySettingDTO validitySetting) {
-        this.validitySetting = validitySetting;
     }
 
     public Byte getRxMsgType() {
@@ -224,22 +227,6 @@ public class WorkReportDTO {
         this.auMsgSetting = auMsgSetting;
     }
 
-    public String getIconUri() {
-        return iconUri;
-    }
-
-    public void setIconUri(String iconUri) {
-        this.iconUri = iconUri;
-    }
-
-    public String getIconUrl() {
-        return iconUrl;
-    }
-
-    public void setIconUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
-    }
-
     public Timestamp getUpdateTime() {
         return updateTime;
     }
@@ -254,6 +241,22 @@ public class WorkReportDTO {
 
     public void setUpdateInfo(String updateInfo) {
         this.updateInfo = updateInfo;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     @Override

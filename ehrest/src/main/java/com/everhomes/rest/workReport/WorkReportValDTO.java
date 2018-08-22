@@ -14,46 +14,62 @@ import java.util.List;
  * <li>reportValId: 工作汇报单id</li>
  * <li>reportId: 工作汇报id</li>
  * <li>title: 标题</li>
+ * <li>reportType: 汇报类型</li>
  * <li>applierName: 申请人姓名</li>
+ * <li>updateTime: 修改时间</li>
+ * <li>createTime: 创建时间</li>
+ * <li>receiverNames: 接收人姓名(外部快速显示)</li>
+ * <li>iconUrl: 图标url</li>
  * <li>applierUserId: 申请人id</li>
  * <li>applierUserAvatar: 申请人头像</li>
- * <li>receiverNames: 接收人姓名(外部快速显示)</li>
  * <li>receivers: 接收人 参考{@link com.everhomes.rest.ui.user.SceneContactDTO}</li>
  * <li>reportTime: 汇报时间</li>
- * <li>reportType: 汇报类型</li>
+ * <li>reportTimeText: 汇报时间(显示)</li>
+ * <li>validText: 截止时间(显示)</>
  * <li>validitySetting: 提交时间设置</li>
  * <li>values: 表单各项值 参考{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * <li>readStatus: 0-未读 1-已读 参考{@link com.everhomes.rest.workReport.WorkReportReadStatus}</li>
- * <li>iconUrl: 图标url</li>
- * <li>updateTime: 修改时间</li>
- * <li>createTime: 创建时间</li>
  * <li>ownerToken: 实体标识(对接评论模块)</li>
  * </ul>
  */
 public class WorkReportValDTO {
 
+
+    //  common
     private Long reportValId;
 
     private Long reportId;
 
     private String title;
 
+    private Byte reportType;
+
     private String applierName;
 
+    private Timestamp updateTime;
+
+    private Timestamp createTime;
+
+    //  list
+    private String receiverNames;
+
+    private String iconUrl;
+
+    //  get
     private Long applierUserId;
 
     private Long applierDetailId;
 
     private String applierUserAvatar;
 
-    private String receiverNames;
-
     @ItemType(SceneContactDTO.class)
     private List<SceneContactDTO> receivers;
 
     private Timestamp reportTime;
 
-    private Byte reportType;
+    private String reportTimeText;
+
+    private String validText;
 
     private ReportValiditySettingDTO validitySetting;
 
@@ -61,12 +77,6 @@ public class WorkReportValDTO {
     private List<GeneralFormFieldDTO> values;
 
     private Byte readStatus;
-
-    private String iconUrl;
-
-    private Timestamp updateTime;
-
-    private Timestamp createTime;
 
     private String ownerToken;
 
@@ -97,6 +107,14 @@ public class WorkReportValDTO {
         this.title = title;
     }
 
+    public Byte getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(Byte reportType) {
+        this.reportType = reportType;
+    }
+
     public String getApplierName() {
         return applierName;
     }
@@ -105,12 +123,36 @@ public class WorkReportValDTO {
         this.applierName = applierName;
     }
 
-    public Long getApplierDetailId() {
-        return applierDetailId;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setApplierDetailId(Long applierDetailId) {
-        this.applierDetailId = applierDetailId;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getReceiverNames() {
+        return receiverNames;
+    }
+
+    public void setReceiverNames(String receiverNames) {
+        this.receiverNames = receiverNames;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public Long getApplierUserId() {
@@ -121,20 +163,20 @@ public class WorkReportValDTO {
         this.applierUserId = applierUserId;
     }
 
+    public Long getApplierDetailId() {
+        return applierDetailId;
+    }
+
+    public void setApplierDetailId(Long applierDetailId) {
+        this.applierDetailId = applierDetailId;
+    }
+
     public String getApplierUserAvatar() {
         return applierUserAvatar;
     }
 
     public void setApplierUserAvatar(String applierUserAvatar) {
         this.applierUserAvatar = applierUserAvatar;
-    }
-
-    public String getReceiverNames() {
-        return receiverNames;
-    }
-
-    public void setReceiverNames(String receiverNames) {
-        this.receiverNames = receiverNames;
     }
 
     public List<SceneContactDTO> getReceivers() {
@@ -153,12 +195,20 @@ public class WorkReportValDTO {
         this.reportTime = reportTime;
     }
 
-    public Byte getReportType() {
-        return reportType;
+    public String getReportTimeText() {
+        return reportTimeText;
     }
 
-    public void setReportType(Byte reportType) {
-        this.reportType = reportType;
+    public void setReportTimeText(String reportTimeText) {
+        this.reportTimeText = reportTimeText;
+    }
+
+    public String getValidText() {
+        return validText;
+    }
+
+    public void setValidText(String validText) {
+        this.validText = validText;
     }
 
     public ReportValiditySettingDTO getValiditySetting() {
@@ -183,30 +233,6 @@ public class WorkReportValDTO {
 
     public void setReadStatus(Byte readStatus) {
         this.readStatus = readStatus;
-    }
-
-    public String getIconUrl() {
-        return iconUrl;
-    }
-
-    public void setIconUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
-    }
-
-    public Timestamp getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
     }
 
     public String getOwnerToken() {
