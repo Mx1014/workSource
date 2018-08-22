@@ -132,6 +132,10 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     }
 
     private RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,String identify){
+        RentalResourceType type = rentalv2Provider.findRentalResourceTypes(namespaceId, identify);
+        if (type != null){ //原来就有了 直接拿过来用 不重新生成
+            return type;
+        }
         RentalResourceType rentalResourceType = new RentalResourceType();
         rentalResourceType.setNamespaceId(namespaceId);
         rentalResourceType.setName(name);
