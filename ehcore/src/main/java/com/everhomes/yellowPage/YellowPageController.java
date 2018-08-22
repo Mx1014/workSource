@@ -803,7 +803,7 @@ public class YellowPageController  extends ControllerBase {
 	 * 获取自定义配置状态
 	 * </p>
 	 */
-	@RequestMapping("disableSelfDefinedConfig")
+	@RequestMapping("getSelfDefinedState")
 	@RestReturn(GetSelfDefinedStateResponse.class)
 	public RestResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd){
 		RestResponse response = new RestResponse(allianceStandardService.getSelfDefinedState(cmd));
