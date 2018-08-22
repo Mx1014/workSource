@@ -159,6 +159,8 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
 
                             List<Long> moduleIds = new ArrayList<>();
                             LOGGER.info("zhenzhihuiDTO = {}", zhenZhiHuiUserInfoDTO);
+                            LOGGER.info("code = {}" ,Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode()));
+                            LOGGER.info("Server = {}", ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())));
                             moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
                             LOGGER.info("moduleId = {}", moduleIds);
                             List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
