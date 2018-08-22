@@ -177,30 +177,40 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
                                     homeUrl+ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getUrl());
                             LOGGER.info("init url = {}",builder.toUriString());
+                            StringBuilder urlStr = new StringBuilder().append(builder.toUriString()).append("?");
                             List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
                             if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
                                 sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
+                                urlStr.append("communityId=").append(COMMUNITY_ID).append("&");
+                                urlStr.append("entityType=").append(UserCurrentEntityType.COMMUNITY.getCode()).append("&");
                                 builder.queryParam("communityId", COMMUNITY_ID);
                                 builder.queryParam("entityType",UserCurrentEntityType.COMMUNITY.getCode());
                             }else {
                                 sceneTokenDTO.setScene(SceneType.ENTERPRISE.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
                                 sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
+                                urlStr.append("organizationId=").append(sceneTokenDTO.getEntityId()).append("&");
+                                urlStr.append("entityType=").append(UserCurrentEntityType.ORGANIZATION.getCode()).append("&");
                                 builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
                                 builder.queryParam("entityType",UserCurrentEntityType.ORGANIZATION.getCode());
                             }
                             LOGGER.info("sceneToken = {}", sceneTokenDTO);
+                            urlStr.append("ns=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
+                                    .append("namespaceId=").append(ZHENZHIHUI_NAMESPACE_ID).append("&")
+                                    .append("userId=").append(user.getId()).append("&");
                             builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
                             for (Object key : jsonObject.keySet()) {
-                                if (!key.toString().equals("url")) {
+                                if (!key.toString().equals("url") && !key.toString().equals("categoryDTOList")) {
+                                    urlStr.append(key.toString()).append("=").append(jsonObject.get(key)).append("&");
                                     builder.queryParam(key.toString(), jsonObject.get(key));
                                 }
                             }
-                            LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , builder.build().toUriString());
-                            return builder.build().toUriString();
+                            String url = urlStr.toString().substring(0,urlStr.toString().length()-1);
+                            LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , url);
+                            return url;
                         }
                     }
                 }
