@@ -4,6 +4,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
@@ -15,11 +16,19 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.equipment.findScopeFieldItemCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.SearchUtils;
@@ -28,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.varField.Field;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
@@ -97,6 +107,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private ContractProvider contractProvider;
+
+    @Autowired
+    private EquipmentService equipmentService;
 
     @Override
     public String getIndexType() {
@@ -710,7 +723,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getAptitudeFlagItemId()) {
-            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();
+            cmd.setNamespaceId(customer.getNamespaceId());
+            cmd.setBusinessValue(Byte.valueOf(dto.getAptitudeFlagItemId().toString()));
+            cmd.setModuleName("enterprise_customer");
+            cmd.setCommunityId(customer.getCommunityId());
+            Field field = fieldProvider.findField(10L, "aptitudeFlagItemId");
+            if (field != null)
+            cmd.setFieldId(field.getId());
+            FieldItemDTO aptitudeFlag = equipmentService.findScopeFieldItemByFieldItemId(cmd);
+
             if (null != aptitudeFlag) {
                 dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
             } else {
