@@ -149,6 +149,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		url.append("?displayType=" + config.getDisplayType());
 		url.append("&parentId=" + config.getType());
 		url.append("&enableComment=" + config.getEnableComment());
+		url.append("&ns=" + namespaceId);
 		url.append("#sign_suffix");
 
 		return url.toString();
