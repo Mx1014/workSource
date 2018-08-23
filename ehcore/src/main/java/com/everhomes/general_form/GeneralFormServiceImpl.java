@@ -748,8 +748,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         String contents = gogsGet(repo,generalFormPrintTemplate.gogsPath(),generalFormPrintTemplate.getLastCommit());
         GeneralFormPrintTemplateDTO generalFormPrintTemplateDTO = ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
         generalFormPrintTemplateDTO.setContents(contents);
-        UserInfo user  = this.userService.getUserInfo(generalFormPrintTemplate.getCreatorUid());
-        generalFormPrintTemplateDTO.setCreatorName(user.getNickName());
+        if (generalFormPrintTemplate.getCreatorUid() != null) {
+            UserInfo user  = this.userService.getUserInfo(generalFormPrintTemplate.getCreatorUid());
+            generalFormPrintTemplateDTO.setCreatorName(user.getNickName());
+        }
         return generalFormPrintTemplateDTO;
     }
 
