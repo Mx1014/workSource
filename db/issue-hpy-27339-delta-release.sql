@@ -47,3 +47,8 @@ INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`,
 	"visibleType": "EDITABLE",
 	"filterFlag": 1
 }]',1, 1,SYSDATE()) ;
+
+
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;

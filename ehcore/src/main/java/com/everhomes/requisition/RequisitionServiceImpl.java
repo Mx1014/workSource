@@ -28,12 +28,25 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
-import com.everhomes.rest.requisition.*;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.requisition.CreateRequisitionCommand;
+import com.everhomes.rest.requisition.GetApprovalRunningFormCommond;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
+import com.everhomes.rest.requisition.GetRequisitionDetailCommand;
+import com.everhomes.rest.requisition.GetRequisitionDetailResponse;
+import com.everhomes.rest.requisition.GetRunningRequisitionFlowCommand;
+import com.everhomes.rest.requisition.GetRunningRequisitionFormCommond;
+import com.everhomes.rest.requisition.GetSelectedRequisitionFormCommand;
+import com.everhomes.rest.requisition.ListRequisitionTypesCommand;
+import com.everhomes.rest.requisition.ListRequisitionTypesDTO;
+import com.everhomes.rest.requisition.ListRequisitionsCommand;
+import com.everhomes.rest.requisition.ListRequisitionsDTO;
+import com.everhomes.rest.requisition.ListRequisitionsResponse;
+import com.everhomes.rest.requisition.RequistionErrorCodes;
+import com.everhomes.rest.requisition.UpdateRequisitionActiveStatusCommond;
+import com.everhomes.rest.requisition.UpdateRequisitionRunningFormCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -48,7 +61,6 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
@@ -107,7 +119,7 @@ public class RequisitionServiceImpl implements RequisitionService{
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 //        createFlowCaseCommand.setReferId(req.getId());
 //        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-        createFlowCaseCommand.setServiceType("requisition");
+        createFlowCaseCommand.setServiceType("请示单申请");
         createFlowCaseCommand.setProjectId(req.getOwnerId());
         createFlowCaseCommand.setProjectType(req.getOwnerType());
 
