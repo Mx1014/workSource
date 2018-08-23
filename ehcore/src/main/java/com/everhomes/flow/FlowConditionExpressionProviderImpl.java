@@ -95,6 +95,15 @@ public class FlowConditionExpressionProviderImpl implements FlowConditionExpress
                 .fetchInto(FlowConditionExpression.class);
     }
 
+    @Override
+    public void deleteFlowConditionExpressionByCondition(Long conditionId) {
+        com.everhomes.server.schema.tables.EhFlowConditionExpressions t = Tables.EH_FLOW_CONDITION_EXPRESSIONS;
+        rwContext()
+                .delete(t)
+                .where(t.FLOW_CONDITION_ID.eq(conditionId))
+                .execute();
+    }
+
     private EhFlowConditionExpressionsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhFlowConditionExpressionsDao(context.configuration());
@@ -107,5 +116,9 @@ public class FlowConditionExpressionProviderImpl implements FlowConditionExpress
 
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
     }
 }

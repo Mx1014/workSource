@@ -30,4 +30,9 @@ public interface FlowTemplateCode {
     int DEFAULT_SUPERVISE_MESSAGE_TEXT = 20006;// 你有1个 ${text_button_msg_flow_case_title} 任务尚未处理
     int DEFAULT_REMIND_MESSAGE_TEXT = 20007;// 你有1个任务尚未处理
 
+    int DEFAULT_SUB_FLOW_ENTER_TEXT = 20008;// $子业务名称$进行中
+    int DEFAULT_SUB_FLOW_START_TRACKER_TEXT = 20009;// 子流程创建成功，点击此处查看父流程详情。
+	int DEFAULT_SUB_FLOW_END_TEXT = 20010;// $子业务名称$ 已完成
+	int DEFAULT_SUB_FLOW_ABORT_TEXT = 20011;// $子业务名称$ 已终止
+	int DEFAULT_SUB_FLOW_TOO_DEEP_TEXT = 20012;// 子流程循环层级过多，流程已终止。详情请联系管理员
 }

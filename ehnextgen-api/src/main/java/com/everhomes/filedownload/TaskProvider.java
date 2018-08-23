@@ -14,4 +14,8 @@ public interface TaskProvider {
     List<Task> listWaitingAndRunningTask();
 
     List<Long> listWaitingTaskIds();
+
+    Integer countNotAllReadStatus(Long userId);
+
+    List<Task> listNotReadStatusTasks(Long userId);
 }

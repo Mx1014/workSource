@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 public class NavigatorInstanceConfig implements Serializable  {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -5152885247968357254L;
 
@@ -28,6 +28,14 @@ public class NavigatorInstanceConfig implements Serializable  {
 	private Integer columnSpacing;
 
 	private String backgroundColor;
+
+	private Byte allOrMoreFlag;
+
+	private String allOrMoreType;
+
+	private String allOrMoreLabel;
+
+	private String allOrMoreIconUri;
 
 	public String getItemGroup() {
 		return itemGroup;
@@ -99,6 +107,38 @@ public class NavigatorInstanceConfig implements Serializable  {
 
 	public void setCssStyleFlag(Byte cssStyleFlag) {
 		this.cssStyleFlag = cssStyleFlag;
+	}
+
+	public Byte getAllOrMoreFlag() {
+		return allOrMoreFlag;
+	}
+
+	public void setAllOrMoreFlag(Byte allOrMoreFlag) {
+		this.allOrMoreFlag = allOrMoreFlag;
+	}
+
+	public String getAllOrMoreType() {
+		return allOrMoreType;
+	}
+
+	public void setAllOrMoreType(String allOrMoreType) {
+		this.allOrMoreType = allOrMoreType;
+	}
+
+	public String getAllOrMoreLabel() {
+		return allOrMoreLabel;
+	}
+
+	public void setAllOrMoreLabel(String allOrMoreLabel) {
+		this.allOrMoreLabel = allOrMoreLabel;
+	}
+
+	public String getAllOrMoreIconUri() {
+		return allOrMoreIconUri;
+	}
+
+	public void setAllOrMoreIconUri(String allOrMoreIconUri) {
+		this.allOrMoreIconUri = allOrMoreIconUri;
 	}
 
 	@Override

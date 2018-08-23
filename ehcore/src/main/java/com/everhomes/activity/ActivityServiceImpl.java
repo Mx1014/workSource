@@ -229,6 +229,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -1209,6 +1210,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
             payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
+            if(payUserDTO==null){
+                throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+                        "创建个人付款账户失败");
+            }
             String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
             payUserDTO = payUserDTOs.get(0);

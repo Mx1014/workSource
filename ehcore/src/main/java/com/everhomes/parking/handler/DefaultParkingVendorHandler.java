@@ -190,7 +190,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
 
             Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-            String tag1 = flow.getStringTag1();
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+            Integer tag1 = parkingLot.getFlowMode();
             if(null == tag1) {
                 LOGGER.error("Flow tag is null, flow={}", flow);
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

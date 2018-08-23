@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>sourceRequestType: 请求来源，为空或者0:客户端 1:后台管理 {@link com.everhomes.rest.parking.ParkingSourceRequestType}</li>
  * </ul>
  */
 public class ListParkingLotsCommand {
@@ -22,6 +23,16 @@ public class ListParkingLotsCommand {
      */
     @NotNull
     private Long ownerId;
+
+    private Byte sourceRequestType;
+
+    public Byte getSourceRequestType() {
+        return sourceRequestType;
+    }
+
+    public void setSourceRequestType(Byte sourceRequestType) {
+        this.sourceRequestType = sourceRequestType;
+    }
 
     public ListParkingLotsCommand() {
     }

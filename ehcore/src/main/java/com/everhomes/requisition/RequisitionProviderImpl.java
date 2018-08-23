@@ -34,6 +34,11 @@ public class RequisitionProviderImpl implements RequisitionProvider {
     @Autowired
     private FlowCaseProvider flowCaseProvider;
 
+    static EhRequisitions req = Tables.EH_REQUISITIONS.as("req");
+    static EhRequisitionTypes reqType = Tables.EH_REQUISITION_TYPES.as("reqType");
+
+
+
     @Override
     public void saveRequisition(Requisition req) {
         EhRequisitionsDao dao = getRequisitionDao();
@@ -132,6 +137,5 @@ public class RequisitionProviderImpl implements RequisitionProvider {
     private EhRequisitionsDao getRequisitionDao(){
         return new EhRequisitionsDao(getReadWriteContext().configuration());
     }
-    static EhRequisitions req = Tables.EH_REQUISITIONS.as("req");
-    static EhRequisitionTypes reqType = Tables.EH_REQUISITION_TYPES.as("reqType");
+
 }

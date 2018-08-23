@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.punch;
  
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -33,12 +34,15 @@ import com.everhomes.util.StringHelper;
  * <li>leaveTime:下午离开时间</li>
  * <li>noonLeaveTime:早上离开时间-四次打卡</li>
  * <li>afternoonArriveTime:下午到达时间-四次打卡</li>
- * <li>statuString：状态文字</li> 
+ * <li>statuString：状态文字</li>
+  * <li>overtimeTotalWorkday: 工作日加班时长，毫秒</li>
+  * <li>overtimeTotalRestday: 休息日加班时长，毫秒</li>
+  * <li>overtimeTotalLegalHoliday: 节假日加班时长，毫秒</li>
  * </ul>
  */
 public class PunchLogsDay{
- 
 
+	private Date punchDate;
     private String punchDay;
     private Byte punchStatus ;
 	private Byte morningPunchStatus;
@@ -84,6 +88,17 @@ public class PunchLogsDay{
 	 private Byte ruleType;
 	 private String timeRuleName;
 	 private Long timeRuleId;
+	 private Long overtimeTotalWorkday;
+	 private Long overtimeTotalRestday;
+	 private Long overtimeTotalLegalHoliday;
+
+	 public Date getPunchDate() {
+		 return punchDate;
+	 }
+
+	 public void setPunchDate(Date punchDate) {
+		 this.punchDate = punchDate;
+	 }
 
 	 public Long getPunchOrganizationId() {
 		 return punchOrganizationId;
@@ -503,5 +518,29 @@ public class PunchLogsDay{
 
 	 public void setApprovalStatusList(String approvalStatusList) {
 		 this.approvalStatusList = approvalStatusList;
+	 }
+
+	 public Long getOvertimeTotalWorkday() {
+		 return overtimeTotalWorkday;
+	 }
+
+	 public void setOvertimeTotalWorkday(Long overtimeTotalWorkday) {
+		 this.overtimeTotalWorkday = overtimeTotalWorkday;
+	 }
+
+	 public Long getOvertimeTotalRestday() {
+		 return overtimeTotalRestday;
+	 }
+
+	 public void setOvertimeTotalRestday(Long overtimeTotalRestday) {
+		 this.overtimeTotalRestday = overtimeTotalRestday;
+	 }
+
+	 public Long getOvertimeTotalLegalHoliday() {
+		 return overtimeTotalLegalHoliday;
+	 }
+
+	 public void setOvertimeTotalLegalHoliday(Long overtimeTotalLegalHoliday) {
+		 this.overtimeTotalLegalHoliday = overtimeTotalLegalHoliday;
 	 }
  }

@@ -1,9 +1,7 @@
 package com.everhomes.flow.vars;
 
 import com.everhomes.flow.*;
-import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,25 +47,6 @@ public class FlowVarsTextTrackerCurrentAllProcessorsPhone implements FlowVariabl
         }
 
         users = users.stream().distinct().collect(Collectors.toList());
-		
-		String txt = "";
-		int i = 0;
-		for(Long u : users) {
-			UserInfo ui = flowService.getUserInfoInContext(ctx, u);
-			if(ui != null & ui.getPhones() != null && ui.getPhones().size() > 0) {
-				txt += ui.getPhones().get(0) + ", ";
-				
-				i++;
-				if(i >= FlowConstants.FLOW_MAX_NAME_CNT) {
-					break;
-				}	
-			}	
-		}
-		
-		if(txt.length() > 2) {
-			txt = txt.substring(0, txt.length()-2);
-		}
-		return txt;
+		return displayText(flowService, ctx, users, this::getPhone);
 	}
-
 }

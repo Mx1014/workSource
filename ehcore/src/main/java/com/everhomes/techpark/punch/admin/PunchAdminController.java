@@ -1,46 +1,69 @@
 package com.everhomes.techpark.punch.admin;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.portal.PortalService;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
-import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.techpark.punch.*;
-import com.everhomes.rest.techpark.punch.admin.*;
-
+import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
+import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
+import com.everhomes.rest.techpark.punch.ListOrganizationPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListOrganizationPunchLogsResponse;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
+import com.everhomes.rest.techpark.punch.PunchDayLogInitializeCommand;
+import com.everhomes.rest.techpark.punch.PunchDayLogInitializeMonthlyCommand;
+import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
+import com.everhomes.rest.techpark.punch.admin.BatchUpdateVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
+import com.everhomes.rest.techpark.punch.admin.ExportVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
+import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountCommand;
+import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
+import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
+import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
+import com.everhomes.rest.techpark.punch.admin.ImportVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesCommand;
+import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesResponse;
+import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
+import com.everhomes.rest.techpark.punch.admin.TestPunchDayRefreshCommand;
+import com.everhomes.rest.techpark.punch.admin.TransforSceneTokenCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.entity.EntityType;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.techpark.punch.PunchConstants;
-import com.everhomes.techpark.punch.PunchService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.google.zxing.Result;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.text.ParseException;
 
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
@@ -1156,4 +1179,65 @@ public class PunchAdminController extends ControllerBase {
         return new RestResponse();
     }
 
+    /**
+     * <b>URL: punch/listOrganizationPunchLogs</b>
+     * <p>
+     * 查询某人某天的真实打卡记录
+     * </p>
+     */
+    @RequestMapping("listOrganizationPunchLogs")
+    @RestReturn(value = ListOrganizationPunchLogsResponse.class)
+    public RestResponse listOrganizationPunchLogs(@Valid ListOrganizationPunchLogsCommand cmd) {
+    	ListOrganizationPunchLogsResponse commandResponse = punchService.listOrganizationPunchLogs(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/getUserPunchRuleInfo</b>
+     * <p>
+     * 列出用户的考勤规则详情
+     * </p>
+     */
+    @RequestMapping("getUserPunchRuleInfo")
+    @RestReturn(value = GetUserPunchRuleInfoResponse.class)
+    public RestResponse getUserPunchRuleInfo(@Valid GetUserPunchRuleInfoCommand cmd) {
+        RestResponse response = new RestResponse(punchService.getUserPunchRuleInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/punchDayLogInitialize</b>
+     * <p>手动初始化考勤每日统计数据
+     * </p>
+     */
+    @RequestMapping("punchDayLogInitialize")
+    @RestReturn(value = String.class)
+    public RestResponse punchDayLogInitialize(PunchDayLogInitializeCommand cmd) {
+        punchService.punchDayLogInitialize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /punch/punchDayLogInitializeByMonth</b>
+     * <p>
+     * 初始化某个月的每日统计数据,上线时手动调用进行初始化
+     * </p>
+     */
+    @RequestMapping("punchDayLogInitializeByMonth")
+    @RestReturn(value = String.class)
+    public RestResponse punchDayLogInitializeByMonth(@Valid PunchDayLogInitializeMonthlyCommand cmd) throws ParseException {
+        punchService.punchDayLogInitializeByMonth(cmd.getInitialMonth());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

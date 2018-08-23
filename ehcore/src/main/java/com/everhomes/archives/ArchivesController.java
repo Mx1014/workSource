@@ -434,13 +434,27 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/setArchivesNotification</b>
-     * <p>12.人事档案提醒设置</p>
+     * <p>12-1.人事档案提醒设置</p>
      */
     @RequestMapping("setArchivesNotification")
     @RestReturn(value = String.class)
     public RestResponse setArchivesNotification(ArchivesNotificationCommand cmd){
         archivesService.setArchivesNotification(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/getArchivesNotification</b>
+     * <p>12-2.获取原提醒设置</p>
+     */
+    @RequestMapping("getArchivesNotification")
+    @RestReturn(value = ArchivesNotificationDTO.class)
+    public RestResponse getArchivesNotification(ArchivesNotificationCommand cmd){
+        ArchivesNotificationDTO res = archivesService.getArchivesNotification(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -478,8 +492,8 @@ public class ArchivesController extends ControllerBase{
      * <b>URL: /archives/cleanRedundantArchivesDetails</b>
      * <p>清除人事档案表中的辣鸡数据</p>
      */
-//    @RequestMapping("cleanRedundantArchivesDetails")
-//    @RestReturn(value = String.class)
+    @RequestMapping("cleanRedundantArchivesDetails")
+    @RestReturn(value = String.class)
     public RestResponse cleanRedundantArchivesDetails(){
         archivesService.cleanRedundantArchivesDetails();
         RestResponse response = new RestResponse();

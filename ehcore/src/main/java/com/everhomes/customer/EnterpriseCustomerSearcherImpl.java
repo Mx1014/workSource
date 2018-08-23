@@ -5,13 +5,16 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -92,6 +95,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     @Autowired
     private AddressProvider addressProvider;
 
+    @Autowired
+    private ContractProvider contractProvider;
+
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISE_CUSTOMER;
@@ -149,6 +155,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceItemId" , customer.getSourceItemId());
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
+            builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -224,14 +231,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         } else {
             qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
-                    .field("contactName")
-                    .field("contactAddress")
-                    .field("contactMobile")
-                    .field("trackingName");
+                    .field("contactName",5.0f)
+                    .field("contactAddress",4.0f)
+                    .field("contactPhone",3.0f)
+                    .field("trackingName",4.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile")
+            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactPhone")
             		.addHighlightedField("trackingName");
         }
 
@@ -240,15 +247,29 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
-        if (cmd.getAddressId() != null) {
-            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
-            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+        //是否为资质客户增加筛选
+        Byte aptitudeFlag = contractProvider.filterAptitudeCustomer(cmd.getCommunityId(),cmd.getNamespaceId());
+        if(cmd.getAptitudeFlagItemId() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", cmd.getAptitudeFlagItemId()));
+        }else if(aptitudeFlag == 1) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", CustomerAptitudeFlag.APTITUDE.getCode()));
         }
-        if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
-            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+
+        if(cmd.getAbnormalFlag() != null && cmd.getAbnormalFlag() == 1){
+           fb = FilterBuilders.andFilter(fb, FilterBuilders.missingFilter("addressId"));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+
+        }else {
+            if (cmd.getAddressId() != null) {
+                MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+                qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+            }
+            if (cmd.getBuildingId() != null) {
+                MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+                qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+                //            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+            }
         }
 
         if(cmd.getCustomerCategoryId() != null)
@@ -262,7 +283,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
-        
+
         /*//查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){
@@ -671,6 +692,24 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
             } else {
                 dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getDropBox9ItemId()) {
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            if (null != dropBoxItem) {
+                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+            } else {
+                dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
             }
         }
 

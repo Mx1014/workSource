@@ -92,6 +92,8 @@ public interface ArchivesService {
 
     void setArchivesNotification(ArchivesNotificationCommand cmd);
 
+    ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd);
+
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
     /* 同步数据接口 start */

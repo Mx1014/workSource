@@ -33,7 +33,7 @@ import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
-//后面的3为表eh_express_companies中父id为0的行的id， 国贸 EMS
+//后面的2为表eh_express_companies中父id为0的行的id， 国贸 EMS
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"2")
 public class GuoMaoEmsHandler implements ExpressHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(GuoMaoEmsHandler.class);
