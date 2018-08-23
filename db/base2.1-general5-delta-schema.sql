@@ -102,3 +102,8 @@ ALTER TABLE eh_general_forms ADD COLUMN project_id BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1` BIGINT(20) NULL DEFAULT NULL COMMENT '跳转类型 0-不跳转 2-表单/表单+工作流 3-跳转应用' ;
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
+
+-- by st.zheng 允许表单为空
+ALTER TABLE `eh_lease_form_requests`
+MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
+
