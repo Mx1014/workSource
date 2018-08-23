@@ -56,6 +56,31 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.express', '/express/notifyExpressOrderPaymentV2', '快递缴费新支付回调接口', 0, NULL, 0);
 	
+	
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
+
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.url','http://test105.zuolin.com','the point url','0',NULL,NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.secretKey','OMtTBDhmVQSIP6oJBZ+mw+9i8+wnS1WAwsEVRoFvGXfNmCokOamwScJLdilQ3CuCXYb5J7HK+aua8sifKcEsiQ==','the point secretKey','0',NULL,NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.appKey','476fba87-dd1b-4ab9-ad6a-ca598a889c91','the point appKey','0',NULL,NULL);
+
+
+INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+VALUES(16022500 ,'积分银行',16020000,NULL,'integral-bank',1,2,'/16000000/16020000/16022500','zuolin',120,4800,3,'system','module',NULL);
+INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+VALUES(16023500 ,'积分池',16020000,NULL,'integral-pool',1,2,'/16000000/16020000/16023500','zuolin',130,4900,3,'system','module',NULL);
+
+INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+VALUES(16022600 ,'积分银行',42000000,NULL,'integral-bank',1,2,'/40000040/42000000/16022600','park',120,4800,3,'system','module',NULL);
+INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+VALUES(16023600 ,'积分池',42000000,NULL,'integral-pool',1,2,'/40000040/42000000/16023600','park',130,4900,3,'system','module',NULL);
+
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) VALUES(4800,'积分银行',80000,'/200/80000/4800',1,3,2,110,1,'module');
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) VALUES(4900,'积分池',80000,'/200/80000/4900',1,3,2,120,1,'module');	
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
