@@ -391,6 +391,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         Map<String,String> params = new HashMap();
         params.put("visitorToken", WebTokenGenerator.getInstance().toWebToken(visitor.getId()));
         params.put("status", visitor.getVisitStatus()+"");
+        AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByNamespaceId(visitor.getNamespaceId());
+        App app = appProvider.findAppByKey(mapping.getAppKey());
+        params.put("appKey", app.getAppKey());
+        String s = SignatureHelper.computeSignature(params, app.getSecretKey());
+        params.put("signature", s);
         int i = 0;
         while(i<3) {
             try {
