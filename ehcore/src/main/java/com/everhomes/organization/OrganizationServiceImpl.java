@@ -6791,6 +6791,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
         		&& !notSendMsgFlag) {
+        	LOGGER.info("sendMessageForContactApproved  and notSendMsgFlag:{}",notSendMsgFlag);
             sendMessageForContactApproved(member);
         }
 

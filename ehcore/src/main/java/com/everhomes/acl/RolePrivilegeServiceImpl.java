@@ -1784,7 +1784,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken,
     		                                        Long adminPrivilegeId, Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin){
     	boolean flag = false ;
-    	//标志为true 不发消息,提前返回
+    	//标志为true 不发消息
     	if(notSendMsgFlag){
     		flag = true;
     	}
