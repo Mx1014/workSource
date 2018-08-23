@@ -887,7 +887,24 @@ left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id
 left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
 ) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
 
+-- AUTHOR: 马世亨  20180822
+-- REMARK: 停车缴费V6.6.2 基金小镇项目对接“车安”停车厂商
+SET @configid = (select max(id) from eh_configurations);
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+VALUES (@configid := @configid + 1 , 'parking.chean.url', 'http://113.98.59.44:9022', '车安停车场url', '0', NULL, NULL);
 
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+VALUES (@configid := @configid + 1 , 'parking.chean.privatekey', '71cfa1c59773ddfa289994e6d505bba3', '车安停车场私钥', '0', NULL, NULL);
+
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+VALUES (@configid := @configid + 1 , 'parking.chean.accessKeyId', 'UT', '车安停车场接入方标识', '0', NULL, NULL);
+
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+VALUES (@configid := @configid + 1 , 'parking.chean.branchno', '0', '车安停车分点编号', '0', NULL, NULL);
+
+SET @parkinglotid = (select max(id) from eh_parking_lots);
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`)
+VALUES (@parkinglotid := @parkinglotid + 1, 'community', '240111044331056800', '基金小镇停车场', 'CHEAN', '', '2', '1', '2018-07-27 17:48:07', '999979', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 0,\"identityCardFlag\":1}', SUBSTRING(@id, -3), '0', NULL);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
