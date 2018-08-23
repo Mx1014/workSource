@@ -5958,7 +5958,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             if (identifier != null) {
                                 detail.setRegionCode(identifier.getRegionCode().toString());
                             }
-                            detail.setEmail(member.getStringTag3());
+                            detail.setWorkEmail(member.getStringTag3());
                         	Date date = new Date();
                         	detail.setCheckInTime(new java.sql.Date(date.getTime()));
                         	organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
