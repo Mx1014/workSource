@@ -375,7 +375,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             JSONObject param = new JSONObject();
             param.put("credentialtype","1");
             param.put("credential", order.getPlateNumber());
-            param.put("number",order.getMonthCount().toString());//缴费月数
+            param.put("number",order.getMonthCount().setScale(0).toString());//缴费月数
             param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?"7" : "5");
 
             String json = post(param,MONTHCARD_CHARGE);
@@ -503,8 +503,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setOpenDate(now);
             dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
-//                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
-                dto.setPayMoney(new BigDecimal(0.01));
+                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(now);
@@ -620,17 +619,13 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     protected String post(JSONObject data, String type) {
 
-//        String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
-        String url = "http://113.98.59.44:9022";
+        String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
 
         url += CATEGORY_SEPARATOR + type;
 
-//        String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","UT");
-//        String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
-//        String branchno = configProvider.getValue("parking.chean.branchno","0");
-        String accessKeyId = "UT";
-        String key = "71cfa1c59773ddfa289994e6d505bba3";
-        String branchno = "0";
+        String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","UT");
+        String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
+        String branchno = configProvider.getValue("parking.chean.branchno","0");
 
         String iv = DATE_FORMAT.format(new Date());
         int nonce = (int) (Math.random() * 100);
@@ -664,8 +659,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return result;
     }
 
-    public static void main(String[] args) {
-        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
+//    public static void main(String[] args) {
+//        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
 //        bean.getParkingTempFee(null,"粤BMP525");
 //        bean.getCardInfo("粤B32345",null);
 //      卡类型接口
@@ -681,6 +676,6 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 //        order.setPaidType("10001");
 //        bean.addMonthCard(order,null);
 //        LOGGER.info("amount={}",new BigDecimal("24.00"));
-
-    }
+//
+//    }
 }
