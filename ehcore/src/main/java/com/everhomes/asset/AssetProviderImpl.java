@@ -72,7 +72,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.google.gson.Gson;
 
-import scala.languageFeature.reflectiveCalls;
+//import scala.languageFeature.reflectiveCalls;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
