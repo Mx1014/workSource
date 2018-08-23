@@ -39,7 +39,7 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
         try {
             httpHeaders.setLocation(new URI(location));
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             LOGGER.error("redirect failed, location = {}", location);
         }
         RestResponse restResponse = new RestResponse();

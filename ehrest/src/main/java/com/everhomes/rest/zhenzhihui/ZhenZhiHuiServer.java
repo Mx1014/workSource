@@ -14,9 +14,9 @@ public enum ZhenZhiHuiServer {
     ASSET_MANAGEMENT(1016,"资产管理",38000L,""),
     ENTERPRISES(1017,"企业名录",40500L,""),
     PARK_INVESTMENT(1018,"园区招商",40100L,""),
-    PROPERTY_WARRANTY(1019,"物业报修",20100L,""),
-    COMPLAINT_PROPOSAL(1020,"投诉建议",40500L,""),
-    ENTRANCE_GUARD(1021,"大堂门禁",41010L,""),
+    PROPERTY_WARRANTY(1019,"物业报修",20100L,"/property-repair-web/build/index.html?type=user&displayName=%E8%AE%BE%E5%A4%87%E6%8A%A5%E4%BF%AE&aliasName=%E8%B6%8A%E7%A9%BA%E9%97%B4&title=%E8%AE%BE%E5%A4%87%E6%8A%A5%E4%BF%AE#/home"),
+    COMPLAINT_PROPOSAL(1020,"投诉建议",20100L,"/property-repair-web/build/index.html?type=user&displayName=%E8%AE%BE%E5%A4%87%E6%8A%A5%E4%BF%AE&aliasName=%E8%B6%8A%E7%A9%BA%E9%97%B4&title=%E8%AE%BE%E5%A4%87%E6%8A%A5%E4%BF%AE#/home"),
+    ENTRANCE_GUARD(1021,"大堂门禁",41010L,"/entrance-guard/build/index.html#/keys"),
     BANNER(1022,"广告banner",10400L,""),
     NOTICE_MANAGE(1023,"公告管理",10300L,""),
     ACTIVITY(1024,"官方活动",10600L,"/activity/build/index.html#/listPage"),
@@ -24,10 +24,10 @@ public enum ZhenZhiHuiServer {
     MAIL_LIST(1026,"通讯录",50100L,""),
     CARD_ATTENDANCE(1027,"打卡考勤",50600L,""),
     TASKS(1028,"任务管理",13000L,"/workflow/build/index.html#/list/management"),
-    PARTY(1029,"园区党建",10110L,""),
-    DYNAMIC(1030,"党建动态",40500L,""),
-    NOTICE(1031,"党建公告",40500L,""),
-    DONE(1032,"两学一做",40500L,"");
+    PARTY(1029,"园区党建",10110L,"/forum/build/index.html#/"),
+    DYNAMIC(1030,"党建动态",40500L,"/service-alliance-web/build/index.html#/home/grid"),
+    NOTICE(1031,"党建公告",40500L,"/service-alliance-web/build/index.html#/home/grid"),
+    DONE(1032,"两学一做",40500L,"/service-alliance-web/build/index.html#/home/grid");
 
     private Integer code;
     private String name;

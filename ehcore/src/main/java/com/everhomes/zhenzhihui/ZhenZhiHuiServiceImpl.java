@@ -22,7 +22,7 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServer;
-import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserInfoDTO;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiDTO;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
@@ -141,7 +141,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                     if(null != parameter){
                         String parameterval = new String( new BASE64Decoder().decodeBuffer(parameter) ,charset);
                         LOGGER.info("target_user = {}, method = {}, parameter = {}, parameterval = {}",target_user,method,parameter,parameterval);
-                        ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO = JSON.parseObject(parameterval, ZhenZhiHuiUserInfoDTO.class);
+                        ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO = JSON.parseObject(parameterval, ZhenZhiHuiDTO.class);
                         if (zhenZhiHuiUserInfoDTO != null){
                             User user = this.userService.findUserByIndentifier(ZHENZHIHUI_NAMESPACE_ID, zhenZhiHuiUserInfoDTO.getShouji());
                             if (user == null) {
@@ -179,17 +179,18 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             LOGGER.info("init url = {}",builder.toUriString());
                             StringBuilder urlStr = new StringBuilder().append(builder.toUriString()).append("?");
                             List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationService.listUserRelateOrganizations(user.getId());
-                            builder.queryParam("communityId", COMMUNITY_ID);
+
                             if (CollectionUtils.isEmpty(organizationSimpleDTOS)) {
                                 sceneTokenDTO.setScene(SceneType.PARK_TOURIST.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
-                                urlStr.append("communityId=").append(COMMUNITY_ID).append("&");
+
                                 urlStr.append("entityType=").append(UserCurrentEntityType.COMMUNITY.getCode()).append("&");
                                 builder.queryParam("entityType",UserCurrentEntityType.COMMUNITY.getCode());
                             }else {
                                 sceneTokenDTO.setScene(SceneType.ENTERPRISE.getCode());
                                 sceneTokenDTO.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
                                 sceneTokenDTO.setEntityId(organizationSimpleDTOS.get(0).getId());
+
                                 urlStr.append("organizationId=").append(sceneTokenDTO.getEntityId()).append("&");
                                 urlStr.append("entityType=").append(UserCurrentEntityType.ORGANIZATION.getCode()).append("&");
                                 builder.queryParam("organizationId", sceneTokenDTO.getEntityId());
@@ -205,6 +206,8 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             builder.queryParam("ns", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("namespaceId", ZHENZHIHUI_NAMESPACE_ID);
                             builder.queryParam("userId", user.getId());
+                            builder.queryParam("communityId", COMMUNITY_ID);
+                            builder.queryParam("sceneToken",tokenStr);
                             for (Object key : jsonObject.keySet()) {
                                 if (!key.toString().equals("url") && !key.toString().equals("categoryDTOList")) {
                                     urlStr.append(key.toString()).append("=").append(jsonObject.get(key)).append("&");
@@ -213,7 +216,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             }
                             String url = urlStr.toString().substring(0,urlStr.toString().length()-1);
                             LOGGER.info("zhenzhihui redirect to zuolin, uri={}" , url);
-                            return url;
+                            return builder.build().toUriString();
                         }
                     }
                 }
@@ -225,7 +228,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         return null;
     }
 
-    private User createUserAndUserIdentifier(ZhenZhiHuiUserInfoDTO zhenZhiHuiUserInfoDTO){
+    private User createUserAndUserIdentifier(ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO){
         User user = new User();
         user.setStatus(UserStatus.ACTIVE.getCode());
         user.setNamespaceId(ZHENZHIHUI_NAMESPACE_ID);
