@@ -2057,7 +2057,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	        
 			if(token != null && (cmd.getReservePrivilege() == null || cmd.getReservePrivilege().equals(TrueOrFalseFlag.FALSE.getCode()))) {
 				//删除旧的系统管理员
-				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
+				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,false,false);
 				LOGGER.info("updateTopAdminstrator step 01 :delete old super admin . token:{}",token);
 
 				OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), token);
@@ -2091,7 +2091,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN,true,false);
 			LOGGER.info("updateTopAdminstrator step 03 :create this super admin . token:{} ;name:{}",cmd.getContactToken(),cmd.getContactName());
 
-			//发送信息
+			//发送信息提示新超级管理员
 			sendMessageAfterChangeOrganizationAdmin(
 					contactDTO,
 					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
