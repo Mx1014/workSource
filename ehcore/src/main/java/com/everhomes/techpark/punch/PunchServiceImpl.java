@@ -8489,10 +8489,9 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public ListApprovalCategoriesResponse listApprovalCategories(ListApprovalCategoriesCommand cmd) {
         cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
-        // 接口兼容APP旧版本没传参数的场景，返回基础配置
+        // 接口兼容APP旧版本没传参数的场景，返回除年假和调休外的所有请假类型，无论开启已否
         if (cmd.getNamespaceId() == null || cmd.getOwnerId() == null) {
-            cmd.setNamespaceId(Integer.valueOf(0));
-            cmd.setOwnerId(Long.valueOf(0));
+            return new ListApprovalCategoriesResponse(approvalService.listBaseApprovalCategory(Arrays.asList("年假", "调休")), null);
         }
         ListApprovalCategoryCommand listApprovalCategoryCommand = new ListApprovalCategoryCommand();
         listApprovalCategoryCommand.setNamespaceId(cmd.getNamespaceId());
@@ -8503,7 +8502,7 @@ public class PunchServiceImpl implements PunchService {
         List<ApprovalCategoryDTO> categories = approvalService.initAndListApprovalCategory(listApprovalCategoryCommand).getCategoryList();
 
         buildMoreInfoOfCurrentUser(cmd.getOwnerId(), categories);
-        return new ListApprovalCategoriesResponse(categories, processApprovalCategorieUrl(cmd.getOwnerId(),cmd.getNamespaceId()));
+        return new ListApprovalCategoriesResponse(categories, processApprovalCategorieUrl(cmd.getOwnerId(), cmd.getNamespaceId()));
     }
 
     // 生成不同请假类型的提示信息和当前用户的假期余额
