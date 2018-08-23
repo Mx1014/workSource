@@ -138,7 +138,7 @@ public class WorkReportUtil {
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
                     reportTime = current.minusDays(1L).toLocalDate();
                 else {
-                    //  取时间点比较
+                    //  取时间点进行比较
                     Integer currentTime = current.getHour() * 100 + current.getMinute();
                     if (currentTime > endTime)
                         reportTime = current.toLocalDate();
@@ -152,7 +152,7 @@ public class WorkReportUtil {
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
                     reportTime = firstOfWeek(current.minusWeeks(1L).toLocalDate());
                 else {
-                    //  取周几比较 dayOfWeek
+                    //  取周几进行比较 dayOfWeek
                     Integer currentDay = current.getDayOfWeek().getValue();
                     if (currentDay > endDay)
                         reportTime = firstOfWeek(current.toLocalDate());
@@ -173,7 +173,7 @@ public class WorkReportUtil {
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
                     reportTime = firstOfMonth(current.minusMonths(1L).toLocalDate());
                 else {
-                    //  取日期比较 dayOfMonth
+                    //  取日期进行比较 dayOfMonth
                     Integer currentDay = current.getDayOfMonth();
                     if (currentDay > endDay)
                         reportTime = firstOfMonth(current.toLocalDate());
