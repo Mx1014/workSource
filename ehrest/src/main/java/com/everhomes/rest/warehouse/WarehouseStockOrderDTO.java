@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  * <li>identity:出入库单号</li>
  * <li>executor:执行人</li>
- * <li>serviceType:出入库类型： 1：普通入库;2.领用出库;3.采购入库</li>
+ * <li>serviceType:出入库类型： 1：普通入库;2.领用出库;3.采购入库;4.批量 </li>
  * <li>executionTime:执行时间</li>
  * <li>id:单的id</li>
  *</ul>

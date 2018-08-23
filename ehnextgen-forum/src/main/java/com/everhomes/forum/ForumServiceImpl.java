@@ -5023,40 +5023,13 @@ public class ForumServiceImpl implements ForumService {
     }
 
     private void populatePostCreatorInfo(long userId, Post post) {
-        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-        String creatorNickName = post.getCreatorNickName();
-        String creatorAvatar = post.getCreatorAvatar();
-
-        // 无昵称时直接使用USER表中的信息作为发帖人的信息
+        String creatorNickName = "";
+        String creatorAvatar = "";
+        //直接使用登录用户的头像和昵称
         User creator = userProvider.findUserById(post.getCreatorUid());
         if(creator != null) {
-            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                creatorNickName = creator.getNickName();
-            }
-            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                creatorAvatar = creator.getAvatar();
-            }
-        }
-
-        Long forumId = post.getForumId();
-        if(forumId != null) {
-            // 普通圈使用圈成员的信息
-            Forum forum = forumProvider.findForumById(forumId);
-            if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
-                GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
-                    EntityType.USER.getCode(), post.getCreatorUid());
-                if(member != null) {
-                    creatorNickName = member.getMemberNickName();
-                    creatorAvatar = member.getMemberAvatar();
-                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                        creatorNickName = member.getMemberNickName();
-                    }
-                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
-                        creatorAvatar = member.getMemberAvatar();
-                    }
-                }
-            }
+            creatorNickName = creator.getNickName();
+            creatorAvatar = creator.getAvatar();
         }
 
         post.setCreatorNickName(creatorNickName);

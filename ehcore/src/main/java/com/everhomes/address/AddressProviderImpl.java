@@ -1,43 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-
-import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.server.schema.tables.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
-import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddressArrangement;
-import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
-import com.everhomes.util.RecordHelper;
-import org.apache.commons.lang.StringUtils;
-
 import com.everhomes.asset.AddressIdAndName;
-
-import com.everhomes.rest.address.*;
-import org.jooq.*;
-import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -46,14 +10,22 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
+import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
+import com.everhomes.server.schema.tables.pojos.EhAddressArrangement;
+import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.records.EhAddressesRecord;
@@ -64,6 +36,24 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.*;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -607,6 +597,15 @@ public class AddressProviderImpl implements AddressProvider {
         return addresses.get(0);
     }
 
+    @Override
+    public List<Long> listThirdPartRelatedAddresses(String namespaceType, List<String> addressIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddresses.class));
+        return  context.select(Tables.EH_ADDRESSES.ID).from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN.in(addressIds))
+                .fetchInto(Long.class);
+    }
+
     public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
         List<AddressIdAndName> list = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -755,6 +754,27 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
+    public ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+
+        List<ContractBuildingMapping> mappings = new ArrayList<>();
+        SelectQuery<EhContractBuildingMappingsRecord> query = context.selectQuery(Tables.EH_CONTRACT_BUILDING_MAPPINGS);
+        query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId));
+        query.addOrderBy(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CREATE_TIME.desc());
+        query.fetch().map(r ->{
+            mappings.add(ConvertHelper.convert(r, ContractBuildingMapping.class));
+            return null;
+        });
+        if(mappings == null || mappings.size() == 0) {
+            return null;
+        }
+        return mappings.get(0);
+
+    }
+
+
+    @Override
 	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractBuildingMappings.class, contractBuildingMapping.getId()));
         

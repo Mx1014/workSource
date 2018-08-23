@@ -15,7 +15,7 @@ public interface ClickStatDetailProvider {
 
 	void createClickStatDetail(ClickStatDetail detail);
 
-	List<Map<String, Object>> countClickDetailsByDate(Timestamp minTime, Timestamp maxTime);
+	List<Map<String, Object>> countClickDetailsByDate(Integer namespaceId, Timestamp minTime, Timestamp maxTime);
 
 	void deleteStatDetail(Date date);
 

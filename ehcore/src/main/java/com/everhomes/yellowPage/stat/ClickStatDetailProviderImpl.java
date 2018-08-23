@@ -172,7 +172,7 @@ public class ClickStatDetailProviderImpl implements ClickStatDetailProvider{
 	
 
 	@Override
-	public List<Map<String, Object>> countClickDetailsByDate(Timestamp minTime, Timestamp maxTime) {
+	public List<Map<String, Object>> countClickDetailsByDate(Integer namespaceId, Timestamp minTime, Timestamp maxTime) {
 		return readOnlyContext()
 				.select(TABLE.NAMESPACE_ID.as("namespaceId"), 
 						TABLE.TYPE.as("type"), 
@@ -182,7 +182,7 @@ public class ClickStatDetailProviderImpl implements ClickStatDetailProvider{
 						TABLE.CLICK_TYPE.as("clickType"), 
 						DSL.count().as("clickCount"))
 				.from(TABLE)
-				.where(TABLE.CLICK_TIME.between(minTime.getTime(), maxTime.getTime()))
+				.where(TABLE.CLICK_TIME.between(minTime.getTime(), maxTime.getTime()).and(TABLE.NAMESPACE_ID.eq(namespaceId)))
 				.groupBy(
 						TABLE.OWNER_ID,
 						TABLE.SERVICE_ID, 

@@ -14,6 +14,29 @@
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
 -- REMARK: 1、执行接口/community/caculateAllCommunityArea（该接口计算时间非常长）
 --         2、执行接口/community/caculateAllBuildingArea（该接口计算时间非常长）
+
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (仓库管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 warehouse_material.sh warehouse.sh warehouse_stock_log.sh warehouse_stock.sh es的结构
+--         2、 同步  /warehouse/syncWarehouseIndex
+--         3、同步/warehouse/syncWarehouseMaterialCategoryIndex
+--         4、同步/warehouse/syncWarehouseMaterialsIndex
+--         5、同步/warehouse/syncWarehouseRequestMaterialIndex
+--         6、同步/warehouse/syncWarehouseStockIndex
+--         7、同步/warehouse/syncWarehouseStockLogIndex
+
+-- AUTHOR: 丁建民 2018年8月17日15:13:14 (能耗管理) 更新一下es结构，并调用相关接口同步
+-- REMARK: 1、更新 energy_meter.sh es上的结构
+--         2、同步 /energy/syncEnergyMeterIndex
+
+-- AUTHOR: dengs 2018年8月17日
+-- REMARK: 1、备份表eh_parking_lots
+--         2、调用接口/parking/initFuncLists
+
+-- AUTHOR: 严军 2018年8月17日
+-- REMARK: 1、备份表eh_service_modules 和 eh_portal_items
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -73,7 +96,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 
 SET @homeurl = (select `value` from eh_configurations WHERE `name`='home.url' AND namespace_id = 0 limit 1);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('52200', '企业访客管理', '50000', '/100/50000/52200', '1', '3', '2', '220', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'org_control','1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`,`access_control_type`, `menu_auth_flag`, `category`) VALUES ('42100', '园区访客管理', '20000', '/200/20000/42100', '1', '3', '2', '210', now(), CONCAT('{"url":"',@homeurl,'/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}'), '13', now(), '0', '0', '0', '0', 'community_control','1', '1', 'module');
 
 update eh_service_modules SET instance_config = REPLACE(instance_config,' ','') WHERE id = 52100;
 update eh_service_module_apps SET instance_config = REPLACE(instance_config,' ','') WHERE module_id = 52100;
@@ -481,6 +504,28 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20015', 'zh_CN', '拆分/合并计划产生的未来房源已关联合同，删除失败');
 
 
+-- AUTHOR: 丁建民
+-- REMARK: 合同退约提示信息(来自合同2.8)
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10012', 'zh_CN', '合同关联的账单不存在');
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10020', 'zh_CN', '此账单组中已存在该费项');
+
+
+-- AUTHOR: 丁建民
+-- REMARK: 仓库管理V2.3（库存导入导出功能） issue-34335
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10027', 'zh_CN', '物品编号不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10028', 'zh_CN', '库存不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10029', 'zh_CN', '所属仓库不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10030', 'zh_CN', '库存请输入大于的0整数');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10031', 'zh_CN', '物品编号和名称不能匹配');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'warehouse', '10032', 'zh_CN', '填写分类与物品分类不一致');
+
+
 -- AUTHOR: huangmingbo 2018.08.03
 -- REMARK: 服务联盟v3.5 埋点统计
 SET @event_display_name = '服务联盟埋点统计';
@@ -512,6 +557,348 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES (40550, '用户行为统计权限', 40500, '/200/120000/40500/40550', 1, 4, 2, 3, '2018-03-31 22:18:44', NULL, NULL, '2018-03-31 22:18:44', 0, 1, '1', NULL, '', 1, 1, 'subModule');
 
 
+-- AUTHOR: 黄鹏宇 2018年8月17日16:26:43
+-- REMARK: 请示单默认表单以及企业客户是否为资质客户字段
+
+set @eecid=(select max(id)+1 from `eh_var_fields`);
+set @eeciId=(select max(id)+1 from `eh_var_field_items`);
+INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'aptitudeFlagItemId', '资质客户', 'Long', 10, '/1/10/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
+  INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '是', 1, 2, 1, sysdate(), NULL, NULL, 1);
+set @eeciId=(select max(id)+1 from `eh_var_field_items`);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '否', 2, 2, 1, sysdate(), NULL, NULL, 0);
+
+
+
+set @id=(select max(id)+1 from `eh_general_form_templates`) ;
+INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`,  `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `create_time` ) VALUES (@id, 11, 0, 0, 'EhOrganizations', 25000, 'requisition', '请示单',  0, 'DEFAULT_JSON', '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼栋门牌",
+	"fieldDisplayName": "楼栋门牌",
+	"fieldExtra": "{}",
+	"fieldName": "楼栋门牌",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]',1, 1,SYSDATE()) ;
+
+-- AUTHOR: 郑思挺 2018年8月17日
+-- REMARK: 资源预约3.6
+INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.flow', 'scene', 'zh_CN', '用户类型');
+
+update `eh_rentalv2_cells` set `cell_id` = `id` where `cell_id`is null;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 MONTH) WHERE rental_type = 4 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 MONTH) WHERE rental_type = 4 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 week) WHERE rental_type = 5 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 week) WHERE rental_type = 5 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 day) WHERE rental_type = 2 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = resource_rental_date,end_time = date_add(resource_rental_date,INTERVAL 1 day) WHERE rental_type = 2 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = date_add(resource_rental_date,INTERVAL 8 hour),end_time = date_add(resource_rental_date,INTERVAL 12 hour) WHERE (rental_type = 1 or rental_type = 3) and amorpm = 0 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = date_add(resource_rental_date,INTERVAL 8 hour),end_time = date_add(resource_rental_date,INTERVAL 12 hour) WHERE (rental_type = 1 or rental_type = 3) and amorpm = 0 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = date_add(resource_rental_date,INTERVAL 14 hour),end_time = date_add(resource_rental_date,INTERVAL 18 hour) WHERE (rental_type = 1 or rental_type = 3) and amorpm = 1 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = date_add(resource_rental_date,INTERVAL 14 hour),end_time = date_add(resource_rental_date,INTERVAL 18 hour) WHERE (rental_type = 1 or rental_type = 3) and amorpm = 1 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+UPDATE eh_rentalv2_resource_orders
+SET begin_time = date_add(resource_rental_date,INTERVAL 18 hour),end_time = date_add(resource_rental_date,INTERVAL 22 hour) WHERE  rental_type = 3 and amorpm = 2 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+UPDATE eh_rentalv2_cells
+SET begin_time = date_add(resource_rental_date,INTERVAL 18 hour),end_time = date_add(resource_rental_date,INTERVAL 22 hour) WHERE  rental_type = 3 and amorpm = 2 AND begin_time IS NULL AND end_time IS NULL AND resource_rental_date IS NOT NULL;
+
+
+-- AUTHOR: 吴寒 2018年8月17日
+-- REMARK: 锁掌柜门禁对接
+-- 会议室1
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室1','会议室1','会议室1',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室1','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A1"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室2
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室2','会议室2','会议室2',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室2','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A2"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室3
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室3','会议室3','会议室3',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室3','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A3"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室4
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室4','会议室4','会议室4',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室4','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A4"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室5
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室5','会议室5','会议室5',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室5','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A5"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室6
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室6','会议室6','会议室6',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室6','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A6"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室7-1
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室7-1','会议室7-1','会议室7-1',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室7-1','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A71"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室7-2
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室7-2','会议室7-2','会议室7-2',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室7-2','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A72"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室8
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室8','会议室8','会议室8',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室8','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"001","roomNo":"A8"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- 会议室10
+SET @door_id = (SELECT MAX(id) FROM `eh_door_access`);
+INSERT INTO `eh_door_access` (`id`, `namespace_id`, `uuid`, `door_type`, `hardware_id`, `name`, `display_name`, `description`, `avatar`, `address`, `active_user_id`, `creator_user_id`, `longitude`, `latitude`, `geohash`, `aes_iv`, `link_status`, `owner_type`, `owner_id`, `role`, `create_time`, `status`, `acking_secret_version`, `expect_secret_key`, `groupId`, `floor_id`, `mac_copy`, `enable_amount`, `local_server_id`, `has_qr`) VALUES((@door_id := @door_id + 1),'999972',UUID(),'18','DE:85:D2:31:3E:C0','会议室10','会议室10','会议室10',NULL,NULL,'505361','505361',NULL,NULL,NULL,'','0','0','240111044331050361','0','2018-06-01 06:01:11','1','1','1','0',NULL,NULL,NULL,NULL,'1');
+SET @aclink_id = (SELECT MAX(id) FROM `eh_aclinks`);
+INSERT INTO `eh_aclinks` (`id`, `namespace_id`, `door_id`, `device_name`, `manufacturer`, `firware_ver`, `create_time`, `status`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `driver`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) VALUES((@aclink_id := @aclink_id+1),'999972',@door_id,'会议室10','uclbrt','1',NULL,'1','{"sid":"3a56074d26aebd50027c23a3679b5fa5","token":"768446d02dca22504658ff46cca019","communityNo":"1316881497","buildNo":"001","floorNo":"002","roomNo":"A10"}',NULL,NULL,NULL,NULL,'zuolin',NULL,NULL,NULL,NULL,NULL);
+
+-- AUTHOR: dengs 2018年8月17日
+-- REMARK: issue-26616 停车缴费V6.6（UE优化）
+DELETE from eh_service_modules WHERE id in (40810,40820,40830,40840);
+DELETE from eh_acl_privileges WHERE id in (4080040810,4080040820,4080040830,4080040840);
+DELETE from eh_service_module_privileges WHERE module_id in (40810,40820,40830,40840);
+
+SELECT * from eh_service_modules WHERE id in (40800,40810,40820,40830,40840);
+SELECT * from eh_acl_privileges WHERE id in (4080040800,4080040810,4080040820,4080040830,4080040840);
+SELECT * from eh_service_module_privileges WHERE module_id in (40800,40810,40820,40830,40840);
+
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40810', '申请管理', '40800', '/200/40000/40800/40810', '1', '4', '2', '61', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`) VALUES ('40820', '订单记录', '40800', '/200/40000/40800/40820', '1', '4', '2', '62', now(), NULL, NULL, now(), '0', '1', '1', NULL, '');
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040810, '0', '停车缴费 申请管理', '停车缴费 申请管理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40810', '0', 4080040810, '申请管理权限', '0', now());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4080040820, '0', '停车缴费 订单记录', '停车缴费 订单记录权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '40820', '0', 4080040820, '订单记录权限', '0', now());
+
+-- AUTHOR: 郑思挺 2018年8月17日
+-- REMARK: 装修1.0
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('43000', '装修办理', '40000', '/200/40000/43000', '1', '3', '2', '10', now(), '{}', '13', now(), '0', '0', '0', NULL, 'community_control', '1', '1', 'module');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16032300', '装修办理', '16030000', NULL, 'decoration-management', '1', '2', '/16000000/16030000/16032300', 'zuolin', '8', '43000', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('45150000', '装修办理', '45000000', NULL, 'decoration-management', '1', '2', '/40000040/45000000/45150000', 'park', '2', '43000', '3', 'system', 'module', NULL);
+
+set @privilege_id = (select max(id) from eh_service_module_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (4300043010, '0', '装修办理 装修办理权限', '装修办理 装修办理权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@privilege_id:=@privilege_id+1, '43000', '0', 4300043010, '全部权限', '0', now());
+
+set @eh_locale_templates_id = (select max(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '70', 'zh_CN', '装修申请通过', '尊敬的${decoratorName}，用户（${applyName}：${applyPhone}）提交的装修申请（${applyCompamy}）已审核通过，需尽快提交相关装修资料，请前往APP查看详情，您可以点击以下链接下载APP，并使用本机号码进行注册：${url} 。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '71', 'zh_CN', '资料审核成功', '尊敬的${decoratorName}，关于${applyCompamy}的装修资料已审核通过，请等待管理公司上传费用清单，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '72', 'zh_CN', '资料审核失败', '尊敬的${decoratorName}，关于${applyCompamy}的装修资料审核不通过，装修办理流程已中止，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '73', 'zh_CN', '装修费用清单生成', '尊敬的${name}，关于${applyCompamy}的装修费用清单已上传，需尽快缴费，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '74', 'zh_CN', '缴费完成', '尊敬的${name}，关于${applyCompamy}的装修费用已缴纳，施工人员可凭证进场，请遵守施工相关规定，感谢您的配合。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '75', 'zh_CN', '竣工验收工作流正常结束', '尊敬的${decoratorName}，关于${applyCompamy}的装修已通过竣工验收，请等待管理公司确认押金退费信息，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '76', 'zh_CN', '竣工验收工作流异常结束', '尊敬的${decoratorName}，关于${applyCompamy}的装修竣工验收未通过，装修办理流程已中止，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '77', 'zh_CN', '押金退回信息生成', '尊敬的${name}，关于${applyCompamy}的装修押金退费信息已上传，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '78', 'zh_CN', '押金退回成功', '尊敬的${name}，关于${applyCompamy}的装修押金已退回，装修办理完成，感谢您的使用。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '79', 'zh_CN', '装修公司负责人登记施工人员成功', '尊敬的${workerName}，用户（${decoratorName}：${decoratorPhone}）已登记您为此次装修工程（${applyCompamy}）的施工人员，请前往APP查看详情，您可以点击以下链接下载APP，并使用本机号码进行注册：${url} 。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '80', 'zh_CN', '装修流程被管理员在后台手动中止', '尊敬的${name}，关于${applyCompamy}的装修流程已被管理公司（${operatorName}；${operatorPhone}）中止，您可前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '81', 'zh_CN', '管理员修改装修费用的时候', '尊敬的${name}，关于${applyCompamy}的装修费用清单有更新，请前往APP查看详情。', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@eh_locale_templates_id := @eh_locale_templates_id+1, 'sms.default', '82', 'zh_CN', '管理员修改退费的时候', '尊敬的${name}，关于${applyCompamy}的装修押金退费信息有更新，请前往APP查看详情。', '0');
+
+
+
+-- AUTHOR: 严军 2018年08月17日19:22:25
+-- REMARK: issue-31049 域空间配置V1.4
+
+-- 重建服务广场模板
+DELETE from eh_portal_layout_templates;
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('1', '0', '首页', '{\"layoutName\":\"ServiceMarketLayout\",\"location\":\"/home\",\"groups\":[{\"label\":\"海报\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":1},{\"label\":\"公告\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":2,\"description\":\"\"},{\"label\":\"容器\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":3,\"description\":\"\"}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '1');
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('2', '0', '自定义门户', '{\"groups\":[{\"label\":\"容器\", \"separatorFlag\":\"0\",\"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":1,\"description\":\"\"}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '2');
+INSERT INTO `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `type`) VALUES ('3', '0', '分页签门户', '{\"groups\":[{\"label\":\"分页签\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Tab\",\"style\":\"1\",\"defaultOrder\":1}]}', NULL, '2', '2017-09-15 18:53:16', '2017-09-15 18:53:16', '1', '1', NULL, '3');
+
+-- 首页（激活）
+UPDATE eh_portal_layouts SET type = 1, index_flag = 1 WHERE location = '/home' AND `name` = 'ServiceMarketLayout';
+-- 自定义门户（激活）
+UPDATE eh_portal_layouts SET type = 2, index_flag = 1 WHERE location = '/secondhome' AND `name` = 'SecondServiceMarketLayout';
+-- 分页签门户（激活）
+UPDATE eh_portal_layouts SET type = 3, index_flag = 1 WHERE location = '/association' AND `name` = 'AssociationLayout';
+
+-- 分页签门户（未激活）
+UPDATE eh_portal_layouts a SET type = 3, index_flag = 0 WHERE type IS NULL AND EXISTS ( SELECT * from  eh_portal_item_groups b WHERE a.id = b.layout_id and b.widget = 'Tab');
+
+-- 自定义门户（未激活）
+UPDATE eh_portal_layouts SET type = 2, index_flag = 0 WHERE type IS NULL;
+
+--
+DELETE FROM eh_service_modules  WHERE  id in (400, 90000, 90100, 92000, 92100, 92200);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('400', '其他', '0', '/400', '1', '1', '2', '40', '2018-07-31 11:44:40', NULL, NULL, '2018-07-31 11:44:44', '0', '0', '0', '0', '', '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90000', '第三方服务模块', '400', '/400/90000', '1', '2', '2', '20', '2017-07-04 15:55:50', NULL, NULL, '2017-09-08 18:59:10', '0', '0', '0', '0', '', '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('90100', '第三方服务模块', '90000', '/400/90000/90100', '1', '3', '2', '10', '2018-07-31 12:10:57', NULL, '14', NULL, '0', '0', '0', '1', '', '1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92000', '电商', '400', '/400/92000', '1', '2', '2', '10', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '1', 'classify');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92100', '微商城', '92000', '/400/92000/92100', '1', '3', '2', '10', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', '13', '2018-07-04 17:23:33', '0', '0', '0', '1', NULL, '1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('92200', '食堂', '92000', '/400/92000/92200', '1', '3', '2', '20', '2018-07-31 12:09:15', NULL, '13', '2018-07-31 12:09:25', '0', '0', '0', '1', '', '1', '1', 'module');
+
+-- 将原有的外部链接和电商改成新的模块  add by yanjun  20180811
+DROP PROCEDURE IF EXISTS update_url_module_function;
+DELIMITER //
+CREATE PROCEDURE `update_url_module_function` ()
+BEGIN
+  DECLARE aid LONG;
+  DECLARE ans INTEGER;
+  DECLARE aversionid LONG;
+	DECLARE aname VARCHAR(200);
+	DECLARE adata VARCHAR(10240);
+	DECLARE atype INTEGER;
+  DECLARE amoduleid LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT id, namespace_id, version_id, label, action_data, IF(action_type = 'ZuoLinUrl', 13 , 14),  IF(action_type = 'ZuoLinUrl', 92100 , 90100) from eh_portal_items WHERE action_type = 'ThirdUrl' OR action_type = 'ZuoLinUrl';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO aid, ans, aversionid, aname, adata, atype, amoduleid;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				SET @appId = (SELECT MAX(id) + 1 from eh_service_module_apps);
+
+				INSERT INTO `eh_service_module_apps` (`id`, `namespace_id`, `version_id`, `origin_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `module_control_type`, `custom_tag`, `custom_path`, `access_control_type`) VALUES (@appId, ans, aversionid, @appId, aname, amoduleid, adata, '2', atype, NOW(), NOW(), '1', '1', 'unlimit_control', NULL, NULL, '0');
+				UPDATE eh_portal_items SET action_type = 'ModuleApp', action_data = CONCAT('{"moduleAppId":', @appId, '}') WHERE id = aid;
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_url_module_function;
+DROP PROCEDURE IF EXISTS update_url_module_function;
+
+
+
+-- 当前版本已被他人抢先发布
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id := @id + 1), 'portal', '100021', 'zh_CN', '当前版本已被他人抢先发布，请刷新页面后继续操作！');
+
+-- 黄鹏宇 2018年8月20日
+-- 科兴同步按钮
+
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43960, 21200, 43960, '企业客户管理 全量同步权限');
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43970, 21100, 43970, '合同管理 全量同步权限');
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 超级管理员维护时的消息模板
+UPDATE  eh_locale_templates s SET s.text='${userName}（${contactToken}）的${organizationName}企业管理员身份已被移除。' 
+WHERE s.scope='organization.notification' AND s.code=20;
+
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',23,'zh_CN','添加超级管理员给当前超级管理员发送的消息模板' ,  '您已成为${organizationName}的超级管理员',0);
+
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',24,'zh_CN','删除超级管理员给其他超级管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}超级管理员身份已被移除',0);
+
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',25,'zh_CN','添加超级管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的超级管理员',0);
+
+
+-- 黄鹏宇 2018年8月20日
+-- 本地化导出标题
+
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'enterpriseCustomer.export', '1', 'zh_CN', '企业客户数据导出');
+
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'contract.export', '1', 'zh_CN', '合同异常数据导出');
+
+
+-- 黄鹏宇 2018年8月20日
+-- 替换
+UPDATE `eh_general_form_templates` SET `namespace_id` = 0 WHERE `form_name` = '请示单';
+
+-- AUTHOR: 严军 2018年08月21日10:22:25
+-- REMARK: 启用“工作汇报”的普通公司菜单
+UPDATE eh_web_menus set `status` = 2 WHERE id = 72070000;
+
+-- AUTHOR: 吴寒 2018年8月21日
+-- REMARK: 增加中文
+set @id = (select max(id)+1 from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'punch.time', 'nextDay', 'zh_CN', '次日');
+
+-- AUTHOR: 杨崇鑫  20180822
+-- REMARK: 物业缴费V6.5 数据迁移账单组
+update eh_contract_charging_items as aaa inner join (
+select t2.ccid, d.namespace_id, d.charging_item_id,d.charging_standards_id, d.ownerId,d.bill_group_id  from (
+select t.ccid, t.namespace_id, t.charging_item_id, t.charging_standard_id, t.community_id, t.category_id, c.asset_category_id from (
+select a.id as ccid, a.namespace_id, a.charging_item_id,a.charging_standard_id, b.community_id, b.category_id from eh_contract_charging_items a left join eh_contracts b on a.contract_id=b.id ) as t
+left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id ) as t2
+left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
+) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 系统管理员维护时的消息模板
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',26,'zh_CN','添加系统管理员给当前系统管理员发送的消息模板' ,  '您在${organizationName}的系统管理员身份已被移除',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',27,'zh_CN','删除系统管理员给其他系统管理员发送的消息模板' ,  '您已成为${organizationName}的系统管理员',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -741,6 +1128,13 @@ INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`
 INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `update_time`, `create_time`) VALUES ('16', '0', '0', '0', 'EhOrganizations', '52000', 'any-module', '非红头文件发文申请表', '0', 'DEFAULT_JSON', '[{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"文件标题\",\"fieldExtra\":\"{}\",\"fieldName\":\"文件标题\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDisplayName\":\"文件上传\",\"fieldExtra\":\"{\\\"limitCount\\\":3,\\\"limitPerSize\\\":10485760}\",\"fieldName\":\"文件上传\",\"fieldType\":\"FILE\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"FILE_COUNT_SIZE_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请选择\",\"fieldDisplayName\":\"是否盖章\",\"fieldExtra\":\"{\\\"selectValue\\\":[\\\"是\\\",\\\"否\\\"]}\",\"fieldName\":\"是否盖章\",\"fieldType\":\"DROP_BOX\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"备注信息\",\"fieldExtra\":\"{}\",\"fieldName\":\"备注信息\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"}]', '1', '1', '2018-07-31 14:57:08', '2018-07-31 14:57:08');
 INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `update_time`, `create_time`) VALUES ('17', '0', '0', '0', 'EhOrganizations', '52000', 'any-module', '行政收文（紧急）申请表', '0', 'DEFAULT_JSON', '[{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"发文单位\",\"fieldExtra\":\"{}\",\"fieldName\":\"发文单位\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请选择\",\"fieldDisplayName\":\"收文日期\",\"fieldExtra\":\"{\\\"type\\\":\\\"DATE\\\"}\",\"fieldName\":\"收文日期\",\"fieldType\":\"DATE\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"收文编号\",\"fieldExtra\":\"{}\",\"fieldName\":\"收文编号\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"收文标题\",\"fieldExtra\":\"{}\",\"fieldName\":\"收文标题\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDisplayName\":\"文件上传\",\"fieldExtra\":\"{\\\"limitCount\\\":3,\\\"limitPerSize\\\":10485760}\",\"fieldName\":\"文件上传\",\"fieldType\":\"FILE\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"FILE_COUNT_SIZE_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"备注信息\",\"fieldExtra\":\"{}\",\"fieldName\":\"备注信息\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"}]', '1', '1', '2018-07-31 14:57:08', '2018-07-31 14:57:08');
 INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `update_time`, `create_time`) VALUES ('18', '0', '0', '0', 'EhOrganizations', '52000', 'any-module', '行政收文申请表', '0', 'DEFAULT_JSON', '[{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"发文单位\",\"fieldExtra\":\"{}\",\"fieldName\":\"发文单位\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请选择\",\"fieldDisplayName\":\"收文日期\",\"fieldExtra\":\"{\\\"type\\\":\\\"DATE\\\"}\",\"fieldName\":\"收文日期\",\"fieldType\":\"DATE\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"收文编号\",\"fieldExtra\":\"{}\",\"fieldName\":\"收文编号\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"收文标题\",\"fieldExtra\":\"{}\",\"fieldName\":\"收文标题\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDisplayName\":\"文件上传\",\"fieldExtra\":\"{\\\"limitCount\\\":3,\\\"limitPerSize\\\":10485760}\",\"fieldName\":\"文件上传\",\"fieldType\":\"FILE\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"FILE_COUNT_SIZE_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dynamicFlag\":0,\"fieldDesc\":\"请输入\",\"fieldDisplayName\":\"备注信息\",\"fieldExtra\":\"{}\",\"fieldName\":\"备注信息\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"}]', '1', '1', '2018-07-31 14:57:08', '2018-07-31 14:57:08');
+
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10021', 'zh_CN', '删除失败，该收费项标准已经关联合同，或者产生了账单');
+
 
 
 -- --------------------- SECTION END ---------------------------------------------------------

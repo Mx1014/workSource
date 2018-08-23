@@ -57,29 +57,7 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
-import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
-import com.everhomes.server.schema.tables.pojos.EhCustomerAttachments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
-import com.everhomes.server.schema.tables.pojos.EhCustomerConfigutations;
-import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicatorStatistics;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPotentialDatas;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAdmins;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
@@ -263,6 +241,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_NUMBER.eq(number));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
@@ -2437,4 +2432,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
         return query.fetchInto(CustomerEntryInfo.class);
     }
+
+    @Override
+    public void updateCustomerAptitudeFlag(Long id, Long approvalStatus){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class));
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        EhEnterpriseCustomers eepc = dao.findById(id);
+        eepc.setAptitudeFlagItemId(approvalStatus);
+        dao.update(eepc);
+
+    }
+
+
 }

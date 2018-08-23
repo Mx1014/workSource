@@ -23,6 +23,7 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -62,6 +63,7 @@ import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
@@ -215,6 +217,8 @@ import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -403,6 +407,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private ActivityProivider activityProivider;
 
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
+
+    @Autowired
+    private TaskService taskService;
+
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
 
@@ -563,6 +573,19 @@ public class CustomerServiceImpl implements CustomerService {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
+    }
+
+    @Override
+    public OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
     }
 
     @Override
@@ -867,6 +890,15 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
             } else {
                 dto.setDropBox9ItemName(null);
+            }
+        }
+
+        if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
             }
         }
 
@@ -2774,7 +2806,11 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setApartmentLivingStatus(address.getLivingStatus());
                 //issue-34394,添加buildingId信息，避免前端无法获取buildingId，导致没办法和楼栋门牌匹配上
                 Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-                dto.setBuildingId(building.getId());
+
+                if(building != null) {
+                    dto.setBuildingId(building.getId());
+                }
+
             }
         }
         return dto;
@@ -3260,7 +3296,12 @@ public class CustomerServiceImpl implements CustomerService {
             if (syncCount > 0) {
                 return "1";
             }
-            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            String version;
+            if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
+                version = "0";
+            }else{
+                version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            }
             CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
             if (customerHandle != null) {
                 SyncDataTask task = new SyncDataTask();
@@ -4710,4 +4751,72 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setOrganizationId(customer.getOrganizationId());
         return dto;
     }
+
+    @Override
+    public SearchEnterpriseCustomerResponse listSyncErrorCustomer(SearchEnterpriseCustomerCommand cmd){
+        List<EnterpriseCustomerDTO> customers = new ArrayList<>();
+        List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), "customer", null, 999999);
+
+        for(SyncDataError syncDataError : syncDataErrors){
+            EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(syncDataError.getOwnerId());
+            EnterpriseCustomerDTO customerDTO = ConvertHelper.convert(enterpriseCustomer,EnterpriseCustomerDTO.class);
+            customerDTO.setSyncErrorMsg(syncDataError.getErrorMessage());
+            customers.add(customerDTO);
+        }
+        SearchEnterpriseCustomerResponse response = new SearchEnterpriseCustomerResponse();
+        response.setDtos(customers);
+        return response;
+    }
+
+    @Override
+    public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd) {
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("namespaceId", cmd.getNamespaceId());
+        params.put("communityId", cmd.getCommunityId());
+        params.put("moduleName", cmd.getModuleName());
+        params.put("trackingUids", cmd.getTrackingUids());
+        params.put("trackingUid", cmd.getTrackingUid());
+        params.put("orgId", cmd.getOrgId());
+        params.put("abnormalFlag", cmd.getAbnormalFlag());
+        params.put("addressId", cmd.getAddressId());
+        params.put("adminFlag", cmd.getAdminFlag());
+        params.put("buildingId", cmd.getBuildingId());
+        params.put("type", cmd.getType());
+        params.put("trackingName", cmd.getTrackingName());
+        params.put("aptitudeFlagItemId" ,cmd.getAptitudeFlagItemId());
+        params.put("corpIndustryItemId", cmd.getCorpIndustryItemId());
+        params.put("customerCategoryId", cmd.getCustomerCategoryId());
+        params.put("includedGroupIds", cmd.getIncludedGroupIds());
+        params.put("infoFLag", cmd.getInfoFLag());
+        params.put("keyword", cmd.getKeyword());
+        params.put("lastTrackingTime", cmd.getLastTrackingTime());
+        params.put("levelId", cmd.getLevelId());
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("ownerType", cmd.getOwnerType());
+        params.put("propertyArea", cmd.getPropertyArea());
+        params.put("propertyUnitPrice", cmd.getPropertyUnitPrice());
+        params.put("propertyType", cmd.getPropertyType());
+        params.put("sortField", cmd.getSortField());
+        params.put("sortType", cmd.getSortType());
+        params.put("task_Id", cmd.getTaskId());
+        String fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+
+    @Override
+    public OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
+    }
+
 }

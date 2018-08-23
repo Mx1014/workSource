@@ -880,7 +880,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if (html == null || html == "") {
 			return html = "";
 		} else {
-			html = html.replaceAll("<.*?>", " ").replaceAll("", "");
+			html = html.replaceAll("<.*?>", " ").replaceAll(" ", "");
 			html = html.replaceAll("<.*?", "");
 			return html;
 		}
@@ -4855,7 +4855,7 @@ public class CommunityServiceImpl implements CommunityService {
         	dto.setBuildingId(r.getId());
         	dto.setBuildingName(r.getName());
         	//在租合同数
-        	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName());
+        	Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(r.getName(),r.getCommunityId());
         	dto.setRelatedContractNumber(relatedContractNumber);
         	
         	Double totalRent = contractProvider.getTotalRentInBuilding(r.getName());
@@ -5004,23 +5004,28 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setName(cmd.getCommunityName());
 		community.setAliasName(cmd.getAliasName());
 		community.setAddress(cmd.getAddress());
+		community.setCommunityNumber(cmd.getCommunityNumber());
+
 //		面积数据由房源的面积数据累加得来，不接受直接修改
 //		community.setAreaSize(cmd.getAreaSize());
 //		community.setRentArea(cmd.getRentArea());
 //		community.setFreeArea(cmd.getFreeArea());
 //		community.setChargeArea(cmd.getChargeArea());
-		community.setCommunityNumber(cmd.getCommunityNumber());
 		
 		if (cmd.getCityId() != null) {
-			community.setCityId(cmd.getCityId());
 			Region region = regionProvider.findRegionById(cmd.getCityId());
+			checkRegionIsNull(region);
+			community.setCityId(cmd.getCityId());
 			community.setCityName(region.getName());
 		}
+		
 		if (cmd.getAreaId() != null) {
-			community.setAreaId(cmd.getAreaId());
 			Region region = regionProvider.findRegionById(cmd.getAreaId());
+			checkRegionIsNull(region);
+			community.setAreaId(cmd.getAreaId());
 			community.setAreaName(region.getName());
-		}	
+		}
+		
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
 		Integer namespaceId = cmd.getNamespaceId();
@@ -5050,6 +5055,14 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
+	private void checkRegionIsNull(Region region) {
+		if(null == region) {
+			LOGGER.error("Region not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Region not found.");
+		}
+	}
+
 	@Override
 	public BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd) {
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
@@ -5061,7 +5074,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setApartmentNumber(apartmentNumber);
 		
 		//在租合同数
-		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName());
+		Integer relatedContractNumber = contractProvider.countRelatedContractNumberInBuilding(building.getName(),building.getCommunityId());
     	dto.setRelatedContractNumber(relatedContractNumber);
     	
     	//在租实时均价
@@ -5119,6 +5132,8 @@ public class CommunityServiceImpl implements CommunityService {
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);			
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
+					dto.setDescription(parseHtml(dto.getDescription()));
+					dto.setTrafficDescription(parseHtml(dto.getTrafficDescription()));
 					return dto;
 				}
 			).collect(Collectors.toList());
@@ -5153,6 +5168,8 @@ public class CommunityServiceImpl implements CommunityService {
 				community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 				community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 				community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+				address.setCommunityName(community.getName());
+				addressProvider.updateAddress(address);
 			}
 			communityProvider.updateCommunity(community);
 		}
@@ -5181,6 +5198,8 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 					building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 					building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+					address.setBuildingId(building.getId());
+					addressProvider.updateAddress(address);
 				}
 				communityProvider.updateBuilding(building);
 			}
@@ -5201,12 +5220,29 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 		
+		long startTime01 = System.currentTimeMillis();
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
+		long endTime01 = System.currentTimeMillis();
+		long timeCost01 = endTime01 - startTime01;
+		LOGGER.info("timeCost01:{}ms",timeCost01);
+		
+		long startTime02 = System.currentTimeMillis();
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		long endTime02 = System.currentTimeMillis();
+		long timeCost02 = endTime02 - startTime02;
+		LOGGER.info("timeCost02:{}ms",timeCost02);
+		
+		long startTime03 = System.currentTimeMillis();
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+		long endTime03 = System.currentTimeMillis();
+		long timeCost03 = endTime03 - startTime03;
+		LOGGER.info("timeCost03:{}ms",timeCost03);
+		
+		
 		//用于存储已经计算过的合同id
 		List<Long> contractIds = new ArrayList<>();
 		
+		long startTime04 = System.currentTimeMillis();
 		for (Address address : addresses) {
 			//获取房源状态
 			byte livingStatus = AddressMappingStatus.LIVING.getCode();
@@ -5233,42 +5269,45 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				totalRent = doubleRoundHalfUp(totalRent,2);
 			}
-			if (address.getRentArea() != null && address.getRentArea() > 0) {
-				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
-	    	}
+//			if (address.getRentArea() != null && address.getRentArea() > 0) {
+//				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
+//	    	}
 			//按在租实时均价筛选
-			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
-				continue;
-			}
-			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
-				continue;
-			}
-			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus,areaAveragePrice,totalRent,relatedContractNumber);
+//			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
+//				continue;
+//			}
+//			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
+//				continue;
+//			}
+			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,null,livingStatus,areaAveragePrice,totalRent,relatedContractNumber);
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
 		}
+		long endTime04 = System.currentTimeMillis();
+		long timeCost04 = endTime04 - startTime04;
+		LOGGER.info("timeCost04:{}ms",timeCost04);
 		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
-		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
-		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
-		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
-		int size = 0;
-		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
-			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
-				apartmentsForOnePage.add(apartmentInfoDTO);
-				size ++;
-				if (size > pageSize) {
-					break;
-				}
-			}
-		}
-		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
-			if (size > pageSize) {
-				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
-				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
-			}
-			result.setApartments(apartmentsForOnePage);
-		}
-		
+//		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
+//		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
+//		long pageAnchor = cmd.getPageAnchor()!= null ? cmd.getPageAnchor() : 0;
+//		int size = 0;
+//		for (ApartmentInfoDTO apartmentInfoDTO : apartments) {
+//			if (apartmentInfoDTO.getAddressId() > pageAnchor) {
+//				apartmentsForOnePage.add(apartmentInfoDTO);
+//				size ++;
+//				if (size > pageSize) {
+//					break;
+//				}
+//			}
+//		}
+//		if (apartmentsForOnePage != null && apartmentsForOnePage.size() > 0) {
+//			if (size > pageSize) {
+//				apartmentsForOnePage.remove(apartmentsForOnePage.size()-1);
+//				result.setNextPageAnchor(apartmentsForOnePage.get(apartmentsForOnePage.size()-1).getAddressId());
+//			}
+//			result.setApartments(apartmentsForOnePage);
+//		}
+		result.setApartments(apartments);
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
 		result.setTotalFreeArea(doubleRoundHalfUp(result.getTotalFreeArea(),2));
@@ -5300,13 +5339,11 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setTotalRent(0.0);
 	}
 	
-	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus,double areaAveragePrice,double totalRent,int relatedContractNumber){
+	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,String communityName,byte livingStatus,double areaAveragePrice,double totalRent,int relatedContractNumber){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
-		Community community = communityProvider.findCommunityById(address.getCommunityId());
-		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-		dto.setFloorNumber(building.getFloorNumber());
+		//Community community = communityProvider.findCommunityById(address.getCommunityId());
 		dto.setCommunityId(address.getCommunityId());
-		dto.setCommunityName(community.getName());
+		dto.setCommunityName(address.getCommunityName());
 		dto.setAddressId(address.getId());
 		dto.setBuildingName(address.getBuildingName());
 		dto.setApartmentFloor(address.getApartmentFloor());
@@ -5488,6 +5525,10 @@ public class CommunityServiceImpl implements CommunityService {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
 		if (namespaces!=null && namespaces.size()>0) {
 			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				//排除0域空间的数据
+				if (namespaceInfo.getId().intValue() == 0) {
+					continue;
+				}
 				LOGGER.info("caculating community area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
 				
@@ -5503,6 +5544,8 @@ public class CommunityServiceImpl implements CommunityService {
 							community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 							community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 							community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+							address.setCommunityName(community.getName());
+							addressProvider.updateAddress(address);
 						}
 						communityProvider.updateCommunity(community);
 					}
@@ -5520,6 +5563,10 @@ public class CommunityServiceImpl implements CommunityService {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
 		if (namespaces!=null && namespaces.size()>0) {
 			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				//排除0域空间的数据
+				if (namespaceInfo.getId().intValue() == 0) {
+					continue;
+				}
 				LOGGER.info("caculating building area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
 				
@@ -5537,6 +5584,8 @@ public class CommunityServiceImpl implements CommunityService {
 									building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 									building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 									building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+									address.setBuildingId(building.getId());
+									addressProvider.updateAddress(address);
 								}
 								communityProvider.updateBuilding(building);
 							}
