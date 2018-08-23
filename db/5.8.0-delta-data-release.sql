@@ -888,6 +888,17 @@ left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_
 ) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
 
 
+-- AUTHOR: 黄良铭
+-- REMARK: 系统管理员维护时的消息模板
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_locale_templates);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',26,'zh_CN','添加系统管理员给当前系统管理员发送的消息模板' ,  '您在${organizationName}的系统管理员身份已被移除',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',27,'zh_CN','删除系统管理员给其他系统管理员发送的消息模板' ,  '您已成为${organizationName}的系统管理员',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
+INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
+VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
