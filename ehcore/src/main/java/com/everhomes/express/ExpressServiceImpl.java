@@ -1587,7 +1587,7 @@ public class ExpressServiceImpl implements ExpressService {
         preOrderCommand.setOrderRemark5(null);
         String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
-
+        LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
         return preOrderCommand;
     }
 	

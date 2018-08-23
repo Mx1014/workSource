@@ -781,6 +781,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
+        LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
         return preOrderCommand;
     }
 	
