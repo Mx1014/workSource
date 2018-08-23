@@ -8,10 +8,12 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.ChannelType;
@@ -62,10 +64,12 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRemindCategoryDefaultShares;
 import com.everhomes.server.schema.tables.pojos.EhRemindShares;
+import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +80,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -101,6 +106,8 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private static final int FETCH_SIZE = 2000;
     private static final int PLAN_DATE_CALCULATE_MAX_LOOP = 365;
 
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Autowired
@@ -1169,7 +1176,15 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         if (planDate == null || remindSetting == null) {
             return null;
         } 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getPlanDateCalendar(planDate,remindSetting);
+
+        calendar.add(Calendar.DATE, remindSetting.getOffsetDay() * (-1));
+        calendar.set(Calendar.MILLISECOND, 0);
+        return new Timestamp(calendar.getTimeInMillis()- (remindSetting.getBeforeTime() ==null?0:remindSetting.getBeforeTime()));
+    }
+
+    private Calendar getPlanDateCalendar(Timestamp planDate, RemindSetting remindSetting) {
+    	Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(planDate.getTime());
         if(null != remindSetting.getFixTime()){
         	Calendar setting = Calendar.getInstance();
@@ -1177,12 +1192,11 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         	calendar.set(Calendar.MINUTE, setting.get(Calendar.MINUTE));
         	calendar.set(Calendar.SECOND, setting.get(Calendar.SECOND));        	
         }
-        calendar.add(Calendar.DATE, remindSetting.getOffsetDay() * (-1));
-        calendar.set(Calendar.MILLISECOND, 0);
-        return new Timestamp(calendar.getTimeInMillis()- (remindSetting.getBeforeTime() ==null?0:remindSetting.getBeforeTime()));
-    }
+        return calendar;
+		
+	}
 
-    /**
+	/**
      * 创建重复的日程(同时创建track自己的重复日程)
      * */
     private Remind createRepeatRemind(Remind originRemind, RemindRepeatType repeatType) {
@@ -1362,21 +1376,30 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
     private void sendTrackMessage(String originPlanDescription, Remind trackRemind, RemindModifyType modifyType) {
         String content = "";
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("trackContractName", trackRemind.getTrackContractName());
+        map.put("planDescription", trackRemind.getPlanDescription());
+        
         switch (modifyType) {
             case DELETE:
-                content = String.format("%s删除了日程“%s”", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_DELETE, RemindContants.LOCALE, map, "");
                 break;
             case STATUS_UNDO:
-                content = String.format("%s的日程“%s”重置为未完成", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_STATUS_UNDO, RemindContants.LOCALE, map, "");
                 break;
             case STATUS_DONE:
-                content = String.format("%s的日程“%s”已完成", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_STATUS_DONE, RemindContants.LOCALE, map, "");
                 break;
             case UN_SUBSCRIBE:
-                content = String.format("%s的日程“%s”取消共享了", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_UN_SUBSCRIBE, RemindContants.LOCALE, map, "");
                 break;
             default:
-                content = String.format("%s修改了日程“%s”", trackRemind.getTrackContractName(), originPlanDescription);
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_SETTING_UPDATE, RemindContants.LOCALE, map, "");
                 break;
         }
         boolean isDeleted = RemindModifyType.DELETE == modifyType;
@@ -1384,7 +1407,12 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     }
 
     private void sendRemindMessage(Remind remind) {
-        String content = String.format("%s，%s", remind.getPlanDescription(), remind.getRemindSummary());
+    	SimpleDateFormat timeDF = new SimpleDateFormat("HH:mm");
+    	RemindSetting remindSetting = null;
+    	//兼容5.9.0之前的 需要取remindSetting 的时间
+    	remindSetting = remindProvider.getRemindSettingById(remind.getRemindTypeId());
+    	Calendar  calendar = getPlanDateCalendar(remind.getPlanDate(), remindSetting);
+        String content = String.format("%s，%s %s", remind.getPlanDescription(), remind.getRemindSummary(), timeDF.format(calendar.getTime()));
         sendMessage(remind.getUserId(), content, remind, false);
     }
 
