@@ -6,6 +6,9 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ *
+ */
 public class ZhenzhihuiUserInfoDTO {
     private Integer     identifyType;
     private Long     userId;
