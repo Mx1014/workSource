@@ -94,11 +94,12 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
         addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
 
 
+        GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(cmd.getRequisitionId());
         //GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
         String source_type = "EhGeneralFormValRequests";
 
-        if(generalApproval != null) {
-            cmd2.setGeneralFormId(generalApproval.getFormOriginId());
+        if(request != null) {
+            cmd2.setGeneralFormId(request.get());
             cmd2.setSourceId(cmd.getRequisitionId());
             cmd2.setSourceType(source_type);
             cmd2.setValues(cmd.getValues());
