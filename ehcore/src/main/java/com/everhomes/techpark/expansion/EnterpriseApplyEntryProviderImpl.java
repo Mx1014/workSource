@@ -49,7 +49,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	public EnterpriseDetail getEnterpriseDetailById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
-		SelectQuery<EhEnterpriseDetailsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_DETAILS);
+		SelectQuery<EhEnterpriseDetailsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_DETAILS);4
 		query.addConditions(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID.eq(id));
 		
 		return ConvertHelper.convert(query.fetchOne(), EnterpriseDetail.class);
