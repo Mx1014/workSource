@@ -2100,15 +2100,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 				}
 				
-				//入场报错合同变为正常合同
-				contractProvider.updateContract(contract);
-				contractSearcher.feedDoc(contract);
-				
 				parentContract.setStatus(ContractStatus.HISTORY.getCode());
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 			}
 		}
+		
+
+		//入场报错合同变为正常合同
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
 	}
 
 	@Override
