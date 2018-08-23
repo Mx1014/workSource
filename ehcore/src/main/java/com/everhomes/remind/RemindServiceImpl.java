@@ -1112,17 +1112,18 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private Timestamp buildRemindTime(Timestamp planDate, RemindSetting remindSetting) {
         if (planDate == null || remindSetting == null) {
             return null;
-        }
-        Calendar setting = Calendar.getInstance();
-        setting.setTimeInMillis(remindSetting.getFixTime().getTime());
+        } 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(planDate.getTime());
+        if(null != remindSetting.getFixTime()){
+        	Calendar setting = Calendar.getInstance();
+        	calendar.set(Calendar.HOUR_OF_DAY, setting.get(Calendar.HOUR));
+        	calendar.set(Calendar.MINUTE, setting.get(Calendar.MINUTE));
+        	calendar.set(Calendar.SECOND, setting.get(Calendar.SECOND));        	
+        }
         calendar.add(Calendar.DATE, remindSetting.getOffsetDay() * (-1));
-        calendar.set(Calendar.HOUR_OF_DAY, setting.get(Calendar.HOUR));
-        calendar.set(Calendar.MINUTE, setting.get(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, setting.get(Calendar.SECOND));
         calendar.set(Calendar.MILLISECOND, 0);
-        return new Timestamp(calendar.getTimeInMillis());
+        return new Timestamp(calendar.getTimeInMillis()- (remindSetting.getBeforeTime() ==null?0:remindSetting.getBeforeTime()));
     }
 
     private Remind createRepeatRemind(Remind originRemind, RemindRepeatType repeatType) {
