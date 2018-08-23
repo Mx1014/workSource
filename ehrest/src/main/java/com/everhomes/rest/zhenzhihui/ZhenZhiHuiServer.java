@@ -10,7 +10,7 @@ public enum ZhenZhiHuiServer {
     PARKING(1012,"停车缴费",40800L,""),
     HOTLINE(1013,"服务热线",40300L,""),
     SERVICE_ALLIANCE(1014,"服务联盟",40500L,"/service-alliance-web/build/index.html#/home/grid"),
-    PARK_INTRODUCTION(1015,"园区介绍",10200L,""),
+    PARK_INTRODUCTION(1015,"园区介绍",40500L,"/service-alliance-web/build/index.html#/home/grid"),
     ASSET_MANAGEMENT(1016,"资产管理",38000L,""),
     ENTERPRISES(1017,"企业名录",40500L,""),
     PARK_INVESTMENT(1018,"园区招商",40100L,""),

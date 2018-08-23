@@ -160,8 +160,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                             List<Long> moduleIds = new ArrayList<>();
                             LOGGER.info("zhenzhihuiDTO = {}", zhenZhiHuiUserInfoDTO);
                             LOGGER.info("code = {}" ,Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode()));
-                            LOGGER.info("Server = {}", ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())));
-                            moduleIds.add(ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode())).getModule());
+                            ZhenZhiHuiServer zhenZhiHuiServer = ZhenZhiHuiServer.fromStatus(Integer.valueOf(zhenZhiHuiUserInfoDTO.getCode()));
+                            LOGGER.info("Server = {}", zhenZhiHuiServer);
+                            moduleIds.add(zhenZhiHuiServer.getModule());
                             LOGGER.info("moduleId = {}", moduleIds);
                             List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(ZHENZHIHUI_NAMESPACE_ID, moduleIds);
                             if (CollectionUtils.isEmpty(serviceModuleApps)) {
@@ -169,7 +170,16 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "app is null");
                             }
                             LOGGER.info("ServiceModuleApp = {}", serviceModuleApps.get(0));
-                            String instanceConfig = serviceModuleApps.get(0).getInstanceConfig();
+                            String instanceConfig = "";
+                            if (serviceModuleApps.size() == 1) {
+                               instanceConfig =  serviceModuleApps.get(0).getInstanceConfig();
+                            }else {
+                                for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
+                                    if (zhenZhiHuiServer.getName().equals(serviceModuleApp.getName())) {
+                                        instanceConfig = serviceModuleApp.getInstanceConfig();
+                                    }
+                                }
+                            }
                             LOGGER.info("instanceConfig = {}",instanceConfig);
 
                             JSONObject jsonObject = (JSONObject) JSONValue.parse(instanceConfig);
