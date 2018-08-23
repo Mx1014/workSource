@@ -2942,12 +2942,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
     
     private List<OrganizationOwnerDTO> getApartmentRelatedIndividualCustomers(Integer namespaceId, Long addressId) {
-	    List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
+    	List<OrganizationOwnerDTO> individualCustomerList = new ArrayList<>();
+    	List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
 	    if (organizationOwnerAddressesMappings != null && organizationOwnerAddressesMappings.size()>0) {
-	    	List<OrganizationOwnerDTO> individualCustomerList = organizationOwnerAddressesMappings.stream().map(this::convert).collect(Collectors.toList());
-	    	return individualCustomerList;
+	    	for (OrganizationOwnerAddress organizationOwnerAddress : organizationOwnerAddressesMappings) {
+	    		OrganizationOwner organizationOwner = propertyMgrProvider.findOrganizationOwnerById(organizationOwnerAddress.getOrganizationOwnerId());
+	            if (organizationOwner != null) {
+	            	OrganizationOwnerDTO organizationOwnerDTO = new OrganizationOwnerDTO();
+	                organizationOwnerDTO.setContactName(organizationOwner.getContactName());
+	                organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
+	                individualCustomerList.add(organizationOwnerDTO);
+	            }
+			} 
 	    }
-	    return null;
+	    return individualCustomerList;
 	}
 
 	//  在门牌管理页面中新增企业客户信息tab页，该门牌关联的企业信息来源于3处，详见!新增企业客户信息tab.png!：
@@ -3030,7 +3038,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         return organizationOwnerDTO;
     }
-
+    
     @Override
     public void deleteApartment(DeleteApartmentCommand cmd) {
         Address address = addressProvider.findAddressById(cmd.getId());
