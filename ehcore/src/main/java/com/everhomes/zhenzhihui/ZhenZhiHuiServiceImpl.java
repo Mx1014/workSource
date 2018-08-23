@@ -175,7 +175,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
                                instanceConfig =  serviceModuleApps.get(0).getInstanceConfig();
                             }else {
                                 for (ServiceModuleApp serviceModuleApp : serviceModuleApps) {
-                                    if (zhenZhiHuiServer.getName().equals(serviceModuleApp.getName())) {
+                                    if (serviceModuleApp.getName().contains(zhenZhiHuiServer.getName())) {
                                         instanceConfig = serviceModuleApp.getInstanceConfig();
                                     }
                                 }
