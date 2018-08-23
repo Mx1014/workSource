@@ -58,7 +58,11 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     private static final String OUT_INFO = "api.aspx/park.out.info";
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.SIMPLIFIED_CHINESE);
+        }
+    };
 
     @Override
     public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
@@ -86,9 +90,9 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         dto.setPlateNumber(plateNumber);
 
         try {
-            Date entertime = DATE_FORMAT.parse(tempFee.getEntertime());
+            Date entertime = DATE_FORMAT.get().parse(tempFee.getEntertime());
             dto.setEntryTime(entertime.getTime());
-            Date calcendtime = DATE_FORMAT.parse(tempFee.getCalcendtime());
+            Date calcendtime = DATE_FORMAT.get().parse(tempFee.getCalcendtime());
             dto.setPayTime(calcendtime.getTime());
         } catch (ParseException e) {
             LOGGER.error("Parse time error,EntryTime={},PayTime={}",tempFee.getEntertime(),tempFee.getCalcendtime());
@@ -229,8 +233,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         JSONObject param = new JSONObject();
         param.put("NumNo",log.getPlateNumber());
         JSONObject park = new JSONObject();
-        park.put("StartDate",DATE_FORMAT.format(log.getApplyTime()));
-        park.put("ExpiryDate",DATE_FORMAT.format(log.getClearanceTime()));
+        park.put("StartDate",DATE_FORMAT.get().format(log.getApplyTime()));
+        park.put("ExpiryDate",DATE_FORMAT.get().format(log.getClearanceTime()));
         param.put("Park",park);
         String json = post(param,OPEN_MONTHCARD);
         CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
@@ -247,8 +251,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         JSONObject param = new JSONObject();
         param.put("credentialtype","1");
         param.put("credential",r.getPlateNumber());
-        param.put("starttime",DATE_FORMAT.format(r.getApplyTime()));
-        param.put("endtime",DATE_FORMAT.format(r.getClearanceTime()));
+        param.put("starttime",DATE_FORMAT.get().format(r.getApplyTime()));
+        param.put("endtime",DATE_FORMAT.get().format(r.getClearanceTime()));
         String json = post(param,OUT_INFO);
         CheanJsonArray<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonArray<JSONObject>>(){});
         if(null != entity && entity.getStatus() && entity.getData().size() > 0){
@@ -307,7 +311,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
-        if(createMonthCard(request.getPlateNumber(),DATE_FORMAT.format(timestampStart),DATE_FORMAT.format(timestampEnd))){
+        if(createMonthCard(request.getPlateNumber(),DATE_FORMAT.get().format(timestampStart),DATE_FORMAT.get().format(timestampEnd))){
             updateFlowStatus(request);
             return true;
         }
@@ -539,8 +543,8 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         }
 
         long now = System.currentTimeMillis();
-        String opendate = DATE_FORMAT.format(new Date(now));
-        String expirydate = DATE_FORMAT.format(Utils.getTimestampByAddNatureMonth(now,requestMonthCount));
+        String opendate = DATE_FORMAT.get().format(new Date(now));
+        String expirydate = DATE_FORMAT.get().format(Utils.getTimestampByAddNatureMonth(now,requestMonthCount));
         createMonthCard(cmd.getPlateNumber(),opendate,expirydate);
 
         OpenCardInfoDTO dto = new OpenCardInfoDTO();
@@ -584,7 +588,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             expirydate = (null != card.getNewexpirydate() ? card.getNewexpirydate() : card.getExpirydate());
             Long expiradateResult = null;
             try {
-                expiradateResult = DATE_FORMAT.parse(expirydate).getTime();
+                expiradateResult = DATE_FORMAT.get().parse(expirydate).getTime();
             } catch (ParseException e) {
                 LOGGER.error("parse expiry date error, date={}", expirydate);
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -627,7 +631,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
         String branchno = configProvider.getValue("parking.chean.branchno","0");
 
-        String iv = DATE_FORMAT.format(new Date());
+        String iv = DATE_FORMAT.get().format(new Date());
         int nonce = (int) (Math.random() * 100);
         Map<String, Object> params = new HashMap<>();
         params.put("from",accessKeyId);
@@ -662,7 +666,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 //    public static void main(String[] args) {
 //        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
 //        bean.getParkingTempFee(null,"粤BMP525");
-//        bean.getCardInfo("粤B32345",null);
+//        bean.getCardInfo("粤BMP525",null);
 //      卡类型接口
 //        bean.getParkingRechargeRates(null,null,null);
 //      开卡
