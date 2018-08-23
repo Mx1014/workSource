@@ -456,6 +456,36 @@ ALTER TABLE `eh_buildings` ADD COLUMN `free_area` double NULL DEFAULT NULL COMME
 ALTER TABLE `eh_communities` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
 ALTER TABLE `eh_addresses` ADD COLUMN `is_future_apartment` tinyint NULL DEFAULT 0 COMMENT '未来房源标记（0：否，1：是）';
 
+-- AUTHOR: 杨崇鑫  20180724
+-- REMARK: 物业缴费V6.5所需新增的字段
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_originId` BIGINT(20) COMMENT '合同管理应用的originId';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_changeFlag` TINYINT COMMENT '是否走合同变更，1、0';
+-- REMARK: 修改域空间发布保存相关应用配置
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率';
+-- REMARK: 账单表：增加应收不含税字段,税额字段：tax_amount
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.3 （欠费时间筛选、费项进多账单组）
+ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_count` BIGINT COMMENT '欠费天数' after due_day_deadline;
+-- REMARK: 因为新增计价条款时先选组再选费项，故查看合同概览时在收费项目前多加一列字段。概览中前4个Tab均需要在收费项目前多加一列账单组。
+ALTER TABLE `eh_contract_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+ALTER TABLE `eh_contract_charging_changes` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
+-- AUTHOR: 丁建民
+-- REMARK: 合同2.8
+ALTER TABLE `eh_contracts` ADD COLUMN `cost_generation_method`  tinyint DEFAULT NULL COMMENT '合同截断时的费用收取方式，0：按计费周期，1：按实际天数';
+
 
 -- ------------------------------
 -- 每日统计表     add by mingbo.huang  2018/07/25
@@ -503,23 +533,256 @@ CREATE TABLE `eh_alliance_stat_details` (
   KEY `i_eh_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户的点击明细';
 
--- AUTHOR: 杨崇鑫  20180724
--- REMARK: 物业缴费V6.5所需新增的字段
--- REMARK: 修改域空间发布保存相关应用配置
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_originId` BIGINT(20) COMMENT '合同管理应用的originId';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `contract_changeFlag` TINYINT COMMENT '是否走合同变更，1、0';
--- REMARK: 修改域空间发布保存相关应用配置
-ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率';
--- REMARK: 账单表：增加应收不含税字段,税额字段：tax_amount
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+-- AUTHOR: huangpengyu  20180709
+-- REMARK: 此功能将所有不需要走审批的表单字段关联起来
+create table `eh_general_form_val_requests`
+(
+   `id`                   bigint not null,
+   `organization_id`      bigint comment 'organization_id',
+   `owner_id`             bigint comment 'owner_id',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   `module_id`            bigint comment 'module_id',
+   `module_type`          varchar(64) comment 'module_type',
+   `source_id`            bigint comment 'source_id',
+   `source_type`          varchar(64) comment 'source_type',
+	 `approval_status`      tinyint comment '该表单的审批状态,0-待发起，1-审批中，2-审批通过，3-审批终止' default 0,
+	 `status`               tinyint comment '该表单的状态，0-删除，1-生效' default 1,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
 
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
+-- AUTHOR: huangpengyu  20180717
+-- REMARK: 将表单筛选字段与客户关联起来
+create table `eh_general_form_filter_user_map`
+(
+   `id`                   bigint not null,
+   `owner_id`             bigint comment 'owner_id' not null,
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+   `module_type`          varchar(64) comment 'module_type' ,
+	 `form_origin_id`				bigint comment '关联的表id' not null,
+	 `form_version`					bigint comment '关联的表version' not null,
+   `field_name`           varchar(64) comment '被选中的字段名' not null,
+	 `user_uuid`						varchar(128) comment '当前登录的用户用于获取字段' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
 
+
+alter table eh_enterprise_customers add aptitude_flag_item_id BIGINT null comment '0-无资质，1-有资质' default 0;
+
+alter table eh_general_forms add operator_name varchar(64) null comment '修改人';
+alter table eh_general_forms add creater_name varchar(64) null comment '新增人';
+
+
+alter table eh_general_approvals add creater_name varchar(64) null comment '新增人';
+
+-- AUTHOR: huangpengyu  20180811
+-- REMARK: 增加合同过滤客户配置项
+create table `eh_enterprise_customer_aptitude_flag`
+(
+   `id`                   bigint not null,
+   `value`             		TINYINT not null comment '是否筛选，1-筛选，0-不筛选' default 0,
+	 `owner_id`           	bigint not null comment 'communityId',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_customer_aptitude_flag in dev mode';
+
+
+-- AUTHOR: 吴寒
+-- REMARK: ISSUE-33577 增加update_time 给punch_logs表(为金蝶对接接口提供)
+ALTER TABLE eh_punch_logs ADD COLUMN `update_date` DATE ;
+
+
+-- AUTHOR: 黄鹏宇 2018-8-13
+-- REMARK: 增加导入错误日志表
+CREATE TABLE `eh_sync_data_errors` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `module_id` BIGINT,
+  `sync_type` VARCHAR(64) NOT NULL COMMENT '同步类型，对应同步的任务类型，如sync_contract',
+  `owner_id` BIGINT NOT NULL COMMENT '错误对应的id，如：contractId，对应同步的任务类型',
+  `owner_type` VARCHAR(64),
+  `error_message` VARCHAR(512) NOT NULL COMMENT '发生错误的信息',
+  `task_id` BIGINT NOT NULL COMMENT '同步版本',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- AUTHOR: 郑思挺
+-- REMARK: 资源预约3.6.2
+ALTER TABLE `eh_rentalv2_default_rules`
+ADD COLUMN `remark_flag`  tinyint(4) NULL COMMENT '备注是否必填 0否 1是' AFTER `overtime_strategy`,
+ADD COLUMN `remark`  varchar(255) NULL COMMENT '备注显示文案' AFTER `remark_flag`;
+
+ALTER TABLE `eh_rentalv2_time_interval`
+ADD COLUMN `amorpm`  tinyint(4) NULL AFTER `time_step`,
+ADD COLUMN `name`  varchar(10) NULL AFTER `amorpm`;
+
+
+CREATE TABLE `eh_rentalv2_refund_tips` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int NOT NULL ,
+`source_type`  varchar(20) NULL ,
+`source_id`  bigint(20) NULL ,
+`refund_strategy`  tinyint(4) NULL ,
+`tips`  varchar(255) NULL ,
+`resource_type`  varchar(20) NULL ,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- AUTHOR: 郑思挺
+-- REMARK: 资源预约3.6
+ALTER TABLE eh_rentalv2_resource_pics rename eh_rentalv2_site_resources;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `type`  varchar(64) NULL DEFAULT 'pic' AFTER `owner_type`;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `name`  varchar(64) NULL  AFTER `type`;
+ALTER TABLE `eh_rentalv2_site_resources`
+ADD COLUMN `size`  varchar(64) NULL  AFTER `name`;
+
+ALTER TABLE `eh_rentalv2_cells`
+ADD COLUMN `cell_id`  bigint(20) NULL AFTER `id`;
+
+-- AUTHOR: 吴寒
+-- REMARK: 锁掌柜门禁对接
+ALTER TABLE `eh_aclinks` CHANGE `string_tag1` `string_tag1` VARCHAR(1024) ;
+
+
+-- AUTHOR: 邓爽 2018年7月5日22:04:25
+-- REMARK: issue-26616 停车缴费V6.6（UE优化）
+ALTER TABLE `eh_parking_lots` ADD COLUMN `func_list` TEXT COMMENT '此停车场对接的功能列表Json,如["tempfee","monthRecharge"]';
+
+-- AUTHOR: 郑思挺
+-- REMARK: 装修1.0
+CREATE TABLE `eh_decoration_requests` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`community_id`  bigint(20) NOT NULL ,
+`create_time`  datetime NULL  ,
+`start_time`  datetime NULL  ,
+`end_time`  datetime NULL  ,
+`apply_uid`  bigint(20) NULL ,
+`apply_name`  varchar(64) NULL ,
+`apply_phone`  varchar(64) NULL ,
+`apply_company`  varchar(255) NULL ,
+`address`  varchar(255) NULL ,
+`decorator_uid`  bigint(20) NULL ,
+`decorator_name`  varchar(64) NULL ,
+`decorator_phone`  varchar(64) NULL ,
+`decorator_company_id`  bigint(20) NULL ,
+`decorator_company`  varchar(255) NULL ,
+`decorator_qrid`  varchar(255) NULL COMMENT '二维码id' ,
+`status`  tinyint NULL ,
+`cancel_flag`  tinyint NULL COMMENT '0未取消 1工作流取消 2后台取消' ,
+`cancel_reason`  varchar(1024) NULL ,
+`refound_amount`  DECIMAL(18,2) NULL COMMENT '退款金额' ,
+`refound_comment`  varchar(1024) NULL COMMENT '退款备注',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_workers` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`request_id`  bigint(20) NOT NULL ,
+`worker_type`  varchar(64) NULL ,
+`uid`  bigint(20) NULL ,
+`name`  varchar(64) NULL ,
+`phone`  varchar(64) NULL ,
+`image`  varchar(255) NULL ,
+`qrid`  varchar(255) NULL COMMENT '二维码id' ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_setting` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`community_id`  bigint(20) NOT NULL ,
+`owner_type`  varchar(64) NOT NULL COMMENT '\'basic\' 基础设置 \'file\'装修资料 \'fee\'缴费 \'apply\'施工申请 \'complete\'竣工验收 \'refound\'押金退回' ,
+`owner_id`  bigint(20) NULL COMMENT '当owner_type为apply 时 表示审批id' ,
+`content`  text NULL ,
+`address`  varchar(255) NULL COMMENT '收款地址或资料提交地址' ,
+`longitude` DOUBLE,
+`latitude` DOUBLE,
+`phone`  varchar(64) NULL COMMENT '咨询电话' ,
+`create_time`  datetime NULL  ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_atttachment` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`setting_id`  bigint(20) NOT NULL ,
+`name`  varchar(64) NULL ,
+`attachment_type`  varchar(64) NULL COMMENT '\'file\'文件 \'fee\'费用' ,
+`size`  varchar(32) NULL ,
+`file_uri`  varchar(255) NULL ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_fee` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`request_id`  bigint(20) NOT NULL ,
+`fee_name`  varchar(64) NULL ,
+`fee_price`  varchar(64) NULL ,
+`amount`  varchar(64) NULL ,
+`total_price`  decimal(20,2) NULL ,
+`create_time`  datetime NULL  ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_companies` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`organization_id`  bigint(20) NULL ,
+`name`  varchar(64) NULL ,
+`create_time`  datetime NULL  ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_company_chiefs` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`company_id`  bigint(20) NOT NULL COMMENT '装修公司的id',
+`name`  varchar(64) NULL ,
+`phone`  varchar(64) NULL ,
+`uid`   bigint(20) NULL ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_decoration_approval_vals` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`request_id`  bigint(20) NULL ,
+`approval_id`  bigint(20) NULL ,
+`approval_name`  varchar(64) NULL ,
+`flow_case_id`  bigint(20) NULL ,
+`form_origin_id`  bigint(20) NULL ,
+`form_version`  bigint(20) NULL ,
+`delete_flag`  tinyint NULL COMMENT '0未取消 1取消' ,
+`create_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- AUTHOR: 严军 2018年08月17日19:22:25
+-- REMARK: issue-31049 域空间配置V1.4
+ALTER TABLE `eh_portal_layout_templates` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-渐变导航栏（服务广场），2-自定义门户（二级门户），3-分页签门户（社群Tab）';
+
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-渐变导航栏（服务广场），2-自定义门户（二级门户），3-分页签门户（社群Tab）';
+
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
+
+-- AUTHOR: 唐岑
+-- REMARK: 资产管理V3.1 2018年8月23日16:22:55
+-- REMARK: 解决issue-36278，房源管理查询速度慢的问题，同时向eh_addresses表中补充building_id、community_name两个字段
+ALTER TABLE `eh_addresses` ADD COLUMN `building_id` bigint(20) NULL DEFAULT NULL COMMENT '房源所在楼宇id' AFTER `community_id`;
+
+ALTER TABLE `eh_addresses` ADD COLUMN `community_name` varchar(64) NULL DEFAULT NULL COMMENT '房源所在园区名称' AFTER `community_id`;
+
+-- AUTHOR: 黄良铭 2018年08月23日
+-- REMARK: #36462
+ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
 -- --------------------- SECTION END ---------------------------------------------------------
