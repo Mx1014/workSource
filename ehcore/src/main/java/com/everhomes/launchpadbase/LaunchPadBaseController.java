@@ -106,6 +106,22 @@ public class LaunchPadBaseController extends ControllerBase {
 
 
     /**
+     * <b>URL: /launchpadbase/listAllApps</b>
+     * <p>广场根据组件获取全部应用，包括自定义的</p>
+     */
+    @RequestMapping("listAllApps")
+    @RestReturn(value=ListAllAppsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAllApps(ListAllLaunchPadAppsCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
      * <p>获取运营板块信息</p>
      */

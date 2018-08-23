@@ -617,19 +617,18 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
 
-		appDTO.setActionData(app.getInstanceConfig());
 		PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 		if(handler != null){
 			String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
 			if(itemActionData != null){
-				appDTO.setActionData(itemActionData);
+				app.setInstanceConfig(itemActionData);
 			}
 		}
 
-		appDTO.setActionData(launchPadService.refreshActionData(appDTO.getActionData()));
+		app.setInstanceConfig(launchPadService.refreshActionData(app.getInstanceConfig()));
 
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), appDTO.getActionData());
+		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), app.getInstanceConfig());
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
 
