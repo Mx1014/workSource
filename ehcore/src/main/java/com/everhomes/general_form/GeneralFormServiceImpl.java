@@ -645,6 +645,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     "generalForm is null");
         }
         GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
+        generalFormPrintTemplate.setName(form.getFormName());
         generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
         generalFormPrintTemplate.setOwnerId(form.getId());
         //使用gogs存储合同内容
@@ -684,9 +685,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
         generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
         generalFormPrintTemplate.setOwnerId(form.getId());
+        generalFormPrintTemplate.setName(form.getFormName());
         boolean isNewFile = false;
         GeneralFormPrintTemplate oldTemplate = generalFormProvider.getGeneralFormPrintTemplateById(cmd.getId());
-        if (!oldTemplate.getName().equals(cmd.getName())) {
+        if (!oldTemplate.getName().equals(form.getFormName())) {
             isNewFile = true;
         }
         //使用gogs存储合同内容
