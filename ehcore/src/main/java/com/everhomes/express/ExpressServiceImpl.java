@@ -1561,8 +1561,8 @@ public class ExpressServiceImpl implements ExpressService {
 //        preOrderCommand.setBusinessOrderNumber(generateBizOrderNum(accountCode,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
         preOrderCommand.setBusinessPayerType(payerType.getCode());
         preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
-//        String businessPayerParams = getBusinessPayerParams(cmd);
-//        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+        String businessPayerParams = getBusinessPayerParams(cmd);
+        preOrderCommand.setBusinessPayerParams(businessPayerParams);
 
        // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
         preOrderCommand.setPaymentPayeeId(bizPayeeId); //不知道填什么
@@ -1591,7 +1591,28 @@ public class ExpressServiceImpl implements ExpressService {
         return preOrderCommand;
     }
 	
-    private Long changePayAmount(BigDecimal amount){
+    private String getBusinessPayerParams(PayExpressOrderCommandV2 cmd) {
+
+        Long businessPayerId = UserContext.currentUserId();
+
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, UserContext.getCurrentNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
+	
+	}
+
+	private Long changePayAmount(BigDecimal amount){
 
         if(amount == null){
             return 0L;
