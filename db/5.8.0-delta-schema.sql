@@ -775,4 +775,8 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-�
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
 
+
+-- AUTHOR: 黄良铭 2018年08月23日
+-- REMARK: #36462 
+ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
 -- --------------------- SECTION END ---------------------------------------------------------
