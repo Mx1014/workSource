@@ -2090,7 +2090,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			OrganizationContactDTO contactDTO = this.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
 					PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN,true,false);
 			LOGGER.info("updateTopAdminstrator step 03 :create this super admin . token:{} ;name:{}",cmd.getContactToken(),cmd.getContactName());
-
+			
 			//发送信息提示新超级管理员
 			sendMessageAfterChangeOrganizationAdmin(
 					contactDTO,
@@ -2098,6 +2098,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
 			);
 			
+			//为旧超级管理员发送被删除超级管理员提示(如果旧超级管理员是他自己,这里通过token 相等来判断,表示应该是新增超级管理员,不应该给他自己发删除超级管理员的信息)
+			if(token!=null && !token.equals(cmd.getContactName())){
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(token, cmd.getOrganizationId(), null);
+				if(member !=null ){
+					sendMessageAfterChangeOrganizationAdmin(
+							ConvertHelper.convert(member, OrganizationContactDTO.class),
+							OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+							OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+					);
+				}
+			}
+						
 			Organization o = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 			if(null != o){
 				o.setAdminTargetId(cmd.getUserId());
