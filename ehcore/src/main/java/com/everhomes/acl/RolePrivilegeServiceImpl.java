@@ -1783,8 +1783,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 */
     private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken,
     		                                        Long adminPrivilegeId, Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin){
+    	boolean flag = false ;
+    	//标志为true 不发消息,提前返回
+    	if(notSendMsgFlag){
+    		flag = true;
+    	}
 		//创建机构账号，包括注册、把用户添加到公司
-		OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(organizationId, contactName, contactToken,null);
+		OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(organizationId, contactName, contactToken,flag);
 
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			//分配具体公司管理员权限
@@ -2051,8 +2056,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 	        
 			if(token != null && (cmd.getReservePrivilege() == null || cmd.getReservePrivilege().equals(TrueOrFalseFlag.FALSE.getCode()))) {
-				//删除旧的管理员
-				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,false,true);
+				//删除旧的系统管理员
+				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
 				LOGGER.info("updateTopAdminstrator step 01 :delete old super admin . token:{}",token);
 
 				OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), token);

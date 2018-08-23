@@ -6786,11 +6786,11 @@ public class OrganizationServiceImpl implements OrganizationService {
  * @param member
  * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息 
  */
-    private void joinOrganizationAfterOperation(OrganizationMember member ,Boolean notSendMsgFlag) {
+    private void joinOrganizationAfterOperation(OrganizationMember member ,boolean notSendMsgFlag) {
         userSearcher.feedDoc(member);
 
         if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
-        		&& (notSendMsgFlag==null ||!notSendMsgFlag)) {
+        		&& !notSendMsgFlag) {
             sendMessageForContactApproved(member);
         }
 
@@ -7635,9 +7635,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         return member;
     }
 
+
     @Override
     public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName
-    								, String contactToken ,Boolean notSendMsgFlag) {
+    								, String contactToken ,boolean notSendMsgFlag) {
 
         if (null == contactToken) {
             LOGGER.error("contactToken can not be empty.");
@@ -11296,7 +11297,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //是往公司添加新成员就需要发消息
                 if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
                     organizationMember.setOrganizationId(enterpriseId);
-                    joinOrganizationAfterOperation(organizationMember,null);
+                    joinOrganizationAfterOperation(organizationMember,false);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428

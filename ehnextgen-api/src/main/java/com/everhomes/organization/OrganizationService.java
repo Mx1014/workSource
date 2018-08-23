@@ -589,7 +589,7 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName,
-			String contactToken,Boolean notSendMsgFlag);
+			String contactToken,boolean notSendMsgFlag);
 
 	/**组织架构批量调整**/
 	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
