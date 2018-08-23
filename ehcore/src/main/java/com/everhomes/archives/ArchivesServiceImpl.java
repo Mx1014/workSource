@@ -242,7 +242,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void stickArchivesContact(StickArchivesContactCommand cmd) {
         Long userId = UserContext.currentUserId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {

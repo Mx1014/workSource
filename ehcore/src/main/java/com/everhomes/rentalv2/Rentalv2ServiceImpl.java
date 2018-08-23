@@ -4549,6 +4549,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					doorAuthId += createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
 							Long.parseLong(id), rentalResource.getCreatorUid()) + ",";
 				order.setDoorAuthId(doorAuthId.substring(0, doorAuthId.length() - 1));
+				rentalv2Provider.updateRentalBill(order);
 			}
 		}
 
@@ -5559,8 +5560,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
-				//当可预约数量为0时, 或者在后台手动关闭时
-				if (dto.getCounts() <= 0 || rsr.getStatus() == SiteRuleStatus.MANUAL_CLOSE.getCode()) {
+				//当可预约数量为0时
+				if (dto.getCounts() <= 0 ) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 
@@ -5588,8 +5589,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (validateTime) {
 			setRentalCellStatus(new java.util.Date(), dto, rsr, rule);
 		}
-		//当可预约数量为0时, 或者在后台手动关闭时
-		if (dto.getCounts() == 0 || rsr.getStatus() == SiteRuleStatus.MANUAL_CLOSE.getCode()) {
+		//当可预约数量为0时
+		if (dto.getCounts() == 0) {
 			dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 		}
 
