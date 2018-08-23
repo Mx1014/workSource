@@ -65,11 +65,8 @@ import com.everhomes.server.schema.tables.pojos.EhRemindShares;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,7 +154,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     @Override
     public GetRemindSettingsResponse listRemindSettings() {
         List<RemindSetting> settings = remindProvider.findRemindSettings();
-        List<RemindSettingDTO> types = settings.stream().map(r -> {
+        List<RemindSettingDTO> types = settings.stream().filter(r->checkVersion(r.getAppVersion())).map(r -> {
             RemindSettingDTO dto = new RemindSettingDTO();
             dto.setRemindTypeId(r.getId());
             dto.setRemindDisplayName(r.getName());
@@ -170,6 +167,45 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         GetRemindSettingsResponse response = new GetRemindSettingsResponse();
         response.setRemindTypes(types);
         return response;
+    }
+    /**
+     * 根据设置的分隔版本号 比如"5.8.0;5.9.0"
+     * 则如果app版本号和setting版本号都不到5.8.0
+     * 或者超过5.8.0不到5.9.0
+     * 或者都超过5.9.0 返回为true 否则为false
+     * */
+    private boolean checkVersion(String settingVersionStr) {
+        if (null != settingVersionStr) {
+            try {
+                Version requestVersion = Version.fromVersionString(UserContext.current().getVersion());
+                Version settingVer = Version.fromVersionString(UserContext.current().getVersion());
+                String sgemenConfig = configurationProvider.getValue(ConfigConstants.REMIND_VERSION_SEGMEN, "5.9.0");
+                String[] versionSegs = StringUtils.split(sgemenConfig, ";");
+                for (int i = 0; i < versionSegs.length; i++) {
+                    Version segmenVersion = Version.fromVersionString(versionSegs[i]);
+                    long segmenValue = Version.encodeValue(segmenVersion.getMajor(), segmenVersion.getMinor(), segmenVersion.getRevision());
+                    //如果请求的版本号小于分隔版本 : 提醒的版本小于分隔版本则为true;否则为false
+                    if(Version.encodeValue(requestVersion.getMajor(), requestVersion.getMinor(), requestVersion.getRevision()) < segmenValue){
+                        if (Version.encodeValue(settingVer.getMajor(), settingVer.getMinor(), settingVer.getRevision()) < segmenValue) {
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }else {
+                        //如果请求版本号不小于分隔版本, setting的小于分隔版本 也为假
+                        if (Version.encodeValue(settingVer.getMajor(), settingVer.getMinor(), settingVer.getRevision()) < segmenValue) {
+                            return false;
+                        }
+                    }
+                }
+                //循环所有分隔版本请求版本号和setting的版本号都不小于,则都是新版本则为真
+                return true;
+            }catch(Exception e ){
+                LOGGER.error("检测version出错了", e);
+                return false;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -546,7 +582,10 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             remindSetting = remindProvider.getRemindSettingById(cmd.getRemainTypeId());
         }
         String remindType = remindSetting != null ? remindSetting.getName() : null;
-        Timestamp planDate = cmd.getPlanDate() != null ? new Timestamp(cmd.getPlanDate()) : null;
+        Timestamp planDate = null;
+        if (cmd.getPlanDate() != null) {
+            planDate = new Timestamp(cmd.getPlanDate() + (cmd.getPlanTime() == null ? 0 : cmd.getPlanTime()));
+        }
         RemindRepeatType repeatType = RemindRepeatType.fromCode(cmd.getRepeatType());
 
         // 创建，编辑，完成，未完成，加入我的日程等操作的日程排在列表最前面
@@ -599,7 +638,10 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             remindSetting = remindProvider.getRemindSettingById(cmd.getRemainTypeId());
         }
         String remindType = remindSetting != null ? remindSetting.getName() : null;
-        Timestamp planDate = cmd.getPlanDate() != null ? new Timestamp(cmd.getPlanDate()) : null;
+        Timestamp planDate = null ;
+        if (cmd.getPlanDate() != null) {
+            planDate = new Timestamp(cmd.getPlanDate() + (cmd.getPlanTime() == null ? 0 : cmd.getPlanTime()));
+        }
         RemindRepeatType repeatType = RemindRepeatType.fromCode(cmd.getRepeatType());
 
         // 创建，编辑，完成，未完成，加入我的日程等操作的日程排在列表最前面
@@ -625,17 +667,37 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         existRemind.setRemindSummary(getRemindSummary(planDate, RemindRepeatType.fromCode(cmd.getRepeatType())));
 
         List<Remind> trackReminds = remindProvider.findRemindsByTrackRemindIds(Collections.singletonList(existRemind.getId()));
-
+        List<Remind> unSubscribeReminds = new ArrayList<>();
         dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(existRemind);
             remindProvider.deleteRemindSharesByRemindId(existRemind.getId());
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind));
+            for (Remind trackRemind : trackReminds) {
+                OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(trackRemind.getUserId(), trackRemind.getOwnerId());
+                if (!shareMemberDTOcontainsShareId(cmd.getShareToMembers(), member.getId())) {
+                    //取消共享,删日程发消息
+                    remindProvider.deleteRemind(trackRemind);
+                    unSubscribeReminds.add(trackRemind);
+                    trackReminds.remove(trackRemind);
+                }
+            }
             updateTrackReminds(trackReminds, existRemind, false);
             return null;
         });
 
         sendTrackMessageOnBackGround(originPlanDescription, trackReminds, RemindModifyType.SETTING_UPDATE);
+        sendTrackMessageOnBackGround(originPlanDescription, unSubscribeReminds, RemindModifyType.UN_SUBSCRIBE);
+
         return existRemind.getId();
+    }
+
+    private boolean shareMemberDTOcontainsShareId(List<ShareMemberDTO> shareToMembers, Long id) {
+        for (ShareMemberDTO dto : shareToMembers) {
+            if (dto.getSourceId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -680,27 +742,16 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     }
 
     private RemindDTO convertToRemindDTO(Remind remind, String shareColour, boolean queryShares) {
-        RemindDTO remindDTO = new RemindDTO();
-        remindDTO.setId(remind.getId());
-        remindDTO.setRemindCategoryId(remind.getRemindCategoryId());
+        RemindDTO remindDTO = ConvertHelper.convert(remind, RemindDTO.class);
         if (remind.getPlanDate() != null) {
             remindDTO.setPlanDate(remind.getPlanDate().getTime());
         }
-        remindDTO.setPlanDescription(remind.getPlanDescription());
         remindDTO.setRemindDisplayName(remind.getRemindType());
-        remindDTO.setRepeatType(remind.getRepeatType());
-        remindDTO.setStatus(remind.getStatus());
         if (remind.getRemindTime() != null) {
             remindDTO.setRemindTime(remind.getRemindTime().getTime());
         }
-        remindDTO.setRemindTypeId(remind.getRemindTypeId());
-        remindDTO.setShareShortDisplay(remind.getShareShortDisplay());
-        remindDTO.setShareCount(remind.getShareCount());
-        remindDTO.setContactName(remind.getContactName());
         remindDTO.setOwnerUserId(remind.getUserId());
-        remindDTO.setTrackRemindId(remind.getTrackRemindId());
         remindDTO.setTrackStatus(SubscribeStatus.SUBSCRIBE.getCode());
-        remindDTO.setDefaultOrder(remind.getDefaultOrder());
 
         if (Long.compare(UserContext.currentUserId(), remind.getUserId()) == 0) {
             // 日程的userId是当前登录人的情况
@@ -962,26 +1013,31 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                                     UserContext.current().getUser().getLocale(),
                                     "No permission"));
         }
+        createSubscribeRemind(remind, member.getContactName(), UserContext.currentUserId());
+    }
+    /**创建关注者的日程提醒*/
+    private void createSubscribeRemind(Remind remind, String contactName, Long userId) {
 
         // 创建，编辑，完成，未完成，加入我的日程等操作的日程排在列表最前面
-        Integer nextOrder = remindProvider.getNextRemindDefaultOrder(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), UserContext.currentUserId(), null);
+        Integer nextOrder = remindProvider.getNextRemindDefaultOrder(remind.getNamespaceId(), remind.getOwnerType(), remind.getOwnerId(), UserContext.currentUserId(), null);
         Remind subscribe = new Remind();
         subscribe.setNamespaceId(remind.getNamespaceId());
         subscribe.setOwnerType(remind.getOwnerType());
         subscribe.setOwnerId(remind.getOwnerId());
-        subscribe.setUserId(UserContext.currentUserId());
+        subscribe.setUserId(userId);
         subscribe.setPlanDescription(remind.getPlanDescription());
         subscribe.setRemindCategoryId(Long.valueOf(0));
         subscribe.setPlanDate(remind.getPlanDate());
         subscribe.setStatus(remind.getStatus());
         subscribe.setShareShortDisplay("无");
         subscribe.setShareCount(0);
-        subscribe.setContactName(member.getContactName());
+        subscribe.setContactName(contactName);
         subscribe.setTrackRemindId(remind.getId());
         subscribe.setTrackRemindUserId(remind.getUserId());
         subscribe.setTrackContractName(remind.getContactName());
         subscribe.setDefaultOrder(nextOrder != null ? nextOrder : Integer.valueOf(1));
         remindProvider.createRemind(subscribe);
+
     }
 
     @Override
@@ -1108,7 +1164,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         }
         return "";
     }
-
+    /**根据remindSetting 和 planDate 生成提醒时间*/
     private Timestamp buildRemindTime(Timestamp planDate, RemindSetting remindSetting) {
         if (planDate == null || remindSetting == null) {
             return null;
@@ -1126,6 +1182,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         return new Timestamp(calendar.getTimeInMillis()- (remindSetting.getBeforeTime() ==null?0:remindSetting.getBeforeTime()));
     }
 
+    /**
+     * 创建重复的日程(同时创建track自己的重复日程)
+     * */
     private Remind createRepeatRemind(Remind originRemind, RemindRepeatType repeatType) {
         if (RemindStatus.DONE != RemindStatus.fromCode(originRemind.getStatus())
                 || RemindRepeatType.NONE == repeatType
@@ -1182,9 +1241,17 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             repeatRemind.setShareCount(shareMembers.size());
         }
 
+        List<Remind> originSubscribeReminds = remindProvider.findRemindsByTrackRemindIds(Collections.singletonList(originRemind.getId()));
+
         dbProvider.execute(transactionStatus -> {
             remindProvider.createRemind(repeatRemind);
             remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind));
+            //origin日程点完成后,origin日程被追踪的日程也会重复一份
+            originSubscribeReminds.stream().map(remind -> {
+                createSubscribeRemind(repeatRemind, remind.getContactName(), remind.getUserId());
+                return null;
+            });
+
             return null;
         });
         return repeatRemind;
@@ -1195,36 +1262,28 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime newPlanDateTime = null;
         LocalDateTime nextPlanDateTime1 = originPlanDateTime;   // 下一期日程时间
-        LocalDateTime nextPlanDateTime2 = originPlanDateTime;   // 下下期日程时间
         boolean isStop = false;
         int count = 0;
         do {
             switch (repeatType) {
                 case DAILY:
                     nextPlanDateTime1 = nextPlanDateTime1.plus(1, ChronoUnit.DAYS);
-                    nextPlanDateTime2 = nextPlanDateTime1.plus(1, ChronoUnit.DAYS);
                     break;
                 case WEEKLY:
                     nextPlanDateTime1 = nextPlanDateTime1.plus(1, ChronoUnit.WEEKS);
-                    nextPlanDateTime2 = nextPlanDateTime1.plus(1, ChronoUnit.WEEKS);
                     break;
                 case MONTHLY:
                     // 比如重复日程起初设置的日期是31号，经过没有31日的月份以后，日期会发生变化，校正的目的是有31日的月份应该还是31日，其它月份是最后一天
                     nextPlanDateTime1 = correctExpectDayOfMonth(nextPlanDateTime1.plus(1, ChronoUnit.MONTHS), expectDayOfMonth);
-                    nextPlanDateTime2 = correctExpectDayOfMonth(nextPlanDateTime1.plus(1, ChronoUnit.MONTHS), expectDayOfMonth);
                     break;
                 case YEARLY:
                     nextPlanDateTime1 = nextPlanDateTime1.plus(1, ChronoUnit.YEARS);
-                    nextPlanDateTime2 = nextPlanDateTime1.plus(1, ChronoUnit.YEARS);
                     break;
                 default:
                     return null;
             }
 
             if (nextPlanDateTime1.isAfter(now)) {
-                newPlanDateTime = nextPlanDateTime1;
-                isStop = true;
-            } else if (nextPlanDateTime1.isBefore(now) && nextPlanDateTime2.isAfter(now)) {
                 newPlanDateTime = nextPlanDateTime1;
                 isStop = true;
             } else if (++count >= PLAN_DATE_CALCULATE_MAX_LOOP) {
@@ -1312,6 +1371,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                 break;
             case STATUS_DONE:
                 content = String.format("%s的日程“%s”已完成", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
+                break;
+            case UN_SUBSCRIBE:
+                content = String.format("%s的日程“%s”取消共享了", trackRemind.getTrackContractName(), trackRemind.getPlanDescription());
                 break;
             default:
                 content = String.format("%s修改了日程“%s”", trackRemind.getTrackContractName(), originPlanDescription);
