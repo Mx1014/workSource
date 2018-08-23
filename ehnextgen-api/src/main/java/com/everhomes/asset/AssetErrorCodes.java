@@ -26,4 +26,5 @@ public class AssetErrorCodes {
 
     
     static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
+    static final int STANDARD_RELEATE_CONTRACT_CHECK = 10021;
 }

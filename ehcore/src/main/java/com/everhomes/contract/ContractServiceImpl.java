@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.locale.LocaleTemplateService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -243,143 +244,144 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
 
 	@Autowired
-	private ContractProvider contractProvider;
+	protected ContractProvider contractProvider;
 	
 	@Autowired
-	private ConfigurationProvider configurationProvider;
+	protected ConfigurationProvider configurationProvider;
 	
 	@Autowired
-	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+	protected ContractBuildingMappingProvider contractBuildingMappingProvider;
 	
 	@Autowired
-	private OrganizationService organizationService;
+	protected OrganizationService organizationService;
 	
 	@Autowired
-	private SmsProvider smsProvider;
+	protected SmsProvider smsProvider;
 	
 	@Autowired
-	private AppUrlService appUrlService;
+	protected AppUrlService appUrlService;
 	
 	@Autowired
-	private CommunityProvider communityProvider;
+	protected CommunityProvider communityProvider;
 	
 	@Autowired
-	private OrganizationProvider organizationProvider;
+	protected OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private CoordinationProvider coordinationProvider;
+	protected CoordinationProvider coordinationProvider;
 	
 	@Autowired
-	private ScheduleProvider scheduleProvider;
+	protected ScheduleProvider scheduleProvider;
 
 	@Autowired
-	private ContractPaymentPlanProvider contractPaymentPlanProvider;
+	protected ContractPaymentPlanProvider contractPaymentPlanProvider;
 
 	@Autowired
-	private ContractAttachmentProvider contractAttachmentProvider;
+	protected ContractAttachmentProvider contractAttachmentProvider;
 
 	@Autowired
-	private ContractChargingItemAddressProvider contractChargingItemAddressProvider;
+	protected ContractChargingItemAddressProvider contractChargingItemAddressProvider;
 
 	@Autowired
-	private ContractChargingItemProvider contractChargingItemProvider;
+	protected ContractChargingItemProvider contractChargingItemProvider;
 
 	@Autowired
-	private ContentServerService contentServerService;
+	protected ContentServerService contentServerService;
 
 	@Autowired
-	private AddressProvider addressProvider;
+	protected AddressProvider addressProvider;
 
 	@Autowired
-	private ContractSearcher contractSearcher;
+	protected ContractSearcher contractSearcher;
 
 	@Autowired
-	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+	protected EnterpriseCustomerProvider enterpriseCustomerProvider;
 
 	@Autowired
-	private FlowService flowService;
+	protected FlowService flowService;
 
 	@Autowired
-	private LocaleStringService localeStringService;
+	protected LocaleStringService localeStringService;
 
 	@Autowired
-	private UserProvider userProvider;
+	protected UserProvider userProvider;
 
 	@Autowired
-	private AssetProvider assetProvider;
+	protected AssetProvider assetProvider;
 
 	@Autowired
-	private AssetService assetService;
+	protected AssetService assetService;
 
 	@Autowired
-	private PropertyMgrProvider propertyMgrProvider;
+	protected PropertyMgrProvider propertyMgrProvider;
 
 	@Autowired
-	private IndividualCustomerProvider individualCustomerProvider;
+	protected IndividualCustomerProvider individualCustomerProvider;
 
 	@Autowired
-	private FieldProvider fieldProvider;
+	protected FieldProvider fieldProvider;
 
 	@Autowired
-	private ContractChargingChangeProvider contractChargingChangeProvider;
+	protected ContractChargingChangeProvider contractChargingChangeProvider;
 	@Autowired
-	private ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
+	protected ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
 
 	@Autowired
-	private PropertyMgrService propertyMgrService;
+	protected PropertyMgrService propertyMgrService;
 
 	@Autowired
-	private UserPrivilegeMgr userPrivilegeMgr;
+	protected UserPrivilegeMgr userPrivilegeMgr;
 
 	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
+	protected RolePrivilegeService rolePrivilegeService;
 
 	@Autowired
-	private DbProvider dbProvider;
+	protected DbProvider dbProvider;
 
-	private String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
-	private String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
-
-	@Autowired
-	private SyncDataTaskService syncDataTaskService;
+	protected String flowcaseContractOwnerType = FlowOwnerType.CONTRACT.getCode();
+	protected String flowcasePaymentContractOwnerType = FlowOwnerType.PAYMENT_CONTRACT.getCode();
 
 	@Autowired
-	private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+	protected SyncDataTaskService syncDataTaskService;
 
 	@Autowired
-	private RequisitionProvider requisitionProvider;
+	protected ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+
+	@Autowired
+	protected RequisitionProvider requisitionProvider;
 	
 	//多入口相关
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
 	
 	@Autowired
-    private FieldService fieldService;
+    protected FieldService fieldService;
 	
 	@Autowired
-	private CustomerService customerService;
+	protected CustomerService customerService;
 
 	@Autowired
-	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+	protected EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 	
 	@Autowired
-    private GogsService gogsService;
+    protected GogsService gogsService;
 	
 	@Autowired
-    private UserService userService;
+    protected UserService userService;
 
 	@Autowired
-	private TaskService taskService;
+	protected TaskService taskService;
+
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 	@Value("${equipment.ip}")
-	private String equipmentIp;
+	protected String equipmentIp;
 
-	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+	protected void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
 	}
 	
@@ -483,7 +485,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
     	}
     }
 
-	private void sendMessageToBackTwoMonthsOrganizations(Integer namespaceId) {
+	protected void sendMessageToBackTwoMonthsOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		long offset = 60*ONE_DAY_MS;
@@ -527,7 +529,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 	
-	private void sendMessageToBackOneMonthOrganizations(Integer namespaceId) {
+	protected void sendMessageToBackOneMonthOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		long offset = 30*ONE_DAY_MS;
@@ -570,7 +572,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void sendMessageToNewOrganizations(Integer namespaceId) {
+	protected void sendMessageToNewOrganizations(Integer namespaceId) {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		List<Contract> contractList = contractProvider.listContractsByCreateDateRange(lastNow, now, namespaceId);
@@ -608,11 +610,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 	
-	private void sendMessageToUser(Integer namespaceId, Set<String> phoneNumbers, String templateScope, int code, List<Tuple<String, Object>> params) {
+	protected void sendMessageToUser(Integer namespaceId, Set<String> phoneNumbers, String templateScope, int code, List<Tuple<String, Object>> params) {
 		sendMessageToUser(namespaceId, phoneNumbers.toArray(new String[phoneNumbers.size()]), templateScope, code, getLocale(), params);
 	}
 	
-	private void sendMessageToUser(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+	protected void sendMessageToUser(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("send message parameters are: namespaceId="+namespaceId+", phoneNumbers="+Arrays.toString(phoneNumbers)+", templateScope="+templateScope+", code="+templateId);
 		}
@@ -620,12 +622,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
 	}
 	
-	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	private static final SimpleDateFormat chineDateSF = new SimpleDateFormat("yyyy年MM月dd日");
-	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final long ONE_DAY_MS = 24*3600*1000;
+	protected static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	protected static final SimpleDateFormat chineDateSF = new SimpleDateFormat("yyyy年MM月dd日");
+	protected static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	protected static final long ONE_DAY_MS = 24*3600*1000;
 	// 获取今天10点钟的这个时间
-	private Timestamp getCurrentDate() {
+	protected Timestamp getCurrentDate() {
 		Date date = new Date();
 		String dateStr = dateSF.format(date);
 		try {
@@ -636,25 +638,25 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	//获取昨天上午10点这个时间
-	private Timestamp getNextNow(Timestamp now) {
+	protected Timestamp getNextNow(Timestamp now) {
 		return new Timestamp(now.getTime()-ONE_DAY_MS);
 	}
 
-    private String getLocale() {
+    protected String getLocale() {
         User user = UserContext.current().getUser();
         if(user != null && user.getLocale() != null)
             return user.getLocale();
         return Locale.SIMPLIFIED_CHINESE.toString();
     }
     
-	private String getChinaDate(Timestamp date) {
+	protected String getChinaDate(Timestamp date) {
 		if (date == null) {
 			return "";
 		}
 		return chineDateSF.format(date);
 	} 
 	
-	private String getAppName(Integer namespaceId) {
+	protected String getAppName(Integer namespaceId) {
 		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(namespaceId,OSType.Android.getCode()));
 		if (appUrlDTO != null) {
 			return appUrlDTO.getName();
@@ -662,7 +664,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return "";
 	}
 	
-	private String getCommunityName(Long organizationId) {
+	protected String getCommunityName(Long organizationId) {
 		//1. 找到企业入驻的园区
 		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
 		if (organizationCommunityRequest == null) {
@@ -705,7 +707,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private void checkContractNumberUnique(Integer namespaceId, String contractNumber, Long categoryId) {
+	protected void checkContractNumberUnique(Integer namespaceId, String contractNumber, Long categoryId) {
 		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber, categoryId);
 		if(contract != null) {
 			LOGGER.error("contractNumber {} in namespace {} already exist!", contractNumber, namespaceId);
@@ -973,7 +975,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return contractDetailDTO;
 	}
 
-	private void syncCustomerToOrganization(Long customerId) {
+	protected void syncCustomerToOrganization(Long customerId) {
 		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(customerId);
 		if (customer != null) {
 			Organization organization = null;
@@ -1087,7 +1089,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
-	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
+	protected void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_CANCEL);
 
 		if((chargingItems == null || chargingItems.size() == 0)
@@ -1145,7 +1147,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
+	protected List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
 		List<RentAdjust> rentAdjusts = new ArrayList<>();
 		adjusts.forEach(adjust -> {
 			RentAdjust rentAdjust = new RentAdjust();
@@ -1180,7 +1182,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
+	protected List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
 		List<RentFree> rentFrees = new ArrayList<>();
 		frees.forEach(free -> {
 			RentFree rentFree = new RentFree();
@@ -1205,7 +1207,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
+	protected List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
 		Gson gson = new Gson();
 		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
@@ -1254,7 +1256,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private void addToFlowCase(Contract contract, String flowcaseOwnerType) {
+	protected void addToFlowCase(Contract contract, String flowcaseOwnerType) {
 //		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
 //				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
 		Flow flow = null;
@@ -1293,7 +1295,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
+	protected Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
 		// add by tangcen
 		List<String> oldApartments = new ArrayList<>();
 		List<String> newApartments = new ArrayList<>();
@@ -1401,7 +1403,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+	protected void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
 		//没有id的，增加
 	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItem> existChargingItems = contractChargingItemProvider.listByContractId(contract.getId());
@@ -1457,7 +1459,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 	//对比ContractChargingItem by tangcen
-	private boolean compareContractChargingItem(ContractChargingItem contractChargingItem, ContractChargingItem exist) {
+	protected boolean compareContractChargingItem(ContractChargingItem contractChargingItem, ContractChargingItem exist) {
 		if (contractChargingItem==null || exist==null) {
 			return false;
 		}
@@ -1466,7 +1468,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return updateDto.equals(existDto);
 	}
 
-	private void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
+	protected void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
 		//没有id的，增加
 	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItemAddress> existItemAddresses = contractChargingItemAddressProvider.findByItemId(item.getId());
@@ -1498,7 +1500,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void dealContractChargingChanges(Contract contract, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
+	protected void dealContractChargingChanges(Contract contract, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
 		// 没有id的，增加
 		//有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingChange> existChargingChanges = contractChargingChangeProvider.listByContractId(contract.getId());
@@ -1529,7 +1531,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private Map<Long, ContractChargingChange> dealChanges(Contract contract, Map<Long, ContractChargingChange> map, List<ContractChargingChangeDTO> changes, ChangeType changeType) {
+	protected Map<Long, ContractChargingChange> dealChanges(Contract contract, Map<Long, ContractChargingChange> map, List<ContractChargingChangeDTO> changes, ChangeType changeType) {
 		changes.forEach(change -> {
 			ContractChargingChange contractChargingChange = ConvertHelper.convert(change, ContractChargingChange.class);
 			if(change.getChangeStartTime() != null) {
@@ -1574,7 +1576,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return map;
 	}
 	//对比ContractChargingChange by tangcen
-	private boolean compareContractChargingChange(ContractChargingChange contractChargingChange,ContractChargingChange exist) {
+	protected boolean compareContractChargingChange(ContractChargingChange contractChargingChange,ContractChargingChange exist) {
 		if (contractChargingChange == null || exist ==null) {
 			return false;
 		}
@@ -1583,7 +1585,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return updateDto.equals(existDto);
 	}
 
-	private void dealContractChargingChangeAddresses(ContractChargingChange contractChargingChange, List<BuildingApartmentDTO> apartments ) {
+	protected void dealContractChargingChangeAddresses(ContractChargingChange contractChargingChange, List<BuildingApartmentDTO> apartments ) {
 		List<ContractChargingChangeAddress> existChangeAddresses = contractChargingChangeAddressProvider.findByChangeId(contractChargingChange.getId());
 		Map<Long, ContractChargingChangeAddress> map = new HashMap<>();
 		if(existChangeAddresses != null && existChangeAddresses.size() > 0) {
@@ -1612,7 +1614,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			});
 		}
 	}
-	private void dealContractAttachments(Long contractId, List<ContractAttachmentDTO> attachments) {
+	protected void dealContractAttachments(Long contractId, List<ContractAttachmentDTO> attachments) {
 		List<ContractAttachment> existAttachments = contractAttachmentProvider.listByContractId(contractId);
 		Map<Long, ContractAttachment> map = new HashMap<>();
 		if(existAttachments != null && existAttachments.size() > 0) {
@@ -1643,7 +1645,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 	
 	//add by tangcen
-	private void dealContractAttachments(Contract contract, List<ContractAttachmentDTO> attachments) {
+	protected void dealContractAttachments(Contract contract, List<ContractAttachmentDTO> attachments) {
 		Long contractId = contract.getId();
 		List<ContractAttachment> existAttachments = contractAttachmentProvider.listByContractId(contractId);
 		Map<Long, ContractAttachment> map = new HashMap<>();
@@ -1679,7 +1681,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private void dealContractPlans(Long contractId, List<ContractPaymentPlanDTO> plans) {
+	protected void dealContractPlans(Long contractId, List<ContractPaymentPlanDTO> plans) {
 		List<ContractPaymentPlan> existPlans = contractPaymentPlanProvider.listByContractId(contractId);
 		Map<Long, ContractPaymentPlan> map = new HashMap<>();
 		if(existPlans != null && existPlans.size() > 0) {
@@ -1803,7 +1805,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				//ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
-	private Timestamp setToEnd(Long date) {
+	protected Timestamp setToEnd(Long date) {
 		try{
 			Timestamp stp = new Timestamp(date);
 			LocalDateTime time = stp.toLocalDateTime();
@@ -1813,8 +1815,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	private Timestamp setToBegin(Long date) {
+	protected static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	protected Timestamp setToBegin(Long date) {
 		try{
 			Timestamp stp = new Timestamp(date);
 			LocalDateTime time = stp.toLocalDateTime();
@@ -2126,7 +2128,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	}
 
-	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> notifyGroups, List<ContractParamGroupMapDTO> paidGroups) {
+	protected void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> notifyGroups, List<ContractParamGroupMapDTO> paidGroups) {
 		List<ContractParamGroupMap> existNotifyGroups = contractProvider.listByParamId(id, ContractParamGroupType.NOTIFY_GROUP.getCode());
 		List<ContractParamGroupMap> existPaidGroups = contractProvider.listByParamId(id, ContractParamGroupType.PAY_GROUP.getCode());
 		Map<Long, ContractParamGroupMap> notifyGroupMap = new HashMap<>();
@@ -2147,7 +2149,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	}
 
-	private void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> groups, Map<Long, ContractParamGroupMap> map) {
+	protected void dealParamGroupMap(Long id, List<ContractParamGroupMapDTO> groups, Map<Long, ContractParamGroupMap> map) {
 		if(groups != null && groups.size() > 0) {
 			groups.forEach(group -> {
 				if(group.getId() == null) {
@@ -2238,7 +2240,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return null;
 	}
 
-	private ContractParamDTO toContractParamDTO(ContractParam param) {
+	protected ContractParamDTO toContractParamDTO(ContractParam param) {
 		ContractParamDTO dto = ConvertHelper.convert(param, ContractParamDTO.class);
 		List<ContractParamGroupMap> notifyGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.NOTIFY_GROUP.getCode());
 		List<ContractParamGroupMap> paidGroups = contractProvider.listByParamId(param.getId(), ContractParamGroupType.PAY_GROUP.getCode());
@@ -2577,7 +2579,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return null;
 	}
 
-	private Long getConfigId(Integer namespaceId, Long categoryId) {
+	protected Long getConfigId(Integer namespaceId, Long categoryId) {
 		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, 21200L, null, categoryId.toString(), null);
 		if (serviceModuleApp != null && serviceModuleApp.size()>0){
 			return serviceModuleApp.get(0).getId();
@@ -2628,7 +2630,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return null;
 	}
 
-	private Contract checkContract(Long id) {
+	protected Contract checkContract(Long id) {
 		Contract contract = contractProvider.findContractById(id);
 		if(contract == null) {
 			LOGGER.error("contract is not exit! id: {}", id);
@@ -2638,7 +2640,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return contract;
 	}
 
-	private void processContractApartments(ContractDetailDTO dto) {
+	protected void processContractApartments(ContractDetailDTO dto) {
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(dto.getId());
 		if(contractApartments != null && contractApartments.size() > 0) {
 			List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
@@ -2650,15 +2652,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractChargingChanges(ContractDetailDTO dto) {
+	protected void processContractChargingChanges(ContractDetailDTO dto) {
 		List<ContractChargingChange> contractChargingChanges = contractChargingChangeProvider.listByContractId(dto.getId());
 		if(contractChargingChanges != null && contractChargingChanges.size() > 0) {
 			List<ContractChargingChangeDTO> adjusts = new ArrayList<>();
 			List<ContractChargingChangeDTO> frees = new ArrayList<>();
 			contractChargingChanges.forEach(change -> {
 				ContractChargingChangeDTO changeDTO = ConvertHelper.convert(change, ContractChargingChangeDTO.class);
-				String itemName = assetProvider.findChargingItemNameById(change.getChargingItemId());
-				changeDTO.setChargingItemName(itemName);
+//				String itemName = assetProvider.findChargingItemNameById(change.getChargingItemId());
+//				changeDTO.setChargingItemName(itemName);
+				//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,change.getChargingItemId());
+				changeDTO.setChargingItemName(projectChargingItemName);
 				if(change.getChangeStartTime() != null) {
 					changeDTO.setChangeStartTime(change.getChangeStartTime().getTime());
 				}
@@ -2685,7 +2691,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractChargingChangeAddresses(ContractChargingChangeDTO dto) {
+	protected void processContractChargingChangeAddresses(ContractChargingChangeDTO dto) {
 		List<ContractChargingChangeAddress> changeAddresses = contractChargingChangeAddressProvider.findByChangeId(dto.getId());
 		if(changeAddresses != null && changeAddresses.size() > 0) {
 			List<BuildingApartmentDTO> addressDtos = new ArrayList<>();
@@ -2719,7 +2725,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractChargingItems(ContractDetailDTO dto) {
+	protected void processContractChargingItems(ContractDetailDTO dto) {
 		List<ContractChargingItem> contractChargingItems = contractChargingItemProvider.listByContractId(dto.getId());
 		if(contractChargingItems != null && contractChargingItems.size() > 0) {
 			List<ContractChargingItemDTO> chargingItemsDto = contractChargingItems.stream().map(item -> {
@@ -2759,7 +2765,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractChargingItemAddresses(ContractChargingItemDTO dto) {
+	protected void processContractChargingItemAddresses(ContractChargingItemDTO dto) {
 		List<ContractChargingItemAddress> itemAddresses = contractChargingItemAddressProvider.findByItemId(dto.getId());
 		if(itemAddresses != null && itemAddresses.size() > 0) {
 			List<BuildingApartmentDTO> addressDtos = new ArrayList<>();
@@ -2793,7 +2799,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractAttachments(ContractDetailDTO dto) {
+	protected void processContractAttachments(ContractDetailDTO dto) {
 		List<ContractAttachment> contractAttachments = contractAttachmentProvider.listByContractId(dto.getId());
 		if(contractAttachments != null && contractAttachments.size() > 0) {
 			List<ContractAttachmentDTO> dtos = contractAttachments.stream().map(attachment -> {
@@ -2808,7 +2814,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private void processContractPaymentPlans(ContractDetailDTO dto) {
+	protected void processContractPaymentPlans(ContractDetailDTO dto) {
 		List<ContractPaymentPlan> contractPlans = contractPaymentPlanProvider.listByContractId(dto.getId());
 		if(contractPlans != null && contractPlans.size() > 0) {
 			List<ContractPaymentPlanDTO> dtos = contractPlans.stream().map(plan -> {
@@ -2860,7 +2866,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 
-	private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+	protected String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
 		Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
 		if(map == null) {
 			return null;
@@ -2868,7 +2874,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return  map.get(code);
 	}
 
-	private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+	protected Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
 		Object o = redisTemplate.opsForValue().get(code);
 		if(o != null) {
 			Map<String, String> keys = new HashMap<>();
@@ -3059,7 +3065,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		params.put("communityId", cmd.getCommunityId());
 		params.put("categoryId", cmd.getCategoryId());
 		params.put("task_Id", cmd.getTaskId());
-		String fileName = String.format("合同异常数据导出",  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		String fileName = String.format(localeStringService.getLocalizedString("contract.export","1",UserContext.current().getUser().getLocale(),"") +  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
@@ -3190,7 +3196,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 	}
 	
-	private ContractExportDetailDTO convertToExportDetail(ContractDTO dto) {
+	protected ContractExportDetailDTO convertToExportDetail(ContractDTO dto) {
 		ContractExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, ContractExportDetailDTO.class);
 		try {
 			StringBuffer buildings = new StringBuffer();
@@ -3603,7 +3609,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return functionIds;
 	}
 
-    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+    protected GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
         GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
         if (repo == null) {
             repo = new GogsRepo();
@@ -3619,7 +3625,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
         return repo;
     }
 	
-    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+    protected GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
         GogsRawFileParam param = new GogsRawFileParam();
         param.setCommitMessage(gogsCommitMessage());
         param.setNewFile(isNewFile);
@@ -3628,19 +3634,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
         return gogsService.commitFile(repo, path, param);  
     }
 
-    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+    protected GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
         GogsRawFileParam param = new GogsRawFileParam();
         param.setCommitMessage(gogsCommitMessage());
         param.setLastCommit(lastCommit);
         return gogsService.deleteFile(repo, path, param);
     }
 
-    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
+    protected String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         return new String(file, Charset.forName("UTF-8"));
     }
 
-    private String gogsCommitMessage() {
+    protected String gogsCommitMessage() {
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
         return String.format(
                 "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
@@ -3799,13 +3805,34 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		dto.setEntities(entities);
 		return dto;
 	}
-	private String timeToStr(Timestamp time) {
+	protected String timeToStr(Timestamp time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(time);
     }
-    private String timeToStr2(Long time) {
+    protected String timeToStr2(Long time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(time);
     }
+
+	@Override
+	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		if (cmd.getContractId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		//1删除合同模板映射,只有待发起，草稿合同能修改
+		Contract contract = checkContract(cmd.getContractId());
+		if(!ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			LOGGER.error("contract is not approve qualitied! id: {}", cmd.getId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+					"contract is not approve qualitied!");
+		}
+		contract.setTemplateId(null);
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+	}
 
 }

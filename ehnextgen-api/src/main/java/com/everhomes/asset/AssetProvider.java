@@ -306,7 +306,7 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId);
 
 
-    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs);
 
     AssetPaymentOrder getOrderById(Long orderId);
 
@@ -496,4 +496,6 @@ public interface AssetProvider {
 	PaymentBills findBillById(Long billId);
 	
 	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
+	
+	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 }

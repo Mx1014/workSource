@@ -2927,6 +2927,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}else {
 			response.setIndividualCustomerInvolved((byte)0);
 		}
+        //设置所在楼宇的楼层数
+        Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        response.setBuildingFloorNumber(building.getFloorNumber());
         
         return response;
     }

@@ -1,9 +1,13 @@
 package com.everhomes.contentserver;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
+import com.everhomes.acl.AclProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.contentserver.*;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,20 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.AclProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.contentserver.AddConfigItemCommand;
-import com.everhomes.rest.contentserver.AddContentServerCommand;
-import com.everhomes.rest.contentserver.ContentServerDTO;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.contentserver.UploadFileInfoCommand;
-import com.everhomes.rest.contentserver.UploadFileInfoDTO;
-import com.everhomes.rest.contentserver.UploadIdCommand;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.RequireAuthentication;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/contentServer")
@@ -221,6 +213,21 @@ public class ContentServerController extends ControllerBase {
             response.setErrorDescription("Error");            
         }
         
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /contentServer/parseSharedUri</b>
+     * <p>解析图片 uri</p>
+     */
+    @RequestMapping("parseSharedUri")
+    @RestReturn(value = String.class)
+    public RestResponse parseURI(@Valid ParseURICommand cmd) {
+        String url = contentService.parseSharedUri(cmd.getUri());
+        RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
 }

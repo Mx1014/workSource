@@ -443,7 +443,7 @@ public interface PunchService {
 	
 	GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request);
 
-	String getAdjustRuleUrl();
+	String getAdjustRuleUrl(HttpServletRequest request);
 
 	/**
 	 * 用于上线时进行手动初始化操作

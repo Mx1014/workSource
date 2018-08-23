@@ -341,7 +341,14 @@ public interface UserService {
             Map<String, String[]> paramMap);
   
     Byte isUserAuth();
+
+    UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
     
+    void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
+
+    PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
+
     void registerWXLoginConnection(HttpServletRequest request);
+
 
 }

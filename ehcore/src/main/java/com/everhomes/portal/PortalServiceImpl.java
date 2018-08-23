@@ -8,6 +8,8 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ItemServiceCategry;
@@ -17,6 +19,7 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.menu.WebMenuService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
@@ -73,6 +76,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Component
@@ -164,6 +168,12 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private SequenceService sequenceService;
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private LocaleStringService localeStringService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -376,6 +386,11 @@ public class PortalServiceImpl implements PortalService {
 		portalLayout.setOperatorUid(user.getId());
 		portalLayout.setNamespaceId(namespaceId);
 		portalLayout.setStatus(PortalLayoutStatus.ACTIVE.getCode());
+
+		//防止老页面页面缓存，没有type
+		if(PortalLayoutType.fromCode(cmd.getType()) == null){
+			cmd.setType(PortalLayoutType.SECONDSERVICEMARKETLAYOUT.getCode());
+		}
 
 		this.dbProvider.execute((status) -> {
 			if(null != cmd.getType()){
@@ -1525,79 +1540,97 @@ public class PortalServiceImpl implements PortalService {
 			public void run() {
 				try{
 
-					UserContext.setCurrentUser(user);
-					//同步和发布的时候不用预览账号
-					UserContext.current().setPreviewPortalVersionId(null);
-					dbProvider.execute((status) -> {
+					//保证同一个域空间只有一个人在发布，两个人同时发布的时候会阻塞，阻塞结束之后protectReleaseVersion会报错。
+					coordinationProvider.getNamedLock(CoordinationLocks.PORTAL_PUBLISH.getCode() + namespaceId).enter(() -> {
 
-						//清理预览版本的用户信息
-						portalVersionUserProvider.deletePortalVersionUsers(namespaceId);
-
-						//清理预览版本服务广场数据
-						removePreviewVersion(namespaceId);
-
-						//将当前版本改成release版本
-						//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
-						//从而服务广场layout的preview和release版本的版本号一致
-						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
-
-							//正式发布时清理预览版本的状态
-							removePreviewVersionStatus(namespaceId);
-
-							//更新版本号为新的版本
-							updateVersionToNewVersion(cmd.getVersionId());
-
-							//更新正式版本标志
-							updateReleaseVersion(namespaceId, cmd.getVersionId());
-						}else {
-
-							//增加预览版本次数，用于生成版本本号
-							PortalVersion releaseVersion = findReleaseVersion(namespaceId);
-							releaseVersion.setPreviewCount(releaseVersion.getPreviewCount() + 1);
-							portalVersionProvider.updatePortalVersion(releaseVersion);
+						try {
+							//正式版本保护机制，不能对正式版本做编辑和发布。
+							protectReleaseVersion(cmd.getVersionId());
+						}catch (Exception ex){
+							portalPublishLog.setStatus(PortalPublishLogStatus.FAILING.getCode());
+							String localizedString = localeStringService.getLocalizedString(PortalErrorCode.SCOPE, String.valueOf(PortalErrorCode.ERROR_VERSION_CONFLICT), UserContext.current().getUser().getLocale(), null);
+							portalPublishLog.setContentData(localizedString);
+							portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
 						}
 
-						//发布应用
-						publishServiceModuleApp(namespaceId, cmd.getVersionId());
+						UserContext.setCurrentUser(user);
+						//同步和发布的时候不用预览账号
+						UserContext.current().setPreviewPortalVersionId(null);
+						dbProvider.execute((status) -> {
 
-						//发布item分类
-						publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
+							//清理预览版本的用户信息
+							portalVersionUserProvider.deletePortalVersionUsers(namespaceId);
 
-						//删除已有的layout
-						deleteLayoutBeforePublish(namespaceId);
+							//清理预览版本服务广场数据
+							removePreviewVersion(namespaceId);
 
-						for (PortalLayout layout: layouts) {
-							//发布layout
-							publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
-						}
+							//将当前版本改成release版本
+							//服务广场layout的版本号用release版本的日期和大版本号组合，例如2018013001
+							//从而服务广场layout的preview和release版本的版本号一致
+							if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE) {
 
-						//正式发布之后，在此基础上生成小本版
-						if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
+								//正式发布时清理预览版本的状态
+								removePreviewVersionStatus(namespaceId);
 
-							//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
-							copyPortalToNewMinorVersion(namespaceId, cmd.getVersionId());
+								//更新版本号为新的版本
+								updateVersionToNewVersion(cmd.getVersionId());
 
-							PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(cmd.getVersionId());
-							//给发布的版本的父辈复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
-							copyPortalToNewMinorVersion(namespaceId, publishVersion.getParentId());
+								//更新正式版本标志
+								updateReleaseVersion(namespaceId, cmd.getVersionId());
+							}else {
 
-							//清理很的老版本
-							cleanOldVersion(namespaceId);
+								//增加预览版本次数，用于生成版本本号
+								PortalVersion releaseVersion = findReleaseVersion(namespaceId);
+								releaseVersion.setPreviewCount(releaseVersion.getPreviewCount() + 1);
+								portalVersionProvider.updatePortalVersion(releaseVersion);
+							}
 
-						}else {
-							//更新预览版本标志
-							updatePreviewVersion(namespaceId, cmd.getVersionId());
+							//发布应用
+							publishServiceModuleApp(namespaceId, cmd.getVersionId());
 
-							//更新预览用户
-							updatePortalVersionUsers(namespaceId, cmd.getVersionId(), cmd.getVersionUserIds());
-						}
+							//发布item分类
+							publishItemCategory(namespaceId, cmd.getVersionId(), cmd.getPublishType());
 
-						portalPublishLog.setProcess(100);
-						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
-						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+							//删除已有的layout
+							deleteLayoutBeforePublish(namespaceId);
+
+							for (PortalLayout layout: layouts) {
+								//发布layout
+								publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
+							}
+
+							//正式发布之后，在此基础上生成小本版
+							if(PortalPublishType.fromCode(cmd.getPublishType()) == PortalPublishType.RELEASE){
+
+								//新版本复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
+								copyPortalToNewMinorVersion(namespaceId, cmd.getVersionId());
+
+								PortalVersion publishVersion = portalVersionProvider.findPortalVersionById(cmd.getVersionId());
+								//给发布的版本的父辈复制一个小版本，比如发布3.1版本变成了5.0版本，那5.0要复制一个5.1，3.0也要复制一个新的3.1
+								copyPortalToNewMinorVersion(namespaceId, publishVersion.getParentId());
+
+								//清理很的老版本
+								cleanOldVersion(namespaceId);
+
+							}else {
+								//更新预览版本标志
+								updatePreviewVersion(namespaceId, cmd.getVersionId());
+
+								//更新预览用户
+								updatePortalVersionUsers(namespaceId, cmd.getVersionId(), cmd.getVersionUserIds());
+							}
+
+							portalPublishLog.setProcess(100);
+							portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
+							portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+
+							return null;
+						});
 
 						return null;
 					});
+
+
 				}catch (Exception e){
 					portalPublishLog.setStatus(PortalPublishLogStatus.FAILING.getCode());
 					portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);

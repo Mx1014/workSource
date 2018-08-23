@@ -17,6 +17,40 @@ public final class PunchDateUtils {
     private PunchDateUtils() {
     }
 
+    /**
+     * <p>取这天开始的时间</p>
+     *
+     *
+     * @param calendar  要取时间的日期
+     * @return calendar:这天0点0分0秒0毫秒 <code>null</code> if Exception
+     */
+    public static Calendar getDateBeginCalendar(Calendar calendar){
+        if (null == calendar) {
+            return null;
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        return calendar;
+    }
+
+    /**
+     * <p>取这天开始的时间</p>
+     *
+     *
+     * @param date  要取时间的日期
+     * @return date:这天0点0分0秒0毫秒 <code>null</code> if Exception
+     */
+    public static Date getDateBeginDate(Date date){
+        Calendar calendar = Calendar.getInstance();
+        if (null == date) {
+            return null;
+        }
+        calendar.setTime(date);
+        return getDateBeginCalendar(calendar).getTime();
+    }
+    
     public static String getTheFirstMonthDate(String month, String defaultValue) {
         SimpleDateFormat df1 = new SimpleDateFormat(DATE_SDF_1);
         SimpleDateFormat df2 = new SimpleDateFormat(DATE_SDF_2);

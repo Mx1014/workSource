@@ -1476,7 +1476,7 @@ public class AssetServiceImpl implements AssetService {
             noticeConfig.setNoticeObjs(StringHelper.toJsonString(config.getNoticeObjs()));
             toSaveConfigs.add(noticeConfig);
         }
-        assetProvider.autoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), toSaveConfigs);
+        assetProvider.autoNoticeConfig(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCategoryId(), toSaveConfigs);
     }
 
     private void assetFeeHandler(List<BillItemsExpectancy> list,List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,BillingCycle cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition,Byte billingCycle,PaymentChargingItemScope itemScope) {
@@ -3471,26 +3471,42 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
             Long brotherStandardId = null;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherStandardId = InsertChargingStandards(cmd, brotherStandardId);
+            brotherStandardId = getBrotherStandardId();
             for(int i = 0; i < allCommunityIds.size(); i ++){
                 Long cid = allCommunityIds.get(i);
-                // 园区下brother_standard_id不为null的即为coupled
-                boolean coupled = assetProvider.checkCoupledChargingStandard(cid, cmd.getCategoryId());
-                if(coupled){
-                    //耦合
-                    cmd.setOwnerId(cid);
-                    InsertChargingStandards(cmd, brotherStandardId);
+//                // 园区下brother_standard_id不为null的即为coupled
+//                boolean coupled = assetProvider.checkCoupledChargingStandard(cid, cmd.getCategoryId());
+//                if(coupled){
+//                    //耦合
+//                    cmd.setOwnerId(cid);
+//                    InsertChargingStandards(cmd, brotherStandardId);
+//                }
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cid);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isChargingStandardsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	//耦合
+                	cmd.setOwnerId(cid);
+                	InsertChargingStandards(cmd, brotherStandardId, null);
                 }
             }
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            InsertChargingStandards(cmd, null, brotherStandardId);
         }else{
-            InsertChargingStandards(cmd, null);
+            InsertChargingStandards(cmd, null, null);
             assetProvider.deCoupledForChargingItem(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }
-
+    }
+    
+    private Long getBrotherStandardId() {
+    	long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
+    	return nextStandardId;
     }
 
-    private Long InsertChargingStandards(CreateChargingStandardCommand cmd, Long brotherStandardId) {
+    private Long InsertChargingStandards(CreateChargingStandardCommand cmd, Long brotherStandardId, Long nextStandardId) {
         if(cmd.getFormulaType() == 1 || cmd.getFormulaType() == 2){
             String formula_no_quote = cmd.getFormula();
             formula_no_quote = formula_no_quote.replace("[[","");
@@ -3507,7 +3523,9 @@ public class AssetServiceImpl implements AssetService {
         c.setFormula(cmd.getFormula());
         c.setFormulaJson(cmd.getFormulaJson());
         c.setFormulaType(cmd.getFormulaType());
-        long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
+        if(nextStandardId == null) {
+        	nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
+        }
         c.setId(nextStandardId);
         c.setName(cmd.getChargingStandardName());
         c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -3588,8 +3606,14 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-        DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-        byte deCouplingFlag = 1;
+    	//issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
+        //只要关联了合同（包括草稿合同）就不能删除标准
+    	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
+    	if(workFlag){
+    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
+        }
+    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
+    	byte deCouplingFlag = 1;
         // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;

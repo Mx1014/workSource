@@ -1262,7 +1262,10 @@ public class FieldServiceImpl implements FieldService {
         checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
         checkModuleManageCommand.setOrganizationId(ownerId);
         checkModuleManageCommand.setOwnerType(ownerType);
-        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if(UserContext.currentUserId() != null)
+            checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        else
+            return true;
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
         }
