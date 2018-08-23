@@ -5168,6 +5168,8 @@ public class CommunityServiceImpl implements CommunityService {
 				community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 				community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 				community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+				address.setCommunityName(community.getName());
+				addressProvider.updateAddress(address);
 			}
 			communityProvider.updateCommunity(community);
 		}
@@ -5196,6 +5198,8 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 					building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 					building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+					address.setBuildingId(building.getId());
+					addressProvider.updateAddress(address);
 				}
 				communityProvider.updateBuilding(building);
 			}
@@ -5303,7 +5307,6 @@ public class CommunityServiceImpl implements CommunityService {
 //			}
 //			result.setApartments(apartmentsForOnePage);
 //		}
-		
 		result.setApartments(apartments);
 		result.setTotalAreaSize(doubleRoundHalfUp(result.getTotalAreaSize(),2));
 		result.setTotalRentArea(doubleRoundHalfUp(result.getTotalRentArea(),2));
@@ -5338,11 +5341,9 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,String communityName,byte livingStatus,double areaAveragePrice,double totalRent,int relatedContractNumber){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
-		Community community = communityProvider.findCommunityById(address.getCommunityId());
-		//Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-		//dto.setFloorNumber(building.getFloorNumber());
+		//Community community = communityProvider.findCommunityById(address.getCommunityId());
 		dto.setCommunityId(address.getCommunityId());
-		dto.setCommunityName(community.getName());
+		dto.setCommunityName(address.getCommunityName());
 		dto.setAddressId(address.getId());
 		dto.setBuildingName(address.getBuildingName());
 		dto.setApartmentFloor(address.getApartmentFloor());
@@ -5524,6 +5525,10 @@ public class CommunityServiceImpl implements CommunityService {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
 		if (namespaces!=null && namespaces.size()>0) {
 			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				//排除0域空间的数据
+				if (namespaceInfo.getId().intValue() == 0) {
+					continue;
+				}
 				LOGGER.info("caculating community area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
 				
@@ -5539,6 +5544,8 @@ public class CommunityServiceImpl implements CommunityService {
 							community.setChargeArea(community.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 							community.setFreeArea(community.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 							community.setSharedArea(community.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+							address.setCommunityName(community.getName());
+							addressProvider.updateAddress(address);
 						}
 						communityProvider.updateCommunity(community);
 					}
@@ -5556,6 +5563,10 @@ public class CommunityServiceImpl implements CommunityService {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
 		if (namespaces!=null && namespaces.size()>0) {
 			for (NamespaceInfoDTO namespaceInfo : namespaces) {
+				//排除0域空间的数据
+				if (namespaceInfo.getId().intValue() == 0) {
+					continue;
+				}
 				LOGGER.info("caculating building area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
 				
@@ -5573,6 +5584,8 @@ public class CommunityServiceImpl implements CommunityService {
 									building.setChargeArea(building.getChargeArea() + (address.getChargeArea() != null ? address.getChargeArea() : 0.0));
 									building.setFreeArea(building.getFreeArea() + (address.getFreeArea() != null ? address.getFreeArea() : 0.0));
 									building.setSharedArea(building.getSharedArea() + (address.getSharedArea() != null ? address.getSharedArea() : 0.0));
+									address.setBuildingId(building.getId());
+									addressProvider.updateAddress(address);
 								}
 								communityProvider.updateBuilding(building);
 							}

@@ -2587,11 +2587,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (address == null) {
             address = new Address();
             address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
             address.setCityId(community.getCityId());
             address.setCityName(community.getCityName());
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
             address.setAddress(building.getName() + "-" + cmd.getApartmentName());
@@ -2621,15 +2623,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     address.setSourceItemName(item.getItemDisplayName());
                 }
             }
-
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             addressProvider.createAddress(address);
         } else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-            address.setAreaSize(cmd.getAreaSize());
-
+        	address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
+            address.setBuildingName(building.getName());
+            address.setBuildingId(building.getId());
+        	
+        	address.setAreaSize(cmd.getAreaSize());
             address.setBuildArea(cmd.getBuildArea());
             address.setRentArea(cmd.getRentArea());
             address.setChargeArea(cmd.getChargeArea());
