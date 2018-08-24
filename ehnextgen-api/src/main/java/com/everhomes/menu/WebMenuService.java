@@ -12,7 +12,7 @@ public interface WebMenuService {
 
 	List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd);
 
-	ListUserAppCategoryResponse listUserAppCategory(ListUserAppCategoryCommand cmd);
+	List<AppCategoryDTO>  listUserAppCategory(ListUserAppCategoryCommand cmd);
 
 	/**
 	 * 获取左邻管理后台菜单

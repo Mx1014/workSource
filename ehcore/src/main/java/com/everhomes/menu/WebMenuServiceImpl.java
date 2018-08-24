@@ -161,7 +161,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	}
 
 	@Override
-	public ListUserAppCategoryResponse listUserAppCategory(ListUserAppCategoryCommand cmd){
+	public List<AppCategoryDTO> listUserAppCategory(ListUserAppCategoryCommand cmd){
 		//拆成两个独立的方法
 		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
 		//后面一个是根据应用id获取菜单的，这个是菜单的锅
@@ -170,10 +170,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<AppCategoryDTO> dtos = listCategoryByAppIds(appOriginIds);
 
-		ListUserAppCategoryResponse response = new ListUserAppCategoryResponse();
-		response.setDtos(dtos);
-
-		return response;
+		return dtos;
 	}
 
 

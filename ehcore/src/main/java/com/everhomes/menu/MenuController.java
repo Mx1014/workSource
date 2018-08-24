@@ -13,12 +13,14 @@ import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.me_menu.ListMeWebMenusCommand;
 import com.everhomes.rest.menu.*;
 
+import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestDoc(value="menu controller", site="core")
@@ -52,10 +54,10 @@ public class MenuController extends ControllerBase {
      * <p>获取园区场景的菜单</p>
      */
     @RequestMapping("listUserAppCategory")
-    @RestReturn(value=ListUserAppCategoryResponse.class)
+    @RestReturn(value=AppCategoryDTO.class, collection = true)
     public RestResponse listUserAppCategory(ListUserAppCategoryCommand cmd) {
 
-        ListUserAppCategoryResponse res = webMenuService.listUserAppCategory(cmd);
+        List<AppCategoryDTO> res = webMenuService.listUserAppCategory(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
