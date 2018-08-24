@@ -385,6 +385,8 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportName(result.getReportName());
                 dto.setReportId(result.getId());
                 dto.setReportType(result.getReportType());
+                dto.setIconUri(result.getIconUri());
+                dto.setIconUrl(contentServerService.parserUri(dto.getIconUri()));
                 //  check the scope.
                 if (checkTheScope(result.getId(), member))
                     reports.add(dto);
@@ -668,7 +670,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportTime(WorkReportUtil.getReportTime(dto.getReportType(), dto.getValiditySetting()));
         dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
         //  todo:截止日期文本化
-        dto.setValidText("待完成");
+        dto.setValidText("写不动了");
         dto.setValues(form.getFormFields());
         dto.setTitle(report.getReportName());
         return dto;
@@ -724,6 +726,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 if (report != null)
                     dto.setTitle(report.getReportName());
                 dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
+                dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
                 dto.setUpdateTime(r.getUpdateTime());
                 List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
                 dto.setReceivers(receivers);
@@ -782,6 +785,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 if (report != null)
                     dto.setTitle(report.getReportName());
                 dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
+                dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
                 dto.setReadStatus(r.getReadStatus());
                 dto.setApplierName(r.getApplierName());
                 dto.setUpdateTime(r.getUpdateTime());
