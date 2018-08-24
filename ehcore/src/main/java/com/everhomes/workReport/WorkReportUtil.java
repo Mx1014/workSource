@@ -3,7 +3,6 @@ package com.everhomes.workReport;
 import com.everhomes.rest.workReport.ReportValiditySettingDTO;
 import com.everhomes.rest.workReport.WorkReportType;
 
-import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -129,7 +128,9 @@ public class WorkReportUtil {
         //  截止时间点
         Integer endTime = Integer.valueOf(setting.getEndTime().replace(":", ""));
         //  截止周几或日期
-        Integer endDay = Integer.valueOf(setting.getEndMark());
+        Integer endDay = null;
+        if (setting.getEndMark() != null)
+            endDay = Integer.valueOf(setting.getEndMark());
         LocalDate reportTime = null;
         switch (WorkReportType.fromCode(rType)) {
             case DAY:
