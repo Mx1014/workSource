@@ -928,7 +928,7 @@ public class AssetServiceImpl implements AssetService {
              cmd.setCategoryId(assetCategoryId);
          }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
-        , cmd.getCategoryId());
+        , cmd.getCategoryId(), cmd.getBillGroupId());
     }
 
     @Override
@@ -4768,8 +4768,13 @@ public class AssetServiceImpl implements AssetService {
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		String endTimeStr = yyyyMMdd.format(endTime);
 		
+		// 36363 账单为空，则不需要删除账单 
+		PaymentBills bill = assetProvider.findLastBill(contractId);
+		if (bill == null) {
+			return;
+		}
 		if (costGenerationMethod == (byte)0) {//按计费周期
-			PaymentBills bill = assetProvider.findLastBill(contractId);
+			//PaymentBills bill = assetProvider.findLastBill(contractId);
 			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
 			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
 			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中
@@ -4790,7 +4795,7 @@ public class AssetServiceImpl implements AssetService {
 				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
 			}
 		}else if (costGenerationMethod == (byte)1) {//按实际天数
-			PaymentBills bill = assetProvider.findLastBill(contractId);
+			//PaymentBills bill = assetProvider.findLastBill(contractId);
 			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
 			//如果退约/变更日期产生的billitem刚好落在最后一个bill中，需要对最后一个bill进行重新计算，而不是直接删除
 			//对应缴费项的生成规则：超过合同结束时间的billitem，不论billitem的开始时间是什么，全都会落在最后一个bill中

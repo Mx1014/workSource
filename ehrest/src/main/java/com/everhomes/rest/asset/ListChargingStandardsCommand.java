@@ -29,6 +29,7 @@ public class ListChargingStandardsCommand {
     private Integer namespaceId;
     private Long categoryId;
     private Long moduleId;
+    private Long billGroupId;
 
     public Long getModuleId() {
 		return moduleId;
@@ -104,4 +105,12 @@ public class ListChargingStandardsCommand {
     public ListChargingStandardsCommand() {
 
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

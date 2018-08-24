@@ -13,7 +13,7 @@ public interface ApprovalCategoryProvider {
 
 	ApprovalCategory findApprovalCategoryById(Long id);
 
-	ApprovalCategory findApprovalCategoryByOriginId(Long id, Long ownerId);
+	ApprovalCategory findApprovalCategoryByOriginId(Long id, Integer namespaceId, Long ownerId);
 
 	ApprovalCategory findApprovalCategoryById(Integer namespaceId, String ownerType, Long ownerId, Long id);
 

@@ -2204,10 +2204,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         if (address == null) {
         	address = new Address();
             address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
             address.setCityId(community.getCityId());
             address.setCityName(community.getCityName());
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
+            address.setBuildingId(building.getId());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
             address.setApartmentFloor(data.getApartmentFloor());
@@ -2226,6 +2228,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         	//导入房源后，需要更新相应楼宇和园区的面积
             addAreaInBuildingAndCommunity(community, building, address);
 		}else {
+			//为了兼顾以前的历史数据，需要为这些数据添加CommunityName和BuildingId
+			address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
+            address.setBuildingId(building.getId());
+            address.setBuildingName(building.getName());
+			
 			Double oldAreaSize = address.getAreaSize() == null ? 0.0 : address.getAreaSize();
             Double oldFreeArea = address.getFreeArea() == null ? 0.0 : address.getFreeArea();
             Double oldChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
@@ -3354,6 +3362,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				fileName = String.format("房源信息_%s", cmd.getBuildingName());
 			}
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
 			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());

@@ -5322,14 +5322,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						dto.setAmorpm(rsr.getAmorpm());
 					}
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+					if (dto.getCounts() == 0 ) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 
@@ -5349,7 +5349,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private void calculateCurrentStatus(RentalSiteRulesDTO dto, RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
 		boolean isClosed = rentalv2Provider.findOtherModeClosed(rentalResource, rentalCell, priceRules);
 		if (isClosed) {
-			dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+			dto.setStatus(SiteRuleStatus.MANUAL_CLOSE.getCode());
 		}
 	}
 
@@ -5455,14 +5455,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+					if (dto.getCounts() == 0 ) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 
@@ -5552,7 +5552,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setAmorpm(rsr.getAmorpm());
 				}
 				dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-				dto.setStatus(SiteRuleStatus.OPEN.getCode());
+				//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 				// 支持复选，要换一种方式计算剩余数量
 				//calculateAvailableCount(dto, rs, rsr, priceRules);
@@ -5568,7 +5568,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
 				if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
 					if (closedSegment.getMaxCover(rsr.getBeginTime().getTime(),rsr.getEndTime().getTime()) > 0)
-						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+						dto.setStatus(SiteRuleStatus.MANUAL_CLOSE.getCode());
 					//calculateCurrentStatus(dto, rs, rsr, priceRules);
 				}
 
@@ -6001,14 +6001,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						dto.setAmorpm(rsr.getAmorpm());
 					}
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+					if (dto.getCounts() == 0 ) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 
@@ -6176,14 +6176,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+					if (dto.getCounts() == 0 ) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 
@@ -6346,14 +6346,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						dto.setAmorpm(rsr.getAmorpm());
 					}
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
+					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+					if (dto.getCounts() == 0 ) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 
@@ -6512,7 +6512,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setAmorpm(rsr.getAmorpm());
 				}
 				dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-				dto.setStatus(SiteRuleStatus.OPEN.getCode());
+				//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 				// 支持复选，要换一种方式计算剩余数量
 				calculateAvailableCount(dto, rs, rsr, priceRules);
@@ -6520,7 +6520,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
 
-				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte) -1)) {
+				if (dto.getCounts() == 0 ) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 

@@ -200,7 +200,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         if(pageSize == null || pageSize < 1) pageSize = 20;
         int overloadPageSize = pageSize + 1;
         List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,overloadPageSize,cmd.getSubmissionStatus()
-                ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
+                ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(), cmd.getCommunityId());
         if(dtos.size() > pageSize) {
             response.setNextPageAnchor(pageAnchor + pageSize);
             dtos.remove(dtos.size() - 1);
