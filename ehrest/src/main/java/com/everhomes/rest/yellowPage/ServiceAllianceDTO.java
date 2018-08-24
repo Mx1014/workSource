@@ -60,6 +60,7 @@ import java.util.List;
  *  <li>endDate : 用于policydeclare样式 结束日期 格式 yyyy-MM-dd</li>
  *  <li>formId : 表单id</li>
  *  <li>flowId : 工作流id</li>
+ *  <li>isGeneralConfig : 1-是通用配置 0/null-项目配置</li>
  *  <li>tagGroups : 该服务的筛选组列表(list) {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO}</li>
  * </ul>
  */

@@ -557,7 +557,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public List<ServiceAllianceCategories> listChildCategories(
+	public List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
+		return listChildCategories(null, null, ownerType, ownerId, namespaceId, parentId, status, displayDestination);
+	}
+	
+	@Override
+	public List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
 			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
@@ -588,10 +593,17 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
 		}
+		
+		if (null != locator && null != locator.getAnchor()) {
+			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ID.ge(locator.getAnchor()));
+		}
+		
+        query.addConditions(condition);
+        
+    	if (null != pageSize) {
+			query.addLimit(pageSize+1);
+		}
 
-        if(condition != null) {
-        	query.addConditions(condition);
-        }
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query child categories, sql=" + query.getSQL());
@@ -602,6 +614,16 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	result.add(ConvertHelper.convert(record, ServiceAllianceCategories.class));
             return null;
         });
+        
+		if (null != locator) {
+			int size = result.size();
+			if (null != pageSize && size > pageSize) {
+				locator.setAnchor(result.get(size - 1).getId());
+				result.remove(size - 1);
+			} else {
+				locator.setAnchor(null);
+			}
+		}
         
         return result;
 	}

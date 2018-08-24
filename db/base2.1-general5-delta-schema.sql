@@ -103,6 +103,11 @@ ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1`
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
 
+-- by st.zheng 允许表单为空
+ALTER TABLE `eh_lease_form_requests`
+MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
+
+
 -- 工位预订 城市管理 通用修改 shiheng.ma 20180824
 alter table `eh_office_cubicle_cities` add column `owner_type` varchar(128) DEFAULT NULL;
 alter table `eh_office_cubicle_cities` add column `owner_id` bigint(20) DEFAULT NULL;

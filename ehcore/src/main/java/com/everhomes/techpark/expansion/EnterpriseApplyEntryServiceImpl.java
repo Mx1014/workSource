@@ -1945,16 +1945,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		cmd.setSourceType(EntityType.LEASE_PROJECT.getCode());
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
-		enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 
 		cmd.setSourceType(EntityType.LEASE_BUILDING.getCode());
 		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
-		enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 
 		cmd.setSourceType(EntityType.LEASE_PROMOTION.getCode());
 		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
-		enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 	}
 }
