@@ -640,6 +640,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"Invalid paramter of size error: null ");
 	}
 
+	private void checkOwnerTypeOwnerId(String ownerType,Long ownerId){
+		if(null == ownerType || null == ownerId){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of ownerType ownerId: null ");
+		}
+	}
+
 	private void sendMessage(OfficeCubicleSpace space,OfficeCubicleOrder order) {
 		// 发消息 +推送
 
@@ -987,6 +994,23 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public ListCitiesResponse copyCities(CopyCitiesCommand cmd) {
+
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+//		officeCubicleCityProvider.listOfficeCubicleCity();
+
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(cmd.getNamespaceId());
+//		officeCubicleCityProvider.createOfficeCubicleCity();
+		return null;
+	}
+
+	@Override
+	public ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public Byte getProjectCustomize(GetCustomizeCommand cmd) {
 		return null;
 	}
 }

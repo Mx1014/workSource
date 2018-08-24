@@ -150,4 +150,16 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCityByOwnerId(String ownerType, Long ownerId) {
+		assert (null != ownerType && null != ownerId);
+//		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+//				.where(Tables.EH_OFFICE_CUBICLE_CITIES.name.eq(namespaceId))
+//				.and(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
+//				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+//				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+//				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+		return null;
+	}
 }

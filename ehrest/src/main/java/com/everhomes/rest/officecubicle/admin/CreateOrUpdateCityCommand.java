@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>iconUrl: 图片url</li>
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目（为空代表通用配置）</li>
+ * <li>orgId: 管理公司id</li>
  * </ul>
  */
 public class CreateOrUpdateCityCommand {
@@ -24,6 +25,7 @@ public class CreateOrUpdateCityCommand {
 //  标准版兼容通用
     private String ownerType;
     private Long ownerId;
+    private Long orgId;
 
     public Long getId() {
         return id;

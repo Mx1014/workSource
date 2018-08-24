@@ -109,5 +109,6 @@ MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
 
 
 -- 工位预订 城市管理 通用修改 shiheng.ma 20180824
-alter table `eh_office_cubicle_cities` add column `owner_type` varchar(128) DEFAULT NULL;
-alter table `eh_office_cubicle_cities` add column `owner_id` bigint(20) DEFAULT NULL;
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `org_id` BIGINT(20) DEFAULT NULL COMMENT '所属管理公司Id';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT '项目类型';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT '项目Id';

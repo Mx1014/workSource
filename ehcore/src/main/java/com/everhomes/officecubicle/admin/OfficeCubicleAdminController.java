@@ -153,17 +153,44 @@ public class OfficeCubicleAdminController extends ControllerBase {
 
     /**
      * <b>URL: /officecubicle/copyCities</b>
-     * <p>城市管理-获取已经设定的城市列表</p>
+     * <p>城市管理-复制默认配置</p>
      */
     @RequestMapping("copyCities")
-    @RestReturn(value=ListCitiesResponse.class )
+    @RestReturn(value=ListCitiesResponse.class)
     public RestResponse copyCities(CopyCitiesCommand cmd) {
         ListCitiesResponse resp = this.officeCubicleService.copyCities(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
 
+    /**
+     * <b>URL: /officecubicle/removeCustomizedCities</b>
+     * <p>城市管理-恢复默认配置</p>
+     */
+    @RequestMapping("removeCustomizedCities")
+    @RestReturn(value=ListCitiesResponse.class)
+    public RestResponse removeCustomizedCities(CopyCitiesCommand cmd) {
+        ListCitiesResponse resp = this.officeCubicleService.removeCustomizedCities(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /officecubicle/getProjectCustomize</b>
+     * <p>城市管理-获取自定义配置状态</p>
+     */
+    @RequestMapping("getProjectCustomize")
+    @RestReturn(value=String.class)
+    public RestResponse getProjectCustomize(GetCustomizeCommand cmd) {
+        Byte flag = this.officeCubicleService.getProjectCustomize(cmd);
+        RestResponse response = new RestResponse(flag);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 

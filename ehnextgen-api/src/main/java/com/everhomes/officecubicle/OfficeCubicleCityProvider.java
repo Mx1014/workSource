@@ -24,4 +24,6 @@ public interface OfficeCubicleCityProvider {
 	List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId);
 
 	List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId);
+
+	List<OfficeCubicleCity> listOfficeCubicleCityByOwnerId(String ownerType,Long ownerId);
 }
