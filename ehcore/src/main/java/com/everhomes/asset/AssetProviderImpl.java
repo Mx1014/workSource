@@ -2102,7 +2102,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId) {
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
 
         EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
@@ -2120,8 +2120,9 @@ public class AssetProviderImpl implements AssetProvider {
                 // add category id to filter the right billing cycle fix #32202
                 .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))//issue-35467 【物业缴费6.3】选择账单组的计费周期为“合同月”，选择收费项后，计费周期要过滤掉非“合同月”的计费标准
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE);
-       // limiteCycles
+        // limiteCycles
         context.select()
                 .from(standardScopeT,standardT)
                 .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
