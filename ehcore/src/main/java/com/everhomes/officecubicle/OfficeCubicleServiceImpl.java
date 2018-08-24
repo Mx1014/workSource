@@ -984,4 +984,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}
+
+	@Override
+	public ListCitiesResponse copyCities(CopyCitiesCommand cmd) {
+		return null;
+	}
 }

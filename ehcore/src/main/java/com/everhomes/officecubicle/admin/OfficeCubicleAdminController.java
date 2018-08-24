@@ -151,6 +151,21 @@ public class OfficeCubicleAdminController extends ControllerBase {
 
     }
 
+    /**
+     * <b>URL: /officecubicle/copyCities</b>
+     * <p>城市管理-获取已经设定的城市列表</p>
+     */
+    @RequestMapping("copyCities")
+    @RestReturn(value=ListCitiesResponse.class )
+    public RestResponse copyCities(CopyCitiesCommand cmd) {
+        ListCitiesResponse resp = this.officeCubicleService.copyCities(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
 
     /**
      * <b>URL: /officecubicle/addSpace</b>
@@ -244,6 +259,8 @@ public class OfficeCubicleAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
 
     
 }

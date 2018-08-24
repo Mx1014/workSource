@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>cityName: 市</li>
  * <li>iconUri: 图片uri</li>
  * <li>iconUrl: 图片url</li>
+ * <li>ownerType: 所属类型</li>
+ * <li>ownerId: 所属项目（为空代表通用配置）</li>
  * </ul>
  */
 public class CreateOrUpdateCityCommand {
@@ -18,6 +20,10 @@ public class CreateOrUpdateCityCommand {
     private String cityName;
     private String iconUri;
     private String iconUrl;
+
+//  标准版兼容通用
+    private String ownerType;
+    private Long ownerId;
 
     public Long getId() {
         return id;
@@ -57,6 +63,22 @@ public class CreateOrUpdateCityCommand {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

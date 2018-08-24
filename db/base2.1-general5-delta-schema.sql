@@ -108,3 +108,7 @@ ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `skip_type` TINYINT NOT 
 ALTER TABLE `eh_lease_form_requests`
 MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
 
+
+-- 工位预订 城市管理 通用修改 shiheng.ma 20180824
+alter table `eh_office_cubicle_cities` add column `owner_type` varchar(128) DEFAULT NULL;
+alter table `eh_office_cubicle_cities` add column `owner_id` bigint(20) DEFAULT NULL;
