@@ -130,7 +130,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getJobLevelIds() != null)
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
-
+        addCommand.setNamespaceId(cmd.getNamespaceId());
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
             if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
