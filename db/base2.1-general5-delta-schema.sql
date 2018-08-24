@@ -102,3 +102,7 @@ ALTER TABLE eh_general_forms ADD COLUMN project_id BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1` BIGINT(20) NULL DEFAULT NULL COMMENT '跳转类型 0-不跳转 2-表单/表单+工作流 3-跳转应用' ;
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
+
+-- 工位预订 城市管理 通用修改 shiheng.ma 20180824
+alter table `eh_office_cubicle_cities` add column `owner_type` varchar(128) DEFAULT NULL;
+alter table `eh_office_cubicle_cities` add column `owner_id` bigint(20) DEFAULT NULL;
