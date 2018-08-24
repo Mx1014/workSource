@@ -775,7 +775,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
             if(request != null){
                 Gson gson = new Gson();
-                List<GeneralFormFieldDTO> formFields = gson.fromJson(request.getTemplateText(), new TypeToken<List<GeneralFormFieldDTO>>(){}.getType()); 
+                List<GeneralFormFieldDTO> formFields = gson.fromJson(request.getTemplateText(), new TypeToken<List<GeneralFormFieldDTO>>(){}.getType());
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
+                List<GeneralFormFieldDTO> allFormFields = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+                for(GeneralFormFieldDTO dto : allFormFields){
+                    if(dto.getFilterFlag() == (byte)1){
+                        formFields.add(dto);
+                    }
+                }
                 return formFields.stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
             }else{
                 LOGGER.error("can not find running approval." + cmd.getNamespaceId() + cmd.getModuleId());
