@@ -324,17 +324,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 	@Override
-	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long approvalId){
+	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
         generalFormValRequests.setOwnerType(ownerType);
         generalFormValRequests.setNamespaceId(namespaceId);
-        generalFormValRequests.setModuleId(moduleId);
-		generalFormValRequests.setModuleType(moduleType);
-        generalFormValRequests.setSourceId(approvalId);
-        generalFormValRequests.setSourceType("approval");
+        generalFormValRequests.setSourceId(moduleId);
+        generalFormValRequests.setSourceType(moduleType);
+		generalFormValRequests.setFormOriginId(formOriginId);
+		generalFormValRequests.setFormVersion(formVersion);
 		generalFormValRequests.setApprovalStatus((byte)0);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -379,7 +379,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 		EhGeneralFormValRequests dto = dao.findById(sourceId);
-		dto.setStatus(status);
+		dto.setApprovalStatus(status);
 		dao.update(dto);
 		return dto.getId();
 	}

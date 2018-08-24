@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -139,6 +140,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
 
 
+
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -218,8 +220,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             rsp = builder.execute().actionGet();
         }catch (Exception e){
             LOGGER.error("execute the es has failed");
-
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,"执行es查询失败");
+            return null;
         }
 
         if(LOGGER.isDebugEnabled())
@@ -288,6 +289,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                         }
                         returnMap.put(dto.getFieldName(), fieldValue);
                     } catch (IOException e) {
+                        returnMap.put(dto.getFieldName(), dto.getFieldValue());
                     }
 
                 }
@@ -341,15 +343,41 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                     } else {
                         builder.field("approvalStatus", request.getApprovalStatus());
                     }
-                    if(request.getSourceId() != null){
-                        builder.field("approvalId", request.getSourceId());
-                    }
                 }
 
             }
 
             for (GeneralFormVal val : generalFormVal) {
-                builder.field(val.getFieldName(), val.getFieldValue());
+                GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+                String fieldValue = dto.getFieldValue();
+                ObjectMapper mapper = new ObjectMapper();
+                JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+                Map<String,String> urMap;
+                try {
+                    urMap = mapper.readValue(fieldValue, jvt);
+                    for (Entry<String, String> entry : urMap.entrySet()) {
+                        fieldValue  = entry.getValue();
+
+                        if(entry.getKey().equals("addressId")){
+                            fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+                            break;
+                        }
+                        if(entry.getKey().equals("customerName")){
+                            if (StringUtils.isNotBlank(fieldValue)) {
+                                break;
+                            }
+                        }
+                        if(entry.getKey().equals("text")) {
+                            if (StringUtils.isNotBlank(fieldValue)) {
+                                break;
+                            }
+                        }
+
+                    }
+                    builder.field(val.getFieldName(), fieldValue);
+                } catch (IOException e) {
+                }
+
             }
 
             builder.endObject();

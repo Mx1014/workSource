@@ -93,7 +93,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private Byte abnormalFlag;
 
-    private Byte searchFromCustomerPageFlag;
+    private Byte ContractSearchCustomerFlag;
 
     private Long taskId;
 
@@ -331,11 +331,11 @@ public class SearchEnterpriseCustomerCommand {
         this.abnormalFlag = abnormalFlag;
     }
 
-    public Byte getSearchFromCustomerPageFlag() {
-        return searchFromCustomerPageFlag;
+    public Byte getContractSearchCustomerFlag() {
+        return ContractSearchCustomerFlag;
     }
 
-    public void setSearchFromCustomerPageFlag(Byte searchFromCustomerPageFlag) {
-        this.searchFromCustomerPageFlag = searchFromCustomerPageFlag;
+    public void setContractSearchCustomerFlag(Byte contractSearchCustomerFlag) {
+        ContractSearchCustomerFlag = contractSearchCustomerFlag;
     }
 }

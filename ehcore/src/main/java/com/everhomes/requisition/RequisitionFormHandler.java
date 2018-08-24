@@ -7,12 +7,16 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.*;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.requisition.RequistionErrorCodes;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -40,6 +44,8 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
     private GeneralApprovalProvider generalApprovalProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -99,7 +105,8 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
         String source_type = "EhGeneralFormValRequests";
 
         if(request != null) {
-            cmd2.setGeneralFormId(request.get());
+            cmd2.setGeneralFormId(request.getFormOriginId());
+            cmd2.setGeneralFormVersion(request.getFormVersion());
             cmd2.setSourceId(cmd.getRequisitionId());
             cmd2.setSourceType(source_type);
             cmd2.setValues(cmd.getValues());
@@ -112,6 +119,12 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
         }
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
         return dto;
+    }
+
+    @Override
+    public Long saveGeneralFormVal(PostGeneralFormValCommand cmd){
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getCommunityId());
+        return generalFormService.saveGeneralForm(cmd);
     }
 
     @Override

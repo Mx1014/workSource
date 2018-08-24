@@ -262,15 +262,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
         //是否为资质客户增加筛选
 
-        if(cmd.getSearchFromCustomerPageFlag() != null && cmd.getSearchFromCustomerPageFlag() == 1){
-            if(cmd.getAptitudeFlagItemId() != null){
-                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", cmd.getAptitudeFlagItemId()));
-            }
-        }else{
+        if(cmd.getContractSearchCustomerFlag() != null && cmd.getContractSearchCustomerFlag() == 1){
+
             Byte aptitudeFlag = contractProvider.filterAptitudeCustomer(cmd.getCommunityId(),cmd.getNamespaceId());
             if(aptitudeFlag == 1) {
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", CustomerAptitudeFlag.APTITUDE.getCode()));
             }
+
+        }
+
+        if(cmd.getAptitudeFlagItemId() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlagItemId", cmd.getAptitudeFlagItemId()));
         }
 
         if(cmd.getAbnormalFlag() != null && cmd.getAbnormalFlag() == 1){

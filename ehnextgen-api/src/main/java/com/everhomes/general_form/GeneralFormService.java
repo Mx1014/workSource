@@ -67,6 +67,7 @@ public interface GeneralFormService {
 	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
 
+	Long saveGeneralFormVal(PostGeneralFormValCommand cmd);
 	/**
 	 * 保存但不提交工作流
 	 * @param cmd
