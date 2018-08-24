@@ -6,21 +6,31 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>ownerType: 1-园区，4-公司。参考{@link com.everhomes.rest.common.OwnerType}</li>
+ *     <li>ownerId: ownerId</li>
  *     <li>navigatorAllIconUri: 容器组件“全部”按钮的IconUri</li>
  * </ul>
  */
 public class UpdateLaunchPadConfigCommand {
 
-    private Long id;
+    private Byte ownerType;
+    private Long ownerId;
     private String navigatorAllIconUri;
 
-    public Long getId() {
-        return id;
+    public Byte getOwnerType() {
+        return ownerType;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setOwnerType(Byte ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getNavigatorAllIconUri() {

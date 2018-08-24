@@ -36,9 +36,9 @@ public class LaunchPadConfigServiceImpl implements LaunchPadConfigService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
-
 	@Override
-	public LaunchPadConfigDTO createLaunchPadConfig(CreateLaunchPadConfigCommand cmd) {
+	public LaunchPadConfigDTO updateLaunchPadConfig(UpdateLaunchPadConfigCommand cmd) {
+
 
 		if(OwnerType.fromCode(cmd.getOwnerType()) == null || cmd.getOwnerId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -61,33 +61,6 @@ public class LaunchPadConfigServiceImpl implements LaunchPadConfigService {
 			launchPadConfigProvider.updateLaunchPadConfig(launchPadConfig);
 		}
 
-
-		LaunchPadConfigDTO dto = toDto(launchPadConfig);
-
-		return dto;
-
-	}
-
-	@Override
-	public LaunchPadConfigDTO updateLaunchPadConfig(UpdateLaunchPadConfigCommand cmd) {
-
-		if(cmd.getId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter, cmd = {}", cmd);
-		}
-
-		LaunchPadConfig launchPadConfig = launchPadConfigProvider.findById(cmd.getId());
-
-		if(launchPadConfig == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter, cmd = {}", cmd);
-		}
-
-		if(cmd.getNavigatorAllIconUri() != null){
-			launchPadConfig.setNavigatorAllIconUri(cmd.getNavigatorAllIconUri());
-		}
-
-		launchPadConfigProvider.updateLaunchPadConfig(launchPadConfig);
 
 		LaunchPadConfigDTO dto = toDto(launchPadConfig);
 

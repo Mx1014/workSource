@@ -19,19 +19,19 @@ public class LaunchPadConfigController extends ControllerBase {
     @Autowired
     private LaunchPadConfigService launchPadConfigService;
 
-    /**
-     * <b>URL: /launchPadConfig/createLaunchPadConfig</b>
-     * <p>创建广场配置</p>
-     */
-    @RequestMapping("createLaunchPadConfig")
-    @RestReturn(value=LaunchPadConfigDTO.class)
-    public RestResponse createLaunchPadConfig(CreateLaunchPadConfigCommand cmd) {
-        LaunchPadConfigDTO dto = launchPadConfigService.createLaunchPadConfig(cmd);
-        RestResponse response =  new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /launchPadConfig/createLaunchPadConfig</b>
+//     * <p>创建广场配置</p>
+//     */
+//    @RequestMapping("createLaunchPadConfig")
+//    @RestReturn(value=LaunchPadConfigDTO.class)
+//    public RestResponse createLaunchPadConfig(CreateLaunchPadConfigCommand cmd) {
+//        LaunchPadConfigDTO dto = launchPadConfigService.createLaunchPadConfig(cmd);
+//        RestResponse response =  new RestResponse(dto);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 
     /**
@@ -75,6 +75,7 @@ public class LaunchPadConfigController extends ControllerBase {
     @RequestMapping("deleteLaunchPadConfig")
     @RestReturn(value=String.class)
     public RestResponse deleteLaunchPadConfig(DeleteLaunchPadConfigCommand cmd) {
+        launchPadConfigService.deleteLaunchPadConfig(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

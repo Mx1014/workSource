@@ -10,10 +10,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.launchpad.CommunityBiz;
-import com.everhomes.launchpad.CommunityBizProvider;
-import com.everhomes.launchpad.CommunityBizService;
-import com.everhomes.launchpad.LaunchPadService;
+import com.everhomes.launchpad.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -28,6 +25,7 @@ import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.common.OwnerType;
 import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.common.ScopeType;
@@ -134,6 +132,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+	private LaunchPadConfigProvider launchPadConfigProvider;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -561,11 +562,52 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 				appDtos.add(appDTO);
 			}
+
+			//广场加上全部
+			if(userAppFlag){
+				AppDTO allIcon = getAllIcon(communityId, orgId);
+				appDtos.add(allIcon);
+			}
+
 		}
 
 		ListLaunchPadAppsResponse response = new ListLaunchPadAppsResponse();
 		response.setApps(appDtos);
 		return response;
+	}
+
+
+	private AppDTO getAllIcon(Long communityId, Long orgId){
+
+		AppDTO allDto = new AppDTO();
+		allDto.setAppId(-1L);
+		allDto.setName("全部");
+		allDto.setModuleId(-10000L);
+		allDto.setClientHandlerType((byte)0);
+		//填充路由信息
+		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), null, allDto.getName(), null);
+		allDto.setRouterPath(routerInfo.getPath());
+		allDto.setRouterQuery(routerInfo.getQuery());
+
+		Community community = communityProvider.findCommunityById(communityId);
+
+		Byte ownerType = OwnerType.ORGANIZATION.getCode();
+		Long ownerId = orgId;
+		//园区自定义配置的
+		if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
+			ownerType = OwnerType.COMMUNITY.getCode();
+			ownerId = communityId;
+		}
+
+		LaunchPadConfig launchPadConfig = launchPadConfigProvider.findLaunchPadConfig(ownerType, ownerId);
+		if(launchPadConfig != null){
+			String url = contentServerService.parserUri(launchPadConfig.getNavigatorAllIconUri(), LaunchPadConfig.class.getSimpleName(), launchPadConfig.getId());
+			allDto.setIconUrl(url);
+		}
+
+
+		return allDto;
+
 	}
 
 	// 移动端广场需要编辑名称，所以需要 communityId, orgId
@@ -628,7 +670,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		app.setInstanceConfig(launchPadService.refreshActionData(app.getInstanceConfig()));
 
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), app.getInstanceConfig());
+		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig());
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
 
@@ -645,8 +687,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData){
 		String query = "appId=" + appId;
 		try {
-			// 加上默认的参数appId和title
-			query = query + "&title=" + URLEncoder.encode(title, "UTF-8");
+			// 加上默认的参数appId和displayName
+			query = query + "&displayName=" + URLEncoder.encode(title, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn("query encode, query=", query);
 		}
