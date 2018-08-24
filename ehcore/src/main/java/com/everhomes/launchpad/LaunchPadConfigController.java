@@ -24,7 +24,7 @@ public class LaunchPadConfigController extends ControllerBase {
      * <p>创建广场配置</p>
      */
     @RequestMapping("createLaunchPadConfig")
-    @RestReturn(value=String.class)
+    @RestReturn(value=LaunchPadConfigDTO.class)
     public RestResponse createLaunchPadConfig(CreateLaunchPadConfigCommand cmd) {
         LaunchPadConfigDTO dto = launchPadConfigService.createLaunchPadConfig(cmd);
         RestResponse response =  new RestResponse(dto);
@@ -39,7 +39,7 @@ public class LaunchPadConfigController extends ControllerBase {
      * <p>更新广场配置</p>
      */
     @RequestMapping("updateLaunchPadConfig")
-    @RestReturn(value=String.class)
+    @RestReturn(value=LaunchPadConfigDTO.class)
     public RestResponse updateLaunchPadConfig(UpdateLaunchPadConfigCommand cmd) {
 
         LaunchPadConfigDTO dto = launchPadConfigService.updateLaunchPadConfig(cmd);
@@ -56,7 +56,7 @@ public class LaunchPadConfigController extends ControllerBase {
      * <p>查询广场配置</p>
      */
     @RequestMapping("findLaunchPadConfig")
-    @RestReturn(value=String.class)
+    @RestReturn(value=LaunchPadConfigDTO.class)
     public RestResponse findLaunchPadConfig(FindLaunchPadConfigCommand cmd) {
 
         LaunchPadConfigDTO dto = launchPadConfigService.findLaunchPadConfig(cmd);
