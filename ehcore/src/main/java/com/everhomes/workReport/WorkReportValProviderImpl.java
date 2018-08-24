@@ -120,8 +120,8 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         if(cmd.getApplierIds() != null && cmd.getApplierIds().size()>0)
             query.addConditions(Tables.EH_WORK_REPORT_VALS.APPLIER_USER_ID.in(cmd.getApplierIds()));
         if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(WorkReportUtil.timestampToDate(cmd.getStartTime())));
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(WorkReportUtil.timestampToDate(cmd.getEndTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(WorkReportUtil.toSqlDate(cmd.getStartTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(WorkReportUtil.toSqlDate(cmd.getEndTime())));
         }
 
         //  EH_WORK_REPORT_VAL_RECEIVER_MAP conditions.

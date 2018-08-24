@@ -3,6 +3,7 @@ package com.everhomes.workReport;
 import com.everhomes.rest.workReport.ReportValiditySettingDTO;
 import com.everhomes.rest.workReport.WorkReportType;
 
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -12,10 +13,8 @@ public class WorkReportUtil {
     /**
      * 根据汇报时间与设定得到具体时间
      */
-    static LocalDateTime getSettingTime(Long rTime, Byte rType, Byte sType, String sMask, String sTime) {
-        Instant instant = Instant.ofEpochMilli(rTime);
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDateTime reportTime = LocalDateTime.ofInstant(instant, zone);
+    public static LocalDateTime getSettingTime(Byte rType, Long rTime, Byte sType, String sMask, String sTime) {
+        LocalDateTime reportTime = toLocalDateTime(rTime);
         String pattern = "yyyy-MM-dd HH:mm:ss";
         int year, month, day;
         String temp = null;
@@ -57,23 +56,22 @@ public class WorkReportUtil {
     }
 
     /**
-     * 将Timestamp转化为 java.sql.Date
+     * 将getTime()转化为 LocalDateTime
      */
-    static java.sql.Date timestampToDate(Long timestamp) {
-        Instant instant = Instant.ofEpochMilli(timestamp);
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDate date = LocalDateTime.ofInstant(instant, zone).toLocalDate();
-        return java.sql.Date.valueOf(date);
+    public static java.sql.Date toSqlDate(Long time) {
+        LocalDateTime temp = toLocalDateTime(time);
+        return java.sql.Date.valueOf(temp.toLocalDate());
     }
 
     /**
      * 根据汇报类型显示日期
      */
-    static String displayReportTime(Byte rType, java.sql.Date rTime) {
+    public static String displayReportTime(Byte rType, Long rTime) {
         DateTimeFormatter mdFormat = DateTimeFormatter.ofPattern("M月d日");
         DateTimeFormatter ymFormat = DateTimeFormatter.ofPattern("yyyy年M月");
 
-        LocalDate temp = rTime.toLocalDate();
+        LocalDate temp = toLocalDateTime(rTime).toLocalDate();
+//        LocalDate temp = rTime.toLocalDate();
         if (rTime == null)
             return null;
         String result = "";
@@ -123,7 +121,8 @@ public class WorkReportUtil {
             3-3-1.currentTime>endTime -> ThisMonth
             3-3-2.currentTime<=endTime -> LastMonth*/
     /* ------------------------------------------- 汇报时间获取规则总结end ------------------------------------------- */
-    static LocalDate getReportTime(Byte rType, ReportValiditySettingDTO setting) {
+
+    public static Timestamp getReportTime(Byte rType, ReportValiditySettingDTO setting) {
         LocalDateTime current = LocalDateTime.now();
         //  截止时间点
         Integer endTime = Integer.valueOf(setting.getEndTime().replace(":", ""));
@@ -131,66 +130,75 @@ public class WorkReportUtil {
         Integer endDay = null;
         if (setting.getEndMark() != null)
             endDay = Integer.valueOf(setting.getEndMark());
-        LocalDate reportTime = null;
+        LocalDate temp = null;
         switch (WorkReportType.fromCode(rType)) {
             case DAY:
                 if (setting.getStartType() == 0 && setting.getEndType() == 0)
-                    reportTime = current.toLocalDate();
+                    temp = current.toLocalDate();
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
-                    reportTime = current.minusDays(1L).toLocalDate();
+                    temp = current.minusDays(1L).toLocalDate();
                 else {
                     //  取时间点进行比较
                     Integer currentTime = current.getHour() * 100 + current.getMinute();
                     if (currentTime > endTime)
-                        reportTime = current.toLocalDate();
+                        temp = current.toLocalDate();
                     else
-                        reportTime = current.minusDays(1L).toLocalDate();
+                        temp = current.minusDays(1L).toLocalDate();
                 }
                 break;
             case WEEK:
                 if (setting.getStartType() == 0 && setting.getEndType() == 0)
-                    reportTime = firstOfWeek(current.toLocalDate());
+                    temp = firstOfWeek(current.toLocalDate());
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
-                    reportTime = firstOfWeek(current.minusWeeks(1L).toLocalDate());
+                    temp = firstOfWeek(current.minusWeeks(1L).toLocalDate());
                 else {
                     //  取周几进行比较 dayOfWeek
                     Integer currentDay = current.getDayOfWeek().getValue();
                     if (currentDay > endDay)
-                        reportTime = firstOfWeek(current.toLocalDate());
+                        temp = firstOfWeek(current.toLocalDate());
                     else if (currentDay < endDay)
-                        reportTime = firstOfWeek(current.minusWeeks(1L).toLocalDate());
+                        temp = firstOfWeek(current.minusWeeks(1L).toLocalDate());
                     else {
                         Integer currentTime = current.getHour() * 100 + current.getMinute();
                         if (currentTime > endTime)
-                            reportTime = firstOfWeek(current.toLocalDate());
+                            temp = firstOfWeek(current.toLocalDate());
                         else
-                            reportTime = firstOfWeek(current.minusWeeks(1L).toLocalDate());
+                            temp = firstOfWeek(current.minusWeeks(1L).toLocalDate());
                     }
                 }
                 break;
             case MONTH:
                 if (setting.getStartType() == 0 && setting.getEndType() == 0)
-                    reportTime = firstOfMonth(current.toLocalDate());
+                    temp = firstOfMonth(current.toLocalDate());
                 else if (setting.getStartType() == 1 && setting.getEndType() == 1)
-                    reportTime = firstOfMonth(current.minusMonths(1L).toLocalDate());
+                    temp = firstOfMonth(current.minusMonths(1L).toLocalDate());
                 else {
                     //  取日期进行比较 dayOfMonth
                     Integer currentDay = current.getDayOfMonth();
                     if (currentDay > endDay)
-                        reportTime = firstOfMonth(current.toLocalDate());
+                        temp = firstOfMonth(current.toLocalDate());
                     else if (currentDay < endDay)
-                        reportTime = firstOfMonth(current.minusMonths(1L).toLocalDate());
+                        temp = firstOfMonth(current.minusMonths(1L).toLocalDate());
                     else {
                         Integer currentTime = current.getHour() * 100 + current.getMinute();
                         if (currentTime > endTime)
-                            reportTime = firstOfMonth(current.toLocalDate());
+                            temp = firstOfMonth(current.toLocalDate());
                         else
-                            reportTime = firstOfMonth(current.minusMonths(1L).toLocalDate());
+                            temp = firstOfMonth(current.minusMonths(1L).toLocalDate());
                     }
                 }
                 break;
         }
-        return reportTime;
+        return Timestamp.valueOf(temp.atTime(0,0,0));
+    }
+
+    /**
+     * 将getTime()转化为 LocalDateTime
+     */
+    private static LocalDateTime toLocalDateTime(Long time) {
+        Instant instant = Instant.ofEpochMilli(time);
+        ZoneId zone = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(instant, zone);
     }
 
     /**
@@ -206,6 +214,7 @@ public class WorkReportUtil {
     private static LocalDate firstOfMonth(LocalDate date) {
         return date.minusDays(date.getDayOfMonth() - 1);
     }
+
     /*public static String formatTime2WorkReportTime(long time, Byte reportType) {
         WorkReportType workReportType = WorkReportType.fromCode(reportType);
         if (workReportType == null) {

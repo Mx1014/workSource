@@ -458,9 +458,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
         ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        LocalDateTime startTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
+        LocalDateTime startTime = WorkReportUtil.getSettingTime(cmd.getReportType(), cmd.getReportTime(),
                 setting.getStartType(), setting.getStartMark(), setting.getStartTime());
-        LocalDateTime endTime = WorkReportUtil.getSettingTime(cmd.getReportTime(), cmd.getReportType(),
+        LocalDateTime endTime = WorkReportUtil.getSettingTime(cmd.getReportType(), cmd.getReportTime(),
                 setting.getEndType(), setting.getEndMark(), setting.getEndTime());
         //  whether the post time is right
         if(!checkPostTime(LocalDateTime.now(), startTime, endTime))
@@ -475,7 +475,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         reportVal.setModuleType(report.getModuleType());
         reportVal.setStatus(WorkReportStatus.VALID.getCode());
         reportVal.setReportId(cmd.getReportId());
-        reportVal.setReportTime(WorkReportUtil.timestampToDate(cmd.getReportTime()));
+        reportVal.setReportTime(WorkReportUtil.toSqlDate(cmd.getReportTime()));
         reportVal.setApplierUserId(user.getId());
         reportVal.setApplierName(fixUpUserName(user.getId(), cmd.getOrganizationId()));
         reportVal.setReportType(cmd.getReportType());
@@ -598,7 +598,6 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
 
-
     @Override
     public WorkReportValDTO getWorkReportValItem(WorkReportValIdCommand cmd) {
         //  1.the reportValId is null means posting the report val.
@@ -648,25 +647,31 @@ public class WorkReportServiceImpl implements WorkReportService {
             dto.setReportValId(reportVal.getId());
             dto.setReportType(reportVal.getReportType());
             dto.setReportTime(new Timestamp(reportVal.getReportTime().getTime()));
+            dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
             dto.setValues(fields);
             dto.setReceivers(receivers);
             return dto;
-        } else {
-            WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-            GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
-            formCommand.setNamespaceId(namespaceId);
-            formCommand.setOwnerId(report.getOwnerId());
-            formCommand.setOwnerType(report.getOwnerType());
-            formCommand.setSourceId(report.getId());
-            formCommand.setSourceType(WORK_REPORT);
-            GeneralFormDTO form = generalFormService.getTemplateBySourceId(formCommand);
-
-            dto.setReportId(report.getId());
-            dto.setReportType(report.getReportType());
-            dto.setValues(form.getFormFields());
-            dto.setTitle(report.getReportName());
-            return dto;
         }
+
+        WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+        GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
+        formCommand.setNamespaceId(namespaceId);
+        formCommand.setOwnerId(report.getOwnerId());
+        formCommand.setOwnerType(report.getOwnerType());
+        formCommand.setSourceId(report.getId());
+        formCommand.setSourceType(WORK_REPORT);
+        GeneralFormDTO form = generalFormService.getTemplateBySourceId(formCommand);
+
+        dto.setReportId(report.getId());
+        dto.setReportType(report.getReportType());
+        dto.setValiditySetting(JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class));
+        dto.setReportTime(WorkReportUtil.getReportTime(dto.getReportType(), dto.getValiditySetting()));
+        dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+        //  todo:截止日期文本化
+        dto.setValidText("待完成");
+        dto.setValues(form.getFormFields());
+        dto.setTitle(report.getReportName());
+        return dto;
     }
 
     private List<SceneContactDTO> listWorkReportValReceivers(Long reportValId) {

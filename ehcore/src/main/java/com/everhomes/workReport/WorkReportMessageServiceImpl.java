@@ -38,7 +38,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime()));
+        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -69,7 +69,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime()));
+        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
