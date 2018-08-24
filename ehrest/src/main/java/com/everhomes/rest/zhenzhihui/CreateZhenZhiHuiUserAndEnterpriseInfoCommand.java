@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>name: 姓名</li>
  *     <li>identifyType: 证件类型,请参考{@link com.everhomes.rest.zhenzhihui.ZhenZhiHuiCertificateType}</li>
- *     <li>identifyToken: 证件号码<li/>
+ *     <li>identifyToken: 证件号码</li>
  *     <li>email: 邮件</li>
  *     <li>corporationToken: 法人证件号码</li>
  *     <li>corporationType: 法人证件类型,请参考{@link com.everhomes.rest.zhenzhihui.ZhenZhiHuiCertificateType}</li>
