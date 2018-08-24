@@ -7,8 +7,11 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.point.UserLevel;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -21,17 +24,24 @@ import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoCommand;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiAffairType;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiRedirectCommand;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServer;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiDTO;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServiceErrorCode;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
@@ -95,9 +105,14 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private OrganizationServiceImpl organizationService;
     @Autowired
     private ConfigurationProvider configurationProvider;
-
+    @Autowired
+    private OrganizationProvider organizationProvider;
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
+    @Autowired
+    private ZhenzhihuiUserInfoProvider zhenzhihuiUserInfoProvider;
+    @Autowired
+    private ZhenzhihuiEnterpriseInfoProvider zhenzhihuiEnterpriseInfoProvider;
     @Override
     public String ssoService(HttpServletRequest request, HttpServletResponse response) {
         String TICKET = request.getParameter("TICKET");
@@ -236,6 +251,61 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public void zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
+        Long userId = UserContext.current().getUser().getId();
+        if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
+            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(userId);
+            if (CollectionUtils.isEmpty(members)) {
+                LOGGER.error("no authority access to enterprise affair");
+                throw RuntimeErrorException.errorWith(ZhenZhiHuiServiceErrorCode.SCOPE, ZhenZhiHuiServiceErrorCode.ERROR_NO_AUTHORITY, "no authority access to enterprise affair");
+            }
+            boolean authorityFlag = false;
+            for (OrganizationMember member : members) {
+                if (OrganizationMemberGroupType.MANAGER.getCode().equals(member.getMemberGroup())) {
+                    authorityFlag = true;
+                    break;
+                }
+            }
+            if (!authorityFlag) {
+                LOGGER.error("no authority access to enterprise affair");
+                throw RuntimeErrorException.errorWith(ZhenZhiHuiServiceErrorCode.SCOPE, ZhenZhiHuiServiceErrorCode.ERROR_NO_AUTHORITY, "no authority access to enterprise affair");
+            }
+        }
+        List<ZhenzhihuiUserInfo> zhenzhihuiUserInfoList = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userId);
+        if (CollectionUtils.isEmpty(zhenzhihuiUserInfoList)) {
+            LOGGER.info("redirect to fill in url");
+        }else {
+            LOGGER.info("redirect to zhenzhihui url");
+        }
+    }
+
+    @Override
+    public void createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
+        Long userId = UserContext.current().getUser().getId();
+        ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
+        zhenzhihuiUserInfo.setUserId(userId);
+        this.zhenzhihuiUserInfoProvider.createZhenzhihuiUserInfo(zhenzhihuiUserInfo);
+        LOGGER.info("redirect to zhenzhihui url");
+    }
+
+    @Override
+    public void createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
+        Long userId = UserContext.current().getUser().getId();
+        ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
+        zhenzhihuiUserInfo.setUserId(userId);
+        this.zhenzhihuiUserInfoProvider.createZhenzhihuiUserInfo(zhenzhihuiUserInfo);
+        ZhenzhihuiEnterpriseInfo zhenzhihuiEnterpriseInfo = new ZhenzhihuiEnterpriseInfo();
+        zhenzhihuiEnterpriseInfo.setUserId(userId);
+        zhenzhihuiEnterpriseInfo.setCorporationName(cmd.getCorporationName());
+        zhenzhihuiEnterpriseInfo.setIdentifyToken(cmd.getCorporationToken());
+        zhenzhihuiEnterpriseInfo.setIdentifyType(cmd.getCorporationType());
+        zhenzhihuiEnterpriseInfo.setEnterpriseName(cmd.getEnterpriseName());
+        zhenzhihuiEnterpriseInfo.setEnterpriseToken(cmd.getEnterpriseToken());
+        this.zhenzhihuiEnterpriseInfoProvider.createZhenzhihuiEnterpriseInfo(zhenzhihuiEnterpriseInfo);
+        LOGGER.info("redirect to zhenzhihui url");
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO){

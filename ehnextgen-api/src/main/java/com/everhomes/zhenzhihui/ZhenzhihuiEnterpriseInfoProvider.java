@@ -19,4 +19,6 @@ public interface ZhenzhihuiEnterpriseInfoProvider {
 			ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<ZhenzhihuiEnterpriseInfo> listZhenzhihuiEnterpriseInfoByUserId(Long userId);
+
 }

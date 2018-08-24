@@ -3,13 +3,27 @@ package com.everhomes.rest.zhenzhihui;
 
 import com.everhomes.util.StringHelper;
 
-public class ZhenzhihuiUserInfoDTO {
+/**
+ * <ul>
+ *     <li>name: 姓名</li>
+ *     <li>identifyType: 证件类型,请参考{@link com.everhomes.rest.zhenzhihui.ZhenZhiHuiCertificateType}</li>
+ *     <li>identifyToken: 证件号码<li/>
+ *     <li>email: 邮件</li>
+ * </ul>
+ */
+public class CreateZhenZhiHuiUserInfoCommand {
+    private String      name;
     private Integer     identifyType;
-    private Long     userId;
-    private Long     id;
     private String     identifyToken;
     private String     email;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Integer getIdentifyType() {
         return identifyType;
@@ -18,26 +32,6 @@ public class ZhenzhihuiUserInfoDTO {
 
     public void setIdentifyType(Integer identifyType) {
         this.identifyType = identifyType;
-    }
-
-
-    public Long getUserId() {
-        return userId;
-    }
-
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-
-    public Long getId() {
-        return id;
-    }
-
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
 

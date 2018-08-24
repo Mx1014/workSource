@@ -5,6 +5,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoCommand;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,34 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
         restResponse.setErrorDescription("invalid token or redirect");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /zhenzhihuisso/createUserInfo</b>
+     * <p>填写圳智慧所需用户信息</p>
+     */
+    @RequestMapping("createUserInfo")
+    @RestReturn(value=String.class)
+    public Object createUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
+        zhenZhiHuiService.createZhenzhihuiUserInfo(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /zhenzhihuisso/createUserAndEnterpriseInfo</b>
+     * <p>填写圳智慧所需用户信息</p>
+     */
+    @RequestMapping("createUserAndEnterpriseInfo")
+    @RestReturn(value=String.class)
+    public Object createUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
+        zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 }

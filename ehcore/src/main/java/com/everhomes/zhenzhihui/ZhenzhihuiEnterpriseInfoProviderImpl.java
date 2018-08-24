@@ -108,6 +108,18 @@ public class ZhenzhihuiEnterpriseInfoProviderImpl implements ZhenzhihuiEnterpris
         return objs;
     }
 
+    @Override
+    public List<ZhenzhihuiEnterpriseInfo> listZhenzhihuiEnterpriseInfoByUserId(Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhZhenzhihuiEnterpriseInfo.class));
+
+        SelectQuery<EhZhenzhihuiEnterpriseInfoRecord> query = context.selectQuery(Tables.EH_ZHENZHIHUI_ENTERPRISE_INFO);
+        query.addConditions(Tables.EH_ZHENZHIHUI_ENTERPRISE_INFO.USER_ID.eq(userId));
+        List<ZhenzhihuiEnterpriseInfo> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, ZhenzhihuiEnterpriseInfo.class);
+        });
+        return objs;
+    }
+
     private void prepareObj(ZhenzhihuiEnterpriseInfo obj) {
     }
 }

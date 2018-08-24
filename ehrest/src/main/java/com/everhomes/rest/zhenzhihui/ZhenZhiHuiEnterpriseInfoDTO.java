@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
-public class ZhenzhihuiEnterpriseInfoDTO {
+public class ZhenZhiHuiEnterpriseInfoDTO {
     private String     identifyToken;
     private String     enterpriseToken;
     private Long     userId;

@@ -18,4 +18,5 @@ public interface ZhenzhihuiUserInfoProvider {
 	List<ZhenzhihuiUserInfo> queryZhenzhihuiUserInfos(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<ZhenzhihuiUserInfo> listZhenzhihuiUserInfosByUserId(Long userId);
 }
