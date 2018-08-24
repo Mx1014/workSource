@@ -114,14 +114,13 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 	}
 
 	@Override
-	public ListLocalCamerasResponse listLocalCameras(CrossShardListingLocator locator, Long ownerId, Byte ownerType,
-			Long serverId, Long doorAccessId, Byte enterStatus, Byte linkStatus, Integer pageSize) {
+	public ListLocalCamerasResponse listLocalCameras(ListLocalCamerasCommand cmd) {
 		ListLocalCamerasResponse resp = new ListLocalCamerasResponse();
-		int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
 		List<Long> serverIds = new ArrayList<Long>();
-		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(ownerType);
-		if(serverId == null){
-			List<AclinkServer> servers = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(), ownerId, typ, null, 0);
+		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(cmd.getOwnerType());
+		if(cmd.getServerId() == null){
+			List<AclinkServer> servers = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(), cmd.getOwnerId(), typ, null, 0);
 			if(servers.size()>0){
 				for(AclinkServer server: servers){
 					serverIds.add(server.getId());
@@ -130,8 +129,10 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 				return resp;
 			}
 		}
-		
-		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, serverId, serverIds, doorAccessId, enterStatus, linkStatus, count);
+		cmd.setServerIds(serverIds);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, cmd);
 		List<AclinkCameraDTO> dtos = new ArrayList<AclinkCameraDTO>();
 		for(AclinkCamera camera : cameras){
 			AclinkCameraDTO dto = ConvertHelper.convert(camera, AclinkCameraDTO.class);

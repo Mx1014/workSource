@@ -170,7 +170,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
-        query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
+        query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
         if(locator.getAnchor() != null && locator.getAnchor() != 0) {
             query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
             }

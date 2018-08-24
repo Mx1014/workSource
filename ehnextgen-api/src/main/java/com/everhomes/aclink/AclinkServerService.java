@@ -20,6 +20,7 @@ import com.everhomes.rest.aclink.PairLocalServerResponse;
 import com.everhomes.rest.aclink.QueryServerRelationsCommand;
 import com.everhomes.rest.aclink.QueryServerRelationsResponse;
 import com.everhomes.rest.aclink.SyncLocalServerResponse;
+import com.everhomes.rest.aclink.UpdateCameraIpadBatchCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 
@@ -52,5 +53,7 @@ public interface AclinkServerService {
 	ListLocalServerByOrgResponse listLocalServerByOrg(ListLocalServerByOrgCommand cmd);
 
 	AclinkServerDTO onServerDisconnecting(AclinkDisconnectedCommand cmd);
+
+	void updateCameraIpadBatch(UpdateCameraIpadBatchCommand cmd);
 
 }
