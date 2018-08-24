@@ -287,9 +287,18 @@ public class RequisitionServiceImpl implements RequisitionService{
             GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
             return ConvertHelper.convert(form, GeneralFormDTO.class);
         }else{
-            LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
-            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
-            return ConvertHelper.convert(request, GeneralFormDTO.class);
+            GeneralApproval getApproval = generalApprovalProvider.getGeneralApprovalByModuleId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+            if(getApproval == null) {
+                LOGGER.error("no approval has been created" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_ONE_APPROVAL, "no approval has been created");
+            }else{
+                LOGGER.error("no approval has been used" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_USED_APPROVAL, "no approval has been used");
+            }
+            /*GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            return ConvertHelper.convert(request, GeneralFormDTO.class);*/
 
         }
 

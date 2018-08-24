@@ -779,7 +779,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
                 List<GeneralFormFieldDTO> allFormFields = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
                 for(GeneralFormFieldDTO dto : allFormFields){
-                    if(dto.getFilterFlag() == (byte)1){
+                    if(dto.getFilterFlag() != null && dto.getFilterFlag() == (byte)1){
                         formFields.add(dto);
                     }
                 }

@@ -8,6 +8,8 @@ package com.everhomes.rest.requisition;
 public interface RequistionErrorCodes {
     static final String SCOPE = "requisition";
     static final Integer ERROR_CREATE_FLOW_CASE = 1001;
+    static final Integer ERROR_NO_ONE_APPROVAL = 506;
+    static final Integer ERROR_NO_USED_APPROVAL = 507;
 
     static final int ERROR_FORM_NOT_FIND = 1003;
 
