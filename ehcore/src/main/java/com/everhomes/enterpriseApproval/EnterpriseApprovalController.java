@@ -160,13 +160,13 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterpriseApproval/listAvailableApprovalGroups</b>
+     * <b>URL: /enterpriseApproval/listEnterpriseApprovalGroups</b>
      * <p>OA 审批分类列表(组列表)</p>
      */
-    @RequestMapping("listAvailableApprovalGroups")
+    @RequestMapping("listEnterpriseApprovalGroups")
     @RestReturn(value = EnterpriseApprovalGroupDTO.class, collection = true)
-    public RestResponse listAvailableApprovalGroups(){
-        List<EnterpriseApprovalGroupDTO> res = enterpriseApprovalService.listAvailableApprovalGroups();
+    public RestResponse listEnterpriseApprovalGroups(){
+        List<EnterpriseApprovalGroupDTO> res = enterpriseApprovalService.listEnterpriseApprovalGroups();
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
