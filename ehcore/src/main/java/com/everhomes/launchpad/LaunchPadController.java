@@ -157,7 +157,6 @@ public class LaunchPadController extends ControllerBase {
      */
     @RequestMapping("updateUserApps")
     @RestReturn(value=String.class)
-    @RequireAuthentication(false)
     public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

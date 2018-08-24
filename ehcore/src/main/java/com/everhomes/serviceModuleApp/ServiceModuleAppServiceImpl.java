@@ -769,6 +769,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		List<RecommendApp>  recommendApps = new ArrayList<>();
 
 		List<AppCommunityConfigDTO>  dtos = new ArrayList<>();
+
+		//1、查询配置
+		//自定义的园区查询园区自定义配置表EH_APP_COMMUNITY_CONFIGS，跟随默认的园区查询安装表。
+
+
 		if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
 
 			//自定义配置的
@@ -848,6 +853,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			return response;
 		}
 
+		//2、将应用分类
 
 		List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), 0L);
 
