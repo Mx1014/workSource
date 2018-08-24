@@ -5932,6 +5932,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         List<Long> departmentIds = new ArrayList<>();
                         departmentIds.add(cmd.getEnterpriseId());
                         addArchivesContactCommand.setDepartmentIds(departmentIds);
+                        addArchivesContactCommand.setNamespaceId(user.getNamespaceId());
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                         sendMessageForContactApproved(member);
@@ -11138,7 +11139,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 
