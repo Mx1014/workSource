@@ -384,7 +384,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(VisitorsysStatus.HAS_VISITED != visitStatus
                 || ownerType!=VisitorsysOwnerType.COMMUNITY
                 || sourceType != VisitorsysSourceType.OUTER
-                || visitorsysNotifyThirdType != VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
+                || visitorsysNotifyThirdType == VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
             return;
         }
         String callbackurl = configurationProvider.getValue(visitor.getNamespaceId(),"visitorsys.lufu.callback", "");
