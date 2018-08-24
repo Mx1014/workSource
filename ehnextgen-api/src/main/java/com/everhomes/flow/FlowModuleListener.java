@@ -27,7 +27,10 @@ public interface FlowModuleListener {
 
     /**
      * 获取业务类型列表，用于搜索时的业务类型选择
+     *
+     * <b>已废弃</b>
      */
+    @Deprecated
     default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
 	    return null;
 	}
@@ -82,6 +85,13 @@ public interface FlowModuleListener {
      * @param flowUserType 当前用户的身份：申请人、处理人、督办人
      */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
+	
+	/**
+     * 用于任务的详情显示
+     * @param flowCase 任务
+     * @param flowUserType 当前用户的身份：申请人、处理人、督办人
+     */
+	//List<FlowCaseEntity> onFlowCaseDetailRenderV2(FlowCase flowCase, FlowUserType flowUserType);
 
     /**
      * 当按钮被点击时触发该方法调用
@@ -126,10 +136,28 @@ public interface FlowModuleListener {
      * 条件节点的变量渲染为真实的值
      * @param ctx 上下文
      * @param variableName 条件变量名称
-     * @param extra 附加信息 {@link com.everhomes.rest.flow.FlowConditionVariableDTO#extra}
-     * @return  返回 FlowConditionVariable 的具体实现类, 比如 FlowConditionStringVariable
+     * @param entityType   目前不使用
+     * @param entityId     目前不使用
+     * @param extra        附加信息 {@link FlowConditionVariableDTO#extra}
+     * @return  返回 FlowConditionVariable 的具体实现类的实例, 比如 FlowConditionStringVariable
      */
-    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variableName, String extra) { return null;}
+    default FlowConditionVariable onFlowConditionVariableRender(
+            FlowCaseState ctx, String variableName, String entityType, Long entityId, String extra) {
+        return null;
+    }
+
+    /**
+     * 条件节点的 <b>表单</b> 变量渲染为真实的值
+     * @param ctx 上下文
+     * @param variableName 条件变量名称
+     * @param entityType   如果是在工作流级别设置的表单,为: flow, 如果是在工作流节点级别设置的表单为：flow_node {@link com.everhomes.rest.flow.FlowEntityType}
+     * @param entityId     对应的工作流 id 或工作流节点 id
+     * @param extra        附加信息 {@link FlowConditionVariableDTO#extra}
+     * @return  返回 FlowConditionVariable 的具体实现类的实例, 比如 FlowConditionStringVariable
+     */
+    default FlowConditionVariable onFlowConditionFormVariableRender(FlowCaseState ctx, String variableName, String entityType, Long entityId, String extra) {
+        return null;
+    }
 
     /**
      * 需要在工作流里使用表单功能，需要实现此方法
@@ -157,6 +185,17 @@ public interface FlowModuleListener {
      * 工作流启用之前触发调用
      */
     default void onFlowStateChanging(Flow flow) {
+
+    }
+
+    /**
+     * 进入子流程的时候触发该方法的调用
+     * @param ctx   父流程上下文
+     * @param mapping   工作流与业务映射关系
+     * @param subFlow   子流程工作流
+     * @param cmd   创建 flowCase 的 command
+     */
+    default void onSubFlowEnter(FlowCaseState ctx, FlowServiceMapping mapping, Flow subFlow, CreateFlowCaseCommand cmd) {
 
     }
 }

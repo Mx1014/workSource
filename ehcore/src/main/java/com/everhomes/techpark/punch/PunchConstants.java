@@ -1,6 +1,11 @@
 package com.everhomes.techpark.punch;
 
 public class PunchConstants {
+	public static final Integer PAGE_SIZE_AT_A_TIME = 1000;
+	public static final Long ONE_DAY_MS = 24 * 3600 * 1000L;
+	public static final Long DEFAULT_SPLIT_TIME = 4 * 3600 * 1000L;
+	public static final Long MILLISECONDGMT = 8 * 3600 * 1000L;
+	
 	/** module id 50600L */
 	public static final Long PUNCH_MODULE_ID = 50600L;
 	/** PUNCH_STATUS_SCOPE ="punch.status" */
@@ -57,5 +62,40 @@ public class PunchConstants {
 	public static final int PUNCH_MESSAGE_UPDATE_PAIBAN = 4;
 	public static final int PUNCH_MESSAGE_TIMERULES = 5;
 	public static final String PUNCH_MESSAGE_RESTTIME = "6";
+	
 
+	/** REDIS monthReport Process*/
+	public static final String MONTH_REPORT_PROCESS ="MONTH.REPORT.PROCESS";
+
+	
+	/**考勤加班规则不同加班类型的提示文案初始化scope:"overtime.rule.tip.info"*/
+	public static final String OVERTIME_INFO_SCOPE ="overtime.rule.tip.info";
+	/**未设置打卡规则*/
+	public static final String OVERTIME_INFO_NORULE ="-1";
+	/**未开启*/
+	public static final String OVERTIME_INFO_CLOSE ="0";
+	/**需要申请和打卡，时长按打卡时间计算，但不能超过申请的时间*/
+	public static final String OVERTIME_INFO_BOTH ="1";
+	/**需要申请，时长按申请单时间计算*/
+	public static final String OVERTIME_INFO_REQUEST ="2";
+	/**不需要申请，时长按打卡时间计算*/
+	public static final String OVERTIME_INFO_PUNCH ="3";
+	/**工作日加班：*/
+	public static final String OVERTIME_INFO_WORKDAY ="4";
+	/**休息日/节假日加班：*/
+	public static final String OVERTIME_INFO_HOLIDAY ="5";
+	
+
+	/** 申请统计项列表 "punch.exception.statistic"  */
+	public static final String EXCEPTION_STATISTIC_SCOPE ="punch.exception.statistic";
+	public static final int ASK_FOR_LEAVE_TEMPLATE_CONTENT = 1;
+	public static final int GO_OUT_TEMPLATE_TITLE = 2;
+	public static final int GO_OUT_TEMPLATE_CONTENT = 3;
+	
+
+	/** punchType的scope "punch.punchType"  */
+	public static final String PUNCH_PUNCHTYPE_SCOPE ="punch.punchType";
+	/** punchType的scope "punch.time"  */
+	public static final String PUNCH_TIME_SCOPE ="punch.time";
+	public static final String NEXT_DAY ="nextDay";
 }

@@ -35,21 +35,21 @@ public class FormFieldGoOutProcessor implements FormFieldProcessor{
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("开始时间");
-        dto.setName("开始时间");
+        dto.setValue("开始时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("结束时间");
-        dto.setName("结束时间");
+        dto.setValue("结束时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
         dto.setDisplayName("外出时长");
-        dto.setName("外出时长");
+        dto.setValue("外出时长");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 

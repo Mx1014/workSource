@@ -7,20 +7,20 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>params: 参数列表 {@link FlowPredefinedParamDTO}</li>
+ *     <li>groups: 组列表 {@link com.everhomes.rest.flow.FlowConditionVariableGroup}</li>
  * </ul>
  */
 public class ListFlowConditionVariablesResponse {
 
-    @ItemType(FlowConditionVariableDTO.class)
-    private List<FlowConditionVariableDTO> variables;
+    @ItemType(FlowConditionVariableGroup.class)
+    private List<FlowConditionVariableGroup> groups;
 
-    public List<FlowConditionVariableDTO> getVariables() {
-        return variables;
+    public List<FlowConditionVariableGroup> getGroups() {
+        return groups;
     }
 
-    public void setVariables(List<FlowConditionVariableDTO> variables) {
-        this.variables = variables;
+    public void setGroups(List<FlowConditionVariableGroup> groups) {
+        this.groups = groups;
     }
 
     @Override

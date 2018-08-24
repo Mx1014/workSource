@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import java.sql.Date;
 import java.util.List;
 
 public interface ApprovalCategoryProvider {
@@ -10,16 +9,23 @@ public interface ApprovalCategoryProvider {
 
 	void updateApprovalCategory(ApprovalCategory approvalCategory);
 
+	Integer getNextApprovalCategoryDefaultOrder(Integer namespaceId, String ownerType, Long ownerId);
+
 	ApprovalCategory findApprovalCategoryById(Long id);
 
-	List<ApprovalCategory> listApprovalCategory();
+	ApprovalCategory findApprovalCategoryByOriginId(Long id, Integer namespaceId, Long ownerId);
 
-	List<ApprovalCategory> listApprovalCategory(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType);
+	ApprovalCategory findApprovalCategoryById(Integer namespaceId, String ownerType, Long ownerId, Long id);
+
+	List<ApprovalCategory> listBaseApprovalCategory();
+
+	List<ApprovalCategory> listApprovalCategory(QueryApprovalCategoryCondition condition);
+
+	void createApprovalCategoryInitLog(ApprovalCategoryInitLog approvalCategoryInitLog);
+
+	int countApprovalCategoryInitLogByOwnerId(Integer namespaceId, String ownerType, Long ownerId);
 
 	ApprovalCategory findApprovalCategoryByName(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType,
 			String categoryName);
-
-	List<ApprovalCategory> listApprovalCategoryForStatistics(Integer namespaceId, String ownerType,
-			Long ownerId, Byte approvalType, Date fromDate);
 
 }

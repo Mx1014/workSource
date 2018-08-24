@@ -1,9 +1,9 @@
 package com.everhomes.rest.techpark.punch;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 
 
@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>userName：名称</li>
  * <li>punchMonth：打卡月份</li>
  * <li>token：联系电话</li>
+ * <li>deptId：部门id</li>
  * <li>deptName：部门</li>
  * <li>punchOrgName：所属规则</li>
  * <li>workDayCount:应上班天数</li>
@@ -21,26 +22,34 @@ import com.everhomes.util.StringHelper;
  * <li>belateCount：迟到天数</li>
  * <li>leaveEarlyCount：早退天数</li>
  * <li>unPunchCount：未打卡天数</li>
- * <li>blandleCount：迟到且早退天数</li> 
+ * <li>blandleCount：迟到且早退天数</li>
+ * <li>extTotal: 请假总时长，单位天</li>
+ * <li>extTotalDisplay: 请假总时长格式化显示，如3.0天1.0小时</li>
  * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
  * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
- * <li>exceptionRequestCount：异常天数 </li>
  * <li>annualLeaveBalance：年假余额</li>
  * <li>overtimeCompensationBalance：调休余额</li>
  * <li>deviceChangeCounts：设备异常数量</li>
  * <li>exceptionRequestCounts：异常申请数</li>
  * <li>belateTime：迟到时长</li>
  * <li>leaveEarlyTime：早退时长</li>
+ * <li>forgotPunchCountOnDuty: 上班缺卡次数</li>
+ * <li>forgotPunchCountOffDuty: 下班缺卡次数</li>
  * <li>forgotCount：缺卡次数</li>
- * <li>statusList：每天状态列表 参考{@link com.everhomes.rest.techpark.punch.DayStatusDTO}</li> 
+ * <li>overtimeTotalWorkdayDisplay: 工作日加班时长，格式：xx小时xx分钟</li>
+ * <li>overtimeTotalRestdayDisplay: 休息日加班时长，格式：xx小时xx分钟</li>
+ * <li>overtimeTotalLegalHolidayDisplay: 节假日加班时长，格式：xx小时xx分钟</li>
+ * <li>statusList：每天状态列表 参考{@link com.everhomes.rest.techpark.punch.DayStatusDTO}</li>
  * </ul>
  */
 public class PunchCountDTO {
 	private Long userId;
+	private Long detailId;
 	private String userName;
 	private String punchMonth;
 	private String punchOrgName;
 	private String token;
+	private Long deptId;
 	private String deptName;
     private Integer workDayCount;
     private Double workCount;
@@ -57,19 +66,33 @@ public class PunchCountDTO {
 	private String userEnterpriseGroup;
 	@ItemType(AbsenceTimeDTO.class)
 	private List<AbsenceTimeDTO> absenceTimeList;
+	private Double extTotal;
+	private String extTotalDisplay;
 	@ItemType(ExtDTO.class)
 	private List<ExtDTO> exts;
 	private Byte userStatus;
 	private Integer exceptionDayCount;
-	private Integer exceptionRequestCount;
     private Double annualLeaveBalance;
     private Double overtimeCompensationBalance;
     private Integer deviceChangeCounts;
-    private Double exceptionRequestCounts;
+    private Integer exceptionRequestCounts;
     private String belateTime;
     private String leaveEarlyTime;
-    private Integer forgotCount;
+	private Integer forgotCount;
+	private Integer forgotPunchCountOffDuty;
+	private Integer forgotPunchCountOnDuty;
+	private String overtimeTotalWorkdayDisplay;
+	private String overtimeTotalRestdayDisplay;
+	private String overtimeTotalLegalHolidayDisplay;
     private List<DayStatusDTO> statusList;
+
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
+	}
 
 	public Integer getExceptionDayCount() {
 		return exceptionDayCount;
@@ -217,14 +240,6 @@ public class PunchCountDTO {
 		this.punchMonth = punchMonth;
 	}
 
-	public Integer getExceptionRequestCount() {
-		return exceptionRequestCount;
-	}
-
-	public void setExceptionRequestCount(Integer exceptionRequestCount) {
-		this.exceptionRequestCount = exceptionRequestCount;
-	}
-
 	public Double getAnnualLeaveBalance() {
 		return annualLeaveBalance;
 	}
@@ -249,11 +264,11 @@ public class PunchCountDTO {
 		this.deviceChangeCounts = deviceChangeCounts;
 	}
 
-	public Double getExceptionRequestCounts() {
+	public Integer getExceptionRequestCounts() {
 		return exceptionRequestCounts;
 	}
 
-	public void setExceptionRequestCounts(Double exceptionRequestCounts) {
+	public void setExceptionRequestCounts(Integer exceptionRequestCounts) {
 		this.exceptionRequestCounts = exceptionRequestCounts;
 	}
 
@@ -288,5 +303,68 @@ public class PunchCountDTO {
 	public void setStatusList(List<DayStatusDTO> statusList) {
 		this.statusList = statusList;
 	}
-	
+
+	public Double getExtTotal() {
+		return extTotal;
+	}
+
+	public void setExtTotal(Double extTotal) {
+		this.extTotal = extTotal;
+	}
+
+	public String getExtTotalDisplay() {
+		return extTotalDisplay;
+	}
+
+	public void setExtTotalDisplay(String extTotalDisplay) {
+		this.extTotalDisplay = extTotalDisplay;
+	}
+
+	public Long getDeptId() {
+		return deptId;
+	}
+
+	public void setDeptId(Long deptId) {
+		this.deptId = deptId;
+	}
+
+	public String getOvertimeTotalWorkdayDisplay() {
+		return overtimeTotalWorkdayDisplay;
+	}
+
+	public void setOvertimeTotalWorkdayDisplay(String overtimeTotalWorkdayDisplay) {
+		this.overtimeTotalWorkdayDisplay = overtimeTotalWorkdayDisplay;
+	}
+
+	public String getOvertimeTotalRestdayDisplay() {
+		return overtimeTotalRestdayDisplay;
+	}
+
+	public void setOvertimeTotalRestdayDisplay(String overtimeTotalRestdayDisplay) {
+		this.overtimeTotalRestdayDisplay = overtimeTotalRestdayDisplay;
+	}
+
+	public String getOvertimeTotalLegalHolidayDisplay() {
+		return overtimeTotalLegalHolidayDisplay;
+	}
+
+	public void setOvertimeTotalLegalHolidayDisplay(String overtimeTotalLegalHolidayDisplay) {
+		this.overtimeTotalLegalHolidayDisplay = overtimeTotalLegalHolidayDisplay;
+	}
+
+	public Integer getForgotPunchCountOffDuty() {
+		return forgotPunchCountOffDuty;
+	}
+
+	public void setForgotPunchCountOffDuty(Integer forgotPunchCountOffDuty) {
+		this.forgotPunchCountOffDuty = forgotPunchCountOffDuty;
+	}
+
+	public Integer getForgotPunchCountOnDuty() {
+		return forgotPunchCountOnDuty;
+	}
+
+	public void setForgotPunchCountOnDuty(Integer forgotPunchCountOnDuty) {
+		this.forgotPunchCountOnDuty = forgotPunchCountOnDuty;
+	}
 }

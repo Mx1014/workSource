@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * 深业 停车
  */
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST1")
 public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestParkingVendorHandler.class);
 
@@ -77,11 +78,18 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
 
 		String json = configProvider.getValue("parking.default.card.type", "");
-		ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
-        List<ParkingCardType> list = new ArrayList<>();
-
-		list.add(cardType);
-
+		List<ParkingCardType> list = new ArrayList<>();
+		if(json.startsWith("{")) {
+			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+			list.add(cardType);
+			ret.setCardTypes(list);
+		}else if(json.startsWith("[")){
+			JSONArray array = JSONObject.parseArray(json);
+			for (Object o : array) {
+				ParkingCardType cardType = JSONObject.parseObject(o.toString(),ParkingCardType.class);
+				list.add(cardType);
+			}
+		}
 		ret.setCardTypes(list);
 
     	return ret;

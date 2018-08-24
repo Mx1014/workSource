@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,14 +12,12 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
-import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
@@ -34,10 +31,8 @@ import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchDayLog;
-import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -168,7 +163,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 			exceptionRequest.setRequestInfo(processRequestDate(a.getEffectiveDate())+
 					localeStringService.getLocalizedString(ApprovalTypeTemplateCode.SCOPE, a.getApprovalType().toString(), UserContext.current()
 							.getUser().getLocale(),"") + a.getHourLength()+localeStringService.getLocalizedString("time.unit", "hour", "zh_CN", "hour"));
-			PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+			PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 			
 			String punchDetail = processPunchDetail(pdl);
 
@@ -184,7 +179,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest a) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(a);
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 		BasicDescriptionDTO dto = new BasicDescriptionDTO();
 		dto.setPunchDate(new Timestamp(a.getEffectiveDate().getTime()));
 		dto.setHourLength(a.getHourLength());
@@ -266,7 +261,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		int code = ApprovalLogTitleTemplateCode.OVERTIME_MAIN_TITLE ; 
 		map.put("date",processRequestDate(a.getEffectiveDate()));
 		map.put("hour",a.getHourLength());
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 		map.put("punchLog",processPunchDetail(pdl)) ;
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		

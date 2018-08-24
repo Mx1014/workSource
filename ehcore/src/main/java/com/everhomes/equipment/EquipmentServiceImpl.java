@@ -233,6 +233,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -489,8 +490,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.updateEquipmentStandard(standard);
 				equipmentStandardSearcher.feedDoc(standard);
 			}
-
-			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
+			//issue-36509 remove deal this logic for zijing project
+//			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		}
 		createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());//创建新的巡检对象和标准关联表
@@ -1137,8 +1138,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
-			//删除计划关联表中的该设备
-			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+			//删除计划关联表中的该设备 issue-36509 紫荆要求不删
+//			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 			List<Long> updateStandardIds = increamentUpdateEquipmentStandardMap(user, equipment, eqStandardMap);
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -5652,8 +5653,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		//ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId())); this will invoke _exit() and kill all thead include children thread
-		inActiveTaskByPlanId(cmd.getId());
+		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
+//		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 

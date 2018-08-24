@@ -14,6 +14,7 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
@@ -29,6 +30,7 @@ import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -61,6 +63,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.file.FileUtils;
 import com.everhomes.util.pdf.PdfUtils;
+import com.everhomes.yellowPage.stat.ClickStatDetail;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
@@ -86,11 +90,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	
 	@Autowired
 	private GroupProvider groupProvider;
+	
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 	
 	@Autowired
 	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
+	
+	@Autowired
+	ClickStatDetailProvider detailProvider;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -152,9 +160,38 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//同步申请到es
 		syncRequest(values, request, flowCase,yellowPage,status);
 		
+		//添加到埋点统计中
+		createCommitStatDetail(flowCase, yellowPage);
+		
 		//发送消息给相关人员
 		sendMessage(yellowPageId,flowCase, formItemsInfo);
 		
+	}
+	
+	private void createCommitStatDetail(FlowCase flowCase, ServiceAlliances service) {
+		if (null == service) {
+			return;
+		}
+
+		ClickStatDetail detail = new ClickStatDetail();
+		detail.setNamespaceId(flowCase.getNamespaceId());
+		detail.setType(service.getParentId());
+		detail.setOwnerId(service.getOwnerId());
+		detail.setCategoryId(service.getCategoryId());
+		detail.setServiceId(service.getId());
+		detail.setClickType(StatClickOrSortType.CLICK_TYPE_COMMIT_TIMES.getCode());
+		detail.setClickTime(System.currentTimeMillis());
+
+		// 设置用户相关信息
+		detail.setUserId(flowCase.getApplyUserId());
+		TargetDTO dto = organizationProvider.findUserContactByUserId(flowCase.getNamespaceId(),
+				flowCase.getApplyUserId());
+		if (null != dto) {
+			detail.setUserName(dto.getTargetName());
+			detail.setUserPhone(dto.getUserIdentifier());
+		}
+
+		detailProvider.createClickStatDetail(detail);
 	}
 
 	private void syncRequest(List<PostApprovalFormItem> values,ServiceAllianceRequestInfo request,FlowCase flowCase,ServiceAlliances  sa, Byte status) {

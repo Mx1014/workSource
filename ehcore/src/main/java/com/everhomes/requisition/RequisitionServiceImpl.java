@@ -1,25 +1,39 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormTemplate;
+import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.general_approval.GeneralApprovalDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.requisition.*;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -34,13 +48,14 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
  */
 
 @Service
-public class RequisitionServiceImpl implements RequisitionService {
+public class RequisitionServiceImpl implements RequisitionService{
     private static final Logger LOGGER = LoggerFactory.getLogger(RequisitionServiceImpl.class);
     @Autowired
     private RequisitionProvider requisitionProvider;
@@ -56,6 +71,12 @@ public class RequisitionServiceImpl implements RequisitionService {
     private OrganizationService organizationService;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -114,6 +135,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setList(result);
         return response;
     }
+
 
     @Override
     public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
@@ -190,4 +212,130 @@ public class RequisitionServiceImpl implements RequisitionService {
         }
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.REQUISITION_MODULE, (byte)13, null, null, communityId);
     }
+
+
+    //新增
+
+    @Override
+    public Long updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+        if(cmd.getFormOriginId() != null && cmd.getFormOriginId() >= 0l && cmd.getFormVersion() >= 0 && cmd.getFormVersion() != null) {
+            approval.setFormOriginId(cmd.getFormOriginId());
+            approval.setFormVersion(cmd.getFormVersion());
+            GeneralApproval obj = generalApprovalProvider.updateGeneralApproval(approval);
+            Long formOriginId = obj.getFormOriginId();
+            return formOriginId;
+        }else {
+            LOGGER.error("form origin id or form version param cannot null. form_origin_id : " + cmd.getFormOriginId() + ", form_version : " + cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "form origin id or form version param cannot null");
+
+        }
+    }
+
+    public String getUserContactNameByUserId(Long userId) {
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(userId);
+        if (members != null && members.size() > 0)
+            return members.get(0).getContactName();
+        return "";
+    }
+
+
+    @Override
+    public void updateRequisitionApprovalActiveStatus(UpdateRequisitionActiveStatusCommond cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getId());
+
+
+        if(cmd.getStatus() != null) {
+            approval.setStatus(cmd.getStatus());
+            if(cmd.getStatus().equals(GeneralApprovalStatus.RUNNING.getCode())){
+                GeneralApproval oldRunning = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+                if(oldRunning != null){
+                    oldRunning.setStatus(GeneralApprovalStatus.INVALID.getCode());
+                }
+                this.dbProvider.execute((status) -> {
+                    if(oldRunning != null){
+                            generalApprovalProvider.updateGeneralApproval(oldRunning);
+                    }
+
+                    generalApprovalProvider.updateGeneralApproval(approval);
+                    return null;
+                });
+
+            }else{
+                generalApprovalProvider.updateGeneralApproval(approval);
+            }
+        }
+    }
+
+    @Override
+    public GeneralFormDTO getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd){
+        GeneralApproval runningApproval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+        if(runningApproval != null) {
+            GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        }else{
+            LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            return ConvertHelper.convert(request, GeneralFormDTO.class);
+
+        }
+
+    }
+
+    @Override
+    public Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd){
+        Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType());
+        if(flow != null){
+            return flow.getId();
+        }else{
+            LOGGER.error("the flow Id can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the flow Id can not find");
+        }
+    }
+
+    @Override
+    public GeneralApprovalDTO getApprovalRunningForm(GetApprovalRunningFormCommond cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+        if(approval != null){
+            return ConvertHelper.convert(approval,GeneralApprovalDTO.class);
+        }else{
+            LOGGER.error("the approval can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the approval can not find");
+        }
+    }
+
+
+    @Override
+    public Long getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd){
+        GeneralFormVal request;
+        List<GeneralFormValDTO> result;
+
+        if(cmd.getCustomerId() != null && cmd.getNamespaceId() !=null && cmd.getCommunityId() != null){
+
+
+            request = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
+           if(request != null){
+               return request.getSourceId();
+           }
+           return null;
+
+
+        }else{
+            LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() +  ", communityId: " + cmd.getCommunityId() + ", customerId: " + cmd.getCustomerId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,communityId,customerId cannot be null.");
+        }
+    }
+
+    private String getContractNameByUserId(Long userId, Long organizationId) {
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
+        if (member != null) {
+            return member.getContactName();
+        }
+        return UserContext.current().getUser().getNickName();
+    }
+
 }

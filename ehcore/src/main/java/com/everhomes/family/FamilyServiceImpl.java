@@ -4,6 +4,7 @@ package com.everhomes.family;
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
@@ -32,6 +33,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.aclink.DeleteAuthByOwnerCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
@@ -147,6 +149,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private DoorAccessService doorAccessService;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -697,6 +702,13 @@ public class FamilyServiceImpl implements FamilyService {
         }
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
 
+        // 离开家庭，删除大堂门禁
+        DeleteAuthByOwnerCommand deleteAuthByOwnerCommand = new DeleteAuthByOwnerCommand();
+        deleteAuthByOwnerCommand.setNamespaceId(user.getNamespaceId());
+        deleteAuthByOwnerCommand.setOwnerId(group.getIntegralTag2());
+        deleteAuthByOwnerCommand.setOwnerType((byte)0);
+        deleteAuthByOwnerCommand.setUserId(userId);
+        this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
@@ -902,6 +914,11 @@ public class FamilyServiceImpl implements FamilyService {
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
+            //给客户端发一条通知 ,MetaObjectType由于没设置拒绝类型,但同意类型应该也可以用,因为都只是触发刷新地址而已
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
+            
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
@@ -927,6 +944,11 @@ public class FamilyServiceImpl implements FamilyService {
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            
+            //给客户端发一条通知 ,MetaObjectType由于没设置拒绝类型,但同意类型应该也可以用,因为都只是触发刷新地址而已
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OPERATOR;

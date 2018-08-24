@@ -1,5 +1,7 @@
 package com.everhomes.portal;
 
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+
 /**
  * Created by sfyan on 2017/8/8.
  */
@@ -60,5 +62,13 @@ public interface PortalPublishHandler {
      */
     default Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig){
         return null;
+    }
+    
+    /**
+     * 所有应用发布完成之后，再给各个应用发送一个通知
+     * @param app
+     */
+    default void afterAllAppPulish(ServiceModuleApp app){
+    	
     }
 }

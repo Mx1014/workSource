@@ -450,4 +450,90 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /address/createAddressArrangement</b>
+     * <p>创建房源相关的拆分/合并计划</p>
+     */
+    @RequestMapping("createAddressArrangement")
+    @RestReturn(value = String.class)
+    public RestResponse createAddressArrangement(CreateAddressArrangementCommand cmd) {
+    	addressService.createAddressArrangement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/listAddressArrangement</b>
+     * <p>查看房源相关的拆分/合并计划</p>
+     */
+    @RequestMapping("listAddressArrangement")
+    @RestReturn(value=AddressArrangementDTO.class)
+    public RestResponse listAddressArrangement(ListAddressArrangementCommand cmd) {
+    	AddressArrangementDTO dto = addressService.listAddressArrangement(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/updateAddressArrangement</b>
+     * <p>修改房源相关的拆分/合并计划</p>
+     */
+    @RequestMapping("updateAddressArrangement")
+    @RestReturn(value = String.class)
+    public RestResponse updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
+    	addressService.updateAddressArrangement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/deleteAddressArrangement</b>
+     * <p>删除房源相关的拆分/合并计划</p>
+     */
+    @RequestMapping("deleteAddressArrangement")
+    @RestReturn(value = String.class)
+    public RestResponse deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
+    	addressService.deleteAddressArrangement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/getHistoryApartment</b>
+     * <p>查找历史房源</p>
+     */
+    @RequestMapping("getHistoryApartment")
+    @RestReturn(value=HistoryApartmentDTO.class, collection = true)
+    public RestResponse getHistoryApartment(GetHistoryApartmentCommand cmd) {
+    	List<HistoryApartmentDTO> dtos=addressService.getHistoryApartment(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/excuteAddressArrangement</b>
+     * <p>测试接口：用于执行拆分合并计划</p>
+     */
+    @RequestMapping("excuteAddressArrangement")
+    @RestReturn(value=String.class)
+    public RestResponse excuteAddressArrangement(ExcuteAddressArrangementCommand cmd) {
+    	addressService.excuteAddressArrangement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }

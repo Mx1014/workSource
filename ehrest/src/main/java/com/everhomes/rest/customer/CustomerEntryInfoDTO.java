@@ -21,6 +21,7 @@ import java.sql.Timestamp;
  *     <li>contractEndDate：合同结束日期</li>
  *     <li>contractEndMonth：合同结束月份</li>
  *     <li>remark：备注/企业评级</li>
+ *     <li>addressExists: 该关联房源是否存在（1：存在，0：不存在）</li>
  * </ul>
  * Created by ying.xiong on 2017/12/6.
  */
@@ -48,8 +49,17 @@ public class CustomerEntryInfoDTO {
     private Double chargeArea;
 
     private String orientation;
+    private Byte addressExists;
+    
+    public Byte getAddressExists() {
+		return addressExists;
+	}
 
-    public String getApartment() {
+	public void setAddressExists(Byte addressExists) {
+		this.addressExists = addressExists;
+	}
+
+	public String getApartment() {
         return apartment;
     }
 

@@ -16,6 +16,8 @@ public class PostGeneralFormDTO {
     private String sourceType;
     private Long sourceId;
 
+    private Long requisitionId;
+
     @ItemType(GeneralFormFieldDTO.class)
     private List<GeneralFormFieldDTO> formFields;
 
@@ -76,6 +78,14 @@ public class PostGeneralFormDTO {
 
     public void setFormFields(List<GeneralFormFieldDTO> formFields) {
         this.formFields = formFields;
+    }
+
+    public Long getRequisitionId() {
+        return requisitionId;
+    }
+
+    public void setRequisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
     }
 
     @Override

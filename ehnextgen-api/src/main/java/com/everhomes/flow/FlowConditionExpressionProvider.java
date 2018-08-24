@@ -18,4 +18,6 @@ public interface FlowConditionExpressionProvider {
     void updateFlowConditionExpressions(List<FlowConditionExpression> expressions);
 
     List<FlowConditionExpression> listFlowConditionExpressionByFlow(Long flowMainId, Integer flowVersion);
+
+    void deleteFlowConditionExpressionByCondition(Long conditionId);
 }

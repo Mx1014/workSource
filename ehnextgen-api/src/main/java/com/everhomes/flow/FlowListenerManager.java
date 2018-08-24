@@ -54,7 +54,7 @@ public interface FlowListenerManager {
 	 * @return
 	 */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
-
+	
 	/**
 	 * 当时间触发的时候
 	 * @param ctx
@@ -85,7 +85,7 @@ public interface FlowListenerManager {
 
     void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId);
 
-    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
+    FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra);
 
     List<FlowFormDTO> listFlowForms(Flow flow);
 
@@ -94,4 +94,8 @@ public interface FlowListenerManager {
 	void onFlowStateChanged(Flow flow);
 
     void onFlowStateChanging(Flow flow);
+
+    FlowConditionVariable onFlowConditionFormVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra);
+
+    void onSubFlowEnter(FlowCaseState ctx, FlowServiceMapping mapping, Flow subFlow, CreateFlowCaseCommand cmd);
 }

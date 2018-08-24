@@ -43,6 +43,11 @@ import com.everhomes.util.StringHelper;
  * <li>internal: 内件物品</li>
  * <li>insuredPrice: 保价金额</li>
  * <li>paidFlag: 1是0否，表示是否点击过支付，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>flowCaseId:工作流id</li>
+ * <li>expressType: 0:物品 1:文件 2:其他  国贸快递专用</li>
+ * <li>expressWay: 0:陆运 1:空运  国贸快递专用</li>
+ * <li>expressTarget: 0:同城 1:外埠  国贸快递专用</li>
+ * <li>expressRemark: 备注 国贸快递专用</li>
  * </ul>
  */
 public class ExpressOrderDTO {
@@ -81,6 +86,51 @@ public class ExpressOrderDTO {
 	private BigDecimal insuredPrice;
 	private String expressLogoUrl;
 	private Byte paidFlag;
+	private Long flowCaseId;
+	private Byte expressType;
+	private Byte expressWay;
+	private Byte expressTarget;
+	private String expressRemark;
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public Byte getExpressType() {
+		return expressType;
+	}
+
+	public void setExpressType(Byte expressType) {
+		this.expressType = expressType;
+	}
+
+	public Byte getExpressWay() {
+		return expressWay;
+	}
+
+	public void setExpressWay(Byte expressWay) {
+		this.expressWay = expressWay;
+	}
+
+	public Byte getExpressTarget() {
+		return expressTarget;
+	}
+
+	public void setExpressTarget(Byte expressTarget) {
+		this.expressTarget = expressTarget;
+	}
+
+	public String getExpressRemark() {
+		return expressRemark;
+	}
+
+	public void setExpressRemark(String expressRemark) {
+		this.expressRemark = expressRemark;
+	}
 
 	public Byte getPaidFlag() {
 		return paidFlag;

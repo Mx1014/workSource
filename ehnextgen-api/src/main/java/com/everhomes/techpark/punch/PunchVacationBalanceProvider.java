@@ -14,4 +14,7 @@ public interface PunchVacationBalanceProvider {
 	List<PunchVacationBalance> listPunchVacationBalance();
 
 	PunchVacationBalance findPunchVacationBalanceByDetailId(Long id);
+
+	List<PunchVacationBalance> findPunchVacationBalanceByDetailIds(List<Long> detailIds);
+
 }

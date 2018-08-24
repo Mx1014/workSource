@@ -96,4 +96,6 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_JOB_POSITION_EXISTS = 300003; //通用岗位已存在
 
     int ERROR_ORG_NAME_REPEAT = 900030; //名称重复
+
+    int ERROR_USER_IS_ADMINISTRATOR = 900031; //用户为管理员，不允许退出
 }

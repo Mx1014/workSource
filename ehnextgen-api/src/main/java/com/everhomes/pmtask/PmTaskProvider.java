@@ -86,6 +86,8 @@ public interface PmTaskProvider {
 
 	PmTaskOrder findPmTaskOrderByTaskId(Long taskId);
 
+	PmTaskOrder findPmTaskOrderByBizOrderNum(String BizOrderNum);
+
 	void clearOrderDetails();
 
 }

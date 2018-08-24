@@ -107,10 +107,6 @@
 	                </configuration>
 	            </plugin>
 	            <plugin>
-	                <groupId>org.springframework.boot</groupId>
-	                <artifactId>spring-boot-maven-plugin</artifactId>
-	            </plugin>
-	            <plugin>
 	                 <groupId>org.codehaus.mojo</groupId>
 	                 <artifactId>properties-maven-plugin</artifactId>
 					<version>${properties-maven-plugin.version}</version>
@@ -128,25 +124,6 @@
 	                     </execution>
 	                 </executions>
 	            </plugin>
-	            
-	            <plugin>
-	                <groupId>org.apache.maven.plugins</groupId>
-	                <artifactId>maven-javadoc-plugin</artifactId>
-	                <configuration>
-	                  <additionalparam>-Xdoclint:none</additionalparam>
-	                </configuration>
-	<!--                  
-	                <executions>
-	                    <execution>
-	                        <id>attach-javadocs</id>
-	                        <phase>deploy</phase>
-	                        <goals>
-	                            <goal>jar</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	-->                
-	            </plugin>
 	            <!-- explicitly define maven-deploy-plugin after other to force exec order -->
 	            <plugin>
 	                <artifactId>maven-deploy-plugin</artifactId>
@@ -160,7 +137,19 @@
 	                    </execution>
 	                </executions>
 	            </plugin>            
-	            
+	            <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 	        </plugins>
     </build>
 
