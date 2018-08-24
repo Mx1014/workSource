@@ -185,13 +185,16 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private boolean checkVersion(String settingVersionStr) {
         if (null != settingVersionStr) {
             try {
-                Version requestVersion = null;
-                Version settingVer = Version.fromVersionString(UserContext.current().getVersion());
+                Version settingVer = Version.fromVersionString(settingVersionStr);
                 String sgemenConfig = configurationProvider.getValue(ConfigConstants.REMIND_VERSION_SEGMEN, "5.9.0");
                 String[] versionSegs = StringUtils.split(sgemenConfig, ";");
                 //如果UserContext 获取不到version或者version不合法,就当做最新版本.用versionSegs的最后一个版本
+                Version requestVersion = Version.fromVersionString(versionSegs[versionSegs.length-1]);
                 try{
-                	requestVersion = Version.fromVersionString(UserContext.current().getVersion());
+                	//0.0.0是网页请求之类的,设置为最新版本
+                	if(!UserContext.current().getVersion().equals("0.0.0")){
+                		requestVersion = Version.fromVersionString(UserContext.current().getVersion());
+                	}
                 }catch(InvalidParameterException e){
                 	requestVersion = Version.fromVersionString(versionSegs[versionSegs.length-1]);
                 }
