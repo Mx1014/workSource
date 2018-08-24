@@ -1,5 +1,6 @@
 CREATE TABLE `eh_zhenzhihui_user_info` (
   `id` BIGINT NOT NULL,
+  `name` VARCHAR (62) NOT NULL DEFAULT '' COMMENT '姓名',
   `identify_token` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '证件号码',
   `identify_type` INTEGER NOT NULL DEFAULT 10 COMMENT '证件类型',
   `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_users',
