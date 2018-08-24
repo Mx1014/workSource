@@ -176,7 +176,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/createEnterpriseApproval</b>
      * <p>OA 新增审批</p>
-     * @return
      */
     @RequestMapping("createEnterpriseApproval")
     @RestReturn(value=EnterpriseApprovalDTO.class)
