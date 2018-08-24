@@ -9,6 +9,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.message.MessageService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.announcement.AnnouncementDetailActionData;
 import com.everhomes.rest.announcement.AnnouncementLocalStringCode;
 import com.everhomes.rest.announcement.AnnouncementNotificationTemplateCode;
 import com.everhomes.rest.app.AppConstants;
@@ -91,10 +92,9 @@ public class AnnouncementNoticeJob extends QuartzJobBean {
         List<Integer> status = new ArrayList<Integer>();
         status.add(AuthFlag.AUTHENTICATED.getCode());
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        ActivityDetailActionData actionData = new ActivityDetailActionData();
-        actionData.setForumId(postDTO.getForumId());
-        actionData.setTopicId(postDTO.getId());
-        String url = RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+        AnnouncementDetailActionData actionData = new AnnouncementDetailActionData();
+        actionData.setAnnouncementId(postDTO.getId());
+        String url = RouterBuilder.build(Router.BULLETIN_DETAIL, actionData);
         Map map = new HashMap();
         map.put("subject", postDTO.getSubject());
         do {

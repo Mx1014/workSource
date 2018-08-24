@@ -233,6 +233,9 @@ public enum Router {
     BULLETIN_OWN_BY_ORG(ActionType.NOTICE_MANAGERMENT,
             "zl://bulletin/own-by-org", NoParamActionData.class),
 
+    BULLETIN_DETAIL(ActionType.ANNOUNCEMENT_DETAIL,
+            "zl://bulletin/detail", NoParamActionData.class),
+
     /**
      * resource-reservation
      */
