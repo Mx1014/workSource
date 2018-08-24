@@ -5004,23 +5004,28 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setName(cmd.getCommunityName());
 		community.setAliasName(cmd.getAliasName());
 		community.setAddress(cmd.getAddress());
+		community.setCommunityNumber(cmd.getCommunityNumber());
+
 //		面积数据由房源的面积数据累加得来，不接受直接修改
 //		community.setAreaSize(cmd.getAreaSize());
 //		community.setRentArea(cmd.getRentArea());
 //		community.setFreeArea(cmd.getFreeArea());
 //		community.setChargeArea(cmd.getChargeArea());
-		community.setCommunityNumber(cmd.getCommunityNumber());
 		
 		if (cmd.getCityId() != null) {
-			community.setCityId(cmd.getCityId());
 			Region region = regionProvider.findRegionById(cmd.getCityId());
+			checkRegionIsNull(region);
+			community.setCityId(cmd.getCityId());
 			community.setCityName(region.getName());
 		}
+		
 		if (cmd.getAreaId() != null) {
-			community.setAreaId(cmd.getAreaId());
 			Region region = regionProvider.findRegionById(cmd.getAreaId());
+			checkRegionIsNull(region);
+			community.setAreaId(cmd.getAreaId());
 			community.setAreaName(region.getName());
-		}	
+		}
+		
 		communityProvider.updateCommunity(community);
 		//更新园区项目分类
 		Integer namespaceId = cmd.getNamespaceId();
@@ -5047,6 +5052,14 @@ public class CommunityServiceImpl implements CommunityService {
 				rca.setResourceType(cmd.getResourceType());
 				communityProvider.createResourceCategoryAssignment(rca);
 			}
+		}
+	}
+
+	private void checkRegionIsNull(Region region) {
+		if(null == region) {
+			LOGGER.error("Region not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Region not found.");
 		}
 	}
 

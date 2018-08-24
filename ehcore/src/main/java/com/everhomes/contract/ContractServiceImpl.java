@@ -848,9 +848,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getChargingItems() != null) {
 			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
 				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
-				List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
+				/*List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
 						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId(), null);
-				Long billGroupId = groupRules.get(0).getBillGroupId();
+				Long billGroupId = groupRules.get(0).getBillGroupId();*/
+				
+				Long billGroupId = cmd.getChargingItems().get(i).getBillGroupId();
+				
 				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
 				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
 
@@ -2467,13 +2470,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						String endTimeByPeriod = "";
 						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
 						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
-						if ((contract.getContractStartDate()).after(chargingItems.get(i).getChargingExpiredTime())) {
-							endTimeByDay=yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
-						}else {
-							endTimeByDay=yyyyMMdd.format(contract.getContractStartDate());
-							endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
-						}
+						
+						//35563 【合同管理2.8】查看退约的合同，费用收取方式字段，收取时间未显示 by djm
+						endTimeByDay=yyyyMMdd.format(contract.getDenunciationTime());
+						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
+						
 						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
 						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);

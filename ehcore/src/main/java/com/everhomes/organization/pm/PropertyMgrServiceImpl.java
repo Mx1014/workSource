@@ -70,6 +70,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAddress;
@@ -102,6 +103,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.BillingAccountHelper;
@@ -164,6 +166,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.ApproveMemberCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
@@ -480,6 +483,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -632,6 +636,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
+   	@Autowired
+   	private ContractBuildingMappingProvider contractBuildingMappingProvider;
    	
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
@@ -2907,22 +2914,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (latestEndDateContract!=null) {
         	response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
-        
+        //关联的预定计划
         if (propertyMgrProvider.isInvolvedWithReservation(cmd.getId())) {
         	response.setReservationInvolved((byte)1);
 		}else {
 			response.setReservationInvolved((byte)0);
 		}
-        
-        List<CustomerEntryInfo> customerEntryInfos = enterpriseCustomerProvider.findActiveCustomerEntryInfoByAddressId(address.getId());
-        if (customerEntryInfos!=null && customerEntryInfos.size()>0) {
-			response.setEnterpriseCustomerInvolved((byte)1);
-		}else {
+        //关联的企业客户
+        List<EnterpriseCustomer> customers = getApartmentRelatedEnterpriseCustomers(cmd.getId());
+        if(customers != null && customers.size() > 0) {
+        	response.setEnterpriseCustomerInvolved((byte)1);
+        } else {
 			response.setEnterpriseCustomerInvolved((byte)0);
-		}
-        
-        List<OrganizationOwnerAddress> organizationOwnerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(address.getNamespaceId(), address.getId());
-        if (organizationOwnerAddresses!=null && organizationOwnerAddresses.size()>0) {
+		} 
+        //关联的个人客户
+        List<OrganizationOwnerDTO> individualCustomerList = getApartmentRelatedIndividualCustomers(address.getNamespaceId(), address.getId());
+        if (individualCustomerList!=null && individualCustomerList.size()>0) {
         	response.setIndividualCustomerInvolved((byte)1);
 		}else {
 			response.setIndividualCustomerInvolved((byte)0);
@@ -2934,7 +2941,50 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         return response;
     }
     
-    //寻找与房源关联的有效合同中，结束日期最晚的合同
+    private List<OrganizationOwnerDTO> getApartmentRelatedIndividualCustomers(Integer namespaceId, Long addressId) {
+	    List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
+	    if (organizationOwnerAddressesMappings != null && organizationOwnerAddressesMappings.size()>0) {
+	    	List<OrganizationOwnerDTO> individualCustomerList = organizationOwnerAddressesMappings.stream().map(this::convert).collect(Collectors.toList());
+	    	return individualCustomerList;
+	    }
+	    return null;
+	}
+
+	//  在门牌管理页面中新增企业客户信息tab页，该门牌关联的企业信息来源于3处，详见!新增企业客户信息tab.png!：
+	//  a) 企业客户基本信息中关联了楼栋门牌的企业
+	//  b) 入驻信息tab页中关联了楼栋门牌的企业
+	//  c) 合同中关联了楼栋门牌的企业；
+    private List<EnterpriseCustomer> getApartmentRelatedEnterpriseCustomers(Long addressId) {
+    	Set<Long> customerIds = new HashSet<>();
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+
+        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByAddress(addressId);
+        if(mappings != null && mappings.size() > 0) {
+            mappings.forEach(mapping -> {
+                Contract contract = contractProvider.findContractById(mapping.getContractId());
+                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+                        && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
+                        && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    customerIds.add(contract.getCustomerId());
+                }
+            });
+        }
+        List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.findActiveCustomerEntryInfoByAddressId(addressId);
+        if(entryInfos != null && entryInfos.size() > 0) {
+            entryInfos.forEach(entryInfo -> {
+                if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(entryInfo.getCustomerType()))) {
+                    customerIds.add(entryInfo.getCustomerId());
+                }
+            });
+        }
+        if(customerIds != null && customerIds.size() > 0) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomers(customerIds);
+            return customers;
+        }
+		return null;
+	}
+
+	//寻找与房源关联的有效合同中，结束日期最晚的合同
     private Contract findLatestEndDateContract(Long addressId){
     	Contract latestEndDateContract = null;
         List<Contract> contracts = contractProvider.listContractsByAddressId(addressId);
