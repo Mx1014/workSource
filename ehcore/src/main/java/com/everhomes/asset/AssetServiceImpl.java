@@ -928,7 +928,7 @@ public class AssetServiceImpl implements AssetService {
              cmd.setCategoryId(assetCategoryId);
          }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
-        , cmd.getCategoryId());
+        , cmd.getCategoryId(), cmd.getBillGroupId());
     }
 
     @Override
