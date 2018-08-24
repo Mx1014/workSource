@@ -79,6 +79,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -184,10 +185,16 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private boolean checkVersion(String settingVersionStr) {
         if (null != settingVersionStr) {
             try {
-                Version requestVersion = Version.fromVersionString(UserContext.current().getVersion());
+                Version requestVersion = null;
                 Version settingVer = Version.fromVersionString(UserContext.current().getVersion());
                 String sgemenConfig = configurationProvider.getValue(ConfigConstants.REMIND_VERSION_SEGMEN, "5.9.0");
                 String[] versionSegs = StringUtils.split(sgemenConfig, ";");
+                //如果UserContext 获取不到version或者version不合法,就当做最新版本.用versionSegs的最后一个版本
+                try{
+                	requestVersion = Version.fromVersionString(UserContext.current().getVersion());
+                }catch(InvalidParameterException e){
+                	requestVersion = Version.fromVersionString(versionSegs[versionSegs.length-1]);
+                }
                 for (int i = 0; i < versionSegs.length; i++) {
                     Version segmenVersion = Version.fromVersionString(versionSegs[i]);
                     long segmenValue = Version.encodeValue(segmenVersion.getMajor(), segmenVersion.getMinor(), segmenVersion.getRevision());
