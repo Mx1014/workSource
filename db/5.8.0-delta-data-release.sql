@@ -36,6 +36,18 @@
 -- AUTHOR: 严军 2018年8月17日
 -- REMARK: 1、备份表eh_service_modules 和 eh_portal_items
 
+-- AUTHOR: 杨崇鑫 2018年8月23日
+-- REMARK：issue-36437: 修复【物业缴费6.3-5.8.0beta】【历史数据】查看域空间配置，发现之前已经建立合同->缴费，没有显示
+-- REMARK: 1、备份表eh_service_module_apps（包括独立部署环境）
+-- REMARK: 2、在每个环境（包括独立部署环境）执行以下查询sql
+-- select DISTINCT(a.origin_id), t.asset_category_id, t.contract_category_id from eh_service_module_apps a left join (
+-- 		select DISTINCT(b.asset_category_id),b.contract_category_id from eh_service_module_apps left join eh_asset_module_app_mappings b on instance_config like concat('%"categoryId":', b.asset_category_id,'%')
+-- 		where module_id=20400 and instance_config not like '%contractOriginId%'  and b.asset_category_id is not null order by asset_category_id 
+-- 		) as t on a.instance_config like concat('%"categoryId":', t.contract_category_id,'%')
+-- where a.module_id=21200 and t.asset_category_id is not null;
+-- REMARK：3、找杨崇鑫生成update语句执行
+-- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":\"""&A1&"\""}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
