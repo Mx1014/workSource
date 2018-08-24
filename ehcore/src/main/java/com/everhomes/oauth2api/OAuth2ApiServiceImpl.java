@@ -5,6 +5,12 @@ import java.util.stream.Collectors;
 
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.user.ZhenZhiHuiUserDetailInfo;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfo;
+import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfoProvider;
+import com.everhomes.zhenzhihui.ZhenzhihuiUserInfo;
+import com.everhomes.zhenzhihui.ZhenzhihuiUserInfoProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +46,12 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
     @Autowired
     private OrganizationServiceImpl organizationServiceImpl;
 
+    @Autowired
+    private ZhenzhihuiUserInfoProvider zhenzhihuiUserInfoProvider;
+
+    @Autowired
+    private ZhenzhihuiEnterpriseInfoProvider zhenzhihuiEnterpriseInfoProvider;
+
     @Override
     public UserInfo getUserInfoForInternal(Long grantorUid) {
         return userService.getUserSnapshotInfoWithPhone(grantorUid);
@@ -52,13 +64,31 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
     }
 
     @Override
-    public UserInfo getUserInfoForZhenZhiHui(Long grantorUid) {
+    public ZhenZhiHuiUserDetailInfo getUserInfoForZhenZhiHui(Long grantorUid) {
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(grantorUid);
         List<OrganizationSimpleDTO> organizationSimpleDTOS = this.organizationServiceImpl.listUserRelateOrganizations(grantorUid);
         if (!CollectionUtils.isEmpty(organizationSimpleDTOS)) {
             userInfo.setOrganizationList(organizationSimpleDTOS);
         }
-        return userInfo;
+        ZhenZhiHuiUserDetailInfo zhenZhiHuiUserDetailInfo = ConvertHelper.convert(userInfo, ZhenZhiHuiUserDetailInfo.class);
+        List<ZhenzhihuiUserInfo> zhenzhihuiUserInfos = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userInfo.getId());
+        if (!CollectionUtils.isEmpty(zhenzhihuiUserInfos)) {
+            ZhenzhihuiUserInfo zhenzhihuiUserInfo = zhenzhihuiUserInfos.get(0);
+            zhenZhiHuiUserDetailInfo.setIdentifyType(zhenzhihuiUserInfo.getIdentifyType());
+            zhenZhiHuiUserDetailInfo.setIdentifyToken(zhenzhihuiUserInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setName(zhenzhihuiUserInfo.getName());
+            zhenZhiHuiUserDetailInfo.setEmail(zhenzhihuiUserInfo.getEmail());
+        }
+        List<ZhenzhihuiEnterpriseInfo> zhenzhihuiEnterpriseInfos = this.zhenzhihuiEnterpriseInfoProvider.listZhenzhihuiEnterpriseInfoByUserId(userInfo.getId());
+        if (!CollectionUtils.isEmpty(zhenzhihuiEnterpriseInfos)) {
+            ZhenzhihuiEnterpriseInfo zhenzhihuiEnterpriseInfo = zhenzhihuiEnterpriseInfos.get(0);
+            zhenZhiHuiUserDetailInfo.setEnterpriseName(zhenzhihuiEnterpriseInfo.getEnterpriseName());
+            zhenZhiHuiUserDetailInfo.setEnterpriseToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setCorporationName(zhenzhihuiEnterpriseInfo.getCorporationName());
+            zhenZhiHuiUserDetailInfo.setCorporationToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setCorporationType(zhenzhihuiEnterpriseInfo.getIdentifyType());
+        }
+        return zhenZhiHuiUserDetailInfo;
     }
 
     @Override
