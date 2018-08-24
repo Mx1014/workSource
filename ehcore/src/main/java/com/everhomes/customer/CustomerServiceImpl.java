@@ -63,7 +63,6 @@ import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
@@ -257,7 +256,6 @@ import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
-import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.scheduler.RunningFlag;
@@ -2781,7 +2779,8 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (dto.getAddressId() != null) {
             Address address = addressProvider.findAddressById(dto.getAddressId());
-            if (address != null) {
+            // only hook active address info
+            if (address != null && AddressAdminStatus.ACTIVE.equals(AddressAdminStatus.fromCode(address.getStatus()))) {
                 dto.setAddressName(address.getAddress());
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddressId(address.getId());

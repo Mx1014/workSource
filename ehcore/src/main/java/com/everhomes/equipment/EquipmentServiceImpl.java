@@ -490,8 +490,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.updateEquipmentStandard(standard);
 				equipmentStandardSearcher.feedDoc(standard);
 			}
-
-			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
+			//issue-36509 remove deal this logic for zijing project
+//			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		}
 		createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());//创建新的巡检对象和标准关联表
@@ -1138,8 +1138,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
-			//删除计划关联表中的该设备
-			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+			//删除计划关联表中的该设备 issue-36509 紫荆要求不删
+//			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 			List<Long> updateStandardIds = increamentUpdateEquipmentStandardMap(user, equipment, eqStandardMap);
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());

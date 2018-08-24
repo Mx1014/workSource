@@ -669,7 +669,12 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
             // 转换
              Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-             cmd.setCategoryId(assetCategoryId);
+             //issue-36480 【物业缴费6.5】合同应用没有关联物业缴费应用，签合同的时候添加计价条款，账单组显示了内容
+             if(assetCategoryId != null) {
+            	 cmd.setCategoryId(assetCategoryId);
+             }else {
+            	 return null;
+             }
          }
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
     }
@@ -928,7 +933,7 @@ public class AssetServiceImpl implements AssetService {
              cmd.setCategoryId(assetCategoryId);
          }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
-        , cmd.getCategoryId());
+        , cmd.getCategoryId(), cmd.getBillGroupId());
     }
 
     @Override
