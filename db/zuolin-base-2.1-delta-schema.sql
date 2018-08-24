@@ -48,3 +48,14 @@ CREATE TABLE `eh_recommend_apps` (
 
 ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
 
+-- 服务广场通用配置表
+CREATE TABLE `eh_launch_pad_configs` (
+  `id` bigint(20) NOT NULL,
+  `scope_type` tinyint(4) NOT NULL,
+  `scope_id` bigint(20) NOT NULL,
+  `navigator_all_icon_uri` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_scope_id` (`scope_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
