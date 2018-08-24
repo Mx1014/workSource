@@ -751,7 +751,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private RemindDTO convertToRemindDTO(Remind remind, String shareColour, boolean queryShares) {
         RemindDTO remindDTO = ConvertHelper.convert(remind, RemindDTO.class);
         if (remind.getPlanDate() != null) {
-            remindDTO.setPlanDate(remind.getPlanDate().getTime());
+            remindDTO.setPlanTime(DateStatisticHelper.getDateTimeLong(remind.getPlanDate()));
+            //plandate只保留日期部分的时间戳
+            remindDTO.setPlanDate(remind.getPlanDate().getTime() - remindDTO.getPlanTime());
         }
         remindDTO.setRemindDisplayName(remind.getRemindType());
         if (remind.getRemindTime() != null) {

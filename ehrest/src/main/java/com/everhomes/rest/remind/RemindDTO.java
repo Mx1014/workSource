@@ -206,4 +206,12 @@ public class RemindDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getPlanTime() {
+		return planTime;
+	}
+
+	public void setPlanTime(Long planTime) {
+		this.planTime = planTime;
+	}
 }
