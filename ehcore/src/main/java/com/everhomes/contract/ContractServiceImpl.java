@@ -884,16 +884,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						djChargingVariable.setVariableName("单价(含税)");
 						djChargingVariable.setVariableValue(dj.toString());
 						newChargingVariableList.getChargingVariables().add(djChargingVariable);
-						ChargingVariable djbhsChargingVariable = new ChargingVariable();
-						djbhsChargingVariable.setVariableIdentifier("djbhs");
-						djbhsChargingVariable.setVariableName("单价(不含税)");
-						djbhsChargingVariable.setVariableValue(djbhs.toString());
-						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 						ChargingVariable taxRateChargingVariable = new ChargingVariable();
 						taxRateChargingVariable.setVariableIdentifier("taxRate");
 						taxRateChargingVariable.setVariableName("税率");
 						taxRateChargingVariable.setVariableValue(taxRate.toString());
 						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable djbhsChargingVariable = new ChargingVariable();
+						djbhsChargingVariable.setVariableIdentifier("djbhs");
+						djbhsChargingVariable.setVariableName("单价(不含税)");
+						djbhsChargingVariable.setVariableValue(djbhs.toString());
+						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 						ChargingVariable mjChargingVariable = new ChargingVariable();
 						mjChargingVariable.setVariableIdentifier("mj");
 						mjChargingVariable.setVariableName("面积");
@@ -925,16 +925,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						gdjeChargingVariable.setVariableName("固定金额(含税)");
 						gdjeChargingVariable.setVariableValue(gdje.toString());
 						newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
-						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
-						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
-						gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
-						gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
-						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 						ChargingVariable taxRateChargingVariable = new ChargingVariable();
 						taxRateChargingVariable.setVariableIdentifier("taxRate");
 						taxRateChargingVariable.setVariableName("税率");
 						taxRateChargingVariable.setVariableValue(taxRate.toString());
 						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+						gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
+						gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
+						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 
 						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
 					}
@@ -1309,7 +1309,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
-				// add by tangcen
+				// add by tangcen ContractBuildingMapping中收费面积是AreaSize
 				oldApartments.add(" 门牌：" + apartment.getApartmentName() + " 收费面积：" + apartment.getAreaSize());
 			});
 		}
@@ -1335,7 +1335,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (buildingApartments != null && buildingApartments.size() > 0) {
 			for (BuildingApartmentDTO buildingApartment : buildingApartments) {
 				// add by tangcen
-				newApartments.add(buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
+				//newApartments.add(buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
+				newApartments.add(" 门牌：" + buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				// totalSize = totalSize + size;
 				BigDecimal chargeArea = new BigDecimal(Double.toString(size));
@@ -2000,10 +2001,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		Contract exist = checkContract(cmd.getId());
-		contractProvider.updateContract(contract);
+		//contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-		contractSearcher.feedDoc(contract);
+		//contractSearcher.feedDoc(contract);
 		
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
@@ -2098,11 +2099,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 				}
+				
 				parentContract.setStatus(ContractStatus.HISTORY.getCode());
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 			}
 		}
+		
+
+		//入场报错合同变为正常合同
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
 	}
 
 	@Override

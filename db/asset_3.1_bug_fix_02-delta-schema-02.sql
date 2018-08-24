@@ -775,14 +775,4 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-�
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
 
--- AUTHOR: 唐岑
--- REMARK: 资产管理V3.1 2018年8月23日16:22:55
--- REMARK: 解决issue-36278，房源管理查询速度慢的问题，同时向eh_addresses表中补充building_id、community_name两个字段
-ALTER TABLE `eh_addresses` ADD COLUMN `building_id` bigint(20) NULL DEFAULT NULL COMMENT '房源所在楼宇id' AFTER `community_id`;
-
-ALTER TABLE `eh_addresses` ADD COLUMN `community_name` varchar(64) NULL DEFAULT NULL COMMENT '房源所在园区名称' AFTER `community_id`;
-
--- AUTHOR: 黄良铭 2018年08月23日
--- REMARK: #36462 
-ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
 -- --------------------- SECTION END ---------------------------------------------------------

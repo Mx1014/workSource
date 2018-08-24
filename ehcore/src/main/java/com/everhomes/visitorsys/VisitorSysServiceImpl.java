@@ -384,13 +384,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(VisitorsysStatus.HAS_VISITED != visitStatus
                 || ownerType!=VisitorsysOwnerType.COMMUNITY
                 || sourceType != VisitorsysSourceType.OUTER
-                || visitorsysNotifyThirdType != VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
+                || visitorsysNotifyThirdType == VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
             return;
         }
         String callbackurl = configurationProvider.getValue(visitor.getNamespaceId(),"visitorsys.lufu.callback", "");
         Map<String,String> params = new HashMap();
         params.put("visitorToken", WebTokenGenerator.getInstance().toWebToken(visitor.getId()));
         params.put("status", visitor.getVisitStatus()+"");
+        AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByNamespaceId(visitor.getNamespaceId());
+        App app = appProvider.findAppByKey(mapping.getAppKey());
+        params.put("appKey", app.getAppKey());
+        String s = SignatureHelper.computeSignature(params, app.getSecretKey());
+        params.put("signature", s);
         int i = 0;
         while(i<3) {
             try {

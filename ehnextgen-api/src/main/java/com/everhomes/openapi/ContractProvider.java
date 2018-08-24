@@ -124,6 +124,10 @@ public interface ContractProvider {
 
 	Long findCategoryIdByNamespaceId(Integer namespaceId);
 
+	Integer getRelatedContractCountByAddressIds(List<Long> addressIdList);
+
+	Double getTotalRentByAddressIds(List<Long> addressIdList);
+
 	
 
 	
