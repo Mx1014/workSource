@@ -2,10 +2,6 @@
 package com.everhomes.rest.announcement;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.AttachmentDTO;
-import com.everhomes.rest.forum.ForumModuleType;
-import com.everhomes.rest.forum.InteractFlag;
-import com.everhomes.rest.forum.StickFlag;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.util.StringHelper;
 
