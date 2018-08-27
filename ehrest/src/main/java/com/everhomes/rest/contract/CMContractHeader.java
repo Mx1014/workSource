@@ -51,8 +51,18 @@ public class CMContractHeader {
     private String ContractAmt;
 
     private String Recordstatus;
+    
+    private String SignDate;
 
-    public String getRentalID() {
+    public String getSignDate() {
+		return SignDate;
+	}
+
+	public void setSignDate(String signDate) {
+		SignDate = signDate;
+	}
+
+	public String getRentalID() {
         return RentalID;
     }
 

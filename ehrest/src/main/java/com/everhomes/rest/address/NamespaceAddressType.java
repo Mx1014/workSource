@@ -9,7 +9,7 @@ package com.everhomes.rest.address;
  * </ul>
  */
 public enum NamespaceAddressType {
-	JINDIE("jindie"), SHENZHOU("shenzhou"), EBEI("ebei");
+	JINDIE("jindie"), SHENZHOU("shenzhou"), EBEI("ebei"), RUIAN_CM("ruian_cm");
     
     private String code;
     private NamespaceAddressType(String code) {
