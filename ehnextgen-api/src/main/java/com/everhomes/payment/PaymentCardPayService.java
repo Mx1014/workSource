@@ -5,7 +5,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
 import com.everhomes.rest.payment.UpdateAccountSettingCommand;
-import com.everhomes.rest.rentalv2.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderCommand;
 
 import java.util.List;
 

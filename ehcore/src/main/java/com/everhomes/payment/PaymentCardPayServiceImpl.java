@@ -1,27 +1,38 @@
 package com.everhomes.payment;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.OwnerType;
-import com.everhomes.rest.order.PaymentUserStatus;
-import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
 import com.everhomes.rest.payment.UpdateAccountSettingCommand;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +43,14 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     private com.everhomes.paySDK.api.PayService payServiceV2;
     @Autowired
     private PaymentCardProvider paymentCardProvider;
-
+    @Autowired
+    protected GeneralOrderService orderService;
+    @Autowired
+    private UserProvider userProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    @Value("${server.contextPath:}")
+    private String contextPath;
     @Override
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
         String userPrefix = "EhOrganizations";
@@ -117,11 +135,129 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
                     "暂未绑定收款账户");
         }
         //2、组装报文，发起下单请求
+        PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd);
 
+        //3、组装支付方式
+        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
         return null;
     }
 
-    Long getPayeeAccountByCommunityId(Long communityId){
+    private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
+        OrderCommandResponse response = orderCommandResponse.getPayResponse();
+        PreOrderDTO dto = ConvertHelper.convert(response, PreOrderDTO.class);
+        dto.setAmount(cmd.getAmount());
+        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+        if (paymentMethods != null)
+            dto.setPayMethod(paymentMethods.stream().map(r->{
+                PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                convert.setExtendInfo(getPayMethodExtendInfo());
+                return convert;
+            }).collect(Collectors.toList()));
+        dto.setOrderId(cmd.getOrderId());
+        return dto;
+    }
+
+    private String getPayMethodExtendInfo(){
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
+        String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
+
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        return String.format(format, payV2HomeUrl+getOrderInfoUri);
+    }
+
+    private PurchaseOrderCommandResponse createOrder(PreOrderCommand preOrderCommand){
+        CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(preOrderCommand);
+        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
+        }
+
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+        return orderCommandResponse;
+    }
+
+    private CreatePurchaseOrderCommand preparePaymentBillOrder(PreOrderCommand cmd) {
+        CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+        //PaymentParamsDTO转为Map
+        Map<String, String> flattenMap = new HashMap<>();
+        StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
+
+        preOrderCommand.setAmount(cmd.getAmount());
+        String accountCode = "NS"+cmd.getNamespaceId();
+        preOrderCommand.setAccountCode(accountCode);
+        preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        preOrderCommand.setBusinessOrderType(cmd.getOrderType());
+        BusinessPayerType payerType = BusinessPayerType.USER;
+        preOrderCommand.setBusinessPayerType(payerType.getCode());
+        preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+        String businessPayerParams = getBusinessPayerParams(cmd);
+        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+        preOrderCommand.setPaymentPayeeId(cmd.getBizPayeeId());
+        preOrderCommand.setPaymentParams(flattenMap);
+
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.paymentCard", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        preOrderCommand.setCallbackUrl(backUrl);
+        preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+        preOrderCommand.setGoodsName("一卡通");
+        preOrderCommand.setGoodsDescription(null);
+        preOrderCommand.setIndustryName(null);
+        preOrderCommand.setIndustryCode(null);
+        preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        preOrderCommand.setOrderRemark1("一卡通");
+        preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
+        preOrderCommand.setOrderRemark4(null);
+        preOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+        return preOrderCommand;
+
+    }
+
+    private String getBusinessPayerParams(PreOrderCommand cmd) {
+
+        Long businessPayerId = UserContext.currentUserId();
+
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
+    }
+
+    /*
+     * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+       CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+     */
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
+
+    private Long getPayeeAccountByCommunityId(Long communityId){
         List<PaymentCardAccount> accounts = paymentCardProvider.listPaymentCardAccounts(EntityType.COMMUNITY.getCode(),communityId);
         if (accounts != null && accounts.size() > 0)
             return accounts.get(0).getAccountId();

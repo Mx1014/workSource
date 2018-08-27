@@ -127,6 +127,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	private LocaleStringService localeStringService;
     @Autowired
     private CoordinationProvider coordinationProvider;
+    @Autowired
+	private PaymentCardPayService payService;
+
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
@@ -251,13 +254,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 
 		preOrderCommand.setPayerId(user.getId());
 		preOrderCommand.setNamespaceId(user.getNamespaceId());
-//		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-//				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
-//				UserContext.current().getUser().getLocale(),
-//				"activity roster pay");
-//		preOrderCommand.setSummary(temple);
-		//不再维护
-		//PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+		//paymentCardProvider.updatePaymentCardRechargeOrder();
 		return null;
 	}
 

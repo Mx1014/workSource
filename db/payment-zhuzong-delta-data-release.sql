@@ -1,0 +1,2 @@
+-- by st.zheng 一卡通
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ( 'pay.v2.callback.url.paymentCard', '/payment/payNotify', '一卡通新支付回调接口', '0', NULL, NULL);
