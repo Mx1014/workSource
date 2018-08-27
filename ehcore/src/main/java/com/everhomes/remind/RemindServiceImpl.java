@@ -968,7 +968,10 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                                     UserContext.current().getUser().getLocale(),
                                     "The remind is not exist"));
         }
-
+        //如果日程状态已经改变了,就直接返回
+        if(remind.getStatus().equals(cmd.getStatus())){
+        	return response;
+        }
         Integer nextOrder = remindProvider.getNextRemindDefaultOrder(namespaceId, remind.getOwnerType(), remind.getOwnerId(), UserContext.currentUserId(), cmd.getStatus());
         Integer order = nextOrder != null ? nextOrder : Integer.valueOf(1);
 
