@@ -1,5 +1,5 @@
 -- add by st.zheng 增加一卡通账号设置
-CREATE TABLE `eh_payment_card_account` (
+CREATE TABLE `eh_payment_card_accounts` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int(11) NULL ,
 `owner_type`  varchar(64) NULL ,
