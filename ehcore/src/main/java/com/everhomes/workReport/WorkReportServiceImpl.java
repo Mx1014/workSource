@@ -460,12 +460,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
         ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        LocalDateTime startTime = WorkReportUtil.getSettingTime(cmd.getReportType(), cmd.getReportTime(),
-                setting.getStartType(), setting.getStartMark(), setting.getStartTime());
-        LocalDateTime endTime = WorkReportUtil.getSettingTime(cmd.getReportType(), cmd.getReportTime(),
-                setting.getEndType(), setting.getEndMark(), setting.getEndTime());
+
         //  whether the post time is right
-        if(!checkPostTime(LocalDateTime.now(), startTime, endTime))
+        if(checkPostTime(cmd.getReportTime(), report.getReportType(), setting))
             throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME,
                     "The post time is not in the valid range");
 
@@ -515,14 +512,19 @@ public class WorkReportServiceImpl implements WorkReportService {
         return dto;
     }
 
-    private boolean checkPostTime(LocalDateTime postTime, LocalDateTime startTime, LocalDateTime endTime) {
+    private boolean checkPostTime(Long reportTime, Byte reportType, ReportValiditySettingDTO setting) {
+        LocalDateTime postTime = LocalDateTime.now();
+        LocalDateTime startTime = WorkReportUtil.getSettingTime(reportType, reportTime, setting.getStartType(),
+                setting.getStartMark(), setting.getStartTime());
+        LocalDateTime endTime = WorkReportUtil.getSettingTime(reportType, reportTime, setting.getEndType(),
+                setting.getEndMark(), setting.getEndTime());
         if (startTime.isBefore(postTime) && endTime.isAfter(postTime))
-            return true;
+            return false;
         if (startTime.isEqual(postTime))
-            return true;
+            return false;
         if (endTime.isEqual(postTime))
-            return true;
-        return false;
+            return false;
+        return true;
     }
 
     private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
@@ -656,6 +658,14 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
 
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+        ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
+        Timestamp reportTime = WorkReportUtil.getReportTime(report.getReportType(), setting);
+        //  todo:下期开始时间注解
+        if(checkPostTime(reportTime.getTime(), report.getReportType(), setting)){
+            throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME_V2,
+                    "已超过截止时间，无法提交。下期汇报将于${开始提交时间}开始提交。");
+        }
+
         GetTemplateBySourceIdCommand formCommand = new GetTemplateBySourceIdCommand();
         formCommand.setNamespaceId(namespaceId);
         formCommand.setOwnerId(report.getOwnerId());
@@ -666,8 +676,8 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         dto.setReportId(report.getId());
         dto.setReportType(report.getReportType());
-        dto.setValiditySetting(JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class));
-        dto.setReportTime(WorkReportUtil.getReportTime(dto.getReportType(), dto.getValiditySetting()));
+        dto.setValiditySetting(setting);
+        dto.setReportTime(reportTime);
         dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
         //  todo:截止日期文本化
         dto.setValidText("写不动了");

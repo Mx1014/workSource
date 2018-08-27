@@ -11,4 +11,6 @@ public interface WorkReportErrorCode {
     int ERROR_NO_READ_PERMISSIONS = 10003;  //  没有阅读权限.
 
     int ERROR_WRONG_POST_TIME = 10004;      //  提交时间未在规定范围内
+
+    int ERROR_WRONG_POST_TIME_V2 = 10005;     //  提交时间未在规定范围内(返回空白页)
 }
