@@ -30,6 +30,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -640,6 +641,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"Invalid paramter of size error: null ");
 	}
 
+	private void checkOwnerTypeOwnerId(String ownerType,Long ownerId){
+		if(null == ownerType || null == ownerId){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of ownerType ownerId: null ");
+		}
+	}
+
+	private void checkOrgId(Long orgId){
+		if(null == orgId){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of orgId: null ");
+		}
+	}
+
 	private void sendMessage(OfficeCubicleSpace space,OfficeCubicleOrder order) {
 		// 发消息 +推送
 
@@ -872,7 +887,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(namespaceId==null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,pageAnchor,pageSize+1);
+		checkOrgId(cmd.getOrgId());
+		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,cmd.getOrgId(),cmd.getOwnerType(),cmd.getOwnerId(),pageAnchor,pageSize+1);
 
 		if (null == cities || cities.size()==0)
 			return null;
@@ -910,6 +926,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
 		checkCityName(cmd.getProvinceName(),cmd.getCityName());
+		checkOrgId(cmd.getOrgId());
 		if(cmd.getId()!=null){
 			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
 			if(officeCubicleCity==null){
@@ -919,6 +936,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCity.setCityName(cmd.getCityName());
 			officeCubicleCity.setProvinceName(cmd.getProvinceName());
 			officeCubicleCity.setIconUri(cmd.getIconUri());
+			officeCubicleCity.setOrgId(cmd.getOrgId());
 			officeCubicleCity.setStatus((byte)2);
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
@@ -987,6 +1005,61 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public ListCitiesResponse copyCities(CopyCitiesCommand cmd) {
-		return null;
+
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		List<OfficeCubicleCity> generalCities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
+
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if(null != cities){
+			cities.stream().forEach(r ->{
+				officeCubicleCityProvider.deleteOfficeCubicleCity(r.getId());
+			});
+		}
+		if(null != generalCities){
+			generalCities.stream().forEach(r ->{
+				r.setOwnerType(cmd.getOwnerType());
+				r.setOwnerId(cmd.getOwnerId());
+				officeCubicleCityProvider.createOfficeCubicleCity(r);
+			});
+		}
+		ListCitiesCommand listcmd = new ListCitiesCommand();
+		listcmd.setOwnerType(cmd.getOwnerType());
+		listcmd.setOwnerId(cmd.getOwnerId());
+		listcmd.setOrgId(cmd.getOrgId());
+		ListCitiesResponse response = this.listCities(listcmd);
+
+		return response;
+	}
+
+	@Override
+	public ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd) {
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		if(null != cities){
+			cities.stream().forEach(r -> {
+				officeCubicleCityProvider.deleteOfficeCubicleCity(r.getId());
+			});
+		}
+		ListCitiesCommand listcmd = new ListCitiesCommand();
+		listcmd.setOrgId(cmd.getOrgId());
+		ListCitiesResponse response = this.listCities(listcmd);
+		return response;
+	}
+
+	@Override
+	public Byte getProjectCustomize(GetCustomizeCommand cmd) {
+
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
+
+		if(null != cities && cities.size() > 0){
+			return TrueOrFalseFlag.TRUE.getCode();
+		} else {
+			List<OfficeCubicleCity> generalCities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
+			if(null != generalCities && generalCities.size() > 0){
+				return TrueOrFalseFlag.TRUE.getCode();
+			}
+		}
+		return TrueOrFalseFlag.FALSE.getCode();
 	}
 }

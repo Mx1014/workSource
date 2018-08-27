@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 页大小</li>
  * <li>ownerType: 所属类型</li>
  * <li>ownerId: 所属项目（为空代表通用配置）</li>
+ * <li>orgId: 管理公司Id</li>
  * </ul>
  */
 public class ListCitiesCommand {
@@ -26,6 +27,7 @@ public class ListCitiesCommand {
 //  标准版兼容通用
     private String ownerType;
     private Long ownerId;
+    private Long orgId;
 
     public String getParentName() {
 		return parentName;
@@ -73,6 +75,14 @@ public class ListCitiesCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override

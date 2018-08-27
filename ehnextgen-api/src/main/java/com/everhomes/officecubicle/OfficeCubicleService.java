@@ -53,4 +53,8 @@ public interface OfficeCubicleService {
 	ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd);
 
 	ListCitiesResponse copyCities(CopyCitiesCommand cmd);
+
+	ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd);
+
+	Byte getProjectCustomize(GetCustomizeCommand cmd);
 }
