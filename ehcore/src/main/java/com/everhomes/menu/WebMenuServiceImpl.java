@@ -400,8 +400,51 @@ public class WebMenuServiceImpl implements WebMenuService {
 			setMenuToAppCategoryDto(dto, webMenus);
 		}
 
+
+		//清除空目录
+		if(dtos != null && dtos.size() > 0){
+			dtos = dtos.stream().filter((dto) -> {
+				boolean removeFlag = removeEmpty(dto);
+				return !removeFlag;
+			}).collect(Collectors.toList());
+		}
+
 		return dtos;
 
+	}
+
+
+	private boolean removeEmpty(AppCategoryDTO dto){
+
+		if(dto == null){
+			return false;
+		}
+
+
+		//1、有下级目录，先遍历下级目录。
+		if(dto.getDtos() != null && dto.getDtos().size() > 0){
+			List<AppCategoryDTO> subDtos = dto.getDtos().stream().filter((subDto) -> {
+				boolean removeFlag = removeEmpty(subDto);
+				return !removeFlag;
+			}).collect(Collectors.toList());
+
+			dto.setDtos(subDtos);
+		}
+
+		//2、处理完下级目录之后，再看看是否剩余非空目录
+		if(dto.getDtos() != null && dto.getDtos().size() > 0){
+			return false;
+		}
+
+
+		//3、有没有菜单
+		if(dto.getMenuDtos() != null && dto.getMenuDtos().size() > 0){
+			return false;
+		}
+
+
+		//4、没有非空目录，也没有菜单，要删除。
+		return true;
 	}
 
 
