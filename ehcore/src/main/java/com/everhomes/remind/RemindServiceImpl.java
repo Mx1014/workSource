@@ -93,6 +93,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -689,7 +690,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             remindProvider.updateRemind(existRemind);
             remindProvider.deleteRemindSharesByRemindId(existRemind.getId());
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind));
-            for (Remind trackRemind : trackReminds) {
+            Iterator<Remind> iterator = trackReminds.iterator();
+            while (iterator.hasNext()) { 
+            	Remind trackRemind = iterator.next();
                 OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(trackRemind.getUserId(), trackRemind.getOwnerId());
                 if (!shareMemberDTOcontainsShareId(cmd.getShareToMembers(), member.getId())) {
                     //取消共享,删日程发消息
