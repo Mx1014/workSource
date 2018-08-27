@@ -104,6 +104,13 @@ ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NUL
 ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `skip_type` TINYINT NOT NULL DEFAULT '0' COMMENT '1-当该服务类型下只有一个服务时，点击服务类型直接进入服务。0-反之';
 
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `type` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '服务联盟类型' ;
+
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_type` VARCHAR(15) NOT NULL DEFAULT 'organization';
+
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` INT(11) NOT NULL DEFAULT '0' ;
+
+
 -- by st.zheng 允许表单为空
 ALTER TABLE `eh_lease_form_requests`
 MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
