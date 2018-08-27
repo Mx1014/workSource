@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 
 public interface DoorAccessProvider {
 
@@ -32,4 +34,5 @@ public interface DoorAccessProvider {
 
 	List<DoorAccess> listDoorAccessByServerId(Long id, Integer count);
 	
+	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd); 
 }

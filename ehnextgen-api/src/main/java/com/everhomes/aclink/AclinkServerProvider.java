@@ -12,8 +12,6 @@ import com.everhomes.rest.aclink.DoorAccessOwnerType;
 
 public interface AclinkServerProvider {
 
-//	List<AclinkServer> listLocalServers(AclinkListLocalServersCommand cmd);
-
 	List<AclinkServer> listLocalServers(CrossShardListingLocator locator, Long ownerId, DoorAccessOwnerType ownerType, String uuid,
 			int count);
 	
@@ -32,5 +30,7 @@ public interface AclinkServerProvider {
 	void deleteLocalServer(Long id);
 
 	AclinkServer findLocalServersByUuid(String uuid);
+
+	List<AclinkServer> queryLocalServers(CrossShardListingLocator locator, AclinkListLocalServersCommand cmd);
 
 }

@@ -80,7 +80,9 @@ public class DoorAccessDTO {
     private Integer maxCount;
     private Integer defualtInvalidDuration;
 
-    public Byte getEnableDuration() {
+
+
+	public Byte getEnableDuration() {
 		return enableDuration;
 	}
 

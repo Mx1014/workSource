@@ -195,7 +195,10 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	public void notifySyncVistorsCommand(NotifySyncVistorsCommand cmd) {
 		DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
 		if(door == null || door.getLocalServerId() == null || door.getLocalServerId() == 0){
-			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "FR-door not found");
+			//太多场景会用到,找不到就打个日志算了,不抛异常  by liuyilin 20180824
+//			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "FR-door not found");
+			LOGGER.info("FR-door not found");
+			return ;
 		}
 		AclinkServer server = aclinkServerProvider.findServerById(door.getLocalServerId());
 		//消息拼装

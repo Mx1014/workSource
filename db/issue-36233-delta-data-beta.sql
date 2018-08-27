@@ -10,7 +10,7 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 
 -- AUTHOR: 刘一麟 2018年8月17日
--- REMARK: 人脸识别摄像头新增所属组织
+-- REMARK: 人脸识别摄像头新增所属组织 补全namespace
 update `eh_aclink_cameras` SET `owner_id` = (SELECT `owner_id` from eh_door_access where `eh_door_access`.`id` = `eh_aclink_cameras`.`door_access_id` ),
 `owner_type` = (SELECT `owner_type` from eh_door_access where `eh_door_access`.`id` = `eh_aclink_cameras`.`door_access_id` ),
 `namespace_id` = (SELECT `namespace_id` from eh_door_access where `eh_door_access`.`id` = `eh_aclink_cameras`.`door_access_id` )  where owner_id is NULL or owner_id = 0;

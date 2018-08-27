@@ -414,60 +414,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
         
-        List<DoorAccess> dacs = doorAccessProvider.queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
-
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
-                if(cmd.getSearch() != null) {
-                    Condition c = Tables.EH_DOOR_ACCESS.NAME.like(cmd.getSearch() + "%").
-                            or(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getSearch() + "%")).
-                            or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like((cmd.getSearch() + "%"))
-                                    );
-                    query.addConditions(c);
-                }
-                
-                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
-                
-                if(cmd.getGroupId() == null) {
-                    //Select door access only
-                    Condition cond = Tables.EH_DOOR_ACCESS.GROUPID.ne(0l)
-                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
-                            .and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
-                    query.addConditions(cond);
-                } else if(cmd.getGroupId().equals(-1l)) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
-                } else if(!cmd.getGroupId().equals(0l)) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
-                }
-                //else select all include groups
-                
-                if(cmd.getDoorType() != null) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
-                }else{
-                	//不传doorType,过滤掉巴士门禁 by liuyilin 20180614
-                	query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_BUS.getCode()));
-                }
-                if(cmd.getServerId() != null){
-                	query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.eq(cmd.getServerId()));
-                }
-                if(cmd.getLinkStatus() != null){
-                	query.addConditions(Tables.EH_DOOR_ACCESS.LINK_STATUS.eq(cmd.getLinkStatus()));
-                }
-                return query;
-            }
+        List<DoorAccessDTO> dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
+        for(DoorAccessDTO dto : dtos) {
+            Long rv = getDoorAccessLastTick(ConvertHelper.convert(dto, DoorAccess.class));
             
-        });
-        
-        List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
-        for(DoorAccess da : dacs) {
-            getDoorAccessLastTick(da);
+            if((rv.longValue()+TASK_TICK_TIMEOUT) > System.currentTimeMillis()) {
+            	dto.setLinkStatus(DoorAccessLinkStatus.SUCCESS.getCode());
+            } else {
+            	dto.setLinkStatus(DoorAccessLinkStatus.FAILED.getCode());
+                }
             
-            DoorAccessDTO dto = ConvertHelper.convert(da, DoorAccessDTO.class);
             //User user = userProvider.findUserById(da.getCreatorUserId());
-            UserInfo user = userService.getUserSnapshotInfoWithPhone(da.getCreatorUserId());
+            UserInfo user = userService.getUserSnapshotInfoWithPhone(dto.getCreatorUserId());
             if(user != null) {
                 String nickName = (user.getNickName() == null ? user.getNickName(): user.getAccountName());
                 dto.setCreatorName(nickName);
@@ -479,8 +437,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 dto.setCreatorPhone(phone);
                 }
             
-            if(da.getGroupid() != 0) {
-                DoorAccess group = doorAccessProvider.getDoorAccessById(da.getGroupid());
+            Aclink aclink = aclinkProvider.getAclinkByDoorId(dto.getId());
+            dto.setVersion(aclink.getFirwareVer());
+            
+            if(dto.getGroupId() > 0) {
+                DoorAccess group = doorAccessProvider.getDoorAccessById(dto.getGroupId());
                 if(group != null) {
                     dto.setGroupId(group.getId());
                     dto.setGroupName(group.getDisplayNameNotEmpty());
@@ -495,8 +456,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	dto.setEnableAmount((byte) 0);
             }
 
-            if(da.getLocalServerId() != null && da.getLocalServerId() != 0L){
-            	AclinkServerDTO serverDto = aclinkServerService.findLocalServerById(da.getLocalServerId());
+            if(dto.getLocalServerId() != null && dto.getLocalServerId() != 0L){
+            	AclinkServerDTO serverDto = aclinkServerService.findLocalServerById(dto.getLocalServerId());
             	if(serverDto != null ){
             		dto.setServer(serverDto);
             	}
@@ -4406,28 +4367,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			String arg3) {
         //Must be
         try {
-        	ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					LOGGER.info("start run.....");
-					 Long id = (Long)arg2;
-			         if(null == id) {
-			              LOGGER.error("None of UserIdentifier");
-			         } else {
-			        	 if(LOGGER.isDebugEnabled()) {
-			        		 LOGGER.debug("newUserAutoAuth id= " + id); 
-			        	 }
-			              
-		              try {
-		            	  newUserAutoAuth(id);
-		              } catch(Exception exx) {
-		            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
-		            	  }
-
-			         }
-				}
-			});
-			
+			LOGGER.info("start run.....");
+			 Long id = (Long)arg2;
+	         if(null == id) {
+	              LOGGER.error("None of UserIdentifier");
+	         } else {
+	        	 if(LOGGER.isDebugEnabled()) {
+	        		 LOGGER.debug("newUserAutoAuth id= " + id); 
+	        	 }
+	              
+              try {
+            	  newUserAutoAuth(id);
+              } catch(Exception exx) {
+            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
+            	  }
+	         }
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
         } finally{
@@ -5389,6 +5343,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         getDoorAccessLastTick(da);
         
         DoorAccessDTO dto = ConvertHelper.convert(da, DoorAccessDTO.class);
+        Aclink aclink = aclinkProvider.getAclinkByDoorId(dto.getId());
+        if(aclink != null){
+        	dto.setVersion(aclink.getFirwareVer());
+        }else{
+        	LOGGER.info(String.format("can not find aclink with doorId:%d",dto.getId()));
+        }
+        
         UserInfo user = userService.getUserSnapshotInfoWithPhone(da.getCreatorUserId());
         if(user != null) {
             String nickName = (user.getNickName() == null ? user.getNickName(): user.getAccountName());
@@ -5425,5 +5386,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
 
 		return dto;
+	}
+
+	@Override
+	public String testUser(Long id) {
+		UserIdentifier identifier = userProvider.findIdentifierById(id);
+		return identifier.getIdentifierToken();
 	}
 }

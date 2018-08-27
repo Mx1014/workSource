@@ -14,14 +14,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
+
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorAccessStatus;
+import com.everhomes.rest.aclink.DoorAccessType;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
@@ -306,6 +311,88 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         }
         
         return das;
+	}
+
+	@Override
+	public List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd) {
+		final List<DoorAccessDTO> objs = new ArrayList<DoorAccessDTO>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+
+            locator.setShardIterator(shardIterator);
+        }
+
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhDoorAccessRecord> query = context.selectQuery(Tables.EH_DOOR_ACCESS);
+
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+            if(cmd.getName() != null) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like("%" + cmd.getName() + "%"));
+            }
+            if(cmd.getDisplayName() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like("%" + cmd.getDisplayName() + "%"));
+            }
+            if(cmd.getHardwareId() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like("%" + cmd.getHardwareId() + "%"));
+            }
+            
+            query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+            
+            if(cmd.getGroupId() == null) {
+                //Select door access only
+                Condition cond = Tables.EH_DOOR_ACCESS.GROUPID.ne(0l)
+                .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
+                        .and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
+                query.addConditions(cond);
+            } else if(cmd.getGroupId().equals(-1l)) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
+            } else if(!cmd.getGroupId().equals(0l)) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
+            }
+            //else select all include groups
+            
+            if(cmd.getDoorType() != null) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+            }else{
+            	//不传doorType,过滤掉巴士门禁 by liuyilin 20180614
+            	query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_BUS.getCode()));
+            }
+            if(cmd.getServerId() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.eq(cmd.getServerId()));
+            }
+            if(cmd.getLinkStatus() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.LINK_STATUS.eq(cmd.getLinkStatus()));
+            }
+
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
+            query.addJoin(Tables.EH_ACLINKS, Tables.EH_ACLINKS.DOOR_ID.eq(Tables.EH_DOOR_ACCESS.ID));
+            query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
+            int count = cmd.getPageSize();
+            if(count >0){
+            	query.addLimit(count + 1);
+            }
+            
+            query.fetch().map((r) -> {
+            	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
+            	dto.setVersion(r.getValue(Tables.EH_ACLINKS.FIRWARE_VER));
+                objs.add(dto);
+                return null;
+            });
+
+            if(count>0 && objs.size() > count) {
+                locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+
+        });
+        return objs;
 	}
 
 

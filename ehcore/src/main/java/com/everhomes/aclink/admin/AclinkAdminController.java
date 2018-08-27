@@ -69,7 +69,7 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/aclink/ListDoorAccess</b>
+     * <b>URL: /admin/aclink/listDoorAccess</b>
      * <p>获取门禁列表 lite版</p>
      * @return 门禁列表
      */
@@ -93,6 +93,23 @@ public class AclinkAdminController extends ControllerBase {
     	RestResponse response = new RestResponse();
         
         response.setResponseObject(doorAccessService.getDoorAccessById(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/testUser</b>
+     * <p>根据id获取单个门禁详情</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("testUser")
+    @RestReturn(value=String.class)
+    public RestResponse testUser(@Valid GetDoorAccessByIdCommand cmd) {
+    	RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.testUser(cmd.getId()));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -629,7 +646,7 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/aclink/generateMarchUUID</b>
-     * <p>生成唯一配对码 </p>
+     * <p>生成唯一配对码  门禁3.0已经不用该接口</p>
      * @return
      */
     @RequestMapping("generateMarchUUID")
@@ -827,7 +844,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse listLocalIpad(ListLocalIpadCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),null,null,null,null,null,null,cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -843,7 +860,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse queryLocalIpads(QueryAclinkIpadCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getServerId(),cmd.getDoorAccessId(),cmd.getEnterStatus(),cmd.getLinkStatus(),cmd.getStatus(),null,cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,ConvertHelper.convert(cmd, ListLocalIpadCommand.class)));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -854,10 +871,12 @@ public class AclinkAdminController extends ControllerBase {
      * <p>新增内网ipad</p>
      */
     @RequestMapping("createLocalIpad")
-    @RestReturn(value=String.class)
+    @RestReturn(value=CreateLocalIpadResponse.class)
     public RestResponse addLocalIpad(CreateLocalIpadCommand cmd){
-    	aclinkIpadService.createLocalIpad(cmd);
-    	RestResponse response = new RestResponse();
+    	CreateMarchUUIDCommand cmd1 = new CreateMarchUUIDCommand();
+    	cmd1.setUuidType((byte) 1);
+    	cmd.setUuid(aclinkServerService.generateUUID(cmd1));
+    	RestResponse response = new RestResponse(aclinkIpadService.createLocalIpad(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -876,6 +895,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/setIpadLogo</b>
+     * <p>删除内网ipad</p>
+     */
+    //TODO
+//    @RequestMapping("setIpadLogo")
+//    @RestReturn(value=String.class)
+//    public RestResponse setIpadLogo(SetIpadLogoCommand cmd){
+//    	aclinkIpadService.deleteLocalIpad(cmd.getId());
+//    	RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /admin/aclink/deleteLocalIpad</b>

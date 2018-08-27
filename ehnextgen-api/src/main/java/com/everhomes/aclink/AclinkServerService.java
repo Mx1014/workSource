@@ -26,7 +26,7 @@ import com.everhomes.rest.aclink.UpdateLocalServersCommand;
 
 public interface AclinkServerService {
 
-	CreateMarchUUIDResponse generateUUID(CreateMarchUUIDCommand cmd);
+	String generateUUID(CreateMarchUUIDCommand cmd);
 
 	ListAclinkServersResponse listLocalServers(AclinkListLocalServersCommand cmd);
 	

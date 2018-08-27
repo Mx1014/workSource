@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -21,6 +23,22 @@ public class ListLocalIpadCommand {
 	private Byte ownerType;
 
 	private String search;
+	
+	private Long serverId;
+	
+	private List<Long> serverIds;
+	
+	private Long doorAccessId;
+	
+	private Byte enterStatus;
+	
+	private Byte linkStatus;
+	
+	private Byte activeStatus;
+	
+	private String uuid;
+	
+	private Integer count;
 
 	private Long pageAnchor;
 
@@ -48,6 +66,70 @@ public class ListLocalIpadCommand {
 
 	public void setSearch(String search) {
 		this.search = search;
+	}
+
+	public Long getServerId() {
+		return serverId;
+	}
+
+	public void setServerId(Long serverId) {
+		this.serverId = serverId;
+	}
+
+	public List<Long> getServerIds() {
+		return serverIds;
+	}
+
+	public void setServerIds(List<Long> serverIds) {
+		this.serverIds = serverIds;
+	}
+
+	public Long getDoorAccessId() {
+		return doorAccessId;
+	}
+
+	public void setDoorAccessId(Long doorAccessId) {
+		this.doorAccessId = doorAccessId;
+	}
+
+	public Byte getEnterStatus() {
+		return enterStatus;
+	}
+
+	public void setEnterStatus(Byte enterStatus) {
+		this.enterStatus = enterStatus;
+	}
+
+	public Byte getLinkStatus() {
+		return linkStatus;
+	}
+
+	public void setLinkStatus(Byte linkStatus) {
+		this.linkStatus = linkStatus;
+	}
+
+	public Byte getActiveStatus() {
+		return activeStatus;
+	}
+
+	public void setActiveStatus(Byte activeStatus) {
+		this.activeStatus = activeStatus;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 
 	public Long getPageAnchor() {

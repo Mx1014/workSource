@@ -11,6 +11,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 属于上级的类型</li>
  * <li>groupId: 分组信息，参考{@link com.everhomes.rest.aclink.DoorAccessType}</li>
  * <li>search: 搜索字符串</li>
+ * <li>displayName:名称</li>
+ * <li>name:标识</li>
+ * <li>hardwareId:mac地址</li>
  * <li>linkStatus: 连接状态{@link com.everhomes.rest.aclink.DoorAccessLinkStatus}</li>
  * <li>doorType: 门禁类型</li>
  * <li>serverId: 关联服务器id</li>
@@ -36,8 +39,30 @@ public class QueryDoorAccessAdminCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    //门禁3.0需要区分以下三种搜索条件,原参数search不用,暂时保留,by liuyilin 20180827
+    private String name;
+    private String displayName;
+    private String hardwareId;
     
-    public Long getOwnerId() {
+    public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getDisplayName() {
+		return displayName;
+	}
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+	public String getHardwareId() {
+		return hardwareId;
+	}
+	public void setHardwareId(String hardwareId) {
+		this.hardwareId = hardwareId;
+	}
+	public Long getOwnerId() {
         return ownerId;
     }
     public void setOwnerId(Long ownerId) {

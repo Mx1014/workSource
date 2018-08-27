@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,7 +16,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateLocalCamerasCommand {
-
+	@NotNull
+	private Long ownerId;
+	@NotNull
+	private Byte ownerType;
+	
 	private Long id;
 	private String name;
 	private String ipAddress;
@@ -24,6 +30,22 @@ public class CreateLocalCamerasCommand {
 	private String keyCode;
 	private String account;
   
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Byte getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(Byte ownerType) {
+		this.ownerType = ownerType;
+	}
+
 	public String getKeyCode() {
 		return keyCode;
 	}

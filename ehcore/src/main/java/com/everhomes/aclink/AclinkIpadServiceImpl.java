@@ -16,9 +16,12 @@ import com.everhomes.rest.aclink.AclinkIPadDTO;
 import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.CreateLocalIpadCommand;
+import com.everhomes.rest.aclink.CreateLocalIpadResponse;
+import com.everhomes.rest.aclink.CreateMarchUUIDCommand;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.ListLocalIpadCommand;
 import com.everhomes.rest.aclink.ListLocalIpadResponse;
 import com.everhomes.rest.aclink.UpdateLocalIpadCommand;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -45,24 +48,9 @@ public class AclinkIpadServiceImpl implements AclinkIpadService {
 	private AclinkServerProvider aclinkServerProvider;
 
 	@Override
-	public ListLocalIpadResponse listLocalIpads(CrossShardListingLocator locator, Long ownerId, Byte ownerType,
-			Long serverId, Long doorAccessId, Byte enterStatus, Byte linkStatus,  Byte activeStatus, String uuid, Integer pageSize) {
+	public ListLocalIpadResponse listLocalIpads(CrossShardListingLocator locator, ListLocalIpadCommand cmd) {
 		ListLocalIpadResponse resp = new ListLocalIpadResponse();
-		int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
-		List<Long> serverIds = new ArrayList<Long>();
-		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(ownerType);
-		if(serverId == null){
-			List<AclinkServer> servers = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(), ownerId, typ, null, 0);
-			if(servers.size()>0){
-				for(AclinkServer server: servers){
-					serverIds.add(server.getId());
-				}
-			}else{
-				return resp;
-			}
-		}
-		
-		List<AclinkIpad> ipads = aclinkIpadProvider.listLocalIpads(locator, serverId, serverIds, doorAccessId, enterStatus, linkStatus, activeStatus, uuid, count);
+		List<AclinkIpad> ipads = aclinkIpadProvider.listLocalIpads(locator, cmd);
 		List<AclinkIPadDTO> dtos = new ArrayList<AclinkIPadDTO>();
 		for(AclinkIpad ipad : ipads){
 			AclinkIPadDTO dto = ConvertHelper.convert(ipad, AclinkIPadDTO.class);
@@ -76,7 +64,8 @@ public class AclinkIpadServiceImpl implements AclinkIpadService {
 	}
 
 	@Override
-	public void createLocalIpad(CreateLocalIpadCommand cmd) {
+	public CreateLocalIpadResponse createLocalIpad(CreateLocalIpadCommand cmd) {
+		CreateLocalIpadResponse rsp = new CreateLocalIpadResponse();
 		AclinkIpad ipad = new AclinkIpad();
 		User user = UserContext.current().getUser();
 		ipad.setDoorAccessId(cmd.getDoorAccessId());
@@ -107,7 +96,8 @@ public class AclinkIpadServiceImpl implements AclinkIpadService {
 			server.setOperatorUid(ipad.getOperatorUid());
 			aclinkServerProvider.updateLocalServer(server);
 		}
-		
+		rsp.setUuid(cmd.getUuid());
+		return rsp;
 	}
 
 	@Override

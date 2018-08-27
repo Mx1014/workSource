@@ -63,6 +63,8 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 		camera.setLinkStatus((byte) 2);//TODO delete
 		camera.setKeyCode(cmd.getKeyCode());
 		camera.setAccount(cmd.getAccount());
+		camera.setOwnerId(cmd.getOwnerId());
+		camera.setOwnerType(cmd.getOwnerType());
 		aclinkCameraProvider.createLocalCamera(camera);
 		//内网服务器下属设备有变动,更新服务器的上次操作时间
 		AclinkServer server = aclinkServerProvider.findServerById(camera.getServerId());
@@ -117,19 +119,6 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 	public ListLocalCamerasResponse listLocalCameras(ListLocalCamerasCommand cmd) {
 		ListLocalCamerasResponse resp = new ListLocalCamerasResponse();
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
-		List<Long> serverIds = new ArrayList<Long>();
-		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(cmd.getOwnerType());
-		if(cmd.getServerId() == null){
-			List<AclinkServer> servers = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(), cmd.getOwnerId(), typ, null, 0);
-			if(servers.size()>0){
-				for(AclinkServer server: servers){
-					serverIds.add(server.getId());
-				}
-			}else{
-				return resp;
-			}
-		}
-		cmd.setServerIds(serverIds);
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, cmd);

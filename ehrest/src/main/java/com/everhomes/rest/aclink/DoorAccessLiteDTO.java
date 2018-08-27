@@ -24,7 +24,7 @@ public class DoorAccessLiteDTO {
 	private String name;
 	private String displayName;
 	private Integer defualtInvalidDuration;
-	private String farewareVersion;
+	private String version;
 	
 	public Long getId() {
 		return id;
@@ -62,11 +62,11 @@ public class DoorAccessLiteDTO {
 	public void setDefualtInvalidDuration(Integer defualtInvalidDuration) {
 		this.defualtInvalidDuration = defualtInvalidDuration;
 	}
-	public String getFarewareVersion() {
-		return farewareVersion;
+	public String getVersion() {
+		return version;
 	}
-	public void setFarewareVersion(String farewareVersion) {
-		this.farewareVersion = farewareVersion;
+	public void setVersion(String version) {
+		this.version = version;
 	}
 	
 	@Override

@@ -187,4 +187,6 @@ public interface DoorAccessService {
 	public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd);
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
+
+	public String testUser(Long id);
 }
