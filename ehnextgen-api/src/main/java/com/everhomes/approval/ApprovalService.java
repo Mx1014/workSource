@@ -83,6 +83,8 @@ public interface ApprovalService {
 
 	UpdateApprovalCategoryResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd);
 
+	List<ApprovalCategoryDTO> listBaseApprovalCategory(List<String> ignoreNames);
+
 	ListApprovalCategoryResponse initAndListApprovalCategory(ListApprovalCategoryCommand cmd);
 
 	void deleteApprovalCategory(DeleteApprovalCategoryCommand cmd);
