@@ -85,6 +85,7 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      */
     @RequestMapping("zhenzhihuiRedirect")
     @RestReturn(value=String.class)
+    @RequireAuthentication(false)
     public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
         zhenZhiHuiService.zhenzhihuiRedirect(cmd);
         RestResponse restResponse = new RestResponse();

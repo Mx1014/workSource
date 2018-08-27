@@ -260,6 +260,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     @Override
     public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
+        LOGGER.info("userId = {}",userId);
         if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
             List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(userId);
             if (CollectionUtils.isEmpty(members)) {
