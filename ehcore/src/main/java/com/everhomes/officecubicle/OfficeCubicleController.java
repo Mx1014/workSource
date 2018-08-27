@@ -129,6 +129,21 @@ public class OfficeCubicleController extends ControllerBase {
         return response;
     	
     }
+
+
+    /**
+     * <b>URL: /officecubicle/getCurrentProjectOnlyFlag</b>
+     * <p>工位预定-是否本项目可见 1为本项目可见 0为全部可见</p>
+     */
+    @RequestMapping("getCurrentProjectOnlyFlag")
+    @RestReturn(value=String.class )
+    public RestResponse getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd) {
+
+        RestResponse response = new RestResponse(this.officeCubicleService.getCurrentProjectOnlyFlag(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }
 

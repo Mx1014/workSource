@@ -1062,4 +1062,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		}
 		return TrueOrFalseFlag.FALSE.getCode();
 	}
+
+	@Override
+	public Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd) {
+		String currentProjectOnly = configurationProvider.getValue(cmd.getNamespaceId(),"officecubicle.currentProjectOnly","0");
+		return Byte.valueOf(currentProjectOnly);
+	}
 }

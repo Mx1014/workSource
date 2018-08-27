@@ -57,4 +57,6 @@ public interface OfficeCubicleService {
 	ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd);
 
 	Byte getProjectCustomize(GetCustomizeCommand cmd);
+
+	Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd);
 }
