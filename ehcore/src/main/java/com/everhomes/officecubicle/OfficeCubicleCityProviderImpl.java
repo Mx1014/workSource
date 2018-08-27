@@ -110,6 +110,8 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_TYPE.eq(ownerType));
 		if(null != ownerId)
 			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId));
+		else
+		    query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull());
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2));
 		query.addOrderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc());
 		query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.lt(nextPageAnchor));
@@ -191,6 +193,7 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
 				.where(Tables.EH_OFFICE_CUBICLE_CITIES.ORG_ID.eq(orgId))
 				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+                .and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull())
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
