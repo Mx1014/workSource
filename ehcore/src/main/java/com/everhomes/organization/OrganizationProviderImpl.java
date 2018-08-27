@@ -117,19 +117,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.InsertQuery;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.TableLike;
-import org.jooq.UpdateQuery;
+
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -142,9 +131,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 
+
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -4006,7 +3998,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String identifierToken, String keywords, CrossShardListingLocator locator, int pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+        //SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+        //add by huangliangming 指定返回值的ID选LOG的,不指定它会随机选导致ID不唯一前端排序出错.
+        com.everhomes.server.schema.tables.EhOrganizationMemberLogs log = Tables.EH_ORGANIZATION_MEMBER_LOGS;
+        Field<?>[] logFields = log.fields();
+        SelectQuery<Record> query = context.select(Arrays.asList(logFields)).getQuery();
+        query.addFrom(log);
+
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
         if (userInfoKeyword != null) {
             String keyword = "%" + userInfoKeyword + "%";
@@ -4030,7 +4028,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
         query.addLimit(pageSize + 1);
 
-        List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+       // List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+        //add by huangliangming 指定返回值的ID选LOG的,不指定它会随机选导致ID不唯一前端排序出错.
+        List<OrganizationMemberLog> list = query.fetch().map(record -> {
+        	Long memberLogId = record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID);
+            OrganizationMemberLog memberLog = new OrganizationMemberLog();       
+            memberLog.setId(memberLogId);
+            memberLog.setContactDescription(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_DESCRIPTION));
+            memberLog.setContactName(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME));
+            memberLog.setContactToken(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TOKEN));
+            memberLog.setContactType(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TYPE));
+            memberLog.setNamespaceId(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.NAMESPACE_ID));
+            memberLog.setOperateTime(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATE_TIME));
+            memberLog.setOperationType(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE));
+            memberLog.setOperatorUid(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATOR_UID));
+            memberLog.setOrganizationId(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID));
+            memberLog.setRequestType(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.REQUEST_TYPE));
+            memberLog.setUserId(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            return memberLog;
+        });
         if (list != null && list.size() > pageSize) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list = list.subList(0, pageSize);

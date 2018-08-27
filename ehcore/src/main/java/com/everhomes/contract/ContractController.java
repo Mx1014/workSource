@@ -58,17 +58,9 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
-import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/contract")
