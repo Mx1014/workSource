@@ -28,12 +28,25 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
-import com.everhomes.rest.requisition.*;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.requisition.CreateRequisitionCommand;
+import com.everhomes.rest.requisition.GetApprovalRunningFormCommond;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
+import com.everhomes.rest.requisition.GetRequisitionDetailCommand;
+import com.everhomes.rest.requisition.GetRequisitionDetailResponse;
+import com.everhomes.rest.requisition.GetRunningRequisitionFlowCommand;
+import com.everhomes.rest.requisition.GetRunningRequisitionFormCommond;
+import com.everhomes.rest.requisition.GetSelectedRequisitionFormCommand;
+import com.everhomes.rest.requisition.ListRequisitionTypesCommand;
+import com.everhomes.rest.requisition.ListRequisitionTypesDTO;
+import com.everhomes.rest.requisition.ListRequisitionsCommand;
+import com.everhomes.rest.requisition.ListRequisitionsDTO;
+import com.everhomes.rest.requisition.ListRequisitionsResponse;
+import com.everhomes.rest.requisition.RequistionErrorCodes;
+import com.everhomes.rest.requisition.UpdateRequisitionActiveStatusCommond;
+import com.everhomes.rest.requisition.UpdateRequisitionRunningFormCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -48,7 +61,6 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
@@ -107,7 +119,7 @@ public class RequisitionServiceImpl implements RequisitionService{
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 //        createFlowCaseCommand.setReferId(req.getId());
 //        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-        createFlowCaseCommand.setServiceType("requisition");
+        createFlowCaseCommand.setServiceType("请示单申请");
         createFlowCaseCommand.setProjectId(req.getOwnerId());
         createFlowCaseCommand.setProjectType(req.getOwnerType());
 
@@ -275,12 +287,32 @@ public class RequisitionServiceImpl implements RequisitionService{
             GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
             return ConvertHelper.convert(form, GeneralFormDTO.class);
         }else{
-            LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
-            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
-            return ConvertHelper.convert(request, GeneralFormDTO.class);
+            GeneralApproval getApproval = generalApprovalProvider.getGeneralApprovalByModuleId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+            if(getApproval == null) {
+                LOGGER.error("no approval has been created" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_ONE_APPROVAL, "no approval has been created");
+            }else{
+                LOGGER.error("no approval has been used" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_USED_APPROVAL, "no approval has been used");
+            }
+            /*GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            return ConvertHelper.convert(request, GeneralFormDTO.class);*/
 
         }
 
+    }
+
+    @Override
+    public GeneralFormDTO getSelectedRequisitionForm(GetSelectedRequisitionFormCommand cmd){
+        if(cmd.getFormVersion() != null && cmd.getFormOriginId() != null)
+            return ConvertHelper.convert(generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion()), GeneralFormDTO.class);
+        else{
+            LOGGER.error("the form Id can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the form Id can not find");
+        }
     }
 
     @Override

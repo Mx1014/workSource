@@ -62,9 +62,12 @@ public interface GeneralFormService {
 
 	Long deleteGeneralFormVal(PostGeneralFormValCommand cmd);
 
+	Long deleteGeneralForm(PostGeneralFormValCommand cmd);
+
 	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
 
+	Long saveGeneralFormVal(PostGeneralFormValCommand cmd);
 	/**
 	 * 保存但不提交工作流
 	 * @param cmd
