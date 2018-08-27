@@ -429,4 +429,8 @@ public interface AssetProvider {
 	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
+	
+	Long createCMBill(PaymentBills paymentBills);
+	
+	void createCMBillItem(PaymentBillItems items);
 }

@@ -239,7 +239,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 syncContractsFromThirdPart("1", date, communityIdentifier, taskId, categoryId, contractApplicationScene);
             }else{
             	//同步CM数据到物业账单表
-            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, UserContext.getCurrentNamespaceId());
+            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929);
             	
             }
 
