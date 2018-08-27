@@ -698,7 +698,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                     //取消共享,删日程发消息
                     remindProvider.deleteRemind(trackRemind);
                     unSubscribeReminds.add(trackRemind);
-                    trackReminds.remove(trackRemind);
+                    iterator.remove();
                 }
             }
             updateTrackReminds(trackReminds, existRemind, false);
