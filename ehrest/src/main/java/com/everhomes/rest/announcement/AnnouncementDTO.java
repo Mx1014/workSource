@@ -38,7 +38,7 @@ import java.util.List;
  *     <li>viewCount: 浏览的数目</li>
  *     <li>updateTime: 公告更新时间</li>
  *     <li>createTime: 公告创建时间</li>
- *     <li>attachments: 公告的附件信息，参见{@link AttachmentDTO}</li>
+ *     <li>attachments: 公告的附件信息，参见{@link com.everhomes.rest.announcement.AttachmentDTO}</li>
  *     <li>likeFlag: 是否点赞，参见{@link UserLikeType}</li>
  *     <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.announcement.AnnouncementFavoriteFlag}</li>
  *     <li>shareUrl: 分享链接</li>
