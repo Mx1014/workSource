@@ -7,6 +7,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoCommand;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiRedirectCommand;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,20 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
     @RestReturn(value=String.class)
     public Object createUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
         zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /zhenzhihuisso/zhenzhihuiRedirect</b>
+     * <p>圳智慧跳转URL</p>
+     */
+    @RequestMapping("zhenzhihuiRedirect")
+    @RestReturn(value=String.class)
+    public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
+        zhenZhiHuiService.zhenzhihuiRedirect(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");

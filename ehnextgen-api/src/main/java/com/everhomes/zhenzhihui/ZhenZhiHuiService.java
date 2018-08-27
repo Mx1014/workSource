@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface ZhenZhiHuiService {
     String ssoService(HttpServletRequest request, HttpServletResponse response);
-    void zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd);
-    void createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd);
-    void createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd);
+    Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd);
+    Object createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd);
+    Object createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd);
 }

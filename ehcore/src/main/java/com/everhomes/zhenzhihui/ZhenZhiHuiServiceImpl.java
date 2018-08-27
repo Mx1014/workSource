@@ -77,6 +77,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -96,6 +97,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     private static final Integer ZHENZHIHUI_NAMESPACE_ID = 999931;
     private static final Long COMMUNITY_ID  = 240111044332063520L;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ZhenZhiHuiServiceImpl.class);
+
+    private static final String REDIRECT_FILL_IN_USER_INFO = "/mobile/static/apply-form/apply_personal_form.html";
+    private static final String REDIRECT_FILL_IN_USER_AND_ENTERPRISE_INFO = "/mobile/static/apply-form/apply_co_form.html";
 
     @Autowired
     private UserService userService;
@@ -254,7 +258,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     }
 
     @Override
-    public void zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
+    public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
             List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(userId);
@@ -275,24 +279,48 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
             }
         }
         List<ZhenzhihuiUserInfo> zhenzhihuiUserInfoList = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userId);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String location = "";
         if (CollectionUtils.isEmpty(zhenzhihuiUserInfoList)) {
-            LOGGER.info("redirect to fill in url");
+            String homeUrl = this.configurationProvider.getValue(0,"home.url","https://core.zuolin.com");
+            if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
+                location = homeUrl + REDIRECT_FILL_IN_USER_AND_ENTERPRISE_INFO;
+            }else {
+                location = homeUrl + REDIRECT_FILL_IN_USER_INFO;
+            }
+            LOGGER.info("redirect to fill in location, url={}",location);
         }else {
-            LOGGER.info("redirect to zhenzhihui url");
+            String zhenzhihuiUrl = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com");
+            location = zhenzhihuiUrl+cmd.getCode();
+            LOGGER.info("redirect to zhenzhihui url={}",location);
         }
+        try {
+            httpHeaders.setLocation(new URI(location));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
     }
 
     @Override
-    public void createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
+    public Object createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
         this.zhenzhihuiUserInfoProvider.createZhenzhihuiUserInfo(zhenzhihuiUserInfo);
-        LOGGER.info("redirect to zhenzhihui url");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.PERSON.getCode();
+        try {
+            httpHeaders.setLocation(new URI(location));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        LOGGER.info("redirect to zhenzhihui url={}",location);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
     }
 
     @Override
-    public void createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
+    public Object createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
@@ -305,7 +333,15 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         zhenzhihuiEnterpriseInfo.setEnterpriseName(cmd.getEnterpriseName());
         zhenzhihuiEnterpriseInfo.setEnterpriseToken(cmd.getEnterpriseToken());
         this.zhenzhihuiEnterpriseInfoProvider.createZhenzhihuiEnterpriseInfo(zhenzhihuiEnterpriseInfo);
-        LOGGER.info("redirect to zhenzhihui url");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.ENTERPRISE.getCode();
+        try {
+            httpHeaders.setLocation(new URI(location));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        LOGGER.info("redirect to zhenzhihui url={}",location);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO){
