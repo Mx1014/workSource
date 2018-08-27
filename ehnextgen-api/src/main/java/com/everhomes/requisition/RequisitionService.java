@@ -1,10 +1,8 @@
 //@formatter:off
 package com.everhomes.requisition;
 
-import com.everhomes.flow.Flow;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.requisition.*;
 
 import java.util.List;
@@ -35,6 +33,8 @@ public interface RequisitionService {
      * @return
      */
     GeneralFormDTO getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd);
+
+    GeneralFormDTO getSelectedRequisitionForm(GetSelectedRequisitionFormCommand cmd);
 
     Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd);
 

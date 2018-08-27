@@ -55,7 +55,7 @@ public interface GeneralFormProvider {
      * @param ownerId
      * @param sourceId
      */
-    void deleteGeneralFormVal(String ownerType, String sourceType, Integer namespaceId, Long currentOrganizationId, Long ownerId, Long sourceId);
+    void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId);
 
     /**
      * 获取
@@ -72,7 +72,7 @@ public interface GeneralFormProvider {
 
     List<GeneralFormVal> listGeneralForm();
 
-    Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
+    Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion);
 
     List<GeneralFormValRequest>  listGeneralFormValRequest(Integer namespaceId, Long sourceId, Long ownerId);
 

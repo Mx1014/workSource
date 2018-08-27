@@ -14,6 +14,8 @@ public interface GeneralApprovalProvider {
 
 	void deleteGeneralApproval(GeneralApproval obj);
 
+	GeneralApproval getGeneralApprovalByModuleId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType);
+
 	GeneralApproval getGeneralApprovalById(Long id);
 
 	List<GeneralApproval> queryGeneralApprovals(ListingLocator locator,
