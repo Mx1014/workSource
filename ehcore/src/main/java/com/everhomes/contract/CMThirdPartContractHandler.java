@@ -227,7 +227,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         CMSyncObject cmSyncObject =
                 (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
 
-
+        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
 
         if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
 
