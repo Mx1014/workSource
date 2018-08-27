@@ -2,8 +2,10 @@ package com.everhomes.payment;
 
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
 import com.everhomes.rest.payment.UpdateAccountSettingCommand;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 
 import java.util.List;
 
@@ -14,5 +16,7 @@ public interface PaymentCardPayService {
     ListBizPayeeAccountDTO getAccountSetting(GetAccountSettingCommand cmd);
 
     void updateAccountSetting(UpdateAccountSettingCommand cmd);
+
+    PreOrderDTO createPreOrder(PreOrderCommand cmd);
 
 }

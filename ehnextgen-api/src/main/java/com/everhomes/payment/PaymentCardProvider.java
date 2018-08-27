@@ -53,4 +53,10 @@ public interface PaymentCardProvider {
 	List<PaymentCardRechargeOrder> listPaymentCardRechargeOrders(Integer pageSize,
 			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 			CrossShardListingLocator locator);
+
+	List<PaymentCardAccount> listPaymentCardAccounts(String ownerType, Long ownerId);
+
+	void deleteAccounts(String ownerType, Long ownerId);
+
+	void createPaymentCardAccount(PaymentCardAccount account);
 }

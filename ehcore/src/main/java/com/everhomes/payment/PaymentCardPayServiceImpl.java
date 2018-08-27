@@ -1,13 +1,20 @@
 package com.everhomes.payment;
 
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
 import com.everhomes.rest.payment.UpdateAccountSettingCommand;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +22,16 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentCardPayServiceImpl.class);
 
     @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
+    @Autowired
+    private PaymentCardProvider paymentCardProvider;
 
     @Override
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
@@ -72,11 +83,48 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
 
     @Override
     public ListBizPayeeAccountDTO getAccountSetting(GetAccountSettingCommand cmd) {
-        return null;
+        List<PaymentCardAccount> accounts = paymentCardProvider.listPaymentCardAccounts(cmd.getOwnerType(), cmd.getOwnerId());
+        if (accounts == null || accounts.size() == 0)
+            return null;
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
+        if (payUserDTOs == null || payUserDTOs.size() == 0)
+            return null;
+        ListBizPayeeAccountDTO dto = convertAccount(payUserDTOs.get(0));
+
+        return dto;
     }
 
     @Override
     public void updateAccountSetting(UpdateAccountSettingCommand cmd) {
+        //删除
+        paymentCardProvider.deleteAccounts(cmd.getOwnerType(),cmd.getOwnerId());
+        //添加
+        PaymentCardAccount account = ConvertHelper.convert(cmd,PaymentCardAccount.class);
+        account.setNamespaceId(UserContext.getCurrentNamespaceId());
+        paymentCardProvider.createPaymentCardAccount(account);
 
+    }
+
+    @Override
+    public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
+        PreOrderDTO preOrderDTO = null;
+        //1、收款方是否有会员，无则报错
+        cmd.setBizPayeeId(getPayeeAccountByCommunityId(cmd.getCommunityId()));
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Stream.of(cmd.getBizPayeeId()).collect(Collectors.toList()));
+        if (payUserDTOs == null || payUserDTOs.size() == 0){
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
+                    "暂未绑定收款账户");
+        }
+        //2、组装报文，发起下单请求
+
+        return null;
+    }
+
+    Long getPayeeAccountByCommunityId(Long communityId){
+        List<PaymentCardAccount> accounts = paymentCardProvider.listPaymentCardAccounts(EntityType.COMMUNITY.getCode(),communityId);
+        if (accounts != null && accounts.size() > 0)
+            return accounts.get(0).getAccountId();
+        return null;
     }
 }

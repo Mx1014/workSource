@@ -4,11 +4,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.util.DateHelper;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +26,6 @@ import com.everhomes.server.schema.tables.daos.EhPaymentCardIssuersDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardTransactionsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardsDao;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
-import com.everhomes.server.schema.tables.records.EhPaymentCardIssuerCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentCardIssuersRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentCardsRecord;
 import com.everhomes.util.ConvertHelper;
 
 
@@ -439,4 +430,39 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
 		 
 		 return results;
     }
+
+	@Override
+	public List<PaymentCardAccount> listPaymentCardAccounts(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		SelectQuery<EhPaymentCardAccountsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_ACCOUNTS);
+		query.addConditions(Tables.EH_PAYMENT_CARD_ACCOUNTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PAYMENT_CARD_ACCOUNTS.OWNER_ID.eq(ownerId));
+		return query.fetch().map(r->ConvertHelper.convert(r,PaymentCardAccount.class));
+	}
+
+	@Override
+	public void deleteAccounts(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPaymentCardAccountsRecord> step = context.delete(Tables.EH_PAYMENT_CARD_ACCOUNTS);
+		Condition condition  = Tables.EH_PAYMENT_CARD_ACCOUNTS.OWNER_TYPE.eq(ownerType)
+				.and(Tables.EH_PAYMENT_CARD_ACCOUNTS.OWNER_ID.eq(ownerId));
+		step.where(condition).execute();
+	}
+
+	@Override
+	public void createPaymentCardAccount(PaymentCardAccount account) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPaymentCardAccounts.class));
+		account.setId(id);
+		account.setCraeteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentCardAccountsRecord record = ConvertHelper.convert(account,
+				EhPaymentCardAccountsRecord.class);
+		InsertQuery<EhPaymentCardAccountsRecord> query = context
+				.insertQuery(Tables.EH_PAYMENT_CARD_ACCOUNTS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentCardAccounts.class,
+				null);
+	}
 }
