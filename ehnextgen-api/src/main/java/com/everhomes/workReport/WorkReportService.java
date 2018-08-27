@@ -53,4 +53,6 @@ public interface WorkReportService {
     String getUserAvatar(Long userId);
 
     void syncWorkReportReceiver();
+
+    void updateWorkReportReceiverAvatar();
 }

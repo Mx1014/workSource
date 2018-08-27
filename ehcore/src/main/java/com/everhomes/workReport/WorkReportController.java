@@ -318,4 +318,18 @@ public class WorkReportController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /workReport/updateWorkReportReceiverAvatar</b>
+     * <p>更新工作汇报接收人头像 </p>
+     */
+    @RequestMapping("updateWorkReportReceiverAvatar")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkReportReceiverAvatar() {
+        workReportService.updateWorkReportReceiverAvatar();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

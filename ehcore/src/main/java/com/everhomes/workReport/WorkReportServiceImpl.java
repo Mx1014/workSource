@@ -892,11 +892,23 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public void syncWorkReportReceiver() {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
-        for(WorkReportValReceiverMap r : receivers){
+        for (WorkReportValReceiverMap r : receivers) {
             WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
             r.setOrganizationId(val.getOrganizationId());
             workReportValProvider.updateWorkReportValReceiverMap(r);
         }
     }
 
+    @Override
+    public void updateWorkReportReceiverAvatar() {
+        List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
+        for (WorkReportValReceiverMap r : receivers) {
+            if (r.getReceiverAvatar() == null)
+                continue;
+            String avatar = r.getReceiverAvatar();
+            String uri = avatar.substring(avatar.indexOf("image") + 6, avatar.lastIndexOf("?"));
+            r.setReceiverAvatar("cs://1/image/" + uri);
+            workReportValProvider.updateWorkReportValReceiverMap(r);
+        }
+    }
 }
