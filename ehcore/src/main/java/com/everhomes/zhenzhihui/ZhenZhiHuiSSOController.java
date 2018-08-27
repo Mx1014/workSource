@@ -56,12 +56,18 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>填写圳智慧所需用户信息</p>
      */
     @RequestMapping("createUserInfo")
-    @RestReturn(value=String.class)
     public Object createUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
-        zhenZhiHuiService.createZhenzhihuiUserInfo(cmd);
+        String location = zhenZhiHuiService.createZhenzhihuiUserInfo(cmd);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            httpHeaders.setLocation(new URI(location));
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        } catch (Exception e) {
+            LOGGER.error("redirect failed, location = {}", location);
+        }
         RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
+        restResponse.setErrorDescription("invalid token or redirect");
         return restResponse;
     }
 
@@ -70,12 +76,18 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>填写圳智慧所需用户信息</p>
      */
     @RequestMapping("createUserAndEnterpriseInfo")
-    @RestReturn(value=String.class)
     public Object createUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
-        zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
+        String location = zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            httpHeaders.setLocation(new URI(location));
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        } catch (Exception e) {
+            LOGGER.error("redirect failed, location = {}", location);
+        }
         RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
+        restResponse.setErrorDescription("invalid token or redirect");
         return restResponse;
     }
 
@@ -84,13 +96,19 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>圳智慧跳转URL</p>
      */
     @RequestMapping("zhenzhihuiRedirect")
-    @RestReturn(value=String.class)
     @RequireAuthentication(false)
     public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
-        zhenZhiHuiService.zhenzhihuiRedirect(cmd);
+        String location = zhenZhiHuiService.zhenzhihuiRedirect(cmd);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            httpHeaders.setLocation(new URI(location));
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        } catch (Exception e) {
+            LOGGER.error("redirect failed, location = {}", location);
+        }
         RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
+        restResponse.setErrorDescription("invalid token or redirect");
         return restResponse;
     }
 }

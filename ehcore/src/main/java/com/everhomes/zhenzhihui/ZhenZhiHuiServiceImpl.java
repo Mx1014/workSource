@@ -258,9 +258,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     }
 
     @Override
-    public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
+    public String zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
-        LOGGER.info("userId = {}",userId);
+        LOGGER.info("user = {}",UserContext.current().getUser());
         if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
             List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(userId);
             if (CollectionUtils.isEmpty(members)) {
@@ -280,7 +280,6 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
             }
         }
         List<ZhenzhihuiUserInfo> zhenzhihuiUserInfoList = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userId);
-        HttpHeaders httpHeaders = new HttpHeaders();
         String location = "";
         if (CollectionUtils.isEmpty(zhenzhihuiUserInfoList)) {
             String homeUrl = this.configurationProvider.getValue(0,"home.url","https://core.zuolin.com");
@@ -295,33 +294,22 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
             location = zhenzhihuiUrl+cmd.getCode();
             LOGGER.info("redirect to zhenzhihui url={}",location);
         }
-        try {
-            httpHeaders.setLocation(new URI(location));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return location;
     }
 
     @Override
-    public Object createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
+    public String createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
         this.zhenzhihuiUserInfoProvider.createZhenzhihuiUserInfo(zhenzhihuiUserInfo);
-        HttpHeaders httpHeaders = new HttpHeaders();
         String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.PERSON.getCode();
-        try {
-            httpHeaders.setLocation(new URI(location));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
         LOGGER.info("redirect to zhenzhihui url={}",location);
-        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return location;
     }
 
     @Override
-    public Object createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
+    public String createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
@@ -334,15 +322,9 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         zhenzhihuiEnterpriseInfo.setEnterpriseName(cmd.getEnterpriseName());
         zhenzhihuiEnterpriseInfo.setEnterpriseToken(cmd.getEnterpriseToken());
         this.zhenzhihuiEnterpriseInfoProvider.createZhenzhihuiEnterpriseInfo(zhenzhihuiEnterpriseInfo);
-        HttpHeaders httpHeaders = new HttpHeaders();
         String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.ENTERPRISE.getCode();
-        try {
-            httpHeaders.setLocation(new URI(location));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
         LOGGER.info("redirect to zhenzhihui url={}",location);
-        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return location;
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO){
