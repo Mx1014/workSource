@@ -113,7 +113,8 @@ public class LaunchPadBaseController extends ControllerBase {
     @RestReturn(value=ListAllAppsResponse.class)
     @RequireAuthentication(false)
     public RestResponse listAllApps(ListAllLaunchPadAppsCommand cmd) {
-        RestResponse response =  new RestResponse();
+        ListAllAppsResponse res = serviceModuleAppService.listAllApps(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
