@@ -815,25 +815,23 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 
 
     @Override
-    public List<ServiceModuleFunction> listIncludeFunctions(Integer namespaceId, Long comunityId, Long moduleId) {
-        List<ServiceModuleFunction> results = new ArrayList<>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
-        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
+    public List<ServiceModuleIncludeFunction> listIncludeFunctions(Integer namespaceId, Long communityId, Long moduleId) {
+        List<ServiceModuleIncludeFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
+        SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
 
-        if (comunityId != null)
-            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId)
-                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L))
-                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.isNull()));
+        Condition cond = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.NAMESPACE_ID.ne(namespaceId);
+        if (communityId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(communityId)
+                    .or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(0L))
+                    .or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.isNotNull()));
         if (moduleId != null)
             cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
 
-        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.COMMUNITYID.eq(comunityId));
-        query.addCondi
-        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.MODULE_ID.eq(moduleId));
-        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.NAMESPACEID.eq(namespaceId));
+        query.addConditions(cond);
 
         query.fetch().map((r) -> {
-            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            results.add(ConvertHelper.convert(r, ServiceModuleIncludeFunction.class));
             return null;
         });
         return results;

@@ -76,4 +76,5 @@ CREATE TABLE `eh_service_module_include_functions`
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
 
 
+
 -- --------------------- SECTION END ---------------------------------------------------------
