@@ -96,7 +96,6 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>圳智慧跳转URL</p>
      */
     @RequestMapping("zhenzhihuiRedirect")
-    @RequireAuthentication(false)
     public Object zhenzhihuiRedirect(ZhenZhiHuiRedirectCommand cmd) {
         String location = zhenZhiHuiService.zhenzhihuiRedirect(cmd);
         HttpHeaders httpHeaders = new HttpHeaders();
