@@ -6,9 +6,10 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>groupId: groupId</li>
  *     <li>groupName: groupName</li>
  *     <li>widget: widget</li>
- *     <li>instanceConfig: instanceConfig 根据widget参考com.everhomes.rest.launchpadbase.groupinstanceconfig包下的组件  </li>
+ *     <li>instanceConfig: instanceConfig 根据widget参考com.everhomes.rest.launchpadbase.groupinstanceconfig包下的组件</li>
  *     <li>style: style</li>
  *     <li>defaultOrder: defaultOrder</li>
  *     <li>separatorFlag: separatorFlag</li>
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class ItemGroupDTO {
 
+    private Long groupId;
     private String groupName;
     private String widget;
     private Object instanceConfig;
@@ -26,6 +28,15 @@ public class ItemGroupDTO {
     private Integer separatorFlag;
     private Integer separatorHeight;
     private Integer columnCount;
+
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
 
     public String getGroupName() {
         return groupName;

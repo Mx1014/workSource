@@ -1653,6 +1653,7 @@ public class PortalServiceImpl implements PortalService {
 		for (PortalItemGroup itemGroup: itemGroups) {
 			LaunchPadLayoutGroup group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroup.class);
 			group.setGroupName(itemGroup.getLabel());
+			group.setGroupId(itemGroup.getId());
 			if(null != itemGroup.getSeparatorFlag()){
 				group.setSeparatorFlag(itemGroup.getSeparatorFlag().intValue());
 			}
