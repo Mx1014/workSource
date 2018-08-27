@@ -813,6 +813,33 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+
+    @Override
+    public List<ServiceModuleFunction> listIncludeFunctions(Integer namespaceId, Long comunityId, Long moduleId) {
+        List<ServiceModuleFunction> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleFunctions.class));
+        SelectQuery<EhServiceModuleFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_FUNCTIONS);
+
+        if (comunityId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(comunityId)
+                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L))
+                    .or(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.COMMUNITY_ID.isNull()));
+        if (moduleId != null)
+            cond = cond.and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));
+
+        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.COMMUNITYID.eq(comunityId));
+        query.addCondi
+        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_SERVICE_MODULE_FUNCTIONS.NAMESPACEID.eq(namespaceId));
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleFunction.class));
+            return null;
+        });
+        return results;
+    }
+
+
 	@Override
 	public void deleteServiceModuleFromBlack(Long Id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleExcludeFunctions.class));
