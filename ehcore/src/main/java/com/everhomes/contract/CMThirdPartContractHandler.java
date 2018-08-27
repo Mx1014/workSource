@@ -233,7 +233,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 date = getNextDay(date, sdf);
                 syncContractsFromThirdPart("1", date, communityIdentifier, taskId, categoryId, contractApplicationScene);
             }else{
-
+            	//同步CM数据到物业账单表
+            	
+            	
             }
 
         }
