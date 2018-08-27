@@ -11,6 +11,8 @@ public class GetCustomizeCommand {
     private String ownerType;
     private Long ownerId;
 
+    private Long orgId;
+
     public String getOwnerType() {
         return ownerType;
     }
@@ -25,5 +27,13 @@ public class GetCustomizeCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 }

@@ -83,6 +83,14 @@ public class CreateOrUpdateCityCommand {
         this.ownerId = ownerId;
     }
 
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
