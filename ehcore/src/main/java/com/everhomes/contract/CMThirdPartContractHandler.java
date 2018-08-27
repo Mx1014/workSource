@@ -3,6 +3,7 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.asset.AssetService;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -91,6 +92,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     @Autowired
     private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
     
+    @Autowired
+    private AssetService assetService;
+	
     @Autowired
     private CommunityProvider communityProvider;
     
@@ -309,6 +313,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
 
 
+        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
 
         if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
 
@@ -324,6 +329,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }else{
             	//存储瑞安合同
             	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
+            	//同步CM数据到物业账单表
+            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929);
+            	
             }
         }
         /*EbeiJsonEntity<List<EbeiContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<EbeiJsonEntity<List<EbeiContract>>>(){});

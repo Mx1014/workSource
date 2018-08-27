@@ -4,6 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -254,4 +255,6 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+	
+	void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId);
 }

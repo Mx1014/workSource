@@ -99,6 +99,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -5650,6 +5651,15 @@ public class AssetServiceImpl implements AssetService {
 	 */
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
+	}
+	
+	/**
+	 * 同步瑞安CM的账单数据到左邻的数据库表中
+	 */
+	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
+		AssetVendor vendor = checkAssetVendor(namespaceId,0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        handler.syncRuiAnCMBillToZuolin(cmSyncObject, namespaceId);
 	}
 
 }
