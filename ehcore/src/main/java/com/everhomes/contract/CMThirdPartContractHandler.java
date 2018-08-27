@@ -3,6 +3,7 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.asset.AssetService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
@@ -14,6 +15,7 @@ import com.everhomes.rest.contract.EbeiContract;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.util.xml.XMLToJSON;
 import com.google.gson.Gson;
@@ -52,6 +54,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
     @Autowired
     private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+    
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene){
@@ -234,7 +239,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 syncContractsFromThirdPart("1", date, communityIdentifier, taskId, categoryId, contractApplicationScene);
             }else{
             	//同步CM数据到物业账单表
-            	
+            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, UserContext.getCurrentNamespaceId());
             	
             }
 
