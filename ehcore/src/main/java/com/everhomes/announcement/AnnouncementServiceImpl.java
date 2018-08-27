@@ -2,23 +2,29 @@
 package com.everhomes.announcement;
 
 import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.announcement.AnnouncementDTO;
+import com.everhomes.rest.announcement.CancelLikeAnnouncementCommand;
 import com.everhomes.rest.announcement.CreateAnnouncementCommand;
 import com.everhomes.rest.announcement.DeleteAnnouncementCommand;
 import com.everhomes.rest.announcement.GetAnnouncementCommand;
+import com.everhomes.rest.announcement.LikeAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementResponse;
 import com.everhomes.rest.announcement.QueryAnnouncementCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CronDateUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -92,6 +98,28 @@ public class AnnouncementServiceImpl implements AnnouncementService{
         }
         response.setAnnouncementDTOs(dtos);
         return response;
+    }
+
+    @Override
+    public void likeAnnouncement(LikeAnnouncementCommand cmd) {
+        LikeTopicCommand command = new LikeTopicCommand();
+        command.setTopicId(cmd.getAnnouncementId());
+        Forum forum = forumService.findFourmByNamespaceId(UserContext.getCurrentNamespaceId());
+        if(forum != null){
+            command.setForumId(forum.getId());
+        }
+        this.forumService.likeTopic(command);
+    }
+
+    @Override
+    public void cancelLikeAnnouncement(CancelLikeAnnouncementCommand cmd) {
+        CancelLikeTopicCommand command = new CancelLikeTopicCommand();
+        command.setTopicId(cmd.getAnnouncementId());
+        Forum forum = forumService.findFourmByNamespaceId(UserContext.getCurrentNamespaceId());
+        if(forum != null){
+            command.setForumId(forum.getId());
+        }
+        this.forumService.cancelLikeTopic(command);
     }
 
     private void sendMessageToUserWhenCreateAnnouncement(Integer namespaceId, List<Long> communityIds, PostDTO postDTO) {

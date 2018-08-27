@@ -6,9 +6,11 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.announcement.AnnouncementDTO;
+import com.everhomes.rest.announcement.CancelLikeAnnouncementCommand;
 import com.everhomes.rest.announcement.CreateAnnouncementCommand;
 import com.everhomes.rest.announcement.DeleteAnnouncementCommand;
 import com.everhomes.rest.announcement.GetAnnouncementCommand;
+import com.everhomes.rest.announcement.LikeAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementCommand;
 import com.everhomes.rest.announcement.ListAnnouncementResponse;
 import com.everhomes.rest.announcement.QueryAnnouncementCommand;
@@ -83,6 +85,38 @@ public class AnnouncementController extends ControllerBase {
     public RestResponse listAnnouncement(ListAnnouncementCommand cmd) {
         ListAnnouncementResponse res = announcementService.listAnnouncement(cmd);
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /announcement/likeAnnouncement</b>
+     * <p>对公告点赞</p>
+     * @return 点赞的结果
+     */
+    @RequestMapping("likeAnnouncement")
+    @RestReturn(value=String.class)
+    public RestResponse likeAnnouncement(LikeAnnouncementCommand cmd) {
+        this.announcementService.likeAnnouncement(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /announcement/cancelLikeAnnouncement</b>
+     * <p>对公告取消赞</p>
+     * @return 取消赞的结果
+     */
+    @RequestMapping("cancelLikeAnnouncement")
+    @RestReturn(value=String.class)
+    public RestResponse cancelLikeAnnouncement(CancelLikeAnnouncementCommand cmd) {
+        this.announcementService.cancelLikeAnnouncement(cmd);
+
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
