@@ -4,7 +4,9 @@ import com.everhomes.user.User;
 
 public interface WorkReportMessageService {
 
-    void postWorkReportMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user);
+    void workReportPostMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user);
 
-    void updateWorkReportMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user);
+    void workReportUpdateMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user);
+
+    void workReportCommentMessage(User user, WorkReportVal reportVal, WorkReport report, Long parentCommentId);
 }

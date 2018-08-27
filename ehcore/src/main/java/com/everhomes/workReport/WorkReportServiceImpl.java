@@ -500,7 +500,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
                 if(ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY)
-                    workReportMessageService.postWorkReportMessage(report, reportVal, receiverId, user);
+                    workReportMessageService.workReportPostMessage(report, reportVal, receiverId, user);
             }
             return null;
         });
@@ -589,7 +589,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 //  create the receiver.
                 workReportValProvider.createWorkReportValReceiverMap(receiver);
                 //  send message to the receiver.
-                workReportMessageService.updateWorkReportMessage(report, reportVal, receiverId, user);
+                workReportMessageService.workReportUpdateMessage(report, reportVal, receiverId, user);
             }
             return null;
         });
