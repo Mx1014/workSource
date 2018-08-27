@@ -108,7 +108,7 @@ ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `type` BIGINT(20) NOT NU
 
 ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_type` VARCHAR(15) NOT NULL DEFAULT 'organization';
 
-ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` INT(11) NOT NULL DEFAULT '0' ;
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` BIGINT(20) NOT NULL DEFAULT '0' ;
 
 
 -- by st.zheng 允许表单为空
