@@ -76,7 +76,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
             createFlowCaseCommand.setApplyUserId(UserContext.current().getUser().getId());
             createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
             createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-            createFlowCaseCommand.setServiceType("requisition");
+            createFlowCaseCommand.setServiceType("请示单申请");
             createFlowCaseCommand.setProjectId(cmd.getOwnerId());
             createFlowCaseCommand.setProjectType(cmd.getOwnerType());
 
