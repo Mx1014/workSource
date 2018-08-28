@@ -1,7 +1,7 @@
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心v3.0
 -- 用户表增加showCompanyFlag字段
-ALTER TABLE `eh_users` ADD COLUMN `showCompanyFlag` TINYINT COMMENT '是否展示公司名称';
+ALTER TABLE `eh_users` ADD COLUMN `show_company_flag` TINYINT COMMENT '是否展示公司名称';
 
 -- 个人中心配置表
 CREATE TABLE `eh_personal_center_settings` (
