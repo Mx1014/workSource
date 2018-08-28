@@ -176,7 +176,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/createEnterpriseApproval</b>
      * <p>OA 新增审批</p>
-     * @return
      */
     @RequestMapping("createEnterpriseApproval")
     @RestReturn(value=EnterpriseApprovalDTO.class)
@@ -191,7 +190,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/deleteEnterpriseApproval</b>
      * <p>OA 删除审批</p>
-     * @return
      */
     @RequestMapping("deleteEnterpriseApproval")
     @RestReturn(value=String.class)
@@ -206,7 +204,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/updateEnterpriseApproval</b>
      * <p>OA 编辑审批</p>
-     * @return
      */
     @RequestMapping("updateEnterpriseApproval")
     @RestReturn(value=EnterpriseApprovalDTO.class)
@@ -221,7 +218,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovalTypes</b>
      * <p>OA 获取审批类型列表(用来做filter条件)</p>
-     * @return
      */
     @RequestMapping("listEnterpriseApprovalTypes")
     @RestReturn(value=ListEnterpriseApprovalsResponse.class)
@@ -236,7 +232,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/enableEnterpriseApproval</b>
      * <p>OA 启用审批</p>
-     * @return
      */
     @RequestMapping("enableEnterpriseApproval")
     @RestReturn(value=String.class)
@@ -251,7 +246,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/disableEnterpriseApproval</b>
      * <p>OA 禁用审批</p>
-     * @return
      */
     @RequestMapping("disableEnterpriseApproval")
     @RestReturn(value=String.class)

@@ -215,71 +215,15 @@ public class WorkReportUtil {
         return date.minusDays(date.getDayOfMonth() - 1);
     }
 
-    /*public static String formatTime2WorkReportTime(long time, Byte reportType) {
-        WorkReportType workReportType = WorkReportType.fromCode(reportType);
-        if (workReportType == null) {
-            workReportType = WorkReportType.DAY;
-        }
-        StringBuffer sb = new StringBuffer();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time);
-        switch (workReportType) {
-            case DAY: {
-                //选中今日
-                sb.append(MMDD.format(calendar.getTime()));
-                break;
-            }
-            case WEEK: {
-                calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                sb.append(MMDD.format(calendar.getTime()));
-                sb.append("～");
-                calendar.add(Calendar.DAY_OF_MONTH, 6);
-                sb.append(MMDD.format(calendar.getTime()));
-                break;
-            }
-            case MONTH: {
-                sb.append(YYYYMM.format(calendar.getTime()));
-                break;
-            }
-            default:
-                break;
-        }
-        return sb.toString();
+    /**
+     * 获取截止时间文本
+     */
+    public static String displayEndTime(LocalDateTime endTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M月d日 HH:mm");
+        return formatter.format(endTime);
     }
 
     public static void main(String[] args) {
-        String pattern = "yyyy-MM-dd HH:mm:ss";
-        String s = "2019-02-25 09:30:01";
-        TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(s);
-        ZoneId zone = ZoneId.systemDefault();
-
-        DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("M月d日");
-        Long reportTime = LocalDateTime.from(accessor).atZone(zone).toInstant().toEpochMilli();
-        LocalDateTime time1 = getSettingTime(reportTime, WorkReportType.DAY.getCode(), WorkReportType.DAY.getCode(), null, "15:30");
-        LocalDateTime time2 = getSettingTime(reportTime, WorkReportType.DAY.getCode(), WorkReportType.WEEK.getCode(), null, "16:30");
-        LocalDateTime time3 = getSettingTime(reportTime, WorkReportType.WEEK.getCode(), WorkReportType.DAY.getCode(), "4", "12:30");
-        LocalDateTime time4 = getSettingTime(reportTime, WorkReportType.WEEK.getCode(), WorkReportType.WEEK.getCode(), "5", "13:30");
-        LocalDateTime time5 = getSettingTime(reportTime, WorkReportType.MONTH.getCode(), WorkReportType.DAY.getCode(), "11", "11:30");
-        LocalDateTime time6 = getSettingTime(reportTime, WorkReportType.MONTH.getCode(), WorkReportType.WEEK.getCode(), "12", "12:30");
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        System.out.println(formatter.format(time1));
-        System.out.println(formatter.format(time2));
-        System.out.println(time1.isBefore(time2));
-
-        System.out.println(formatter.format(time3));
-        System.out.println(formatter.format(time4));
-        System.out.println(formatter.format(time5));
-        System.out.println(formatter.format(time6));
-
-        System.out.println(dayFormat.format(time1));
-
-        System.out.println(displayReportTime(WorkReportType.DAY.getCode(), java.sql.Date.valueOf(time1.toLocalDate())));
-        System.out.println(displayReportTime(WorkReportType.WEEK.getCode(), java.sql.Date.valueOf(time1.toLocalDate())));
-        System.out.println(displayReportTime(WorkReportType.MONTH.getCode(), java.sql.Date.valueOf(time1.toLocalDate())));
-
-    }*/
+        System.out.println(displayEndTime(LocalDateTime.now()));
+    }
 }
