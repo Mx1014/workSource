@@ -22,6 +22,8 @@ public class GetGeneralFormValCommand {
 
     private String ownerType;
 
+    private Long currentOrganizationId;
+
     private String sourceType;
     private Long sourceId;
     private String moduleType;
@@ -81,6 +83,14 @@ public class GetGeneralFormValCommand {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public Long getCurrentOrganizationId() {
+        return currentOrganizationId;
+    }
+
+    public void setCurrentOrganizationId(Long currentOrganizationId) {
+        this.currentOrganizationId = currentOrganizationId;
     }
 
     @Override
