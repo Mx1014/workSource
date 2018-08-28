@@ -11,12 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListUploadCertificatesCommand;
+import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.contract.CMBill;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -70,9 +77,12 @@ public class RuiAnCMAssetVendorHandler extends AssetVendorHandler {
 						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
 					items.setChargingItemName(cmBill.getBillItemName());
+					items.setAmountOwed(new BigDecimal(cmBill.getBalanceAmt()));
+					//items.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
+					items.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
+					items.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
 					
 					assetProvider.createCMBillItem(items);
-					
 				}
 			}
 		}
@@ -98,6 +108,22 @@ public class RuiAnCMAssetVendorHandler extends AssetVendorHandler {
             list.remove(list.size()-1);
         }
         return list;
+    }
+	
+	public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
+        ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
+        for(int i = 0; i< dtos.size(); i ++) {
+            ExemptionItemDTO dto = dtos.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1) {
+                dto.setIsPlus((byte)0);
+                dto.setAmount(dto.getAmount().divide(new BigDecimal("-1")));
+            }else{
+                dto.setIsPlus((byte)1);
+            }
+        }
+        return response;
     }
     
 }
