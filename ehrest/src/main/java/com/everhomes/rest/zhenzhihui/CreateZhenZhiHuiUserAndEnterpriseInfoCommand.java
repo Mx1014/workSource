@@ -26,6 +26,15 @@ public class CreateZhenZhiHuiUserAndEnterpriseInfoCommand {
     private String     corporationName;
     private String     enterpriseToken;
     private String     enterpriseName;
+    private Integer    enterpriseType;
+
+    public Integer getEnterpriseType() {
+        return enterpriseType;
+    }
+
+    public void setEnterpriseType(Integer enterpriseType) {
+        this.enterpriseType = enterpriseType;
+    }
 
     public String getName() {
         return name;

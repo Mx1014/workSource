@@ -324,6 +324,7 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         zhenzhihuiEnterpriseInfo.setIdentifyType(cmd.getCorporationType());
         zhenzhihuiEnterpriseInfo.setEnterpriseName(cmd.getEnterpriseName());
         zhenzhihuiEnterpriseInfo.setEnterpriseToken(cmd.getEnterpriseToken());
+        zhenzhihuiEnterpriseInfo.setEnterpriseType(cmd.getEnterpriseType());
         this.zhenzhihuiEnterpriseInfoProvider.createZhenzhihuiEnterpriseInfo(zhenzhihuiEnterpriseInfo);
         String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com?code=")+ZhenZhiHuiAffairType.ENTERPRISE.getCode();
         LOGGER.info("redirect to zhenzhihui url={}",location);

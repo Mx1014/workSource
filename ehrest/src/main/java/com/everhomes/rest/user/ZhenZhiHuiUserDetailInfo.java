@@ -51,6 +51,8 @@ import java.util.List;
  *     <li>corporationName: 法人名称</li>
  *     <li>enterpriseToken: 单位证件号码</li>
  *     <li>enterpriseName: 单位名称</li>
+ *     <li>enterpriseType:单位证件类型</li>
+ *     <li>userType: 用户类型</li>
  *  </ul>
  **/
 public class ZhenZhiHuiUserDetailInfo {
@@ -105,6 +107,8 @@ public class ZhenZhiHuiUserDetailInfo {
     private String     corporationName;
     private String     enterpriseToken;
     private String     enterpriseName;
+    private Integer    enterpriseType;
+    private Byte       userType;
 
     @ItemType(OrganizationSimpleDTO.class)
     private List<OrganizationSimpleDTO> organizationList;
@@ -117,6 +121,22 @@ public class ZhenZhiHuiUserDetailInfo {
 
     public void setOrganizationList(List<OrganizationSimpleDTO> organizationList) {
         this.organizationList = organizationList;
+    }
+
+    public Byte getUserType() {
+        return userType;
+    }
+
+    public void setUserType(Byte userType) {
+        this.userType = userType;
+    }
+
+    public Integer getEnterpriseType() {
+        return enterpriseType;
+    }
+
+    public void setEnterpriseType(Integer enterpriseType) {
+        this.enterpriseType = enterpriseType;
     }
 
     public String getName() {

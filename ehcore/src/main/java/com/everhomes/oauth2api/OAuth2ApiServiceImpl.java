@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.user.ZhenZhiHuiUserDetailInfo;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiUserType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfo;
 import com.everhomes.zhenzhihui.ZhenzhihuiEnterpriseInfoProvider;
 import com.everhomes.zhenzhihui.ZhenzhihuiUserInfo;
 import com.everhomes.zhenzhihui.ZhenzhihuiUserInfoProvider;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,8 @@ import com.everhomes.user.UserService;
  */
 @Service
 public class OAuth2ApiServiceImpl implements OAuth2ApiService {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OAuth2ApiServiceImpl.class);
 
     @Autowired
     private UserService userService;
@@ -71,7 +75,9 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
             userInfo.setOrganizationList(organizationSimpleDTOS);
         }
         ZhenZhiHuiUserDetailInfo zhenZhiHuiUserDetailInfo = ConvertHelper.convert(userInfo, ZhenZhiHuiUserDetailInfo.class);
+        LOGGER.info("userId = {}", userInfo.getId());
         List<ZhenzhihuiUserInfo> zhenzhihuiUserInfos = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userInfo.getId());
+        LOGGER.info("userInfo size = {}",zhenzhihuiUserInfos.size());
         if (!CollectionUtils.isEmpty(zhenzhihuiUserInfos)) {
             ZhenzhihuiUserInfo zhenzhihuiUserInfo = zhenzhihuiUserInfos.get(0);
             zhenZhiHuiUserDetailInfo.setIdentifyType(zhenzhihuiUserInfo.getIdentifyType());
@@ -80,6 +86,7 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
             zhenZhiHuiUserDetailInfo.setEmail(zhenzhihuiUserInfo.getEmail());
         }
         List<ZhenzhihuiEnterpriseInfo> zhenzhihuiEnterpriseInfos = this.zhenzhihuiEnterpriseInfoProvider.listZhenzhihuiEnterpriseInfoByUserId(userInfo.getId());
+        LOGGER.info("enterprise size = {}",zhenzhihuiEnterpriseInfos.size());
         if (!CollectionUtils.isEmpty(zhenzhihuiEnterpriseInfos)) {
             ZhenzhihuiEnterpriseInfo zhenzhihuiEnterpriseInfo = zhenzhihuiEnterpriseInfos.get(0);
             zhenZhiHuiUserDetailInfo.setEnterpriseName(zhenzhihuiEnterpriseInfo.getEnterpriseName());
@@ -87,6 +94,10 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
             zhenZhiHuiUserDetailInfo.setCorporationName(zhenzhihuiEnterpriseInfo.getCorporationName());
             zhenZhiHuiUserDetailInfo.setCorporationToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
             zhenZhiHuiUserDetailInfo.setCorporationType(zhenzhihuiEnterpriseInfo.getIdentifyType());
+            zhenZhiHuiUserDetailInfo.setEnterpriseType(zhenzhihuiEnterpriseInfo.getEnterpriseType());
+            zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.BOTH.getCode());
+        }else {
+            zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.PERSON.getCode());
         }
         return zhenZhiHuiUserDetailInfo;
     }
