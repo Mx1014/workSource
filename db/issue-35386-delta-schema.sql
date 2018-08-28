@@ -13,6 +13,7 @@ CREATE TABLE `eh_zhenzhihui_enterprise_info` (
   `id` BIGINT NOT NULL,
   `enterprise_name` VARCHAR(64) DEFAULT '' COMMENT '单位名称',
   `enterprise_token` VARCHAR(64) DEFAULT '' COMMENT '单位证件号码',
+  `enterprise_type`  INTEGER NOT NULL DEFAULT 10 COMMENT '单位证件类型',
   `corporation_name` VARCHAR(32) DEFAULT '' COMMENT '法人名称',
   `identify_token` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '法人证件号码',
   `identify_type` INTEGER NOT NULL DEFAULT 10 COMMENT '法人证件类型',
