@@ -28,6 +28,7 @@ import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoComman
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoResponse;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiAffairType;
+import com.everhomes.rest.zhenzhihui.ZhenZhiHuiEnterpriseInfoDTO;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiRedirectCommand;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServer;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiDTO;
@@ -282,19 +283,25 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         }
         List<ZhenzhihuiUserInfo> zhenzhihuiUserInfoList = this.zhenzhihuiUserInfoProvider.listZhenzhihuiUserInfosByUserId(userId);
         String location = "";
+        String homeUrl = this.configurationProvider.getValue(0,"home.url","https://core.zuolin.com");
         if (CollectionUtils.isEmpty(zhenzhihuiUserInfoList)) {
-            String homeUrl = this.configurationProvider.getValue(0,"home.url","https://core.zuolin.com");
             if (cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
                 location = homeUrl + REDIRECT_FILL_IN_USER_AND_ENTERPRISE_INFO;
             }else {
                 location = homeUrl + REDIRECT_FILL_IN_USER_INFO;
             }
             LOGGER.info("redirect to fill in location, url={}",location);
-        }else {
-            String zhenzhihuiUrl = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com");
-            location = zhenzhihuiUrl+cmd.getCode();
-            LOGGER.info("redirect to zhenzhihui url={}",location);
+            return location;
         }
+        List<ZhenzhihuiEnterpriseInfo> zhenZhiHuiEnterpriseInfos  = this.zhenzhihuiEnterpriseInfoProvider.listZhenzhihuiEnterpriseInfoByUserId(userId);
+        if (CollectionUtils.isEmpty(zhenZhiHuiEnterpriseInfos) && cmd.getCode().equals(ZhenZhiHuiAffairType.ENTERPRISE.getCode())) {
+            location = homeUrl + REDIRECT_FILL_IN_USER_AND_ENTERPRISE_INFO;
+            LOGGER.info("redirect to fill in enterprise information, url={}",location);
+            return location;
+        }
+        String zhenzhihuiUrl = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com?code=");
+        location = zhenzhihuiUrl+cmd.getCode();
+        LOGGER.info("redirect to zhenzhihui url={}",location);
         return location;
     }
 
