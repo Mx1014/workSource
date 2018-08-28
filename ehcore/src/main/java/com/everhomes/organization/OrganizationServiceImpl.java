@@ -6025,7 +6025,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
             deleteEnterpriseContactStatus(operatorUid, member);
-            sendMessageForContactReject(member);
+            sendMessageForContactReject(member , cmd.getRejectText());
         }
 
     }
@@ -9357,11 +9357,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         return map;
     }
 
-    private String getNotifyText(Organization org, OrganizationMember member, User user, int code) {
+    private String getNotifyText(Organization org, OrganizationMember member, User user, int code ,String textInfo) {
         Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2") : member.getContactName());
         map.put("userToken", member.getContactToken());
+        
+        map.put("textInfo", textInfo==null?"":textInfo);
         if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
@@ -9408,7 +9410,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
         // send notification to all the other members in the group
-        String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
+        String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR ,null);
 
         //Updated by Jannson 
         //includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
@@ -9453,7 +9455,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF,null);
 
         QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
 
@@ -9467,7 +9469,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
         // send notification to all the other members in the group
-        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
+        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER,null);
         // 消息只发给公司的管理人员  by sfyan 20170213
 //        includeList = this.includeOrgList(org, member.getTargetId());
         includeList = listOrganzationAdminIds(member.getOrganizationId());
@@ -9493,13 +9495,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
-    private void sendMessageForContactReject(OrganizationMember member) {
+    private void sendMessageForContactReject(OrganizationMember member , String rejectText) {
         // send notification to who is requesting to join the enterprise
         Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
         User user = userProvider.findUserById(member.getTargetId());
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN,rejectText);
 
         // send notification to who is requesting to join the enterprise
 
@@ -9520,7 +9522,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = userProvider.findUserById(member.getTargetId());
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT,null);
         List<Long> includeList = new ArrayList<Long>();
         //给申请人发的信息应为私信by xiongying 20160524
         sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
@@ -9534,7 +9536,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         includeList.clear();
 
         // send notification to all the other members in the enterprise
-        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
+        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER,null);
 
         //消息只发给公司的管理人员  by sfyan 20170213
         includeList = this.includeOrgList(org, member.getTargetId());
