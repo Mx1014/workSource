@@ -1,8 +1,8 @@
 package com.everhomes.rest.workReport;
 
 public interface WorkReportNotificationTemplateCode {
-	String SCOPE = "work.report.notification";
 
+	String SCOPE = "work.report.notification";
 
 	int COMMENT_MESSAGE_1 = 1; //	${评论人} 在Ta的 ${汇报类型}（${汇报日期}） 中 回复了你
 
