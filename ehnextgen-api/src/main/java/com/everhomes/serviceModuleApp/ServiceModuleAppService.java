@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.rest.launchpad.ListAllAppsResponse;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -41,7 +42,7 @@ public interface ServiceModuleAppService {
 
     ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd);
 
-    RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData);
+    RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path);
 
     void updateStatus(UpdateStatusCommand cmd);
 
@@ -60,4 +61,6 @@ public interface ServiceModuleAppService {
 	void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd);
 
 	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
+
+    ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
 }

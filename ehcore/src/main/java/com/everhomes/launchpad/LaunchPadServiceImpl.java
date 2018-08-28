@@ -2915,7 +2915,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null);
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
 		}
@@ -3014,7 +3014,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null);
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
 		}
