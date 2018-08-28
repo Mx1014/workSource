@@ -17,6 +17,6 @@ public interface PaymentCardPayService {
 
     void updateAccountSetting(UpdateAccountSettingCommand cmd);
 
-    PreOrderDTO createPreOrder(PreOrderCommand cmd);
+    PreOrderDTO createPreOrder(PreOrderCommand cmd, PaymentCardRechargeOrder order);
 
 }

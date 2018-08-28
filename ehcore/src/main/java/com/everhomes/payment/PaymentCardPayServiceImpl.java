@@ -124,7 +124,7 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     }
 
     @Override
-    public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
+    public PreOrderDTO createPreOrder(PreOrderCommand cmd,PaymentCardRechargeOrder order) {
         PreOrderDTO preOrderDTO = null;
         //1、收款方是否有会员，无则报错
         cmd.setBizPayeeId(getPayeeAccountByCommunityId(cmd.getCommunityId()));
@@ -139,7 +139,16 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
 
         //3、组装支付方式
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+
+        //4、保存订单信息
+        saveOrderRecord( order,orderCommandResponse);
         return preOrderDTO;
+    }
+
+    private void saveOrderRecord(PaymentCardRechargeOrder order , PurchaseOrderCommandResponse orderCommandResponse) {
+        OrderCommandResponse response = orderCommandResponse.getPayResponse();
+        order.setBizOrderNo(response.getBizOrderNum());
+        paymentCardProvider.updatePaymentCardRechargeOrder(order);
     }
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){

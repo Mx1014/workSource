@@ -10,6 +10,7 @@ import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +33,10 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     @Override
     public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
-        this.checkOrderNoIsNull(cmd.getOrderId());
+        this.checkOrderNoIsNull(cmd.getBizOrderNum());
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess start cmd = {}", cmd);
-        PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
-//        if (0 != order.getAmount().compareTo(payservice.changePayAmount(cmd.getAmount()))) {
-//            LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//                    "Order amount is not equal to payAmount.");
-//        }
+        PaymentCardRechargeOrder order = checkOrder(cmd.getBizOrderNum());
+
 
         this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()+cmd.getOrderId()).tryEnter(()-> {
             PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
@@ -59,15 +56,15 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     @Override
      public void payFail(SrvOrderPaymentNotificationCommand cmd) {
-        this.checkOrderNoIsNull(cmd.getOrderId());
-        PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
-        Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-        order.setPayStatus(CardOrderStatus.INACTIVE.getCode());
-        order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
-        order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-        order.setPaidTime(payTimeStamp);
-        order.setPaidType(String.valueOf(cmd.getPaymentType()));
-        paymentCardProvider.updatePaymentCardRechargeOrder(order);
+//        this.checkOrderNoIsNull(cmd.getOrderId());
+//        PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
+//        Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+//        order.setPayStatus(CardOrderStatus.INACTIVE.getCode());
+//        order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+//        order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+//        order.setPaidTime(payTimeStamp);
+//        order.setPaidType(String.valueOf(cmd.getPaymentType()));
+//        paymentCardProvider.updatePaymentCardRechargeOrder(order);
     }
 
     @Override
@@ -80,11 +77,11 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     }
 
-    private PaymentCardRechargeOrder checkOrder(Long orderId) {
-        PaymentCardRechargeOrder order = paymentCardProvider.findPaymentCardRechargeOrderById(orderId);
+    private PaymentCardRechargeOrder checkOrder(String bizOrderNum) {
+        PaymentCardRechargeOrder order = paymentCardProvider.findPaymentCardRechargeOrderByBizOrderNum(bizOrderNum);
 
         if(order == null){
-            LOGGER.error("the order {} not found.",orderId);
+            LOGGER.error("the order {} not found.",bizOrderNum);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "the order not found.");
         }
@@ -102,8 +99,8 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
         return handler;
     }
 
-    private void checkOrderNoIsNull(Long orderNo) {
-        if(orderNo==null){
+    private void checkOrderNoIsNull(String bizOrderNum) {
+        if(StringUtils.isBlank(bizOrderNum)){
             LOGGER.error("orderNo is null or empty.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "orderNo is null or empty.");

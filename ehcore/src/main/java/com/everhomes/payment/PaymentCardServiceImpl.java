@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.order.*;
 import org.apache.commons.codec.binary.Base64;
@@ -129,6 +131,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     private CoordinationProvider coordinationProvider;
     @Autowired
 	private PaymentCardPayService payService;
+	@Autowired
+	private PaymentCardOrderEmbeddedV2Handler paymentCardOrderEmbeddedV2Handler;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
@@ -256,10 +260,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		preOrderCommand.setNamespaceId(user.getNamespaceId());
 
 
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-		//paymentCardRechargeOrder.set
-		//paymentCardProvider.updatePaymentCardRechargeOrder();
-		return null;
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand,paymentCardRechargeOrder);
+		return callBack;
 	}
 
 	@Override
@@ -930,4 +932,14 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     				"ownerType cannot be null.");
         }
     }
+
+	@Override
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+		if (!PayUtil.verifyCallbackSignature(cmd))
+		throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+				"signature wrong");
+		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
+		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		paymentCardOrderEmbeddedV2Handler.paySuccess(cmd2);
+	}
 }

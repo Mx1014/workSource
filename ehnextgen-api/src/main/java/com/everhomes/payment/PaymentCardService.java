@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.ApplyCardCommand;
@@ -75,4 +76,6 @@ public interface PaymentCardService {
     void exportCardTransactions(SearchCardTransactionsCommand cmd,HttpServletResponse response);
     
     void updateCardRechargeOrder(UpdateCardRechargeOrderCommand cmd);
+
+    void payNotify(OrderPaymentNotificationCommand cmd);
 }

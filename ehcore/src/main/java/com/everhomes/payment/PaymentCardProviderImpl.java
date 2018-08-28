@@ -287,8 +287,17 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         return ConvertHelper.convert(query.fetchOne(), PaymentCardRechargeOrder.class);
 		
     }
-    
-    @Override
+
+	@Override
+	public PaymentCardRechargeOrder findPaymentCardRechargeOrderByBizOrderNum(String bizOrderNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);
+		query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.BIZ_ORDER_NO.eq(bizOrderNum));
+
+		return ConvertHelper.convert(query.fetchOne(), PaymentCardRechargeOrder.class);
+	}
+
+	@Override
     public void updatePaymentCardRechargeOrder(PaymentCardRechargeOrder order){
     	
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

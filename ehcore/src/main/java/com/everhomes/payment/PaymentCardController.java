@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -282,6 +283,22 @@ public class PaymentCardController extends ControllerBase{
     public RestResponse searchCardTransactions(SearchCardTransactionsCommand cmd) {
     	SearchCardTransactionsResponse resp = paymentCardService.searchCardTransactions(cmd);
         RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /payment/payNotify <b>
+     * <p>支付回调</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("payNotify")
+    @RestReturn(String.class)
+    public RestResponse payNotify(OrderPaymentNotificationCommand cmd) {
+        this.paymentCardService.payNotify(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

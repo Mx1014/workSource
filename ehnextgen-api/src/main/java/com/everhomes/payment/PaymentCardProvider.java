@@ -31,6 +31,8 @@ public interface PaymentCardProvider {
     		String consumeType,Byte status,String keyword,Long pageAnchor,Integer pageSize);
 	
 	PaymentCardRechargeOrder findPaymentCardRechargeOrderById(Long orderId);
+
+	PaymentCardRechargeOrder findPaymentCardRechargeOrderByBizOrderNum(String bizOrderNum);
 	
 	void updatePaymentCardRechargeOrder(PaymentCardRechargeOrder order);
 	
