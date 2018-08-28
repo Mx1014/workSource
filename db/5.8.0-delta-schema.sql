@@ -791,6 +791,8 @@ ALTER TABLE `eh_addresses` ADD COLUMN `community_name` varchar(64) NULL DEFAULT 
 -- REMARK: #36462 
 ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
 
+-- 黄鹏宇 2018年8月28日
+-- REMARK: 按钮白名单
 CREATE TABLE `eh_service_module_include_functions`
 (
    `id`                   bigint not null,
@@ -801,4 +803,5 @@ CREATE TABLE `eh_service_module_include_functions`
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
 
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
