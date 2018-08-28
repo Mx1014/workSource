@@ -929,6 +929,7 @@ UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='ap
 -- REMARK: 添加删除权限控制
 SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+UPDATE `eh_service_module_privileges` SET `remark` = '新增/修改/发起审批' where `privilege_id` = 250001002;
 
 -- 更改请示单module name jiarui 20180823
 update eh_service_modules set name = '请示单管理' where id = 25000;
