@@ -230,9 +230,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
             SelectQuery<Record> query = context
                     .select(t.fields())
-                    .from(t).leftOuterJoin(Tables.EH_FLOWS)
-                    .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
-                            .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                    .from(t)
                     .where(cond)
                     .getQuery();
 
