@@ -8,7 +8,7 @@ INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`
 
 
 set @id=(select max(id)+1 from `eh_general_form_templates`) ;
-INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`,  `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `create_time` ) VALUES (@id, 11, 0, 0, 'EhOrganizations', 25000, 'requisition', '请示单',  0, 'DEFAULT_JSON', '[{
+INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`,  `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `create_time` ) VALUES (@id, 0, 0, 0, 'EhOrganizations', 25000, 'requisition', '请示单',  0, 'DEFAULT_JSON', '[{
 	"dynamicFlag": 0,
 	"fieldDesc": "客户名称",
 	"fieldDisplayName": "客户名称",
@@ -47,3 +47,19 @@ INSERT INTO `eh_general_form_templates`(`id`, `namespace_id`, `organization_id`,
 	"visibleType": "EDITABLE",
 	"filterFlag": 1
 }]',1, 1,SYSDATE()) ;
+
+
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;
+
+-- 更改现网所有的资质都为有资质
+update eh_enterprise_customers set aptitude_flag_item_id = 1;
+
+-- 添加一键转为资质客户按钮
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+
+update eh_service_module_functions set module_id = 21100 where id = 43960;
+update eh_service_module_functions set module_id = 21200 where id = 43970;
+update eh_service_module_functions set module_id = 21100 where id = 43980;
+

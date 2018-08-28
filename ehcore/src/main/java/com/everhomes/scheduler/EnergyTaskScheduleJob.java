@@ -17,7 +17,6 @@ import com.everhomes.energy.EnergyMeterAddress;
 import com.everhomes.energy.EnergyMeterAddressProvider;
 import com.everhomes.energy.EnergyMeterChangeLog;
 import com.everhomes.energy.EnergyMeterChangeLogProvider;
-import com.everhomes.energy.EnergyMeterFormulaProvider;
 import com.everhomes.energy.EnergyMeterProvider;
 import com.everhomes.energy.EnergyMeterReadingLog;
 import com.everhomes.energy.EnergyMeterReadingLogProvider;
@@ -63,6 +62,7 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -146,9 +146,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     @Autowired
     private EnergyMeterSettingLogProvider meterSettingLogProvider;
-
-    @Autowired
-    private EnergyMeterFormulaProvider meterFormulaProvider;
 
     @Autowired
     private IndividualCustomerProvider individualCustomerProvider;
@@ -298,8 +295,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
                         ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
                         BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
-                        FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
+                        //#36363 水费抄表后，合同的费用清单出不来 add by djm
+						FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(), task.getExecutiveStartTime().getTime(),
+								task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address, meter.getMeterType(), item.getBillGroupId());
                         feeRules.add(feeRule);
                         contractId.add(item.getContractId());
                     });
@@ -313,7 +311,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                             BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                             FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
+                                    task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType(), null);
                             feeRules.add(feeRule);
                         });
                         //suanqian paymentExpectanciesCalculate();
@@ -327,7 +325,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                                 BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                                 FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                        task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
+                                        task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType(), null);
                                 feeRules.add(feeRule);
                             });
                             //suanqian paymentExpectanciesCalculate();
@@ -341,7 +339,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                     DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                                     BigDecimal amount = (amountMap != null ? amountMap.get(address.getAddressId()) : new BigDecimal(0));
                                     FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
-                                            task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
+                                            task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType(), null);
                                     feeRules.add(feeRule);
                                 });
                                 //suanqian paymentExpectanciesCalculate();
@@ -440,13 +438,16 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     }
 
     private FeeRules generateChargingItemsFeeRule(BigDecimal amount, Long chargingItemId, Long chargingStandardId,
-            Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address,Byte meterType) {
+            Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address,Byte meterType, Long billGroupId) {
         Gson gson = new Gson();
         FeeRules feeRule = new FeeRules();
         feeRule.setChargingItemId(chargingItemId);
         feeRule.setChargingStandardId(chargingStandardId);
         feeRule.setDateStrBegin(new Date(chargingStartTime));
         feeRule.setDateStrEnd(new Date(chargingExpiredTime));
+        if (billGroupId != null) {
+        	feeRule.setBillGroupId(billGroupId);
+		}
         List<ContractProperty> contractProperties = new ArrayList<>();
         ContractProperty cp = new ContractProperty();
         cp.setApartmentName(address.getApartmentName());

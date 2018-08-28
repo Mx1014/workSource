@@ -58,4 +58,23 @@ create table `eh_enterprise_customer_aptitude_flag`
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_customer_aptitude_flag in dev mode';
 
+-- 2018年8月22日
+-- 新增在request表单中存储该表单的formOriginId和formVersion
+alter table eh_general_form_val_requests add form_origin_id BIGINT null comment '该表单所属的表单模板id';
+alter table eh_general_form_val_requests add form_version BIGINT null comment '该表单所属的表单模板version';
+
+
+
+CREATE TABLE `eh_service_module_include_functions`
+(
+   `id`                   bigint not null,
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+	 `community_id`					bigint comment 'community_id' not null,
+	 `function_id`					bigint comment '关联的按钮id' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
+
+
+
 -- --------------------- SECTION END ---------------------------------------------------------

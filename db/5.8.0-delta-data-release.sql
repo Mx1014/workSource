@@ -36,6 +36,18 @@
 -- AUTHOR: 严军 2018年8月17日
 -- REMARK: 1、备份表eh_service_modules 和 eh_portal_items
 
+-- AUTHOR: 杨崇鑫 2018年8月23日
+-- REMARK：issue-36437: 修复【物业缴费6.3-5.8.0beta】【历史数据】查看域空间配置，发现之前已经建立合同->缴费，没有显示
+-- REMARK: 1、备份表eh_service_module_apps（包括独立部署环境）
+-- REMARK: 2、在每个环境（包括独立部署环境）执行以下查询sql
+-- select DISTINCT(a.origin_id), t.asset_category_id, t.contract_category_id from eh_service_module_apps a left join (
+-- 		select DISTINCT(b.asset_category_id),b.contract_category_id from eh_service_module_apps left join eh_asset_module_app_mappings b on instance_config like concat('%"categoryId":', b.asset_category_id,'%')
+-- 		where module_id=20400 and instance_config not like '%contractOriginId%'  and b.asset_category_id is not null order by asset_category_id 
+-- 		) as t on a.instance_config like concat('%"categoryId":', t.contract_category_id,'%')
+-- where a.module_id=21200 and t.asset_category_id is not null;
+-- REMARK：3、找杨崇鑫生成update语句执行
+-- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":\"""&A1&"\""}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -899,6 +911,39 @@ INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,names
 VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
+
+-- AUTHOR: huangmingbo
+-- REMARK: 修改快递添加账户提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180809', 'zh_CN', '收款账户已存在，请勿重复添加');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180810', 'zh_CN', '需要更新的收款账户ID不存在');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送默认推送方式改为新推送
+UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='apple.pusher.flag';
+
+
+-- END
+
+-- AUTHOR: 黄鹏宇 2018-8-28
+-- REMARK: 添加删除权限控制
+SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;
+
+-- 更改现网所有的资质都为有资质
+update eh_enterprise_customers set aptitude_flag_item_id = 1;
+
+-- 添加一键转为资质客户按钮
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+update eh_service_module_functions set module_id = 21100 where id = 43960;
+update eh_service_module_functions set module_id = 21200 where id = 43970;
+update eh_service_module_functions set module_id = 21100 where id = 43980;
+
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

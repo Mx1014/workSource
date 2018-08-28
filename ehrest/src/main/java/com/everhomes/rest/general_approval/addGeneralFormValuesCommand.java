@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class addGeneralFormValuesCommand {
 	private Long generalFormId;
+	private Long generalFormVersion;
 	private String sourceType;
 	private Long sourceId;
 
@@ -51,6 +52,14 @@ public class addGeneralFormValuesCommand {
 
 	public void setGeneralFormId(Long generalFormId) {
 		this.generalFormId = generalFormId;
+	}
+
+	public Long getGeneralFormVersion() {
+		return generalFormVersion;
+	}
+
+	public void setGeneralFormVersion(Long generalFormVersion) {
+		this.generalFormVersion = generalFormVersion;
 	}
 
 	@Override

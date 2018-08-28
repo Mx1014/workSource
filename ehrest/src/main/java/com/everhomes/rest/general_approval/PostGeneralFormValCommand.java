@@ -26,6 +26,9 @@ public class PostGeneralFormValCommand {
 
 	private String ownerType;
 
+
+	private Long approvalId;
+
 	private String sourceType;
 	private Long sourceId;
 
@@ -108,6 +111,14 @@ public class PostGeneralFormValCommand {
 
 	public void setRequisitionId(Long requisitionId) {
 		this.requisitionId = requisitionId;
+	}
+
+	public Long getApprovalId() {
+		return approvalId;
+	}
+
+	public void setApprovalId(Long approvalId) {
+		this.approvalId = approvalId;
 	}
 
 	@Override

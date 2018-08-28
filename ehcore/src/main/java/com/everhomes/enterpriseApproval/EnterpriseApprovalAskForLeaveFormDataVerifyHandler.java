@@ -52,13 +52,12 @@ public class EnterpriseApprovalAskForLeaveFormDataVerifyHandler implements Gener
         }
         ApprovalCategory a2 = null;
         if (a1.getNamespaceId() == 0) {
-            a2 = approvalCategoryProvider.findApprovalCategoryByOriginId(value.getRestId(), cmd.getOrganizationId());
+            a2 = approvalCategoryProvider.findApprovalCategoryByOriginId(value.getRestId(), UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
         }
         // 兼容旧版本APP,如果是旧版本，对应的是namespace_id=0的基础数据，因此需要通过findApprovalCategoryByOriginId获取到对应公司的类型
         ApprovalCategory approvalCategory = a2 != null ? a2 : a1;
-        if (approvalCategory == null || ApprovalCategoryStatus.INACTIVE == ApprovalCategoryStatus.fromCode(approvalCategory.getStatus())
-                || ApprovalCategoryStatus.DELETED == ApprovalCategoryStatus.fromCode(approvalCategory.getStatus())) {
-            throwError(ApprovalServiceErrorCode.APPROVAL_CATEGORY_UNUSEABLE_ERROR);
+        if (approvalCategory == null || ApprovalCategoryStatus.DELETED == ApprovalCategoryStatus.fromCode(approvalCategory.getStatus())) {
+            throwError(ApprovalServiceErrorCode.APPROVAL_CATEGORY_NOT_EXIST);
         }
         if (ApprovalCategoryReminderFlag.ACTIVE != ApprovalCategoryReminderFlag.fromCode(approvalCategory.getRemainderFlag())) {
             // 没有开启余额关联，不需要校验余额
