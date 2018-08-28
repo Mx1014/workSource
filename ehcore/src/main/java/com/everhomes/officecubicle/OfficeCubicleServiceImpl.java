@@ -1008,6 +1008,13 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
 
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if (null != config && config.getCustomizeFlag().equals(TrueOrFalseFlag.TRUE.getCode())){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_AlREADY_CUSTOMIZE_CONFIG,
+					"Already customize config");
+		}
+
 		List<OfficeCubicleCity> generalCities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
 
 		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
@@ -1030,11 +1037,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		listcmd.setOrgId(cmd.getOrgId());
 		ListCitiesResponse response = this.listCities(listcmd);
 
+		config.setCustomizeFlag(TrueOrFalseFlag.TRUE.getCode());
+		officeCubicleProvider.updateConfig(config);
+
 		return response;
 	}
 
 	@Override
 	public ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd) {
+
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if (null != config && config.getCustomizeFlag().equals(TrueOrFalseFlag.FALSE.getCode())){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_AlREADY_GENERAL_CONFIG,
+					"Already general config");
+		}
+
 		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
 		if(null != cities){
 			cities.stream().forEach(r -> {
@@ -1044,23 +1064,29 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		ListCitiesCommand listcmd = new ListCitiesCommand();
 		listcmd.setOrgId(cmd.getOrgId());
 		ListCitiesResponse response = this.listCities(listcmd);
+
+		config.setCustomizeFlag(TrueOrFalseFlag.FALSE.getCode());
+		officeCubicleProvider.updateConfig(config);
+
 		return response;
 	}
 
 	@Override
 	public Byte getProjectCustomize(GetCustomizeCommand cmd) {
-
-		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
-
-		if(null != cities && cities.size() > 0){
-			return TrueOrFalseFlag.TRUE.getCode();
-		} else {
-			List<OfficeCubicleCity> generalCities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
-			if(null != generalCities && generalCities.size() > 0){
-				return TrueOrFalseFlag.TRUE.getCode();
-			}
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		if(null != config){
+			return config.getCustomizeFlag();
+		}else{
+			config = new OfficeCubicleConfig();
+			config.setOwnerId(cmd.getOwnerId());
+			config.setOwnerType(cmd.getOwnerType());
+			config.setOrgId(cmd.getOrgId());
+			config.setNamespaceId(UserContext.getCurrentNamespaceId());
+			config.setCustomizeFlag(TrueOrFalseFlag.FALSE.getCode());
+			officeCubicleProvider.createConfig(config);
 		}
-		return TrueOrFalseFlag.FALSE.getCode();
+		return config.getCustomizeFlag();
 	}
 
 	@Override
