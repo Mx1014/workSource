@@ -3168,7 +3168,7 @@ public class PunchServiceImpl implements PunchService {
         //2018-8-28:删除中未删除的状态的timeRule也要被查询
         List<Byte> statusList = new ArrayList<>();
         statusList.add(PunchRuleStatus.ACTIVE.getCode());
-        statusList.add(PunchRuleStatus.DELETED.getCode());
+        statusList.add(PunchRuleStatus.DELETING.getCode());
 		//看是循环timerule找当天的timeRule
         List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwnerAndStatusList(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), statusList );
         if (null != timeRules)
