@@ -14,7 +14,7 @@ CREATE TABLE `eh_personal_center_settings` (
   `sort_num` INTEGER NOT NULL DEFAULT 0 COMMENT '展示顺序',
   `showable` TINYINT COMMENT '是否展示',
   `editable` TINYINT COMMENT '是否可编辑',
-  `router_url` VARCHAR(64) COMMENT '跳转路由',
+  `type` VARCHAR(64) COMMENT '功能所属类型',
   `icon_uri` VARCHAR(64) COMMENT '图标URI',
   `version` BIGINT NOT NULL DEFAULT 0 COMMENT '版本号',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态',
