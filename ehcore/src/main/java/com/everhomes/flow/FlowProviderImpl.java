@@ -319,14 +319,15 @@ public class FlowProviderImpl implements FlowProvider {
         return this.queryFlows(new ListingLocator(), -1, (locator, query) -> {
             com.everhomes.server.schema.tables.EhFlows t = Tables.EH_FLOWS;
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-            query.addConditions(t.MODULE_TYPE.eq(moduleType));
+            if (moduleType != null) {
+                query.addConditions(t.MODULE_TYPE.eq(moduleType));
+            }
             query.addConditions(t.MODULE_ID.eq(moduleId));
             query.addConditions(t.PROJECT_TYPE.eq(projectType));
             query.addConditions(t.PROJECT_ID.eq(projectId));
             query.addConditions(t.OWNER_TYPE.eq(ownerType));
             query.addConditions(t.OWNER_ID.eq(ownerId));
             query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
-
             query.addConditions(t.FLOW_MAIN_ID.eq(0L));
             return query;
         });

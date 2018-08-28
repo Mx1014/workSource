@@ -669,6 +669,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         if (mirrorOwnerId != null) {
             generalForm.setOwnerId(mirrorOwnerId);
         }
+        generalForm.setFormOriginId(null);
         generalFormProvider.createGeneralForm(generalForm);
         return generalForm;
     }
