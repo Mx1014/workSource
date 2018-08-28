@@ -14,19 +14,43 @@ public class PersonalCenterSettingDTO {
     private Byte     group;
     private String     name;
     private Byte     region;
-    private String     funcitonName;
-    private Byte     editalbe;
+    private String     functionName;
+    private Byte     editable;
     private Timestamp     createTime;
     private Integer     namespaceId;
     private Long     updateUid;
     private Long     version;
     private String     iconUri;
-    private Byte     showalbe;
+    private Byte     showable;
     private Integer     order;
     private Long     id;
 
 
-    public Byte getStatus() {
+	public String getFunctionName() {
+		return functionName;
+	}
+
+	public void setFunctionName(String functionName) {
+		this.functionName = functionName;
+	}
+
+	public Byte getEditable() {
+		return editable;
+	}
+
+	public void setEditable(Byte editable) {
+		this.editable = editable;
+	}
+
+	public Byte getShowable() {
+		return showable;
+	}
+
+	public void setShowable(Byte showable) {
+		this.showable = showable;
+	}
+
+	public Byte getStatus() {
 		return status;
 	}
 
@@ -96,26 +120,6 @@ public class PersonalCenterSettingDTO {
 	}
 
 
-	public String getFuncitonName() {
-		return funcitonName;
-	}
-
-
-	public void setFuncitonName(String funcitonName) {
-		this.funcitonName = funcitonName;
-	}
-
-
-	public Byte getEditalbe() {
-		return editalbe;
-	}
-
-
-	public void setEditalbe(Byte editalbe) {
-		this.editalbe = editalbe;
-	}
-
-
 	public Timestamp getCreateTime() {
 		return createTime;
 	}
@@ -163,16 +167,6 @@ public class PersonalCenterSettingDTO {
 
 	public void setIconUri(String iconUri) {
 		this.iconUri = iconUri;
-	}
-
-
-	public Byte getShowalbe() {
-		return showalbe;
-	}
-
-
-	public void setShowalbe(Byte showalbe) {
-		this.showalbe = showalbe;
 	}
 
 

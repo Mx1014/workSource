@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestDoc(value="personal center form controller", site="core")
 @RestController
 @RequestMapping("/personal_center")
-public class PersonalCenterController extends ControllerBase{
+public class PersonalCenterSettingController extends ControllerBase{
 }
