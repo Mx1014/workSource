@@ -139,7 +139,7 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
 
         //3、组装支付方式
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
-        return null;
+        return preOrderDTO;
     }
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){

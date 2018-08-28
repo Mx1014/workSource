@@ -257,7 +257,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
+		paymentCardRechargeOrder.set
 		//paymentCardProvider.updatePaymentCardRechargeOrder();
 		return null;
 	}
