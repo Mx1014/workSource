@@ -133,6 +133,10 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	private void prepareObj(GeneralForm obj) {
+        if(StringUtils.isBlank(obj.getOperatorName())){
+            User user = UserContext.current().getUser();
+            obj.setOperatorName(user.getNickName());
+        }
 		Long l2 = DateHelper.currentGMTTime().getTime();
 		obj.setCreateTime(new Timestamp(l2));
 		if(null == obj.getFormOriginId())
