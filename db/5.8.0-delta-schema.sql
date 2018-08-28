@@ -836,5 +836,9 @@ CREATE TABLE `eh_new_preview` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- AUTHOR: 马世亨 2018年08月28日
+-- REMARK: #35665 物品放行提示内容长度限制取消
+ALTER TABLE `eh_relocation_configs` MODIFY COLUMN `tips_content` text NULL COMMENT '提示内容' AFTER `tips_flag`;
+
 -- END
 -- --------------------- SECTION END ---------------------------------------------------------
