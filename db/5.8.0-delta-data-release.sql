@@ -949,6 +949,14 @@ update eh_service_module_functions set module_id = 21100 where id = 43980;
 UPDATE eh_locale_templates s SET s.text='您被拒绝加入公司“${enterpriseName}”，拒绝理由：${textInfo}。' WHERE s.scope='enterprise.notification' AND s.namespace_id=0 AND s.code=3;
 
 
+-- AUTHOR: xq.tian 2018-8-28
+-- REMARK: 工作流提示文字
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10001', 'zh_CN', '工作流已存在');
+
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

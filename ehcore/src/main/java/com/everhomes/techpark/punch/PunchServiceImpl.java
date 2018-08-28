@@ -204,6 +204,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -240,6 +241,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -3163,8 +3165,12 @@ public class PunchServiceImpl implements PunchService {
         if (punchDate == null) {
             return new PunchTimeRule(0L, PunchDayType.RESTDAY);
         }
-        //看是循环timerule找当天的timeRule
-        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), PunchRuleStatus.ACTIVE.getCode());
+        //2018-8-28:删除中未删除的状态的timeRule也要被查询
+        List<Byte> statusList = new ArrayList<>();
+        statusList.add(PunchRuleStatus.ACTIVE.getCode());
+        statusList.add(PunchRuleStatus.DELETING.getCode());
+		//看是循环timerule找当天的timeRule
+        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwnerAndStatusList(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), statusList );
         if (null != timeRules)
             for (PunchTimeRule timeRule : timeRules) {
                 Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
@@ -7892,7 +7898,7 @@ public class PunchServiceImpl implements PunchService {
     }
     public void deletepunchGroup(Long punchOrgId, Long ownerId){
     	Organization organization = this.organizationProvider.findOrganizationById(punchOrgId);
-        checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
+        
         this.organizationProvider.deleteOrganization(organization);
         //  组织架构删除薪酬组人员关联及配置
         this.uniongroupService.deleteUniongroupConfigresByGroupId(punchOrgId, ownerId);
@@ -7912,6 +7918,8 @@ public class PunchServiceImpl implements PunchService {
     }
     @Override
     public void deletePunchGroup(DeleteCommonCommand cmd) {
+        Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+        checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
         this.dbProvider.execute((TransactionStatus status) -> {
 
             PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
@@ -7925,8 +7933,6 @@ public class PunchServiceImpl implements PunchService {
             tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
             java.sql.Date tomorrow = new java.sql.Date(tomorrowCalendar.getTimeInMillis());
             punchProvider.setPunchSchedulingsStatus(pr.getId(), PunchRuleStatus.DELETING.getCode(), tomorrow);
-//            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-//            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
 //            this.organizationProvider.deleteOrganization(organization);
 //            //  组织架构删除薪酬组人员关联及配置
 //            this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(), cmd.getOwnerId());

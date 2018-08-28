@@ -5812,7 +5812,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setAvatar(user.getAvatar());
 
             /**创建企业级的member/detail/user_organiztion记录**/
-            OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            OrganizationMember tempMember = createOrganiztionMemberWithoutDetailAndUserOrganization(member, cmd.getOrganizationId());
             member.setId(tempMember.getId());
             //增加customer admin record 状态
             try {
@@ -12654,7 +12654,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         /**创建/更新detail,并获取detailId**/
         // 申请加入企业的时候，不需要在人事档案中新增数据，在审核通过后，再在人事档案中新增数据。 add by yanlong.liang 20180725
-//        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
+        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
 
         OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
 
@@ -12684,6 +12684,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationMember;// add by xq.tian 2017/07/05
     }
 
+    private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
+        User user = UserContext.current().getUser();
+        OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
+
+        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
+
+        //如果企业中没有有该记录
+        if (null == desOrgMember) {
+            /**创建belongTo的记录**/
+            organizationMember.setOrganizationId(organizationId);
+            organizationMember.setOperatorUid(user.getId());
+            organizationProvider.createOrganizationMember(organizationMember);
+
+            /**创建user_organization的记录（仅当target为user且grouptype为企业时添加）**/
+            if (organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
+                createOrUpdateUserOrganization(organizationMember);
+            }
+        }
+        return organizationMember;// add by xq.tian 2017/07/05
+    }
     /**
      * 获取一个组织的总公司ID
      **/

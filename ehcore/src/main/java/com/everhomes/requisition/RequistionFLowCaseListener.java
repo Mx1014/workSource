@@ -229,7 +229,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);
