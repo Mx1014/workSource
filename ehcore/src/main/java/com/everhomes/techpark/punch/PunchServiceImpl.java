@@ -204,6 +204,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -240,6 +241,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -3163,8 +3165,12 @@ public class PunchServiceImpl implements PunchService {
         if (punchDate == null) {
             return new PunchTimeRule(0L, PunchDayType.RESTDAY);
         }
-        //看是循环timerule找当天的timeRule
-        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), PunchRuleStatus.ACTIVE.getCode());
+        //2018-8-28:删除中未删除的状态的timeRule也要被查询
+        List<Byte> statusList = new ArrayList<>();
+        statusList.add(PunchRuleStatus.ACTIVE.getCode());
+        statusList.add(PunchRuleStatus.DELETED.getCode());
+		//看是循环timerule找当天的timeRule
+        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwnerAndStatusList(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), statusList );
         if (null != timeRules)
             for (PunchTimeRule timeRule : timeRules) {
                 Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
