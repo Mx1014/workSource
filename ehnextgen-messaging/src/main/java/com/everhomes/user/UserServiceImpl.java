@@ -74,6 +74,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -6698,12 +6699,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		}
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
 		if (userIdentifier != null) {
-			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-			if (user != null) {
-				user.setIdentifierToken(userIdentifier.getIdentifierToken());
-				return ConvertHelper.convert(user, UserDTO.class);
-			}
-		}
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                return ConvertHelper.convert(user, UserDTO.class);
+            }
+        }
 		return null;
 	}
     
@@ -6758,6 +6759,43 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		  }
 		  return sceneList ;
 	  }
-	
+
+      @Override
+	  public UserDTO getTopAdministrator( GetTopAdministratorCommand cmd){
+
+            if(cmd.getOrgId() == null ){
+                LOGGER.error("orgId is null in the  cmd = {}",  cmd);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
+            }
+          Organization org = checkOrganization(cmd.getOrgId());
+        //  Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+          if(org != null) {
+              if (org.getAdminTargetId() != null) {
+                  UserIdentifier userIdentifier = userProvider
+                          .findClaimedIdentifierByOwnerAndType(org.getAdminTargetId(),IdentifierType.MOBILE.getCode());
+                  if (userIdentifier != null) {
+                      User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                      if (user != null) {
+                          user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                          return ConvertHelper.convert(user, UserDTO.class);
+                      }
+                  }
+                  return null;
+              }
+          }
+          return null;
+      }
+
+
+        private Organization checkOrganization(Long organizationId) {
+            Organization org = organizationProvider.findOrganizationById(organizationId);
+            if(org == null){
+                LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
+            }
+            return org;
+        }
+
+
 
 }
