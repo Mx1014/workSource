@@ -351,4 +351,10 @@ public interface UserService {
     void registerWXLoginConnection(HttpServletRequest request);
 
 
+    /**
+     * 查询超级管理员
+     * @param cmd
+     * @return
+     */
+    UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 }
