@@ -22,6 +22,8 @@ public class ListTaskCategoriesCommand {
 	private Long pageAnchor;
 	private Integer pageSize;
 
+	private Long organizationId;
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -85,6 +87,14 @@ public class ListTaskCategoriesCommand {
 
 	public Long getOwnerId() {
 		return ownerId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public void setOwnerId(Long ownerId) {

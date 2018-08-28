@@ -945,6 +945,28 @@ update eh_service_module_functions set module_id = 21100 where id = 43980;
 
 -- END
 
+-- AUTHOR: 黄良铭
+-- REMARK: #35742  【用户认证3.6】客户端拒绝后的拒绝理由 不在消息体现
+UPDATE eh_locale_templates s SET s.text='您被拒绝加入公司“${enterpriseName}”，拒绝理由：${textInfo}。' WHERE s.scope='enterprise.notification' AND s.namespace_id=0 AND s.code=3;
+
+
+-- AUTHOR: xq.tian 2018-8-28
+-- REMARK: 工作流提示文字
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10001', 'zh_CN', '工作流已存在');
+
+
+
+
+-- AUTHOR: 马世亨 2018年8月28日
+-- REMARK: 物业报修页面地址
+set @configId = (select max(id) + 1 from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES (@configId, 'pmtask.uri', 'property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix', 'the pmtask web url', '0', NULL, NULL);
+update eh_service_modules set action_type = 13 where id = 20100;
+update eh_service_module_apps set action_type = 13 where module_id = 20100;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
