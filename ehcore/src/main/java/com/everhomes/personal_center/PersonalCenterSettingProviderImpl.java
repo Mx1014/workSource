@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +106,21 @@ public class PersonalCenterSettingProviderImpl implements PersonalCenterSettingP
             locator.setAnchor(null);
         }
 
+        return objs;
+    }
+
+    @Override
+    public List<PersonalCenterSetting> queryActivePersonalCenterSettings(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPersonalCenterSettings.class));
+
+        SelectQuery<EhPersonalCenterSettingsRecord> query = context.selectQuery(Tables.EH_PERSONAL_CENTER_SETTINGS);
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.STATUS.eq(PersonalCenterSettingStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.REGION.asc());
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.SORT_NUM.asc());
+        List<PersonalCenterSetting> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, PersonalCenterSetting.class);
+        });
         return objs;
     }
 

@@ -11,7 +11,7 @@ public class PersonalCenterSettingDTO {
     private Long     createUid;
     private Timestamp     updateTime;
     private String     routerUrl;
-    private Byte     group;
+    private Byte     groupType;
     private String     name;
     private Byte     region;
     private String     functionName;
@@ -22,7 +22,7 @@ public class PersonalCenterSettingDTO {
     private Long     version;
     private String     iconUri;
     private Byte     showable;
-    private Integer     order;
+    private Integer     sortNum;
     private Long     id;
 
 
@@ -87,16 +87,6 @@ public class PersonalCenterSettingDTO {
 
 	public void setRouterUrl(String routerUrl) {
 		this.routerUrl = routerUrl;
-	}
-
-
-	public Byte getGroup() {
-		return group;
-	}
-
-
-	public void setGroup(Byte group) {
-		this.group = group;
 	}
 
 
@@ -169,16 +159,21 @@ public class PersonalCenterSettingDTO {
 		this.iconUri = iconUri;
 	}
 
-
-	public Integer getOrder() {
-		return order;
+	public Byte getGroupType() {
+		return groupType;
 	}
 
-
-	public void setOrder(Integer order) {
-		this.order = order;
+	public void setGroupType(Byte groupType) {
+		this.groupType = groupType;
 	}
 
+	public Integer getSortNum() {
+		return sortNum;
+	}
+
+	public void setSortNum(Integer sortNum) {
+		this.sortNum = sortNum;
+	}
 
 	public Long getId() {
 		return id;
