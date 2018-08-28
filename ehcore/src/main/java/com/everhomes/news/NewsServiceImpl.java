@@ -2442,4 +2442,22 @@ public class NewsServiceImpl implements NewsService {
 
 		return url;
 	}
+
+	@Override
+	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -156,6 +156,17 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
+    
+    /**
+	 * <b>URL: /yellowPage/listServiceAllianceCategoriesAdmin</b> 
+	 * <p> 列出服务联盟类型，后台使用 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listServiceAllianceCategoriesAdmin")
+	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
+	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesAdmin(cmd));
+	}
 
     /**
 	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
@@ -754,5 +765,50 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
     
-    
+	/**
+	 * <b>URL: /yellowPage/enableSelfDefinedConfig</b>
+	 * <p>
+	 * 开启自定义配置
+	 * </p>
+	 */
+	@RequestMapping("enableSelfDefinedConfig")
+	@RestReturn(String.class)
+	public RestResponse enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd){
+		allianceStandardService.enableSelfDefinedConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/disableSelfDefinedConfig</b>
+	 * <p>
+	 * 关闭自定义配置
+	 * </p>
+	 */
+	@RequestMapping("disableSelfDefinedConfig")
+	@RestReturn(String.class)
+	public RestResponse disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd){
+		allianceStandardService.disableSelfDefinedConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/getSelfDefinedState</b>
+	 * <p>
+	 * 获取自定义配置状态
+	 * </p>
+	 */
+	@RequestMapping("getSelfDefinedState")
+	@RestReturn(GetSelfDefinedStateResponse.class)
+	public RestResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd){
+		RestResponse response = new RestResponse(allianceStandardService.getSelfDefinedState(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

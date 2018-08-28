@@ -51,4 +51,12 @@ public interface OfficeCubicleService {
 	CityDTO getCityById(GetCityByIdCommand cmd);
 
 	ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd);
+
+	ListCitiesResponse copyCities(CopyCitiesCommand cmd);
+
+	ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd);
+
+	Byte getProjectCustomize(GetCustomizeCommand cmd);
+
+	Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd);
 }

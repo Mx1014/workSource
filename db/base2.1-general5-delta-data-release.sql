@@ -21,5 +21,10 @@ INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100026', 'zh_CN', '请先发布新版本后再启用');
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
-  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本');
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '100027', 'zh_CN', '当前工作流未被修改，请修改后发布新版本')
+
+-- AUTHOR: shiheng.ma  20180824
+-- REMARK: 工位预订 应用配置迁移
+UPDATE `eh_service_modules` SET `instance_config`='{\"url\":\"${home.url}/station-booking-web/build/index.html#/home#sign_suffix\",\"currentProjectOnly\":0}' WHERE `id`='40200';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/station-booking-web/build/index.html#/home#sign_suffix\",\"currentProjectOnly\":0}' WHERE `module_id`='40200';
 -- --------------------- SECTION END ---------------------------------------------------------
