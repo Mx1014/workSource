@@ -911,6 +911,17 @@ INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,names
 VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
+
+-- AUTHOR: huangmingbo
+-- REMARK: 修改快递添加账户提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180809', 'zh_CN', '收款账户已存在，请勿重复添加');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180810', 'zh_CN', '需要更新的收款账户ID不存在');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送默认推送方式改为新推送
+UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='apple.pusher.flag';
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
