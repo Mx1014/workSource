@@ -7892,7 +7892,7 @@ public class PunchServiceImpl implements PunchService {
     }
     public void deletepunchGroup(Long punchOrgId, Long ownerId){
     	Organization organization = this.organizationProvider.findOrganizationById(punchOrgId);
-        checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
+        
         this.organizationProvider.deleteOrganization(organization);
         //  组织架构删除薪酬组人员关联及配置
         this.uniongroupService.deleteUniongroupConfigresByGroupId(punchOrgId, ownerId);
@@ -7912,6 +7912,8 @@ public class PunchServiceImpl implements PunchService {
     }
     @Override
     public void deletePunchGroup(DeleteCommonCommand cmd) {
+        Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+        checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
         this.dbProvider.execute((TransactionStatus status) -> {
 
             PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
@@ -7925,8 +7927,6 @@ public class PunchServiceImpl implements PunchService {
             tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 1);
             java.sql.Date tomorrow = new java.sql.Date(tomorrowCalendar.getTimeInMillis());
             punchProvider.setPunchSchedulingsStatus(pr.getId(), PunchRuleStatus.DELETING.getCode(), tomorrow);
-//            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-//            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
 //            this.organizationProvider.deleteOrganization(organization);
 //            //  组织架构删除薪酬组人员关联及配置
 //            this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(), cmd.getOwnerId());
