@@ -7,6 +7,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoCommand;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoResponse;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiRedirectCommand;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.RequireAuthentication;
@@ -56,18 +57,12 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>填写圳智慧所需用户信息</p>
      */
     @RequestMapping("createUserInfo")
+    @RestReturn(value = CreateZhenZhiHuiUserInfoResponse.class)
     public Object createUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
-        String location = zhenZhiHuiService.createZhenzhihuiUserInfo(cmd);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        try {
-            httpHeaders.setLocation(new URI(location));
-            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-        } catch (Exception e) {
-            LOGGER.error("redirect failed, location = {}", location);
-        }
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
-        restResponse.setErrorDescription("invalid token or redirect");
+        CreateZhenZhiHuiUserInfoResponse res = zhenZhiHuiService.createZhenzhihuiUserInfo(cmd);
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 
@@ -76,18 +71,13 @@ public class ZhenZhiHuiSSOController extends ControllerBase{
      * <p>填写圳智慧所需用户信息</p>
      */
     @RequestMapping("createUserAndEnterpriseInfo")
+    @RestReturn(value = CreateZhenZhiHuiUserInfoResponse.class)
     public Object createUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
-        String location = zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        try {
-            httpHeaders.setLocation(new URI(location));
-            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-        } catch (Exception e) {
-            LOGGER.error("redirect failed, location = {}", location);
-        }
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
-        restResponse.setErrorDescription("invalid token or redirect");
+        CreateZhenZhiHuiUserInfoResponse res = zhenZhiHuiService.createZhenzhihuiUserAndEnterpriseInfo(cmd);
+
+        RestResponse restResponse = new RestResponse(res);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
 

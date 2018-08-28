@@ -26,6 +26,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserAndEnterpriseInfoCommand;
 import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoCommand;
+import com.everhomes.rest.zhenzhihui.CreateZhenZhiHuiUserInfoResponse;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiAffairType;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiRedirectCommand;
 import com.everhomes.rest.zhenzhihui.ZhenZhiHuiServer;
@@ -298,18 +299,20 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
     }
 
     @Override
-    public String createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
+    public CreateZhenZhiHuiUserInfoResponse createZhenzhihuiUserInfo(CreateZhenZhiHuiUserInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
         this.zhenzhihuiUserInfoProvider.createZhenzhihuiUserInfo(zhenzhihuiUserInfo);
-        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.PERSON.getCode();
+        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com?code=")+ZhenZhiHuiAffairType.PERSON.getCode();
         LOGGER.info("redirect to zhenzhihui url={}",location);
-        return location;
+        CreateZhenZhiHuiUserInfoResponse response = new CreateZhenZhiHuiUserInfoResponse();
+        response.setLocation(location);
+        return response;
     }
 
     @Override
-    public String createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
+    public CreateZhenZhiHuiUserInfoResponse createZhenzhihuiUserAndEnterpriseInfo(CreateZhenZhiHuiUserAndEnterpriseInfoCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
         ZhenzhihuiUserInfo zhenzhihuiUserInfo = ConvertHelper.convert(cmd, ZhenzhihuiUserInfo.class);
         zhenzhihuiUserInfo.setUserId(userId);
@@ -322,9 +325,11 @@ public class ZhenZhiHuiServiceImpl implements ZhenZhiHuiService{
         zhenzhihuiEnterpriseInfo.setEnterpriseName(cmd.getEnterpriseName());
         zhenzhihuiEnterpriseInfo.setEnterpriseToken(cmd.getEnterpriseToken());
         this.zhenzhihuiEnterpriseInfoProvider.createZhenzhihuiEnterpriseInfo(zhenzhihuiEnterpriseInfo);
-        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com")+ZhenZhiHuiAffairType.ENTERPRISE.getCode();
+        String location = this.configurationProvider.getValue(ZHENZHIHUI_NAMESPACE_ID,"zhenzhihui.redirect.url","https://core.zuolin.com?code=")+ZhenZhiHuiAffairType.ENTERPRISE.getCode();
         LOGGER.info("redirect to zhenzhihui url={}",location);
-        return location;
+        CreateZhenZhiHuiUserInfoResponse response = new CreateZhenZhiHuiUserInfoResponse();
+        response.setLocation(location);
+        return response;
     }
 
     private User createUserAndUserIdentifier(ZhenZhiHuiDTO zhenZhiHuiUserInfoDTO){
