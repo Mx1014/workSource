@@ -725,6 +725,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
+    public List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.getGeneralFormVal(cmd);
+    }
+
+    @Override
     public Long saveGeneralForm(PostGeneralFormValCommand cmd) {
 
         //先新建表单字段的集合
@@ -803,8 +809,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
                 for(GeneralFormFieldDTO dto: cmd.getFormFields()){
                     if(StringUtils.isNotBlank(dto.getFieldName())) {
-                        generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
-                                UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        if(!dto.getFieldType().equals(GeneralFormFieldType.FILE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.IMAGE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                                    UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        }else{
+                            LOGGER.error("getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                                    "getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                        }
+
                     }else{
                         LOGGER.error("getGeneralFormVal false: param cannot be null. ");
                     }

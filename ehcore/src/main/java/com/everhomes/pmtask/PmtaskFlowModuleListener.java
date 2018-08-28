@@ -770,6 +770,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		cmd.setOrganizationId(flow.getOrganizationId());
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
 			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
 		else
