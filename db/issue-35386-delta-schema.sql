@@ -5,8 +5,7 @@ CREATE TABLE `eh_zhenzhihui_user_info` (
   `identify_type` INTEGER NOT NULL DEFAULT 10 COMMENT '证件类型',
   `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_users',
   `email` VARCHAR(64) NOT NULL DEFAULT '""' COMMENT '邮箱',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_zhenzhihui_user` (`identify_token`,`identify_type`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='圳智慧所需用户信息。';
 
 CREATE TABLE `eh_zhenzhihui_enterprise_info` (
