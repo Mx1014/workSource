@@ -666,7 +666,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 setting.getEndMark(), setting.getEndTime());            //  获取汇报有效截止时间
         //  check whether return the white page
         if (checkPostTime(LocalDateTime.now(), startTime, endTime)) {
-            String description = "已超过截止时间，无法提交。下期汇报将于" + WorkReportUtil.displayEndTime(endTime) + "开始提交。";
+            String description = "已超过截止时间，无法提交。下期汇报将于" + WorkReportUtil.formatTime(startTime) + "开始提交。";
             throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME_V2, description);
         }
 
@@ -683,8 +683,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setValiditySetting(setting);
         dto.setReportTime(reportTime);
         dto.setReportTimeText(WorkReportUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
-        //  todo:截止日期文本化
-        dto.setValidText("写不动了");
+        dto.setValidText(WorkReportUtil.formatTime(endTime));
         dto.setValues(form.getFormFields());
         dto.setTitle(report.getReportName());
         return dto;

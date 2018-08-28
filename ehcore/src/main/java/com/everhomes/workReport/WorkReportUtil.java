@@ -216,14 +216,10 @@ public class WorkReportUtil {
     }
 
     /**
-     * 获取截止时间文本
+     * 格式化时间
      */
-    public static String displayEndTime(LocalDateTime endTime){
+    public static String formatTime(LocalDateTime endTime){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M月d日 HH:mm");
         return formatter.format(endTime);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(displayEndTime(LocalDateTime.now()));
     }
 }
