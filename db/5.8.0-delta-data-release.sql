@@ -922,6 +922,28 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- REMARK: 苹果推送默认推送方式改为新推送
 UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='apple.pusher.flag';
 
+
+-- END
+
+-- AUTHOR: 黄鹏宇 2018-8-28
+-- REMARK: 添加删除权限控制
+SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;
+
+-- 更改现网所有的资质都为有资质
+update eh_enterprise_customers set aptitude_flag_item_id = 1;
+
+-- 添加一键转为资质客户按钮
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+update eh_service_module_functions set module_id = 21100 where id = 43960;
+update eh_service_module_functions set module_id = 21200 where id = 43970;
+update eh_service_module_functions set module_id = 21100 where id = 43980;
+
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
