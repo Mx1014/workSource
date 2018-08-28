@@ -911,6 +911,15 @@ INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,names
 VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
+
+-- AUTHOR: 马世亨 2018年8月28日
+-- REMARK: 物业报修页面地址
+set @configId = (select max(id) + 1 from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES (@configId, 'pmtask.uri', 'property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix', 'the pmtask web url', '0', NULL, NULL);
+update eh_service_modules set action_type = 13 where id = 20100;
+update eh_service_module_apps set action_type = 13 where module_id = 20100;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
