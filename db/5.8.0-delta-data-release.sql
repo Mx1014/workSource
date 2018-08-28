@@ -944,6 +944,11 @@ update eh_service_module_functions set module_id = 21100 where id = 43980;
 
 -- END
 
+-- AUTHOR: 黄良铭
+-- REMARK: #35742  【用户认证3.6】客户端拒绝后的拒绝理由 不在消息体现
+UPDATE eh_locale_templates s SET s.text='您被拒绝加入公司“${enterpriseName}”，拒绝理由：${textInfo}。' WHERE s.scope='enterprise.notification' AND s.namespace_id=0 AND s.code=3;
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
