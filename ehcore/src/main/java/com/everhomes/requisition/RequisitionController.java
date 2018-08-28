@@ -5,10 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.Flow;
-import com.everhomes.rest.general_approval.GeneralApprovalDTO;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,6 +199,22 @@ public class RequisitionController extends ControllerBase {
     @RestReturn(value=Long.class)
     public RestResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd) {
         Long dto = requisitionService.getGeneralFormByCustomerId(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /requisition/getSelectedRequisitionForm</b>
+     * <p> 前端传入表单，后台查找启用的审批流程并根据启用流程查找启用的表单，并返回  </p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getSelectedRequisitionForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse getSelectedRequisitionForm(GetSelectedRequisitionFormCommand cmd) {
+        GeneralFormDTO dto = requisitionService.getSelectedRequisitionForm(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

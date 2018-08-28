@@ -74,13 +74,17 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             e.printStackTrace();
         }finally {
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
-        acdat.build(map);
+        if (map.size() > 0) {
+            acdat.build(map);
+        }
         fileUrl = cmd.getUrl();
     }
 

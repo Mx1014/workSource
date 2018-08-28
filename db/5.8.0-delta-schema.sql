@@ -775,6 +775,11 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-�
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
 
+-- 2018年8月22日
+-- 新增在request表单中存储该表单的formOriginId和formVersion
+alter table eh_general_form_val_requests add form_origin_id BIGINT null comment '该表单所属的表单模板id';
+alter table eh_general_form_val_requests add form_version BIGINT null comment '该表单所属的表单模板version';
+
 -- AUTHOR: 唐岑
 -- REMARK: 资产管理V3.1 2018年8月23日16:22:55
 -- REMARK: 解决issue-36278，房源管理查询速度慢的问题，同时向eh_addresses表中补充building_id、community_name两个字段
@@ -785,4 +790,18 @@ ALTER TABLE `eh_addresses` ADD COLUMN `community_name` varchar(64) NULL DEFAULT 
 -- AUTHOR: 黄良铭 2018年08月23日
 -- REMARK: #36462 
 ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
+
+-- 黄鹏宇 2018年8月28日
+-- REMARK: 按钮白名单
+CREATE TABLE `eh_service_module_include_functions`
+(
+   `id`                   bigint not null,
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+	 `community_id`					bigint comment 'community_id' not null,
+	 `function_id`					bigint comment '关联的按钮id' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
+
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------

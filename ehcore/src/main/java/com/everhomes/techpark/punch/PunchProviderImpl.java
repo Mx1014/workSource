@@ -102,6 +102,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -2823,7 +2824,23 @@ public class PunchProviderImpl implements PunchProvider {
         step.execute();
 
     }
-
+    @Override
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwnerAndStatusList(String ownerType, Long ownerId, List<Byte> statusList) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_PUNCH_TIME_RULES);
+        Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
+                .and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+                .and(Tables.EH_PUNCH_TIME_RULES.STATUS.in(statusList));
+        step.where(condition);
+        List<PunchTimeRule> result = step
+                .orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, PunchTimeRule.class);
+                });
+        return result;
+    }
+    
     @Override
     public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

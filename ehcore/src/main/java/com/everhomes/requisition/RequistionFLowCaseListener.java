@@ -6,9 +6,13 @@ import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormSearcher;
 import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValRequest;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.openapi.Contract;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
@@ -49,6 +53,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private AddressProvider addressProvider;
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
+    @Autowired
+    private GeneralFormSearcher generalFormSearcher;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -77,6 +83,22 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         return result;
     }
 
+
+    @Override
+    public void onFlowCaseStateChanged(FlowCaseState ctx) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
+        }
+        FlowCase flowCase = ctx.getFlowCase();
+        if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
+            // 审批驳回开始节点，更新合同的状态为待发起 -- djm
+
+            generalFormProvider.updateGeneralFormValRequestStatus(flowCase.getReferId(), RequisitionStatus.WAIT.getCode());
+            List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),25000l, flowCase.getProjectId());
+
+            generalFormSearcher.feedDoc(request);
+        }
+    }
     /**
      * 工作流步骤走完后，更改请示单的状态
      */
@@ -112,7 +134,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1l);
             }
         }
-
+        generalFormSearcher.feedDoc(request);
 //        String owner = requisitionProvider.getOwnerById(referId);
 //        RequistionListener lis = map.get(owner);
 //        lis.onRequisitionEnd();
@@ -207,7 +229,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);

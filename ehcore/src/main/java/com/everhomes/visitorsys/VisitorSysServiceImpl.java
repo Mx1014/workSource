@@ -2314,7 +2314,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
             doorCmd.setHeadImgUri(visitor.getVisitorPicUri());
         }
-        DoorAuthDTO localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
+        DoorAuthDTO localVisitorAuth = null;
+        try {
+            localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
+        } catch (Exception e) {
+            LOGGER.error("error invoke dooraccess");
+        }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
             visitor.setDoorGuardQrcode(localVisitorAuth.getQrString());
