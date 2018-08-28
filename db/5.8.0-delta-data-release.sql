@@ -911,6 +911,24 @@ INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,names
 VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
+
+-- END
+
+-- AUTHOR: 黄鹏宇 2018-8-28
+-- REMARK: 添加删除权限控制
+SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;
+
+-- 更改现网所有的资质都为有资质
+update eh_enterprise_customers set aptitude_flag_item_id = 1;
+
+-- 添加一键转为资质客户按钮
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

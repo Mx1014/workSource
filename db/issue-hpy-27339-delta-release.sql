@@ -58,3 +58,4 @@ update eh_enterprise_customers set aptitude_flag_item_id = 1;
 
 -- 添加一键转为资质客户按钮
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+
