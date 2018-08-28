@@ -59,3 +59,6 @@ CREATE TABLE `eh_launch_pad_configs` (
   PRIMARY KEY (`id`),
   KEY `i_eh_owner_id` (`owner_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 新接口使用group_id代替itemGroup和itemLocation  add by yanjun 20180828
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `app_id`;
