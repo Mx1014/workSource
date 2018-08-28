@@ -405,10 +405,11 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 	public OfficeCubicleConfig findConfigByOwnerId(String ownerType, Long ownerId) {
 		assert(null != ownerId && StringUtils.isNotEmpty(ownerType));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.select().from(Tables.EH_OFFICE_CUBICLE_CONFIGS)
+		List<OfficeCubicleConfig> result = context.select().from(Tables.EH_OFFICE_CUBICLE_CONFIGS)
 				.where(Tables.EH_OFFICE_CUBICLE_CONFIGS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.OWNER_TYPE.eq(ownerType)
 				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.STATUS.eq((byte)2)))
-				.fetchOne().map(r -> ConvertHelper.convert(r, OfficeCubicleConfig.class));
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleConfig.class));
+		return null != result ? result.get(0) : null;
 	}
 }
