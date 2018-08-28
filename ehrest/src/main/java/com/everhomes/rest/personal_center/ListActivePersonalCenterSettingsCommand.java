@@ -6,12 +6,11 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId： 域空间ID</li>
- *     <li>version: 版本号</li>
  * </ul>
  */
-public class ListPersonalCenterSettingsCommand {
+public class ListActivePersonalCenterSettingsCommand {
     private Integer namespaceId;
-    private Long version;
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -19,15 +18,6 @@ public class ListPersonalCenterSettingsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

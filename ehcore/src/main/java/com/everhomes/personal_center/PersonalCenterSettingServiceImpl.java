@@ -5,6 +5,8 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.personal_center.CreateUserEmailCommand;
+import com.everhomes.rest.personal_center.ListActivePersonalCenterSettingsCommand;
+import com.everhomes.rest.personal_center.ListActivePersonalCenterSettingsResponse;
 import com.everhomes.rest.personal_center.ListPersonalCenterSettingsCommand;
 import com.everhomes.rest.personal_center.ListPersonalCenterSettingsResponse;
 import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
@@ -15,13 +17,13 @@ import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInfoDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
@@ -79,12 +81,29 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     }
 
     @Override
-    public ListPersonalCenterSettingsResponse listPersonalCenterSettings(ListPersonalCenterSettingsCommand cmd) {
-        ListPersonalCenterSettingsResponse response = new ListPersonalCenterSettingsResponse();
+    public ListActivePersonalCenterSettingsResponse listActivePersonalCenterSettings(ListActivePersonalCenterSettingsCommand cmd) {
+        ListActivePersonalCenterSettingsResponse response = new ListActivePersonalCenterSettingsResponse();
         List<PersonalCenterSetting> list = this.personalCenterSettingProvider.queryActivePersonalCenterSettings(cmd.getNamespaceId());
+        if (CollectionUtils.isEmpty(list)) {
+            list = this.personalCenterSettingProvider.queryDefaultPersonalCenterSettings();
+        }
         List<PersonalCenterSettingDTO> dtoList = new ArrayList<>();
         list.stream().forEach((r) -> {
              dtoList.add(ConvertHelper.convert(r,PersonalCenterSettingDTO.class));
+        });
+        return response;
+    }
+
+    @Override
+    public ListPersonalCenterSettingsResponse listPersonalCenterSettingsByNamespaceIdAndVersion(ListPersonalCenterSettingsCommand cmd) {
+        ListPersonalCenterSettingsResponse response = new ListPersonalCenterSettingsResponse();
+        List<PersonalCenterSetting> list = this.personalCenterSettingProvider.queryPersonalCenterSettingsByNamespaceIdAndVersion(cmd.getNamespaceId(), cmd.getVersion());
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        List<PersonalCenterSettingDTO> dtoList = new ArrayList<>();
+        list.stream().forEach((r) -> {
+            dtoList.add(ConvertHelper.convert(r,PersonalCenterSettingDTO.class));
         });
         return response;
     }

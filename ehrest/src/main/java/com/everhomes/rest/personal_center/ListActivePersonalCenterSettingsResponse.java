@@ -8,10 +8,10 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 个人中心配置列表，请参考{@link PersonalCenterSettingDTO}</li>
+ *     <li>dtos: 个人中心配置列表，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingDTO}</li>
  * </ul>
  */
-public class ListPersonalCenterSettingsResponse {
+public class ListActivePersonalCenterSettingsResponse {
 
     @ItemType(PersonalCenterSettingDTO.class)
     private List<PersonalCenterSettingDTO> dtos;

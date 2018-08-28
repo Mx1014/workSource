@@ -124,6 +124,36 @@ public class PersonalCenterSettingProviderImpl implements PersonalCenterSettingP
         return objs;
     }
 
+    @Override
+    public List<PersonalCenterSetting> queryDefaultPersonalCenterSettings() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPersonalCenterSettings.class));
+
+        SelectQuery<EhPersonalCenterSettingsRecord> query = context.selectQuery(Tables.EH_PERSONAL_CENTER_SETTINGS);
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.NAMESPACE_ID.eq(0));
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.STATUS.eq(PersonalCenterSettingStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.REGION.asc());
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.SORT_NUM.asc());
+        List<PersonalCenterSetting> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, PersonalCenterSetting.class);
+        });
+        return objs;
+    }
+
+    @Override
+    public List<PersonalCenterSetting> queryPersonalCenterSettingsByNamespaceIdAndVersion(Integer namespaceId, Long version) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPersonalCenterSettings.class));
+
+        SelectQuery<EhPersonalCenterSettingsRecord> query = context.selectQuery(Tables.EH_PERSONAL_CENTER_SETTINGS);
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_PERSONAL_CENTER_SETTINGS.VERSION.eq(version));
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.REGION.asc());
+        query.addOrderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.SORT_NUM.asc());
+        List<PersonalCenterSetting> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, PersonalCenterSetting.class);
+        });
+        return objs;
+    }
+
     private void prepareObj(PersonalCenterSetting obj) {
     }
 }

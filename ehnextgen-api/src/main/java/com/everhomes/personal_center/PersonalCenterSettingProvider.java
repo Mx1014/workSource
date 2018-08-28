@@ -19,4 +19,6 @@ public interface PersonalCenterSettingProvider {
 			ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 	List<PersonalCenterSetting> queryActivePersonalCenterSettings(Integer namespaceId);
+	List<PersonalCenterSetting> queryDefaultPersonalCenterSettings();
+	List<PersonalCenterSetting> queryPersonalCenterSettingsByNamespaceIdAndVersion(Integer namespaceId, Long version);
 }

@@ -10,7 +10,7 @@ public class PersonalCenterSettingDTO {
     private Byte     status;
     private Long     createUid;
     private Timestamp     updateTime;
-    private String     routerUrl;
+    private String     type;
     private Byte     groupType;
     private String     name;
     private Byte     region;
@@ -79,16 +79,13 @@ public class PersonalCenterSettingDTO {
 		this.updateTime = updateTime;
 	}
 
-
-	public String getRouterUrl() {
-		return routerUrl;
+	public String getType() {
+		return type;
 	}
 
-
-	public void setRouterUrl(String routerUrl) {
-		this.routerUrl = routerUrl;
+	public void setType(String type) {
+		this.type = type;
 	}
-
 
 	public String getName() {
 		return name;
