@@ -39,21 +39,21 @@
 -- AUTHOR: 黄良铭 2018年8月24日
 -- REMARK:   coreserver 中需要配置kafka的相关信息: 定位到 /data1/ehserver/server/core/ehcore.yml
 --(注意层级 ,可到10.1.120.105 相应地方拷贝) ,在文件后添加以下信息(注意去掉前面的"--",bootstrap-servers 为积分服务器地址,记得相应修改)
---spring.kafka:
---  bootstrap-servers: 10.1.120.111:9092
---  producer:
---    retries: 0
---    batch-size: 16384
---    buffer-memory: 33554432
---    key-serializer: org.apache.kafka.common.serialization.StringSerializer
---    value-serializer: org.apache.kafka.common.serialization.StringSerializer
---  consumer:
---    group-id: ehcore-group
---    auto-offset-reset: earliest
---    enable-auto-commit: true
- --   auto-commit-interval: 100
---    key-serializer: org.apache.kafka.common.serialization.StringSerializer
---    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+		--		spring.kafka:
+		-- 			 bootstrap-servers: 10.1.120.111:9092
+		-- 			 producer:
+		--    			retries: 0
+		--   	 			batch-size: 16384
+		--    			buffer-memory: 33554432
+		--    			key-serializer: org.apache.kafka.common.serialization.StringSerializer
+		--    			value-serializer: org.apache.kafka.common.serialization.StringSerializer
+		--  			consumer:
+		--    			group-id: ehcore-group
+		--    			auto-offset-reset: earliest
+		--    			enable-auto-commit: true
+		 --   			auto-commit-interval: 100
+		--    			key-serializer: org.apache.kafka.common.serialization.StringSerializer
+		--    			value-serializer: org.apache.kafka.common.serialization.StringSerializer
 			 
 
 -- --------------------- SECTION END ---------------------------------------------------------
