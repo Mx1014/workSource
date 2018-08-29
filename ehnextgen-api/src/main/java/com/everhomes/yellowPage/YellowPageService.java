@@ -1,6 +1,7 @@
 package com.everhomes.yellowPage;
 
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.yellowPage.*;
 
@@ -105,5 +106,11 @@ public interface YellowPageService {
 	String transferTime(Long parentId);
 
 	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
+
+	void updateAllianceTag(Integer namespaceId, String ownerType, Long ownerId, Long type, AllianceTagDTO parentTagDto,
+			List<AllianceTagDTO> childTagDtos);
+
+	List<AllianceTagGroupDTO> getAllianceTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
+			String ownerType, Long ownerId, Long type);
 
 }

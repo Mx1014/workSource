@@ -549,16 +549,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
-		List<ServiceAllianceCategories> serviceAllianceCategories = yellowPageProvider.listChildCategories(null, null, namespaceId, 0L, null, null);
-		if(serviceAllianceCategories == null || serviceAllianceCategories.size() == 0 ){
-			return new ArrayList<>();
-		}
-		return serviceAllianceCategories.stream().map(r->{
-			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
-			dto.setNamespaceId(namespaceId);
-			dto.setServiceName(r.getName());
-			return dto;
-		}).collect(Collectors.toList());
+		return null;
 	}
 	
 	@Override

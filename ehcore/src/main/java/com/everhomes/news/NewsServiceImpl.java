@@ -30,6 +30,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
@@ -1046,7 +1047,7 @@ public class NewsServiceImpl implements NewsService {
 		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
 		response.setCommunityIds(communityIds.stream().map(r -> r.toString()).collect(Collectors.toList()));
 		response.setPublishTime(news.getPublishTime().getTime());
-		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(), null, 0l, null, null,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(),null,null, null, 0l, null, null,
 				news.getCategoryId());
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r -> ConvertHelper.convert(r, NewsTagDTO.class))
 				.collect(Collectors.toList());
@@ -1089,7 +1090,7 @@ public class NewsServiceImpl implements NewsService {
 		// r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.forEach(r -> {
-			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId(), null, r.getId(), null, null,
+			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId() ,null,null, null, r.getId(), null, null,
 					r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t -> ConvertHelper.convert(t, NewsTagDTO.class)).map(t -> {
 				// if (map.get(r.getId())!=null)
@@ -1592,12 +1593,12 @@ public class NewsServiceImpl implements NewsService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		if (cmd.getPageSize() == null)
 			pageSize = 9999999;
-		List<NewsTag> parentTags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getIsSearch(), 0l,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getIsSearch(), 0l,
 				cmd.getPageAnchor(), pageSize + 1, cmd.getCategoryId());
 		List<NewsTagDTO> result = parentTags.stream().map(r -> ConvertHelper.convert(r, NewsTagDTO.class))
 				.collect(Collectors.toList());
 		result.stream().forEach(r -> {
-			List<NewsTag> tags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), null, r.getId(), null,
+			List<NewsTag> tags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), null, r.getId(), null,
 					null, r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t -> ConvertHelper.convert(t, NewsTagDTO.class))
 					.collect(Collectors.toList());
@@ -2354,7 +2355,7 @@ public class NewsServiceImpl implements NewsService {
 	 * @return
 	 */
 	private List<NewsTag> getAllNewsTags(Integer namespaceId, Long categoryId) {
-		return newsProvider.listNewsTag(namespaceId, null, null, null, null, categoryId);
+		return newsProvider.listNewsTag(namespaceId,null, null, null, null, null, null, categoryId);
 	}
 
 	/**
@@ -2445,19 +2446,132 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		updateSelfDefinedConfig(cmd, true);
 	}
 
 	@Override
 	public void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
-		// TODO Auto-generated method stub
+		updateSelfDefinedConfig(cmd, false);
+	}
+	
+	private void updateSelfDefinedConfig(GetSelfDefinedStateCommand cmd, boolean enable) {
+
+		if (!isIdValid(cmd.getCategoryId())) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_CATEGORY_ID_NOT_VALID, "Invalid category id");
+		}
+
+		Byte state = getSelfDefinedState(cmd.getProjectId(), cmd.getCategoryId());
+		if (enable) {
+			// 如果需要开启，而且当前是关闭状态，才进行创建
+			if (TrueOrFalseFlag.FALSE.getCode().equals(state)) {
+				createSelfDefinedConfig(cmd.getCategoryId(), cmd.getProjectId(), cmd.getCurrentPMId());
+			}
+			return;
+		}
+
+		if (TrueOrFalseFlag.TRUE.getCode().equals(state)) {
+			// 关闭时删除所有该项目下的所有自定义配置
+			deleteSelfDefinedConfig(cmd.getCategoryId(), cmd.getProjectId());
+		}
+
+	}
+
+	private void deleteSelfDefinedConfig(Long categoryId, Long projectId) {
+		// 删除tag
+		newsProvider.deleteProjectNewsTags(projectId, categoryId);
+
+		// 删除tagVal
+	}
+
+	private void createSelfDefinedConfig(Long categoryId, Long projectId, Long organizationId) {
 		
+		// 获取所有标签
+		List<NewsTag> allTags = newsProvider.listNewsTag(
+				UserContext.getCurrentNamespaceId(), NewsOwnerType.ORGANIZATION.getCode(), organizationId, 
+				null, null, null, null, categoryId);
+		if (CollectionUtils.isEmpty(allTags)) {
+			return;
+		}
+		
+		//获取父子标签
+		List<NewsTag> pTags = new ArrayList<>();
+		List<NewsTag> cTags = new ArrayList<>();
+		for (NewsTag tag : allTags) {
+			if (0 == tag.getParentId()) {
+				pTags.add(tag);
+				continue;
+			}
+			cTags.add(tag);
+		}
+		
+		if (0 == pTags.size()) {
+			return;
+		}
+
+		dbProvider.execute(r -> {
+			//创建父亲标签
+			Map<Long,Long> parentIdDiffMap = new HashMap<>();
+			for (NewsTag tag : pTags) {
+				tag.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
+				tag.setOwnerId(projectId);
+				parentIdDiffMap.put(tag.getId(), newsProvider.createNewsTag(tag));
+			}
+	
+			//创建子标签
+			for (NewsTag tag : cTags) {
+				Long newParentId = parentIdDiffMap.get(tag.getParentId());
+				if (null == newParentId) {
+					continue;
+				}
+				
+				tag.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
+				tag.setOwnerId(projectId);
+				tag.setParentId(newParentId);
+				newsProvider.createNewsTag(tag);
+			}
+			
+			return null;
+		});
+
+	}
+
+	private boolean isIdValid(Long id) {
+		if (null == id || id < 0) {
+			return false;
+		}
+
+		return true;
+	}
+	
+	private Byte getSelfDefinedState(Long projectId, Long categoryId) {
+		List<NewsTag> tags = getProjectParentTags(projectId, categoryId);
+		return CollectionUtils.isEmpty(tags) ? TrueOrFalseFlag.FALSE.getCode() : TrueOrFalseFlag.TRUE.getCode();
 	}
 
 	@Override
 	public GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd) {
-		// TODO Auto-generated method stub
+		GetSelfDefinedStateResponse resp = new GetSelfDefinedStateResponse();
+		resp.setIsOpen(getSelfDefinedState(cmd.getProjectId(), cmd.getCategoryId()));
+		return resp;
+	}
+
+	private List<NewsTag> getProjectParentTags(Long projectId, Long categoryId) {
+		return newsProvider.listParentTags(NewsOwnerType.COMMUNITY.getCode(), projectId, categoryId);
+	}
+
+	private List<NewsTag> getParentTags(String ownerType, Long ownerId, Long organizationId, Long categoryId) {
+
+		List<NewsTag> tags = newsProvider.listParentTags(ownerType, ownerId, categoryId);
+		if (!CollectionUtils.isEmpty(tags)) {
+			return tags;
+		}
+
+		if (NewsOwnerType.COMMUNITY.getCode().equals(ownerType)) {
+			return newsProvider.listParentTags(NewsOwnerType.ORGANIZATION.getCode(), organizationId, categoryId);
+		}
+
 		return null;
 	}
+	
 }

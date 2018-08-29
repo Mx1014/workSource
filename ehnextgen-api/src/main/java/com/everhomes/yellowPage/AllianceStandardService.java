@@ -1,5 +1,8 @@
 package com.everhomes.yellowPage;
 
+import java.util.List;
+
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
 import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
@@ -18,4 +21,9 @@ public interface AllianceStandardService {
 	void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
 	
 	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
+
+	ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type);
+
+	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
+			String ownerType, Long ownerId, Long organizationId, Long type);
 }

@@ -51,6 +51,7 @@ public interface YellowPageProvider {
 	YellowPage findYellowPageById(Long id, String ownerType, Long ownerId);
 	
 	ServiceAllianceCategories findCategoryById(Long id);
+	ServiceAllianceCategories findMainCategory(String ownerTye, Long ownerId, Long type);
 	ServiceAllianceCategories findCategoryByName(Integer namespaceId, String name);
 	ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId);
 	void createCategory(ServiceAllianceCategories category);
@@ -64,8 +65,7 @@ public interface YellowPageProvider {
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
-	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
+	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, CategoryAdminStatus status, List<Byte> displayDestination, boolean queryAllChilds);
  
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
@@ -101,6 +101,8 @@ public interface YellowPageProvider {
 	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
+	
+	List<ServiceAllianceAttachment> listAttachments(Long ownerId, Byte attachmentType);
 
 	Long createGolfRequest(ServiceAllianceGolfRequest request);
 
@@ -152,5 +154,9 @@ public interface YellowPageProvider {
 	List<ServiceAlliances> findOldFormServiceAlliance();
 
 
+	void deleteProjectMainConfig(Long projectId, Long type);
 
+	void deleteProjectCategories(Long projectId, Long type);
+
+	List<ServiceAllianceCategories> listChildCategories(Long parentId);
 }
