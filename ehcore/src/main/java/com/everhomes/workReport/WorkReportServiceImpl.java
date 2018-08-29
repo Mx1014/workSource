@@ -339,6 +339,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportType(template.getReportType());
             report.setOperatorUserId(userId);
             report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
+            report.setIconUri(template.getIconUri());
             if (form != null) {
                 report.setFormOriginId(form.getFormOriginId());
                 report.setFormVersion(form.getFormVersion());
@@ -354,6 +355,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setOperatorUserId(userId);
             report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
+            report.setIconUri(template.getIconUri());
             if (form != null) {
                 report.setFormOriginId(form.getFormOriginId());
                 report.setFormVersion(form.getFormVersion());
