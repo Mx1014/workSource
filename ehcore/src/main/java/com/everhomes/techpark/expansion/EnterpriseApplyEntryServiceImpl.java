@@ -1900,19 +1900,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		cmd2.setSourceType(EntityType.LEASE_PROJECT.getCode());
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
 		Long formId = request == null ? null : request.getSourceId();
 		copyCustomRequestForm(cmd2,formId);
 
 		cmd2.setSourceType(EntityType.LEASE_BUILDING.getCode());
 		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
 		formId = request == null ? null : request.getSourceId();
 		copyCustomRequestForm(cmd2,formId);
 
 		cmd2.setSourceType(EntityType.LEASE_PROMOTION.getCode());
 		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
 		formId = request == null ? null : request.getSourceId();
 		copyCustomRequestForm(cmd2,formId);
 
