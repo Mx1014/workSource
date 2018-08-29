@@ -410,6 +410,9 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.OWNER_TYPE.eq(ownerType)
 				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.STATUS.eq((byte)2)))
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleConfig.class));
-		return null != result ? result.get(0) : null;
+		if(null != result && result.size() > 0){
+			return result.get(0);
+		}
+		return null;
 	}
 }
