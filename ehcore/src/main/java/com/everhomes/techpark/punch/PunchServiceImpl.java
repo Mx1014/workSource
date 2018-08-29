@@ -11361,14 +11361,13 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
-    private List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, String punchMonth, Integer pageSize,
-        Long anchor, String userName) {
-//        ListingLocator listingLocator = new ListingLocator();
-//        listingLocator.setAnchor(anchor);
+    private List<OrganizationMemberDetails> listMembers(Long ownerId, Long deptId, String punchMonth, Integer pageSize, Long anchor, String userName) {
+        // yyyyMM to yyyy-MM
+        String punchMonthInLine = punchMonth.substring(0, 4) + "-" + punchMonth.substring(4, 6);
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode())
-                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
+                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.like(punchMonthInLine + "%")));
             //月底之前入职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lessOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
 
