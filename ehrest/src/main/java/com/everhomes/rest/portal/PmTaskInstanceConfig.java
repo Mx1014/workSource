@@ -24,6 +24,10 @@ public class PmTaskInstanceConfig {
 
 	private String url;
 
+	private	Byte appAgentSwitch;
+
+	private Byte bgAgentSwitch;
+
 	public Long getTaskCategoryId() {
 		return taskCategoryId;
 	}
@@ -62,6 +66,22 @@ public class PmTaskInstanceConfig {
 
 	public void setFeeModel(Byte feeModel) {
 		this.feeModel = feeModel;
+	}
+
+	public Byte getAppAgentSwitch() {
+		return appAgentSwitch;
+	}
+
+	public void setAppAgentSwitch(Byte appAgentSwitch) {
+		this.appAgentSwitch = appAgentSwitch;
+	}
+
+	public Byte getBgAgentSwitch() {
+		return bgAgentSwitch;
+	}
+
+	public void setBgAgentSwitch(Byte bgAgentSwitch) {
+		this.bgAgentSwitch = bgAgentSwitch;
 	}
 
 	@Override
