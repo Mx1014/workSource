@@ -16,7 +16,7 @@ CREATE TABLE `eh_personal_center_settings` (
   `editable` TINYINT COMMENT '是否可编辑',
   `type` INTEGER NOT NULL COMMENT '功能所属类型',
   `icon_uri` VARCHAR(64) COMMENT '图标URI',
-  `version` BIGINT NOT NULL DEFAULT 0 COMMENT '版本号',
+  `version` INTEGER NOT NULL DEFAULT 0 COMMENT '版本号',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态',
   `create_uid` BIGINT COMMENT '创建人ID',
   `create_time` TIMESTAMP COMMENT '创建时间',
