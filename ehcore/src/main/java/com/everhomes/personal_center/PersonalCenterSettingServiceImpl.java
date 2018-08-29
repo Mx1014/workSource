@@ -4,6 +4,8 @@ package com.everhomes.personal_center;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.personal_center.CreatePersonalCenterSettingsResponse;
+import com.everhomes.rest.personal_center.CreatePersonalSettingCommand;
 import com.everhomes.rest.personal_center.CreateUserEmailCommand;
 import com.everhomes.rest.personal_center.ListActivePersonalCenterSettingsCommand;
 import com.everhomes.rest.personal_center.ListActivePersonalCenterSettingsResponse;
@@ -106,5 +108,10 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             dtoList.add(ConvertHelper.convert(r,PersonalCenterSettingDTO.class));
         });
         return response;
+    }
+
+    @Override
+    public CreatePersonalCenterSettingsResponse createPersonalCenterSettings(CreatePersonalSettingCommand cmd) {
+        return null;
     }
 }

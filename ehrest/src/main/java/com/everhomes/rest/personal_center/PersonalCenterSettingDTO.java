@@ -10,7 +10,7 @@ public class PersonalCenterSettingDTO {
     private Byte     status;
     private Long     createUid;
     private Timestamp     updateTime;
-    private String     type;
+    private Integer     type;
     private Byte     groupType;
     private String     name;
     private Byte     region;
@@ -79,11 +79,11 @@ public class PersonalCenterSettingDTO {
 		this.updateTime = updateTime;
 	}
 
-	public String getType() {
+	public Integer getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(Integer type) {
 		this.type = type;
 	}
 
