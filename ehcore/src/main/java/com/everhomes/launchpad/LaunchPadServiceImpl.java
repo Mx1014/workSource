@@ -3022,4 +3022,68 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		return response;
 	}
+
+
+	@Override
+	public ListAllAppsResponse listAllApps(ListAllAppsCommand cmd) {
+		ListAllAppsResponse response = new ListAllAppsResponse();
+
+
+		Byte scopeCode = 0;
+		Long scopeId = 0L;
+		AppContext context = cmd.getAppContext();
+		if(context.getCommunityId() != null){
+			scopeCode = ScopeType.COMMUNITY.getCode();
+			scopeId = context.getCommunityId();
+		}else if(context.getOrganizationId() != null){
+			scopeCode = ScopeType.ORGANIZATION.getCode();
+			scopeId = context.getOrganizationId();
+		}else if(context.getFamilyId() != null){
+			scopeCode = ScopeType.RESIDENTIAL.getCode();
+			scopeId = context.getFamilyId();
+		}
+
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategryByGroupId(cmd.getGroupId(), scopeCode, scopeId);
+		if(categories != null && categories.size() > 0){
+			for (ItemServiceCategry categry: categories){
+
+				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, categry.getName());
+				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
+				LaunchPadCategoryDTO categoryDTO = new LaunchPadCategoryDTO();
+				categoryDTO.setAppDtos(appDtos);
+				categoryDTO.setName(categry.getName());
+				if(categry.getIconUri() != null){
+					String url = contentServerService.parserUri(categry.getIconUri(), ItemServiceCategry.class.getSimpleName(), categry.getId());
+					categoryDTO.setIconUrl(url);
+				}
+
+			}
+		}else {
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null);
+
+			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
+
+			LaunchPadCategoryDTO categoryDTO = new LaunchPadCategoryDTO();
+			categoryDTO.setAppDtos(appDtos);
+
+		}
+
+
+
+
+
+		return null;
+	}
+
+
+	private List<AppDTO> itemToAppDto(List<LaunchPadItem> items){
+
+
+		return null;
+	}
+
+	@Override
+	public void updateUserApps(UpdateUserAppsCommand cmd) {
+
+	}
 }

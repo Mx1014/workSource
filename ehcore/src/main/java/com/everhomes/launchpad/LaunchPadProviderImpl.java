@@ -698,6 +698,23 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
+	public List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, Byte scopeCode, Long scopeId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.GROUP_ID.eq(groupId));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scopeCode));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scopeId));
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		query.addConditions(getPreviewPortalVersionCondition(Tables.EH_ITEM_SERVICE_CATEGRIES.getName()));
+
+		List<ItemServiceCategry> res = query.fetch().map(r -> ConvertHelper.convert(r, ItemServiceCategry.class));
+		return res;
+	}
+
+
+	@Override
 	public void createItemServiceCategry(ItemServiceCategry itemServiceCategry) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhItemServiceCategries.class));
 		itemServiceCategry.setId(id);
@@ -785,5 +802,34 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.PREVIEW_PORTAL_VERSION_ID.isNotNull());
 		query.execute();
 	}
+
+
+	@Override
+	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, Byte scopeCode, Long scopeId, String categoryName){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+
+		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+
+		if(!StringUtils.isEmpty(categoryName)){
+			query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categoryName));
+		}
+
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(SceneType.PARK_TOURIST.getCode()));
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		Condition previewCondition = getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName());
+		query.addConditions(previewCondition);
+
+		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));
+
+		return items;
+	}
+
+
 
 }

@@ -2315,6 +2315,8 @@ public class PortalServiceImpl implements PortalService {
 							itemCategory.setPreviewPortalVersionId(versionId);
 						}
 
+						itemCategory.setGroupId(category.getItemGroupId());
+
 						launchPadProvider.createItemServiceCategry(itemCategory);
 
 						PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();

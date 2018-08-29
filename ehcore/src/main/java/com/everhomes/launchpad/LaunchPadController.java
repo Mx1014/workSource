@@ -158,6 +158,7 @@ public class LaunchPadController extends ControllerBase {
     @RequestMapping("updateUserApps")
     @RestReturn(value=String.class)
     public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
+        launchPadService.updateUserApps(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -173,9 +174,11 @@ public class LaunchPadController extends ControllerBase {
     @RestReturn(value=ListAllAppsResponse.class)
     @RequireAuthentication(false)
     public RestResponse listAllApps(ListAllAppsCommand cmd) {
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
+
+        ListAllAppsResponse res = launchPadService.listAllApps(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 

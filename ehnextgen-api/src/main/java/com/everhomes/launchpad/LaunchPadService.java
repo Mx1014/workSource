@@ -99,4 +99,8 @@ public interface LaunchPadService {
     String getSceneTokenByCommunityId(Long communityId);
 
     ListBulletinsCardsResponse listBulletinsCards(ListBulletinsCardsCommand cmd);
+
+    ListAllAppsResponse listAllApps(ListAllAppsCommand cmd);
+
+    void updateUserApps(UpdateUserAppsCommand cmd);
 }
