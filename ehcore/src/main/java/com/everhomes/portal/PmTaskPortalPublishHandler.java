@@ -15,11 +15,14 @@ import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -95,6 +98,11 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         String displayname = "物业报修";
         if(9L == taskCategoryId){
             displayname = "投诉与建议";
+        }
+        try {
+            displayname = URLEncoder.encode(displayname,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("url encode error.");
         }
         Url = String.format(Url,namespaceId,taskCategoryId,displayname);
         JSONObject actionData = new JSONObject();
