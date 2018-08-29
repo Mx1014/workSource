@@ -152,7 +152,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         employee.setContactShortToken(cmd.getContactShortToken());
         employee.setWorkEmail(cmd.getWorkEmail());
         employee.setContractPartyId(cmd.getOrganizationId());
-
+        if (StringUtils.isEmpty(cmd.getWorkEmail())) {
+            OrganizationMember organizationMember = this.organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(memberDTO.getTargetId(),memberDTO.getOrganizationId());
+            if (organizationMember != null) {
+                employee.setWorkEmail(organizationMember.getStringTag3());
+            }
+        }
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
         dto.setContactToken(employee.getContactToken());
