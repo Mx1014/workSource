@@ -13,6 +13,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -86,7 +87,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     }
 
     /**
-     * 根据不同的情况发送消息
+     * 根据不同的评论情况发送消息
      * 具体规则参考RP
      */
     @Override
@@ -185,6 +186,18 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 break;
         }
         return subject;
+    }
+
+    @Scheduled(cron = "0 30 * * * ?")
+    @Override
+    public void workReportRxMessage(){
+
+    }
+
+    @Scheduled(cron = "0 30 * * * ?")
+    @Override
+    public void workReportAuMessage(){
+
     }
 
     private void sendMessage(String content, String title, Long receiverId, WorkReportVal reportVal){

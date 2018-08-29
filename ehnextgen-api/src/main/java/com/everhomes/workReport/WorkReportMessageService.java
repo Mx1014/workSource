@@ -9,4 +9,8 @@ public interface WorkReportMessageService {
     void workReportUpdateMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user);
 
     void workReportCommentMessage(User user, WorkReportVal reportVal, WorkReport report, Long parentCommentId);
+
+    void workReportRxMessage();
+
+    void workReportAuMessage();
 }
