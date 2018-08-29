@@ -1097,7 +1097,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             Timestamp remindStartTime = new Timestamp(DateHelper.currentGMTTime().getTime() - 6*60*1000L);
             LOGGER.info("remindSchedule begin, reminder bigin time is {}  reminder end time is {}"
                     , DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindStartTime.getTime()),
-                    DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindStartTime.getTime()));
+                    DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindEndTime.getTime()));
             List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
             long count = 0;
             boolean isProcess = !CollectionUtils.isEmpty(reminds);
