@@ -126,6 +126,11 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getCommunityId());
         return generalFormService.saveGeneralForm(cmd);
     }
+    @Override
+    public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_VIEW, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getOwnerId());
+        return generalFormService.getGeneralFormVal(cmd);
+    }
 
     @Override
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){

@@ -37,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
@@ -769,12 +770,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		cmd.setOrganizationId(flow.getOrganizationId());
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
 			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
 		else
 			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
+		if(null == response.getRequests()){
+			LOGGER.error("Categories is null.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+					"Categories is null.");
+		}
 		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
 		list.add(dto);
 		return list;

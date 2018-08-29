@@ -79,4 +79,6 @@ public interface GeneralFormService {
 
 	List<String> saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
 
+	List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd);
+
 }

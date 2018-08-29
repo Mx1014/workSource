@@ -80,6 +80,8 @@ public interface NewsService {
 	Long checkNewsToken(Long userId, String newsToken);
 
 	String getNewsQR(UpdateNewsCommand cmd);
+
+	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
 	
 }
 

@@ -2373,13 +2373,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
 		step.where(condition);
+		Record record = step.fetchAny();
+		if (record == null)
+			return null;
 
-		RentalResourceType result = step.fetchAny()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalResourceType.class);
-				});
-
-		return result;
+		return ConvertHelper.convert(record, RentalResourceType.class);
 
 	}
 

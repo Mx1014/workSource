@@ -912,12 +912,24 @@ VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统�
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
 
+-- AUTHOR: huangmingbo
+-- REMARK: 修改快递添加账户提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180809', 'zh_CN', '收款账户已存在，请勿重复添加');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180810', 'zh_CN', '需要更新的收款账户ID不存在');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送默认推送方式改为新推送
+UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='apple.pusher.flag';
+
+
 -- END
 
 -- AUTHOR: 黄鹏宇 2018-8-28
 -- REMARK: 添加删除权限控制
 SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+UPDATE `eh_service_module_privileges` SET `remark` = '新增/修改/发起审批' where `privilege_id` = 250001002;
 
 -- 更改请示单module name jiarui 20180823
 update eh_service_modules set name = '请示单管理' where id = 25000;
@@ -932,6 +944,38 @@ update eh_service_module_functions set module_id = 21200 where id = 43970;
 update eh_service_module_functions set module_id = 21100 where id = 43980;
 
 -- END
+
+-- AUTHOR: 黄良铭
+-- REMARK: #35742  【用户认证3.6】客户端拒绝后的拒绝理由 不在消息体现
+UPDATE eh_locale_templates s SET s.text='您被拒绝加入公司“${enterpriseName}”，拒绝理由：${textInfo}。' WHERE s.scope='enterprise.notification' AND s.namespace_id=0 AND s.code=3;
+
+
+-- AUTHOR: xq.tian 2018-8-28
+-- REMARK: 工作流提示文字
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10001', 'zh_CN', '工作流已存在');
+
+
+
+
+-- AUTHOR: 马世亨 2018年8月28日
+-- REMARK: 物业报修页面地址
+set @configId = (select max(id) + 1 from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES (@configId, 'pmtask.uri', 'property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix', 'the pmtask web url', '0', NULL, NULL);
+update eh_service_modules set action_type = 13 where id = 20100;
+update eh_service_module_apps set action_type = 13 where module_id = 20100;
+
+
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 暂时屏蔽“ERP”、“人力资源”和“企业服务” add by yanjun 20180829
+UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
+
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 清除微商城模块默认配置
+UPDATE eh_service_modules SET instance_config = NULL where id = 92100;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

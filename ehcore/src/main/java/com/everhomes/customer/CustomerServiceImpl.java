@@ -279,6 +279,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
@@ -1299,7 +1300,7 @@ public class CustomerServiceImpl implements CustomerService {
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
                 command.setId(customer.getOrganizationId());
-                organizationService.deleteEnterpriseById(command, false);
+                ExecutorUtil.submit(() -> organizationService.deleteEnterpriseById(command, false));
             }
         }
         routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
