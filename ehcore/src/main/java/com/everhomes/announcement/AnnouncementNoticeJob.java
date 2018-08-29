@@ -93,7 +93,7 @@ public class AnnouncementNoticeJob extends QuartzJobBean {
         status.add(AuthFlag.AUTHENTICATED.getCode());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         AnnouncementDetailActionData actionData = new AnnouncementDetailActionData();
-        actionData.setAnnouncementId(postDTO.getId());
+        actionData.setBulletinId(postDTO.getId());
         String url = RouterBuilder.build(Router.BULLETIN_DETAIL, actionData);
         Map map = new HashMap();
         map.put("subject", postDTO.getSubject());
