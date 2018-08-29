@@ -9,7 +9,6 @@ import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.rest.workReport.WorkReportNotificationTemplateCode;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,9 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Autowired
     private WorkReportService workReportService;
+
+    @Autowired
+    private WorkReportProvider workReportProvider;
 
     @Autowired
     private WorkReportValProvider workReportValProvider;
@@ -198,7 +200,8 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Override
     public void workReportAuMessage(){
 
-        List<WorkReport> auReports;
+        List<WorkReport> auReports = workReportProvider.listAuWorkReports();
+
     }
 
     private void sendMessage(String content, String title, Long receiverId, WorkReportVal reportVal){

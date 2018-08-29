@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.workReport.ReportAuthorMsgType;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -118,6 +119,22 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         query.addOrderBy(Tables.EH_WORK_REPORTS.ID.asc());
 
         //  return back results
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReport.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<WorkReport> listAuWorkReports(){
+        List<WorkReport> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
+        query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
+        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
+
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReport.class));
             return null;
