@@ -102,7 +102,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -906,6 +905,16 @@ public class PunchProviderImpl implements PunchProvider {
             return ConvertHelper.convert(record, PunchDayLog.class);
         }
         return null;
+    }
+
+    @Override
+    public int deletePunchDayLogByDateAndDetailId(Long detailId, Long companyId, String punchDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchDayLogs.class));
+        DeleteQuery<EhPunchDayLogsRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_DAY_LOGS);
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(Date.valueOf(punchDate)));
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.eq(detailId));
+        return deleteQuery.execute();
     }
 
     @Override
