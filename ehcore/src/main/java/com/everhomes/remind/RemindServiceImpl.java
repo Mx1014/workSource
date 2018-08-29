@@ -1090,8 +1090,6 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     @Override
     public void remindSchedule() {
         this.coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode()).tryEnter(() -> {
-//            LocalDateTime remindDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
-//            Timestamp remindTime = new Timestamp(remindDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             //改成每次提醒6分钟前到现在的
             Timestamp remindEndTime = new Timestamp(DateHelper.currentGMTTime().getTime());
             Timestamp remindStartTime = new Timestamp(DateHelper.currentGMTTime().getTime() - 6*60*1000L);
