@@ -37,11 +37,14 @@ import com.everhomes.rest.notice.EnterpriseNoticeReceiverType;
 import com.everhomes.rest.notice.EnterpriseNoticeSecretFlag;
 import com.everhomes.rest.notice.EnterpriseNoticeShowType;
 import com.everhomes.rest.notice.EnterpriseNoticeStatus;
+import com.everhomes.rest.notice.EnterpriseNoticeStickFlag;
 import com.everhomes.rest.notice.GetCurrentUserContactInfoCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
 import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.StickyEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UnStickyEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -49,11 +52,13 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +67,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -601,5 +607,31 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         return homeUrl + String.format(webUri, UserContext.getCurrentNamespaceId(), noticeToken);
     }
+
+	@Override
+	public void stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd) {
+		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
+        if (enterpriseNotice == null || EnterpriseNoticeStatus.INACTIVE == EnterpriseNoticeStatus.fromCode(enterpriseNotice.getStatus())) {
+            return;
+        }
+        enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.STICK.getCode());
+        enterpriseNotice.setStickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
+        enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
+	}
+
+	@Override
+	public void unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd) {
+
+		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
+        if (enterpriseNotice == null || EnterpriseNoticeStatus.INACTIVE == EnterpriseNoticeStatus.fromCode(enterpriseNotice.getStatus())) {
+            return;
+        }
+        enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.UN_STICK.getCode());
+        //最晚取消置顶的也要排序在前面
+        enterpriseNotice.setStickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
+        enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
+	}
 
 }
