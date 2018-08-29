@@ -198,6 +198,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Override
     public void workReportAuMessage(){
 
+        List<WorkReport> auReports;
     }
 
     private void sendMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
