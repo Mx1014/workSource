@@ -967,6 +967,11 @@ VALUES (@configId, 'pmtask.uri', 'property-repair-web/build/index.html?ns=%s&typ
 update eh_service_modules set action_type = 13 where id = 20100;
 update eh_service_module_apps set action_type = 13 where module_id = 20100;
 
+
+-- AUTHOR: 马世亨 2018年8月29日
+-- REMARK: 暂时屏蔽“ERP”、“人力资源”和“企业服务” add by yanjun 20180829
+UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
