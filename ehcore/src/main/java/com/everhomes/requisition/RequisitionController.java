@@ -196,9 +196,9 @@ public class RequisitionController extends ControllerBase {
      * @return
      */
     @RequestMapping("getGeneralFormByCustomerId")
-    @RestReturn(value=Long.class)
+    @RestReturn(value=GetGeneralFormByCustomerIdResponse.class)
     public RestResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd) {
-        Long dto = requisitionService.getGeneralFormByCustomerId(cmd);
+        GetGeneralFormByCustomerIdResponse dto = requisitionService.getGeneralFormByCustomerId(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

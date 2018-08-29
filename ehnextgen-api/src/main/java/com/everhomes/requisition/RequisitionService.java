@@ -40,5 +40,5 @@ public interface RequisitionService {
 
     GeneralApprovalDTO getApprovalRunningForm(GetApprovalRunningFormCommond cmd);
 
-    Long getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd);
+    GetGeneralFormByCustomerIdResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd);
 }

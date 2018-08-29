@@ -28,22 +28,7 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
-import com.everhomes.rest.requisition.CreateRequisitionCommand;
-import com.everhomes.rest.requisition.GetApprovalRunningFormCommond;
-import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
-import com.everhomes.rest.requisition.GetRequisitionDetailCommand;
-import com.everhomes.rest.requisition.GetRequisitionDetailResponse;
-import com.everhomes.rest.requisition.GetRunningRequisitionFlowCommand;
-import com.everhomes.rest.requisition.GetRunningRequisitionFormCommond;
-import com.everhomes.rest.requisition.GetSelectedRequisitionFormCommand;
-import com.everhomes.rest.requisition.ListRequisitionTypesCommand;
-import com.everhomes.rest.requisition.ListRequisitionTypesDTO;
-import com.everhomes.rest.requisition.ListRequisitionsCommand;
-import com.everhomes.rest.requisition.ListRequisitionsDTO;
-import com.everhomes.rest.requisition.ListRequisitionsResponse;
-import com.everhomes.rest.requisition.RequistionErrorCodes;
-import com.everhomes.rest.requisition.UpdateRequisitionActiveStatusCommond;
-import com.everhomes.rest.requisition.UpdateRequisitionRunningFormCommand;
+import com.everhomes.rest.requisition.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
@@ -341,18 +326,21 @@ public class RequisitionServiceImpl implements RequisitionService{
 
 
     @Override
-    public Long getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd){
-        GeneralFormVal request;
-        List<GeneralFormValDTO> result;
+    public GetGeneralFormByCustomerIdResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd){
+        GeneralFormVal val;
+        GetGeneralFormByCustomerIdResponse response = new GetGeneralFormByCustomerIdResponse();
 
         if(cmd.getCustomerId() != null && cmd.getNamespaceId() !=null && cmd.getCommunityId() != null){
 
 
-            request = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
-           if(request != null){
-               return request.getSourceId();
-           }
-           return null;
+            val = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
+            if(val != null){
+                response.setFormOriginId(val.getFormOriginId());
+                response.setFormVersion(val.getFormVersion());
+                response.setSourceId(val.getSourceId());
+                return response;
+            }
+            return null;
 
 
         }else{

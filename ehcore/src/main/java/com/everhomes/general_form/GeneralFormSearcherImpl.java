@@ -272,12 +272,16 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                             fieldValue  = entry.getValue();
 
                             if(entry.getKey().equals("addressId")){
-                                fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+                                if(StringUtils.isNotBlank(entry.getValue())) {
+                                    fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+                                }
                                 break;
                             }
                             if(entry.getKey().equals("customerName")){
-                                EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
-                                fieldValue = customer.getName();
+                                if(StringUtils.isNotBlank(entry.getValue())) {
+                                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
+                                    fieldValue = customer.getName();
+                                }
                                 break;
                             }
                             if(entry.getKey().equals("text")) {
