@@ -152,6 +152,7 @@ public enum CoordinationLocks {
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
+    PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
 
 
