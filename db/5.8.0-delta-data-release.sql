@@ -976,6 +976,17 @@ UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
 -- REMARK: issue-null 清除微商城模块默认配置
 UPDATE eh_service_modules SET instance_config = NULL where id = 92100;
 
+
+-- AUTHOR: 黄鹏宇 2018年8月29日
+-- REMARK: 配置全量同步，一键转为资质客户白名单
+
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999944, NULL, 21100, 43980);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21100, 43960);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
+
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
