@@ -51,6 +51,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
@@ -252,6 +253,8 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdResponse;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
@@ -417,6 +420,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private RequisitionService requisitionService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -1260,6 +1266,17 @@ public class CustomerServiceImpl implements CustomerService {
             LOGGER.error("Insufficient privilege");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
+        }
+        GetGeneralFormByCustomerIdCommand cmd2 = new GetGeneralFormByCustomerIdCommand();
+        cmd2.setCommunityId(cmd.getCommunityId());
+        cmd2.setCustomerId(customer.getId());
+        cmd2.setModuleId(25000L);
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        GetGeneralFormByCustomerIdResponse response = requisitionService.getGeneralFormByCustomerId(cmd2);
+        if(response != null && response.getSourceId() != null && response.getSourceId() != 0){
+            LOGGER.error("this customer has a requisition , ", customer);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_HAS_CONTRACT,
+                    "enterprise customer has contract");
         }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(), customer.getId(), CustomerType.ENTERPRISE.getCode());
         for (Contract contract : contracts) {

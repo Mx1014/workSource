@@ -683,13 +683,19 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     }
 
+    @Override
+    public Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.deleteGeneralFormVal(cmd);
+    }
+
 
     @Override
     public Long deleteGeneralForm(PostGeneralFormValCommand cmd){
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
             //generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
-            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
-            generalFormSearcher.deleteById(cmd.getRequisitionId());
+            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getSourceId(), GeneralFormValRequestStatus.DELETE.getCode());
+            generalFormSearcher.deleteById(cmd.getSourceId());
             return cmd.getSourceId();
         }else{
             LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
