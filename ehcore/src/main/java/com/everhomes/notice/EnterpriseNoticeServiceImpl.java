@@ -628,8 +628,9 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             return;
         }
         enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.UN_STICK.getCode());
-        //最晚取消置顶的也要排序在前面
-        enterpriseNotice.setStickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        //最晚取消置顶的也要排序在前面所以更新createTime并且取消stickTime
+        enterpriseNotice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseNotice.setStickTime(null);
         enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
         enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
 	}
