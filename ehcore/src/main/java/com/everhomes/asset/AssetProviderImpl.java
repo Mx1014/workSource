@@ -2970,7 +2970,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<PaymentBillGroup> listAllBillGroups() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        //EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
         List<PaymentBillGroup> list = new ArrayList<>();
         context.select()
                 .from(t)

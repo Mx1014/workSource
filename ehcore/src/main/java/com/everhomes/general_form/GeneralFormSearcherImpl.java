@@ -339,9 +339,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(first.getSourceId());
                 if(request != null) {
                     if (request.getApprovalStatus() == null) {
-                        builder.field("approvalStatus", 0);
+                        builder.field("审批状态", 0);
                     } else {
-                        builder.field("approvalStatus", request.getApprovalStatus());
+                        builder.field("审批状态", request.getApprovalStatus());
                     }
                 }
 

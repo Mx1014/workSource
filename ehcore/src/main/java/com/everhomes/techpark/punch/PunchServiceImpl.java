@@ -204,7 +204,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -241,7 +240,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -2058,7 +2056,9 @@ public class PunchServiceImpl implements PunchService {
                 return 0L;
             }
         }
-
+        Collections.sort(approvalTimeIntervalsThisInterval, (o1, o2) -> {
+            return Long.compare(o1.getBeginTime().getTime(), o2.getBeginTime().getTime());
+        });
         if (onDutyLog.getPunchTime() != null) {
             // 上班有打卡、迟到
             return totalTimeIntervalGaps(approvalTimeIntervalsThisInterval, new Date(latestOnDutyTimeLong), onDutyLog.getPunchTime());
@@ -2096,7 +2096,9 @@ public class PunchServiceImpl implements PunchService {
                 return 0L;
             }
         }
-
+        Collections.sort(approvalTimeIntervalsThisInterval, (o1, o2) -> {
+            return Long.compare(o1.getBeginTime().getTime(), o2.getBeginTime().getTime());
+        });
         // 下班有打卡，早退
         if (offDutyLog.getPunchTime() != null) {
             return totalTimeIntervalGaps(approvalTimeIntervalsThisInterval, offDutyLog.getPunchTime(), new Date(earliestOffDutyTimeLong));
