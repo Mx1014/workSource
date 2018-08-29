@@ -3043,36 +3043,44 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			scopeId = context.getFamilyId();
 		}
 
+        List<LaunchPadCategoryDTO> categoryDtos = new ArrayList<>();
+
 		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategryByGroupId(cmd.getGroupId(), scopeCode, scopeId);
+
+		//1、有分类的--“全部”，按照分类查询。
+        //2、没有分类--“更多”，把所有的查询出来，有客户端判断。
 		if(categories != null && categories.size() > 0){
 			for (ItemServiceCategry categry: categories){
 
 				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, categry.getName());
 				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
-				LaunchPadCategoryDTO categoryDTO = new LaunchPadCategoryDTO();
-				categoryDTO.setAppDtos(appDtos);
-				categoryDTO.setName(categry.getName());
+				LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
+                categoryDto.setAppDtos(appDtos);
+                categoryDto.setName(categry.getName());
 				if(categry.getIconUri() != null){
 					String url = contentServerService.parserUri(categry.getIconUri(), ItemServiceCategry.class.getSimpleName(), categry.getId());
-					categoryDTO.setIconUrl(url);
+                    categoryDto.setIconUrl(url);
 				}
 
+                categoryDtos.add(categoryDto);
 			}
+
+			response.setCategoryDtos(categoryDtos);
 		}else {
 			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null);
-
 			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
-
-			LaunchPadCategoryDTO categoryDTO = new LaunchPadCategoryDTO();
-			categoryDTO.setAppDtos(appDtos);
-
+			LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
+            categoryDto.setAppDtos(appDtos);
+            categoryDtos.add(categoryDto);
 		}
 
 
 
 
 
-		return null;
+		response.setCategoryDtos(categoryDtos);
+
+		return response;
 	}
 
 
@@ -3084,6 +3092,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public void updateUserApps(UpdateUserAppsCommand cmd) {
+
+
 
 	}
 }
