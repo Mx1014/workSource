@@ -7,6 +7,11 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+/**
+ * <ul>
+ *     <li>dtos : 公司列表，请参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * </ul>
+ */
 public class ListUserOrganizationResponse {
 
     @ItemType(OrganizationDTO.class)

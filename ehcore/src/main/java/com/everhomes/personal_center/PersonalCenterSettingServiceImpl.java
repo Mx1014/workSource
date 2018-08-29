@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.personal_center;
 
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -14,6 +16,7 @@ import com.everhomes.rest.personal_center.ListPersonalCenterSettingsResponse;
 import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
 import com.everhomes.rest.personal_center.ListUserOrganizationResponse;
 import com.everhomes.rest.personal_center.PersonalCenterSettingDTO;
+import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +45,8 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     private UserService userService;
     @Autowired
     private OrganizationService organizationService;
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Autowired
     private PersonalCenterSettingProvider personalCenterSettingProvider;
@@ -91,7 +97,9 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         }
         List<PersonalCenterSettingDTO> dtoList = new ArrayList<>();
         list.stream().forEach((r) -> {
-             dtoList.add(ConvertHelper.convert(r,PersonalCenterSettingDTO.class));
+             PersonalCenterSettingDTO dto = ConvertHelper.convert(r,PersonalCenterSettingDTO.class);
+             dto.setIconUrl(this.parseUrl(dto.getIconUri(),cmd.getNamespaceId()));
+             dtoList.add(dto);
         });
         return response;
     }
@@ -105,13 +113,69 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         }
         List<PersonalCenterSettingDTO> dtoList = new ArrayList<>();
         list.stream().forEach((r) -> {
-            dtoList.add(ConvertHelper.convert(r,PersonalCenterSettingDTO.class));
+            PersonalCenterSettingDTO dto = ConvertHelper.convert(r,PersonalCenterSettingDTO.class);
+            dto.setIconUrl(this.parseUrl(dto.getIconUri(),cmd.getNamespaceId()));
+            dtoList.add(dto);
         });
         return response;
     }
 
     @Override
     public CreatePersonalCenterSettingsResponse createPersonalCenterSettings(CreatePersonalSettingCommand cmd) {
-        return null;
+        List<PersonalCenterSetting> list = this.personalCenterSettingProvider.queryActivePersonalCenterSettings(cmd.getNamespaceId());
+        if (!CollectionUtils.isEmpty(list)) {
+            list.stream().forEach(r -> {
+                r.setStatus(PersonalCenterSettingStatus.SAVING.getCode());
+                r.setUpdateTime(new Timestamp(new Date().getTime()));
+                r.setUpdateUid(UserContext.currentUserId());
+                this.personalCenterSettingProvider.updatePersonalCenterSetting(r);
+            });
+        }
+        List<PersonalCenterSettingDTO> dtoList = cmd.getSettings();
+        List<PersonalCenterSettingDTO> returnDtoList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(dtoList)) {
+            Integer version = getVersion(cmd.getNamespaceId());
+            dtoList.stream().forEach(r -> {
+                PersonalCenterSetting personalCenterSetting = ConvertHelper.convert(r, PersonalCenterSetting.class);
+                personalCenterSetting.setStatus(PersonalCenterSettingStatus.ACTIVE.getCode());
+                personalCenterSetting.setVersion(version);
+                personalCenterSetting.setCreateTime(new Timestamp(new Date().getTime()));
+                personalCenterSetting.setCreateUid(UserContext.currentUserId());
+                this.personalCenterSettingProvider.createPersonalCenterSetting(personalCenterSetting);
+                PersonalCenterSettingDTO returnDto = ConvertHelper.convert(personalCenterSetting, PersonalCenterSettingDTO.class);
+                returnDto.setIconUrl(parseUrl(returnDto.getIconUri(),cmd.getNamespaceId()));
+                returnDtoList.add(returnDto);
+            });
+        }
+        CreatePersonalCenterSettingsResponse response = new CreatePersonalCenterSettingsResponse();
+        response.setDtos(returnDtoList);
+        return response;
+    }
+
+    private Date getTime(int hour,int minute,int second){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY,hour);
+        calendar.set(Calendar.MINUTE,minute);
+        calendar.set(Calendar.SECOND,second);
+
+        return calendar.getTime();
+    }
+
+    private String parseUrl(String uri, Integer namespaceId) {
+       return this.contentServerService.parserUri(uri, EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+    }
+    /**
+     * 生成版本号
+     * 如:2018010101
+     * @param namespaceId
+     * @return
+     */
+    private Integer getVersion(Integer namespaceId){
+        Calendar calendar = Calendar.getInstance();
+        Integer version = calendar.get(Calendar.YEAR) * 100000 + (calendar.get(Calendar.MONTH) + 1) * 1000 + calendar.get(Calendar.DATE) * 10;
+        Timestamp dayStart = new Timestamp(getTime(0,0,0).getTime());
+        Timestamp dayEnd = new Timestamp(getTime(23,59,59).getTime());
+        int count = this.personalCenterSettingProvider.countPersonalCenterSettingVersion(namespaceId, dayStart, dayEnd);
+        return version+count+1;
     }
 }

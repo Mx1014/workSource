@@ -6,6 +6,28 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ *     <li>id:id</li>
+ *     <li>name: 个人中心配置项展示名称</li>
+ *     <li>functionName: 个人中心配置项所属功能名称，固定不变</li>
+ *     <li>status: 状态，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingStatus}</li>
+ *     <li>region: 展示区域，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingRegionType}</li>
+ *     <li>groupType: 分组：1 2 3 ....</li>
+ *     <li>sortNum: 展示顺序</li>
+ *     <li>type: 个人中心配置项所属类型，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingType}</li>
+ *     <li>iconUri:图标URI</li>
+ *     <li>iconUrl: 图标URL</li>
+ *     <li>showable: 是否展示，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>editable: 是否可编辑，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>version: 版本号</li>
+ *     <li>namespaceId: 域空间ID</li>
+ *     <li>createUid: 创建人ID</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>updateUid: 修改人ID</li>
+ *     <li>updateTime: 修改时间</li>
+ * </ul>
+ */
 public class PersonalCenterSettingDTO {
     private Byte     status;
     private Long     createUid;
@@ -19,14 +41,22 @@ public class PersonalCenterSettingDTO {
     private Timestamp     createTime;
     private Integer     namespaceId;
     private Long     updateUid;
-    private Long     version;
+    private Integer     version;
     private String     iconUri;
+    private String iconUrl;
     private Byte     showable;
     private Integer     sortNum;
     private Long     id;
 
+    public String getIconUrl() {
+        return iconUrl;
+    }
 
-	public String getFunctionName() {
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getFunctionName() {
 		return functionName;
 	}
 
@@ -136,16 +166,13 @@ public class PersonalCenterSettingDTO {
 		this.updateUid = updateUid;
 	}
 
-
-	public Long getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-
-	public void setVersion(Long version) {
+	public void setVersion(Integer version) {
 		this.version = version;
 	}
-
 
 	public String getIconUri() {
 		return iconUri;

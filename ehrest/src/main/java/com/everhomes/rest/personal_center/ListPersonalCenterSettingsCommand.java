@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPersonalCenterSettingsCommand {
     private Integer namespaceId;
-    private Long version;
+    private Integer version;
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -20,11 +20,11 @@ public class ListPersonalCenterSettingsCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Long getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

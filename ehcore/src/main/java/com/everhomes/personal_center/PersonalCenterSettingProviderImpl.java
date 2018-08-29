@@ -13,8 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -140,7 +144,7 @@ public class PersonalCenterSettingProviderImpl implements PersonalCenterSettingP
     }
 
     @Override
-    public List<PersonalCenterSetting> queryPersonalCenterSettingsByNamespaceIdAndVersion(Integer namespaceId, Long version) {
+    public List<PersonalCenterSetting> queryPersonalCenterSettingsByNamespaceIdAndVersion(Integer namespaceId, Integer version) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPersonalCenterSettings.class));
 
         SelectQuery<EhPersonalCenterSettingsRecord> query = context.selectQuery(Tables.EH_PERSONAL_CENTER_SETTINGS);
@@ -152,6 +156,16 @@ public class PersonalCenterSettingProviderImpl implements PersonalCenterSettingP
             return ConvertHelper.convert(r, PersonalCenterSetting.class);
         });
         return objs;
+    }
+
+    @Override
+    public int countPersonalCenterSettingVersion(Integer namespaceId, Timestamp dayStartTime, Timestamp dayEndTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectJoinStep<Record1<Integer>> step = context.select(DSL.countDistinct(Tables.EH_PERSONAL_CENTER_SETTINGS.VERSION)).from(Tables.EH_PERSONAL_CENTER_SETTINGS);
+        Condition condition = Tables.EH_PERSONAL_CENTER_SETTINGS.NAMESPACE_ID.eq(namespaceId);
+        condition.and(Tables.EH_PERSONAL_CENTER_SETTINGS.CREATE_TIME.ge(dayStartTime)).and(Tables.EH_PERSONAL_CENTER_SETTINGS.CREATE_TIME.le(dayEndTime));
+        return step.where(condition).fetchOneInto(Integer.class);
     }
 
     private void prepareObj(PersonalCenterSetting obj) {
