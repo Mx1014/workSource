@@ -64,3 +64,5 @@ CREATE TABLE `eh_launch_pad_configs` (
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `app_id`;
 
 ALTER TABLE `eh_item_service_categries` ADD COLUMN `group_id`  bigint(20) NULL;
+
+ALTER TABLE `eh_user_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `item_id`;
