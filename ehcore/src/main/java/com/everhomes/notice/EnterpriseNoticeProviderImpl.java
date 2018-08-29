@@ -123,6 +123,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 enterpriseNotice.setUpdateUid(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID));
                 enterpriseNotice.setUpdateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME));
                 enterpriseNotice.setOperatorName(r.getValue(Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME));
+                enterpriseNotice.setStickFlag(r.getValue(Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG));
                 return enterpriseNotice;
             });
         }
