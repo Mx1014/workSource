@@ -3,15 +3,14 @@ package com.everhomes.requisition;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.requisition.RequistionErrorCodes;
@@ -46,6 +45,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
     private DbProvider dbProvider;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -125,6 +125,27 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
     public Long saveGeneralFormVal(PostGeneralFormValCommand cmd){
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getCommunityId());
         return generalFormService.saveGeneralForm(cmd);
+    }
+
+    @Override
+    public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_DELETE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getCommunityId());
+        FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(PrivilegeConstants.REQUISITION_MODULE, null, null, "requisitionId", cmd.getSourceId(), true);
+        if(flowcase != null) {
+            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+            stepDTO.setFlowCaseId(flowcase.getId());
+            stepDTO.setFlowNodeId(flowcase.getCurrentNodeId());
+            stepDTO.setStepCount(flowcase.getStepCount());
+            stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+            stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
+            stepDTO.setOperatorId(UserContext.currentUserId());
+            flowService.processAutoStep(stepDTO);
+            DeleteFlowCaseCommand cmd2 = new DeleteFlowCaseCommand();
+            cmd2.setFlowCaseId(flowcase.getId());
+            flowService.deleteFlowCase(cmd2);
+
+        }
+        return generalFormService.deleteGeneralFormVal(cmd);
     }
 
     @Override

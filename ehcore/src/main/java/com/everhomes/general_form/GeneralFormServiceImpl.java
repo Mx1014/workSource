@@ -683,6 +683,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     }
 
+    @Override
+    public Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.deleteGeneralFormVal(cmd);
+    }
+
 
     @Override
     public Long deleteGeneralForm(PostGeneralFormValCommand cmd){
