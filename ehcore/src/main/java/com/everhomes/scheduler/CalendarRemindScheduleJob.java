@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CalendarRemindScheduleJob extends QuartzJobBean {
     public static final String CALENDAR_REMIND_SCHEDULE = "calendar-remind-";
-    public static String CRON_EXPRESSION = "0 0 9 * * ?";
+    public static String CRON_EXPRESSION = "0 0/5 * * * ? ";
 
     @Autowired
     private RemindService remindService;

@@ -13,7 +13,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.ChannelType;
@@ -64,7 +63,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRemindCategoryDefaultShares;
 import com.everhomes.server.schema.tables.pojos.EhRemindShares;
-import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -82,9 +80,7 @@ import org.springframework.util.CollectionUtils;
 import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -97,13 +93,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
 public class RemindServiceImpl implements RemindService, ApplicationListener<ContextRefreshedEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
     private static final String DEFAULT_CATEGORY_NAME = "默认分类";
     private static final int FETCH_SIZE = 2000;
     private static final int PLAN_DATE_CALCULATE_MAX_LOOP = 365;
@@ -1093,11 +1090,15 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     @Override
     public void remindSchedule() {
         this.coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode()).tryEnter(() -> {
-            LOGGER.info("remindSchedule begin");
-            LocalDateTime remindDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
-            Timestamp remindTime = new Timestamp(remindDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-
-            List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindTime, FETCH_SIZE);
+//            LocalDateTime remindDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
+//            Timestamp remindTime = new Timestamp(remindDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            //改成每次提醒6分钟前到现在的
+            Timestamp remindEndTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+            Timestamp remindStartTime = new Timestamp(DateHelper.currentGMTTime().getTime() - 6*60*1000L);
+            LOGGER.info("remindSchedule begin, reminder bigin time is {}  reminder end time is {}"
+                    , DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindStartTime.getTime()),
+                    DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindStartTime.getTime()));
+            List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
             long count = 0;
             boolean isProcess = !CollectionUtils.isEmpty(reminds);
             while (isProcess) {
@@ -1112,7 +1113,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                         LOGGER.error("remindSchedule error,remindId = {}", remind.getId(), e);
                     }
                 });
-                reminds = remindProvider.findUndoRemindsByRemindTime(remindTime, FETCH_SIZE);
+                reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
                 isProcess = !CollectionUtils.isEmpty(reminds);
             }
             LOGGER.info("remindSchedule end,remind count = {}", count);
