@@ -968,9 +968,13 @@ update eh_service_modules set action_type = 13 where id = 20100;
 update eh_service_module_apps set action_type = 13 where module_id = 20100;
 
 
--- AUTHOR: 马世亨 2018年8月29日
--- REMARK: 暂时屏蔽“ERP”、“人力资源”和“企业服务” add by yanjun 20180829
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 暂时屏蔽“ERP”、“人力资源”和“企业服务” add by yanjun 20180829
 UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
+
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 清除微商城模块默认配置
+UPDATE eh_service_modules SET instance_config = NULL where id = 92100;
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
