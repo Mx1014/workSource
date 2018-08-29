@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>feeModel: 费用清单模式 0 关闭 1 开启</li>
  *     <li>type: 样式</li>
  *     <li>url: url</li>
+ *     <li>appAgentSwitch: app代发开关 0 关闭 1 开启</li>
+ *     <li>bgAgentSwitch: 后台代发开关 0 关闭 1 开启</li>
  * </ul>
  */
 public class PmTaskInstanceConfig {
