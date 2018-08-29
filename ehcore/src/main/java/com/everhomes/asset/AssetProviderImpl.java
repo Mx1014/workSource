@@ -2988,7 +2988,9 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
                 .set(t.SWITCH,(byte)1)
-                .where(t.DATE_STR.lessThan(billDateStr))
+                //.where(t.DATE_STR.lessThan(billDateStr))
+                //修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
+                .where(t.DATE_STR_DUE.lessOrEqual(billDateStr))//DATE_STR_DUE：应收日期（出账单日）
                 .and(t.SWITCH.eq((byte)0))
                 .execute();
     }

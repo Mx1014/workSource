@@ -2706,7 +2706,8 @@ public class AssetServiceImpl implements AssetService {
         return new BigDecimal("0");
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
@@ -2723,7 +2724,7 @@ public class AssetServiceImpl implements AssetService {
 //                }
             	//修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
                 Calendar c = newClearedCalendar();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String billDateStr = sdf.format(c.getTime());
                 assetProvider.updateBillSwitchOnTime(billDateStr);
             });
