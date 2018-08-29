@@ -2706,8 +2706,8 @@ public class AssetServiceImpl implements AssetService {
         return new BigDecimal("0");
     }
 
-    //@Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
+    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
