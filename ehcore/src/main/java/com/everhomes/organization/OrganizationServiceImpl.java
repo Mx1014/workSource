@@ -7723,7 +7723,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationProvider.updateOrganizationMemberDetails(detail, member.getDetailId());
                 // 删除离职Log表中的记录
                 this.archivesService.deleteArchivesDismissEmployees(detail.getId(),detail.getOrganizationId());
+            } else {
+            	// 如果档案记录不存在，则再重新创建一个。 added by janson
+            	Long new_detail_id = getEnableDetailOfOrganizationMember(member, organizationId);
+            	member.setDetailId(new_detail_id);
+            	organizationProvider.updateOrganizationMember(member);
             }
+            
         }
 
         // 删除离职Log表中的记录
@@ -12664,7 +12670,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setOrganizationId(organizationId);
             organizationMember.setOperatorUid(user.getId());
             //绑定member表的detail_id
-//            organizationMember.setDetailId(new_detail_id);
+            organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
 
             /**创建user_organization的记录（仅当target为user且grouptype为企业时添加）**/
