@@ -58,7 +58,9 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.warehouse.WarehouseMaterialUnitDTO;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
@@ -582,5 +584,18 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(namespaceId);
 		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
 		return new RestResponse(detail);
+	}
+	
+	/**
+	 * <b>URL: /contract/getContractCategoryList</b>
+	 * <p>获取合同应用的列表</p>
+	 */
+	@RequestMapping("getContractCategoryList")
+	@RestReturn(value = ContractCategoryListDTO.class, collection = true)
+	public RestResponse getContractCategoryList(ContractCategoryCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		List<ContractCategoryListDTO> categoryList = contractService.getContractCategoryList(cmd);
+		return new RestResponse(categoryList);
 	}
 }
