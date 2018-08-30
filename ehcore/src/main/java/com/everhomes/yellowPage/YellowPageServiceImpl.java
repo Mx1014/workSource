@@ -1720,36 +1720,29 @@ public class YellowPageServiceImpl implements YellowPageService {
 		locator.setAnchor(cmd.getPageAnchor());
 		
 		//先获取主样式
-		List<ServiceAllianceCategories> entityResultList = listChildCategories(locator, namespaceId, cmd, displayDestination);
+		List<ServiceAllianceCategories> entityResultList = allianceStandardService.listChildCategories(locator,
+				cmd.getPageSize(), cmd.getOwnerType(), cmd.getOwnerId(), null, cmd.getParentId());
+		List<ServiceAllianceCategoryDTO> dtos = null;
+		if (null != entityResultList) {
+			dtos = entityResultList.stream().map(r -> {
+				ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
+				String locale = UserContext.current().getUser().getLocale();
+				String displayCategoryName = localeStringService.getLocalizedString(
+						ServiceAllianceLocalStringCode.CATEGORY_DISPLAY_SCOPE, String.valueOf(dto.getDisplayMode()), locale,
+						"");
+				dto.setDisplayModeName(displayCategoryName);
 
-		List<ServiceAllianceCategoryDTO> dtos = entityResultList.stream().map(r -> {
-			ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
-			String locale = UserContext.current().getUser().getLocale();
-			String displayCategoryName = localeStringService.getLocalizedString(
-					ServiceAllianceLocalStringCode.CATEGORY_DISPLAY_SCOPE, String.valueOf(dto.getDisplayMode()), locale,
-					"");
-			dto.setDisplayModeName(displayCategoryName);
-
-			ServiceAllianceSkipRule skipRule = yellowPageProvider.getCateorySkipRule(r.getId(), r.getNamespaceId());
-			dto.setSkipType(skipRule == null ? (byte) 0 : (byte) 1);
-			return dto;
-		}).collect(Collectors.toList());
+				ServiceAllianceSkipRule skipRule = yellowPageProvider.getCateorySkipRule(r.getId(), r.getNamespaceId());
+				dto.setSkipType(skipRule == null ? (byte) 0 : (byte) 1);
+				return dto;
+			}).collect(Collectors.toList());
+		}
 
 		// 组织返回数据
 		ListServiceAllianceCategoriesAdminResponse resp = new ListServiceAllianceCategoriesAdminResponse();
 		resp.setDtos(dtos);
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
-	}
-
-
-	private List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer namespaceId,
-			ListServiceAllianceCategoriesCommand cmd, List<Byte> displayDestination) {
-		
-		//先获取主样式
-		
-		
-		return null;
 	}
 
 	@Override
@@ -3734,7 +3727,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		List<AllianceTag> parentTags = allianceTagProvider.getAllianceParentTagList(locator, pageSize, namespaceId,
 				ownerType, ownerId, type);
 		if (CollectionUtils.isEmpty(parentTags)) {
-			return null;
+			return  new ArrayList<>(10);
 		}
 
 		List<AllianceTagGroupDTO> groups = new ArrayList<>(10);

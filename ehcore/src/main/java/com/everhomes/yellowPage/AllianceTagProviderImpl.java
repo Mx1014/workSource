@@ -89,7 +89,7 @@ public class AllianceTagProviderImpl implements AllianceTagProvider{
 				query.addConditions(tag.OWNER_ID.eq(ownerId));
 			}
 			
-			query.addConditions(tag.TYPE.eq(ownerId));
+			query.addConditions(tag.TYPE.eq(type));
 			query.addConditions(tag.PARENT_ID.eq(parentId));
 			return null;
 		});
