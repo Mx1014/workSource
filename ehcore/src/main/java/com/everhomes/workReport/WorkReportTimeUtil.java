@@ -133,18 +133,7 @@ public class WorkReportTimeUtil {
         LocalDate temp = null;
         switch (WorkReportType.fromCode(rType)) {
             case DAY:
-                if (setting.getStartType() == 0 && setting.getEndType() == 0)
-                    temp = current.toLocalDate();
-                else if (setting.getStartType() == 1 && setting.getEndType() == 1)
-                    temp = current.minusDays(1L).toLocalDate();
-                else {
-                    //  取时间点进行比较
-                    Integer currentTime = current.getHour() * 100 + current.getMinute();
-                    if (currentTime > endTime)
-                        temp = current.toLocalDate();
-                    else
-                        temp = current.minusDays(1L).toLocalDate();
-                }
+                temp = getDayReportTime(current, endTime, setting);
                 break;
             case WEEK:
                 if (setting.getStartType() == 0 && setting.getEndType() == 0)
@@ -191,6 +180,31 @@ public class WorkReportTimeUtil {
         }
         return Timestamp.valueOf(temp.atTime(0,0,0));
     }
+
+    private static LocalDate getDayReportTime(LocalDateTime current, Integer endTime, ReportValiditySettingDTO setting) {
+        LocalDate temp;
+        Integer currentTime = current.getHour() * 100 + current.getMinute();
+        if (setting.getStartType() == 0 && setting.getEndType() == 0) {
+            if (currentTime <= endTime)
+                temp = current.toLocalDate();
+            else
+                temp = current.plusDays(1).toLocalDate();
+        } else if (setting.getStartType() == 1 && setting.getEndType() == 1){
+            if (currentTime <= endTime)
+                temp = current.minusDays(1L).toLocalDate();
+            else
+                temp = current.toLocalDate();
+        }
+        else {
+            //  取时间点进行比较
+            if (currentTime > endTime)
+                temp = current.toLocalDate();
+            else
+                temp = current.minusDays(1L).toLocalDate();
+        }
+        return temp;
+    }
+
 
     /**
      * 将getTime()转化为 LocalDateTime
