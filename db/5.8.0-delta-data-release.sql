@@ -8,7 +8,7 @@
 -- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: jiarui  20180807
--- REMARK: 执行search 下脚本 enter_meter.sh
+-- REMARK: 执行search 下脚本 energy_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: 唐岑 2018年8月17日15:13:14

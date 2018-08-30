@@ -102,7 +102,6 @@ import com.everhomes.rest.varField.UpdateFieldItemsCommand;
 import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
-import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
@@ -320,7 +319,8 @@ public class FieldServiceImpl implements FieldService {
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
+                // for equipment inspection custom design
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==cmd.getInspectionCategoryId()));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
