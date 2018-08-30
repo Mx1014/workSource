@@ -1,6 +1,8 @@
 package com.everhomes.workReport;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configurations.ConfigurationsProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
@@ -20,6 +22,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import org.hibernate.engine.config.spi.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -55,6 +58,9 @@ public class WorkReportServiceImpl implements WorkReportService {
     private ContentServerService contentServerService;
 
     @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
     private WorkReportMessageService workReportMessageService;
 
     @Autowired
@@ -68,6 +74,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     private final String WORK_REPORT = "WORK_REPORT";
 
     private final String WORK_REPORT_VAL = "work_report_val";
+
+    private final String WORK_REPORT_ICON = "work.report.icon";
 
     @Override
     public WorkReportDTO addWorkReport(AddWorkReportCommand cmd) {
@@ -84,6 +92,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         report.setModuleType(cmd.getModuleType());
         report.setOperatorUserId(userId);
         report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
+        report.setIconUri(configurationProvider.getValue(WORK_REPORT_ICON, ""));
 
         //  add it with the initial scope.
         dbProvider.execute((TransactionStatus status) -> {
