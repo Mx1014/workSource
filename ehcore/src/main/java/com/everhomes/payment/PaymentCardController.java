@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.payment.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,33 +17,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.payment.ApplyCardCommand;
-import com.everhomes.rest.payment.CardIssuerDTO;
-import com.everhomes.rest.payment.NotifyEntityCommand;
-import com.everhomes.rest.payment.NotifyEntityDTO;
-import com.everhomes.rest.payment.SetCardPasswordCommand;
-import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
-import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
-import com.everhomes.rest.payment.ListCardIssuerCommand;
-import com.everhomes.rest.payment.ResetCardPasswordCommand;
-import com.everhomes.rest.payment.GetCardPaidResultCommand;
-import com.everhomes.rest.payment.GetCardPaidResultDTO;
-import com.everhomes.rest.payment.ListCardInfoCommand;
-import com.everhomes.rest.payment.CardInfoDTO;
-import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
-import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
-import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
-import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
-import com.everhomes.rest.payment.ListCardTransactionsCommand;
-import com.everhomes.rest.payment.ListCardTransactionsResponse;
-import com.everhomes.rest.payment.RechargeCardCommand;
-import com.everhomes.rest.payment.SearchCardUsersCommand;
-import com.everhomes.rest.payment.SearchCardUsersResponse;
-import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
-import com.everhomes.rest.payment.SearchCardTransactionsCommand;
-import com.everhomes.rest.payment.SearchCardTransactionsResponse;
-import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.util.RequireAuthentication;
 
 
@@ -216,6 +190,20 @@ public class PaymentCardController extends ControllerBase{
     public RestResponse listCardTransactions(ListCardTransactionsCommand cmd) {
     	ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);
         RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /payment/freezeCard</b>
+     * <p>挂失或解挂 账户</p>
+     */
+    @RequestMapping("listCardTransactions")
+    @RestReturn(value=String.class)
+    public RestResponse freezeCard(FreezeCardCommand cmd) {
+       // ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
