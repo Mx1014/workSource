@@ -68,5 +68,11 @@ public interface LaunchPadProvider {
 
     void deletePreviewVersionCategories(Integer namespaceId);
 
-    List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, Byte scopeCode, Long scopeId, String categoryName);
+    List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, Byte scopeCode, Long scopeId, String categoryName, Byte displayFlag);
+
+    void deleteUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId);
+
+    List<UserLaunchPadItem> listUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId);
+
+    List<LaunchPadItem> listLaunchPadItemsByIds(List<Long> itemIds);
 }

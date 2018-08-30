@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>scopeCode: item可见范围类型，此参数用于校验item，参考{@link com.everhomes.rest.common.ScopeType}</li>
- *     <li>scopeId: 看见范围具体Id，此参数用于校验item，0为全部</li>
+ *     <li>groupId: 组件Id</li>
+ *     <li>appContext: 上下文信息，参考{@link AppContext}</li>
  *     <li>itemIds: 按照顺序排列顺序传来itemId</li>
  * </ul>
  */

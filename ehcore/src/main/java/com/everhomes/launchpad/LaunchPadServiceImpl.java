@@ -3029,19 +3029,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		ListAllAppsResponse response = new ListAllAppsResponse();
 
 
-		Byte scopeCode = 0;
-		Long scopeId = 0L;
-		AppContext context = cmd.getAppContext();
-		if(context.getCommunityId() != null){
-			scopeCode = ScopeType.COMMUNITY.getCode();
-			scopeId = context.getCommunityId();
-		}else if(context.getOrganizationId() != null){
-			scopeCode = ScopeType.ORGANIZATION.getCode();
-			scopeId = context.getOrganizationId();
-		}else if(context.getFamilyId() != null){
-			scopeCode = ScopeType.RESIDENTIAL.getCode();
-			scopeId = context.getFamilyId();
-		}
+		Byte scopeCode = getScopeCode(cmd.getAppContext());
+		String ownerType = getOwnerType(cmd.getAppContext());
+		Long scopeId = getScopeId(cmd.getAppContext());
 
         List<LaunchPadCategoryDTO> categoryDtos = new ArrayList<>();
 
@@ -3052,7 +3042,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		if(categories != null && categories.size() > 0){
 			for (ItemServiceCategry categry: categories){
 
-				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, categry.getName());
+				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, categry.getName(), null);
 				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 				LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
                 categoryDto.setAppDtos(appDtos);
@@ -3067,32 +3057,267 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 			response.setCategoryDtos(categoryDtos);
 		}else {
-			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null);
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null, null);
 			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 			LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
             categoryDto.setAppDtos(appDtos);
             categoryDtos.add(categoryDto);
 		}
 
+		Long userId = UserContext.currentUserId();
 
+		List<AppDTO> appDtos = new ArrayList<>();
 
+		if(userId != null || userId != 0){
+			//查询用户自己编辑的广场信息
+			List<UserLaunchPadItem> userItems = launchPadProvider.listUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, scopeId);
+			appDtos = userItemToAppDto(userItems);
 
+		}
+
+		if(appDtos == null || appDtos.size() == 0){
+			//默认的
+			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null, ItemDisplayFlag.DISPLAY.getCode());
+			appDtos = itemToAppDto(defaultItems);
+		}
 
 		response.setCategoryDtos(categoryDtos);
+		response.setDefaultDtos(appDtos);
 
 		return response;
 	}
 
 
+	private Byte getScopeCode(AppContext context){
+		Byte scopeCode = 0;
+		if(context.getCommunityId() != null){
+			scopeCode = ScopeType.COMMUNITY.getCode();
+		}else if(context.getOrganizationId() != null){
+			scopeCode = ScopeType.ORGANIZATION.getCode();
+		}else if(context.getFamilyId() != null){
+			scopeCode = ScopeType.RESIDENTIAL.getCode();
+		}
+
+		return scopeCode;
+	}
+
+
+	private String getOwnerType(AppContext context){
+		String ownerType = null;
+		if(context.getCommunityId() != null){
+			ownerType =  EntityType.COMMUNITY.getCode();
+		}else if(context.getOrganizationId() != null){
+			ownerType = EntityType.ORGANIZATIONS.getCode();
+		}else if(context.getFamilyId() != null){
+			ownerType =  EntityType.COMMUNITY.getCode();
+		}
+
+		return ownerType;
+	}
+
+	private Long getScopeId(AppContext context){
+		Long scopeId = 0L;
+		if(context.getCommunityId() != null){
+			scopeId = context.getCommunityId();
+		}else if(context.getOrganizationId() != null){
+			scopeId = context.getOrganizationId();
+		}else if(context.getFamilyId() != null){
+			scopeId = context.getFamilyId();
+		}
+
+		return scopeId;
+	}
+
 	private List<AppDTO> itemToAppDto(List<LaunchPadItem> items){
 
+		if(items == null || items.size() == 0){
+			return null;
+		}
 
-		return null;
+		Set<Long> appIds = new HashSet<>();
+		for(LaunchPadItem item: items){
+			appIds.add(item.getAppId());
+		}
+
+		Map<Long, ServiceModuleApp> appMap = getAppMap(new ArrayList<>(appIds));
+		Map<Long, ServiceModule> moduleMap = getModuleMap(new ArrayList<>(appIds));
+
+
+		List<AppDTO> dtos = new ArrayList<>();
+
+		for(LaunchPadItem item: items){
+			AppDTO dto = ConvertHelper.convert(item, AppDTO.class);
+			ServiceModuleApp app = appMap.get(item.getAppId());
+
+			if(app != null){
+				dto.setModuleId(app.getModuleId());
+				ServiceModule serviceModule = moduleMap.get(app.getModuleId());
+				if(serviceModule != null){
+					dto.setClientHandlerType(serviceModule.getClientHandlerType());
+				}
+
+				String actionData = refreshActionData(item.getActionData());
+
+				String path = "/index";
+				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
+					path = "/more";
+				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+					path = "/all";
+				}
+
+				//填充路由信息
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path);
+				dto.setRouterPath(routerInfo.getPath());
+				dto.setRouterQuery(routerInfo.getQuery());
+			}
+
+			dto.setName(item.getItemLabel());
+			dto.setItemId(item.getId());
+
+			if(!org.springframework.util.StringUtils.isEmpty(item.getIconUri())){
+				String url = contentServerService.parserUri(item.getIconUri(), LaunchPadItem.class.getSimpleName(), item.getId());
+				dto.setIconUrl(url);
+			}
+
+			dtos.add(dto);
+		}
+
+		return dtos;
+	}
+
+
+	private List<AppDTO> userItemToAppDto(List<UserLaunchPadItem> items){
+		if(items == null || items.size() == 0){
+			return null;
+		}
+
+		Set<Long> itemIds = new HashSet<>();
+		for(UserLaunchPadItem item: items){
+			itemIds.add(item.getItemId());
+		}
+
+		List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(new ArrayList<>(itemIds));
+
+		List<AppDTO> dtos = itemToAppDto(launchPadItems);
+
+		return dtos;
+	}
+
+
+	private Map<Long, ServiceModuleApp> getAppMap(List<Long> appIds){
+
+		Map<Long, ServiceModuleApp> appMap = new HashMap<>();
+
+		if(appIds == null || appIds.size() == 0){
+			return appMap;
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppsByOriginIds(UserContext.getCurrentNamespaceId(), appIds);
+
+		if(apps == null || apps.size() == 0){
+			return appMap;
+		}
+
+		for(ServiceModuleApp app: apps){
+			appMap.put(app.getOriginId(), app);
+		}
+
+		return appMap;
+	}
+
+
+	private Map<Long, ServiceModule> getModuleMap(List<Long> appIds){
+
+		Map<Long, ServiceModule> moduleMap = new HashMap<>();
+
+		if(appIds == null || appIds.size() == 0){
+			return moduleMap;
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppsByOriginIds(UserContext.getCurrentNamespaceId(), appIds);
+
+		if(apps == null || apps.size() == 0){
+			return moduleMap;
+		}
+
+		Set<Long> moduleIds = new HashSet<>();
+
+		for(ServiceModuleApp app: apps){
+			moduleIds.add(app.getModuleId());
+		}
+
+		if(moduleIds.size() == 0){
+			return moduleMap;
+		}
+
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(new ArrayList<>(moduleIds));
+
+
+		if(serviceModules == null || serviceModules.size() == 0){
+			return moduleMap;
+		}
+
+		for(ServiceModule module: serviceModules){
+			moduleMap.put(module.getId(), module);
+		}
+
+		return moduleMap;
 	}
 
 	@Override
 	public void updateUserApps(UpdateUserAppsCommand cmd) {
 
+		if(cmd.getGroupId() == null || cmd.getItemIds() == null || cmd.getItemIds().size() == 0){
+			LOGGER.error("Invalid paramter, cmd = ", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter, cmd = " + cmd);
+		}
+
+		Long userId = UserContext.currentUserId();
+		String ownerType = getOwnerType(cmd.getAppContext());
+		Long ownerId = getScopeId(cmd.getAppContext());
+
+
+		dbProvider.execute((transactionStatus -> {
+
+			//删除已有的自定义配置
+			launchPadProvider.deleteUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, ownerId);
+
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(cmd.getItemIds());
+
+			if(launchPadItems == null || launchPadItems.size() == 0){
+				LOGGER.error("launchPadItem not found.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"launchPadItem not found.");
+			}
+
+
+			Integer order = 1;
+			for (LaunchPadItem item: launchPadItems){
+
+				if(!cmd.getGroupId().equals(item.getGroupId())){
+					LOGGER.error("launchPadItem not match. item.groupId=" + item.getGroupId() + " cmd.groupId=" + cmd.getGroupId());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"launchPadItem not match. item.groupId=" + item.getGroupId() + " cmd.groupId=" + cmd.getGroupId());
+				}
+
+				UserLaunchPadItem userItem = new UserLaunchPadItem();
+				userItem.setItemName(item.getItemName());
+				userItem.setItemId(item.getId());
+				userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+				userItem.setDefaultOrder(order);
+				userItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+				userItem.setOwnerId(ownerId);
+				userItem.setOwnerType(ownerType);
+				userItem.setSceneType(item.getSceneType());
+				userItem.setUserId(userId);
+				userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				launchPadProvider.createUserLaunchPadItem(userItem);
+				order = order + 1;
+			}
+			return null;
+		}));
 
 
 	}
