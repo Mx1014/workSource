@@ -11613,12 +11613,13 @@ public class PunchServiceImpl implements PunchService {
  
     private OrganizationMember findOrganizationMemberByTargetId(List<OrganizationMember> members,
 			Long userId) {
-    	if(null == members || null == userId)
-		for(OrganizationMember member : members){
-			if(userId.equals(member.getTargetId())){
-				return member;
+    	if(null != members && null != userId){
+			for(OrganizationMember member : members){
+				if(userId.equals(member.getTargetId())){
+					return member;
+				}
 			}
-		}
+    	}
 		return null;
 	}
 
