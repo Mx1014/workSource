@@ -2067,6 +2067,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
         List<PaymentChargingItem> items = context.selectFrom(t)
+        		.where(t.NAMESPACE_ID.isNull().or(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))) //物业缴费V6.0 收费项配置可手动新增
+        		.and(t.OWNER_ID.isNull().or(t.OWNER_ID.eq(ownerId))) //物业缴费V6.0 收费项配置可手动新增
                 .fetchInto(PaymentChargingItem.class);
 
         List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
