@@ -6645,6 +6645,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					Community community = communityProvider.findCommunityById(family.getCommunityId());
 					if(community !=null){
 						AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
+                        addressSiteDTO.setCommunityId(community.getId());
 						addressSiteDTO.setCommunityName(community.getName());
 						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
 								+ community.getAreaName() + community.getAddress());
