@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.app.AppService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
@@ -9,14 +10,12 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormTemplate;
-import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
@@ -28,6 +27,10 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
+
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+
 import com.everhomes.rest.requisition.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
@@ -74,6 +77,8 @@ public class RequisitionServiceImpl implements RequisitionService{
     private GeneralFormProvider generalFormProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -334,13 +339,20 @@ public class RequisitionServiceImpl implements RequisitionService{
 
 
             val = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
+
+            ListServiceModuleAppsCommand cmd2 = new ListServiceModuleAppsCommand();
+            cmd2.setModuleId(cmd.getModuleId());
+            cmd2.setNamespaceId(cmd.getNamespaceId());
+            ListServiceModuleAppsResponse appsResponse = portalService.listServiceModuleApps(cmd2);
             if(val != null){
                 response.setFormOriginId(val.getFormOriginId());
                 response.setFormVersion(val.getFormVersion());
                 response.setSourceId(val.getSourceId());
+                response.setAppId(appsResponse.getServiceModuleApps().iterator().next().getId());
                 return response;
             }
             return null;
+
 
 
         }else{
