@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>groupId: 组件Id</li>
- *     <li>context: 上下文信息，参考{@link AppContext}</li>
+ *     <li>context: 上下文信息，其中communityId必须传。参考{@link AppContext}</li>
  *     <li>itemIds: 按照顺序排列顺序传来itemId</li>
  * </ul>
  */
