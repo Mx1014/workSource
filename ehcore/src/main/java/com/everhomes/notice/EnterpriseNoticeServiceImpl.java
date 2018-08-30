@@ -611,9 +611,6 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 	@Override
 	public void stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd) {
 		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
-        if (enterpriseNotice == null || EnterpriseNoticeStatus.INACTIVE == EnterpriseNoticeStatus.fromCode(enterpriseNotice.getStatus())) {
-            return;
-        }
         enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.STICK.getCode());
         enterpriseNotice.setStickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
@@ -624,9 +621,6 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 	public void unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd) {
 
 		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
-        if (enterpriseNotice == null || EnterpriseNoticeStatus.INACTIVE == EnterpriseNoticeStatus.fromCode(enterpriseNotice.getStatus())) {
-            return;
-        }
         enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.UN_STICK.getCode());
         //最晚取消置顶的也要排序在前面所以更新createTime并且取消stickTime
         enterpriseNotice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
