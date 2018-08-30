@@ -3,20 +3,21 @@ package com.everhomes.rest.community.admin;
 
 /**
  * <ul>审核类型
- * <li>NOT_MANUAL(0): 非人工审核(邮箱认证或通讯录导入)</li>
  * <li>MANUAL(1): 人工审核</li>
+ * <li>EMAIL(2): 邮箱审核</li>
+ * <li>IMPORT(3): 通讯录导入</li>
  * </ul>
  */
 public enum OperateType {
-    NOT_MANUAL((byte)0), MANUAL((byte)1);
+    MANUAL((byte)1), EMAIL((byte)2), IMPORT((byte)3);
 
-    private byte code;
+    private Byte code;
 
-    private OperateType(byte code) {
+    private OperateType(Byte code) {
         this.code = code;
     }
     
-    public byte getCode() {
+    public Byte getCode() {
         return this.code;
     }
     
