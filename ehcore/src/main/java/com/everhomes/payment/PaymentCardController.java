@@ -353,6 +353,36 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
 
+    /**
+     * <b>URL: /payment/getHotline</b>
+     * <p>
+     * 获取服务热线
+     * </p>
+     */
+    @RequestMapping("getHotline")
+    @RestReturn(value = PaymentCardHotlineDTO.class)
+    public RestResponse getHotline( GetHotlineCommand cmd) {
+        PaymentCardHotlineDTO dto = paymentCardService.getHotline(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-    
+    /**
+     * <b>URL: /payment/updateHotline</b>
+     * <p>
+     * 更新服务热线
+     * </p>
+     */
+    @RequestMapping("updateHotline")
+    @RestReturn(value = String.class)
+    public RestResponse updateHotline( UpdateHotlineCommand cmd) {
+        paymentCardService.updateHotline(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

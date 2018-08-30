@@ -7,6 +7,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 
 public interface PaymentCardProvider {
 	List<PaymentCardIssuerCommunity> listPaymentCardIssuerCommunity(Long ownerId,String ownerType);
+
+	void updatePaymentCardIssuerCommunity(PaymentCardIssuerCommunity community);
 	
 	List<PaymentCard> listPaymentCard(Long ownerId,String ownerType,Long userId);
 	

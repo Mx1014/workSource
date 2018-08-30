@@ -19,6 +19,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.payment.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -49,42 +50,6 @@ import com.everhomes.payment.taotaogu.NotifyEntity;
 import com.everhomes.payment.taotaogu.TaotaoguTokenCacheItem;
 import com.everhomes.payment.taotaogu.TaotaoguVendorConstant;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.payment.ApplyCardCommand;
-import com.everhomes.rest.payment.CardInfoDTO;
-import com.everhomes.rest.payment.CardIssuerDTO;
-import com.everhomes.rest.payment.CardOrderStatus;
-import com.everhomes.rest.payment.CardRechargeOrderDTO;
-import com.everhomes.rest.payment.CardRechargeStatus;
-import com.everhomes.rest.payment.CardTransactionDTO;
-import com.everhomes.rest.payment.CardTransactionOfMonth;
-import com.everhomes.rest.payment.CardTransactionStatus;
-import com.everhomes.rest.payment.CardUserDTO;
-import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
-import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
-import com.everhomes.rest.payment.GetCardPaidResultCommand;
-import com.everhomes.rest.payment.GetCardPaidResultDTO;
-import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
-import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
-import com.everhomes.rest.payment.ListCardInfoCommand;
-import com.everhomes.rest.payment.ListCardIssuerCommand;
-import com.everhomes.rest.payment.ListCardTransactionsCommand;
-import com.everhomes.rest.payment.ListCardTransactionsResponse;
-import com.everhomes.rest.payment.NotifyEntityCommand;
-import com.everhomes.rest.payment.NotifyEntityDTO;
-import com.everhomes.rest.payment.PaidResultStatus;
-import com.everhomes.rest.payment.PaymentCardErrorCode;
-import com.everhomes.rest.payment.RechargeCardCommand;
-import com.everhomes.rest.payment.ResetCardPasswordCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
-import com.everhomes.rest.payment.SearchCardTransactionsCommand;
-import com.everhomes.rest.payment.SearchCardTransactionsResponse;
-import com.everhomes.rest.payment.SearchCardUsersCommand;
-import com.everhomes.rest.payment.SearchCardUsersResponse;
-import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
-import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
-import com.everhomes.rest.payment.SetCardPasswordCommand;
-import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -941,5 +906,26 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
 		cmd2.setBizOrderNum(cmd.getBizOrderNum());
 		paymentCardOrderEmbeddedV2Handler.paySuccess(cmd2);
+	}
+
+	@Override
+	public PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd) {
+		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
+		List<PaymentCardIssuerCommunity> hotlines = paymentCardProvider.listPaymentCardIssuerCommunity(cmd.getOwnerId(), cmd.getOwnerType());
+		if (hotlines == null || hotlines.size() == 0)
+			return null;
+		PaymentCardHotlineDTO dto = ConvertHelper.convert(hotlines.get(0),PaymentCardHotlineDTO.class);
+		return dto;
+	}
+
+	@Override
+	public void updateHotline(UpdateHotlineCommand cmd) {
+		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
+		List<PaymentCardIssuerCommunity> hotlines = paymentCardProvider.listPaymentCardIssuerCommunity(cmd.getOwnerId(), cmd.getOwnerType());
+		if (hotlines == null || hotlines.size() == 0)
+			return ;
+		PaymentCardIssuerCommunity hotline = hotlines.get(0);
+		hotline.setHotline(cmd.getHotline());
+		paymentCardProvider.updatePaymentCardIssuerCommunity(hotline);
 	}
 }

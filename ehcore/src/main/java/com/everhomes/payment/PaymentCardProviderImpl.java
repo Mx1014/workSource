@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.DateHelper;
@@ -22,10 +23,6 @@ import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhPaymentCardIssuersDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentCardTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentCardsDao;
 import com.everhomes.util.ConvertHelper;
 
 
@@ -53,8 +50,17 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         		r -> ConvertHelper.convert(r, PaymentCardIssuerCommunity.class));
         return result;
     }
-    
-    @Override
+
+	@Override
+	public void updatePaymentCardIssuerCommunity(PaymentCardIssuerCommunity community) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentCardIssuerCommunitiesDao dao = new EhPaymentCardIssuerCommunitiesDao(context.configuration());
+
+		dao.update(community);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentCardIssuerCommunities.class, null);
+	}
+
+	@Override
     public List<PaymentCardIssuer> listPaymentCardIssuer(Long ownerId,String ownerType){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
     	SelectJoinStep<Record> query = context.select(Tables.EH_PAYMENT_CARD_ISSUERS.fields()).from(Tables.EH_PAYMENT_CARD_ISSUERS);
