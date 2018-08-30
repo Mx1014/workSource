@@ -153,6 +153,7 @@ public enum CoordinationLocks {
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
     PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
+    PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
 
 
