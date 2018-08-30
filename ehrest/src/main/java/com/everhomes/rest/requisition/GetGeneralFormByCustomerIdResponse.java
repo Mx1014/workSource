@@ -7,6 +7,7 @@ public class GetGeneralFormByCustomerIdResponse {
     private Long formOriginId;
     private Long formVersion;
     private Long sourceId;
+    private Long appId;
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -30,6 +31,14 @@ public class GetGeneralFormByCustomerIdResponse {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     @Override

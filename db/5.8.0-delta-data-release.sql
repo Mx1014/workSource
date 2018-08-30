@@ -985,6 +985,7 @@ INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `communi
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21100, 43960);
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (250001003, null, '删除请示', '删除请示', NULL);
 -- END
 
 -- --------------------- SECTION END ---------------------------------------------------------
