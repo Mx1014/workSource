@@ -1,13 +1,15 @@
 package com.everhomes.workReport;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.workReport.WorkReportDetailsActionData;
-import com.everhomes.rest.workReport.WorkReportNotificationTemplateCode;
+import com.everhomes.rest.workReport.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -15,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class WorkReportMessageServiceImpl implements WorkReportMessageService {
@@ -49,7 +48,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
+        model.put("reportTime", WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -74,7 +73,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
+        model.put("reportTime", WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -108,7 +107,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         // 汇报名称
         String reportName = report.getReportName();
         // 汇报时间
-        String reportTime = WorkReportUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime());
+        String reportTime = WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime());
 
         WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(parentCommentId);
         if (commentatorId.longValue() == applierId.longValue()) {
@@ -198,11 +197,29 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Scheduled(cron = "0 30 * * * ?")
     @Override
-    public void workReportAuMessage(){
+    public void workReportAuMessage() {
 
-        List<WorkReport> auReports = workReportProvider.listAuWorkReports();
+       /* String time = WorkReportTimeUtil.currenHHmmTime();
+        List<WorkReport> auReports = new ArrayList<>();
+        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
+            query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
+            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
+            return query;
+        });
+        for (WorkReport r : results) {
+            ReportMsgSettingDTO dto = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
+            if (time.equals(dto.getMsgTime()))
+                auReports.add(r);
+        }
+        if (auReports.size() == 0)
+            return;
 
+        for (WorkReport au : auReports) {
+
+        }
+*/
     }
+
 
     private void sendMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
 

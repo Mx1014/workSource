@@ -1,6 +1,9 @@
 package com.everhomes.workReport;
 
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+
 import java.util.List;
 
 public interface WorkReportProvider {
@@ -17,7 +20,7 @@ public interface WorkReportProvider {
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer pageSize, Long organizationId, String ownerType, Long moduleId, Byte status);
 
-    List<WorkReport> listAuWorkReports();
+    List<WorkReport> queryWorkReports(ListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 
     void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
 

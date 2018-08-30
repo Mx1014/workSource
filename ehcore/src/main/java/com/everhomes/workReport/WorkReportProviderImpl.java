@@ -4,6 +4,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.ReportAuthorMsgType;
@@ -127,18 +129,13 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
-    public List<WorkReport> listAuWorkReports(){
-        List<WorkReport> results = new ArrayList<>();
-
+    public List<WorkReport> queryWorkReports(ListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
-        query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
-        query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
-
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, WorkReport.class));
+        queryBuilderCallback.buildCondition(locator, query);
+        List<WorkReport> results = query.fetchInto(WorkReport.class);
+        if (null == results || results.size() == 0)
             return null;
-        });
         return results;
     }
 

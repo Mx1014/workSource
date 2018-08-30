@@ -8,7 +8,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
-public class WorkReportUtil {
+public class WorkReportTimeUtil {
 
     /**
      * 根据汇报时间与设定得到具体时间
@@ -218,8 +218,16 @@ public class WorkReportUtil {
     /**
      * 格式化时间
      */
-    public static String formatTime(LocalDateTime endTime){
+    public static String formatTime(LocalDateTime time){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M月d日 HH:mm");
-        return formatter.format(endTime);
+        return formatter.format(time);
+    }
+
+    /**
+     * 当前时间点(HH:mm)
+     */
+    public static String currenHHmmTime(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        return formatter.format(LocalDateTime.now());
     }
 }
