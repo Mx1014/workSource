@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class PaymentCardController extends ControllerBase{
 
 	@Autowired
 	private PaymentCardService paymentCardService;
+	@Autowired
+    private PaymentCardPayService paymentCardPayService;
 
 	/**
      * <b>URL: /payment/listCardInfo</b>
@@ -317,5 +320,39 @@ public class PaymentCardController extends ControllerBase{
     public void exportCardTransactions(SearchCardTransactionsCommand cmd,HttpServletResponse response) {
     	paymentCardService.exportCardTransactions(cmd, response);
     }
+
+    /**
+     * <b>URL: /payment/updateAccountSetting</b>
+     * <p>
+     * 更新支付账户设定
+     * </p>
+     */
+    @RequestMapping("updateAccountSetting")
+    @RestReturn(value = String.class)
+    public RestResponse updateAccountSetting( UpdateAccountSettingCommand cmd) {
+        paymentCardPayService.updateAccountSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /payment/getAccountSetting</b>
+     * <p>
+     * 获取支付账户设定
+     * </p>
+     */
+    @RequestMapping("getAccountSetting")
+    @RestReturn(value = ListBizPayeeAccountDTO.class)
+    public RestResponse getAccountSetting( GetAccountSettingCommand cmd) {
+        ListBizPayeeAccountDTO dto = paymentCardPayService.getAccountSetting(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
     
 }

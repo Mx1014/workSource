@@ -11,3 +11,5 @@ CREATE TABLE `eh_payment_card_accounts` (
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
