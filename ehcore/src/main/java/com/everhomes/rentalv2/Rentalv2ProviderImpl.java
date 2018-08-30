@@ -1544,7 +1544,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
 		step.where(condition);
 		List<RentalResourcePic> result = step
-				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourcePic.class);
 				});
