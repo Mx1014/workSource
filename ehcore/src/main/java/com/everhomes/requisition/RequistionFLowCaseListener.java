@@ -202,6 +202,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         FlowCaseEntity e;
 
         forLoop:for(GeneralFormVal val : request){
+
             e = new FlowCaseEntity();
             switch(val.getFieldType()){
                 case "SINGLE_LINE_TEXT":
@@ -267,12 +268,13 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
                 JsonArray urlJsons = jo.getAsJsonArray("urls");
                 if(urlJsons != null && urlJsons.size() > 0){
-                    caseFileDTO.setUrl(urlJsons.get(0).getAsString());
+                    fieldValue = urlJsons.get(0).getAsString();
                 }else{
                     caseFileDTO.setUrl("");
                 }
 
-                fieldValue = StringHelper.toJsonString(caseFileDTO);
+
+
                 e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
@@ -317,7 +319,13 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     e2.setEntityType(FlowCaseEntityType.LIST.getCode());
                     break;
             }
-            String fieldValue = arr.getAsJsonObject().get("fieldValue").getAsJsonObject().toString();
+            String fieldValue;
+            JsonElement jsonElement = arr.getAsJsonObject().get("fieldValue");
+            if(jsonElement != null) {
+                fieldValue = jsonElement.getAsJsonObject().toString();
+            }else{
+                fieldValue = "";
+            }
 
             ObjectMapper mapper = new ObjectMapper();
             JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
@@ -343,23 +351,41 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 }
                 e2.setValue(fieldValue);
             } catch (IOException ex) {
-                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                JsonArray urlJsons = jo.getAsJsonArray("urls");
-                if(urlJsons != null && urlJsons.size() > 0){
-                    caseFileDTO.setUrl(urlJsons.get(0).getAsString());
-                }else{
-                    caseFileDTO.setUrl("");
-                }
+                try {
+                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                    JsonArray urlJsons = jo.getAsJsonArray("urls");
+                    if (urlJsons != null && urlJsons.size() > 0) {
+                        fieldValue = urlJsons.get(0).getAsString();
+                    } else {
+                        caseFileDTO.setUrl("");
+                    }
 
-                fieldValue = StringHelper.toJsonString(caseFileDTO);
-                e2.setValue(fieldValue);
+
+
+                    e2.setValue(fieldValue);
+                }catch (Exception e){
+                    e2.setValue(fieldValue);
+                }
             }
             e2.setKey(arr.getAsJsonObject().get("fieldName").getAsString());
             subEntities.add(e2);
         }
         return subEntities;
     }
+
+
+
+/*    public static void main(String[] args){
+        String str = "{\"urls\":[\"http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvMVpqSXlPVFF4T0RRMFkyTXlNV016TW1NM05qVmlaVFkwT1dJMk1qUTNZdw?token=VZvdfkggHypKc8H05lAERNNReYYiZFwwQWJFpnk18LGs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVjyuzKjAnDupH1Q0vzL0T0M\"],\"uris\":[\"cs://1/image/aW1hZ2UvTVRvMVpqSXlPVFF4T0RRMFkyTXlNV016TW1NM05qVmlaVFkwT1dJMk1qUTNZdw\"]}";
+        JsonObject jo = new JsonParser().parse(str).getAsJsonObject();
+        FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+        //Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        JsonArray urlJsons = jo.getAsJsonArray("urls");
+        System.out.println(urlJsons.get(0).getAsString());
+
+    }*/
 //    @Override
 //    public void onApplicationEvent(ContextRefreshedEvent event) {
 //        for(RequistionListener req : reqListeners){
