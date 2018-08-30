@@ -6,7 +6,7 @@ ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT COMM
 ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT COMMENT '是否有附件';
 
 -- 增加附件表 会议预定和会议纪要共用
-CREATE TABLE `eh_enterprise_notice_attachments` (
+CREATE TABLE `eh_meeting_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_tyoe` VARCHAR(32) NOT NULL COMMENT 'owner type EhMeetingRecords/EhMeetingReservations',
