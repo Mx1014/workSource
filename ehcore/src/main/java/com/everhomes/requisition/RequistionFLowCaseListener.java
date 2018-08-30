@@ -2,6 +2,7 @@
 package com.everhomes.requisition;
 
 import com.everhomes.address.AddressProvider;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
@@ -13,10 +14,14 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.GeneralFormValsResponse;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.ConvertHelper;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,6 +60,10 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
     @Autowired
     private GeneralFormSearcher generalFormSearcher;
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+    @Autowired
+    private CustomerService customerService;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -131,7 +140,14 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     ex.printStackTrace();
                 }
 
-                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1l);
+                GetEnterpriseCustomerCommand cmd = new GetEnterpriseCustomerCommand();
+                cmd.setCommunityId(flowCase.getProjectId());
+                cmd.setId(Long.valueOf(fieldValue));
+                EnterpriseCustomerDTO customer = customerService.getEnterpriseCustomer(cmd);
+                customer.setAptitudeFlagItemId(1L);
+                customerService.updateEnterpriseCustomer(ConvertHelper.convert(customer, UpdateEnterpriseCustomerCommand.class));
+
+                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1L);
             }
         }
         generalFormSearcher.feedDoc(request);
@@ -145,6 +161,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
+
+
     }
 
     @Override
@@ -225,11 +243,16 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                             break;
                         }
                     }
+                    if(entry.getKey().equals("urls")){
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            break;
+                        }
+                    }
 
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);

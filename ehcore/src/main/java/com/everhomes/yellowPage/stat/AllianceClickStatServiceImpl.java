@@ -5,13 +5,18 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -32,7 +38,11 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.common.PrivilegeType;
+import com.everhomes.rest.statistics.event.StatEventCommonStatus;
+import com.everhomes.rest.statistics.event.StatEventLogDTO;
 import com.everhomes.rest.yellowPage.IdNameDTO;
 import com.everhomes.rest.yellowPage.ListServiceNamesCommand;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
@@ -49,19 +59,29 @@ import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
-import com.everhomes.rest.yellowPage.stat.TestAddClickDetailCommand;
-import com.everhomes.rest.yellowPage.stat.TestPocessStatCommand;
+import com.everhomes.rest.yellowPage.stat.TestClickStatCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAllianceStat;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.statistics.event.StatEvent;
+import com.everhomes.statistics.event.StatEventContentLogProvider;
+import com.everhomes.statistics.event.StatEventDeviceLog;
+import com.everhomes.statistics.event.StatEventDeviceLogProvider;
 import com.everhomes.statistics.event.StatEventHandler;
 import com.everhomes.statistics.event.StatEventLog;
+import com.everhomes.statistics.event.StatEventLogContent;
+import com.everhomes.statistics.event.StatEventLogProvider;
+import com.everhomes.statistics.event.StatEventParamLog;
+import com.everhomes.statistics.event.StatEventParamLogProvider;
+import com.everhomes.statistics.event.StatEventProvider;
+import com.everhomes.statistics.event.StatEventStepExecution;
 import com.everhomes.statistics.event.handler.StatEventHandlerManager;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -94,6 +114,26 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private StatEventContentLogProvider statEventContentLogProvider;
+	
+	@Autowired
+	private StatEventDeviceLogProvider statEventDeviceLogProvider;
+	
+	@Autowired
+	private StatEventProvider statEventProvider;
+	
+	@Autowired
+	private StatEventLogProvider statEventLogProvider;
+	
+	@Autowired
+	private StatEventParamLogProvider statEventParamLogProvider;
+	
+	@Autowired
+	private NamespaceProvider namespaceProvider;
+	
+	
 
 	@Override
 	public ListInterestStatResponse listInterestStat(ListStatCommonCommand cmd) {
@@ -902,29 +942,8 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	}
 
 
-	@Override
-	public String testPocessStat(TestPocessStatCommand cmd) {
-		
-        StatEventHandler handler = StatEventHandlerManager.getHandler("service_alliance_click");
-        LocalDateTime statTime =  LocalDateTime.now();
-        if (!StringUtils.isEmpty(cmd.getDateString())) {
-        	String[] strs = cmd.getDateString().split("-");
-        	Integer year = Integer.parseInt(strs[0]);
-          	Integer month = Integer.parseInt(strs[1]);
-          	Integer day = Integer.parseInt(strs[2]);
-        	statTime = LocalDateTime.of(year, month, day, 0, 0);
-        }
-        
-        deleteStat(statTime);
-        
-        handler.processStat(null, null, statTime.toLocalDate(), null);
-        
-        return "testPocessStat is ok param:"+cmd.toString();
-	}
-
-
-	private void deleteStat(LocalDateTime statTime) {
-		Timestamp minTime = Timestamp.valueOf(statTime.toLocalDate().atTime(LocalTime.MIN));
+	private void deleteStat(LocalDate statDate) {
+		Timestamp minTime = Timestamp.valueOf(statDate.atTime(LocalTime.MIN));
 		Date date = new Date(minTime.getTime());
 
 		EhAllianceStat STAT_TABLE = Tables.EH_ALLIANCE_STAT;
@@ -934,32 +953,177 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 		context.delete(STAT_TABLE).where(STAT_TABLE.CLICK_DATE.eq(date)).execute();
 	}
 
-
+	
 	@Override
-	public String testAddClickDetail(TestAddClickDetailCommand cmd) {
-		StatEventHandler handler = StatEventHandlerManager.getHandler("service_alliance_click");
+	public String testClickStat(TestClickStatCommand cmd) {
 
-		StatEventLog log = new StatEventLog();
-		log.setNamespaceId(cmd.getNamespaceId());
-		log.setDeviceTime(System.currentTimeMillis());
-		if (null != cmd.getClickTime()) {
-			log.setDeviceTime(cmd.getClickTime());
-		}
+		DbProvider dbProvider = PlatformContext.getComponent(DbProvider.class);
 
-		Map<String, String> param = new HashMap<>();
-		if (null != cmd.getServiceId()) {
-			param.put("serviceId", "" + cmd.getServiceId());
-		}
+		dbProvider.execute(r -> {
+			detailSave(cmd.getStartDate(), cmd.getEndDate());
+			return null;
+		});
 
-		param.put("categoryId", "" + cmd.getCategoryId());
-		param.put("userId", "" + cmd.getUserId());
-		param.put("clickType", cmd.getClickType() + "");
-		param.put("communityId", cmd.getCommunityId() + "");
-		
-		handler.processEventParamLogs(log, param);
-		
-		return "testAddClickDetail is ok param:"+cmd.toString();
-		
+		return cmd.toString();
 	}
+
+	private void detailStat(List<Namespace> namespaces, LocalDate statDate) {
+		deleteStat(statDate); 
+        StatEventHandler handler = StatEventHandlerManager.getHandler("service_alliance_click");
+		for (Namespace namespace : namespaces) {
+			handler.processStat(namespace, null, statDate, null);
+		}
+	}
+	
+	private void detailSave(String startDateStr, String endDateStr) {
+		LocalDate startDate = LocalDate.parse(startDateStr, DateTimeFormatter.ofPattern("yyyyMMdd"));
+		LocalDate endDate = LocalDate.parse(endDateStr, DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+		if (startDate.isAfter(endDate)) {
+			LocalDate tmp = startDate;
+			startDate = endDate;
+			endDate = tmp;
+		}
+        List<Namespace> namespaces = namespaceProvider.listNamespaces();
+
+		do {
+			doExecute(startDate);
+			detailStat(namespaces, startDate);
+			startDate = startDate.plusDays(1);
+		} while (!startDate.isAfter(endDate));
+	}
+	
+	private void updateEventLogContent(List<Long> toUpdateIds) {
+		DbProvider dbProvider = PlatformContext.getComponent(DbProvider.class);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhStatEventContentLogs LOGS = Tables.EH_STAT_EVENT_CONTENT_LOGS;
+		context.update(LOGS).set(LOGS.STATUS, StatEventCommonStatus.WAITING_FOR_CONFIRMATION.getCode())
+				.where(LOGS.ID.in(toUpdateIds)).execute();
+	}
+
+	private List<StatEventLogContent> listEventLogContent(Timestamp minTime, Timestamp maxTime) {
+		DbProvider dbProvider = PlatformContext.getComponent(DbProvider.class);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		return context.selectFrom(Tables.EH_STAT_EVENT_CONTENT_LOGS)
+				.where(Tables.EH_STAT_EVENT_CONTENT_LOGS.STATUS.eq(StatEventCommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_STAT_EVENT_CONTENT_LOGS.CREATE_TIME.between(minTime, maxTime))
+				.and(Tables.EH_STAT_EVENT_CONTENT_LOGS.CONTENT.like("%\"service_alliance_click\"%"))
+				.fetchInto(StatEventLogContent.class);
+	}
+	
+	 public void doExecute(LocalDate statDate) {
+
+	        Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
+	        Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
+
+	        List<StatEventLogContent> logContents = listEventLogContent(minTime, maxTime);
+
+	        Map<String, StatEventDeviceLog> statDeviceLogMap = new HashMap<>();
+
+	        // 有可能第一次什么也没有，客户端会传个0的sessionId
+	        // StatEventDeviceLog zeroDevice = new StatEventDeviceLog();
+	        // zeroDevice.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+	        // zeroDevice.setUid(0L);
+	        // zeroDevice.setId(0L);
+	        // statDeviceLogMap.put("0", zeroDevice);
+
+	        Map<String, StatEvent> statEventMap = new HashMap<>();
+	        // Map<String, StatEventParam> statEventParamMap = new HashMap<>();
+	        Map<String, List<Long>> sessionIdToDeviceGenIdMap = new HashMap<>();
+			DbProvider dbProvider = PlatformContext.getComponent(DbProvider.class);
+	        for (StatEventLogContent logContent : logContents) {
+	            StatEventLogDTO[] logs = (StatEventLogDTO[]) StringHelper.fromJsonString(logContent.getContent(), StatEventLogDTO[].class);
+	            dbProvider.execute(status -> {
+	                for (StatEventLogDTO logDTO : logs) {
+	                    if (logDTO == null) continue;
+
+	                    StatEventDeviceLog deviceLog = statDeviceLogMap.get(logDTO.getSessionId());
+	                    if (deviceLog == null) {
+	                        deviceLog = statEventDeviceLogProvider.findStatEventDeviceLogById(Long.valueOf(logDTO.getSessionId()));
+	                        // 找不到这个deviceLog就跳过
+	                        if (deviceLog == null) {
+	                            continue;
+	                        }
+	                        statDeviceLogMap.put(String.valueOf(deviceLog.getId()), deviceLog);
+	                    }
+	                    StatEvent statEvent = statEventMap.get(logDTO.getEventName());
+	                    if (statEvent == null) {
+	                        statEvent = statEventProvider.findStatEventByName(logDTO.getEventName());
+	                        statEventMap.put(statEvent.getEventName(), statEvent);
+	                    }
+
+	                    // 根据deviceGenId去重
+	                    List<Long> deviceGenIdList = sessionIdToDeviceGenIdMap.get(logDTO.getSessionId());
+	                    if (deviceGenIdList == null) {
+	                        deviceGenIdList = statEventLogProvider.listDeviceGenIdBySessionId(logDTO.getSessionId());
+	                        deviceGenIdList.add(logDTO.getLogId());
+	                        sessionIdToDeviceGenIdMap.put(logDTO.getSessionId(), deviceGenIdList);
+	                    } else {
+	                        if (deviceGenIdList.contains(logDTO.getLogId())) {
+	                            continue;
+	                        }
+	                        deviceGenIdList.add(logDTO.getLogId());
+	                    }
+
+	                    StatEventLog log = new StatEventLog();
+	                    log.setNamespaceId(logContent.getNamespaceId());
+	                    log.setUid(deviceLog.getUid());
+	                    log.setDeviceGenId(logDTO.getLogId());
+	                    log.setAcc(logDTO.getAcc());
+	                    log.setDeviceGenId(logDTO.getLogId());
+	                    log.setEventName(logDTO.getEventName());
+	                    log.setEventVersion(logDTO.getVersion());
+	                    log.setEventType(statEvent.getEventType());
+	                    log.setSessionId(logDTO.getSessionId());
+	                    log.setStatus(StatEventCommonStatus.ACTIVE.getCode());
+	                    log.setDeviceTime(logDTO.getDeviceTime());
+	                    log.setAcc(1);
+	                    log.setUploadTime(logContent.getCreateTime());
+	                    statEventLogProvider.createStatEventLog(log);
+
+	                    Map<String, String> param = logDTO.getParam();
+	                    if (param == null) {
+	                        continue;
+	                    }
+
+	                    StatEventHandler handler = StatEventHandlerManager.getHandler(log.getEventName());
+	                    List<StatEventParamLog> paramLogs = handler.processEventParamLogs(log, param);
+	                    statEventParamLogProvider.createStatEventParamLogs(paramLogs);
+
+	                    /*for (Map.Entry<String, String> entry : param.entrySet()) {
+	                        StatEventParam statEventParam = statEventParamMap.get(log.getEventName() + entry.getKey());
+	                        if (statEventParam == null) {
+	                            statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), entry.getKey());
+	                            statEventParamMap.put(log.getEventName() + entry.getKey(), statEventParam);
+	                        }
+	                        if (statEventParam != null) {
+	                            StatEventParamLog paramLog = new StatEventParamLog();
+	                            paramLog.setStatus(StatEventCommonStatus.ACTIVE.getCode());
+	                            paramLog.setSessionId(log.getSessionId());
+	                            paramLog.setNamespaceId(log.getNamespaceId());
+	                            paramLog.setEventType(log.getEventType());
+	                            paramLog.setEventName(log.getEventName());
+	                            paramLog.setUid(log.getUid());
+	                            paramLog.setEventLogId(log.getId());
+	                            paramLog.setParamKey(entry.getKey());
+	                            paramLog.setEventVersion(log.getEventVersion());
+	                            paramLog.setUploadTime(logContent.getCreateTime());
+	                            if (statEventParam.getParamType() == StatEventParamType.NUMBER.getCode()) {
+	                                paramLog.setNumberValue(Integer.valueOf(entry.getValue()));
+	                            } else {
+	                                paramLog.setStringValue(entry.getValue());
+	                            }
+	                            statEventParamLogProvider.createStatEventParamLog(paramLog);
+	                        }
+	                    }*/
+	                }
+	                return true;
+	            });
+	            // 把这条记录状态置为已load
+	            logContent.setStatus(StatEventCommonStatus.WAITING_FOR_CONFIRMATION.getCode());
+	            statEventContentLogProvider.updateStatEventLogContent(logContent);
+	        }
+	    }
 	
 }

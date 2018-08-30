@@ -2707,20 +2707,26 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
-                List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
-                //获取当前时间，如果是5号，则将之前的账单的switch装为1
-                for (int i = 0; i < list.size(); i++) {
-                    PaymentBillGroup paymentBillGroup = list.get(i);
-                    Calendar c = newClearedCalendar();
-                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-                        String billDateStr = sdf.format(c.getTime());
-                        assetProvider.updateBillSwitchOnTime(billDateStr);
-                    }
-                }
+//                List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
+//                //获取当前时间，如果是5号，则将之前的账单的switch装为1
+//                for (int i = 0; i < list.size(); i++) {
+//                    PaymentBillGroup paymentBillGroup = list.get(i);
+//                    Calendar c = newClearedCalendar();
+//                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
+//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+//                        String billDateStr = sdf.format(c.getTime());
+//                        assetProvider.updateBillSwitchOnTime(billDateStr);
+//                    }
+//                }
+            	//修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
+                Calendar c = newClearedCalendar();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String billDateStr = sdf.format(c.getTime());
+                assetProvider.updateBillSwitchOnTime(billDateStr);
             });
         }
 

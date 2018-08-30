@@ -154,7 +154,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("getGeneralFormVal")
 	@RestReturn(value=GeneralFormValDTO.class, collection = true)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormVal(cmd);
+		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormValWithPrivi(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

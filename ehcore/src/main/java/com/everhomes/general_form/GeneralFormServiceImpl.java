@@ -683,13 +683,19 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     }
 
+    @Override
+    public Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.deleteGeneralFormVal(cmd);
+    }
+
 
     @Override
     public Long deleteGeneralForm(PostGeneralFormValCommand cmd){
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
             //generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
-            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
-            generalFormSearcher.deleteById(cmd.getRequisitionId());
+            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getSourceId(), GeneralFormValRequestStatus.DELETE.getCode());
+            generalFormSearcher.deleteById(cmd.getSourceId());
             return cmd.getSourceId();
         }else{
             LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
@@ -722,6 +728,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public Long saveGeneralFormVal(PostGeneralFormValCommand cmd){
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         return handler.saveGeneralFormVal(cmd);
+    }
+
+    @Override
+    public List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.getGeneralFormVal(cmd);
     }
 
     @Override
@@ -803,8 +815,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
                 for(GeneralFormFieldDTO dto: cmd.getFormFields()){
                     if(StringUtils.isNotBlank(dto.getFieldName())) {
-                        generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
-                                UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        if(!dto.getFieldType().equals(GeneralFormFieldType.FILE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.IMAGE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                                    UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        }else{
+                            LOGGER.error("getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                                    "getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                        }
+
                     }else{
                         LOGGER.error("getGeneralFormVal false: param cannot be null. ");
                     }

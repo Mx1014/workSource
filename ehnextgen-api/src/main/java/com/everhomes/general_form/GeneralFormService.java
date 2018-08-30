@@ -61,6 +61,7 @@ public interface GeneralFormService {
 	List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd);
 
 	Long deleteGeneralFormVal(PostGeneralFormValCommand cmd);
+	Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd);
 
 	Long deleteGeneralForm(PostGeneralFormValCommand cmd);
 
@@ -77,5 +78,7 @@ public interface GeneralFormService {
 	List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd);
 
 	List<String> saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
+
+	List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd);
 
 }

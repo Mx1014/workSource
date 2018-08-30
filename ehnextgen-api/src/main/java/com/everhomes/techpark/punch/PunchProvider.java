@@ -95,6 +95,8 @@ public interface PunchProvider {
 
 	public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
 
+	int deletePunchDayLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
+
 	public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate);
 	
 	public void createPunchDayLog(PunchDayLog punchDayLog);
@@ -327,6 +329,8 @@ public interface PunchProvider {
 	public void deletePunchTimeIntervalByPunchRuleId(Long id);
 
 	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status);
+	
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwnerAndStatusList(String ownerType, Long ownerId, List<Byte> statusList);
 
 	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
 

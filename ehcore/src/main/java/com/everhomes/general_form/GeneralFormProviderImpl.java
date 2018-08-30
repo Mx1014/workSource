@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormValRequestStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormFilterUserMapDao;
@@ -367,6 +368,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
 
 		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.APPROVAL_STATUS.ne(GeneralFormValRequestStatus.DELETE.getCode()));
 		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormValRequest.class));
 	}
 
