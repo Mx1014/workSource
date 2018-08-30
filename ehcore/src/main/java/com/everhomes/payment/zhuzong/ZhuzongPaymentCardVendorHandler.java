@@ -7,6 +7,7 @@ import com.everhomes.payment.*;
 import com.everhomes.rest.payment.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.io.Charsets;
@@ -34,6 +35,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +49,11 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     @Autowired
     private PaymentCardProvider paymentCardProvider;
 
+    private static final String APPLT_CARD_TYPE = "0";
     private static final String ACCOUNT_QUERY_TYPE = "1";
+    private static final String FREEZE_ACCOUNT_TYPE = "4";
+
+    public static final String vendorName = "ZHUZONG";
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
     @Override
     public List<CardInfoDTO> getCardInfoByVendor(ListCardInfoCommand cmd) {
@@ -58,18 +64,17 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             return null;
         PaymentCard card = cardList.get(0);
         JSONObject jo = new JSONObject();
-        jo.put("FunctionID", "1");
+        jo.put("FunctionID", ACCOUNT_QUERY_TYPE);
         ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
         jo.put("UserID", vendorDate.getUserId());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
-        if ("1".equals(cardInfo.getResultID())){//返回报错
+        if (!"0".equals(cardInfo.getResultID())){//返回报错
             LOGGER.error("paymentCard getCardInfoByVendor error, param={} response = {}", jo,response);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "paymentCard getCardInfoByVendor error");
         }
-        if (!"0".equals(cardInfo.getResultID()))
-            return null;
+
         CardInfoDTO cardInfoDTO = new CardInfoDTO();
         cardInfoDTO.setBalance(new BigDecimal(cardInfo.getBalance()));
         cardInfoDTO.setMobile(card.getMobile());
@@ -89,12 +94,44 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     @Override
     public CardInfoDTO applyCard(ApplyCardCommand cmd, PaymentCardIssuer cardIssuer) {
         JSONObject jo = new JSONObject();
-        jo.put("FunctionID", "0");
+        jo.put("FunctionID", APPLT_CARD_TYPE);
         jo.put("UserName ",cmd.getName());
         jo.put("UserID ",cmd.getUserId());
+        String response = postToZhuzong(jo.toJSONString());
+        ZhuzongApplyCard applyCard = (ZhuzongApplyCard)StringHelper.fromJsonString(response, ZhuzongApplyCard.class);
+        if ("1".equals(applyCard.getResultID())) //失败
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "绑定账户失败");
+        if ("2".equals(applyCard.getResultID())) //已绑定
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "该账户已被绑定");
+        if ("3".equals(applyCard.getResultID())) //已销户
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "该账户已被销户");
+        if ("4".equals(applyCard.getResultID())) //不存在
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "该账户不存在");
 
-
-        return null;
+        User user = UserContext.current().getUser();
+        PaymentCard paymentCard = new PaymentCard();
+        paymentCard.setOwnerId(cmd.getOwnerId());
+        paymentCard.setOwnerType(cmd.getOwnerType());
+        paymentCard.setNamespaceId(user.getNamespaceId());
+        paymentCard.setIssuerId(cardIssuer.getId());
+        paymentCard.setUserName(cmd.getName());
+        paymentCard.setMobile(cmd.getMobile());
+        paymentCard.setCardNo(applyCard.getUserID());
+        paymentCard.setUserId(user.getId());
+        paymentCard.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        paymentCard.setCreatorUid(user.getId());
+        paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
+        paymentCard.setVendorName(vendorName);
+        ZhuzongVendorDate vendorDate = new ZhuzongVendorDate();
+        vendorDate.setUserId(cmd.getUserId());
+        paymentCard.setVendorCardData(StringHelper.toJsonString(vendorDate));
+        paymentCardProvider.createPaymentCard(paymentCard);
+        CardInfoDTO cardInfoDTO = ConvertHelper.convert(paymentCard, CardInfoDTO.class);
+        return cardInfoDTO;
     }
 
     @Override
@@ -123,6 +160,10 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
                 if (entity != null) {
                     json = EntityUtils.toString(entity, "utf8");
                 }
+            }else{
+                LOGGER.error("paymentCard request error, param={} response = {}", params, response);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "paymentCard request error.");
             }
 
         }catch (IOException e) {
@@ -151,7 +192,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             return ;
         ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
         JSONObject jo = new JSONObject();
-        jo.put("FunctionID", "4");
+        jo.put("FunctionID", FREEZE_ACCOUNT_TYPE);
         jo.put("UserID",vendorDate.getUserId());
         jo.put("LossType",cmd.getLossType().toString());
         postToZhuzong(jo.toJSONString());

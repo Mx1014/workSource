@@ -7,7 +7,7 @@ package com.everhomes.payment.zhuzong;
  * UserName : 姓名
  * DeptName : 部门
  * Balance : 本金金额
- * StateID : 状态
+ * StateID : 状态 0正常 1挂失
  */
 public class ZhuzongUserCardInfo {
 
