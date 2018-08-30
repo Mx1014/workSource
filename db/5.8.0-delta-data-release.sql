@@ -874,7 +874,7 @@ DELIMITER ;
 CALL update_allOrMore_flag_function;
 DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
 
-
+UPDATE eh_portal_item_groups SET instance_config = replace(instance_config, '{,', '{');
 
 
 
