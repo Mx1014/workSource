@@ -831,4 +831,19 @@ CREATE TABLE `eh_new_preview` (
 ALTER TABLE `eh_relocation_configs` MODIFY COLUMN `tips_content` text NULL COMMENT '提示内容' AFTER `tips_flag`;
 
 -- END
+
+-- AUTHOR: 黄鹏宇 2018年08月28日
+-- REMARK: 页面按钮白名单
+CREATE TABLE `eh_service_module_include_functions`
+(
+   `id`                   bigint not null,
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+	 `community_id`					bigint comment 'community_id' null,
+	 `function_id`					bigint comment '关联的按钮id' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
+
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------

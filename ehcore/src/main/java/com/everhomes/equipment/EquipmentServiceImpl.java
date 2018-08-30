@@ -215,6 +215,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -411,6 +412,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+
+	private final  String queueDelay = "pmtaskdelays";
+	private final  String queueNoDelay = "pmtasknodelays";
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
@@ -5506,9 +5513,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
+
 		equipmentProvider.updateEquipmentTaskByPlanId(planId);
 		int pageSize = 200;
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		unscheduleRelatedJobAndStatus(planId);
 		for (; ; ) {
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByPlanId(planId, locator, pageSize);
 			LOGGER.debug("inActiveTaskByPlanId tasks size={}", tasks.size());
@@ -5521,6 +5530,33 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (locator.getAnchor() == null) {
 				break;
 			}
+		}
+
+	}
+
+	private void unscheduleRelatedJobAndStatus(Long planId) {
+		// unschedule related task notify job
+		int pageSize = 200;
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		try {
+			for (; ; ) {
+                List<Long> recordIds = equipmentProvider.listNotifyRecordByPlanId(planId, locator, pageSize);
+                if (recordIds != null && recordIds.size() > 0) {
+                    recordIds.forEach((r) -> {
+                        scheduleProvider.unscheduleJob(queueDelay + r.toString());
+                        scheduleProvider.unscheduleJob(queueNoDelay + r.toString());
+                        // invalidate notify records in case core reboot and restore job from it on exception
+						pmNotifyProvider.invalidateNotifyRecord(recordIds);
+
+                    });
+                }
+                if (locator.getAnchor() == null) {
+                    break;
+                }
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error(e.getMessage());
 		}
 
 	}

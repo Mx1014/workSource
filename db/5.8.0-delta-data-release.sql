@@ -8,7 +8,7 @@
 -- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: jiarui  20180807
--- REMARK: 执行search 下脚本 enter_meter.sh
+-- REMARK: 执行search 下脚本 energy_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
@@ -837,6 +837,45 @@ DELIMITER ;
 CALL update_url_module_function;
 DROP PROCEDURE IF EXISTS update_url_module_function;
 
+-- 刷新itemGroup是否开启“全部”更多
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+DELIMITER //
+CREATE PROCEDURE `update_allOrMore_flag_function` ()
+BEGIN
+  DECLARE itemGroupId LONG;
+  DECLARE alabel  VARCHAR(200);
+	DECLARE actionData VARCHAR(10240);
+	DECLARE iconUri VARCHAR(10240);
+	DECLARE allOrMoreType VARCHAR(200);
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT item_group_id, label, action_data, icon_uri from eh_portal_items WHERE action_type = 'AllOrMore' and action_data is NOT NULL;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO itemGroupId, alabel, actionData, iconUri;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				IF instr(actionData,'more') > 0 THEN
+          SET allOrMoreType = 'more';
+				ELSE
+					SET allOrMoreType = 'all';
+				END IF;
+
+				UPDATE eh_portal_item_groups SET instance_config = REPLACE (instance_config, '}', CONCAT(',"allOrMoreType":"', allOrMoreType, '","allOrMoreLabel":"', alabel, '","allOrMoreFlag":1,"allOrMoreIconUri":"', iconUri, '"}')) WHERE id = itemGroupId AND instance_config NOT LIKE '%allOrMoreFlag%';
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_allOrMore_flag_function;
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+
+
+
 
 
 -- 当前版本已被他人抢先发布
@@ -975,6 +1014,17 @@ UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
 -- AUTHOR: 严军 2018年8月29日
 -- REMARK: issue-null 清除微商城模块默认配置
 UPDATE eh_service_modules SET instance_config = NULL where id = 92100;
+
+
+-- AUTHOR: 黄鹏宇 2018年8月29日
+-- REMARK: 配置全量同步，一键转为资质客户白名单
+
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999944, NULL, 21100, 43980);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21100, 43960);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
+
+-- END
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

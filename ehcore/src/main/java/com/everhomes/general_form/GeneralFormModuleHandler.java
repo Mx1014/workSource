@@ -26,6 +26,10 @@ public interface GeneralFormModuleHandler {
         return null;
     }
 
+    default Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
+        return null;
+    }
+
 
     default GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd){
         return new GeneralFormReminderDTO(TrueOrFalseFlag.FALSE.getCode());
