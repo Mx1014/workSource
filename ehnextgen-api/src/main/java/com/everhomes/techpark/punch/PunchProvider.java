@@ -95,6 +95,8 @@ public interface PunchProvider {
 
 	public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
 
+	int deletePunchDayLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
+
 	public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate);
 	
 	public void createPunchDayLog(PunchDayLog punchDayLog);

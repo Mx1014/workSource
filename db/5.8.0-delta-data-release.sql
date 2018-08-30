@@ -8,7 +8,7 @@
 -- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: jiarui  20180807
--- REMARK: 执行search 下脚本 enter_meter.sh
+-- REMARK: 执行search 下脚本 energy_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
@@ -836,6 +836,45 @@ END
 DELIMITER ;
 CALL update_url_module_function;
 DROP PROCEDURE IF EXISTS update_url_module_function;
+
+-- 刷新itemGroup是否开启“全部”更多
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+DELIMITER //
+CREATE PROCEDURE `update_allOrMore_flag_function` ()
+BEGIN
+  DECLARE itemGroupId LONG;
+  DECLARE alabel  VARCHAR(200);
+	DECLARE actionData VARCHAR(10240);
+	DECLARE iconUri VARCHAR(10240);
+	DECLARE allOrMoreType VARCHAR(200);
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT item_group_id, label, action_data, icon_uri from eh_portal_items WHERE action_type = 'AllOrMore' and action_data is NOT NULL;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO itemGroupId, alabel, actionData, iconUri;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				IF instr(actionData,'more') > 0 THEN
+          SET allOrMoreType = 'more';
+				ELSE
+					SET allOrMoreType = 'all';
+				END IF;
+
+				UPDATE eh_portal_item_groups SET instance_config = REPLACE (instance_config, '}', CONCAT(',"allOrMoreType":"', allOrMoreType, '","allOrMoreLabel":"', alabel, '","allOrMoreFlag":1,"allOrMoreIconUri":"', iconUri, '"}')) WHERE id = itemGroupId AND instance_config NOT LIKE '%allOrMoreFlag%';
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_allOrMore_flag_function;
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+
+
 
 
 
