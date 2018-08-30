@@ -2,7 +2,7 @@
 -- AUTHOR: 吴寒
 -- REMARK: 会议管理V1.2
 ALTER TABLE `eh_meeting_reservations`  CHANGE `content` `content` TEXT COMMENT '会议详细内容';
-ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` DEFAULT 0 TINYINT COMMENT '是否有附件 1-是 0-否';
+ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
 ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
 
 -- 增加附件表 会议预定和会议纪要共用
