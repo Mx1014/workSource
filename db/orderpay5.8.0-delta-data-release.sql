@@ -2,8 +2,8 @@
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 
--- AUTHOR: 
--- REMARK: 
+-- AUTHOR: liangqishi 20180823
+-- REMARK: 为统一订单申请专有域名gorder.zuolin.com
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -47,14 +47,16 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 马世亨 20180817
 -- REMARK: 增加统一订单错误码
-	INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ((@locale_string_id := @locale_string_id + 1), 'pmtask', '10019', 'zh_CN', '找不到账单');
 
 -- AUTHOR: huangmingbo
 -- REMARK: 增加统一订单配置
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.siyinprint', '/siyinprint/notifySiyinprintOrderPaymentV2', '打印缴费新支付回调接口', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('pay.v2.callback.url.siyinprint', '/siyinprint/notifySiyinprintOrderPaymentV2', '打印缴费新支付回调接口', 0, NULL, 0);
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pay.v2.callback.url.express', '/express/notifyExpressOrderPaymentV2', '快递缴费新支付回调接口', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('pay.v2.callback.url.express', '/express/notifyExpressOrderPaymentV2', '快递缴费新支付回调接口', 0, NULL, 0);
 	
 	
 -- AUTHOR: 黄良铭
