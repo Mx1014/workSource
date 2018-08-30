@@ -4,7 +4,6 @@ package com.everhomes.serviceModuleApp;
 import com.everhomes.acl.ServiceModuleAppAuthorizationService;
 import com.everhomes.acl.ServiceModuleAppProfile;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
-import com.everhomes.app.App;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -42,7 +41,6 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.user.UserContext;
@@ -1268,7 +1266,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
+	public void updateBaseUserApps(UpdateBaseUserAppsCommand cmd) {
 
 		Long userId = UserContext.currentUserId();
 
