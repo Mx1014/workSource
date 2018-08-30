@@ -46,7 +46,7 @@
 -- 		) as t on a.instance_config like concat('%"categoryId":', t.contract_category_id,'%')
 -- where a.module_id=21200 and t.asset_category_id is not null;
 -- REMARK：3、找杨崇鑫生成update语句执行
--- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":\"""&A1&"\""}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
+-- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":"&A1&"}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
