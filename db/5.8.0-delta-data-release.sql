@@ -938,6 +938,15 @@ left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id
 left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
 ) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
 
+-- AUTHOR: 丁建民  20180830
+-- REMARK: 物业缴费V6.5 数据迁移账单组（调租，免租的账单组）
+-- 这个需要备份一下数据
+SELECT aa.id,aa.namespace_id,aa.contract_id ,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id and aa.bill_group_id is NULL;
+
+UPDATE eh_contract_charging_changes as aaa INNER JOIN (SELECT aa.id,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id  and aa.bill_group_id is NULL) as bbb ON aaa.id = bbb.id set aaa.bill_group_id=bbb.target_bill_group_id;
+
 
 -- AUTHOR: 黄良铭
 -- REMARK: 系统管理员维护时的消息模板
