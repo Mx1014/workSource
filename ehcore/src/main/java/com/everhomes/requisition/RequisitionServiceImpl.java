@@ -348,7 +348,7 @@ public class RequisitionServiceImpl implements RequisitionService{
                 response.setFormOriginId(val.getFormOriginId());
                 response.setFormVersion(val.getFormVersion());
                 response.setSourceId(val.getSourceId());
-                response.setAppId(appsResponse.getServiceModuleApps().iterator().next().getId());
+                response.setAppId(appsResponse.getServiceModuleApps().iterator().next().getOriginId());
                 return response;
             }
             return null;

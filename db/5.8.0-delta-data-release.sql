@@ -1025,6 +1025,10 @@ INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `communi
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (250001003, null, '删除请示', '删除请示', NULL);
+
+-- remark：本地化删除客户提示
+set @id = (select max(id)+1 from eh_locale_strings);
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'customer', '10035', 'zh_CN', '有请示单的客户不能删除');
 -- END
 
 -- --------------------- SECTION END ---------------------------------------------------------
