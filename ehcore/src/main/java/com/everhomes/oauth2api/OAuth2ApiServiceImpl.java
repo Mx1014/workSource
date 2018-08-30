@@ -90,11 +90,11 @@ public class OAuth2ApiServiceImpl implements OAuth2ApiService {
         if (!CollectionUtils.isEmpty(zhenzhihuiEnterpriseInfos)) {
             ZhenzhihuiEnterpriseInfo zhenzhihuiEnterpriseInfo = zhenzhihuiEnterpriseInfos.get(0);
             zhenZhiHuiUserDetailInfo.setEnterpriseName(zhenzhihuiEnterpriseInfo.getEnterpriseName());
-            zhenZhiHuiUserDetailInfo.setEnterpriseToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
+            zhenZhiHuiUserDetailInfo.setEnterpriseToken(zhenzhihuiEnterpriseInfo.getEnterpriseToken());
+            zhenZhiHuiUserDetailInfo.setEnterpriseType(zhenzhihuiEnterpriseInfo.getEnterpriseType());
             zhenZhiHuiUserDetailInfo.setCorporationName(zhenzhihuiEnterpriseInfo.getCorporationName());
             zhenZhiHuiUserDetailInfo.setCorporationToken(zhenzhihuiEnterpriseInfo.getIdentifyToken());
             zhenZhiHuiUserDetailInfo.setCorporationType(zhenzhihuiEnterpriseInfo.getIdentifyType());
-            zhenZhiHuiUserDetailInfo.setEnterpriseType(zhenzhihuiEnterpriseInfo.getEnterpriseType());
             zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.BOTH.getCode());
         }else {
             zhenZhiHuiUserDetailInfo.setUserType(ZhenZhiHuiUserType.PERSON.getCode());
