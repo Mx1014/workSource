@@ -1933,6 +1933,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			item.setAppId(AppConstants.APPID_DEFAULT);
+			item.setGroupId(itemGroup.getId());
 			item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			item.setMinVersion(1L);
 			item.setItemGroup(portalItem.getGroupName());
@@ -2066,6 +2067,8 @@ public class PortalServiceImpl implements PortalService {
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
 					item.setScaleType(ScaleType.TAILOR.getCode());
 
+					item.setGroupId(itemGroup.getId());
+
 					//更多全部不进行分类
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
 						item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
@@ -2190,6 +2193,8 @@ public class PortalServiceImpl implements PortalService {
 	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId){
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
+			item.setAppId(moduleApp.getOriginId());
+
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			item.setAccessControlType(moduleApp.getAccessControlType());

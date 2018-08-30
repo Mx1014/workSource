@@ -7,6 +7,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.util.Tuple;
 import org.jooq.Condition;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public interface LaunchPadProvider {
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup, ListingQueryBuilderCallback callback);
 
-    List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, Byte scopeCode, Long scopeId);
+    List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes);
 
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
 
@@ -68,7 +69,7 @@ public interface LaunchPadProvider {
 
     void deletePreviewVersionCategories(Integer namespaceId);
 
-    List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, Byte scopeCode, Long scopeId, String categoryName, Byte displayFlag);
+    List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag);
 
     void deleteUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId);
 

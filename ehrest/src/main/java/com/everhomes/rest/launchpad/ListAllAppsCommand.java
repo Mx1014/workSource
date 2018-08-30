@@ -8,8 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>groupId: groupId</li>
- *     <li>scopeCode: scopeCode</li>
- *     <li>scopeId: scopeId</li>
+ *     <li>context: context {@link com.everhomes.rest.launchpadbase.AppContext}</li>
  * </ul>
  */
 public class ListAllAppsCommand {
@@ -17,8 +16,7 @@ public class ListAllAppsCommand {
     private Long groupId;
 
 
-    private AppContext appContext;
-
+    private AppContext context;
 
 
     public Long getGroupId() {
@@ -29,12 +27,12 @@ public class ListAllAppsCommand {
         this.groupId = groupId;
     }
 
-    public AppContext getAppContext() {
-        return appContext;
+    public AppContext getContext() {
+        return context;
     }
 
-    public void setAppContext(AppContext appContext) {
-        this.appContext = appContext;
+    public void setContext(AppContext context) {
+        this.context = context;
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.Tuple;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -699,16 +700,31 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, Byte scopeCode, Long scopeId){
+	public List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.GROUP_ID.eq(groupId));
-		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scopeCode));
-		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scopeId));
+
+		Condition scopeCondition = null;
+
+		for(Tuple<Byte, Long> scope: scopes){
+			if(scopeCondition == null){
+				scopeCondition = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scope.second()));
+			}else {
+				scopeCondition = scopeCondition.or(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scope.second())));
+			}
+
+		}
+		query.addConditions(scopeCondition);
+
 
 		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
 		query.addConditions(getPreviewPortalVersionCondition(Tables.EH_ITEM_SERVICE_CATEGRIES.getName()));
+
+		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER.asc());
 
 		List<ItemServiceCategry> res = query.fetch().map(r -> ConvertHelper.convert(r, ItemServiceCategry.class));
 		return res;
@@ -806,15 +822,27 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 
 	@Override
-	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, Byte scopeCode, Long scopeId, String categoryName, Byte displayFlag){
+	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag){
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 
 		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
 
 		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
-		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
-		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+
+		Condition scopeCondition = null;
+
+		for(Tuple<Byte, Long> scope: scopes){
+			if(scopeCondition == null){
+				scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scope.second()));
+			}else {
+				scopeCondition = scopeCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scope.second())));
+			}
+
+		}
+		query.addConditions(scopeCondition);
 
 		if(!StringUtils.isEmpty(categoryName)){
 			query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categoryName));
@@ -829,6 +857,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
 		Condition previewCondition = getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName());
 		query.addConditions(previewCondition);
+		query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
 
 		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));
 

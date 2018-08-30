@@ -38,6 +38,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.business.BusinessDTO;
+
+
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.category.CategoryConstants;
@@ -3029,24 +3031,24 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		ListAllAppsResponse response = new ListAllAppsResponse();
 
 
-		Byte scopeCode = getScopeCode(cmd.getAppContext());
-		String ownerType = getOwnerType(cmd.getAppContext());
-		Long scopeId = getScopeId(cmd.getAppContext());
+		List<Tuple<Byte, Long>> scopes = getScope(cmd.getContext());
+		String ownerType = getOwnerType(cmd.getContext());
+		Long ownerId = getOwnerId(cmd.getContext());
 
         List<LaunchPadCategoryDTO> categoryDtos = new ArrayList<>();
 
-		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategryByGroupId(cmd.getGroupId(), scopeCode, scopeId);
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategryByGroupId(cmd.getGroupId(), scopes);
 
 		//1、有分类的--“全部”，按照分类查询。
         //2、没有分类--“更多”，把所有的查询出来，有客户端判断。
 		if(categories != null && categories.size() > 0){
 			for (ItemServiceCategry categry: categories){
 
-				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, categry.getName(), null);
+				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, categry.getName(), null);
 				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 				LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
                 categoryDto.setAppDtos(appDtos);
-                categoryDto.setName(categry.getName());
+                categoryDto.setName(categry.getLabel());
 				if(categry.getIconUri() != null){
 					String url = contentServerService.parserUri(categry.getIconUri(), ItemServiceCategry.class.getSimpleName(), categry.getId());
                     categoryDto.setIconUrl(url);
@@ -3057,7 +3059,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 			response.setCategoryDtos(categoryDtos);
 		}else {
-			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null, null);
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, null);
 			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
 			LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
             categoryDto.setAppDtos(appDtos);
@@ -3070,14 +3072,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		if(userId != null || userId != 0){
 			//查询用户自己编辑的广场信息
-			List<UserLaunchPadItem> userItems = launchPadProvider.listUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, scopeId);
+			List<UserLaunchPadItem> userItems = launchPadProvider.listUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, ownerId);
 			appDtos = userItemToAppDto(userItems);
 
 		}
 
 		if(appDtos == null || appDtos.size() == 0){
 			//默认的
-			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopeCode, scopeId, null, ItemDisplayFlag.DISPLAY.getCode());
+			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, ItemDisplayFlag.DISPLAY.getCode());
 			appDtos = itemToAppDto(defaultItems);
 		}
 
@@ -3088,44 +3090,73 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 
 
-	private Byte getScopeCode(AppContext context){
-		Byte scopeCode = 0;
-		if(context.getCommunityId() != null){
-			scopeCode = ScopeType.COMMUNITY.getCode();
-		}else if(context.getOrganizationId() != null){
-			scopeCode = ScopeType.ORGANIZATION.getCode();
-		}else if(context.getFamilyId() != null){
-			scopeCode = ScopeType.RESIDENTIAL.getCode();
+	private List<Tuple<Byte, Long>> getScope(AppContext context){
+
+
+		List<Tuple<Byte, Long>> list = new ArrayList<>();
+
+		if(context == null){
+			return list;
 		}
 
-		return scopeCode;
+		//communityId必传
+		if(context.getOrganizationId() != null){
+			list.add(new Tuple<>(ScopeType.ORGANIZATION.getCode(), context.getOrganizationId()));
+			list.add(new Tuple<>(ScopeType.ORGANIZATION.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}else if(context.getFamilyId() != null){
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.RESIDENTIAL.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.RESIDENTIAL.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}else{
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}
+
+		return list;
 	}
 
 
 	private String getOwnerType(AppContext context){
 		String ownerType = null;
-		if(context.getCommunityId() != null){
-			ownerType =  EntityType.COMMUNITY.getCode();
-		}else if(context.getOrganizationId() != null){
+
+		if(context == null){
+			return null;
+		}
+
+		//communityId必传
+		if(context.getOrganizationId() != null){
 			ownerType = EntityType.ORGANIZATIONS.getCode();
 		}else if(context.getFamilyId() != null){
+			ownerType =  EntityType.COMMUNITY.getCode();
+		}else {
 			ownerType =  EntityType.COMMUNITY.getCode();
 		}
 
 		return ownerType;
 	}
 
-	private Long getScopeId(AppContext context){
-		Long scopeId = 0L;
-		if(context.getCommunityId() != null){
-			scopeId = context.getCommunityId();
-		}else if(context.getOrganizationId() != null){
-			scopeId = context.getOrganizationId();
-		}else if(context.getFamilyId() != null){
-			scopeId = context.getFamilyId();
+	private Long getOwnerId(AppContext context){
+		Long ownerId = 0L;
+
+		if(context == null){
+			return ownerId;
 		}
 
-		return scopeId;
+		if(context.getOrganizationId() != null){
+			ownerId = context.getOrganizationId();
+		}else if(context.getFamilyId() != null){
+			ownerId = context.getCommunityId();
+		}else {
+			ownerId = context.getCommunityId();
+		}
+
+		return ownerId;
 	}
 
 	private List<AppDTO> itemToAppDto(List<LaunchPadItem> items){
@@ -3274,8 +3305,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 
 		Long userId = UserContext.currentUserId();
-		String ownerType = getOwnerType(cmd.getAppContext());
-		Long ownerId = getScopeId(cmd.getAppContext());
+		String ownerType = getOwnerType(cmd.getContext());
+		Long ownerId = getOwnerId(cmd.getContext());
 
 
 		dbProvider.execute((transactionStatus -> {
@@ -3302,6 +3333,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				}
 
 				UserLaunchPadItem userItem = new UserLaunchPadItem();
+				userItem.setGroupId(item.getGroupId());
 				userItem.setItemName(item.getItemName());
 				userItem.setItemId(item.getId());
 				userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
