@@ -7,7 +7,9 @@ public class GetGeneralFormByCustomerIdResponse {
     private Long formOriginId;
     private Long formVersion;
     private Long sourceId;
+
     private Long appId;
+
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -33,6 +35,7 @@ public class GetGeneralFormByCustomerIdResponse {
         this.sourceId = sourceId;
     }
 
+<<<<<<< HEAD
     public Long getAppId() {
         return appId;
     }
@@ -41,8 +44,14 @@ public class GetGeneralFormByCustomerIdResponse {
         this.appId = appId;
     }
 
+=======
+>>>>>>> 5.8.0
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 5.8.0
