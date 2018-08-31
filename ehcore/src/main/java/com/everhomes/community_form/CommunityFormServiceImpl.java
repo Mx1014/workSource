@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,6 +99,11 @@ public class CommunityFormServiceImpl implements CommunityFormService{
                 }
             }
         }
+        Collections.sort(list,new Comparator<CommunityGeneralFormDTO>() {
+            public int compare(CommunityGeneralFormDTO arg0, CommunityGeneralFormDTO arg1) {
+                return arg1.getCommunityId().compareTo(arg0.getCommunityId());
+            }
+        });
         Integer nextPageOffset = null;
         if (list.size() > pageSize) {
             list.remove(list.size()-1);
