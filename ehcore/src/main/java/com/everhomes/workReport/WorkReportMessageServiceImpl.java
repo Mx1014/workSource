@@ -1,7 +1,5 @@
 package com.everhomes.workReport;
 
-import com.alibaba.fastjson.JSON;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -9,7 +7,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.workReport.*;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -35,6 +32,9 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     private WorkReportValProvider workReportValProvider;
 
     @Autowired
+    private WorkReportTimeService workReportTimeService;
+
+    @Autowired
     private MessagingService messagingService;
 
     @Override
@@ -48,7 +48,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
+        model.put("reportTime", workReportTimeService.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -73,7 +73,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         Map<String, String> model = new HashMap<>();
         model.put("applierName", reportVal.getApplierName());
         model.put("reportName", report.getReportName());
-        model.put("reportTime", WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
+        model.put("reportTime", workReportTimeService.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime()));
         String content = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 WorkReportNotificationTemplateCode.SCOPE,
@@ -107,7 +107,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         // 汇报名称
         String reportName = report.getReportName();
         // 汇报时间
-        String reportTime = WorkReportTimeUtil.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime());
+        String reportTime = workReportTimeService.displayReportTime(report.getReportType(), reportVal.getReportTime().getTime());
 
         WorkReportValComment parentComment = workReportValProvider.getWorkReportValCommentById(parentCommentId);
         if (commentatorId.longValue() == applierId.longValue()) {
