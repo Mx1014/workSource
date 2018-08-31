@@ -32,6 +32,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.order.*;
@@ -167,6 +168,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public NamespaceProvider namespaceProvider;
 	@Autowired
 	private ParkingHubProvider parkingHubProvider;
+	@Autowired
+	private LocaleStringService localeService;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -3576,5 +3579,36 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingProvider.updateParkingLot(parkingLot);
 			}
 		}
+	}
+
+	@Override
+	public void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd) {
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
+			return;
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
+			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			String vendorName = lot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+			if (handler.notifyParkingRechargeOrderPayment(order)) {
+				order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
+				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+				parkingProvider.updateParkingRechargeOrder(order);
+				LOGGER.info("Notify parking recharge by wechat success, cmd={}, order={}", cmd, order);
+			}else{
+				//充值失败
+				order.setStatus(ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode());
+				//充值失败时，将返回的错误信息记录下来
+				if (StringUtils.isBlank(order.getErrorDescription())) {
+					String locale = Locale.SIMPLIFIED_CHINESE.toString();
+					String scope = ParkingErrorCode.SCOPE;
+					String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
+					String defaultText = localeService.getLocalizedString(scope, code, locale, "");
+					order.setErrorDescription(defaultText);
+				}
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+			return null;
+		});
 	}
 }
