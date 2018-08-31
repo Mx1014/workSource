@@ -51,6 +51,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.UpdateUserAppsCommand;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Bulletins;

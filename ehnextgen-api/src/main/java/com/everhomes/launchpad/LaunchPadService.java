@@ -2,6 +2,7 @@ package com.everhomes.launchpad;
 
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.UpdateUserAppsCommand;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.ui.launchpad.*;
