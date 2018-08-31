@@ -75,4 +75,6 @@ public interface MeetingProvider {
 
     List<MeetingRecord> findMeetingRecordsByDetailId(QueryMyMeetingRecordsCondition condition);
 
+	List<MeetingAttachment> listMeetingAttachements(Long ownerId, String ownerType);
+
 }

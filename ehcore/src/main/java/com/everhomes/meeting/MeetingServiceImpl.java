@@ -24,6 +24,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.meeting.AbandonMeetingReservationLockTimeCommand;
+import com.everhomes.rest.meeting.AttachmentOwnerType;
 import com.everhomes.rest.meeting.CancelMeetingReservationCommand;
 import com.everhomes.rest.meeting.CreateMeetingRecordCommand;
 import com.everhomes.rest.meeting.CreateOrUpdateMeetingRoomCommand;
@@ -43,6 +44,7 @@ import com.everhomes.rest.meeting.ListMyMeetingRecordsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsResponse;
 import com.everhomes.rest.meeting.ListMyMeetingsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingsResponse;
+import com.everhomes.rest.meeting.MeetingAttachmentDTO;
 import com.everhomes.rest.meeting.MeetingGeneralFlag;
 import com.everhomes.rest.meeting.MeetingInvitationDTO;
 import com.everhomes.rest.meeting.MeetingMemberSourceType;
@@ -74,9 +76,11 @@ import com.everhomes.scheduler.MeetingRoomRecoveryScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhMeetingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -87,6 +91,9 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.hp.hpl.sparta.xpath.ThisNodeTest;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -107,6 +114,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -116,6 +124,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingServiceImpl implements MeetingService, ApplicationListener<ContextRefreshedEvent> {
@@ -495,6 +505,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecordDetailInfoDTO.setMeetingRecordShareDTOS(getUserAvatar(meetingInvitations));
         meetingRecordDetailInfoDTO.setContent(meetingRecord.getContent());
         meetingRecordDetailInfoDTO.setRecordWordLimit(getRecordWordLimit());
+        meetingRecordDetailInfoDTO.setMeetingAttachments(listMeetingAttachments(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords));
         return meetingRecordDetailInfoDTO;
     }
 
@@ -703,10 +714,24 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         MeetingReservationShowStatus status = buildMeetingReservationShowStatus(meetingReservation);
         meetingReservationDetailDTO.setStatus(status.getCode());
         meetingReservationDetailDTO.setShowStatus(status.toString());
+        meetingReservationDetailDTO.setMeetingAttachments(listMeetingAttachments(meetingReservation.getId(),AttachmentOwnerType.EhMeetingReservations));
         return meetingReservationDetailDTO;
     }
 
-    private MeetingReservationShowStatus buildMeetingReservationShowStatus(MeetingReservation meetingReservation) {
+    private List<MeetingAttachmentDTO> listMeetingAttachments(Long id,
+			AttachmentOwnerType attachmentOwnerType) {
+    	if(null == attachmentOwnerType)
+    		return null;
+    	List<MeetingAttachment> attachments = meetingProvider.listMeetingAttachements(id, attachmentOwnerType.getCode());
+    	if(null != attachments){
+    		return attachments.stream().map(r -> {
+    			return ConvertHelper.convert(r , MeetingAttachmentDTO.class);
+    		}).collect(Collectors.toList());
+    	}
+		return null;
+	}
+
+	private MeetingReservationShowStatus buildMeetingReservationShowStatus(MeetingReservation meetingReservation) {
         MeetingReservationShowStatus status = MeetingReservationShowStatus.COMING_SOON;
         if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
             status = MeetingReservationShowStatus.CANCELED;
@@ -785,6 +810,10 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         addMeetingInvitations.addAll(cmd.getMeetingInvitations());
         addMeetingInvitations.removeAll(existMeetingInvitations);
+        
+        //附件
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
+        List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
         dbProvider.execute(transactionStatus -> {
             Long id = meetingProvider.updateMeetingReservation(updateMeetingReservation);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
@@ -807,7 +836,21 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
+    private List<MeetingAttachment> convertDTO2MeetingAttachment(
+			List<MeetingAttachmentDTO> meetingAttachments, MeetingReservation meetingReservation) {
+		if(meetingAttachments == null){
+			return null;
+		}
+		return meetingAttachments.stream().map(r->{
+			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+			attachment.setNamespaceId(meetingReservation.getNamespaceId());
+			attachment.setOwnerType(AttachmentOwnerType.EhMeetingReservations.getCode());
+			attachment.setOwnerId(meetingReservation.getId());
+			return attachment;
+		}).collect(Collectors.toList());
+	}
+
+	private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
