@@ -1168,9 +1168,13 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecord.setOperatorName(operatorName);
         meetingRecord.setContent(cmd.getContent());
 
+        
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.createMeetingRecord(meetingRecord);
+            //附件 
+            List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord); 
+            meetingProvider.batchCreateMeetingAttachments(newAttachements);
             meetingProvider.batchCreateMeetingInvitations(recordReceivers);
             return null;
         });
@@ -1182,7 +1186,22 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return convertToMeetingRecordDetailInfoDTO(meetingReservation, meetingRecord, meetingInvitationDTOS);
     }
 
-    @Override
+    private List<MeetingAttachment> convertDTO2MeetingAttachment(
+			List<MeetingAttachmentDTO> meetingAttachments, MeetingRecord meetingRecord) {
+
+		if(meetingAttachments == null){
+			return null;
+		}
+		return meetingAttachments.stream().map(r->{
+			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+			attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+			attachment.setOwnerType(AttachmentOwnerType.EhMeetingRecords.getCode());
+			attachment.setOwnerId(meetingRecord.getId());
+			return attachment;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
     public MeetingRecordDetailInfoDTO updateMeetingRecord(UpdateMeetingRecordCommand cmd) {
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
         cmd.setMeetingRecordShareDTOS(getAndCheckMeetingInvitationDTOs(cmd.getMeetingRecordShareDTOS()));
@@ -1230,11 +1249,20 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         addMeetingInvitations.addAll(cmd.getMeetingRecordShareDTOS());
         addMeetingInvitations.removeAll(existMeetingInvitations);
+
+        //附件
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
+        List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
+        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
+        
         List<EhMeetingInvitations> newRecordReceivers = buildEhMeetingInvitations(addMeetingInvitations, meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.updateMeetingRecord(meetingRecord);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
             meetingProvider.batchCreateMeetingInvitations(newRecordReceivers);
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
+            meetingProvider.batchCreateMeetingAttachments(addAttachements);
             return null;
         });
         List<EhMeetingInvitations> newAllMeetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingRecord.getMeetingReservationId(), MeetingInvitationRoleType.CC.getCode());
