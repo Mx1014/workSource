@@ -997,7 +997,7 @@ CREATE TABLE `eh_approval_categories` (
   `update_time` DATETIME,
   `operator_uid` BIGINT,
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   KEY `i_eh_namespace_owner_id` (`namespace_id`,`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
