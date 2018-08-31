@@ -1511,15 +1511,17 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 
-		//进行非空校验
-		if(building != null){
-			if(building.getName().equals(data.getName())){
-				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
-				log.setData(data);
-				log.setErrorLog("building name is repeat");
-				return log;
-			}
-		}
+		//merge conflic
+//
+//		//进行非空校验
+//		if(building != null){
+//			if(building.getName().equals(data.getName())){
+//				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
+//				log.setData(data);
+//				log.setErrorLog("building name is repeat");
+//				return log;
+//			}
+//		}
 
 
 
@@ -1530,7 +1532,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}*/
 
-/*
+
 		if (StringUtils.isEmpty(data.getContactor())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
 			log.setData(data);

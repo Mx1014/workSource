@@ -1591,19 +1591,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(cmd != null && cmd.getContactToken() != null){
 			cmd.setContactToken(cmd.getContactToken().trim());
 		}
-//        OrganizationContactDTO contactDTO = dbProvider.execute(
-//                r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(),
-                		cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN,false,false));
-//		if(contactDTO != null) {
-//            sendMessageAfterChangeOrganizationAdmin(
-//                    contactDTO,
-//                    OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-//                    OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-//            );
-//			return contactDTO;
-//		}
+		OrganizationContactDTO contactDTO = dbProvider.execute(
+				r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(),
+						cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN,false,false));
+		if(contactDTO != null) {
+			sendMessageAfterChangeOrganizationAdmin(
+					contactDTO,
+					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
+			return contactDTO;
+		}
 		return null;
 	}
+
 
     private void sendMessageAfterChangeOrganizationAdmin(OrganizationContactDTO contactDTO, int toTargetTemplateCode, int toOtherTemplateCode) {
         List<OrganizationContactDTO> organizationAdmin = listOrganizationAdmin(contactDTO.getOrganizationId(), ActivationFlag.YES);
@@ -2233,7 +2234,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                    "cannot delete myself");
 			}
-			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, false, false);
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
 				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());

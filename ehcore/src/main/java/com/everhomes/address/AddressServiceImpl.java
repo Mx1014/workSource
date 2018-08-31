@@ -2065,13 +2065,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 //				continue;
 //			}
 
-			if(!buildingNames.contains(data.getBuildingName())){
-                log.setData(data);
-                log.setErrorLog("building is not exists");
-                log.setCode(BuildingServiceErrorCode.ERROR_BUILDING_IS_NOT_EXISTS);
-                errorLogs.add(log);
-                continue;
-            }
+
+            //merge conflict
+//			if(!buildingNames.contains(data.getBuildingName())){
+//                log.setData(data);
+//                log.setErrorLog("building is not exists");
+//                log.setCode(BuildingServiceErrorCode.ERROR_BUILDING_IS_NOT_EXISTS);
+//                errorLogs.add(log);
+//                continue;
+//            }
 			
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);

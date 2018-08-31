@@ -12630,8 +12630,9 @@ public class PunchServiceImpl implements PunchService {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
         try {
-            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
-                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+//            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
+//                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
                 response.setAdminFlag(NormalFlag.YES.getCode());
                 response.setQueryPrivilege(NormalFlag.YES.getCode());
                 return response;
