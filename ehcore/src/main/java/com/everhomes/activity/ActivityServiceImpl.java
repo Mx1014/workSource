@@ -228,6 +228,7 @@ import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormFileValue;
@@ -679,10 +680,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         CommunityGeneralForm communityGeneralForm = this.communityFormProvider.findCommunityGeneralForm(communityId, CommunityFormType.ACTIVITY_SIGNUP);
         if (communityGeneralForm != null) {
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralForm.getFormOriginId());
-            roster.setFormId(form.getId());
-            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-                form.setStatus(GeneralFormStatus.RUNNING.getCode());
-                generalFormProvider.updateGeneralForm(form);
+            if (form != null) {
+                roster.setFormId(form.getId());
+                if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                    form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                    generalFormProvider.updateGeneralForm(form);
+                }
             }
         }
         activityProvider.createActivityRoster(roster);
@@ -7046,9 +7049,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         List<String> propertyNames = new ArrayList<>();
         List<Integer> titleSizes = new ArrayList<>();
         if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
-            titleNames.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
-            for (int i = 0; i < form.getFormFields().size(); i++) {
+            List<GeneralFormFieldDTO> formFieldDTOS = form.getFormFields();
+            for (GeneralFormFieldDTO generalFormFieldDTO : formFieldDTOS) {
+                if (GeneralFormDataVisibleType.HIDDEN.getCode().equals(generalFormFieldDTO.getVisibleType())) {
+                    continue;
+                }
+                titleNames.add(generalFormFieldDTO.getFieldDisplayName());
                 titleSizes.add(20);
+
             }
             excelSettings(excelUtils, form);
         }else {
