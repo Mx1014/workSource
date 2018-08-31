@@ -37,7 +37,7 @@ public interface PortalService {
 	PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd);
 
 
-	void deletePortalLayout(DeletePortalLayoutCommand cmd);
+    void deletePortalLayout(DeletePortalLayoutCommand cmd);
 
 
 	ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd);
@@ -139,4 +139,6 @@ public interface PortalService {
 	ListPortalVersionUsersResponse listPortalVersionUsers(ListPortalVersionUsersCommand cmd);
 
     void revertVersion(RevertVersionCommand cmd);
+
+	PortalLayoutDTO findIndexPortalLayout(FindIndexPortalLayoutCommand cmd);
 }

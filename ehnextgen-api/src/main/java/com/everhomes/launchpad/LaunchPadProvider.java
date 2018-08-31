@@ -33,7 +33,10 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);
     List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, Map<Byte, Long> defalutScopeMap, String keyword, int offset, int pageSize);
 	List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize, long offset, String keyword);
-    List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId, Integer namesapceId);
+
+    void deleteLaunchPadLayout(Integer namespaceId, String name, Byte publishType);
+
+    List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId, Byte scopeCode, long scopeId, Integer namesapceId);
     void deleteLaunchPadItemByTargetTypeAndTargetId(String targetType, long targetId);
     void deleteLaunchPadItemByScopeAndTargetId(Byte scopeCode,Long scopeId,String targetType, long targetId);
 	List<LaunchPadItem> findLaunchPadItem(Integer nameSpaceId,String itemGroup, String itemName,Byte scopeCode, long scopeId);

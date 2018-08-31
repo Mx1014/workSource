@@ -1,10 +1,68 @@
 package com.everhomes.techpark.punch;
 
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.techpark.punch.*;
-import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
+import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
+import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
+import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
+import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
+import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeCommand;
+import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeResponse;
+import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
+import com.everhomes.rest.techpark.punch.GetAdjustRuleUrlResponse;
+import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
+import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoCommand;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoResponse;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
+import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
+import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
+import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
+import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
+import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestItemDetailCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestItemDetailResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMembersResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
+import com.everhomes.rest.techpark.punch.ListPunchStatusItemDetailCommand;
+import com.everhomes.rest.techpark.punch.ListPunchStatusItemDetailResponse;
+import com.everhomes.rest.techpark.punch.ListPunchStatusMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchStatusMembersResponse;
+import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
+import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
+import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.PunchClockCommand;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
+import com.everhomes.rest.techpark.punch.PunchLogsDay;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
+import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
+import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
 import org.slf4j.Logger;
@@ -13,11 +71,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 /**
  * <ul>
@@ -224,15 +279,12 @@ public class PunchController extends ControllerBase {
 
 	/**
 	 * <b>URL: /techpark/punch/listApprovalCategories</b>
-	 * <p>
-	 * 根据请求 companyid和日期 取一年的打卡记录
-	 * </p>
+	 * <p>获取请假类型</p>
 	 */
 	@RequestMapping("listApprovalCategories")
 	@RestReturn(value = ListApprovalCategoriesResponse.class)
-	public RestResponse listApprovalCategories() {
-
-		RestResponse res = new RestResponse(punchService.listApprovalCategories());
+	public RestResponse listApprovalCategories(ListApprovalCategoriesCommand cmd) {
+		RestResponse res = new RestResponse(punchService.listApprovalCategories(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
@@ -383,7 +435,7 @@ public class PunchController extends ControllerBase {
 	@RestReturn(value = ListPunchCountCommandResponse.class)
 	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
 		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
 		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -507,5 +559,154 @@ public class PunchController extends ControllerBase {
 		punchService.refreshMonthReport(cmd.getMonth());
 		return new RestResponse();
 	}
+	/**
+	 * <p>获取加班文案信息</p>
+	 * <b>URL: /techpark/punch/getOvertimeInfo</b>
+	 */
+	@RequestMapping("getOvertimeInfo")
+	@RestReturn(GetOvertimeInfoResponse.class)
+	public RestResponse getOvertimeInfo(GetOvertimeInfoCommand cmd){
+		GetOvertimeInfoResponse resp = punchService.getOvertimeInfo(cmd);
+		return new RestResponse(resp);
+	}
 
+	/**
+	 * <p>获取部门成员的考勤状态按日的统计数据</p>
+	 * <b>URL: /techpark/punch/dailyStatisticsByDepartment</b>
+	 */
+	@RequestMapping("dailyStatisticsByDepartment")
+	@RestReturn(PunchDailyStatisticsByDepartmentResponse.class)
+	public RestResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
+		RestResponse response = new RestResponse(punchService.dailyStatisticsByDepartment(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取部门成员的考勤状态按月的统计数据</p>
+	 * <b>URL: /techpark/punch/monthlyStatisticsByDepartment</b>
+	 */
+	@RequestMapping("monthlyStatisticsByDepartment")
+	@RestReturn(PunchMonthlyStatisticsByDepartmentResponse.class)
+	public RestResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd) {
+		RestResponse response = new RestResponse(punchService.monthlyStatisticsByDepartment(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取部门某日或某月的成员列表</p>
+	 * <b>URL: /techpark/punch/listMembersOfDepartment</b>
+	 */
+	@RequestMapping("listMembersOfDepartment")
+	@RestReturn(ListPunchMembersResponse.class)
+	public RestResponse listMembersOfDepartment(ListPunchMembersCommand cmd) {
+		RestResponse response = new RestResponse(punchService.listMembersOfDepartment(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取部门特定考勤状态的某日或某月的成员列表（出勤明细）</p>
+	 * <b>URL: /techpark/punch/listMembersOfAPunchStatus</b>
+	 */
+	@RequestMapping("listMembersOfAPunchStatus")
+	@RestReturn(ListPunchStatusMembersResponse.class)
+	public RestResponse listMembersOfAPunchStatus(ListPunchStatusMembersCommand cmd) {
+		RestResponse response = new RestResponse(punchService.listMembersOfAPunchStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取部门特定考勤申请类型的某日或某月的成员类表（申请明细）</p>
+	 * <b>URL: /techpark/punch/listMembersOfAPunchExceptionRequest</b>
+	 */
+	@RequestMapping("listMembersOfAPunchExceptionRequest")
+	@RestReturn(ListPunchExceptionRequestMembersResponse.class)
+	public RestResponse listMembersOfAPunchExceptionRequest(ListPunchExceptionRequestMembersCommand cmd) {
+		RestResponse response = new RestResponse(punchService.listMembersOfAPunchExceptionRequest(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取用户某月特定考勤状态的日期明细</p>
+	 * <b>URL: /techpark/punch/listItemDetailsOfAPunchStatus</b>
+	 */
+	@RequestMapping("listItemDetailsOfAPunchStatus")
+	@RestReturn(ListPunchStatusItemDetailResponse.class)
+	public RestResponse listItemDetailsOfAPunchStatus(ListPunchStatusItemDetailCommand cmd) {
+		RestResponse response = new RestResponse(punchService.listItemDetailsOfAPunchStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取用户某月特定考勤异常申请类型的申请明细</p>
+	 * <b>URL: /techpark/punch/listItemDetailsOfAPunchExceptionRequest</b>
+	 */
+	@RequestMapping("listItemDetailsOfAPunchExceptionRequest")
+	@RestReturn(ListPunchExceptionRequestItemDetailResponse.class)
+	public RestResponse listItemDetailsOfAPunchExceptionRequest(ListPunchExceptionRequestItemDetailCommand cmd) {
+		RestResponse response = new RestResponse(punchService.listItemDetailsOfAPunchExceptionRequest(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取员工个人的考勤状态按月的统计数据</p>
+	 * <b>URL: /techpark/punch/monthlyStatisticsByMember</b>
+	 */
+	@RequestMapping("monthlyStatisticsByMember")
+	@RestReturn(PunchMonthlyStatisticsByMemberResponse.class)
+	public RestResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd) {
+		RestResponse response = new RestResponse(punchService.monthlyStatisticsByMember(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>校验用户的统计权限</p>
+	 * <b>URL: /techpark/punch/checkUserStatisticPrivilege</b>
+	 */
+	@RequestMapping("checkUserStatisticPrivilege")
+	@RestReturn(CheckUserStatisticPrivilegeResponse.class)
+	public RestResponse checkUserStatisticPrivilege(CheckUserStatisticPrivilegeCommand cmd) {
+		RestResponse response = new RestResponse(punchService.checkUserStatisticPrivilege(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>获取规则文案URL</p>
+	 * <b>URL: /techpark/punch/getAdjustRuleUrl</b>
+	 */
+	@RequestMapping("getAdjustRuleUrl")
+	@RestReturn(GetAdjustRuleUrlResponse.class)
+	public RestResponse getAdjustRuleUrl(HttpServletRequest request){
+		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl(request)));
+	}
+
+	/**
+	 * <p>获取规则文案URL</p>
+	 * <b>URL: /techpark/punch/getUserPunchRuleInfoUrl</b>
+	 */
+	@RequestMapping("getUserPunchRuleInfoUrl")
+	@RestReturn(GetUserPunchRuleInfoUrlResponse.class)
+	public RestResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request){
+		GetUserPunchRuleInfoUrlResponse resp = punchService.getUserPunchRuleInfoUrl(cmd, request);
+		return new RestResponse(resp);
+	}
+	
+	
 }

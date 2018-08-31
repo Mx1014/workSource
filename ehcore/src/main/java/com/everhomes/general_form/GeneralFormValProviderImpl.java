@@ -115,6 +115,26 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
     }
 
     @Override
+    public GeneralFormVal getGeneralFormVal(Long formOriginId, Long formVersion,
+                                            Long sourceId, String sourceType, String fieldName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        if (formOriginId != null) {
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.FORM_ORIGIN_ID.eq(formOriginId));
+        }
+        if (formVersion != null) {
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.FORM_VERSION.eq(formVersion));
+        }
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        query.addConditions(Tables.EH_GENERAL_FORM_VALS.FIELD_NAME.eq(fieldName));
+
+        query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.desc());
+        return query.fetchAnyInto(GeneralFormVal.class);
+    }
+
+    @Override
     public void deleteGeneralFormValNotInFieldNameScope(Long sourceId, String sourceType, List<String> fieldNameScope){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 

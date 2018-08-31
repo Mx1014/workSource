@@ -3,8 +3,12 @@ package com.everhomes.express;
 
 import java.util.Map;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.express.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -114,16 +118,6 @@ public class ExpressController extends ControllerBase {
 	public RestResponse payExpressOrder(PayExpressOrderCommand cmd){
 		return new RestResponse(expressService.payExpressOrder(cmd));
 	}
-
-	/**
-//	 * <p>9.1. 立即支付 V2</p>
-//	 * <b>URL: /express/payExpressOrderV2</b>
-//	 */
-//	@RequestMapping("payExpressOrderV2")
-//	@RestReturn(PreOrderDTO.class)
-//	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
-////		return new RestResponse(expressService.payExpressOrderV2(cmd));
-//	}
 
 	/**
 	 * <p>10.出单</p>
@@ -372,5 +366,75 @@ public class ExpressController extends ControllerBase {
 	public RestResponse prePayExpressOrder(PrePayExpressOrderCommand cmd){
 		return new RestResponse(expressService.prePayExpressOrder(cmd));
 	}
-	
+
+
+	/**
+	 * <b>URL: /express/listPayeeAccount </b>
+	 * <p>34.获取收款方账号</p>
+	 */
+	@RequestMapping("listPayeeAccount")
+	@RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
+	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(expressService.listPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /express/createOrUpdateBusinessPayeeAccount </b>
+	 * <p>35.关联收款方账号到具体业务</p>
+	 */
+	@RequestMapping("createOrUpdateBusinessPayeeAccount")
+	@RestReturn(value=String.class)
+	public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+		expressService.createOrUpdateBusinessPayeeAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /express/getBusinessPayeeAccount </b>
+	 * <p>36.获取已关联收款账号的业务</p>
+	 */
+	@RequestMapping("getBusinessPayeeAccount")
+	@RestReturn(value=BusinessPayeeAccountDTO.class)
+	public RestResponse getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(expressService.getBusinessPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>37. 立即支付 V2</p>
+	 * <b>URL: /express/payExpressOrderV2</b>
+	 */
+	@RequestMapping("payExpressOrderV2")
+	@RestReturn(PreOrderDTO.class)
+	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
+		return new RestResponse(expressService.payExpressOrderV2(cmd));
+	}
+
+	/**
+	 * <b>URL: /express/notifyExpressOrderPaymentV2</b>
+	 * <p>38. 支付/退款后,支付系统回调</p>
+	 */
+	@RequestMapping("notifyExpressOrderPaymentV2")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
+		expressService.notifyExpressOrderPaymentV2(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

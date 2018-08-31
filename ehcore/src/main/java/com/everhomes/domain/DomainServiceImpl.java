@@ -64,7 +64,8 @@ public class DomainServiceImpl implements DomainService {
 
         List<DomainDTO> list = domains.stream().map(r -> {
             DomainDTO dto = ConvertHelper.convert(r, DomainDTO.class);
-            populateUrl(dto);
+            //循环次数太多，导致很慢
+            //populateUrl(dto);
             return dto;
         }).collect(Collectors.toList());
 

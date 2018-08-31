@@ -19,19 +19,26 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,13 +76,19 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd ,HttpServletRequest request) {
         List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(cmd);
+        //add by liangming.huang 20180816
+        //添加用户活跃记录,为微信端作的,由于时间紧急,先加在这里吧.本来写好接口让微信端调用的/admin/registerWXLogin
+        this.userService.registerWXLoginConnection(request);
+
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     } 
+
+
 
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
@@ -127,43 +140,31 @@ public class UserUiController extends ControllerBase {
 			}
 		//}
 
-		//List<FamilyMemberDTO> resp = null;
-		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
-// 	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-//// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-//// 	    	command.setIsPinyin(1);
-//// 	    	command.setType(ParamType.COMMUNITY.getCode());
-//// 	    	command.setId(sceneToken.getEntityId());
-//// 	    	resp= familyService.listNeighborUsers(command);
-//		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-//
-//// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-//// 	    	command.setIsPinyin(1);
-//// 	    	command.setType(ParamType.FAMILY.getCode());
-//// 	    	command.setId(sceneToken.getEntityId());
-////			resp = familyService.listNeighborUsers(command);
-//
-//			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
-//			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
 //		}
-// 	    if(null != resp &&  0 != resp.size()){
-// 	    	dtos = resp.stream().map(r->{
-//				SceneContactDTO dto = new SceneContactDTO();
-//				dto.setContactId(r.getMemberUid());
-//				dto.setContactName(r.getMemberName());
-//				dto.setStatusLine(r.getStatusLine());
-//				dto.setOccupation(r.getOccupation());
-//				dto.setContactAvatar(r.getMemberAvatarUrl());
-//				dto.setUserId(r.getMemberUid());
-//
-//				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
-//				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
-//				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
-//				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
-//				return dto;
-//			}).collect(Collectors.toList());
-// 	    }
 
+		/*List<FamilyMemberDTO> resp = null;
+		//	仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
+		if (UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType()))
+			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
+
+ 	    if(null != resp &&  0 != resp.size()){
+ 	    	dtos = resp.stream().map(r->{
+				SceneContactDTO dto = new SceneContactDTO();
+				dto.setContactId(r.getMemberUid());
+				dto.setContactName(r.getMemberName());
+				dto.setStatusLine(r.getStatusLine());
+				dto.setOccupation(r.getOccupation());
+				dto.setContactAvatar(r.getMemberAvatarUrl());
+				dto.setUserId(r.getMemberUid());
+
+				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
+				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
+				return dto;
+			}).collect(Collectors.toList());
+ 	    }*/
+ 	    
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);
 		RestResponse response = new RestResponse(res);

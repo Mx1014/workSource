@@ -11,11 +11,14 @@ import java.util.List;
  *     <li>laneId: 泳道id</li>
  *     <li>laneLevel: 泳道level</li>
  *     <li>laneName: 泳道名称</li>
+ *     <li>currNodeParams: currNodeParams</li>
  *     <li>isCurrentLane: 是否是当前泳道</li>
  *     <li>isRejectLane: 当前节点是驳回节点</li>
  *     <li>isAbsortLane: 当前节点是终止节点</li>
  *     <li>needSelectNextNode: 下个节点需要处理人选择</li>
  *     <li>laneEnterTime: 进入泳道的时间</li>
+ *     <li>currentFormOriginId: 当前节点配置的表单id</li>
+ *     <li>currentFormVersion: 当前节点配置的表单 version</li>
  *     <li>logs: 详细日志信息，目前仅有 logContent 有用 {@link com.everhomes.rest.flow.FlowEventLogDTO}</li>
  * </ul>
  */
@@ -30,6 +33,9 @@ public class FlowLaneLogDTO {
     private Byte isAbsortLane;
     private Byte needSelectNextNode;
     private Long laneEnterTime;
+
+    private Long currentFormOriginId;
+    private Long currentFormVersion;
 
     @ItemType(FlowEventLogDTO.class)
     private List<FlowEventLogDTO> logs;
@@ -116,6 +122,22 @@ public class FlowLaneLogDTO {
 
     public void setIsAbsortLane(Byte isAbsortLane) {
         this.isAbsortLane = isAbsortLane;
+    }
+
+    public Long getCurrentFormOriginId() {
+        return currentFormOriginId;
+    }
+
+    public void setCurrentFormOriginId(Long currentFormOriginId) {
+        this.currentFormOriginId = currentFormOriginId;
+    }
+
+    public Long getCurrentFormVersion() {
+        return currentFormVersion;
+    }
+
+    public void setCurrentFormVersion(Long currentFormVersion) {
+        this.currentFormVersion = currentFormVersion;
     }
 
     @Override

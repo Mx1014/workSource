@@ -3,6 +3,8 @@ package com.everhomes.address;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -27,7 +29,7 @@ public interface AddressService {
     Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
 
     Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordNew(ListPropApartmentsByKeywordCommand cmd);
-    
+
     ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd);
     void disclaimAddress(DisclaimAddressCommand cmd);
     
@@ -93,4 +95,12 @@ public interface AddressService {
      */
     void betchDisclaimAddress(BetchDisclaimAddressCommand cmd);
 
+	void createAddressArrangement(CreateAddressArrangementCommand cmd);
+	AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd);
+	void updateAddressArrangement(UpdateAddressArrangementCommand cmd);
+	void deleteAddressArrangement(DeleteAddressArrangementCommand cmd);
+	List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd);
+	void excuteAddressArrangementOnTime();
+	void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd);
+	void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse);
 }

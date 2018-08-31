@@ -9,7 +9,8 @@ public enum OSType {
     Firefox((byte) 4),
     Blackberry((byte) 5),
     IOSWeiXin((byte) 6),
-    AndriodWeiXin((byte) 7);
+    AndriodWeiXin((byte) 7),
+    WEIXIN((byte) 8);
 
     private Byte code;
 

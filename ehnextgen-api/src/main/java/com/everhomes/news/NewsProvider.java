@@ -52,4 +52,9 @@ public interface NewsProvider {
 	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
 
 	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
+
+	Long createNewPreview(News news);
+
+	News findNewPreview(Long id);
+
 }

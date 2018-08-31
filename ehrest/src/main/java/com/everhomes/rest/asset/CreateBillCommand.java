@@ -26,6 +26,7 @@ import java.util.List;
  * <li>dateStrEnd:计费结束</li>
  * <li>isOwed:是否欠费，0：正常；1：欠费</li>
  * <li>customerTel:客户手机号，用来滞后定位用户</li>
+ * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -43,6 +44,9 @@ public class CreateBillCommand {
     private Byte isSettled;
     private String invoiceNum;
     private Long categoryId;
+    
+    //新增附件
+    private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
     public Long getCategoryId() {
         return categoryId;
@@ -199,6 +203,14 @@ public class CreateBillCommand {
 
 	public void setAddresses(String addresses) {
 		this.addresses = addresses;
+	}
+
+	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
+		return assetPaymentBillAttachmentList;
+	}
+
+	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
+		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
 	}
 
 }

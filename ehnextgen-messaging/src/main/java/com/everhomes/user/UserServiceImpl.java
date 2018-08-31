@@ -386,13 +386,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 	@Autowired
 	private SmartCardKeyProvider smartCardKeyProvider;
-	
+
 	private static long stepInSecond = 30;
-	
+
    private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
 
 	private static final String DEVICE_KEY = "device_login";
-	
+
 	@Autowired
     private ArchivesService archivesService;
 
@@ -1469,6 +1469,62 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
+    /**
+     * 微信端活跃记录
+     * @param loginToken
+     * @param borderId
+     * @param borderSessionId
+     * @return
+     */
+    @Override
+    public void registerWXLoginConnection(HttpServletRequest request) {
+    	/*if(request == null){
+    		LOGGER.info("request is null ");
+    	}else{
+    		LOGGER.info(request.toString());
+    	}*/
+    	 Cookie loginTokenCookie = findCookieInRequest("token",request);
+    	 if(loginTokenCookie == null){
+    		 LOGGER.info("loginTokenCookie is null ");
+    		 return ;
+    	 }
+         String token = loginTokenCookie.getValue();
+         LoginToken loginToken = WebTokenGenerator.getInstance().fromWebToken(token, LoginToken.class);
+         if(token == null)
+             return ;
+
+        String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
+
+        String hkeyLogin = String.valueOf(loginToken.getLoginId());
+        Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+        UserLogin login = accessor.getMapValueObject(hkeyLogin);
+        if (login != null && login.getStatus() == UserLoginStatus.LOGGED_IN) {
+            //Save loginBorderId here
+            login.setLoginBorderId(null);
+            login.setBorderSessionId(null);
+            login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+            accessor.putMapValueObject(hkeyLogin, login);
+
+            // 发布用户切换出场景到前台事件   add by liangming.huang 2018/08/16
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
+
+        }
+    }
+
+    private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
+        List<Cookie> matchedCookies = new ArrayList<>();
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals(name)) {
+                    matchedCookies.add(cookie);
+                }
+            }
+        }
+        if(matchedCookies.size() > 0)
+            return matchedCookies.get(matchedCookies.size() - 1);
+        return null;
+    }
     public UserLogin unregisterLoginConnection(LoginToken loginToken, int borderId, String borderSessionId) {
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         String hkeyLogin = String.valueOf(loginToken.getLoginId());
@@ -4183,6 +4239,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.stream().filter(r -> {
             return r.getSceneToken() != null;
         }).collect(Collectors.toList());
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5292,6 +5350,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sceneList.clear();
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+        //设置排序字段
+        sceneList = handleSortName(sceneList);
         return sceneList;
     }
 
@@ -5330,10 +5390,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 sceneList.add(sceneDTO);
                 return null;
             }).collect(Collectors.toList());
-
+            //返回前设置排序字段
+            handleSortName(sceneList);
             return sceneList;
         } else {
-            return this.listTouristRelatedScenes();
+        	//返回前设置排序字段
+            return handleSortName(this.listTouristRelatedScenes());
         }
     }
 
@@ -5613,7 +5675,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				user.setNamespaceUserType(null);
 				LOGGER.info("user={}",user);userProvider.updateUser(user);
 			}
-//
+			//add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
+
             UserLogin oldLogin = UserContext.current().getLogin();
             if (oldLogin != null) {
                 this.logoff(oldLogin);
@@ -5640,6 +5707,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             userProvider.updateIdentifier(userIdentifier);
 
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
             return null;
 
         } else {
@@ -5656,6 +5728,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
 
             user = userProvider.findUserById(user.getId());
             String salt = EncryptionUtils.createRandomSalt();
@@ -5744,6 +5822,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userProvider.updateIdentifier(userIdentifier);
             login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
+
+          //add by huangliangming 20180731 使得微信注册时能够激活管理员
+			// 刷新企业通讯录
+            organizationService.processUserForMember(userIdentifier);
+            //刷新地址信息
+            propertyMgrService.processUserForOwner(userIdentifier);
         }
         return login;
     }private void verificationCode(UserIdentifier userIdentifier, String code){
@@ -6701,7 +6785,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		response.setDtos(dtos);
 		return response;
 	}
-	
+
 	private TimeBasedOneTimePasswordGenerator getTotp() throws NoSuchAlgorithmException {
 	    TimeBasedOneTimePasswordGenerator totp = totpLocal.get();
         if(totp == null) {
@@ -6737,7 +6821,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
         resp.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;
-        
+
         try {
             List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(UserContext.currentUserId());
             SmartCardKey obj = null;
@@ -6747,7 +6831,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 keyGenerator.init(512);
                 Key secretKey = keyGenerator.generateKey();
                 String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
-                
+
                 //use new card for this user
                 obj = new SmartCardKey();
                 obj.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -6760,7 +6844,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
-            
+
             resp.setSmartCardId(obj.getId());
             resp.setSmartCardKey(obj.getCardkey());
         } catch (NoSuchAlgorithmException e) {
@@ -6768,7 +6852,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         return resp;
     }
-    
+
     private int generateTotp(TimeBasedOneTimePasswordGenerator totp, String smartKey, long nowInSec) throws InvalidKeyException, NoSuchAlgorithmException {
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(smartKey.getBytes()), totp.getAlgorithm());
         int code = totp.generateOneTimePassword(key, new Date(nowInSec * 1000));
@@ -6781,14 +6865,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
         resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
         int validWindow = 1;
-        
+
         try {
             totp = getTotp();
             Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
             if(cmd.getCardCode() == null || cmd.getCardCode().length() < 18) {
                 return resp;
             }
-            
+
             String randomUid = cmd.getCardCode().substring(1, 10);
             String totpCode = cmd.getCardCode().substring(10, 18);
             Long uid = Long.parseLong(randomUid);
@@ -6796,7 +6880,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             uid = (uid ^ totpCodeInt);
             List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
             if(cards != null) {
-                
+
                 int j;
                 OUTLOOP:
                 for(j = 0; j < cards.size(); j++) {
@@ -6809,7 +6893,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                         }
                     }
                 }
-                
+
                 if(j < cards.size()) {
                     for(j = j+1; j < cards.size(); j++) {
                         //invalid the old one
@@ -6817,16 +6901,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                         if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
                             card.setStatus(TrueOrFalseFlag.FALSE.getCode());
                             smartCardKeyProvider.updateSmartCardKey(card);
-                        }   
-                    }  
+                        }
+                    }
                 }
-                
+
             }
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generate totp failed", e);
         }
-        
+
         return resp;
     }
 
@@ -6840,26 +6924,26 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if(cmd.getNow() == null) {
                 cmd.setNow(resp.getNow());
             }
-            
+
             int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
             long randomUid = UserContext.currentUserId();
             randomUid = (randomUid) ^ (long)topt;
             String s1 = String.valueOf(randomUid);
             String s2 = "";
             if(s1.length() < 9) {
-                s2 = "000000000".substring(0, 9 - s1.length()) + s1;    
+                s2 = "000000000".substring(0, 9 - s1.length()) + s1;
             } else {
                 s2 = s1;
             }
-            
+
             resp.setQrCode("1" + s2 + String.valueOf(topt));
-            
+
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
         }
         return resp;
-        
+
     }
 
 	/**
@@ -6875,7 +6959,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		}
 		return user;
 	}
-    
+
 	@Override
     public Byte isUserAuth() {
         User user = UserContext.current().getUser();
@@ -6905,5 +6989,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+    /**
+     * 有简称取简称,无简称取全名
+     * @param sceneList
+     * @return
+     */
+	private List<SceneDTO> handleSortName(List<SceneDTO> sceneList ){
+
+		  if(sceneList != null && sceneList.size()>0)
+		  {
+			  for(SceneDTO dto : sceneList){
+				  if(StringUtils.isBlank(dto.getAliasName())){
+					  dto.setAliasName(dto.getName());
+				  }
+			  }
+		  }
+		  return sceneList ;
+	  }
 
 }

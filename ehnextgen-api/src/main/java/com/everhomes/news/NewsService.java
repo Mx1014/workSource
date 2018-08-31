@@ -92,6 +92,9 @@ public interface NewsService {
 	void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd);
 
 	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
+
+	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
+
 }
 
 

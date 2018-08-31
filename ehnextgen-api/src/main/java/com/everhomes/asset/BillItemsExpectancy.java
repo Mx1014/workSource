@@ -3,10 +3,12 @@ package com.everhomes.asset;
 
 
 import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/10/17.
@@ -27,6 +29,7 @@ public class BillItemsExpectancy {
     private String billCycleEnd;
     private Long lateFineStandardId;
     private Date dateStrFakeEnd;
+    private List<VariableIdAndValue> variableIdAndValueList;
 
     public Date getDateStrFakeEnd() {
         return dateStrFakeEnd;
@@ -187,5 +190,14 @@ public class BillItemsExpectancy {
     public void setItemScope(PaymentChargingItemScope itemScope) {
         this.itemScope = itemScope;
     }
+
+	public List<VariableIdAndValue> getVariableIdAndValueList() {
+		return variableIdAndValueList;
+	}
+
+	public void setVariableIdAndValueList(List<VariableIdAndValue> variableIdAndValueList) {
+		this.variableIdAndValueList = variableIdAndValueList;
+	}
+
 
 }

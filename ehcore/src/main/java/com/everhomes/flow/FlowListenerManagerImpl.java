@@ -6,7 +6,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,6 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     @Autowired(required = false)
     private List<FlowModuleListener> moduleListeners;
 
-    @Autowired(required = false)
-    private List<FlowFunctionListener> functionListeners;
-
     @Autowired
     private FlowService flowService;
 
@@ -38,9 +34,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() != null) {
-            return;
-        }
+        // if (event.getApplicationContext().getParent() != null) {
+        //     return;
+        // }
         for (FlowModuleListener listener : moduleListeners) {
             try {
                 FlowModuleInfo info = listener.initModule();
@@ -300,14 +296,15 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(
+            FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getModuleListener();
             FlowConditionVariable conditionVariable = null;
             try {
-                conditionVariable = listener.onFlowConditionVariableRender(ctx, variable, extra);
+                conditionVariable = listener.onFlowConditionVariableRender(ctx, variable, entityType, entityId, extra);
             } catch (Exception e) {
                 wrapError(e, listener);
             }
@@ -365,6 +362,37 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowStateChanging(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+        }
+    }
+
+    @Override
+    public FlowConditionVariable onFlowConditionFormVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
+        if (inst != null) {
+            ctx.setModule(inst.getInfo());
+            FlowModuleListener listener = inst.getModuleListener();
+            FlowConditionVariable conditionVariable = null;
+            try {
+                conditionVariable = listener.onFlowConditionFormVariableRender(ctx, variable, entityType, entityId, extra);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+            return conditionVariable;
+        }
+        return null;
+    }
+
+    @Override
+    public void onSubFlowEnter(FlowCaseState ctx, FlowServiceMapping mapping, Flow subFlow, CreateFlowCaseCommand cmd) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
+        if (inst != null) {
+            ctx.setModule(inst.getInfo());
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onSubFlowEnter(ctx, mapping, subFlow, cmd);
             } catch (Exception e) {
                 wrapError(e, listener);
             }

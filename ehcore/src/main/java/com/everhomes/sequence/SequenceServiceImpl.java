@@ -421,7 +421,6 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2PriceRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2RefundOrders;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceNumbers;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceOrders;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourcePics;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceRanges;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourceTypes;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;

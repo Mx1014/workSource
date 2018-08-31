@@ -15,7 +15,7 @@ public interface PunchMonthReportProvider {
 
 	List<PunchMonthReport> listPunchMonthReport();
 
-	List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, Integer pageSize, CrossShardListingLocator locator);
+	List<PunchMonthReport> listPunchMonthReport(String ownerType, Long ownerId, String punchYear, Integer pageSize, CrossShardListingLocator locator);
 
 	PunchMonthReport findPunchMonthReportByOwnerMonth(Long orgId, String format);
 }

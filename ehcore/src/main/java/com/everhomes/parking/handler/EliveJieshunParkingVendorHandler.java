@@ -29,15 +29,13 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -200,7 +198,81 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 	}
 
 
+	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+		List<ParkingCardDTO> parkingCardLists = listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
+		if(parkingCardLists==null || parkingCardLists.size()==0){
+			return null;
+		}
+		ParkingCardDTO cardInfo = parkingCardLists.get(0);
+		if (cardInfo == null) {
+			return null;
+		}
+		List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
+		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+			return null;
+		}
 
+		ParkingRechargeRateDTO targetRateDTO = null;
+		String cardTypeId = cardInfo.getCardTypeId();
+		for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+			if (rateDTO.getCardTypeId().equals(cardTypeId) && rateDTO.getMonthCount().intValue()==parkingLot.getExpiredRechargeMonthCount()) {
+				targetRateDTO = rateDTO;
+				break;
+			}
+		}
+
+		if (null == targetRateDTO) {
+			parkingRechargeRates.sort((r1,r2)->r1.getMonthCount().compareTo(r2.getMonthCount()));
+			for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+				if (rateDTO.getCardTypeId().equals(cardTypeId)) {
+					targetRateDTO = rateDTO;
+					break;
+				}
+			}
+		}
+		if (null == targetRateDTO) {
+			return null;
+		}
+
+		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(targetRateDTO,ParkingExpiredRechargeInfoDTO.class);
+		dto.setCardTypeName(targetRateDTO.getCardType());
+
+		if (cardInfo != null  && cardInfo.getEndTime() != null) {
+			Integer requestMonthCount = REQUEST_MONTH_COUNT;
+			Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+			if(null != parkingLot) {
+				requestMonthCount = parkingLot.getExpiredRechargeMonthCount();
+				requestRechargeType = parkingLot.getExpiredRechargeType();
+			}
+			long newStartTime = cardInfo.getEndTime();
+			long now = System.currentTimeMillis();
+			if(now>newStartTime){
+				newStartTime = now;
+			}
+			if(requestRechargeType == ParkingCardExpiredRechargeType.ACTUAL.getCode()){
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(System.currentTimeMillis());
+				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+				int today = calendar.get(Calendar.DAY_OF_MONTH);
+				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
+						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+								.divide(new BigDecimal(maxDay), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+				dto.setPrice(price);
+			}else{
+				dto.setPrice(targetRateDTO.getPrice().divide(targetRateDTO.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP)
+						.multiply(new BigDecimal(parkingLot.getExpiredRechargeMonthCount())));
+			}
+			dto.setStartPeriod(newStartTime);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddNatureMonth(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+			dto.setEndPeriod(rechargeEndTimestamp.getTime());
+			dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+			dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.default.rateName","个月"));
+
+		}
+		return dto;
+	}
 
 	@Override
 	public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
@@ -279,6 +351,10 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			String validEnd = attributes.getString("endTime");
 
 			Timestamp timestampStart = new Timestamp(Utils.strToLong(validEnd, Utils.DateStyle.DATE));
+			Long now = System.currentTimeMillis();
+			if(now>timestampStart.getTime()){
+				timestampStart = new Timestamp(now);
+			}
 			Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 

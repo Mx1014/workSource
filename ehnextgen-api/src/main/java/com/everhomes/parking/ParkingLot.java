@@ -41,8 +41,26 @@ public class ParkingLot extends EhParkingLots {
     private Byte invoiceFlag;
     private Byte vipParkingFlag;
     private Byte monthRechargeFlag;
-    private byte businessLicenseFlag;
+    private Byte businessLicenseFlag;
     private Byte identityCardFlag;
+    private Byte monthCardFlag;//是否支持月卡申请，用于应用创建。
+    private Integer flowMode;
+
+    public Integer getFlowMode() {
+        return flowMode;
+    }
+
+    public void setFlowMode(Integer flowMode) {
+        this.flowMode = flowMode;
+    }
+
+    public Byte getMonthCardFlag() {
+        return monthCardFlag;
+    }
+
+    public void setMonthCardFlag(Byte monthCardFlag) {
+        this.monthCardFlag = monthCardFlag;
+    }
 
     public Byte getIdentityCardFlag() {
         return identityCardFlag;

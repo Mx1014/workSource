@@ -35,8 +35,7 @@ public interface CommunityService {
 
     CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
 
-	ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
-			ListComunitiesByKeywordAdminCommand cmd);
+	ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd);
 	
 	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
 	BuildingDTO getBuilding(GetBuildingCommand cmd);
@@ -107,7 +106,7 @@ public interface CommunityService {
 	
 	void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
 	
-	ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
+	ListCommunitiesByKeywordResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
 	
 	List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd);
 	
@@ -157,9 +156,39 @@ public interface CommunityService {
 	void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd);
 
 	void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId);
-	
+
 		//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
+
+	CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd);
+
+	ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd);
+
+	CommunityStatisticsDTO getCommunityStatistics(GetCommunityStatisticsCommand cmd);
+
+	CommunityDetailDTO getCommunityDetail(GetCommunityDetailCommand cmd);
+
+	void updateCommunityAndCategory(UpdateCommunityNewCommand cmd);
+
+	BuildingStatisticsDTO getBuildingStatistics(GetBuildingStatisticsCommand cmd);
+
+	void exportBuildingByKeywords(ListBuildingsByKeywordsCommand cmd, HttpServletResponse httpServletResponse);
+
+	void caculateCommunityArea(CaculateCommunityAreaCommand cmd);
+
+	void caculateBuildingArea(CaculateBuildingAreaCommand cmd);
+
+	ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
+
+	FloorRangeDTO getFloorRange(GetFloorRangeCommand cmd);
+
+	void changeBuildingOrder(ChangeBuildingOrderCommand cmd);
+
+	void exportApartmentsInCommunity(ListApartmentsInCommunityCommand cmd, HttpServletResponse httpServletResponse);
+
+	void caculateAllCommunityArea();
+
+	void caculateAllBuildingArea();
 
 
 }

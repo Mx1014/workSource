@@ -529,7 +529,7 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getUserInfo")
 	@RestReturn(UserInfo.class)
-	public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public RestResponse getUserInfo(GetUserSnapshotInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 		UserInfo info = this.userService.getUserInfo();
 		if(info==null){
 			return new RestResponse(info);

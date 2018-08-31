@@ -211,7 +211,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -4604,7 +4603,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
                 Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
                 task.setExecutiveStartTime(startTime);
                 LocalDateTime endTime = expiredTime.toLocalDateTime();
-                task.setExecutiveExpireTime(Timestamp.valueOf(LocalDateTime.of(endTime.toLocalDate(),LocalTime.MAX).format(dateSF)));
+                task.setExecutiveExpireTime(Timestamp.valueOf(LocalDateTime.of(endTime.toLocalDate().minusDays(1L),LocalTime.MAX).format(dateSF)));
 
                 energyMeterTaskProvider.createEnergyMeterTask(task);
                 energyMeterTaskSearcher.feedDoc(task);

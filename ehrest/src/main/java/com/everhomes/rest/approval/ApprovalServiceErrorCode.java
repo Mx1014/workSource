@@ -34,5 +34,13 @@ public interface ApprovalServiceErrorCode {
 	int EFFECTIVE_DATE_HAS_REQUEST = 10022;  //所选日期已提交过加班申请，请重新选择
 	
 	int APPROVAL_LEVEL_APPROVED = 10023;  //申请单已经被审批
+
+
+	int APPROVAL_CATEGORY_NOT_EXIST = 10030;  // 该假期类型不存在
+	int APPROVAL_CATEGORY_ACTIVE_FOREVER_ERROR = 10031; // 该假期类型不可禁用
+	int APPROVAL_CATEGORY_CAN_NOT_REMOVE_ERROR = 10032; // 假期类型不支持删除操作
+	int APPROVAL_CATEGORY_FORM_DATA_ERROR = 10033;  // 请假表单数据不完整
+	int APPROVAL_CATEGORY_UNUSEABLE_ERROR = 10034;  // 该请假类型未开启
+	int APPROVAL_CATEGORY_VACATION_BALANCE_LIMIT_ERROR = 10035;  // 假期余额不足
 	
 }

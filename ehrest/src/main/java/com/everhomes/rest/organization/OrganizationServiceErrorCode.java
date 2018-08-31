@@ -106,4 +106,7 @@ public interface OrganizationServiceErrorCode {
     int ERROR_WORKPLATFORM_ISNULL = 900037;//是否开启工作台标志为空
     int ERROR_ORGANIZATION_NAME_OVERFLOW = 900038;//公司的名称长度超过50个汉字
 
+
+    //merge 发现冲突900031
+    int ERROR_USER_IS_ADMINISTRATOR = 900031; //用户为管理员，不允许退出
 }
