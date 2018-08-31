@@ -8501,7 +8501,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-    public ListApprovalCategoriesResponse listApprovalCategories(ListApprovalCategoriesCommand cmd) {
+    public ListApprovalCategoriesResponse listApprovalCategories(ListApprovalCategoriesCommand cmd, HttpServletRequest request) {
         cmd.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
         // 接口兼容APP旧版本没传参数的场景，返回除年假和调休外的所有请假类型，无论开启已否
         if (cmd.getNamespaceId() == null || cmd.getOwnerId() == null) {
@@ -8516,7 +8516,7 @@ public class PunchServiceImpl implements PunchService {
         List<ApprovalCategoryDTO> categories = approvalService.initAndListApprovalCategory(listApprovalCategoryCommand).getCategoryList();
 
         buildMoreInfoOfCurrentUser(cmd.getOwnerId(), categories);
-        return new ListApprovalCategoriesResponse(categories, processApprovalCategorieUrl(cmd.getOwnerId(), cmd.getNamespaceId()));
+        return new ListApprovalCategoriesResponse(categories, processApprovalCategorieUrl(cmd.getOwnerId(), cmd.getNamespaceId(), request));
     }
 
     // 生成不同请假类型的提示信息和当前用户的假期余额
@@ -12153,8 +12153,8 @@ public class PunchServiceImpl implements PunchService {
         return dto;
     }
 
-    public String processApprovalCategorieUrl(Long ownerId,Integer namespaceId){
-        String homeUrl = configurationProvider.getValue("home.url", "");
+    public String processApprovalCategorieUrl(Long ownerId,Integer namespaceId, HttpServletRequest request){
+    	String homeUrl = request.getHeader("Host");
         return homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId +"#sign_suffix";
     }
     
