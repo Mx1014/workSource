@@ -11,7 +11,7 @@ import java.util.List;
  *     <li>appIds: 按照顺序排列顺序传来appId</li>
  * </ul>
  */
-public class UpdateBaseUserAppsCommand {
+public class UpdateUserAppsCommand {
 
     private Long communityId;
 

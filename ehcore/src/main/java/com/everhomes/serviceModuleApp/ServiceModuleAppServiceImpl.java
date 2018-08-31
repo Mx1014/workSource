@@ -1266,7 +1266,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public void updateBaseUserApps(UpdateBaseUserAppsCommand cmd) {
+	public void updateBaseUserApps(UpdateUserAppsCommand cmd) {
 
 		Long userId = UserContext.currentUserId();
 

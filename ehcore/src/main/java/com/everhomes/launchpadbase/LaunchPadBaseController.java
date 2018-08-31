@@ -8,6 +8,7 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
+import com.everhomes.rest.launchpadbase.UpdateUserAppsCommand;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ public class LaunchPadBaseController extends ControllerBase {
      */
     @RequestMapping("updateUserApps")
     @RestReturn(value=String.class)
-    public RestResponse updateUserApps(UpdateBaseUserAppsCommand cmd) {
+    public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
         serviceModuleAppService.updateBaseUserApps(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
