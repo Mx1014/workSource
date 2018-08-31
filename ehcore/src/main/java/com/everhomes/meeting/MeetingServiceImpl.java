@@ -534,6 +534,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingReservationSimpleDTO.setSponsorDetailId(meetingReservation.getMeetingSponsorDetailId());
         meetingReservationSimpleDTO.setSponsorName(meetingReservation.getMeetingSponsorName());
         meetingReservationSimpleDTO.setMeetingDate(meetingReservation.getMeetingDate().getTime());
+        meetingReservationSimpleDTO.setAttachmentFlag(meetingReservation.getAttachmentFlag());
         return meetingReservationSimpleDTO;
     }
 
