@@ -2779,11 +2779,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         if(mappings != null && mappings.size() > 0) {
             mappings.forEach(mapping -> {
                 Contract contract = contractProvider.findContractById(mapping.getContractId());
-                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
-                        && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
-                        && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-                    customerIds.add(contract.getCustomerId());
-                }
+                if (contract != null) {
+                	if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+                            && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
+                            && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                        customerIds.add(contract.getCustomerId());
+                    }
+				}
             });
         }
 
