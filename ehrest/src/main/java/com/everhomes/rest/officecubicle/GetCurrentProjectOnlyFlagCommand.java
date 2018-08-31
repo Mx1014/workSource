@@ -2,6 +2,13 @@ package com.everhomes.rest.officecubicle;
 
 import javax.validation.constraints.NotNull;
 
+
+/**
+ * <ul>
+ *  <li>namespaceId: 域空间id</li>
+ *  <li>orgId: 管理公司id</li>
+ * </ul>
+ */
 public class GetCurrentProjectOnlyFlagCommand {
     @NotNull
     private Integer namespaceId;
