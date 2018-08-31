@@ -625,9 +625,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
-
-		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
-
+		ServiceAllianceCategories parent = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
 		if (null == parent) {
 			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
 			throwError(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT, "parent category not found!");
@@ -657,6 +655,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				category.setLogoUrl(cmd.getLogoUrl());
 				category.setSelectedLogoUrl(cmd.getSelectedLogoUrl());
 				category.setSkipType(cmd.getSkipType() == null ? (byte)0 : cmd.getSkipType());
+				category.setType(cmd.getParentId());
 				yellowPageProvider.createCategory(category);
 			} else {
 				category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
