@@ -12675,7 +12675,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `split_date_time` datetime DEFAULT NULL COMMENT '当天考勤时间的分界点',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_id` (`user_id`),
-  KEY `i_eh_enterprise_punch_date_user_id` (`enterprise_id`,`user_id`,`punch_date`)
+  KEY `i_eh_enterprise_punch_date_user_id` (`enterprise_id`,`user_id`,`punch_date`),
   KEY `i_eh_enterprise_punch_date_detail_id` (`enterprise_id`,`punch_date`,`detail_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
