@@ -13134,7 +13134,7 @@ CREATE TABLE `eh_punch_statistics` (
   `overtime_total_restday` bigint(20) NOT NULL DEFAULT '0' COMMENT '休息日加班时长，单位毫秒数',
   `overtime_total_legal_holiday` bigint(20) NOT NULL DEFAULT '0' COMMENT '节假日加班时长，单位毫秒数',
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   KEY `i_eh_punch_month_detail_id` (`punch_month`,`owner_type`,`owner_id`,`detail_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
