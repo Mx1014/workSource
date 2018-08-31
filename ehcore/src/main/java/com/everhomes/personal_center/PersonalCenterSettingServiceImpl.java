@@ -174,7 +174,9 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         dtoList.addAll(cmd.getBasicDtos());
         dtoList.addAll(cmd.getBlockDtos());
         dtoList.addAll(cmd.getListDtos());
-        List<PersonalCenterSettingDTO> returnDtoList = new ArrayList<>();
+        List<PersonalCenterSettingDTO> basicDtos = new ArrayList<>();
+        List<PersonalCenterSettingDTO> blockDtos = new ArrayList<>();
+        List<PersonalCenterSettingDTO> listDtos = new ArrayList<>();
         if (!CollectionUtils.isEmpty(dtoList)) {
             Integer version = getVersion(cmd.getNamespaceId());
             dtoList.stream().forEach(r -> {
@@ -186,11 +188,25 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 this.personalCenterSettingProvider.createPersonalCenterSetting(personalCenterSetting);
                 PersonalCenterSettingDTO returnDto = ConvertHelper.convert(personalCenterSetting, PersonalCenterSettingDTO.class);
                 returnDto.setIconUrl(parseUrl(returnDto.getIconUri(),cmd.getNamespaceId()));
-                returnDtoList.add(returnDto);
+                switch (returnDto.getRegion()) {
+                    case 0 :
+                        basicDtos.add(returnDto);
+                        break;
+                    case 1 :
+                        blockDtos.add(returnDto);
+                        break;
+                    case 2 :
+                        listDtos.add(returnDto);
+                        break;
+                    default:
+                        break;
+                }
             });
         }
         CreatePersonalCenterSettingsResponse response = new CreatePersonalCenterSettingsResponse();
-        response.setDtos(returnDtoList);
+        response.setBasicDtos(basicDtos);
+        response.setBlockDtos(blockDtos);
+        response.setListDtos(listDtos);
         return response;
     }
 

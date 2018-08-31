@@ -8,20 +8,44 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 个人中心配置列表，请参考{@link PersonalCenterSettingDTO}</li>
+ *     <li>basicDtos: 基础信息区个人中心配置列表，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingDTO}</li>
+ *     <li>blockDtos: 方块信息区个人中心配置列表，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingDTO}</li>
+ *     <li>listDtos: 列表信息区个人中心配置列表，请参考{@link com.everhomes.rest.personal_center.PersonalCenterSettingDTO}</li>
  * </ul>
  */
 public class CreatePersonalCenterSettingsResponse {
 
     @ItemType(PersonalCenterSettingDTO.class)
-    private List<PersonalCenterSettingDTO> dtos;
+    private List<PersonalCenterSettingDTO> basicDtos;
 
-    public List<PersonalCenterSettingDTO> getDtos() {
-        return dtos;
+    @ItemType(PersonalCenterSettingDTO.class)
+    private List<PersonalCenterSettingDTO> blockDtos;
+
+    @ItemType(PersonalCenterSettingDTO.class)
+    private List<PersonalCenterSettingDTO> listDtos;
+
+    public List<PersonalCenterSettingDTO> getBasicDtos() {
+        return basicDtos;
     }
 
-    public void setDtos(List<PersonalCenterSettingDTO> dtos) {
-        this.dtos = dtos;
+    public void setBasicDtos(List<PersonalCenterSettingDTO> basicDtos) {
+        this.basicDtos = basicDtos;
+    }
+
+    public List<PersonalCenterSettingDTO> getBlockDtos() {
+        return blockDtos;
+    }
+
+    public void setBlockDtos(List<PersonalCenterSettingDTO> blockDtos) {
+        this.blockDtos = blockDtos;
+    }
+
+    public List<PersonalCenterSettingDTO> getListDtos() {
+        return listDtos;
+    }
+
+    public void setListDtos(List<PersonalCenterSettingDTO> listDtos) {
+        this.listDtos = listDtos;
     }
     @Override
     public String toString() {
