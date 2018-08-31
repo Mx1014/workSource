@@ -5084,10 +5084,10 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
     	}
     	
-		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getName());
+		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getId());
 		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
 		
-		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
+		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getId());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
 		
 		if (dto.getAreaSize()!=null) {
