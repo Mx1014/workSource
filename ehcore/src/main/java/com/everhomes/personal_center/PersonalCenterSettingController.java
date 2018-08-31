@@ -15,6 +15,8 @@ import com.everhomes.rest.personal_center.ListPersonalCenterSettingsCommand;
 import com.everhomes.rest.personal_center.ListPersonalCenterSettingsResponse;
 import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
 import com.everhomes.rest.personal_center.ListUserOrganizationResponse;
+import com.everhomes.rest.personal_center.ListVersionListCommand;
+import com.everhomes.rest.personal_center.ListVersionListResponse;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.UserInfo;
@@ -125,6 +127,20 @@ public class PersonalCenterSettingController extends ControllerBase{
     @RestReturn(value=CreatePersonalCenterSettingsResponse.class)
     public RestResponse publishPersonalSetting(CreatePersonalSettingCommand cmd) {
         CreatePersonalCenterSettingsResponse res = this.personalCenterService.createPersonalCenterSettings(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /personal_center/getVersionList</b>
+     * <p>查询版本列表，只查询最近10个版本</p>
+     */
+    @RequestMapping("getVersionList")
+    @RestReturn(value=ListVersionListResponse.class)
+    public RestResponse getVersionList(ListVersionListCommand cmd) {
+        ListVersionListResponse res = this.personalCenterService.listVersion(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

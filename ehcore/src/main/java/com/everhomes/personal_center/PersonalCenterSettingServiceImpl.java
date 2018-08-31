@@ -15,6 +15,8 @@ import com.everhomes.rest.personal_center.ListPersonalCenterSettingsCommand;
 import com.everhomes.rest.personal_center.ListPersonalCenterSettingsResponse;
 import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
 import com.everhomes.rest.personal_center.ListUserOrganizationResponse;
+import com.everhomes.rest.personal_center.ListVersionListCommand;
+import com.everhomes.rest.personal_center.ListVersionListResponse;
 import com.everhomes.rest.personal_center.PersonalCenterSettingDTO;
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
@@ -149,6 +151,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         }
         CreatePersonalCenterSettingsResponse response = new CreatePersonalCenterSettingsResponse();
         response.setDtos(returnDtoList);
+        return response;
+    }
+
+    @Override
+    public ListVersionListResponse listVersion(ListVersionListCommand cmd) {
+        ListVersionListResponse response = new ListVersionListResponse();
+        response.setVersionList(this.personalCenterSettingProvider.getVersionList(cmd.getNamespaceId()));
         return response;
     }
 

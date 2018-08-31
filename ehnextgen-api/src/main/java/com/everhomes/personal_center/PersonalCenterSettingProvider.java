@@ -24,4 +24,6 @@ public interface PersonalCenterSettingProvider {
 	List<PersonalCenterSetting> queryPersonalCenterSettingsByNamespaceIdAndVersion(Integer namespaceId, Integer version);
 
 	int countPersonalCenterSettingVersion(Integer namespaceId, Timestamp dayStartTime, Timestamp dayEndTime);
+
+	List<Integer> getVersionList(Integer namespaceId);
 }

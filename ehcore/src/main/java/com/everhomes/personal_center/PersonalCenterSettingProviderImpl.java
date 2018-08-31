@@ -168,6 +168,18 @@ public class PersonalCenterSettingProviderImpl implements PersonalCenterSettingP
         return step.where(condition).fetchOneInto(Integer.class);
     }
 
+    @Override
+    public List<Integer> getVersionList(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Integer> versionList = context.selectDistinct(Tables.EH_PERSONAL_CENTER_SETTINGS.VERSION)
+                .from(Tables.EH_PERSONAL_CENTER_SETTINGS)
+                .where(Tables.EH_PERSONAL_CENTER_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+                .orderBy(Tables.EH_PERSONAL_CENTER_SETTINGS.VERSION.desc())
+                .limit(10)
+                .fetchInto(Integer.class);
+        return versionList;
+    }
+
     private void prepareObj(PersonalCenterSetting obj) {
     }
 }
