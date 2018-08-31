@@ -1,5 +1,6 @@
 package com.everhomes.rest.user;
 
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -24,6 +25,7 @@ import java.util.List;
  *     <li>status: status  {@link GroupMemberStatus}</li>
  *     <li>workPlatformFlag: 是否开启工作台标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>addressSiteDtos: 公司办公点或者家庭对应的园区信息参考{@link AddressSiteDTO}</li>
+ *     <li>communityDto: 公司或者家庭所在园区 {@link com.everhomes.rest.address.CommunityDTO}</li>
  * </ul>
  */
 public class AddressUserDTO {
@@ -38,6 +40,7 @@ public class AddressUserDTO {
     private Byte status;
     private Byte workPlatformFlag;
     private List<AddressSiteDTO> addressSiteDtos;
+    private CommunityDTO communityDto;
 
     public Long getId() {
         return id;
@@ -125,6 +128,14 @@ public class AddressUserDTO {
 
     public void setAddressSiteDtos(List<AddressSiteDTO> addressSiteDtos) {
         this.addressSiteDtos = addressSiteDtos;
+    }
+
+    public CommunityDTO getCommunityDto() {
+        return communityDto;
+    }
+
+    public void setCommunityDto(CommunityDTO communityDto) {
+        this.communityDto = communityDto;
     }
 
     @Override
