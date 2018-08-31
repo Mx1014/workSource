@@ -15,6 +15,7 @@ import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.yellowPage.AllianceTagDTO;
 import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
 import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
@@ -129,6 +130,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private void deleteProjectMainConfig(Long type, Long projectId) {
 		yellowPageProvider.deleteProjectMainConfig(projectId, type);
 		
+		//删除图片 attachements ，可以不删
+		
 	}
 
 	// 创建自定义配置 包括主页样式，服务样式，筛选列表，表单，工作流
@@ -155,6 +158,12 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 
 	private void createAllianceTagToProject(Long type, Long projectId, AllianceTagGroupDTO dto) {
 		dto.getParentTag().setId(null);
+		if (null != dto.getChildTags()) {
+			for (AllianceTagDTO tagDto : dto.getChildTags()) {
+				tagDto.setId(null);
+			}
+		}
+		
 		yellowPageService.updateAllianceTag(UserContext.getCurrentNamespaceId(),
 				ServiceAllianceBelongType.COMMUNITY.getCode(), projectId, type, dto.getParentTag(), dto.getChildTags());
 	}
@@ -343,6 +352,11 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		}
 
 		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			
+			if (null == organizationId) {
+				organizationId = getOrgIdByTypeAndProjectId(type, ownerId);
+			}
+			
 			return yellowPageProvider.listCategories(locator, pageSize,
 					ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, namespaceId, null, type,
 					CategoryAdminStatus.ACTIVE, null, isQueryChild);
