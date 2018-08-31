@@ -84,6 +84,8 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         }
         if (map.size() > 0) {
             acdat.build(map);
+        }else {
+            acdat = null;
         }
         fileUrl = cmd.getUrl();
     }
