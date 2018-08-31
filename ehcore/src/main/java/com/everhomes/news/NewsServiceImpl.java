@@ -383,16 +383,16 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		// 设置新的值
-		news.setTitle(cmd.getTitle());
-		news.setAuthor(cmd.getAuthor());
-		news.setCoverUri(cmd.getCoverUri());
-		news.setContentAbstract(cmd.getContentAbstract());
-		news.setContent(cmd.getContent());
-		news.setSourceDesc(cmd.getSourceDesc());
-		news.setSourceUrl(cmd.getSourceUrl());
-		news.setPhone(cmd.getPhone());
-		news.setVisibleType(cmd.getVisibleType());
-		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		originNews.setTitle(cmd.getTitle());
+		originNews.setAuthor(cmd.getAuthor());
+		originNews.setCoverUri(cmd.getCoverUri());
+		originNews.setContentAbstract(cmd.getContentAbstract());
+		originNews.setContent(cmd.getContent());
+		originNews.setSourceDesc(cmd.getSourceDesc());
+		originNews.setSourceUrl(cmd.getSourceUrl());
+		originNews.setPhone(cmd.getPhone());
+		originNews.setVisibleType(cmd.getVisibleType());
+		originNews.setStatus(generateNewsStatus(cmd.getStatus()));
 
 		// 调整摘要
 		adjustNewsContentAbstract(originNews);
@@ -2344,7 +2344,7 @@ public class NewsServiceImpl implements NewsService {
 	/**
 	 * 获取当前域名和版本下的所有标签
 	 *
-	 * @param parentTagId
+	 * @param namespaceId
 	 * @return
 	 */
 	private List<NewsTag> getAllNewsTags(Integer namespaceId, Long categoryId) {
@@ -2438,6 +2438,30 @@ public class NewsServiceImpl implements NewsService {
 		url += token;
 
 		return url;
+	}
+
+
+
+	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
+		News news = ConvertHelper.convert(cmd, News.class);
+		news.setNamespaceId(namespaceId);
+		news.setOwnerType(cmd.getOwnerType());
+		news.setContentType(NewsContentType.RICH_TEXT.getCode());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		news.setCreatorUid(userId);
+		news.setDeleterUid(0L);
+		news.setPhone(cmd.getPhone());
+
+		//调整摘要
+		adjustNewsContentAbstract(news);
+
+		if (cmd.getPublishTime() != null) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
+
+		return news;
 	}
 
 	@Override

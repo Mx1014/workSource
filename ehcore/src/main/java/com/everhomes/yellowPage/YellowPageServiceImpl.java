@@ -264,6 +264,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import static com.everhomes.yellowPage.YellowPageUtils.throwError;
+
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageServiceImpl.class);
@@ -878,7 +880,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		//检验项目id的正确性。
 		if ("community".equals(cmd.getOwnerType()) && (null == cmd.getOwnerId() || cmd.getOwnerId() < 1)) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 
 		cmd.setOwnerId(cmd.getOwnerId());
@@ -1326,7 +1328,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		//检验项目id的正确性。
 		if (null == cmd.getOwnerId() || cmd.getOwnerId() < 1) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 
 		ServiceAlliances serviceAlliance = ConvertHelper.convert(cmd, ServiceAlliances.class);
@@ -3078,7 +3080,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 获取该记录
 		ServiceAllianceProvid provider = allianceProvidProvider.findServiceAllianceProvidById(cmd.getId());
 		if (provider == null) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 		}
 
 		// 校验权限
@@ -3097,7 +3099,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 获取该记录
 		ServiceAllianceProvid provider = allianceProvidProvider.findServiceAllianceProvidById(cmd.getId());
 		if (provider == null) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 			;
 		}
 
@@ -3130,14 +3132,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		// 查看模块是否开启服务商功能开关
 		if (!IsOpenAllianceProviderFunction(cmd.getProviderId())) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_FUNC_NOT_OPEN,
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_FUNC_NOT_OPEN,
 					"alliance provider function not open");
 		}
 
 		// 获取工作流信息
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
 		if (null == flowCase) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST, "flow case not found");
+			throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST, "flow case not found");
 		}
 
 		// 进行事件保存以及工作流处理
@@ -3152,7 +3154,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			if (!CollectionUtils.isEmpty(uploads)) {
 				for (ExtraEventAttachmentDTO dto : uploads) {
 					if (StringUtils.isEmpty(dto.getFileUri())) {
-						YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FILE_NOT_VALID, "file uri not valid");
+						throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_FILE_NOT_VALID, "file uri not valid");
 					}
 
 					AllianceExtraEventAttachment attch = new AllianceExtraEventAttachment();
@@ -3212,7 +3214,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			files = buildProvidersNotifyEmailAttachments(uploads);
 		} catch (IOException e) {
 			LOGGER.error("mail files save error:" + e);
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_MAIL_FILES_SAVE_ERROR, "mail files save error");
+			throwError(YellowPageServiceErrorCode.ERROR_MAIL_FILES_SAVE_ERROR, "mail files save error");
 		}
 
 		// 发送邮件
@@ -3444,7 +3446,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 保存提交人信息
 		User user = UserContext.current().getUser();
 		if (null == user) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_APPLIER_NOT_EXIST, "applier not exist");
+			throwError(YellowPageServiceErrorCode.ERROR_NEW_EVENT_APPLIER_NOT_EXIST, "applier not exist");
 		}
 		log.setFlowUserId(user.getId());
 		log.setFlowUserName(user.getNickName());
@@ -3685,12 +3687,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		AllianceTagGroupDTO group = cmd.getTagGroup();
 		if (null == group || null == group.getParentTag()) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_NOT_VALID, "alliance parent tag is null");
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_NOT_VALID, "alliance parent tag is null");
 			return;
 		}
 
 		if (null == cmd.getType() || cmd.getType() <= 0) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_TYPE_NOT_VALID, "alliance tag type not valid");
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TAG_TYPE_NOT_VALID, "alliance tag type not valid");
 			return;
 		}
 
