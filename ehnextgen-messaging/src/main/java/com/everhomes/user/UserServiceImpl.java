@@ -88,6 +88,7 @@ import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
@@ -6584,12 +6585,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					//办公地点（公司加入的园区）
 					List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(org.getId());
 					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
+                    List<CommunityInfoDTO> communityInfoDtos = new ArrayList<>();
 					if(requests != null && requests.size() > 0){
 						for (OrganizationCommunityRequest request: requests){
 							Community community = communityProvider.findCommunityById(request.getCommunityId());
 							if(community != null){
 								CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
 								communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+
+                                communityInfoDtos.add(communityInfoDTO);
+
 								//根据公司id和项目id查询公司所属项目表eh_organization_workplaces表中的信息，并且将该表中的workplace_name字段组装到communityInfoDTO对象中
 								List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgIdAndCommunityId(org.getId(),community.getId());
 								//创建一个集合List<String>来承载办公地点名称的集合
@@ -6611,7 +6616,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 						}
 					}
 
+                    //地址列表需要的默认是否是这个公司的管理员字段
+                    OrganizationMember orgMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), dto.getId());
+                    if (orgMember != null && OrganizationMemberGroupType.fromCode(orgMember.getMemberGroup()) == OrganizationMemberGroupType.MANAGER) {
+                        dto.setManagerFlag(AdminFlag.YES.getCode());
+                    }
+
+                    //略过没有关联项目的公司
+                    if(TrueOrFalseFlag.fromCode(cmd.getExcludeNoSiteFlag()) == TrueOrFalseFlag.TRUE && communityInfoDtos.size() == 0){
+                        continue;
+                    }
+
+                    communityInfoDtos = removeRepeat(communityInfoDtos);
+
+					dto.setCommunityInfoDtos(communityInfoDtos);
 					dto.setAddressSiteDtos(addressSiteDtos);
+
 					dtos.add(dto);
 				}
 			}
@@ -6641,10 +6661,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
-					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
+                    List<CommunityInfoDTO> communityInfoDtos = new ArrayList<>();
+
+                    List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
 					Community community = communityProvider.findCommunityById(family.getCommunityId());
 					if(community !=null){
-						AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
+
+                        CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
+                        communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+
+                        communityInfoDtos.add(communityInfoDTO);
+
+                        AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
                         addressSiteDTO.setCommunityId(community.getId());
 						addressSiteDTO.setCommunityName(community.getName());
 						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
@@ -6652,7 +6680,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 						addressSiteDtos.add(addressSiteDTO);
 					}
 
+
+                    //略过没有关联项目的家庭
+                    if(TrueOrFalseFlag.fromCode(cmd.getExcludeNoSiteFlag()) == TrueOrFalseFlag.TRUE && communityInfoDtos.size() == 0){
+                        continue;
+                    }
+
+                    communityInfoDtos = removeRepeat(communityInfoDtos);
+
+                    dto.setCommunityInfoDtos(communityInfoDtos);
 					dto.setAddressSiteDtos(addressSiteDtos);
+
 
 					dtos.add(dto);
 				}
@@ -6672,6 +6710,27 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
       return totp;
 	}
+
+
+	private List<CommunityInfoDTO> removeRepeat(List<CommunityInfoDTO> dtos){
+        List<CommunityInfoDTO> newDtos = new ArrayList<>();
+        for(CommunityInfoDTO communityInfoDto: dtos){
+
+            boolean existFlag = false;
+            for(CommunityInfoDTO newDto: newDtos){
+                if(communityInfoDto.getId().equals(newDto.getId())){
+                    existFlag = true;
+                    break;
+                }
+            }
+
+            if(!existFlag){
+                newDtos.add(communityInfoDto);
+            }
+        }
+
+        return newDtos;
+    }
 
     @Override
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
