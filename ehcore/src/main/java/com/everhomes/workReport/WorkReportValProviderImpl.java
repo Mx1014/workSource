@@ -36,6 +36,9 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     private DbProvider dbProvider;
 
     @Autowired
+    private WorkReportTimeService workReportTimeService;
+
+    @Autowired
     private SequenceProvider sequenceProvider;
 
     @Override
@@ -120,8 +123,8 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         if(cmd.getApplierIds() != null && cmd.getApplierIds().size()>0)
             query.addConditions(Tables.EH_WORK_REPORT_VALS.APPLIER_USER_ID.in(cmd.getApplierIds()));
         if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(WorkReportTimeUtil.toSqlDate(cmd.getStartTime())));
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(WorkReportTimeUtil.toSqlDate(cmd.getEndTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(workReportTimeService.toSqlDate(cmd.getStartTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(workReportTimeService.toSqlDate(cmd.getEndTime())));
         }
 
         //  EH_WORK_REPORT_VAL_RECEIVER_MAP conditions.

@@ -5,8 +5,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -41,6 +39,12 @@ public class WorkReportServiceImpl implements WorkReportService {
     private WorkReportValProvider workReportValProvider;
 
     @Autowired
+    private WorkReportMessageService workReportMessageService;
+
+    @Autowired
+    private WorkReportTimeService workReportTimeService;
+
+    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -57,15 +61,6 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
-
-    @Autowired
-    private WorkReportMessageService workReportMessageService;
-
-    @Autowired
-    private LocaleTemplateService localeTemplateService;
-
-    @Autowired
-    private MessagingService messagingService;
 
     private DateTimeFormatter reportFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -470,9 +465,9 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReportVal reportVal = new WorkReportVal();
         ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
 
-        LocalDateTime startTime = WorkReportTimeUtil.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getStartType(),
+        LocalDateTime startTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getStartType(),
                 setting.getStartMark(), setting.getStartTime());        //  获取汇报有效起始时间
-        LocalDateTime endTime = WorkReportTimeUtil.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getEndType(),
+        LocalDateTime endTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getEndType(),
                 setting.getEndMark(), setting.getEndTime());            //  获取汇报有效截止时间
 
         //  whether the post time is valid
@@ -488,7 +483,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         reportVal.setModuleType(report.getModuleType());
         reportVal.setStatus(WorkReportStatus.VALID.getCode());
         reportVal.setReportId(cmd.getReportId());
-        reportVal.setReportTime(WorkReportTimeUtil.toSqlDate(cmd.getReportTime()));
+        reportVal.setReportTime(workReportTimeService.toSqlDate(cmd.getReportTime()));
         reportVal.setApplierUserId(user.getId());
         reportVal.setApplierName(fixUpUserName(user.getId(), cmd.getOrganizationId()));
         reportVal.setReportType(cmd.getReportType());
@@ -660,7 +655,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             dto.setReportValId(reportVal.getId());
             dto.setReportType(reportVal.getReportType());
             dto.setReportTime(new Timestamp(reportVal.getReportTime().getTime()));
-            dto.setReportTimeText(WorkReportTimeUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+            dto.setReportTimeText(workReportTimeService.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
             dto.setValues(fields);
             dto.setReceivers(receivers);
             return dto;
@@ -668,14 +663,14 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        Timestamp reportTime = WorkReportTimeUtil.getReportTime(report.getReportType(), setting);
-        LocalDateTime startTime = WorkReportTimeUtil.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getStartType(),
+        Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), setting);
+        LocalDateTime startTime = workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getStartType(),
                 setting.getStartMark(), setting.getStartTime());        //  获取汇报有效起始时间
-        LocalDateTime endTime = WorkReportTimeUtil.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getEndType(),
+        LocalDateTime endTime = workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getEndType(),
                 setting.getEndMark(), setting.getEndTime());            //  获取汇报有效截止时间
         //  check whether return the white page
         if (checkPostTime(LocalDateTime.now(), startTime, endTime)) {
-            String description = "已超过截止时间，无法提交。下期汇报将于" + WorkReportTimeUtil.formatTime(startTime) + "开始提交。";
+            String description = "已超过截止时间，无法提交。下期汇报将于" + workReportTimeService.formatTime(startTime) + "开始提交。";
             throw RuntimeErrorException.errorWith(WorkReportErrorCode.SCOPE, WorkReportErrorCode.ERROR_WRONG_POST_TIME_V2, description);
         }
 
@@ -691,8 +686,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportType(report.getReportType());
         dto.setValiditySetting(setting);
         dto.setReportTime(reportTime);
-        dto.setReportTimeText(WorkReportTimeUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
-        dto.setValidText(WorkReportTimeUtil.formatTime(endTime));
+        dto.setReportTimeText(workReportTimeService.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+        dto.setValidText(workReportTimeService.formatTime(endTime));
         dto.setValues(form.getFormFields());
         dto.setTitle(report.getReportName());
         return dto;
@@ -748,7 +743,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 if (report != null)
                     dto.setTitle(report.getReportName());
                 dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
-                dto.setReportTimeText(WorkReportTimeUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+                dto.setReportTimeText(workReportTimeService.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
                 dto.setUpdateTime(r.getUpdateTime());
                 List<SceneContactDTO> receivers = listWorkReportValReceivers(r.getId());
                 dto.setReceivers(receivers);
@@ -807,7 +802,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 if (report != null)
                     dto.setTitle(report.getReportName());
                 dto.setReportTime(new Timestamp(r.getReportTime().getTime()));
-                dto.setReportTimeText(WorkReportTimeUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+                dto.setReportTimeText(workReportTimeService.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
                 dto.setReadStatus(r.getReadStatus());
                 dto.setApplierName(r.getApplierName());
                 dto.setUpdateTime(r.getUpdateTime());
@@ -878,7 +873,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setReportId(reportVal.getReportId());
         dto.setReportType(reportVal.getReportType());
         dto.setReportTime(new Timestamp(reportVal.getReportTime().getTime()));
-        dto.setReportTimeText(WorkReportTimeUtil.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
+        dto.setReportTimeText(workReportTimeService.displayReportTime(dto.getReportType(), dto.getReportTime().getTime()));
         dto.setTitle(report.getReportName());
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());
