@@ -1,5 +1,6 @@
 package com.everhomes.officecubicle;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.portal.PortalPublishHandler;
@@ -22,12 +23,12 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         if(StringUtils.isNotEmpty(instanceConfig)){
             JSONObject jsonObj = (JSONObject) JSONObject.parse(instanceConfig);
-            Byte currentProjectOnly = jsonObj.getByte("officecubicle.currentProjectOnly");
+            Byte currentProjectOnly = jsonObj.getByte("currentProjectOnly");
             if(null != currentProjectOnly){
                 configurationProvider.setValue(namespaceId,"officecubicle.currentProjectOnly",String.valueOf(currentProjectOnly));
             }
         }
-        return null;
+        return instanceConfig;
     }
 
     @Override
@@ -37,7 +38,15 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        return null;
+        JSONObject actionDataObj = new JSONObject();
+        JSONObject instanceConfigObj = (JSONObject) JSONObject.parse(instanceConfig);
+        if(StringUtils.isEmpty(instanceConfigObj.getString("url"))){
+            LOGGER.info("OfficeCubicle portal fail.Cause url is null.");
+            actionDataObj.put("url",configurationProvider.getValue(namespaceId,"officecubicle.default.url",""));
+        }else{
+            actionDataObj.put("url", instanceConfigObj.getString("url"));
+        }
+        return actionDataObj.toJSONString();
     }
 
     @Override
