@@ -29,8 +29,6 @@ public class CreatePortalLayoutCommand {
 
 	private Byte indexFlag;
 
-	private Byte type;
-
 	private Long bgColor;
 
 	public Integer getNamespaceId() {
