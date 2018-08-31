@@ -8,7 +8,7 @@
 -- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: jiarui  20180807
--- REMARK: 执行search 下脚本 enter_meter.sh
+-- REMARK: 执行search 下脚本 energy_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
@@ -46,8 +46,10 @@
 -- 		) as t on a.instance_config like concat('%"categoryId":', t.contract_category_id,'%')
 -- where a.module_id=21200 and t.asset_category_id is not null;
 -- REMARK：3、找杨崇鑫生成update语句执行
--- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":\"""&A1&"\""}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
+-- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":"&A1&"}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
 
+-- AUTHOR: 张智伟
+-- REMARK: 调用接口/evh/punch/punchDayLogInitializeByMonth 不需要输入参数 初始化某个月的每日统计数据,上线时手动调用进行初始化
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -874,7 +876,7 @@ DELIMITER ;
 CALL update_allOrMore_flag_function;
 DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
 
-
+UPDATE eh_portal_item_groups SET instance_config = replace(instance_config, '{,', '{');
 
 
 
@@ -937,6 +939,15 @@ select a.id as ccid, a.namespace_id, a.charging_item_id,a.charging_standard_id, 
 left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id ) as t2
 left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
 ) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
+
+-- AUTHOR: 丁建民  20180830
+-- REMARK: 物业缴费V6.5 数据迁移账单组（调租，免租的账单组）
+-- 这个需要备份一下数据
+SELECT aa.id,aa.namespace_id,aa.contract_id ,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id and aa.bill_group_id is NULL;
+
+UPDATE eh_contract_charging_changes as aaa INNER JOIN (SELECT aa.id,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id  and aa.bill_group_id is NULL) as bbb ON aaa.id = bbb.id set aaa.bill_group_id=bbb.target_bill_group_id;
 
 
 -- AUTHOR: 黄良铭
@@ -1024,6 +1035,11 @@ INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `communi
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21100, 43960);
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (250001003, null, '删除请示', '删除请示', NULL);
+
+-- remark：本地化删除客户提示
+set @id = (select max(id)+1 from eh_locale_strings);
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'customer', '10035', 'zh_CN', '有请示单的客户不能删除');
 -- END
 
 -- --------------------- SECTION END ---------------------------------------------------------

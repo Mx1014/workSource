@@ -17,4 +17,6 @@ public interface PmNotifyProvider {
     List<PmNotifyRecord> listUnsendRecords();
 
     void createPmNotifyLog(PmNotifyLog log);
+
+    void invalidateNotifyRecord(List<Long> recordIds);
 }

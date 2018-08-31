@@ -6585,11 +6585,16 @@ public class PunchServiceImpl implements PunchService {
      * 设置定时任务凌晨6点执行一次初始化，晚上22点二次执行（主要是retry的作用，防止6点的任务失败）
      */
     @Override
-    @Scheduled(cron = "1 0 6,22 * * ?")
+    @Scheduled(cron = "1 10 6,22 * * ?")
     public void punchDayLogInitialize() {
-        PunchDayLogInitializeCommand cmd = new PunchDayLogInitializeCommand();
-        cmd.setInitialDateTime(System.currentTimeMillis());
-        punchDayLogInitialize(cmd);
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_LOG_INIT_SCHEDULE.getCode()).enter(() -> {
+                PunchDayLogInitializeCommand cmd = new PunchDayLogInitializeCommand();
+                cmd.setInitialDateTime(System.currentTimeMillis());
+                punchDayLogInitialize(cmd);
+                return null;
+            });
+        }
     }
 
     @Override
