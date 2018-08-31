@@ -254,4 +254,6 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+
+	void createChargingItem(CreateChargingItemCommand cmd);
 }

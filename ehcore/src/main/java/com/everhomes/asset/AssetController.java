@@ -1665,18 +1665,17 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     
     /**
      * <p>新增收费项配置</p>
-     * <b>URL: /asset/add</b>
+     * <b>URL: /asset/createChargingItem</b>
      */
-//    @RequestMapping("testUpdateBillDueDayCountOnTime")
-//    @RestReturn(value = String.class)
-//    public RestResponse testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
-//        assetService.testUpdateBillDueDayCountOnTime(cmd);
-//        RestResponse response = new RestResponse();
-//        response.setErrorDescription("OK");
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        return response;
-//    }
-    
+    @RequestMapping("createChargingItem")
+    @RestReturn(value = String.class)
+    public RestResponse createChargingItem(CreateChargingItemCommand cmd) {
+        assetService.createChargingItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
     
 }
 

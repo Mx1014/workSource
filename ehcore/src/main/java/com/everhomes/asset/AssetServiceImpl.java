@@ -5668,4 +5668,9 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 
+	public void createChargingItem(CreateChargingItemCommand cmd) {
+		
+		
+	}
+
 }
