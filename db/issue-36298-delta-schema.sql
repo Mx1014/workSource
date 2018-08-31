@@ -9,7 +9,7 @@ ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0
 CREATE TABLE `eh_meeting_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_tyoe` VARCHAR(32) NOT NULL COMMENT 'owner type EhMeetingRecords/EhMeetingReservations',
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'owner type EhMeetingRecords/EhMeetingReservations',
   `owner_id` BIGINT NOT NULL COMMENT 'key of the owner',
   `content_name` VARCHAR(1024) COMMENT 'attachment object content name like: abc.jpg',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
