@@ -6591,6 +6591,8 @@ CREATE TABLE `eh_flow_cases` (
   `delete_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '删除状态',
   `route_uri` VARCHAR(128) COMMENT 'route uri',
   `path` VARCHAR(1024) COMMENT 'flow case path',
+  `sub_flow_parent_id` bigint(20) NOT NULL DEFAULT '0',
+  `sub_flow_path` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
