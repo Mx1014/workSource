@@ -48,6 +48,8 @@
 -- REMARK：3、找杨崇鑫生成update语句执行
 -- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":"&A1&"}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
 
+-- AUTHOR: 张智伟
+-- REMARK: 调用接口/evh/punch/punchDayLogInitializeByMonth 不需要输入参数 初始化某个月的每日统计数据,上线时手动调用进行初始化
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
