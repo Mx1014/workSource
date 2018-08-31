@@ -814,11 +814,18 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         //附件
         List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
+        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
+        
         dbProvider.execute(transactionStatus -> {
             Long id = meetingProvider.updateMeetingReservation(updateMeetingReservation);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
             List<EhMeetingInvitations> addMeetingInvitationList = buildEhMeetingInvitations(addMeetingInvitations, id, MeetingInvitationRoleType.ATTENDEE);
             meetingProvider.batchCreateMeetingInvitations(addMeetingInvitationList);
+
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
+            meetingProvider.batchCreateMeetingAttachments(addAttachements);
+            
             return null;
         });
 
@@ -836,7 +843,41 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private List<MeetingAttachment> convertDTO2MeetingAttachment(
+    private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
+			List<MeetingAttachment> newAttachements) {
+    	if(CollectionUtils.isEmpty(oldAttachements))
+			return Collections.emptyList();
+    	if(CollectionUtils.isEmpty(newAttachements))
+			return oldAttachements;
+    	List<MeetingAttachment> deleteAttachements = new ArrayList<>();
+		for (MeetingAttachment oldAttachment : oldAttachements) {
+            boolean shouldDelete = true;
+            for (MeetingAttachment newAttachment : newAttachements) {
+                if (newAttachment.getContentName().equals(oldAttachment.getContentName()) && 
+                		newAttachment.getContentType().equals(oldAttachment.getContentType()) && 
+                		newAttachment.getContentUri().equals(oldAttachment.getContentUri()) ) {
+                    shouldDelete = false;
+                    break;
+                }
+            }
+            if (shouldDelete) {
+            	deleteAttachements .add(oldAttachment);
+            }
+        }
+		return deleteAttachements;
+	}
+
+	private List<MeetingAttachment> findAddAttachments(List<MeetingAttachment> newAttachements,
+			List<MeetingAttachment> deleteAttachements) {
+		if(CollectionUtils.isEmpty(newAttachements))
+			return Collections.emptyList();
+		List<MeetingAttachment> addAttachements = new ArrayList<>();
+		addAttachements.addAll(newAttachements);
+		addAttachements.removeAll(deleteAttachements);
+		return addAttachements;
+	}
+
+	private List<MeetingAttachment> convertDTO2MeetingAttachment(
 			List<MeetingAttachmentDTO> meetingAttachments, MeetingReservation meetingReservation) {
 		if(meetingAttachments == null){
 			return null;

@@ -12,10 +12,12 @@ import com.everhomes.rest.meeting.MeetingMemberSourceType;
 import com.everhomes.rest.meeting.MeetingRoomStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhMeetingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingInvitationsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhMeetingRoomsDao;
+import com.everhomes.server.schema.tables.pojos.EhMeetingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingRecords;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
@@ -27,12 +29,18 @@ import com.everhomes.server.schema.tables.records.EhMeetingRoomsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
+
+
+
+
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
@@ -40,17 +48,23 @@ import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+
+
+
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
+import java.util.List;import java.util.stream.Collectors;
+
 
 @Repository
 public class MeetingProviderImpl implements MeetingProvider {
@@ -564,4 +578,51 @@ public class MeetingProviderImpl implements MeetingProvider {
         }
         return results;
     }
+
+	@Override
+	public List<MeetingAttachment> listMeetingAttachements(Long ownerId, String ownerType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_MEETING_ATTACHMENTS)
+        		.where(Tables.EH_MEETING_ATTACHMENTS.OWNER_ID.eq(ownerId))
+        		.and(Tables.EH_MEETING_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
+         
+        List<MeetingAttachment> results = query.fetch().map(r->ConvertHelper.convert(r, MeetingAttachment.class));
+        if (results == null || results.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return results;
+	}
+
+	@Override
+	public void batchDeleteMeetingAttachments(List<MeetingAttachment> deleteAttachements) {
+		if (CollectionUtils.isEmpty(deleteAttachements)) {
+            return;
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingReservations.class));
+        EhMeetingAttachmentsDao dao = new EhMeetingAttachmentsDao(context.configuration());
+        dao.delete(deleteAttachements.stream().map(r->{return ConvertHelper.convert(r, EhMeetingAttachments.class);}).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void batchCreateMeetingAttachments(List<MeetingAttachment> addAttachements) {
+		if (CollectionUtils.isEmpty(addAttachements)) {
+            return;
+        }
+        long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhMeetingInvitations.class), addAttachements.size());
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        
+        List<EhMeetingAttachments> attachments = new ArrayList<>();
+        for (MeetingAttachment meetingAttachment : addAttachements) {
+        	EhMeetingAttachments attachment = ConvertHelper.convert(meetingAttachment, EhMeetingAttachments.class);
+        	attachment.setId(id++);
+        	attachment.setCreateTime(now);
+        	attachment.setCreatorUid(UserContext.currentUserId()); 
+        	attachments.add(attachment);
+        }
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhMeetingInvitations.class));
+        EhMeetingAttachmentsDao dao = new EhMeetingAttachmentsDao(context.configuration());
+		dao.insert(attachments);
+	}
 }

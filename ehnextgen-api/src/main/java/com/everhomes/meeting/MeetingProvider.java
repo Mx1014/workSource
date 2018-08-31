@@ -77,4 +77,8 @@ public interface MeetingProvider {
 
 	List<MeetingAttachment> listMeetingAttachements(Long ownerId, String ownerType);
 
+	void batchDeleteMeetingAttachments(List<MeetingAttachment> deleteAttachements);
+
+	void batchCreateMeetingAttachments(List<MeetingAttachment> addAttachements);
+
 }
