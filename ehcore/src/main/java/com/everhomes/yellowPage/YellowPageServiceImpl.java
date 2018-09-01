@@ -833,8 +833,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
-		ServiceAllianceCategories mainCag = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType());
-		response.setSkipType(mainCag.getSkipType());
+		ServiceAllianceCategories mainCag = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+		if (null != mainCag) {
+			response.setSkipType(mainCag.getSkipType());
+		}
+		
 		if (cmd.getCategoryId() != null) {
 			ServiceAllianceCategories cag = yellowPageProvider.findCategoryById(cmd.getCategoryId());
 			if (null != cag) {
@@ -1181,7 +1184,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			ServiceAlliances sa = null; 
 			if (cmd.getId() == null) {
 				sa = ConvertHelper.convert(cmd, ServiceAlliances.class);
-				sa.setCreatorUid(UserContext.current().getUser().getId());
+				//设置调査url
+				
+				
+				
 				this.yellowPageProvider.createServiceAlliances(sa);
 			} else {
 
@@ -1194,6 +1200,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 				this.yellowPageProvider.updateServiceAlliances(sa);
 				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(sa.getId()); // 删除旧的图片
 			}
+			
+
+			
 			
 			// 创建多张封面图片 v3.4需求
 			createServiceAllianceAttachments(cmd.getCoverAttachments(), sa.getId(),
