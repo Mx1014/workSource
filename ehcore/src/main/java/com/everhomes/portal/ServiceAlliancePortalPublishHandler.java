@@ -324,7 +324,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name){
 		
 		Long type = config.getType();
-		Byte detailFlag = config.getDetailFlag();
 		Byte enableComment = config.getEnableComment(); //是否允许评论
 		Byte enableProvider = config.getEnableProvider(); //是否打开供应商开关
 		

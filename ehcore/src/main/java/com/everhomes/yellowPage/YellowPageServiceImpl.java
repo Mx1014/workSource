@@ -756,6 +756,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			} else if (JumpType.FORM.equals(JumpType.fromCode(dto.getJumpType()))) {
 				dto.setTemplateName(dto.getTemplateType());
 				dto.setButtonTitle("我要申请");
+				dto.setModuleUrl(buildFormModuleUrl(dto.getId()));
 			}
 		} else {
 			// 兼容以前只有模板跳转时jumptype字段为null的情况
@@ -859,7 +860,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 根据community和type获取所有项目id
 			List<Long> authProjectIds = getProjectIdsByScene(cmd.getOwnerId(), cmd.getParentId());
 			if (CollectionUtils.isEmpty(authProjectIds)) {
-				return response;
+//				return response;
 			}
 			
 			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
@@ -899,6 +900,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				} else if (JumpType.FORM.equals(JumpType.fromCode(dto.getJumpType()))) {
 					dto.setTemplateName(dto.getTemplateType());
 					dto.setButtonTitle("我要申请");
+					dto.setModuleUrl(buildFormModuleUrl(dto.getId()));
 				}
 
 			} else {
@@ -940,6 +942,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return response;
 	}
 	
+	private String buildFormModuleUrl(Long serviceId) {
+		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+	}
+	
 	private boolean checkFormModuleUrlValid(ServiceAllianceDTO dto) {
 
 		if (null == dto.getModuleUrl() || null == dto.getFormId()) {
@@ -972,14 +978,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return null;
 		}
 
-		List<ProjectDTO> dtos = organizationService.getProjectIdsByCommunityAndModuleApps(community.getNamespaceId(),
+		return organizationService.getProjectIdsByCommunityAndModuleApps(community.getNamespaceId(),
 				ownerId, SERVICE_ALLIANCE_MODULE_ID, r -> {
 					ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
 							.fromJsonString(r, ServiceAllianceInstanceConfig.class);
 					return null == config ? false : type.equals(config.getType());
 				});
-
-		return null == dtos ? null : dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 	}
 
 	/**   
