@@ -2,7 +2,7 @@ package com.everhomes.rest.investment;
 
 import java.sql.Timestamp;
 
-public class EnterpriseInvestmentContact {
+public class EnterpriseInvestmentContactDTO {
 
     private Long id;
     private Integer namespaceId;
