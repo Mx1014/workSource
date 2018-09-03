@@ -1118,6 +1118,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dto.setSponsorUserId(meetingReservation.getMeetingSponsorUserId());
             dto.setSponsorDetailId(meetingReservation.getMeetingSponsorDetailId());
             dto.setSponsorName(meetingReservation.getMeetingSponsorName());
+            dto.setAttachmentFlag(meetingReservation.getAttachmentFlag());
             MeetingReservationShowStatus status = buildMeetingReservationShowStatus(meetingReservation);
             dto.setStatus(status.getCode());
             dto.setShowStatus(status.toString());
@@ -1353,6 +1354,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dto.setReceiveTime(meetingRecord.getOperateTime().getTime());
             dto.setRecorderName(meetingRecord.getOperatorName());
             dto.setShowTitle(meetingRecord.getMeetingSubject() + "-会议纪要");
+            dto.setAttachmentFlag(meetingRecord.getAttachmentFlag());
             if (meetingRecord.getContent() != null && meetingRecord.getContent().length() > 100) {
                 dto.setSummary(meetingRecord.getContent().substring(0, 100));
             } else {
