@@ -82,7 +82,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
             return dto;
         }
-        GeneralForm generalForm = this.generalFormProvider.getGeneralFormById(rosterList.get(0).getFormId());
+        GeneralForm generalForm = this.generalFormProvider.findGeneralFormById(rosterList.get(0).getFormId());
         ActivitySignupCommand activitySignupCommand = new ActivitySignupCommand();
         activitySignupCommand.setActivityId(activityId);
         activitySignupCommand.setAdultCount(1);
@@ -121,7 +121,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         if (CollectionUtils.isEmpty(rosterList) || rosterList.get(0).getFormId() == null) {
             return null;
         }
-        GeneralForm generalForm = this.generalFormProvider.getGeneralFormById(rosterList.get(0).getFormId());
+        GeneralForm generalForm = this.generalFormProvider.findGeneralFormById(rosterList.get(0).getFormId());
         if (generalForm != null) {
             dto = ConvertHelper.convert(generalForm,GeneralFormDTO.class);
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
