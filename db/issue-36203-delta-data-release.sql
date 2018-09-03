@@ -3,14 +3,14 @@
 
 -- beta
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('wallet.home.url', 'https://payv2-beta.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
+VALUES ('personal.wallet.home.url', 'https://payv2-beta.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('order.home.url', 'https://biz-beta.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
+VALUES ('personal.order.home.url', 'https://biz-beta.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
 -- 现网
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('wallet.home.url', 'https://payv2.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
+VALUES ('personal.wallet.home.url', 'https://payv2.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('order.home.url', 'https://biz.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
+VALUES ('personal.order.home.url', 'https://biz.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
 
 
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);

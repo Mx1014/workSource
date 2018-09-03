@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.personal_center;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
@@ -20,6 +21,7 @@ import com.everhomes.rest.personal_center.ListVersionListResponse;
 import com.everhomes.rest.personal_center.PersonalCenterSettingDTO;
 import com.everhomes.rest.personal_center.PersonalCenterSettingRegionType;
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
+import com.everhomes.rest.personal_center.PersonalCenterSettingType;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -55,6 +57,9 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
 
     @Autowired
     private PersonalCenterSettingProvider personalCenterSettingProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public void createUserEmail(CreateUserEmailCommand cmd) {
         Long userId = UserContext.currentUserId();
@@ -106,6 +111,14 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         list.stream().forEach((r) -> {
              PersonalCenterSettingDTO dto = ConvertHelper.convert(r,PersonalCenterSettingDTO.class);
              dto.setIconUrl(this.parseUrl(dto.getIconUri(),cmd.getNamespaceId()));
+             if (PersonalCenterSettingType.WALLET.getCode().equals(r.getType())) {
+                 String homeUrl = this.configurationProvider.getValue(0,"personal.wallet.home.url","https://payv2.zuolin.com");
+                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
+             }
+            if (PersonalCenterSettingType.ORDER.getCode().equals(r.getType())) {
+                String homeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
+                dto.setLinkUrl(homeUrl+dto.getLinkUrl());
+            }
              switch (dto.getRegion()) {
                  case 0 :
                      basicDtos.add(dto);

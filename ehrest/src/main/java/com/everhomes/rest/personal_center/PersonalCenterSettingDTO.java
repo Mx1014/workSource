@@ -26,6 +26,7 @@ import com.everhomes.discover.ItemType;
  *     <li>createTime: 创建时间</li>
  *     <li>updateUid: 修改人ID</li>
  *     <li>updateTime: 修改时间</li>
+ *     <li>linkUrl: 跳转链接</li>
  * </ul>
  */
 public class PersonalCenterSettingDTO {
@@ -47,8 +48,17 @@ public class PersonalCenterSettingDTO {
     private Byte     showable;
     private Integer     sortNum;
     private Long     id;
+    private String linkUrl;
 
-    public String getIconUrl() {
+	public String getLinkUrl() {
+		return linkUrl;
+	}
+
+	public void setLinkUrl(String linkUrl) {
+		this.linkUrl = linkUrl;
+	}
+
+	public String getIconUrl() {
         return iconUrl;
     }
 
