@@ -2,6 +2,7 @@
 package com.everhomes.print;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.aclink.uclbrt.BASE64Decoder;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
