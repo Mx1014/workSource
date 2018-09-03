@@ -15,14 +15,14 @@ CREATE TABLE `eh_personal_center_settings` (
   `showable` TINYINT COMMENT '是否展示',
   `editable` TINYINT COMMENT '是否可编辑',
   `type` INTEGER NOT NULL COMMENT '功能所属类型',
-  `icon_uri` VARCHAR(64) COMMENT '图标URI',
+  `icon_uri` VARCHAR(1024) COMMENT '图标URI',
   `version` INTEGER NOT NULL DEFAULT 0 COMMENT '版本号',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态',
   `create_uid` BIGINT COMMENT '创建人ID',
   `create_time` TIMESTAMP COMMENT '创建时间',
   `update_uid` BIGINT COMMENT '修改人ID',
   `update_time` TIMESTAMP COMMENT '修改时间',
-  `link_url` VARCHAR(64) COMMENT '跳转链接',
+  `link_url` VARCHAR(1024) COMMENT '跳转链接',
   PRIMARY KEY (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '个人中心配置表';
 -- END
