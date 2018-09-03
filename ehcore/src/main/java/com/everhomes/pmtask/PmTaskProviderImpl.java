@@ -660,6 +660,16 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	}
 
 	@Override
+	public PmTaskOrder findPmTaskOrderByBizOrderNum(String BizOrderNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrders.class));
+		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_ORDERS);
+		if(null != BizOrderNum)
+			query.addConditions(Tables.EH_PM_TASK_ORDERS.BIZ_ORDER_NUM.eq(BizOrderNum));
+		List<PmTaskOrder> result = query.fetch().map(r->ConvertHelper.convert(r,PmTaskOrder.class));
+		return result.size() == 1 ? result.get(0) : null;
+	}
+
+	@Override
 	public void clearOrderDetails() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		TruncateIdentityStep query = context.truncate(Tables.EH_PM_TASK_ORDERS);

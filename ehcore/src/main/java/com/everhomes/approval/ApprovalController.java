@@ -1,16 +1,12 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryCommand;
 import com.everhomes.rest.approval.CreateApprovalCategoryResponse;
@@ -25,6 +21,7 @@ import com.everhomes.rest.approval.DeleteApprovalFlowCommand;
 import com.everhomes.rest.approval.DeleteApprovalRuleCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetApprovalCategoryCommand;
 import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
 import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryCommand;
@@ -59,6 +56,11 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestDoc("approval controller")
 @RestController
@@ -69,48 +71,73 @@ public class ApprovalController extends ControllerBase {
 	private ApprovalService approvalService;
 
 	/**
-	 * 
-	 * <p>1.增加审批类别，如请假的公出、事假等</p>
+	 * <p>1.获取假期类型详情</p>
+	 * <b>URL: /approval/getApprovalCategoryDetail</b>
+	 */
+	@RequestMapping("getApprovalCategoryDetail")
+	@RestReturn(ApprovalCategoryDTO.class)
+	public RestResponse getApprovalCategoryDetail(GetApprovalCategoryCommand cmd) {
+		ApprovalCategoryDTO dto = approvalService.getApprovalCategoryDetail(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>1.新增假期类型</p>
 	 * <b>URL: /approval/createApprovalCategory</b>
 	 */
 	@RequestMapping("createApprovalCategory")
 	@RestReturn(CreateApprovalCategoryResponse.class)
-	public RestResponse createApprovalCategory(CreateApprovalCategoryCommand cmd){
-		return new RestResponse(approvalService.createApprovalCategory(cmd));
+	public RestResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
+		CreateApprovalCategoryResponse approvalCategoryResponse = approvalService.createApprovalCategory(cmd);
+		RestResponse response = new RestResponse(approvalCategoryResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
-	
+
 	/**
-	 * 
-	 * <p>2.更新审批类别</p>
+	 * <p>2.更新假期类型</p>
 	 * <b>URL: /approval/updateApprovalCategory</b>
 	 */
 	@RequestMapping("updateApprovalCategory")
 	@RestReturn(UpdateApprovalCategoryResponse.class)
-	public RestResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd){
-		return new RestResponse(approvalService.updateApprovalCategory(cmd));
+	public RestResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd) {
+		UpdateApprovalCategoryResponse updateApprovalCategoryResponse = approvalService.updateApprovalCategory(cmd);
+		RestResponse response = new RestResponse(updateApprovalCategoryResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
-	 * 
-	 * <p>3.列出审批类别</p>
+	 * <p>3.列出假期类别</p>
 	 * <b>URL: /approval/listApprovalCategory</b>
 	 */
 	@RequestMapping("listApprovalCategory")
 	@RestReturn(ListApprovalCategoryResponse.class)
-	public RestResponse listApprovalCategory(ListApprovalCategoryCommand cmd){
-		return new RestResponse(approvalService.listApprovalCategory(cmd));
+	public RestResponse listApprovalCategory(ListApprovalCategoryCommand cmd) {
+		ListApprovalCategoryResponse listApprovalCategoryResponse = approvalService.initAndListApprovalCategory(cmd);
+		RestResponse response = new RestResponse(listApprovalCategoryResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
-	 * 
-	 * <p>4.删除审批类别</p>
+	 * <p>4.删除假期类别</p>
 	 * <b>URL: /approval/deleteApprovalCategory</b>
 	 */
 	@RequestMapping("deleteApprovalCategory")
 	@RestReturn(String.class)
-	public RestResponse deleteApprovalCategory(DeleteApprovalCategoryCommand cmd){
+	public RestResponse deleteApprovalCategory(DeleteApprovalCategoryCommand cmd) {
 		approvalService.deleteApprovalCategory(cmd);
-		return new RestResponse();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	/**

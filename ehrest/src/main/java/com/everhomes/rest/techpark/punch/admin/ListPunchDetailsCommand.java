@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：查询对象id(如果是全部部门就是总公司id)</li>  
  * <li>userId：用户id如果不为空,则是查某个人的打卡记录</li>  
  * <li>includeSubDpt：是否包含子部门:0-不包含 1-包含(默认)</li>  
+ * <li>monthReportId: 月报id</li> 
  * <li>userName：用户名搜索可为空</li>
  * <li>startDay: 开始时间</li>
  * <li>endDay：结束时间</li>
@@ -32,6 +33,7 @@ public class ListPunchDetailsCommand {
 	@NotNull
 	private Long ownerId;
 	private Long userId;
+	private Long monthReportId;
 	
 	private Byte includeSubDpt;
 	private String userName;
@@ -180,6 +182,14 @@ public class ListPunchDetailsCommand {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public Long getMonthReportId() {
+		return monthReportId;
+	}
+
+	public void setMonthReportId(Long monthReportId) {
+		this.monthReportId = monthReportId;
 	}
  
 

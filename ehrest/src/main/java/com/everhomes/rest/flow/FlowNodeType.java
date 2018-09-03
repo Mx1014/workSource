@@ -7,11 +7,18 @@ package com.everhomes.rest.flow;
  *     <li>NORMAL("normal"): 普通节点</li>
  *     <li>CONDITION_FRONT("condition_front"): 前置条件</li>
  *     <li>CONDITION_BACK("condition_back"): 后置条件</li>
+ *     <li>SUB_FLOW("sub_flow"): 子流程</li>
  * </ul>
  */
 public enum FlowNodeType {
 
-    START("start"), END("end"), NORMAL("normal"), CONDITION_FRONT("condition_front"), CONDITION_BACK("condition_back");
+    START("start"),
+    END("end"),
+    NORMAL("normal"),
+    CONDITION_FRONT("condition_front"),
+    CONDITION_BACK("condition_back"),
+    SUB_FLOW("sub_flow"),
+    ;
 
     private String code;
 

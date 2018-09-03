@@ -25,5 +25,8 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_ALLIANCE_TAG_NOT_VALID = 11100;  //需要更新父筛选为空
     static final int ERROR_ALLIANCE_TAG_TYPE_NOT_VALID = 11101;  //筛选的类型不合法
     
+    //埋点统计
+    static final int ERROR_ALLIANCE_GET_STAT_TOOL_TYPE_IS_NULL = 11200;  //获取统计信息时type为null
+    
     
 }

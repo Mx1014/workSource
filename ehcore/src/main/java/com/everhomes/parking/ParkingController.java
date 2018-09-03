@@ -815,6 +815,20 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /parking/exportParkingCarVerifications</b>
+     * <p>导出车辆认证申请</p>
+     */
+    @RequestMapping("exportParkingCarVerifications")
+    @RestReturn(value=String.class)
+    public RestResponse exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd,HttpServletResponse resp) {
+        parkingService.exportParkingCarVerifications(cmd,resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/listParkingCarVerifications</b>
      * <p>获取车辆认证申请列表</p>
      */
@@ -1102,6 +1116,54 @@ public class ParkingController extends ControllerBase {
     public RestResponse refreshToken(RefreshTokenCommand cmd) {
 
         parkingService.refreshToken(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getWxParkingQrcode</b>
+     * <p>
+     * 点击下载临时车二维码，扫码支付临时车费用 V6.6
+     * </p>
+     */
+    @RequestMapping("getWxParkingQrcode")
+    @RestReturn(String.class)
+    public RestResponse getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
+        parkingService.getWxParkingQrcode(cmd,resp);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingBussnessStatus</b>
+     * <p>
+     * 获取停车场对接功能，以及对外开放的功能集合 V6.6
+     * </p>
+     */
+    @RequestMapping("getParkingBussnessStatus")
+    @RestReturn(GetParkingBussnessStatusResponse.class)
+    public RestResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
+        GetParkingBussnessStatusResponse baseResponse =  parkingService.getParkingBussnessStatus(cmd);
+
+        RestResponse response = new RestResponse(baseResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/initFuncLists </b>
+     * <p>初始化停车场对接功能表</p>
+     */
+    @RequestMapping("initFuncLists")
+    @RestReturn(value=String.class)
+    public RestResponse initFuncLists(GetParkingBussnessStatusCommand cmd) {
+        parkingService.initFuncLists(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

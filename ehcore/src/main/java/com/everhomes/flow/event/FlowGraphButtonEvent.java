@@ -275,7 +275,7 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
                     flowCaseState.setNextNode(next);
                     flowCaseState.setStepType(stepType);
-                    flowCaseState.getFlowCase().setStepCount(flowCaseState.getFlowCase().getStepCount() + 1);
+                    flowCaseState.incrStepCount();
                 }
                 break;
             case REMINDER_STEP:
@@ -369,7 +369,9 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                         currentNode.getTickSMSAction().fireAction(ctx, this);
                     }
                 }
-                flowStateProcessor.createStepTimeout(ctx, next.getFlowNode());
+                if (!next.getFlowNode().getAllowTimeoutAction().equals((byte) 0)) {
+                    flowStateProcessor.createStepTimeout(ctx, next.getFlowNode());
+                }
                 break;
             default:
                 break;

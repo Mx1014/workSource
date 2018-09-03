@@ -48,6 +48,8 @@ public class GeneralFormDTO {
 	private Byte modifyFlag;
 	private Byte deleteFlag;
 
+	private String operatorName;
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
@@ -201,6 +203,14 @@ public class GeneralFormDTO {
 
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
 	}
 
 	@Override

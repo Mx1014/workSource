@@ -115,6 +115,7 @@ public class ActivityDTO {
     private String contentType;
     private String content;
     private Integer maxQuantity;
+    private Integer minQuantity;
     private String version;
 
     private String achievementType;
@@ -142,6 +143,16 @@ public class ActivityDTO {
     private Timestamp stickTime;
 
     private Byte status;
+
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
+
 
     public Byte getSignupFormFlag() {
         return signupFormFlag;

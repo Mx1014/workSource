@@ -41,6 +41,7 @@ public class ResourceOrderRuleDTO {
     private List<RentalOrderRuleDTO> refundStrategies;
     @ItemType(RentalOrderRuleDTO.class)
     private List<RentalOrderRuleDTO> overtimeStrategies;
+    private List<RentalRefundTipDTO> refundTips;
 
     @Override
     public String toString() {
@@ -125,5 +126,13 @@ public class ResourceOrderRuleDTO {
 
     public void setOvertimeStrategies(List<RentalOrderRuleDTO> overtimeStrategies) {
         this.overtimeStrategies = overtimeStrategies;
+    }
+
+    public List<RentalRefundTipDTO> getRefundTips() {
+        return refundTips;
+    }
+
+    public void setRefundTips(List<RentalRefundTipDTO> refundTips) {
+        this.refundTips = refundTips;
     }
 }

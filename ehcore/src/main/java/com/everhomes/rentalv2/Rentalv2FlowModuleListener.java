@@ -15,9 +15,10 @@ import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+
+import com.everhomes.rest.ui.user.SceneType;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,6 +231,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			if (org != null)
 				e.setValue(org.getName());
 			entities.add(e);
+		}
+
+		String scene = order.getScene();
+		if (!StringUtils.isBlank(scene)){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"scene", RentalNotificationTemplateCode.locale, ""));
+			e.setValue("无");
+			SceneType sceneType = SceneType.fromCode(scene);
+			if (sceneType == SceneType.PM_ADMIN)
+				e.setValue("内部员工");
+			if (sceneType == SceneType.ENTERPRISE)
+				e.setValue("认证用户");
+			if (sceneType == SceneType.PARK_TOURIST)
+				e.setValue("非认证用户");
+            entities.add(e);
 		}
 
 		//资源名
@@ -704,7 +722,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		List<FlowConditionVariableDTO> list = new ArrayList<>();
 		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
 		dto.setDisplayName("金额");
-		dto.setName("amount");
+		dto.setValue("amount");
 		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
 		dto.setOperators(new ArrayList<>());
 		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
@@ -714,7 +732,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 		//目前只有类型一个分支参数
 		if ("amount".equals(variable)) {
 			FlowCase flowcase = ctx.getFlowCase();

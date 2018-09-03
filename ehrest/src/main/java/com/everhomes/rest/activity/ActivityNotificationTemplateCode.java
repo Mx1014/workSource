@@ -21,4 +21,7 @@ public class ActivityNotificationTemplateCode {
     public static final int ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS = 17;    //活动发布后，修改标题、时间和地点
 
     public static final int ACTIVITY_SIGNUP_SUCCESS = 21;  //报名成功后，发送消息推送
+    public static final int ACTIVITY_CANCEL_NO_PAY = 18;   //非付费活动，活动报名人数未达到最低限制人数，活动被取消
+    public static final int ACTIVITY_CANCEL_PAY = 19;   //付费活动，活动报名人数未达到最低限制人数，活动被取消
+    public static final int ACTIVITY_CANCEL_SEND_TO_CREATOR = 20; //活动报名人数未达到最低限制人数，通知发起人.
 }

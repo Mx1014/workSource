@@ -35,7 +35,7 @@ public class InvoiceServiceImpl implements InvoiceService{
     public ListNotInvoicedOrdersResponse listNotInvoicedOrders(ListNotInvoicedOrdersCommand cmd) {
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor()==null?0:cmd.getPageAnchor();
-        List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrdersByUserId(cmd.getUserId(),pageSize,pageAnchor);
+        List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrdersByUserId(cmd.getUserId(),cmd.getStartCreateTime(),cmd.getEndCreateTime(),pageSize,pageAnchor);
         Map<String,ParkingLot> lotsMap = new HashMap<String,ParkingLot>();
         ListNotInvoicedOrdersResponse response = new ListNotInvoicedOrdersResponse();
         if(list !=null && list.size()>0 ){
@@ -55,7 +55,7 @@ public class InvoiceServiceImpl implements InvoiceService{
                 response.setNextPageAnchor(pageAnchor+1);
             }
         }
-        response.setCount(parkingProvider.ParkingRechargeOrdersByUserId(cmd.getUserId()));
+        response.setCount(parkingProvider.ParkingRechargeOrdersByUserId(cmd.getUserId(),cmd.getStartCreateTime(),cmd.getEndCreateTime()));
         return response;
     }
 

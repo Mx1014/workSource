@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.organization.pm;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * Created by Wentian Wang on 2018/6/12.
  */
@@ -15,8 +17,17 @@ public class ListReservationsCommand {
     private Long communityId;
     private Long organizationId;
     private String buildingName;
+    private Byte status;
 
-    public Integer getNamespaceId() {
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 
@@ -54,5 +65,10 @@ public class ListReservationsCommand {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+    
+    @Override
+    public String toString() {
+    	return StringHelper.toJsonString(this);
     }
 }

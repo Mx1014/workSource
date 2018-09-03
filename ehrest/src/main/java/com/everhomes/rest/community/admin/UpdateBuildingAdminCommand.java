@@ -27,6 +27,10 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  *  <li>entryDate: 入驻时间</li>
  *  <li>height: 楼高</li>
  *  <li>buildingNumber: 楼栋编号</li>
+ *  <li>rentArea: 在租面积</li>
+ *  <li>freeArea: 可招租面积</li>
+ *  <li>chargeArea: 收费面积</li>
+ *  <li>floorNumber: 楼栋的楼层数目</li>
  * </ul>
  *
  */
@@ -85,6 +89,43 @@ public class UpdateBuildingAdminCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+	
+	private Double rentArea;
+	private Double freeArea;
+	private Double chargeArea;
+	private Integer floorNumber;
+	
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Integer getFloorNumber() {
+		return floorNumber;
+	}
+
+	public void setFloorNumber(Integer floorNumber) {
+		this.floorNumber = floorNumber;
+	}
 
 	public Double getHeight() {
 		return height;
