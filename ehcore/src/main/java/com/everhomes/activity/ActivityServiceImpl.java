@@ -1928,6 +1928,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosters;
 		}
 
+        RowResult titleRow = (RowResult)rows.get(2);
+		Integer size = titleRow.getCells().size();
 		//Excel模板从第三行开始 edit by yanjun 20170829
 		for(int i=2, len=rows.size(); i<len; i++) {
 
@@ -1979,8 +1981,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             roster.setPhone(phone.trim());
             if (form != null) {
                 List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
-                LOGGER.info("cell length = {}", row.getCells().size());
-                for (int j=0;j<row.getCells().size();j++) {
+                LOGGER.info("cell length = {}", size);
+                for (int j=0;j<size;j++) {
                     PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
                     String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
                     LOGGER.info("value = {}",value);
@@ -7223,7 +7225,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 }
                 signupValue.add(signupInfoDTO.getPhone());
                 signupValue.add(signupInfoDTO.getNickName());
-                signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+                if (UserGender.fromCode(signupInfoDTO.getGender()) == null) {
+                    signupValue.add("-");
+                }else {
+                    signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+                }
                 if (i == 0) {
                     if (!CollectionUtils.isEmpty(itemList)) {
                         for (PostApprovalFormItem postApprovalFormItem : itemList) {
