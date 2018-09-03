@@ -1960,7 +1960,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             List<ActivityRoster> rosterList = this.activityProvider.listRosters(activityId,ActivityRosterStatus.NORMAL);
             String phone = row.getA();
             if (!CollectionUtils.isEmpty(rosterList)) {
-                if (rosters.get(0).getFormId() != null) {
+                if (rosterList.get(0).getFormId() != null) {
                     phone = row.getB();
                 }
             }
