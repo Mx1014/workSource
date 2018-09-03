@@ -5792,7 +5792,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				command.setCommunityId(task.getTargetId());
 				command.setNamespaceId(task.getNamespaceId());
 				command.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
-				OrganizationDTO organization  = equipmentService.getAuthOrgByProjectIdAndModuleId(task.getTargetId(), task.getNamespaceId(), EquipmentConstant.EQUIPMENT_MODULE);
+				OrganizationDTO organization  = getAuthOrgByProjectIdAndModuleId(task.getTargetId(), task.getNamespaceId(), EquipmentConstant.EQUIPMENT_MODULE);
 				if(organization!=null){
 					// here targetId means organization id for searching notify params
 					command.setTargetId(organization.getId());
