@@ -2067,9 +2067,10 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
         List<PaymentChargingItem> items = context.selectFrom(t)
-        		.where(t.NAMESPACE_ID.isNull().or(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))) //物业缴费V6.0 收费项配置可手动新增
-        		.and(t.OWNER_ID.isNull().or(t.OWNER_ID.eq(ownerId))) //物业缴费V6.0 收费项配置可手动新增
-                .fetchInto(PaymentChargingItem.class);
+	    		.where(t.NAMESPACE_ID.isNull().or(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))) //物业缴费V6.0 收费项配置可手动新增
+	    		.and(t.OWNER_ID.isNull().or(t.OWNER_ID.eq(ownerId)).or(t.OWNER_ID.eq(UserContext.getCurrentNamespaceId().longValue()))) //物业缴费V6.0 收费项配置可手动新增
+	            .orderBy(t.CREATE_TIME.desc()) //物业缴费V6.0 收费项配置可手动新增
+	    		.fetchInto(PaymentChargingItem.class);
 
         List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
                 .where(t1.OWNER_ID.eq(ownerId))
@@ -2087,7 +2088,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setIsSelected(isSelected);
             for(int j = 0; j < scopes.size(); j ++){
                 PaymentChargingItemScope scope = scopes.get(j);
-                if(item.getId() == scope.getChargingItemId()){
+                if(item.getId().equals(scope.getChargingItemId())){
                     isSelected = 1;
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
                     dto.setIsSelected(isSelected);
@@ -6767,5 +6768,70 @@ public class AssetProviderImpl implements AssetProvider {
         	return false;
         }
     }
+	
+	public void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds) {
+    	byte de_coupling = 1;
+        if(communityIds!=null && communityIds.size() >1){
+        	//1、创建基础费项数据(eh_payment_charging_items)
+        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
+            for(int i = 0; i < communityIds.size(); i ++){
+                Long cid = communityIds.get(i);
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cid);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	de_coupling = 0;
+                	cmd.setOwnerId(cid);
+                	//2、创建收费项配置作用域数据
+                	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
+                }
+            }
+        }else{
+            //只有一个园区,不是list过来的
+        	//1、创建基础费项数据(eh_payment_charging_items)
+        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
+        	//2、创建收费项配置作用域数据
+        	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
+        }
+    }
+	
+	private PaymentChargingItem createChargingItemForOneCommunity(CreateChargingItemCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建基础费项数据(eh_payment_charging_items)
+        EhPaymentChargingItemsDao chargingItemsDao = new EhPaymentChargingItemsDao(context.configuration());
+        PaymentChargingItem paymentChargingItem = new PaymentChargingItem();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItems.class));
+        paymentChargingItem.setId(nextSequence);
+        paymentChargingItem.setName(cmd.getChargingItemName());
+        paymentChargingItem.setCreatorUid(UserContext.currentUserId());
+        paymentChargingItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        paymentChargingItem.setNamespaceId(cmd.getNamespaceId());
+        paymentChargingItem.setOwnerId(cmd.getOwnerId());
+        paymentChargingItem.setOwnerType(cmd.getOwnerType());
+        paymentChargingItem.setCategoryId(cmd.getCategoryId());
+        chargingItemsDao.insert(paymentChargingItem);
+        return paymentChargingItem;
+	}
+	
+	private void createChargingItemScopesForOneCommunity(CreateChargingItemCommand cmd, PaymentChargingItem paymentChargingItem, Byte decouplingFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建收费项配置作用域数据
+        EhPaymentChargingItemScopesDao chargingItemScopesDao = new EhPaymentChargingItemScopesDao(context.configuration());
+        PaymentChargingItemScope scope = new PaymentChargingItemScope();
+        scope.setChargingItemId(paymentChargingItem.getId());
+        long scopesNextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
+        scope.setId(scopesNextSequence);
+        scope.setNamespaceId(cmd.getNamespaceId());
+        scope.setOwnerId(cmd.getOwnerId());
+        scope.setOwnerType(cmd.getOwnerType());
+        scope.setCategoryId(cmd.getCategoryId());
+        scope.setProjectLevelName(cmd.getProjectLevelNmae());
+        scope.setDecouplingFlag(decouplingFlag);
+        scope.setTaxRate(cmd.getTaxRate());//增加税率
+        chargingItemScopesDao.insert(scope);
+	}
 
 }

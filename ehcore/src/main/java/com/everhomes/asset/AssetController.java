@@ -1664,7 +1664,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
-     * <p>新增收费项配置</p>
+     * <p>新增收费项配置（物业缴费V6.0（UE优化）-30557）</p>
      * <b>URL: /asset/createChargingItem</b>
      */
     @RequestMapping("createChargingItem")

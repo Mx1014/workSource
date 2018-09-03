@@ -429,4 +429,6 @@ public interface AssetProvider {
 	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
+	
+	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }

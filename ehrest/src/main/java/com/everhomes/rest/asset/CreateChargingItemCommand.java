@@ -1,7 +1,7 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
-import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * @author created by ycx
@@ -14,6 +14,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType: 所属者type</li>
  * <li>namespaceId: 域名</li>
  * <li>categoryId: 多入口id</li>
+ * <li>chargingItemName: 收费项名称</li>
+ * <li>projectLevelNmae: 费项显示名称</li>
+ * <li>taxRate: 税率</li>
  *</ul>
  */
 public class CreateChargingItemCommand {
@@ -21,7 +24,9 @@ public class CreateChargingItemCommand {
     private String ownerType;
     private Integer namespaceId;
     private Long categoryId;
-    private String name;
+    private String chargingItemName;
+    private String projectLevelNmae;
+    private BigDecimal taxRate;
     
 	public Long getOwnerId() {
 		return ownerId;
@@ -47,11 +52,23 @@ public class CreateChargingItemCommand {
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
-	public String getName() {
-		return name;
+	public String getChargingItemName() {
+		return chargingItemName;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setChargingItemName(String chargingItemName) {
+		this.chargingItemName = chargingItemName;
+	}
+	public String getProjectLevelNmae() {
+		return projectLevelNmae;
+	}
+	public void setProjectLevelNmae(String projectLevelNmae) {
+		this.projectLevelNmae = projectLevelNmae;
+	}
+	public BigDecimal getTaxRate() {
+		return taxRate;
+	}
+	public void setTaxRate(BigDecimal taxRate) {
+		this.taxRate = taxRate;
 	}
     
 }

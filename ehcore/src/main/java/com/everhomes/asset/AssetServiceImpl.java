@@ -5669,8 +5669,19 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public void createChargingItem(CreateChargingItemCommand cmd) {
-		
-		
+		Long communityId = cmd.getOwnerId();
+        Integer namespaceId = cmd.getNamespaceId();
+        List<Long> communityIds = new ArrayList<>();
+		//如果communityId是空或者-1的话，那么会把communityId设置成域空间ID，代表全部
+        if(communityId == null || communityId == -1){
+        	cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            communityIds = getAllCommunity(namespaceId,true);
+        }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
+        assetProvider.createChargingItem(cmd, communityIds);
 	}
 
 }
