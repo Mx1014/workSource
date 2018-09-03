@@ -3732,4 +3732,29 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractSearcher.feedDoc(contract);
 	}
 
+	@Override
+	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractsByNamespaceIdAndStatus(cmd.getNamespaceId(),ContractStatus.DENUNCIATION.getCode());
+		
+		for (Contract contract : contracts) {
+			if (contract.getCostGenerationMethod() == null) {
+				//costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+				contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+				assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+				
+				if(contract.getCategoryId() == null){
+					contract.setCategoryId(0l);
+		        }else {
+		        	//合同CategoryId和缴费CategoryId转换
+		            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+		            contract.setCategoryId(assetCategoryId);
+				}
+				BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+				contract.setRent(totalAmount);
+				contractProvider.updateContract(contract);
+	            contractSearcher.feedDoc(contract);
+			}
+		}
+	}
+
 }
