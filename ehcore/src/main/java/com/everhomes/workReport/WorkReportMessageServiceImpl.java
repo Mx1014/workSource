@@ -1,5 +1,7 @@
 package com.everhomes.workReport;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -7,6 +9,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.workReport.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -192,6 +195,18 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Scheduled(cron = "0 30 * * * ?")
     @Override
     public void workReportRxMessage(){
+        String time = workReportTimeService.currenHHmmTime();
+        List<WorkReport> rxReports = new ArrayList<>();
+        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
+            query.addConditions(Tables.EH_WORK_REPORTS.RECEIVER_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
+            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
+            return query;
+        });
+        for (WorkReport r : results) {
+            ReportMsgSettingDTO dto = JSON.parseObject(r.getReceiverMsgSeeting(), ReportMsgSettingDTO.class);
+            if (time.equals(dto.getMsgTime()))
+                rxReports.add(r);
+        }
 
     }
 
