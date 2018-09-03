@@ -2090,15 +2090,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosterError;
 		}
 
-		//新增条件真实姓名必填  add by yanjun 20170628
-		if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
-			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REALNAME_EMPTY);
-			errorString = localeStringService.getLocalizedString(scope, code, locale, "The realName is empty");
-			rosterError.setDescription(errorString);
-			rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
-			return rosterError;
-		}
-
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
 			if(newRosters.get(i).getPhone().equals(row.getA())){
