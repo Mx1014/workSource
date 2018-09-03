@@ -1654,6 +1654,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcaseContractOwnerType);
+			//添加发起人字段
+			contract.setSponsorUid(UserContext.currentUserId());
+			contract.setSponsorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 
 		contractProvider.updateContract(contract);
@@ -1860,6 +1863,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}else {
 					addToFlowCase(contract, flowcaseContractOwnerType);
 				}
+				//添加发起人字段
+				contract.setSponsorUid(UserContext.currentUserId());
+				contract.setSponsorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				
 				//工作流不存在，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致
 				contract.setStatus(cmd.getResult());
 				contractProvider.updateContract(contract);
