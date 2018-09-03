@@ -169,9 +169,9 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         if(null!=dto.getStartTime()){
             sb.append(datetimeSF.get().format(new Timestamp(dto.getStartTime())));
             if ((dto.getStartTime() / dayTime) == (dto.getEndTime() / dayTime)) //同一天
-                sb.append(sb.append("-").append(timeSF.get().format(new Timestamp(dto.getEndTime()))));
+                sb.append("-").append(timeSF.get().format(new Timestamp(dto.getEndTime())));
             else
-                sb.append(sb.append("-").append(datetimeSF.get().format(new Timestamp(dto.getEndTime()))));
+                sb.append("-").append(datetimeSF.get().format(new Timestamp(dto.getEndTime())));
         }
         row.createCell(++i).setCellValue(sb.toString());
         //总价
@@ -183,6 +183,8 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         //支付方式
         if(null != dto.getVendorType())
             row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
+        else
+            row.createCell(++i).setCellValue("无");
         //订单状态
         if(dto.getStatus() != null)
             row.createCell(++i).setCellValue(statusToString(dto.getStatus()));

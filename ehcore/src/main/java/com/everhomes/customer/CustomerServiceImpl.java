@@ -23,6 +23,7 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -50,6 +51,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
@@ -215,6 +217,7 @@ import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.findScopeFieldItemCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -250,9 +253,12 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdResponse;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
@@ -273,6 +279,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
@@ -379,6 +386,9 @@ public class CustomerServiceImpl implements CustomerService {
     private UserService userService;
 
     @Autowired
+    private EquipmentService equipmentService;
+
+    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -410,6 +420,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private RequisitionService requisitionService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -892,13 +905,30 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getAptitudeFlagItemId()) {
-            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();
+            cmd.setNamespaceId(customer.getNamespaceId());
+            cmd.setBusinessValue(Byte.valueOf(dto.getAptitudeFlagItemId().toString()));
+            cmd.setModuleName("enterprise_customer");
+            cmd.setCommunityId(customer.getCommunityId());
+            Field field = fieldProvider.findField(10L, "aptitudeFlagItemId");
+            if (field != null)
+                cmd.setFieldId(field.getId());
+            FieldItemDTO aptitudeFlag = equipmentService.findScopeFieldItemByFieldItemId(cmd);
+
             if (null != aptitudeFlag) {
                 dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
             } else {
                 dto.setAptitudeFlagItemName(null);
             }
         }
+        /*if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
+            }
+        }*/
 
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if (!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
@@ -1237,6 +1267,17 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
+        GetGeneralFormByCustomerIdCommand cmd2 = new GetGeneralFormByCustomerIdCommand();
+        cmd2.setCommunityId(cmd.getCommunityId());
+        cmd2.setCustomerId(customer.getId());
+        cmd2.setModuleId(25000L);
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        GetGeneralFormByCustomerIdResponse response = requisitionService.getGeneralFormByCustomerId(cmd2);
+        if(response != null && response.getSourceId() != null && response.getSourceId() != 0){
+            LOGGER.error("this customer has a requisition , ", customer);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_HAS_REQUISITION,
+                    "enterprise customer has requisition");
+        }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(), customer.getId(), CustomerType.ENTERPRISE.getCode());
         for (Contract contract : contracts) {
             if (contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
@@ -1259,7 +1300,7 @@ public class CustomerServiceImpl implements CustomerService {
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
                 command.setId(customer.getOrganizationId());
-                organizationService.deleteEnterpriseById(command, false);
+                ExecutorUtil.submit(() -> organizationService.deleteEnterpriseById(command, false));
             }
         }
         routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
@@ -4816,6 +4857,16 @@ public class CustomerServiceImpl implements CustomerService {
             return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
         return null;
+    }
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            enterpriseCustomerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
     }
 
 }

@@ -29,4 +29,6 @@ public interface ServiceModuleConstants {
     long AUTHENTIFICATION_MODULE_ID = 35000L; // 用户认证模块ID
     long DECORATION_MODULE = 43000L;
 
+    long REQUISITION_MODULE = 25000L; // 请示单模块
+
 }

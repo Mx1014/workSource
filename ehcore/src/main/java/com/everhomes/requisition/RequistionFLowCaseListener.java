@@ -2,20 +2,30 @@
 package com.everhomes.requisition;
 
 import com.everhomes.address.AddressProvider;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormSearcher;
 import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValRequest;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.openapi.Contract;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.GeneralFormValsResponse;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +59,12 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private AddressProvider addressProvider;
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
+    @Autowired
+    private GeneralFormSearcher generalFormSearcher;
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+    @Autowired
+    private CustomerService customerService;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -77,6 +93,22 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         return result;
     }
 
+
+    @Override
+    public void onFlowCaseStateChanged(FlowCaseState ctx) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
+        }
+        FlowCase flowCase = ctx.getFlowCase();
+        if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
+            // 审批驳回开始节点，更新合同的状态为待发起 -- djm
+
+            generalFormProvider.updateGeneralFormValRequestStatus(flowCase.getReferId(), RequisitionStatus.WAIT.getCode());
+            List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),25000l, flowCase.getProjectId());
+
+            generalFormSearcher.feedDoc(request);
+        }
+    }
     /**
      * 工作流步骤走完后，更改请示单的状态
      */
@@ -109,10 +141,17 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     ex.printStackTrace();
                 }
 
-                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1l);
+                GetEnterpriseCustomerCommand cmd = new GetEnterpriseCustomerCommand();
+                cmd.setCommunityId(flowCase.getProjectId());
+                cmd.setId(Long.valueOf(fieldValue));
+                EnterpriseCustomerDTO customer = customerService.getEnterpriseCustomer(cmd);
+                customer.setAptitudeFlagItemId(1L);
+                customerService.updateEnterpriseCustomer(ConvertHelper.convert(customer, UpdateEnterpriseCustomerCommand.class));
+
+                enterpriseCustomerProvider.updateCustomerAptitudeFlag(Long.valueOf(fieldValue), 1L);
             }
         }
-
+        generalFormSearcher.feedDoc(request);
 //        String owner = requisitionProvider.getOwnerById(referId);
 //        RequistionListener lis = map.get(owner);
 //        lis.onRequisitionEnd();
@@ -123,6 +162,10 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
+        List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),25000l, flowCase.getProjectId());
+        generalFormSearcher.feedDoc(request);
+
+
     }
 
     @Override
@@ -130,6 +173,9 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.HANDLING.getCode());
+        List<GeneralFormVal> request = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),25000l, flowCase.getProjectId());
+        generalFormSearcher.feedDoc(request);
+
     }
 
     @Override
@@ -155,7 +201,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         List<FlowCaseEntity> entities = new ArrayList<>();
         FlowCaseEntity e;
 
-        for(GeneralFormVal val : request){
+        forLoop:for(GeneralFormVal val : request){
+
             e = new FlowCaseEntity();
             switch(val.getFieldType()){
                 case "SINGLE_LINE_TEXT":
@@ -174,6 +221,11 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 case "FILE":
                     e.setEntityType(FlowCaseEntityType.FILE.getCode());
                     break;
+                case "SUBFORM" :
+
+                    entities.addAll(getSubEntities(val));
+
+                    continue forLoop;
                 default:
                     e.setEntityType(FlowCaseEntityType.LIST.getCode());
                     break;
@@ -203,17 +255,137 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                             break;
                         }
                     }
+                    if(entry.getKey().equals("urls")){
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            break;
+                        }
+                    }
 
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                JsonArray urlJsons = jo.getAsJsonArray("urls");
+                if(urlJsons != null && urlJsons.size() > 0){
+                    fieldValue = urlJsons.get(0).getAsString();
+                }else{
+                    caseFileDTO.setUrl("");
+                }
+
+
+
+                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);
         }
         return entities;
     }
+
+    private List<FlowCaseEntity> getSubEntities(GeneralFormVal val){
+        List<FlowCaseEntity> subEntities = new ArrayList<>();
+        //Map map = (Map)JSONObject.parse(val.getFieldValue());
+        //JsonArray subArray = (JsonArray) map.get("subForms");
+        JsonObject subJsonObj = new JsonParser().parse(val.getFieldValue()).getAsJsonObject();
+        JsonArray subArray = subJsonObj.getAsJsonArray("subForms").get(0).getAsJsonObject().getAsJsonArray("formFields");
+        FlowCaseEntity head  = new FlowCaseEntity();
+        head.setKey(val.getFieldName());
+        head.setValue("");
+        head.setEntityType(FlowCaseEntityType.LIST.getCode());
+        subEntities.add(head);
+        for(JsonElement arr : subArray){
+            arr.getAsJsonObject().get("fieldName").getAsString();
+            String FieldType = arr.getAsJsonObject().get("fieldType").getAsString();
+            FlowCaseEntity e2  = new FlowCaseEntity();
+            switch(FieldType){
+                case "SINGLE_LINE_TEXT":
+                case "INTEGER_TEXT":
+                case "DATE":
+                case "NUMBER_TEXT":
+                case "DROP_BOX":
+                    e2.setEntityType(FlowCaseEntityType.LIST.getCode());
+                    break;
+                case "MULTI_LINE_TEXT":
+                    e2.setEntityType(FlowCaseEntityType.TEXT.getCode());
+                    break;
+                case "IMAGE":
+                    e2.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+                    break;
+                case "FILE":
+                    e2.setEntityType(FlowCaseEntityType.FILE.getCode());
+                    break;
+                default:
+                    e2.setEntityType(FlowCaseEntityType.LIST.getCode());
+                    break;
+            }
+            String fieldValue;
+            JsonElement jsonElement = arr.getAsJsonObject().get("fieldValue");
+            if(jsonElement != null) {
+                fieldValue = jsonElement.getAsJsonObject().toString();
+            }else{
+                fieldValue = "";
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+            Map<String,String> urMap;
+            try {
+                urMap = mapper.readValue(fieldValue, jvt);
+                for (Map.Entry<String, String> entry : urMap.entrySet()) {
+                    fieldValue  = entry.getValue();
+                    if(entry.getKey().equals("text")) {
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            break;
+                        }
+                    }
+                    if(entry.getKey().equals("urls")){
+                        if (StringUtils.isNotBlank(fieldValue)) {
+                            FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                            caseFileDTO.setUrl(fieldValue);
+                            fieldValue = StringHelper.toJsonString(caseFileDTO);
+                            break;
+                        }
+                    }
+
+                }
+                e2.setValue(fieldValue);
+            } catch (IOException ex) {
+                try {
+                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                    JsonArray urlJsons = jo.getAsJsonArray("urls");
+                    if (urlJsons != null && urlJsons.size() > 0) {
+                        fieldValue = urlJsons.get(0).getAsString();
+                    } else {
+                        caseFileDTO.setUrl("");
+                    }
+
+
+
+                    e2.setValue(fieldValue);
+                }catch (Exception e){
+                    e2.setValue(fieldValue);
+                }
+            }
+            e2.setKey(arr.getAsJsonObject().get("fieldName").getAsString());
+            subEntities.add(e2);
+        }
+        return subEntities;
+    }
+
+
+
+/*    public static void main(String[] args){
+        String str = "{\"urls\":[\"http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvMVpqSXlPVFF4T0RRMFkyTXlNV016TW1NM05qVmlaVFkwT1dJMk1qUTNZdw?token=VZvdfkggHypKc8H05lAERNNReYYiZFwwQWJFpnk18LGs_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVjyuzKjAnDupH1Q0vzL0T0M\"],\"uris\":[\"cs://1/image/aW1hZ2UvTVRvMVpqSXlPVFF4T0RRMFkyTXlNV016TW1NM05qVmlaVFkwT1dJMk1qUTNZdw\"]}";
+        JsonObject jo = new JsonParser().parse(str).getAsJsonObject();
+        FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+        //Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        JsonArray urlJsons = jo.getAsJsonArray("urls");
+        System.out.println(urlJsons.get(0).getAsString());
+
+    }*/
 //    @Override
 //    public void onApplicationEvent(ContextRefreshedEvent event) {
 //        for(RequistionListener req : reqListeners){

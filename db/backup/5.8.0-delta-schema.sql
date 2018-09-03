@@ -775,6 +775,11 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `type`  tinyint(4) NULL COMMENT '1-�
 
 ALTER TABLE `eh_portal_layouts` ADD COLUMN `index_flag`  tinyint(4) NULL DEFAULT NULL COMMENT 'index flag, 0-no, 1-yes';
 
+-- 2018年8月22日
+-- 新增在request表单中存储该表单的formOriginId和formVersion
+alter table eh_general_form_val_requests add form_origin_id BIGINT null comment '该表单所属的表单模板id';
+alter table eh_general_form_val_requests add form_version BIGINT null comment '该表单所属的表单模板version';
+
 -- AUTHOR: 唐岑
 -- REMARK: 资产管理V3.1 2018年8月23日16:22:55
 -- REMARK: 解决issue-36278，房源管理查询速度慢的问题，同时向eh_addresses表中补充building_id、community_name两个字段
@@ -785,4 +790,60 @@ ALTER TABLE `eh_addresses` ADD COLUMN `community_name` varchar(64) NULL DEFAULT 
 -- AUTHOR: 黄良铭 2018年08月23日
 -- REMARK: #36462 
 ALTER TABLE eh_app_urls MODIFY COLUMN logo_url VARCHAR(1024) ;
+
+
+
+-- AUTHOR: 马世亨 2018年08月28日
+-- REMARK: #34923 园区快讯预览表
+CREATE TABLE `eh_new_preview` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT 'namespace id',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'ORGANIZATION',
+  `owner_id` bigint(20) DEFAULT '0' COMMENT 'organization_id',
+  `title` varchar(1024) DEFAULT NULL COMMENT 'title',
+  `author` varchar(128) DEFAULT NULL COMMENT 'author',
+  `cover_uri` varchar(1024) DEFAULT NULL COMMENT 'cover image uri',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'object content type: link url、rich text',
+  `content` longtext COMMENT 'content data, depends on value of content_type',
+  `content_abstract` text COMMENT 'abstract of content data',
+  `source_desc` varchar(128) DEFAULT NULL COMMENT 'where the news comes from',
+  `source_url` varchar(256) DEFAULT NULL COMMENT 'the url of source',
+  `phone` varchar(32) DEFAULT '0',
+  `child_count` bigint(20) NOT NULL DEFAULT '0' COMMENT 'comment count',
+  `forward_count` bigint(20) NOT NULL DEFAULT '0' COMMENT 'forward count',
+  `like_count` bigint(20) NOT NULL DEFAULT '0' COMMENT 'like count',
+  `view_count` bigint(20) NOT NULL DEFAULT '0' COMMENT 'view count',
+  `publish_time` datetime DEFAULT NULL COMMENT 'the time when the news was created, now equals to create_time',
+  `top_index` bigint(20) NOT NULL DEFAULT '0' COMMENT 'if has this value, go to first, order from big to small',
+  `top_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'whether it is top',
+  `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'news creator uid',
+  `create_time` datetime DEFAULT NULL COMMENT 'create time',
+  `deleter_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'deleter uid',
+  `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy. historic data may be useful',
+  `category_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'category id',
+  `visible_type` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- AUTHOR: 马世亨 2018年08月28日
+-- REMARK: #35665 物品放行提示内容长度限制取消
+ALTER TABLE `eh_relocation_configs` MODIFY COLUMN `tips_content` text NULL COMMENT '提示内容' AFTER `tips_flag`;
+
+-- END
+
+-- AUTHOR: 黄鹏宇 2018年08月28日
+-- REMARK: 页面按钮白名单
+CREATE TABLE `eh_service_module_include_functions`
+(
+   `id`                   bigint not null,
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+	 `community_id`					bigint comment 'community_id' null,
+	 `function_id`					bigint comment '关联的按钮id' not null,
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_service_module_include_functions in dev mode';
+
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------

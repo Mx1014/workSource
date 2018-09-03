@@ -2322,6 +2322,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getContractStartDate())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
 					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -2344,6 +2345,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 					}
 					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+					}
 				}
 			}
 		}
@@ -2355,6 +2357,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getDenunciationTime())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
 					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -2375,6 +2378,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 					}
 					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+					}
 				}
 			}
 		}
@@ -2885,6 +2889,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (chargingItems != null && chargingItems.size() > 0) {
 			List<ChargingItemVariables> chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 			for (int i = 0; i < chargingItems.size(); i++) {
+				if ((chargingItems.get(i).getChargingStartTime()).before(EndTimeByDayTimestamp)) {
 				// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 				ChargingItemVariables chargingPaymentTypeVariable = new ChargingItemVariables();
 				// 根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -2909,6 +2914,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 				}
 				dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
 			}
 		}
 		return dto;

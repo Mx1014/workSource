@@ -360,6 +360,7 @@ public interface PrivilegeConstants {
     long REQUISITION_MODULE = 25000L;
     long REQUISITION_VIEW = 250001001L;
     long REQUISITION_CREATE = 250001002L;
+    long REQUISITION_DELETE = 250001003L;
 
     //企业管理
     long ORGANIZATION_CREATE = 33001L;

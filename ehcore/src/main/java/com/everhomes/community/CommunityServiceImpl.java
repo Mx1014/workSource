@@ -2863,15 +2863,14 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("姓名");
-		row.createCell(1).setCellValue("昵称");
-		row.createCell(2).setCellValue("手机号");
-		row.createCell(3).setCellValue("性别");
-		row.createCell(4).setCellValue("家庭地址");
-		row.createCell(5).setCellValue("用户状态");
-		row.createCell(6).setCellValue("社交账号绑定");
-		row.createCell(7).setCellValue("注册时间");
-		row.createCell(8).setCellValue("最近活跃时间");
+		row.createCell(0).setCellValue("昵称");
+		row.createCell(1).setCellValue("手机号");
+		row.createCell(2).setCellValue("性别");
+		row.createCell(3).setCellValue("家庭地址");
+		row.createCell(4).setCellValue("用户状态");
+		row.createCell(5).setCellValue("社交账号绑定");
+		row.createCell(6).setCellValue("注册时间");
+		row.createCell(7).setCellValue("最近活跃时间");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -2880,10 +2879,9 @@ public class CommunityServiceImpl implements CommunityService {
 			Row tempRow = sheet.createRow(i + 1);
 			CommunityUserAddressDTO dto = dtos.get(i);
 
-			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(dto.getNickName());
-			tempRow.createCell(2).setCellValue(dto.getPhone());
-			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+			tempRow.createCell(0).setCellValue(dto.getNickName());
+			tempRow.createCell(1).setCellValue(dto.getPhone());
+			tempRow.createCell(2).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 
 			StringBuffer address = new StringBuffer();
 			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
@@ -2900,11 +2898,11 @@ public class CommunityServiceImpl implements CommunityService {
 				address.deleteCharAt(address.length() -1);
 			}
 
-			tempRow.createCell(4).setCellValue(address.toString());
-			tempRow.createCell(5).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
-			tempRow.createCell(6).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-			tempRow.createCell(7).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(8).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
+			tempRow.createCell(3).setCellValue(address.toString());
+			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
+			tempRow.createCell(5).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(6).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
+			tempRow.createCell(7).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
 		ByteArrayOutputStream out = null;
