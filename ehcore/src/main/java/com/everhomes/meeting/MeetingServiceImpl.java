@@ -1287,10 +1287,12 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (!haveMeetingReservationWritePermission(meetingReservation)) {
             throw errorWithNoPermissionDeleteMeetingRecord();
         }
+        List<MeetingAttachment> deleteAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
         List<EhMeetingInvitations> recordReceivers = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.CC.getCode());
         dbProvider.execute(transactionStatus -> {
             meetingProvider.deleteMeetingRecord(meetingRecord);
             meetingProvider.batchDeleteMeetingInvitations(recordReceivers);
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
             return null;
         });
     }
