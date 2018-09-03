@@ -1979,9 +1979,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             roster.setPhone(phone.trim());
             if (form != null) {
                 List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
+                LOGGER.info("cell length = {}", row.getCells().size());
                 for (int j=0;j<row.getCells().size();j++) {
                     PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
                     String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
+                    LOGGER.info("value = {}",value);
                     postApprovalFormItem.setFieldValue(getStrTrim(value));
                     postApprovalFormItems.add(postApprovalFormItem);
                 }
