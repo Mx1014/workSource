@@ -9,7 +9,6 @@ import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.CountSampleTaskScoresCommand;
 import com.everhomes.rest.quality.CountSampleTaskScoresResponse;
 import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
-import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.SampleQualityInspectionDTO;
 import com.everhomes.rest.quality.SampleTaskScoreDTO;
 import com.everhomes.rest.quality.SearchSampleQualityInspectionCommand;
@@ -196,8 +195,8 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", Status.ACTIVE.getCode()));
 
         if(cmd.getStartTime() != null) {

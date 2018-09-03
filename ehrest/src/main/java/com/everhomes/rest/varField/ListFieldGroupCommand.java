@@ -35,6 +35,8 @@ public class ListFieldGroupCommand {
 
 	private Long categoryId;
 
+    private Long ownerId;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -114,6 +116,22 @@ public class ListFieldGroupCommand {
 
     public void setAdmin(Boolean admin) {
         isAdmin = admin;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

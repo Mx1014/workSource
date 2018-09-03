@@ -139,33 +139,41 @@ import com.google.gson.reflect.TypeToken;
 import java.io.OutputStream;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.organization.OrganizationServiceUser;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-
 import org.springframework.transaction.TransactionStatus;
 
+import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -646,9 +654,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		}
 		
 		Calendar cal=Calendar.getInstance();
@@ -1679,14 +1687,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setTemplateId(cmd.getTemplateId());
 		}
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		
+
 		//by --djm issue-35586
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcaseContractOwnerType);
 		}
 
 		contractProvider.updateContract(contract);
-		
+
 		//add by tangcen
 		//将父合同中关联的未出账单记为无效账单
 		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
@@ -1709,7 +1717,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		dealContractAttachments(contract, cmd.getAttachments());
 		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
-		
+
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
 		
@@ -1969,7 +1977,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-					
+
 					if(cmd.getCategoryId() == null){
 			            cmd.setCategoryId(0l);
 			        }else {
@@ -2022,7 +2030,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractSearcher.feedDoc(parentContract);
 			}
 		}
-		
+
 
 		//入场报错合同变为正常合同
 		contractProvider.updateContract(contract);
@@ -2037,7 +2045,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
@@ -2105,24 +2113,24 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		 * 我们此处获得参数设置也是不需要进行权限校验的，所以在这里以及设置参数那边，我们把权限的校验规则给放开，不做权限校验。
 		 */
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), null,cmd.getCategoryId());
 		//查询在某一个入口，某一个小区，某个收付款合同类型，最低规则
 		if(communityExist != null) {
 			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			//设置的全部规则，又分为不同入口的全部规则，收付款
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(),cmd.getCategoryId());
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}else {//原来的规则
-				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, null);
+				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null,cmd.getOrgId(), null);
 				if(communityExist != null) {
 					return toContractParamDTO(communityExist);
 				}
 			}
 		//原来的规则
 		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null && cmd.getCategoryId() != null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, null);
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, cmd.getOrgId(),null);
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}
@@ -2268,7 +2276,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					dto.setDenunciationName(denunciactionName.getNickName());
 				}
 			}
-			
+
 		}
 
 		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
@@ -2329,7 +2337,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 
 		if(contract.getLayout() != null && StringUtils.isNotBlank(contract.getLayout()) && StringUtils.isNumeric(contract.getLayout())) {
-			ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getLayout()));
+			ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),cmd.getOrgId(), contract.getCommunityId(), Long.valueOf(contract.getLayout()));
 			if(item != null) {
 				dto.setLayoutName(item.getItemDisplayName());
 			}
@@ -2378,7 +2386,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			}
 		}
-		
+
 		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			//向前端返回时间范围
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
@@ -2397,11 +2405,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						String endTimeByPeriod = "";
 						chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
 						chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
-						
+
 						//35563 【合同管理2.8】查看退约的合同，费用收取方式字段，收取时间未显示 by djm
 						endTimeByDay=yyyyMMdd.format(contract.getDenunciationTime());
 						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay,contract.getId(), chargingItems.get(i).getChargingItemId());
-						
+
 						chargingPaymentTypeVariable.setEndTimeByDay(endTimeByDay);
 						chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
@@ -2411,7 +2419,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			}
 		}
-		
+
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
@@ -2908,7 +2916,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		return false;
 	}
-	
+
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
 		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
@@ -3062,7 +3070,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-    
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
@@ -3298,10 +3306,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ListContractTemplatesResponse searchContractTemplates(listContractTemplateCommand cmd) {
+		// this module request param ownerId means communityId
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
-		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
 				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
@@ -3597,7 +3606,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 
 	}
-	
+
 	@Override
 	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd) {
 		EnterpriseContractDTO dto = ConvertHelper.convert(cmd, EnterpriseContractDTO.class);
@@ -3611,7 +3620,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("合同编号");
@@ -3641,7 +3650,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		e.setKey("合同结束时间");
 		e.setValue(timeToStr(contractDetailDTO.getContractEndDate()));
 		entities.add(e);
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("经办人");
@@ -3663,20 +3672,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
 			apartments.append(apartment.getBuildingName() + "-" + apartment.getApartmentName()/* + "  面积："
-					+ apartment.getChargeArea()*/ + "，"); 
+					+ apartment.getChargeArea()*/ + "，");
 		}
 		e.setValue((apartments.toString()).substring(0, (apartments.toString()).length()-1));
 		entities.add(e);
-		
+
 		for (int i = 0; i < (contractDetailDTO.getChargingItems()).size(); i++) {
-			
+
 			List<FlowCaseEntity> chargingItemEntities = new ArrayList<>();
 			FlowCaseEntity chargingItemeE;
-			
+
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.CONTRACT_PRICE.getCode());
 			e.setKey("计价条款");
-			
+
 			// 计价条款json 转对象
 			if (contractDetailDTO.getChargingItems().get(i).getChargingVariables() != null) {
 				contractDetailDTO.getChargingItems().get(i).getChargingVariables();
@@ -3699,19 +3708,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				chargingItemeE.setKey("计费公式");
 				chargingItemeE.setValue(contractDetailDTO.getChargingItems().get(i).getFormula() +"("+ FormulaVariable+")");
 				chargingItemEntities.add(chargingItemeE);
-				
+
 				if (contractDetailDTO.getChargingItems().get(i).getChargingStartTime() != null) {
 					chargingItemeE = new FlowCaseEntity();
 					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
 					chargingItemeE.setKey("起计日期");
 					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingStartTime()));
 					chargingItemEntities.add(chargingItemeE);
-					
+
 					chargingItemeE = new FlowCaseEntity();
 					chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
 					chargingItemeE.setKey("截止日期");
 					chargingItemeE.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
-					chargingItemEntities.add(chargingItemeE);  
+					chargingItemEntities.add(chargingItemeE);
 				}
 				// 添加应用的资产
 				StringBuffer apartmentVariable = new StringBuffer();
@@ -3723,7 +3732,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				chargingItemeE.setEntityType(FlowCaseEntityType.LIST.getCode());
 				chargingItemeE.setKey("应用资产");
 				chargingItemeE.setValue((apartmentVariable.toString()).substring(0, (apartmentVariable.toString()).length()-1));
-				chargingItemEntities.add(chargingItemeE); 
+				chargingItemEntities.add(chargingItemeE);
 			}
 			e.setChargingItemEntities(chargingItemEntities);
 			entities.add(e);
@@ -3756,7 +3765,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		contract.setTemplateId(null);
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		
+
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 	}

@@ -12,7 +12,6 @@ import com.everhomes.server.schema.tables.daos.EhEnergyMeterCategoryMapDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategoryMap;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,12 +54,13 @@ public class EnergyMeterCategoryMapProviderImpl implements EnergyMeterCategoryMa
     }
 
     @Override
-    public List<EnergyMeterCategoryMap> listEnergyMeterCategoryMap(Long communityId) {
+    public List<EnergyMeterCategoryMap> listEnergyMeterCategoryMap(Long communityId,Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<EnergyMeterCategoryMap> maps = context.select().from(Tables.EH_ENERGY_METER_CATEGORY_MAP)
                 .where(Tables.EH_ENERGY_METER_CATEGORY_MAP.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+//                .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.OWNER_ID.eq(ownerId))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, EnergyMeterCategoryMap.class);
                 });

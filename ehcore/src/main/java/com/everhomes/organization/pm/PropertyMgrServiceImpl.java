@@ -496,8 +496,11 @@ import java.util.stream.Stream;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import net.greghaines.jesque.Job;
-
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -507,20 +510,25 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.validation.constraints.Null;
-
-import java.io.*;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -529,9 +537,21 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -680,7 +700,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     private ScheduleProvider scheduleProvider;
     @Autowired
    	private ContractBuildingMappingProvider contractBuildingMappingProvider;
-
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
 
@@ -1545,7 +1564,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void sendNotice(SendNoticeCommand cmd) {
 
-       // this.checkCommunityIdIsNull(cmd.getCommunityId()); 
+       // this.checkCommunityIdIsNull(cmd.getCommunityId());
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1591,7 +1610,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
-               
+
         jesqueClientFactory.getClientPool().enqueue(queueName, job);*/
 
         //更换推送方式 add by huangliangming 20180723
@@ -1622,11 +1641,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
             sendNoticeToNamespaceUser(cmd);
-        } 
+        }
          //添加按项目推送的维度 20180712
         else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
         	sendNoticeToCommunitsUser(cmd);
-        	
+
         }
         //按号码推送
         else if(sendNoticeMode == SendNoticeMode.MOBILE){
@@ -1658,7 +1677,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
         } while (locator.getAnchor() != null);
     }
-    
+
     /**
      * 按项目推送
      * @param cmd
@@ -2651,7 +2670,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getCategoryItemId());
                 if (item != null) {
                     address.setCategoryItemName(item.getItemDisplayName());
                 }
@@ -2660,7 +2679,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getSourceItemId() != null) {
                 address.setSourceItemId(cmd.getSourceItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getSourceItemId());
                 if (item != null) {
                     address.setSourceItemName(item.getItemDisplayName());
                 }
@@ -2687,7 +2706,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getOwnerId(),cmd.getCommunityId(), cmd.getCategoryItemId());
                 if (item != null) {
                     address.setCategoryItemName(item.getItemDisplayName());
                 }
@@ -2696,7 +2715,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getSourceItemId() != null) {
                 address.setSourceItemId(cmd.getSourceItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getSourceItemId());
                 if (item != null) {
                     address.setSourceItemName(item.getItemDisplayName());
                 }
@@ -2867,7 +2886,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (cmd.getCategoryItemId() != null) {
             address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getOwnerId(),address.getCommunityId(), cmd.getCategoryItemId());
             if (item != null) {
                 address.setCategoryItemName(item.getItemDisplayName());
             }
@@ -2876,7 +2895,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (cmd.getSourceItemId() != null) {
             address.setSourceItemId(cmd.getSourceItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), address.getCommunityId(), cmd.getSourceItemId());
             if (item != null) {
                 address.setSourceItemName(item.getItemDisplayName());
             }

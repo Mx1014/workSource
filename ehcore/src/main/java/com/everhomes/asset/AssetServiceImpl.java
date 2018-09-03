@@ -96,7 +96,158 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AdjustBillGroupOrderCommand;
+import com.everhomes.rest.asset.AdjustType;
+import com.everhomes.rest.asset.AppTemplate;
+import com.everhomes.rest.asset.AssetBillSource;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetModuleType;
+import com.everhomes.rest.asset.AssetServiceErrorCode;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.AssetVariable;
+import com.everhomes.rest.asset.AutoNoticeConfigCommand;
+import com.everhomes.rest.asset.BatchImportBillsCommand;
+import com.everhomes.rest.asset.BatchImportBillsResponse;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillGroupIdCommand;
+import com.everhomes.rest.asset.BillGroupRuleIdCommand;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillIdListCommand;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.BillingCycle;
+import com.everhomes.rest.asset.BillsDayType;
+import com.everhomes.rest.asset.CalculateRentCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
+import com.everhomes.rest.asset.CheckTokenRegisterCommand;
+import com.everhomes.rest.asset.ClientIdentityCommand;
+import com.everhomes.rest.asset.ConfigChargingItemsCommand;
+import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.rest.asset.CreatAssetBillCommand;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateBillGroupCommand;
+import com.everhomes.rest.asset.CreateChargingStandardCommand;
+import com.everhomes.rest.asset.CreateFormulaCommand;
+import com.everhomes.rest.asset.DeleteBillCommand;
+import com.everhomes.rest.asset.DeleteBillGroupCommand;
+import com.everhomes.rest.asset.DeleteBillGroupReponse;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.DeleteChargingStandardDTO;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FeeRules;
+import com.everhomes.rest.asset.FindAssetBillCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.FunctionDisableListCommand;
+import com.everhomes.rest.asset.FunctionDisableListDto;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.GetAssetBillStatCommand;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.ImportOwnerCommand;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.IsUserExistInAddressCmd;
+import com.everhomes.rest.asset.IsUserExistInAddressResponse;
+import com.everhomes.rest.asset.JudgeAppShowPayCommand;
+import com.everhomes.rest.asset.JudgeAppShowPayResponse;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAssetBillTemplateCommand;
+import com.everhomes.rest.asset.ListAutoNoticeConfigCommand;
+import com.everhomes.rest.asset.ListAutoNoticeConfigResponse;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailCommandStr;
+import com.everhomes.rest.asset.ListBillDetailOnDateChangeCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillItemsCommand;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsCommandForEnt;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListChargingStandardsResponse;
+import com.everhomes.rest.asset.ListLateFineStandardsCommand;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsCommand;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.ListUploadCertificatesCommand;
+import com.everhomes.rest.asset.ModifyBillGroupCommand;
+import com.everhomes.rest.asset.ModifyChargingStandardCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.ModifySettledBillCommand;
+import com.everhomes.rest.asset.MsgTemplate;
+import com.everhomes.rest.asset.NoticeConfig;
+import com.everhomes.rest.asset.NoticeDayType;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
+import com.everhomes.rest.asset.NoticeObj;
+import com.everhomes.rest.asset.NotifyTimesResponse;
+import com.everhomes.rest.asset.NotifyUnpaidBillsContactCommand;
+import com.everhomes.rest.asset.OneKeyNoticeCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentBillRequest;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
+import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
+import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
+import com.everhomes.rest.asset.ReCalBillCommand;
+import com.everhomes.rest.asset.RentAdjust;
+import com.everhomes.rest.asset.RentFree;
+import com.everhomes.rest.asset.SelectedNoticeCommand;
+import com.everhomes.rest.asset.SeperationType;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.SimpleAssetBillDTO;
+import com.everhomes.rest.asset.TenantType;
+import com.everhomes.rest.asset.TestLateFineCommand;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
+import com.everhomes.rest.asset.UpdateAssetBillCommand;
+import com.everhomes.rest.asset.UpdateAssetBillTemplateCommand;
+import com.everhomes.rest.asset.UploadCertificateCommand;
+import com.everhomes.rest.asset.UploadCertificateDTO;
+import com.everhomes.rest.asset.UploadCertificateInfoDTO;
+import com.everhomes.rest.asset.VariableConstraints;
+import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -161,6 +312,48 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 //import com.everhomes.contract.ContractService;
 
@@ -263,10 +456,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ContractServiceImpl contractService;
-    
+
     @Autowired
     private ServiceModuleService serviceModuleService;
-    
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -661,6 +854,7 @@ public class AssetServiceImpl implements AssetService {
     public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            cmd.setAllScope(true);
         }
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
@@ -676,7 +870,7 @@ public class AssetServiceImpl implements AssetService {
             	 return null;
              }
          }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(),cmd.getOrgId(),cmd.getAllScope());
     }
 
     @Override
@@ -892,7 +1086,7 @@ public class AssetServiceImpl implements AssetService {
             }
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
-        }        
+        }
         exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
     }
     
@@ -907,15 +1101,17 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
+        Boolean allScope = false;
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            allScope = true;
         }
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
 
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId());
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrgId(),allScope);
     }
 
     @Override
@@ -996,7 +1192,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
-    	
+
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         List<Long> categoryIdList = assetProvider.getOriginIdFromMappingAppForEnergy(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         // 转categoryId
@@ -1113,7 +1309,7 @@ public class AssetServiceImpl implements AssetService {
                     	groupRule = groupRules.get(0);
                     }
                     group = assetProvider.getBillGroupById(rule.getBillGroupId());
-                    
+
                     if(group == null || groupRule == null){
                         throw new RuntimeException("bill group or grouprule is null");
                     }
@@ -1155,7 +1351,7 @@ public class AssetServiceImpl implements AssetService {
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
                                     ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                     }
-                    
+
                     assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
                 }
                 //先算出所有的item
@@ -1393,13 +1589,13 @@ public class AssetServiceImpl implements AssetService {
                 //得到金额总和并更新到eh_contracts表中 by steve
                 BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(), null, null);
                 assetProvider.setRent(cmd.getContractId(),totalAmount);
-                
+
             }catch(Exception e){
                 assetProvider.deleteContractPayment(contractId);
                 LOGGER.error("failed calculated bill expectancies, failed contract id = {}", contractId);
                 LOGGER.error("failed calculation", e);
             }
-        }    
+        }
     }
 
     @Override
@@ -2707,7 +2903,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
-    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
@@ -3509,7 +3705,7 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.deCoupledForChargingItem(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }
     }
-    
+
     private Long getBrotherStandardId() {
     	long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
     	return nextStandardId;
@@ -3806,6 +4002,7 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            cmd.setAllScope(true);
         }// set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
@@ -4778,8 +4975,8 @@ public class AssetServiceImpl implements AssetService {
 	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		String endTimeStr = yyyyMMdd.format(endTime);
-		
-		// 36363 账单为空，则不需要删除账单 
+
+		// 36363 账单为空，则不需要删除账单
 		PaymentBills bill = assetProvider.findLastBill(contractId);
 		if (bill == null) {
 			return;
@@ -5094,7 +5291,7 @@ public class AssetServiceImpl implements AssetService {
 //        String openid = null;
 //        String payerName = cmd.getPayerName();
 //        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
-//        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+//        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC,
 //        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
 //        assetProvider.saveOrderBills(bills,order.getId());
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
@@ -5156,11 +5353,11 @@ public class AssetServiceImpl implements AssetService {
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), null, cmd.getOrgId(),false);//对公转账不区分多入口，所以categoryId为null
 	}
 	
 	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response, Integer namespaceId, Long communityId, Long moduleId){
-		
+
 		Calendar c = newClearedCalendar();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -5209,13 +5406,13 @@ public class AssetServiceImpl implements AssetService {
                 //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
                 if(isShowEnergy(namespaceId, communityId, moduleId)) {
                 	//判断该域空间下是否显示用量
-                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode())
                 			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
                 		//eh_payment_charging_items 4:自用水费  7：公摊水费
                         propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
                         titleName.add("用量（吨）");
                         titleSize.add(20);
-                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode())
                 			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
                 		//eh_payment_charging_items 5:自用电费   8：公摊电费
                 		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
@@ -5301,7 +5498,7 @@ public class AssetServiceImpl implements AssetService {
             					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
             				}
             				if(billItemDTO2.getTaxAmount() != null) {
-            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
+            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段
             				}
             				//根据减免费项配置重新计算待收金额
             				long billId = Long.parseLong(dto.getBillId());
@@ -5310,7 +5507,7 @@ public class AssetServiceImpl implements AssetService {
                             if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
                             	amountRecivable = BigDecimal.ZERO;//修复issue-33462
                             }
-        				}        			
+        				}
         				//增加用量
         				if(billItemDTO2.getEnergyConsume() != null) {
         					energyConsume = energyConsume.add(new BigDecimal(billItemDTO2.getEnergyConsume()));
@@ -5531,7 +5728,7 @@ public class AssetServiceImpl implements AssetService {
 			}
     	}
     }
-    
+
     public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         AssetModuleAppMapping mapping = new AssetModuleAppMapping();
         long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
@@ -5558,7 +5755,7 @@ public class AssetServiceImpl implements AssetService {
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
-	
+
 	//判断该域空间下是否显示用量
 	public boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId) {
     	//修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
@@ -5573,7 +5770,7 @@ public class AssetServiceImpl implements AssetService {
         	return false;
         }
     }
-	
+
 	/**
 	 * 定时任务：每天晚上12点定时计算一下欠费天数并更新！(账单组的最晚还款日（eh_payment_bills ： due_day_deadline）)
 	 */
@@ -5608,7 +5805,7 @@ public class AssetServiceImpl implements AssetService {
             });
         }
     }
-	
+
 	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
         	//获得账单,分页一次最多10000个，防止内存不够
@@ -5643,8 +5840,8 @@ public class AssetServiceImpl implements AssetService {
 			}
         }
     }
-	
-	
+
+
 
 	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
@@ -5658,7 +5855,7 @@ public class AssetServiceImpl implements AssetService {
 		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
 		return response;
 	}
-	
+
 	/**
 	 * 获取费项配置的税率
 	 * @param billGroupId

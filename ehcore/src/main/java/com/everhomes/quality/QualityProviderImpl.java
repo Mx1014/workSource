@@ -116,7 +116,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -532,7 +531,7 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 
 	@Override
 	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, 
-			Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult, String planCondition) {
+			Long ownerId, String ownerType, String targetType, List<Long> targetIds, Byte reviewResult, String planCondition) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
@@ -550,8 +549,12 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 //			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
 //		}
 		
-		if(targetId != null && targetId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
+		if(targetIds != null && targetIds.size() > 0) {
+			if(targetIds.size()==1) {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetIds.get(0)));
+			}else {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.in(targetIds));
+			}
         }
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType));    	
@@ -1464,7 +1467,7 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 
 	@Override
 	public List<QualityInspectionLogs> listQualityInspectionLogs(
-			String ownerType, Long ownerId, String targetType, Long targetId,Long scopeId,
+			String ownerType, Long ownerId, String targetType, Long targetId,List<Long> scopeIds,
 			ListingLocator locator, int count) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionLogs.class, locator.getEntityId()));
@@ -1483,8 +1486,12 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.TARGET_TYPE.eq(targetType));    	
 		}
-		if (scopeId != null && scopeId != 0L) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.SCOPE_ID.eq(scopeId));
+		if (scopeIds != null && scopeIds.size()>0 ) {
+			if(scopeIds.size()==1) {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.SCOPE_ID.eq(scopeIds.get(0)));
+			}else {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.SCOPE_ID.in(scopeIds));
+			}
 		}
 		
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_LOGS.ID.desc());
@@ -1790,6 +1797,11 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
 		if(inspectionType != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+
+		if(SpecificationScopeCode.ALL.equals(SpecificationScopeCode.fromCode(scopeCode))){
+			// base support
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
 		
@@ -2896,7 +2908,7 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 	}
 
 	@Override
-	public List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType) {
+	public List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId,List<Long> scopeIds, Byte inspectionType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
@@ -2908,7 +2920,7 @@ public class QualityProviderImpl implements QualityProvider, ApplicationListener
 
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(SpecificationScopeCode.COMMUNITY.getCode()));
 
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.ne(0L));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.in(scopeIds));
 
 		if(inspectionType != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));

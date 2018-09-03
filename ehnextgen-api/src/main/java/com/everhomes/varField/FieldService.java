@@ -59,8 +59,8 @@ public interface FieldService {
 
 
 
-    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
-    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId,Long ownerId, Long communityId, Long itemId);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId,Long ownerId, Long communityId, String moduleName, String displayName);
 
     List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd);
     List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd);
@@ -75,7 +75,6 @@ public interface FieldService {
 
     DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 
-    ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId, Long communityId, String moduleName, String displayName, Long fieldId);
-
     void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName);
+    ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId,Long ownerId, Long communityId, String moduleName, String displayName, Long fieldId);
 }

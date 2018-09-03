@@ -6,7 +6,11 @@ import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.community.*;
+import com.everhomes.community.Building;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDataInfo;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -26,6 +30,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -55,10 +60,51 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentAttachmentDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.BetchDisclaimAddressCommand;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteApartmentAttachmentCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.DownloadApartmentAttachmentCommand;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.address.ImportApartmentDataDTO;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressCommand;
+import com.everhomes.rest.address.ListApartmentAttachmentsCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandV2Response;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -74,7 +120,12 @@ import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
@@ -88,10 +139,27 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.UserServiceAddress;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.FileHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -108,7 +176,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.collect.Sets;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Record5;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,8 +203,15 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
@@ -222,7 +305,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private FieldService fieldService;
-    
+
+    @Autowired
+    private EquipmentService equipmentService;
+
     @Autowired
 	private LocaleTemplateService localeTemplateService;
 
@@ -802,7 +888,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         if(cmd.getBuildingName() != null){
@@ -2053,7 +2139,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 
-		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>(); 
+		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>();
 		for (ImportApartmentDataDTO data : datas) {
 			ImportFileResultLog<ImportApartmentDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
 			//校验excel填写内容
@@ -2074,7 +2160,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 //                errorLogs.add(log);
 //                continue;
 //            }
-			
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);
 				log.setErrorLog("apartment name is null");
@@ -2251,7 +2336,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				}
     		}
             //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
-			importApartment(community, building, data, areaSize, chargeArea, rentArea, freeArea);
+            
+			importApartment(community, building,data, areaSize, chargeArea, rentArea, freeArea);
 		}
         updateCommunityAptCount(community);
         
@@ -2878,11 +2964,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if(customers != null && customers.size() > 0) {
                 customers.forEach(customer -> {
                     EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+                    OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(customer.getCommunityId(), customer.getNamespaceId(), ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
+                    if(organization!=null){
+                        customer.setOwnerId(organization.getId());
+                    }
+                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
                     if(categoryItem != null) {
                         dto.setCategoryItemName(categoryItem.getItemDisplayName());
                     }
-                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getLevelItemId());
                     if(levelItem != null) {
                         dto.setLevelItemName(levelItem.getItemDisplayName());
                     }
