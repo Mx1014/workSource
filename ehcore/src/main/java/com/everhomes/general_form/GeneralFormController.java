@@ -138,7 +138,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("deleteGeneralFormVal")
 	@RestReturn(value=Long.class)
 	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
-		Long id = generalFormService.deleteGeneralForm(cmd);
+		Long id = generalFormService.deleteGeneralFormValWithPrivi(cmd);
 		RestResponse response = new RestResponse(id);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

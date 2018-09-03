@@ -1275,8 +1275,8 @@ public class CustomerServiceImpl implements CustomerService {
         GetGeneralFormByCustomerIdResponse response = requisitionService.getGeneralFormByCustomerId(cmd2);
         if(response != null && response.getSourceId() != null && response.getSourceId() != 0){
             LOGGER.error("this customer has a requisition , ", customer);
-            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_HAS_CONTRACT,
-                    "enterprise customer has contract");
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_HAS_REQUISITION,
+                    "enterprise customer has requisition");
         }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(), customer.getId(), CustomerType.ENTERPRISE.getCode());
         for (Contract contract : contracts) {
