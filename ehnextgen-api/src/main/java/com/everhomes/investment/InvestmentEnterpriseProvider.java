@@ -1,7 +1,19 @@
 package com.everhomes.investment;
 
-public class InvestmentEnterpriseProvider {
+import java.util.List;
 
-    //Long createContact()
+public interface InvestmentEnterpriseProvider {
+
+    Long createContact(EnterpriseInvestmentContact contact);
+
+    Long updateContact(EnterpriseInvestmentContact contact);
+
+    EnterpriseInvestmentContact findContactById(Long id);
+
+    List<EnterpriseInvestmentContact> findContactByCustomerId(Long customerId);
+
+    List<EnterpriseInvestmentContact> findContactByCustomerIdAndType(Long customerId, Byte type);
+
+
 
 }
