@@ -441,4 +441,23 @@ public class CommunityController extends ControllerBase {
         return response;
 
     }
+
+
+    /**
+     * <b>URL: /community/listCommunitiesByOrgIdAndAppId</b>
+     * <p>查询当前公司在这个应用中能管理的项目</p>
+     */
+    @RequestMapping("listCommunitiesByOrgIdAndAppId")
+    @RestReturn(value=ListCommunitiesByOrgIdResponse.class)
+    public RestResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
+
+        ListCommunitiesByOrgIdAndAppIdResponse cmdResponse = this.communityService.listCommunitiesByOrgIdAndAppId(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+
 }
