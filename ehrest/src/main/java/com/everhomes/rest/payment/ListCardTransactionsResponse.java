@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
 
 public class ListCardTransactionsResponse {
 	private Long nextPageAnchor;
-	private Long nextPage;
 	@ItemType(CardTransactionOfMonth.class)
 	private List<CardTransactionOfMonth> requests;
 	
@@ -23,14 +22,6 @@ public class ListCardTransactionsResponse {
 	}
 	public void setRequests(List<CardTransactionOfMonth> requests) {
 		this.requests = requests;
-	}
-
-	public Long getNextPage() {
-		return nextPage;
-	}
-
-	public void setNextPage(Long nextPage) {
-		this.nextPage = nextPage;
 	}
 
 	@Override

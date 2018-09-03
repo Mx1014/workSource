@@ -202,7 +202,7 @@ public class PaymentCardController extends ControllerBase{
      * <b>URL: /payment/freezeCard</b>
      * <p>挂失或解挂 账户</p>
      */
-    @RequestMapping("listCardTransactions")
+    @RequestMapping("freezeCard")
     @RestReturn(value=String.class)
     public RestResponse freezeCard(FreezeCardCommand cmd) {
        // ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);

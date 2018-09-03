@@ -16,7 +16,6 @@ public class ListCardTransactionsCommand {
     private Long ownerId;
 	private Long pageAnchor;
     private Integer pageSize;
-    private Integer pageIndex;
     private Long startTime;
     private Long endTime;
     private String transactionType;
@@ -46,14 +45,6 @@ public class ListCardTransactionsCommand {
 	}
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
-	}
-
-	public Integer getPageIndex() {
-		return pageIndex;
-	}
-
-	public void setPageIndex(Integer pageIndex) {
-		this.pageIndex = pageIndex;
 	}
 
 	public Long getStartTime() {

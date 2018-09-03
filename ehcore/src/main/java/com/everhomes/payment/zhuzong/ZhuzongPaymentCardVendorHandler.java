@@ -36,8 +36,11 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Component(PaymentCardVendorHandler.PAYMENTCARD_VENDOR_PREFIX + "ZHUZONG")
@@ -51,7 +54,10 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
 
     private static final String APPLT_CARD_TYPE = "0";
     private static final String ACCOUNT_QUERY_TYPE = "1";
+    private static final String RECHARGE_TYPE = "3";
     private static final String FREEZE_ACCOUNT_TYPE = "4";
+    private static final String CONSUME_TRANSACTION_TYPE = "5";
+    private static final String RECHARGE_TRANSACTION_TYPE = "6";
 
     public static final String vendorName = "ZHUZONG";
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -136,12 +142,107 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
 
     @Override
     public List<CardTransactionOfMonth> listCardTransactions(ListCardTransactionsCommand cmd, PaymentCard card) {
-        return null;
+        if ("1".equals(cmd.getTransactionType()))
+            return listRechargeTransactions(cmd,card);
+        else
+            return listConsumeTransactions(cmd,card);
+    }
+
+    private List<CardTransactionOfMonth> listConsumeTransactions(ListCardTransactionsCommand cmd, PaymentCard card){
+        JSONObject jo = new JSONObject();
+        jo.put("FunctionID", CONSUME_TRANSACTION_TYPE);
+        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
+        jo.put("UserID",vendorDate.getUserId());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        jo.put("StartDate",format.format(new Date(cmd.getStartTime())));
+        jo.put("EndDate",format.format(new Date(cmd.getEndTime())));
+        jo.put("PageIndex",cmd.getPageAnchor() != null ? cmd.getPageAnchor().toString():"1");
+        jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
+        String response = postToZhuzong(jo.toJSONString());
+        ZhuzongConsumeResponse res = (ZhuzongConsumeResponse)StringHelper.fromJsonString(response, ZhuzongConsumeResponse.class);
+        if (!"0".equals(res.getResultID()))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "查询第三方接口失败");
+        List<CardTransactionOfMonth> transactions = new ArrayList<>();
+        CardTransactionOfMonth month = new CardTransactionOfMonth();
+        month.setRequests(new ArrayList<>());
+        List<ZhuzongConsumeDate> dataList = res.getDataList();
+        format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (ZhuzongConsumeDate date : dataList){
+            CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
+            dto.setItemName("消费");
+            dto.setAmount(new BigDecimal(date.getConsumeValue()));
+            dto.setTransactionType("2");
+            String time = date.getHappenDate() + " " + date.getHappenTime();
+            try {
+                dto.setTransactionTime(format.parse(time).getTime());
+            } catch (ParseException e) {
+                LOGGER.error("paymentCard parse error, time={} ", time);
+            }
+            month.getRequests().add(dto);
+        }
+        transactions.add(month);
+        return transactions;
+    }
+
+    private List<CardTransactionOfMonth> listRechargeTransactions(ListCardTransactionsCommand cmd, PaymentCard card){
+        JSONObject jo = new JSONObject();
+        jo.put("FunctionID", RECHARGE_TRANSACTION_TYPE);
+        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
+        jo.put("UserID",vendorDate.getUserId());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        jo.put("StartDate",format.format(new Date(cmd.getStartTime())));
+        jo.put("EndDate",format.format(new Date(cmd.getEndTime())));
+        jo.put("PageIndex",cmd.getPageAnchor() != null ? cmd.getPageAnchor().toString():"1");
+        jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
+        String response = postToZhuzong(jo.toJSONString());
+        ZhuzongRechargeResponse res = (ZhuzongRechargeResponse)StringHelper.fromJsonString(response, ZhuzongRechargeResponse.class);
+        if (!"0".equals(res.getResultID()))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "查询第三方接口失败");
+        List<CardTransactionOfMonth> transactions = new ArrayList<>();
+        CardTransactionOfMonth month = new CardTransactionOfMonth();
+        month.setRequests(new ArrayList<>());
+        List<ZhuzongRechargeDate> dataList = res.getDataList();
+        format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (ZhuzongRechargeDate date : dataList){
+            CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
+            dto.setItemName("充值·充值成功");
+            dto.setAmount(new BigDecimal(date.getDepositValue()));
+            dto.setTransactionType("1");
+            String time = date.getHappenDate() + " " + date.getHappenTime();
+            try {
+                dto.setTransactionTime(format.parse(time).getTime());
+            } catch (ParseException e) {
+                LOGGER.error("paymentCard parse error, time={} ", time);
+            }
+            dto.setPaidType(date.getDepositType());
+            month.getRequests().add(dto);
+        }
+        transactions.add(month);
+        return transactions;
     }
 
     @Override
     public void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card) {
-
+        JSONObject jo = new JSONObject();
+        jo.put("FunctionID", RECHARGE_TYPE);
+        jo.put("OrderID", order.getOrderNo().toString());
+        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
+        jo.put("UserID",vendorDate.getUserId());
+        jo.put("DepositValue",order.getAmount().setScale(2));
+        jo.put("DepositType","10001".equals(order.getPaidType())?"2":"1");
+        String response = postToZhuzong(jo.toJSONString());
+        ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
+        if ("0".equals(cardInfo.getResultID())){//返回正常
+            order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+            order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+            paymentCardProvider.updatePaymentCardRechargeOrder(order);
+        }else{ //返回错误
+            order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+            order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+            paymentCardProvider.updatePaymentCardRechargeOrder(order);
+        }
     }
 
     public String postToZhuzong(String params) {
