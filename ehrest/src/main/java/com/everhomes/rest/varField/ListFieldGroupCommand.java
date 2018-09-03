@@ -110,21 +110,6 @@ public class ListFieldGroupCommand {
         this.inspectionCategoryId = inspectionCategoryId;
     }
 
-    public Boolean getAdmin() {
-        return isAdmin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        isAdmin = admin;
-    }
-
-    public Boolean getAdmin() {
-        return isAdmin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        isAdmin = admin;
-    }
 
     public Long getOwnerId() {
         return ownerId;

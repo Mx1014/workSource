@@ -807,7 +807,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getBuyOrLeaseItemId()) {
-            ScopeFieldItem buyOrLeaseItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getBuyOrLeaseItemId());
+            ScopeFieldItem buyOrLeaseItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getBuyOrLeaseItemId());
             if (null != buyOrLeaseItem) {
                 dto.setBuyOrLeaseItemName(buyOrLeaseItem.getItemDisplayName());
             } else {
@@ -816,7 +816,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getFinancingDemandItemId()) {
-            ScopeFieldItem financingDemandItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getFinancingDemandItemId());
+            ScopeFieldItem financingDemandItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getFinancingDemandItemId());
             if (null != financingDemandItem) {
                 dto.setFinancingDemandItemName(financingDemandItem.getItemDisplayName());
             } else {
@@ -825,7 +825,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox1ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox1ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getDropBox1ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox1ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -834,7 +834,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox2ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox2ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getDropBox2ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox2ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -843,7 +843,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox3ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox3ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getDropBox3ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox3ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -852,7 +852,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox4ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox4ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getDropBox4ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox4ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -861,7 +861,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox5ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox5ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getDropBox5ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox5ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -870,7 +870,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox6ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox6ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getDropBox6ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox6ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -879,7 +879,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox7ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox7ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getDropBox7ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox7ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -888,7 +888,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox8ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox8ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getDropBox8ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox8ItemName(dropBoxItem.getItemDisplayName());
             } else {
@@ -897,7 +897,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getDropBox9ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
+            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getDropBox9ItemId());
             if (null != dropBoxItem) {
                 dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
             } else {
