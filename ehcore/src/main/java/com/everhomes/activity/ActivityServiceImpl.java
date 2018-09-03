@@ -1928,7 +1928,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosters;
 		}
 
-        RowResult titleRow = (RowResult)rows.get(2);
+        RowResult titleRow = (RowResult)rows.get(1);
 		Integer size = titleRow.getCells().size();
 		//Excel模板从第三行开始 edit by yanjun 20170829
 		for(int i=2, len=rows.size(); i<len; i++) {
