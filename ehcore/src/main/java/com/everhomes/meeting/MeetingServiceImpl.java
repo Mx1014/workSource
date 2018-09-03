@@ -826,7 +826,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
         List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
         List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
-        
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }
         dbProvider.execute(transactionStatus -> {
             Long id = meetingProvider.updateMeetingReservation(updateMeetingReservation);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
@@ -1188,6 +1190,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecord.setOperatorName(operatorName);
         meetingRecord.setContent(cmd.getContent());
 
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }
         
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
@@ -1277,7 +1282,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
         List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
         List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
-        
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }
         List<EhMeetingInvitations> newRecordReceivers = buildEhMeetingInvitations(addMeetingInvitations, meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.updateMeetingRecord(meetingRecord);
