@@ -824,8 +824,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         //附件
         List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
-        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
-        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
+        List<MeetingAttachment> existsAttachements = new ArrayList<>();
+        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
         	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
         }
@@ -856,7 +857,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     }
 
     private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
-			List<MeetingAttachment> newAttachements) {
+			List<MeetingAttachment> newAttachements, List<MeetingAttachment> existsAttachements) {
     	if(CollectionUtils.isEmpty(oldAttachements))
 			return Collections.emptyList();
     	if(CollectionUtils.isEmpty(newAttachements))
@@ -869,6 +870,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
                 		newAttachment.getContentType().equals(oldAttachment.getContentType()) && 
                 		newAttachment.getContentUri().equals(oldAttachment.getContentUri()) ) {
                     shouldDelete = false;
+                    existsAttachements.add(newAttachment);
                     break;
                 }
             }
@@ -880,12 +882,12 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 	}
 
 	private List<MeetingAttachment> findAddAttachments(List<MeetingAttachment> newAttachements,
-			List<MeetingAttachment> deleteAttachements) {
+			List<MeetingAttachment> existsAttachements) {
 		if(CollectionUtils.isEmpty(newAttachements))
 			return Collections.emptyList();
 		List<MeetingAttachment> addAttachements = new ArrayList<>();
 		addAttachements.addAll(newAttachements);
-		addAttachements.removeAll(deleteAttachements);
+		addAttachements.removeAll(existsAttachements);
 		return addAttachements;
 	}
 
@@ -1280,7 +1282,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         //附件
         List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
-        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements);
+        List<MeetingAttachment> existsAttachements = new ArrayList<>();
+		List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
         List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
         	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
