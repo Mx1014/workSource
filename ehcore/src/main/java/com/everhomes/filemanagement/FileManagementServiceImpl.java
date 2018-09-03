@@ -20,14 +20,17 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,10 +124,11 @@ public class FileManagementServiceImpl implements  FileManagementService{
         FileCatalog catalog = fileManagementProvider.findFileCatalogById(cmd.getCatalogId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         FileCatalogDTO dto = new FileCatalogDTO();
-        if (catalog == null)
+        //目录为空或者被删除报错
+        if (catalog == null || FileManagementStatus.INVALID == FileManagementStatus.fromCode(catalog.getStatus()))
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
                     "the file catalog not found.");
-
+         
         //  1.whether the name has been used
         checkTheCatalogName(namespaceId, catalog.getOwnerId(), cmd.getCatalogName(), cmd.getCatalogId());
         //  2.update the name
@@ -251,6 +255,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         dto.setOperatorName(catalog.getOperatorName());
         dto.setUpdateTime(catalog.getUpdateTime());
         dto.setScopes(listFileCatalogScopes(UserContext.getCurrentNamespaceId(), dto.getId()));
+        dto.setIdentify("catgalog" + catalog.getId());
         return dto;
     }
 
@@ -340,19 +345,22 @@ public class FileManagementServiceImpl implements  FileManagementService{
         }
         //如果找得到文件夹就查文件夹path下的
         String searchPath = searchContent == null ? null: searchContent.getPath();
-        List<FileCatalog> catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
-            if (searchPath != null) {
-                //在文件夹下搜索就不搜索目录
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.isNull());
-            }
-            if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
-            if (cmd.getKeywords() != null)
-                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like("%" + cmd.getKeywords() + "%"));
-            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATE_TIME.desc());
-            return query;
-        });
-
+        List<FileCatalog> catalogResults = new ArrayList<>();
+        //只有在选择多个目录搜索的时候才搜目录,并且在选择contentId搜索的时候不搜索目录
+        if(cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 1 && cmd.getContentId() == null){
+	        catalogResults = fileManagementProvider.queryFileCatalogs(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
+	            if (searchPath != null) {
+	                //在文件夹下搜索就不搜索目录
+	                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.isNull());
+	            }
+	            if (cmd.getCatalogIds() != null && cmd.getCatalogIds().size() > 0)
+	                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.ID.in(cmd.getCatalogIds()));
+	            if (cmd.getKeywords() != null)
+	                query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.like("%" + cmd.getKeywords() + "%"));
+	            query.addOrderBy(Tables.EH_FILE_MANAGEMENT_CATALOGS.CREATE_TIME.desc());
+	            return query;
+	        });
+        }
         List<FileContent> folderResults = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, cmd.getOwnerId(), (locator, query) -> {
             if (searchPath != null) {
                 //搜索文件夹下
@@ -477,7 +485,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         if (content == null)
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
                     "the file content not found.");
-
+        checkContentValid(content);
         Map<String, Long> map = checkFilePath(cmd.getPath(), content.getOwnerId());
         Long parentId = map.get("parentId");
         Long catalogId = map.get("catalogId");
@@ -487,11 +495,17 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 cmd.getContentName(), cmd.getContentSuffix(), cmd.getContentId());
         //  2.update the name
         content.setContentName(cmd.getContentName());
+        
         if (checkContentMoved(content, parentId, catalogId)) {
             //移动了新建
             content.setCatalogId(catalogId);
             content.setParentId(parentId);
-            content.setPath("/" + catalogId);
+            if (parentId != null){
+                FileContent parentContent = fileManagementProvider.findFileContentById(parentId);
+                content.setPath(parentContent.getPath());
+            }
+            else
+                content.setPath("");
             fileManagementProvider.createFileContent(content);
         } else {
             //没移动就更新
@@ -502,7 +516,19 @@ public class FileManagementServiceImpl implements  FileManagementService{
         //  3.return back
         return ConvertHelper.convert(content, FileContentDTO.class);
     }
-    /**逐级向上更新父级文件夹和目录的更新人/更新时间*/
+    private void checkContentValid(FileContent content) {
+    	if (FileManagementStatus.INVALID == FileManagementStatus.fromCode(content.getStatus())){
+        	//对于已删除的 文件夹报错,文件恢复
+	        if (FileContentType.fromCode(content.getContentType()) == FileContentType.FOLDER) {
+	        	throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
+	                    "the file content not found.");
+	        }else{
+	        	content.setStatus(FileManagementStatus.VALID.getCode());
+	        } 
+        }
+	}
+
+	/**逐级向上更新父级文件夹和目录的更新人/更新时间*/
     private void updateParentContent(FileContent content) {
         if(content.getParentId() != null && !content.getParentId().equals(content.getId())){
             FileContent parentContent = fileManagementProvider.findFileContentById(content.getParentId());
@@ -588,7 +614,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         	response.setPath(processPathString(cmd.getCatalogId() + ""));
         }
         else{
-        	response.setPath(processPathString(parentContent.getCatalogId() + "/" + parentContent.getPath()+ "/" + parentContent.getPath()));
+        	response.setPath(processPathString(parentContent.getCatalogId() + "/" + parentContent.getPath()+ "/" + cmd.getContentId()));
         }
         List<FileContent> results = fileManagementProvider.queryFileContents(new ListingLocator(), namespaceId, catalog.getOwnerId(), (locator, query) -> {
             query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalog.getId()));
@@ -644,6 +670,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
         } 
         dto.setUpdateTime(content.getUpdateTime());
         dto.setPath(processPathString(content.getCatalogId() + "/" + content.getPath()));
+        dto.setIdentify("content" + content.getId());
 
         return dto;
     }
@@ -672,8 +699,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
             Long catalogId = map.get("catalogId");
             Long parentId = map.get("parentId");
 
-            for (Long contentId : cmd.getContentIds()) {
-            	
+            for (UpdateFileContentNameCommand contentCmd : cmd.getContents()) {
+                Long contentId = contentCmd.getContentId();
                 FileContent content = fileManagementProvider.findFileContentById(contentId);
                 //更新移动前的文件/文件夹更新时间
                 updateParentContent(content);
@@ -681,6 +708,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                     throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CONTENT_NOT_FOUND,
                             "content can not be null.");
                 }
+                checkContentValid(content);
                 if (content.getStatus().equals(FileManagementStatus.INVALID.getCode())) {
                     content.setStatus(FileManagementStatus.VALID.getCode());
                     fileManagementProvider.updateFileContent(content);
@@ -688,7 +716,7 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 content.setCatalogId(catalogId);
                 //  1.whether the name has been used
                 String contentName = setContentNameAutomatically(UserContext.getCurrentNamespaceId(), content.getOwnerId(), catalogId,
-                        parentId, content.getContentName(), content.getContentSuffix());
+                        parentId, contentCmd.getContentName(), contentCmd.getContentSuffix(), contentId);
                 content.setContentName(contentName);
 
                 content.setParentId(parentId);
@@ -703,6 +731,8 @@ public class FileManagementServiceImpl implements  FileManagementService{
                 } else {
                     content.setPath("/" + contentId);
                 }
+                //移动后修改子文件夹/子文件的catalog和path
+                updateSubContentCatalogAndPath(content,1);
                 //更新移动后的文件/文件夹更新时间
                 fileManagementProvider.updateFileContent(content);
                 updateParentContent(content);
@@ -710,8 +740,35 @@ public class FileManagementServiceImpl implements  FileManagementService{
             return null;
         });
 	}
+    /**
+     * 递归更新所有子文件/文件夹 的catalog和path
+     * */
+    private void updateSubContentCatalogAndPath(FileContent parentContent, int loopTime) {
+		if(loopTime++ > 100){
+			throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_LOOP,
+                    "死循环");
+		}
+		if(FileContentType.fromCode(parentContent.getContentType()) == FileContentType.FOLDER){
+			List<FileContent> subContents = fileManagementProvider.queryFileContents(new ListingLocator(), parentContent.getNamespaceId()
+	                , parentContent.getOwnerId(), (locator, query) -> {
+	                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentContent.getId()));
+	                    query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.ne(parentContent.getId()));
+	                    return query;
+	                });
+			if(!CollectionUtils.isEmpty(subContents)){
+				for(FileContent content : subContents){
+					content.setCatalogId(parentContent.getCatalogId());
+					content.setPath(parentContent.getPath() + "/" + content.getId());
+					fileManagementProvider.updateFileContent(content);
+					//再更新自己下级文件/文件夹的
+					updateSubContentCatalogAndPath(content, loopTime);
+				}
+			}
+			
+		}
+	}
 
-    private Map<String, Long> checkFilePath(String targetPath, Long ownerId) {
+	private Map<String, Long> checkFilePath(String targetPath, Long ownerId) {
         if (null == targetPath) {
             throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_FILE_CATALOG_NOT_FOUND,
                     "target path can not be null.");

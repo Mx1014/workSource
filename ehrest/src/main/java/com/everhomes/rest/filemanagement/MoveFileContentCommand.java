@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型,填organization</li>
  * <li>ownerId: 公司id</li>
- * <li>contentIds: id列表 要移动的文件/文件夹id</li>
+ * <li>contents: 文件列表 参考{@link com.everhomes.rest.filemanagement.UpdateFileContentNameCommand} </li>
  * <li>targetPath: 目标路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
  * </ul>
  */
@@ -20,7 +20,7 @@ public class MoveFileContentCommand {
 
 	private Long ownerId;
 
-	private List<Long> contentIds;
+	private List<UpdateFileContentNameCommand> contents;
 
 	private String targetPath;
 
@@ -51,15 +51,6 @@ public class MoveFileContentCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
- 
-
-	public List<Long> getContentIds() {
-		return contentIds;
-	}
-
-	public void setContentIds(List<Long> contentIds) {
-		this.contentIds = contentIds;
-	}
 
 	public String getTargetPath() {
 		return targetPath;
@@ -67,5 +58,13 @@ public class MoveFileContentCommand {
 
 	public void setTargetPath(String targetPath) {
 		this.targetPath = targetPath;
+	}
+
+	public List<UpdateFileContentNameCommand> getContents() {
+		return contents;
+	}
+
+	public void setContents(List<UpdateFileContentNameCommand> contents) {
+		this.contents = contents;
 	}
 }

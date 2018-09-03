@@ -61,6 +61,8 @@ public class FileContentDTO {
     private String path;
     private List<FileContentDTO> contents;
 
+    private String identify;
+
     public FileContentDTO() {
     }
 
@@ -203,5 +205,13 @@ public class FileContentDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getIdentify() {
+        return identify;
+    }
+
+    public void setIdentify(String identify) {
+        this.identify = identify;
     }
 }

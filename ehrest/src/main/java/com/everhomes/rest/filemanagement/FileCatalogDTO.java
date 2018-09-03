@@ -40,6 +40,8 @@ public class FileCatalogDTO {
 
     private Timestamp updateTime;
 
+    private String identify;
+
     public FileCatalogDTO() {
     }
 
@@ -118,5 +120,13 @@ public class FileCatalogDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getIdentify() {
+        return identify;
+    }
+
+    public void setIdentify(String identify) {
+        this.identify = identify;
     }
 }
