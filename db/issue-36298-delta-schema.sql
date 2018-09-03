@@ -14,6 +14,8 @@ CREATE TABLE `eh_meeting_attachments` (
   `content_name` VARCHAR(1024) COMMENT 'attachment object content name like: abc.jpg',
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `content_size` INT(11)  COMMENT 'attachment object size',
+  `content_icon_uri` VARCHAR(1024) COMMENT 'attachment object link of content icon',
   `creator_uid` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
