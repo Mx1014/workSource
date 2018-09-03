@@ -68,6 +68,8 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ListAppAuthorizationsByOrganizatioinIdCommand;
+import com.everhomes.rest.acl.ListAppAuthorizationsByOwnerIdResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -131,6 +133,7 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
+import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
@@ -14474,7 +14477,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
     @Override
-	public List<ProjectDTO> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
+	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
 		// 根据type获取相应的appId
     	namespaceId = null == namespaceId ? UserContext.getCurrentNamespaceId() : namespaceId;
@@ -14505,18 +14508,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 
 		// 获取管理公司下的该应用下所有项目
-		return getOrganizationProjectIdsByAppId(orgDto.getId(), moduleId, targetAppDto.getOriginId());
+		return getOrganizationProjectIdsByAppId(orgDto.getId(),targetAppDto.getOriginId());
 	}
 	
-    @Override
-	public List<ProjectDTO> getOrganizationProjectIdsByAppId(Long organizationId, Long moduleId, Long originAppId) {
-		ListUserRelatedProjectByModuleCommand listCmd = new ListUserRelatedProjectByModuleCommand();
-		listCmd.setOrganizationId(organizationId);
-		listCmd.setModuleId(moduleId);
-		listCmd.setUserId(UserContext.currentUserId());
-		listCmd.setAppId(originAppId);
-		listCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-		return serviceModuleService.listUserRelatedProjectByModuleId(listCmd);
+	@Override
+	public List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId) {
+
+		ListAppAuthorizationsByOrganizatioinIdCommand cmd = new ListAppAuthorizationsByOrganizatioinIdCommand();
+		cmd.setOrganizationId(organizationId);
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		ListAppAuthorizationsByOwnerIdResponse resp = serviceModuleAppAuthorizationService
+				.listAppAuthorizationsByOrganizatioinId(cmd);
+		List<ServiceModuleAppAuthorizationDTO> dtos = resp.getDtos();
+		if (CollectionUtils.isEmpty(dtos)) {
+			return null;
+		}
+		return dtos.stream().filter(r -> r.getAppId() == originAppId)
+				.map(ServiceModuleAppAuthorizationDTO::getProjectId).collect(Collectors.toList());
 	}
 
 }

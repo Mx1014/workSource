@@ -91,8 +91,6 @@ public interface YellowPageProvider {
 	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
 	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
 	
-	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
-
 	Long createInvestRequests(ServiceAllianceInvestRequests request);
 	ServiceAllianceInvestRequests findInvestRequests(Long id);
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
@@ -137,13 +135,6 @@ public interface YellowPageProvider {
 	void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
 
 	void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
-
-	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
-
-	void deleteServiceAllianceSkipRule(Long id);
-
-	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
-
 
 	List<Integer> listAscEntryIds(int namespaceId);
 

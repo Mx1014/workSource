@@ -625,9 +625,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
-
-		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
-
+		ServiceAllianceCategories parent = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
 		if (null == parent) {
 			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
 			throwError(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT, "parent category not found!");
@@ -657,6 +655,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				category.setLogoUrl(cmd.getLogoUrl());
 				category.setSelectedLogoUrl(cmd.getSelectedLogoUrl());
 				category.setSkipType(cmd.getSkipType() == null ? (byte)0 : cmd.getSkipType());
+				category.setType(cmd.getParentId());
 				yellowPageProvider.createCategory(category);
 			} else {
 				category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
@@ -757,6 +756,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			} else if (JumpType.FORM.equals(JumpType.fromCode(dto.getJumpType()))) {
 				dto.setTemplateName(dto.getTemplateType());
 				dto.setButtonTitle("我要申请");
+				dto.setModuleUrl(buildFormModuleUrl(dto.getId()));
 			}
 		} else {
 			// 兼容以前只有模板跳转时jumptype字段为null的情况
@@ -806,9 +806,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
 		if (sa.getType() != null) {
-			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getType());
+			ServiceAllianceCategories category = yellowPageProvider.findMainCategory(sa.getOwnerType(), sa.getOwnerId(), sa.getType());
 			dto.setDisplayMode(category.getDisplayMode());
+			dto.setSkipType(category.getSkipType());
 		}
+		
 		if (!StringUtils.isEmpty(dto.getTemplateType())) {
 			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 			if (template != null) {
@@ -817,13 +819,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 		}
 		this.processDetailUrl(dto);
-
-		dto.setSkipType((byte) 0);
-		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getType(), cmd.getNamespaceId());
-		if (rule != null && rule.getServiceAllianceCategoryId() == cmd.getType().longValue()) {
-			dto.setSkipType((byte) 1);
-		}
-
 		return dto;
 	}
 
@@ -839,13 +834,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
-		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getType());
-		if (rule != null) {
-			response.setSkipType((byte) 1);
+		ServiceAllianceCategories mainCag = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+		if (null != mainCag) {
+			response.setSkipType(mainCag.getSkipType());
 		}
-		rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
-		if (rule != null) {
-			response.setSkipType((byte) 1);
+		
+		if (cmd.getCategoryId() != null) {
+			ServiceAllianceCategories cag = yellowPageProvider.findCategoryById(cmd.getCategoryId());
+			if (null != cag) {
+				response.setSkipType(cag.getSkipType());
+			}
 		}
 		response.setDtos(new ArrayList<ServiceAllianceDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -862,7 +860,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 根据community和type获取所有项目id
 			List<Long> authProjectIds = getProjectIdsByScene(cmd.getOwnerId(), cmd.getParentId());
 			if (CollectionUtils.isEmpty(authProjectIds)) {
-				return response;
+//				return response;
 			}
 			
 			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
@@ -902,6 +900,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				} else if (JumpType.FORM.equals(JumpType.fromCode(dto.getJumpType()))) {
 					dto.setTemplateName(dto.getTemplateType());
 					dto.setButtonTitle("我要申请");
+					dto.setModuleUrl(buildFormModuleUrl(dto.getId()));
 				}
 
 			} else {
@@ -943,6 +942,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return response;
 	}
 	
+	private String buildFormModuleUrl(Long serviceId) {
+		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+	}
+	
 	private boolean checkFormModuleUrlValid(ServiceAllianceDTO dto) {
 
 		if (null == dto.getModuleUrl() || null == dto.getFormId()) {
@@ -975,14 +978,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return null;
 		}
 
-		List<ProjectDTO> dtos = organizationService.getProjectIdsByCommunityAndModuleApps(community.getNamespaceId(),
+		return organizationService.getProjectIdsByCommunityAndModuleApps(community.getNamespaceId(),
 				ownerId, SERVICE_ALLIANCE_MODULE_ID, r -> {
 					ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
 							.fromJsonString(r, ServiceAllianceInstanceConfig.class);
 					return null == config ? false : type.equals(config.getType());
 				});
-
-		return null == dtos ? null : dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 	}
 
 	/**   
@@ -1187,7 +1188,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			ServiceAlliances sa = null; 
 			if (cmd.getId() == null) {
 				sa = ConvertHelper.convert(cmd, ServiceAlliances.class);
-				sa.setCreatorUid(UserContext.current().getUser().getId());
+				//设置调査url
+				
+				
+				
 				this.yellowPageProvider.createServiceAlliances(sa);
 			} else {
 
@@ -1201,11 +1205,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(sa.getId()); // 删除旧的图片
 			}
 			
+
+			
+			
 			// 创建多张封面图片 v3.4需求
 			createServiceAllianceAttachments(cmd.getCoverAttachments(), sa.getId(),
 					ServiceAllianceAttachmentType.COVER_ATTACHMENT.getCode());
 
-			ServiceAllianceCategories categorys = this.yellowPageProvider.findCategoryById(sa.getType());
+			ServiceAllianceCategories categorys = yellowPageProvider.findMainCategory(sa.getOwnerType(), sa.getOwnerId(), sa.getType());
 			if (categorys != null) {
 				categorys.setSkipType(cmd.getSkipType() == null ? (byte)0 : cmd.getSkipType());
 				categorys.setDisplayMode(cmd.getDisplayMode());
@@ -1731,9 +1738,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 						ServiceAllianceLocalStringCode.CATEGORY_DISPLAY_SCOPE, String.valueOf(dto.getDisplayMode()), locale,
 						"");
 				dto.setDisplayModeName(displayCategoryName);
-
-				ServiceAllianceSkipRule skipRule = yellowPageProvider.getCateorySkipRule(r.getId(), r.getNamespaceId());
-				dto.setSkipType(skipRule == null ? (byte) 0 : (byte) 1);
 				return dto;
 			}).collect(Collectors.toList());
 		}

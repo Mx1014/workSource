@@ -192,9 +192,9 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 	@Override
 	public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
-
-		GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(ga.getFormOriginId());
+		ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(cmd.getSourceId(), null, null);
+		
+		GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(sa.getFormId());
 		if (form == null)
 			throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
 					GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
@@ -229,9 +229,9 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 		customField.setDynamicFlag(NormalFlag.NONEED.getCode());
 		customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
 		customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-		customField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-		customField.setFieldValue(JSONObject.toJSONString(ga));
-		fieldDTOs.add(customField);
+//		customField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+//		customField.setFieldValue(JSONObject.toJSONString(ga));
+//		fieldDTOs.add(customField);
 
 		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 		dto.setFormFields(fieldDTOs);

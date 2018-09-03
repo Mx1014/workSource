@@ -707,9 +707,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		// 未携带id时，需要查询当前用户所属项目
-		List<ProjectDTO> projectDtos = organizationService.getOrganizationProjectIdsByAppId(currentPMId, NEWS_MODULE_ID,
-				appId);
-		return projectDtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
+		return organizationService.getOrganizationProjectIdsByAppId(currentPMId, appId);
 	}
 
 	private List<Long> getAuthSearchProjectIdsByScene(Integer namespaceId, Long categoryId, Long communityId) {
@@ -718,7 +716,7 @@ public class NewsServiceImpl implements NewsService {
 			return null;
 		}
 
-		List<ProjectDTO> dtos = organizationService.getProjectIdsByCommunityAndModuleApps(namespaceId, communityId, NEWS_MODULE_ID,
+		return organizationService.getProjectIdsByCommunityAndModuleApps(namespaceId, communityId, NEWS_MODULE_ID,
 				r -> {
 
 					NewsInstanceConfig config = (NewsInstanceConfig) StringHelper.fromJsonString(r,
@@ -729,7 +727,6 @@ public class NewsServiceImpl implements NewsService {
 
 					return categoryId.equals(config.getCategoryId());
 				});
-		return null == dtos ? null : dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 	}
 
 	@Override

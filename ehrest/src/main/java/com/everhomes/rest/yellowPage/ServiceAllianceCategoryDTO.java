@@ -37,6 +37,8 @@ public class ServiceAllianceCategoryDTO {
 	
 	private Long parentId;
 	
+	private Long type;
+	
 	private String name;
 	
 	private String path;
@@ -210,5 +212,13 @@ public class ServiceAllianceCategoryDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getType() {
+		return type;
+	}
+
+	public void setType(Long type) {
+		this.type = type;
+	}
 
 }
