@@ -1212,7 +1212,8 @@ public class CommunityServiceImpl implements CommunityService {
 						propertyMgrService.deleteApartment(command);
 					});
 				}
-				customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
+				//删除楼宇下的房源与企业客户的关联
+				//customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
 				//删除楼栋时，用置状态的方式代替直接删除楼栋的方式(影响较大) by tangcen 2018年8月5日15:14:43
 				//this.communityProvider.deleteBuilding(building);
 				building.setStatus(BuildingAdminStatus.INACTIVE.getCode());
@@ -5083,10 +5084,10 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
     	}
     	
-		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getName());
+		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getId());
 		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
 		
-		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
+		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getId());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
 		
 		if (dto.getAreaSize()!=null) {
