@@ -114,6 +114,8 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -5666,6 +5668,16 @@ public class AssetServiceImpl implements AssetService {
 	 */
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
+	}
+	
+	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+		//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(moduleId);
+		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+		//解析instance_config获取categoryId
+		
 	}
 
 }

@@ -7,6 +7,9 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
@@ -254,4 +257,15 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+	
+	/**
+	 * 获取缴费应用列表接口
+	 */
+	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
+	
+	/**
+	 * 业务应用新增缴费映射关系接口
+	 */
+	public 
+	
 }
