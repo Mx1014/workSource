@@ -184,13 +184,8 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/exportSignupInfo</b>
      */
     @RequestMapping("exportSignupInfo")
-    @RestReturn(value=String.class)
-    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd) {
+    public void exportSignupInfo(@Valid ExportSignupInfoCommand cmd) {
     	activityService.exportActivitySignupNew(cmd);
-    	RestResponse restResponse = new RestResponse();
-    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
-    	restResponse.setErrorDescription("OK");
-    	return restResponse;
     }
 
 //    /**
