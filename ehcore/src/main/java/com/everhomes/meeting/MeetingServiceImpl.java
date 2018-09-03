@@ -1193,7 +1193,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecord.setContent(cmd.getContent());
 
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
-        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
         }
         
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
@@ -1284,9 +1284,9 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
         List<MeetingAttachment> existsAttachements = new ArrayList<>();
 		List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
-        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, deleteAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
-        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
         }
         List<EhMeetingInvitations> newRecordReceivers = buildEhMeetingInvitations(addMeetingInvitations, meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
