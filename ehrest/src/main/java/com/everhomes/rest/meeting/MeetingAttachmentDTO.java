@@ -9,6 +9,9 @@ import com.everhomes.util.StringHelper;
  * <li>contentType :  附件类型 contentserver 的type</li>
  * <li>contentUri : 附件uri contentserver的uri</li>
  * <li>contentUrl : 附件url 直接下载访问的链接</li>
+ * <li>contentSize :  附件大小</li>
+ * <li>contentIconUri : 附件图标uri</li>
+ * <li>contentIconUrl : 附件图标url</li>
  * </ul>
  */
 public class MeetingAttachmentDTO {
@@ -17,7 +20,9 @@ public class MeetingAttachmentDTO {
     private String contentType;
     private String contentUri;
     private String contentUrl;
-
+    private Integer contentSize;
+    private String contentIconUri;
+    private String contentIconUrl;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -61,6 +66,30 @@ public class MeetingAttachmentDTO {
 
 	public void setContentUrl(String contentUrl) {
 		this.contentUrl = contentUrl;
+	}
+
+	public Integer getContentSize() {
+		return contentSize;
+	}
+
+	public void setContentSize(Integer contentSize) {
+		this.contentSize = contentSize;
+	}
+
+	public String getContentIconUri() {
+		return contentIconUri;
+	}
+
+	public void setContentIconUri(String contentIconUri) {
+		this.contentIconUri = contentIconUri;
+	}
+
+	public String getContentIconUrl() {
+		return contentIconUrl;
+	}
+
+	public void setContentIconUrl(String contentIconUrl) {
+		this.contentIconUrl = contentIconUrl;
 	}
     
     

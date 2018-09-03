@@ -9,6 +9,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filemanagement.FileService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -136,6 +137,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     private static final int MEETING_COMING_SOON_MINUTE = 10;
     private static final String LOCALE = "zh_CN";
 
+    @Autowired
+    private FileService fileService;
     @Autowired
     private MeetingProvider meetingProvider;
     @Autowired
@@ -725,10 +728,17 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     	List<MeetingAttachment> attachments = meetingProvider.listMeetingAttachements(id, attachmentOwnerType.getCode());
     	if(null != attachments){
     		return attachments.stream().map(r -> {
-    			return ConvertHelper.convert(r , MeetingAttachmentDTO.class);
+    			return processAttachment2DTO(r);
     		}).collect(Collectors.toList());
     	}
 		return null;
+	}
+
+	private MeetingAttachmentDTO processAttachment2DTO(MeetingAttachment r) {
+		MeetingAttachmentDTO dto = ConvertHelper.convert(r , MeetingAttachmentDTO.class);
+		dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+		dto.setContentIconUrl(contentServerService.parserUri(dto.getContentIconUri()));
+		return dto;
 	}
 
 	private MeetingReservationShowStatus buildMeetingReservationShowStatus(MeetingReservation meetingReservation) {
@@ -882,13 +892,23 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 		if(meetingAttachments == null){
 			return null;
 		}
+		Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
 		return meetingAttachments.stream().map(r->{
 			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
 			attachment.setNamespaceId(meetingReservation.getNamespaceId());
 			attachment.setOwnerType(AttachmentOwnerType.EhMeetingReservations.getCode());
 			attachment.setOwnerId(meetingReservation.getId());
+			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName())); 
 			return attachment;
 		}).collect(Collectors.toList());
+	}
+
+	private String processIconUri(Map<String, String> fileIconUriMap, String fileName) {
+		String suffix = "other";
+		if(null != fileName){
+			suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+		}
+		return fileIconUriMap.get(suffix) == null ? fileIconUriMap.get("other") : fileIconUriMap.get(suffix);
 	}
 
 	private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
@@ -1192,11 +1212,13 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 		if(meetingAttachments == null){
 			return null;
 		}
+		Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
 		return meetingAttachments.stream().map(r->{
 			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
 			attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
 			attachment.setOwnerType(AttachmentOwnerType.EhMeetingRecords.getCode());
 			attachment.setOwnerId(meetingRecord.getId());
+			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName())); 
 			return attachment;
 		}).collect(Collectors.toList());
 	}
