@@ -22,7 +22,7 @@ CREATE TABLE `eh_personal_center_settings` (
   `create_time` TIMESTAMP COMMENT '创建时间',
   `update_uid` BIGINT COMMENT '修改人ID',
   `update_time` TIMESTAMP COMMENT '修改时间',
-
+  `link_url` VARCHAR(64) COMMENT '跳转链接',
   PRIMARY KEY (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '个人中心配置表';
 -- END
