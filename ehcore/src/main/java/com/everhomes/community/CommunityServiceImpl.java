@@ -5899,5 +5899,15 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
+
+
+	@Override
+	public ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
+
+
+
+
+		return null;
+	}
 }
 
