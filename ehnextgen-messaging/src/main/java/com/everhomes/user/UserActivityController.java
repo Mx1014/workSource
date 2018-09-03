@@ -300,7 +300,7 @@ public class UserActivityController extends ControllerBase {
      * 个人中心配置
      */
     @RequestMapping("getUserTreasureNew")
-    @RestReturn(GetUserTreasureResponse.class)
+    @RestReturn(GetUserTreasureNewResponse.class)
     @RequireAuthentication(false)
     public RestResponse getUserTreasureNew() {
         return new RestResponse(userActivityService.getUserTreasureNew());
