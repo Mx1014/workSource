@@ -5,6 +5,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.investment.CreateInvestmentCommand;
+import com.everhomes.rest.investment.SearchInvestmentCommand;
+import com.everhomes.rest.investment.SearchInvestmentResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/investment")
 public class InvestmentEnterpriseController {
+    @Autowired
+    private InvestmentEnterpriseService investmentEnterpriseService;
 
     /**
      * <b>URL: /investment/createInvestment</b>
@@ -20,6 +25,7 @@ public class InvestmentEnterpriseController {
     @RequestMapping("createInvestment")
     @RestReturn(value=Long.class)
     public RestResponse createInvestment(CreateInvestmentCommand cmd) {
+        investmentEnterpriseService.createInvestment(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -32,7 +38,21 @@ public class InvestmentEnterpriseController {
     @RequestMapping("updateInvestment")
     @RestReturn(value=Long.class)
     public RestResponse updateInvestment(CreateInvestmentCommand cmd) {
+        investmentEnterpriseService.updateInvestment(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /investment/listInvestments</b>
+     * <p> 列出招商客户 </p>
+     */
+    @RequestMapping("listInvestment")
+    @RestReturn(value=Long.class)
+    public RestResponse listInvestment(SearchInvestmentCommand cmd) {
+        SearchInvestmentResponse searchInvestmentResponse =  investmentEnterpriseService.listInvestment(cmd);
+        RestResponse response = new RestResponse(searchInvestmentResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
