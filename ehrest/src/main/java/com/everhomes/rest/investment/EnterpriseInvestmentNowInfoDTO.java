@@ -2,20 +2,19 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-public class EnterpriseInvestmentContact {
+public class EnterpriseInvestmentNowInfoDTO {
 
     private Long id;
     private Integer namespaceId;
     private Long communityId;
-    private String name;
-    private Long phoneNumber;
-    private String email;
-    private String position;
-    private String address;
-    private Byte type;
-    private Byte originType;
+    private String nowAddress;
+    private BigDecimal nowRental;
+    private Byte nowRentalUnit;
+    private Double nowArea;
+    private Timestamp nowContractEndDate;
     private Byte status;
     private Long customerId;
     private Timestamp createTime;
@@ -47,60 +46,44 @@ public class EnterpriseInvestmentContact {
         this.communityId = communityId;
     }
 
-    public String getName() {
-        return name;
+    public String getNowAddress() {
+        return nowAddress;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNowAddress(String nowAddress) {
+        this.nowAddress = nowAddress;
     }
 
-    public Long getPhoneNumber() {
-        return phoneNumber;
+    public BigDecimal getNowRental() {
+        return nowRental;
     }
 
-    public void setPhoneNumber(Long phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setNowRental(BigDecimal nowRental) {
+        this.nowRental = nowRental;
     }
 
-    public String getEmail() {
-        return email;
+    public Byte getNowRentalUnit() {
+        return nowRentalUnit;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setNowRentalUnit(Byte nowRentalUnit) {
+        this.nowRentalUnit = nowRentalUnit;
     }
 
-    public String getPosition() {
-        return position;
+    public Double getNowArea() {
+        return nowArea;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
+    public void setNowArea(Double nowArea) {
+        this.nowArea = nowArea;
     }
 
-    public String getAddress() {
-        return address;
+    public Timestamp getNowContractEndDate() {
+        return nowContractEndDate;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Byte getType() {
-        return type;
-    }
-
-    public void setType(Byte type) {
-        this.type = type;
-    }
-
-    public Byte getOriginType() {
-        return originType;
-    }
-
-    public void setOriginType(Byte originType) {
-        this.originType = originType;
+    public void setNowContractEndDate(Timestamp nowContractEndDate) {
+        this.nowContractEndDate = nowContractEndDate;
     }
 
     public Byte getStatus() {
