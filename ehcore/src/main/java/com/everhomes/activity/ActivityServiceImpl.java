@@ -1957,7 +1957,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			// 这里是的getUserFromPhone有点小问题的，id为0的用户在我们系统中是存在的，可能会有某些地方显示异常。
 			// 尝试过将uid设置成null，导致了app查询报名用户和后台导出报名出现了nullpointexception，还有报名、确认、取消、签到、支付、退款、活动详情及报名统计多个接口等没测试。
 			// 素我无能为力，暂时保持原样。
-			User user = getUserFromPhone(row.getA().trim());
+            List<ActivityRoster> rosterList = this.activityProvider.listRosters(activityId,ActivityRosterStatus.NORMAL);
+            String phone = row.getA();
+            if (!CollectionUtils.isEmpty(rosterList)) {
+                if (rosters.get(0).getFormId() != null) {
+                    phone = row.getB();
+                }
+            }
+			User user = getUserFromPhone(phone.trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
 			roster.setUid(user.getId());
@@ -1969,7 +1976,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	        roster.setLotteryFlag((byte) 0);
             roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
             roster.setRealName(user.getNickName());
-            roster.setPhone(row.getA().trim());
+            roster.setPhone(phone.trim());
             if (form != null) {
                 List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
                 for (int j=0;j<row.getCells().size();j++) {
@@ -2072,9 +2079,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		String  locale = UserContext.current().getUser().getLocale();
 		String scope = ActivityLocalStringCode.SCOPE;
 
+		List<ActivityRoster> rosters = this.activityProvider.listRosters(activityId,ActivityRosterStatus.NORMAL);
+		String phone = row.getA();
+		if (!CollectionUtils.isEmpty(rosters)) {
+		    if (rosters.get(0).getFormId() != null) {
+		        phone = row.getB();
+            }
+        }
 		String errorString = "";
 		//手机不能为空
-		if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
+		if (org.apache.commons.lang.StringUtils.isBlank(phone)) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_PHONE_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The phone number is empty");
 			rosterError.setDescription(errorString);
@@ -2082,7 +2096,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosterError;
 		}
 		//手机格式简单检验
-		if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+		if (phone == null || phone.trim().length() != 11 || !phone.trim().startsWith("1")) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_INVALID_PHONE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "Invalid phone number");
 			rosterError.setDescription(errorString);
@@ -2092,7 +2106,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
-			if(newRosters.get(i).getPhone().equals(row.getA())){
+			if(newRosters.get(i).getPhone().equals(phone)){
 				String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ROSTER_IN_EXCEL);
 				errorString = localeStringService.getLocalizedString(scope, code, locale, "Repeat roster in this Excel, checked with phone");
 				rosterError.setDescription(errorString);
@@ -2102,7 +2116,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}
 
 		//检查是否已经报过名
-		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
+		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, phone, ActivityRosterStatus.NORMAL.getCode());
 		if(oldRoster != null){
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ALREADY_EXISTS_UPDATE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, update now");
