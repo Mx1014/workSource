@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>orgId: 公司Id</li>
- *     <li>appId: 应用Id</li>
+ *     <li>appId: 应用Id，标准版必传，定制版可不传</li>
  * </ul>
  */
 public class ListCommunitiesByOrgIdAndAppIdCommand {
