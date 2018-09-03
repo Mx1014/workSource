@@ -2587,11 +2587,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (address == null) {
             address = new Address();
             address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
             address.setCityId(community.getCityId());
             address.setCityName(community.getCityName());
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
             address.setAddress(building.getName() + "-" + cmd.getApartmentName());
@@ -2621,15 +2623,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     address.setSourceItemName(item.getItemDisplayName());
                 }
             }
-
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             addressProvider.createAddress(address);
         } else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-            address.setAreaSize(cmd.getAreaSize());
-
+        	address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
+            address.setBuildingName(building.getName());
+            address.setBuildingId(building.getId());
+        	
+        	address.setAreaSize(cmd.getAreaSize());
             address.setBuildArea(cmd.getBuildArea());
             address.setRentArea(cmd.getRentArea());
             address.setChargeArea(cmd.getChargeArea());
@@ -2942,12 +2947,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
     
     private List<OrganizationOwnerDTO> getApartmentRelatedIndividualCustomers(Integer namespaceId, Long addressId) {
-	    List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
+    	List<OrganizationOwnerDTO> individualCustomerList = new ArrayList<>();
+    	List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
 	    if (organizationOwnerAddressesMappings != null && organizationOwnerAddressesMappings.size()>0) {
-	    	List<OrganizationOwnerDTO> individualCustomerList = organizationOwnerAddressesMappings.stream().map(this::convert).collect(Collectors.toList());
-	    	return individualCustomerList;
+	    	for (OrganizationOwnerAddress organizationOwnerAddress : organizationOwnerAddressesMappings) {
+	    		OrganizationOwner organizationOwner = propertyMgrProvider.findOrganizationOwnerById(organizationOwnerAddress.getOrganizationOwnerId());
+	            if (organizationOwner != null) {
+	            	OrganizationOwnerDTO organizationOwnerDTO = new OrganizationOwnerDTO();
+	                organizationOwnerDTO.setContactName(organizationOwner.getContactName());
+	                organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
+	                individualCustomerList.add(organizationOwnerDTO);
+	            }
+			} 
 	    }
-	    return null;
+	    return individualCustomerList;
 	}
 
 	//  在门牌管理页面中新增企业客户信息tab页，该门牌关联的企业信息来源于3处，详见!新增企业客户信息tab.png!：
@@ -2962,11 +2975,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if(mappings != null && mappings.size() > 0) {
             mappings.forEach(mapping -> {
                 Contract contract = contractProvider.findContractById(mapping.getContractId());
-                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
-                        && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
-                        && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-                    customerIds.add(contract.getCustomerId());
-                }
+                if (contract != null) {
+                	if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+                            && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
+                            && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                        customerIds.add(contract.getCustomerId());
+                    }
+				}
             });
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.findActiveCustomerEntryInfoByAddressId(addressId);
@@ -3030,7 +3045,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         return organizationOwnerDTO;
     }
-
+    
     @Override
     public void deleteApartment(DeleteApartmentCommand cmd) {
         Address address = addressProvider.findAddressById(cmd.getId());
@@ -3428,36 +3443,52 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		if (latestEndDateContract!=null) {
 			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
+		/*
+		* 因为通过addressService.listApartmentsByKeyword(cmd).second()方法获得的address，其IS_FUTURE_APARTMENT都为0，
+		* 所以如下代码可以注释掉，只留下else if分支的代码
+		*/
 		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
-		
-		Address address = addressProvider.findAddressById(addressId);
-		dto.setIsFutureApartment(address.getIsFutureApartment());
-		if (address.getIsFutureApartment() == 1) {
-			AddressArrangement addressArrangement = null;
-			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
-			for (AddressArrangement arrangement : arrangements) {
-    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
-    			if (targetIds.contains(addressId.toString())) {
-    				addressArrangement = arrangement;
-    				break;
-				}
-    		}
-			if(addressArrangement!=null){
-				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+//		Address address = addressProvider.findAddressById(addressId);
+//		dto.setIsFutureApartment(address.getIsFutureApartment());
+//		if (address.getIsFutureApartment() == 1) {
+//			AddressArrangement addressArrangement = null;
+//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
+//			for (AddressArrangement arrangement : arrangements) {
+//    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+//    			if (targetIds.contains(addressId.toString())) {
+//    				addressArrangement = arrangement;
+//    				break;
+//				}
+//    		}
+//			if(addressArrangement!=null){
+//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+//			}
+//		}else if (address.getIsFutureApartment() == 0) {
+//			AddressArrangement addressArrangement = null;
+//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
+//			for (AddressArrangement arrangement : arrangements) {
+//    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+//    			if (originalIds.contains(addressId.toString())) {
+//    				addressArrangement = arrangement;
+//    				break;
+//				}
+//    		}
+//			if(addressArrangement!=null){
+//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+//			}
+//		}
+		dto.setIsFutureApartment((byte)0);
+		AddressArrangement addressArrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
+		for (AddressArrangement arrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+			if (originalIds.contains(addressId.toString())) {
+				addressArrangement = arrangement;
+				break;
 			}
-		}else if (address.getIsFutureApartment() == 0) {
-			AddressArrangement addressArrangement = null;
-			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
-			for (AddressArrangement arrangement : arrangements) {
-    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
-    			if (originalIds.contains(addressId.toString())) {
-    				addressArrangement = arrangement;
-    				break;
-				}
-    		}
-			if(addressArrangement!=null){
-				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
-			}
+		}
+		if(addressArrangement!=null){
+			dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 		}
 		return dto;
 	}

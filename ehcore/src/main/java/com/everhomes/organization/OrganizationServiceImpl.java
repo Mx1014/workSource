@@ -380,6 +380,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -398,6 +399,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -5810,7 +5812,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setAvatar(user.getAvatar());
 
             /**创建企业级的member/detail/user_organiztion记录**/
-            OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            OrganizationMember tempMember = createOrganiztionMemberWithoutDetailAndUserOrganization(member, cmd.getOrganizationId());
             member.setId(tempMember.getId());
             //增加customer admin record 状态
             try {
@@ -5930,6 +5932,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         List<Long> departmentIds = new ArrayList<>();
                         departmentIds.add(cmd.getEnterpriseId());
                         addArchivesContactCommand.setDepartmentIds(departmentIds);
+                        addArchivesContactCommand.setNamespaceId(user.getNamespaceId());
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                         sendMessageForContactApproved(member);
@@ -6022,7 +6025,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
             deleteEnterpriseContactStatus(operatorUid, member);
-            sendMessageForContactReject(member);
+            sendMessageForContactReject(member , cmd.getRejectText());
         }
 
     }
@@ -6779,11 +6782,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-
-    private void joinOrganizationAfterOperation(OrganizationMember member) {
+/**
+ * 
+ * @param member
+ * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息 
+ */
+    private void joinOrganizationAfterOperation(OrganizationMember member ,boolean notSendMsgFlag) {
         userSearcher.feedDoc(member);
 
-        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER) {
+        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER
+        		&& !notSendMsgFlag) {
+        	LOGGER.info("sendMessageForContactApproved  and notSendMsgFlag:{}",notSendMsgFlag);
             sendMessageForContactApproved(member);
         }
 
@@ -7628,8 +7637,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         return member;
     }
 
+
     @Override
-    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken) {
+    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName
+    								, String contactToken ,boolean notSendMsgFlag) {
 
         if (null == contactToken) {
             LOGGER.error("contactToken can not be empty.");
@@ -7712,7 +7723,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationProvider.updateOrganizationMemberDetails(detail, member.getDetailId());
                 // 删除离职Log表中的记录
                 this.archivesService.deleteArchivesDismissEmployees(detail.getId(),detail.getOrganizationId());
+            } else {
+            	// 如果档案记录不存在，则再重新创建一个。 added by janson
+            	Long new_detail_id = getEnableDetailOfOrganizationMember(member, organizationId);
+            	member.setDetailId(new_detail_id);
+            	organizationProvider.updateOrganizationMember(member);
             }
+            
         }
 
         // 删除离职Log表中的记录
@@ -7724,7 +7741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
         if (sendMsgFlag) {
-            joinOrganizationAfterOperation(member);
+            joinOrganizationAfterOperation(member,notSendMsgFlag);
         }
         return member;
     }
@@ -9346,11 +9363,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         return map;
     }
 
-    private String getNotifyText(Organization org, OrganizationMember member, User user, int code) {
+    private String getNotifyText(Organization org, OrganizationMember member, User user, int code ,String textInfo) {
         Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2") : member.getContactName());
         map.put("userToken", member.getContactToken());
+        
+        map.put("textInfo", textInfo==null?"":textInfo);
         if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
@@ -9397,7 +9416,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
         // send notification to all the other members in the group
-        String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
+        String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR ,null);
 
         //Updated by Jannson 
         //includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
@@ -9442,7 +9461,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF,null);
 
         QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
 
@@ -9456,7 +9475,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
         // send notification to all the other members in the group
-        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
+        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER,null);
         // 消息只发给公司的管理人员  by sfyan 20170213
 //        includeList = this.includeOrgList(org, member.getTargetId());
         includeList = listOrganzationAdminIds(member.getOrganizationId());
@@ -9482,13 +9501,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
-    private void sendMessageForContactReject(OrganizationMember member) {
+    private void sendMessageForContactReject(OrganizationMember member , String rejectText) {
         // send notification to who is requesting to join the enterprise
         Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
         User user = userProvider.findUserById(member.getTargetId());
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN,rejectText);
 
         // send notification to who is requesting to join the enterprise
 
@@ -9509,7 +9528,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = userProvider.findUserById(member.getTargetId());
 
         // send notification to who is requesting to join the enterprise
-        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT);
+        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT,null);
         List<Long> includeList = new ArrayList<Long>();
         //给申请人发的信息应为私信by xiongying 20160524
         sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
@@ -9523,7 +9542,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         includeList.clear();
 
         // send notification to all the other members in the enterprise
-        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
+        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER,null);
 
         //消息只发给公司的管理人员  by sfyan 20170213
         includeList = this.includeOrgList(org, member.getTargetId());
@@ -11128,7 +11147,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 
@@ -11288,7 +11307,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //是往公司添加新成员就需要发消息
                 if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
                     organizationMember.setOrganizationId(enterpriseId);
-                    joinOrganizationAfterOperation(organizationMember);
+                    joinOrganizationAfterOperation(organizationMember,false);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
@@ -12641,7 +12660,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         /**创建/更新detail,并获取detailId**/
         // 申请加入企业的时候，不需要在人事档案中新增数据，在审核通过后，再在人事档案中新增数据。 add by yanlong.liang 20180725
-//        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
+        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
 
         OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
 
@@ -12651,7 +12670,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setOrganizationId(organizationId);
             organizationMember.setOperatorUid(user.getId());
             //绑定member表的detail_id
-//            organizationMember.setDetailId(new_detail_id);
+            organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
 
             /**创建user_organization的记录（仅当target为user且grouptype为企业时添加）**/
@@ -12671,6 +12690,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationMember;// add by xq.tian 2017/07/05
     }
 
+    private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
+        User user = UserContext.current().getUser();
+        OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
+
+        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
+
+        //如果企业中没有有该记录
+        if (null == desOrgMember) {
+            /**创建belongTo的记录**/
+            organizationMember.setOrganizationId(organizationId);
+            organizationMember.setOperatorUid(user.getId());
+            organizationProvider.createOrganizationMember(organizationMember);
+
+            /**创建user_organization的记录（仅当target为user且grouptype为企业时添加）**/
+            if (organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
+                createOrUpdateUserOrganization(organizationMember);
+            }
+        }
+        return organizationMember;// add by xq.tian 2017/07/05
+    }
     /**
      * 获取一个组织的总公司ID
      **/

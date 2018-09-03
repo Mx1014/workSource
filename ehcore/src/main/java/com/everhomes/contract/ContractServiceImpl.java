@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.contract;
 
-
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.math.BigDecimal;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.locale.LocaleTemplateService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +45,10 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.archives.ArchivesEmployeesExportTaskHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentBillGroup;
-import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -71,7 +67,6 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.gogs.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.*;
-import com.everhomes.organization.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
@@ -95,7 +90,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.archives.ArchivesExcelLocaleString;
 import com.everhomes.rest.asset.*;
 
 import com.everhomes.rest.asset.ChargingVariables;
@@ -103,74 +97,6 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.*;
-import com.everhomes.rest.contract.AddContractTemplateCommand;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeType;
-import com.everhomes.rest.contract.ChargingItemVariables;
-import com.everhomes.rest.contract.ChargingVariablesDTO;
-import com.everhomes.rest.contract.CheckAdminCommand;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.contract.ContractAttachmentDTO;
-import com.everhomes.rest.contract.ContractChargingChangeDTO;
-import com.everhomes.rest.contract.ContractChargingChangeEventDTO;
-import com.everhomes.rest.contract.ContractChargingItemDTO;
-import com.everhomes.rest.contract.ContractChargingItemEventDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractEventDTO;
-import com.everhomes.rest.contract.ContractExportDetailDTO;
-import com.everhomes.rest.contract.ContractLogDTO;
-import com.everhomes.rest.contract.ContractNumberDataType;
-import com.everhomes.rest.contract.ContractParamDTO;
-import com.everhomes.rest.contract.ContractParamGroupMapDTO;
-import com.everhomes.rest.contract.ContractParamGroupType;
-import com.everhomes.rest.contract.ContractPaymentPlanDTO;
-import com.everhomes.rest.contract.ContractPaymentType;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.ContractTemplateDTO;
-import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
-import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.contract.ContractTrackingTemplateCode;
-import com.everhomes.rest.contract.ContractType;
-import com.everhomes.rest.contract.CreateContractCommand;
-import com.everhomes.rest.contract.CreatePaymentContractCommand;
-import com.everhomes.rest.contract.DeleteContractCommand;
-import com.everhomes.rest.contract.DeleteContractTemplateCommand;
-import com.everhomes.rest.contract.DenunciationContractCommand;
-import com.everhomes.rest.contract.DurationParamDTO;
-import com.everhomes.rest.contract.EnterpriseContractCommand;
-import com.everhomes.rest.contract.EnterpriseContractDTO;
-import com.everhomes.rest.contract.EntryContractCommand;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.GenerateContractNumberCommand;
-import com.everhomes.rest.contract.GenerateContractNumberRule;
-import com.everhomes.rest.contract.GetContractParamCommand;
-import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
-import com.everhomes.rest.contract.GetDurationParamCommand;
-import com.everhomes.rest.contract.GetUserGroupsCommand;
-import com.everhomes.rest.contract.ListApartmentContractsCommand;
-import com.everhomes.rest.contract.ListContractEventsCommand;
-import com.everhomes.rest.contract.ListContractTemplatesResponse;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierResponse;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
-import com.everhomes.rest.contract.ReviewContractCommand;
-import com.everhomes.rest.contract.SearchContractCommand;
-import com.everhomes.rest.contract.SetContractParamCommand;
-import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
-import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
-import com.everhomes.rest.contract.UpdateContractTemplateCommand;
-import com.everhomes.rest.contract.UpdatePaymentContractCommand;
-import com.everhomes.rest.contract.listContractTemplateCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
@@ -210,36 +136,7 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
-import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -717,10 +614,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	@Override
-	/*public String generateContractNumber() {
-		String num = "HT_" + DateHelper.currentGMTTime().getTime() + RandomUtils.nextInt(10);
-		return num;
-	}*/
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
@@ -881,22 +774,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						newChargingVariableList.setChargingVariables(new ArrayList<>());
 						ChargingVariable djChargingVariable = new ChargingVariable();
 						djChargingVariable.setVariableIdentifier("dj");
-						djChargingVariable.setVariableName("单价(含税)");
+						djChargingVariable.setVariableName("单价含税(元)");
 						djChargingVariable.setVariableValue(dj.toString());
 						newChargingVariableList.getChargingVariables().add(djChargingVariable);
-						ChargingVariable djbhsChargingVariable = new ChargingVariable();
-						djbhsChargingVariable.setVariableIdentifier("djbhs");
-						djbhsChargingVariable.setVariableName("单价(不含税)");
-						djbhsChargingVariable.setVariableValue(djbhs.toString());
-						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 						ChargingVariable taxRateChargingVariable = new ChargingVariable();
 						taxRateChargingVariable.setVariableIdentifier("taxRate");
-						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableName("税率(%)");
 						taxRateChargingVariable.setVariableValue(taxRate.toString());
 						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable djbhsChargingVariable = new ChargingVariable();
+						djbhsChargingVariable.setVariableIdentifier("djbhs");
+						djbhsChargingVariable.setVariableName("单价不含税(元)");
+						djbhsChargingVariable.setVariableValue(djbhs.toString());
+						newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 						ChargingVariable mjChargingVariable = new ChargingVariable();
 						mjChargingVariable.setVariableIdentifier("mj");
-						mjChargingVariable.setVariableName("面积");
+						mjChargingVariable.setVariableName("面积(㎡)");
 						mjChargingVariable.setVariableValue(mj.toString());
 						newChargingVariableList.getChargingVariables().add(mjChargingVariable);
 
@@ -922,19 +815,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						newChargingVariableList.setChargingVariables(new ArrayList<>());
 						ChargingVariable gdjeChargingVariable = new ChargingVariable();
 						gdjeChargingVariable.setVariableIdentifier("gdje");
-						gdjeChargingVariable.setVariableName("固定金额(含税)");
+						gdjeChargingVariable.setVariableName("固定金额含税(元)");
 						gdjeChargingVariable.setVariableValue(gdje.toString());
 						newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
-						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
-						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
-						gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
-						gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
-						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 						ChargingVariable taxRateChargingVariable = new ChargingVariable();
 						taxRateChargingVariable.setVariableIdentifier("taxRate");
-						taxRateChargingVariable.setVariableName("税率");
+						taxRateChargingVariable.setVariableName("税率(%)");
 						taxRateChargingVariable.setVariableValue(taxRate.toString());
 						newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+						ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+						gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+						gdjebhsChargingVariable.setVariableName("固定金额不含税(元)");
+						gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
+						newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 
 						cmd.getChargingItems().get(i).setChargingVariables(newChargingVariableList.toString());
 					}
@@ -1309,7 +1202,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
-				// add by tangcen
+				// add by tangcen ContractBuildingMapping中收费面积是AreaSize
 				oldApartments.add(" 门牌：" + apartment.getApartmentName() + " 收费面积：" + apartment.getAreaSize());
 			});
 		}
@@ -1335,7 +1228,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (buildingApartments != null && buildingApartments.size() > 0) {
 			for (BuildingApartmentDTO buildingApartment : buildingApartments) {
 				// add by tangcen
-				newApartments.add(buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
+				//newApartments.add(buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
+				newApartments.add(" 门牌：" + buildingApartment.getApartmentName() + " 收费面积：" + buildingApartment.getChargeArea());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				// totalSize = totalSize + size;
 				BigDecimal chargeArea = new BigDecimal(Double.toString(size));
@@ -2000,10 +1894,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		Contract exist = checkContract(cmd.getId());
-		contractProvider.updateContract(contract);
+		//contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-		contractSearcher.feedDoc(contract);
+		//contractSearcher.feedDoc(contract);
 		
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
@@ -2098,11 +1992,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 				}
+				
 				parentContract.setStatus(ContractStatus.HISTORY.getCode());
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 			}
 		}
+		
+
+		//入场报错合同变为正常合同
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
 	}
 
 	@Override
@@ -2427,6 +2327,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getContractStartDate())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
 					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -2449,6 +2350,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 					}
 					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+					}
 				}
 			}
 		}
@@ -2460,6 +2362,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getDenunciationTime())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
 					//根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -2480,6 +2383,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 					}
 					dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+					}
 				}
 			}
 		}
@@ -2984,13 +2888,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
 		Timestamp EndTimeByDayTimestamp = new Timestamp(cmd.getEndTimeByDay());
-
 		DurationParamDTO dto = new DurationParamDTO();
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
 		if (chargingItems != null && chargingItems.size() > 0) {
 			List<ChargingItemVariables> chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 			for (int i = 0; i < chargingItems.size(); i++) {
+				if ((chargingItems.get(i).getChargingStartTime()).before(EndTimeByDayTimestamp)) {
 				// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 				ChargingItemVariables chargingPaymentTypeVariable = new ChargingItemVariables();
 				// 根据合同应用的categoryId去查找对应的缴费应用的categoryId
@@ -3002,8 +2906,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					String endTimeByDay = "";
 					String endTimeByPeriod = "";
 					chargingPaymentTypeVariable.setChargingItemName(projectChargingItemName);
-					chargingPaymentTypeVariable
-							.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
+					chargingPaymentTypeVariable.setStartTime(yyyyMMdd.format(chargingItems.get(i).getChargingStartTime()));
 					if (EndTimeByDayTimestamp.after(chargingItems.get(i).getChargingExpiredTime())) {
 						endTimeByDay = yyyyMMdd.format(chargingItems.get(i).getChargingExpiredTime());
 						endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeByDay, cmd.getContractId(), chargingItems.get(i).getChargingItemId());
@@ -3015,8 +2918,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					chargingPaymentTypeVariable.setEndTimeByPeriod(endTimeByPeriod);
 					chargingPaymentTypeVariables.add(chargingPaymentTypeVariable);
 				}
-
 				dto.setChargingPaymentTypeVariables(chargingPaymentTypeVariables);
+				}
 			}
 		}
 		return dto;
@@ -3238,9 +3141,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		contractTemplate.setContentType("gogs");
-		
 		ContractTemplate contractTemplateParent = null;
-		
 		//是否是新增的文件 默认不是新文件
 		Boolean isNewFile = false;
 		String lastCommit = "";
@@ -3834,6 +3735,31 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+	}
+
+	@Override
+	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractsByNamespaceIdAndStatus(cmd.getNamespaceId(),ContractStatus.DENUNCIATION.getCode());
+		
+		for (Contract contract : contracts) {
+			if (contract.getCostGenerationMethod() == null) {
+				//costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+				contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+				assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+				
+				if(contract.getCategoryId() == null){
+					contract.setCategoryId(0l);
+		        }else {
+		        	//合同CategoryId和缴费CategoryId转换
+		            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+		            contract.setCategoryId(assetCategoryId);
+				}
+				BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+				contract.setRent(totalAmount);
+				contractProvider.updateContract(contract);
+	            contractSearcher.feedDoc(contract);
+			}
+		}
 	}
 
 }

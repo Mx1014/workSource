@@ -6,6 +6,7 @@ import com.everhomes.energy.EnergyMeterProvider;
 import com.everhomes.energy.EnergyMeterTask;
 import com.everhomes.energy.EnergyMeterTaskProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentInspectionEquipmentPlanMap;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
@@ -57,7 +58,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -210,6 +210,13 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
             if (EntityType.EQUIPMENT_TASK.getCode().equals(record.getOwnerType())) {
                 scope = EquipmentNotificationTemplateCode.SCOPE;
                 EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(record.getOwnerId());
+                if (EquipmentTaskStatus.NONE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))) {
+                    return;
+                }
+                List<EquipmentInspectionEquipmentPlanMap> planMaps = equipmentProvider.getEquipmentInspectionPlanMap(task.getPlanId());
+                if (planMaps == null || planMaps.size() == 0) {
+                    return;
+                }
                 taskName = task.getTaskName();
                 if(PmNotifyType.BEFORE_START.equals(notify)) {
                     time = task.getExecutiveStartTime();

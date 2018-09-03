@@ -26,9 +26,9 @@ import java.util.List;
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
  *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
-
+ *     <li>searchFromCustomerPageFlag : 0-不是从企业客户管理进入搜索，1-从企业客户管理进入搜索</li>
  *     <li>aptitudeFlag : 是否筛选资质客户</li>
-
+ *
  *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
  *     <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
  * </ul>
@@ -93,7 +93,19 @@ public class SearchEnterpriseCustomerCommand {
 
     private Byte abnormalFlag;
 
+    private Byte ContractSearchCustomerFlag;
+
     private Long taskId;
+
+    private Byte convertFlag;
+
+    public Byte getConvertFlag() {
+        return convertFlag;
+    }
+
+    public void setConvertFlag(Byte convertFlag) {
+        this.convertFlag = convertFlag;
+    }
 
     public Long getTaskId() {
         return taskId;
@@ -327,5 +339,13 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setAbnormalFlag(Byte abnormalFlag) {
         this.abnormalFlag = abnormalFlag;
+    }
+
+    public Byte getContractSearchCustomerFlag() {
+        return ContractSearchCustomerFlag;
+    }
+
+    public void setContractSearchCustomerFlag(Byte contractSearchCustomerFlag) {
+        ContractSearchCustomerFlag = contractSearchCustomerFlag;
     }
 }

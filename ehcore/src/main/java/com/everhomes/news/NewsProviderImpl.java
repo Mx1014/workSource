@@ -48,6 +48,9 @@ public class NewsProviderImpl implements NewsProvider {
 		if (news.getPublishTime() == null) {
 			news.setPublishTime(news.getCreateTime());
 		}
+		
+		news.setCreatorUid(UserContext.currentUserId());
+		
 		getReadWriteDao().insert(news);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 		return  id;
@@ -137,12 +140,32 @@ public class NewsProviderImpl implements NewsProvider {
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), News.class);
 	}
 	
+
+	@Override
+	public News findNewsByNamespaceAndId(Integer namespaceId, Long id) {
+		
+		Record rec = getReadOnlyContext()
+		.select()
+		.from(Tables.EH_NEWS)
+		.where(
+				Tables.EH_NEWS.ID.eq(id)
+				.and(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_NEWS.STATUS.ne(NewsStatus.INACTIVE.getCode()))).fetchOne();
+		
+		if (null == rec) {
+			return null;
+		}
+		
+		return ConvertHelper.convert(rec, News.class);
+	}
+	
 	@Override
 	public List<News> findAllActiveNewsByPage(Long from, Integer pageSize){
 		return getReadOnlyContext().select().from(Tables.EH_NEWS)
 		.where(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())))
 		.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
+	
 
 	@Override
 	public List<News> listNews(List<Long> communityIds, Long categoryId, Integer namespaceId, Long from, Integer pageSize,  boolean isScene, Byte status) {
@@ -302,5 +325,27 @@ public class NewsProviderImpl implements NewsProvider {
 			return categories.get(0);
 		}
 		return null;
+	}
+
+	@Override
+	public Long createNewPreview(News news) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPreview.class));
+		news.setId(id);
+		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if (news.getPublishTime() == null) {
+			news.setPublishTime(news.getCreateTime());
+		}
+		DSLContext context = getReadWriteContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		dao.insert(ConvertHelper.convert(news,EhNewPreview.class));
+		return id;
+	}
+
+	@Override
+	public News findNewPreview(Long id) {
+		DSLContext context = getReadOnlyContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		EhNewPreview result = dao.findById(id);
+		return ConvertHelper.convert(result,News.class);
 	}
 }

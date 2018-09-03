@@ -57,6 +57,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             if (null == acdat) {
                 acdat = new AhoCorasickDoubleArrayTrie<String>();
             }
+
             BufferedReader in = null;
             try{
                 URL realUrl = new URL(cmd.getUrl());
@@ -79,7 +80,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
                 }
 
             }
-            acdat.build(map);
+            if (map.size() > 0) {
+                acdat.build(map);
+            }
             fileUrl = cmd.getUrl();
         } catch (Exception e) {
             e.printStackTrace();

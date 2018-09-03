@@ -2230,7 +2230,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId) {
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
 
         EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
@@ -2248,8 +2248,9 @@ public class AssetProviderImpl implements AssetProvider {
                 // add category id to filter the right billing cycle fix #32202
                 .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))//issue-35467 【物业缴费6.3】选择账单组的计费周期为“合同月”，选择收费项后，计费周期要过滤掉非“合同月”的计费标准
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE);
-       // limiteCycles
+        // limiteCycles
         context.select()
                 .from(standardScopeT,standardT)
                 .where(standardT.ID.eq(standardScopeT.CHARGING_STANDARD_ID))
@@ -2339,7 +2340,7 @@ public class AssetProviderImpl implements AssetProvider {
                 var.setVariableIdentifier(varIden);
                 var.setVariableName(varName);
                 if(varIden.equals("dj") || varIden.equals("gdje")){
-                	var.setVariableName(varName+"(含税)");
+                	var.setVariableName(varName+"含税(元)");
                 	var.setVariablePlaceholder("请输入"+varName+"(含税)");
                 }
                 if(varIden.equals("dj")){
@@ -2349,20 +2350,20 @@ public class AssetProviderImpl implements AssetProvider {
                 if(varIden.equals("dj") || varIden.equals("gdje")){
                 	PaymentVariable varRate = new PaymentVariable();
                     varRate.setVariableIdentifier("taxRate");
-                    varRate.setVariableName("税率");
+                    varRate.setVariableName("税率(%)");
                     vars.add(varRate);
                 }
                 if(varIden.equals("gdje")){
                 	PaymentVariable var1 = new PaymentVariable();
                     var1.setVariableIdentifier("gdjebhs");
-                    var1.setVariableName("固定金额(不含税)");
+                    var1.setVariableName("固定金额不含税(元)");
                     var1.setVariablePlaceholder("请输入固定金额(不含税)");
                     vars.add(var1);
                 }
                 if(varIden.equals("dj")){
                 	PaymentVariable var2 = new PaymentVariable();
                     var2.setVariableIdentifier("djbhs");
-                    var2.setVariableName("单价(不含税)");
+                    var2.setVariableName("单价不含税(元)");
                     var2.setVariablePlaceholder("请输入单价(不含税)");
                     vars.add(var2);
                 }
@@ -2965,7 +2966,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT)
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME)
                 .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
@@ -2998,7 +2999,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT)
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME)
                 .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
@@ -3094,7 +3095,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<PaymentBillGroup> listAllBillGroups() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        //EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
         List<PaymentBillGroup> list = new ArrayList<>();
         context.select()
                 .from(t)
@@ -3112,7 +3113,9 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         context.update(t)
                 .set(t.SWITCH,(byte)1)
-                .where(t.DATE_STR.lessThan(billDateStr))
+                //.where(t.DATE_STR.lessThan(billDateStr))
+                //修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
+                .where(t.DATE_STR_DUE.lessOrEqual(billDateStr))//DATE_STR_DUE：应收日期（出账单日）
                 .and(t.SWITCH.eq((byte)0))
                 .execute();
     }
@@ -3698,22 +3701,22 @@ public class AssetProviderImpl implements AssetProvider {
 	                	newChargingVariableList.setChargingVariables(new ArrayList<>());
 	                	ChargingVariable djChargingVariable = new ChargingVariable();
 	                	djChargingVariable.setVariableIdentifier("dj");
-	                	djChargingVariable.setVariableName("单价(含税)");
+	                	djChargingVariable.setVariableName("单价含税(元)");
 	                	djChargingVariable.setVariableValue(dj.toString());
 	                	newChargingVariableList.getChargingVariables().add(djChargingVariable);
-	                	ChargingVariable djbhsChargingVariable = new ChargingVariable();
-	                	djbhsChargingVariable.setVariableIdentifier("djbhs");
-	                	djbhsChargingVariable.setVariableName("单价(不含税)");
-	                	djbhsChargingVariable.setVariableValue(djbhs.toString());
-	                	newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
 	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
-	                	taxRateChargingVariable.setVariableName("税率");
+	                	taxRateChargingVariable.setVariableName("税率(%)");
 	                	taxRateChargingVariable.setVariableValue(taxRate.toString());
 	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+	                	ChargingVariable djbhsChargingVariable = new ChargingVariable();
+	                	djbhsChargingVariable.setVariableIdentifier("djbhs");
+	                	djbhsChargingVariable.setVariableName("单价不含税(元)");
+	                	djbhsChargingVariable.setVariableValue(djbhs.toString());
+	                	newChargingVariableList.getChargingVariables().add(djbhsChargingVariable);
 	                	ChargingVariable mjChargingVariable = new ChargingVariable();
 	                	mjChargingVariable.setVariableIdentifier("mj");
-	                	mjChargingVariable.setVariableName("面积");
+	                	mjChargingVariable.setVariableName("面积(㎡)");
 	                	mjChargingVariable.setVariableValue(mj.toString());
 	                	newChargingVariableList.getChargingVariables().add(mjChargingVariable);
 	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -3755,19 +3758,20 @@ public class AssetProviderImpl implements AssetProvider {
 	                	newChargingVariableList.setChargingVariables(new ArrayList<>());
 	                	ChargingVariable gdjeChargingVariable = new ChargingVariable();
 	                	gdjeChargingVariable.setVariableIdentifier("gdje");
-	                	gdjeChargingVariable.setVariableName("固定金额(含税)");
+	                	gdjeChargingVariable.setVariableName("固定金额含税(元)");
 	                	gdjeChargingVariable.setVariableValue(gdje.toString());
 	                	newChargingVariableList.getChargingVariables().add(gdjeChargingVariable);
-	                	ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
-	                	gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
-	                	gdjebhsChargingVariable.setVariableName("固定金额(不含税)");
-	                	gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
-	                	newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
 	                	ChargingVariable taxRateChargingVariable = new ChargingVariable();
 	                	taxRateChargingVariable.setVariableIdentifier("taxRate");
-	                	taxRateChargingVariable.setVariableName("税率");
+	                	taxRateChargingVariable.setVariableName("税率(%)");
 	                	taxRateChargingVariable.setVariableValue(taxRate.toString());
 	                	newChargingVariableList.getChargingVariables().add(taxRateChargingVariable);
+	                	ChargingVariable gdjebhsChargingVariable = new ChargingVariable();
+	                	gdjebhsChargingVariable.setVariableIdentifier("gdjebhs");
+	                	gdjebhsChargingVariable.setVariableName("固定金额不含税(元)");
+	                	gdjebhsChargingVariable.setVariableValue(gdjebhs.toString());
+	                	newChargingVariableList.getChargingVariables().add(gdjebhsChargingVariable);
+	                	
 	                	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 	                	if(tableName.equals("EH_DEFAULT_CHARGING_ITEMS")) {
 	                		this.dbProvider.execute((TransactionStatus status) -> {
@@ -5776,6 +5780,9 @@ public class AssetProviderImpl implements AssetProvider {
 										.orderBy(bills.DATE_STR_BEGIN.desc())
 										.limit(0,1)
 										.fetchInto(PaymentBills.class);
+		if (list == null || list.size() < 1) {
+			return null;
+		}
 		return list.get(0);		
 	}
 

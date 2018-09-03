@@ -1420,7 +1420,7 @@ public class ContractProviderImpl implements ContractProvider {
 						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 						.fetchInto(Contract.class);
 	}
-
+	
 	@Override
 	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
@@ -1469,6 +1469,58 @@ public class ContractProviderImpl implements ContractProvider {
 			return ConvertHelper.convert(flag2, EnterpriseCustomerAptitudeFlag.class);
 
 		}
+	}
+
+	@Override
+	public Integer getRelatedContractCountByAddressIds(List<Long> addressIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.leftOuterJoin(Tables.EH_CONTRACTS)
+										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdList))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		
+		if (contractIds!=null && contractIds.size()>0) {
+			return contractIds.size();
+		}
+		return 0;
+	}
+
+	@Override
+	public Double getTotalRentByAddressIds(List<Long> addressIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+				
+		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
+										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+										.leftOuterJoin(Tables.EH_CONTRACTS)
+										.on(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(Tables.EH_CONTRACTS.ID))
+										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdList))
+										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+										.fetchInto(Long.class);
+		
+		List<Double> rentList =  context.select(Tables.EH_CONTRACTS.RENT)
+										.from(Tables.EH_CONTRACTS)
+										.where(Tables.EH_CONTRACTS.ID.in(contractIds))
+										.fetchInto(Double.class);
+		Double result = 0.0;
+		for (Double rent : rentList) {
+			result += (rent != null ? rent : 0.0);
+		}
+		return result;
+	}
+
+	@Override
+	public List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		return context.select()
+					  .from(Tables.EH_CONTRACTS)
+					  .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+					  .and(Tables.EH_CONTRACTS.STATUS.eq(statusCode))
+					  .fetchInto(Contract.class);
 	}
 
 }

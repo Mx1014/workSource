@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -80,7 +79,12 @@ public class OpenApiRedirectCiticbuyHandler implements OpenApiRedirectHandler {
     }
 
     private String buildURLParams(String url, Map<String, Object> uriParams) {
-        StringBuilder urlSb = new StringBuilder(url).append("?");
+        StringBuilder urlSb = new StringBuilder(url);
+        if (url.contains("?")) {
+            urlSb.append("&");
+        } else {
+            urlSb.append("?");
+        }
         uriParams.forEach((k, v) -> {
             if (k != null && v != null) {
                 urlSb.append(k).append("=").append(String.valueOf(v)).append("&");

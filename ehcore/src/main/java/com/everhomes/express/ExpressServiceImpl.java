@@ -1712,13 +1712,13 @@ public class ExpressServiceImpl implements ExpressService {
 		List<ExpressPayeeAccount> accounts = accountProvider.findRepeatBusinessPayeeAccounts
 				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
 		if(accounts!=null && accounts.size()>0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.ERROR_CREATE_REPEAT_PAYEE_ACCOUNT,
 					"repeat account");
 		}
 		if(cmd.getId()!=null){
 			ExpressPayeeAccount oldPayeeAccount = accountProvider.findExpressPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.ERROR_PAYEE_ACCOUNT_ID_NOT_EXIST,
 						"unknown payaccountid = "+cmd.getId());
 			}
 			ExpressPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ExpressPayeeAccount.class);
