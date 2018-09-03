@@ -33,7 +33,7 @@ public class OfficeCubiclePortalPublishHandler implements PortalPublishHandler {
 
     @Override
     public String processInstanceConfig(Integer namespaceId, String instanceConfig) {
-        return null;
+        return instanceConfig;
     }
 
     @Override
