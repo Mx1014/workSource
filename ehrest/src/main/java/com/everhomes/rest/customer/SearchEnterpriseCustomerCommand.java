@@ -97,6 +97,16 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long taskId;
 
+    private Byte convertFlag;
+
+    public Byte getConvertFlag() {
+        return convertFlag;
+    }
+
+    public void setConvertFlag(Byte convertFlag) {
+        this.convertFlag = convertFlag;
+    }
+
     public Long getTaskId() {
         return taskId;
     }
