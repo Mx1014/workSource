@@ -136,6 +136,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -262,13 +263,30 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
+     * <b>URL: </b>
+     * <p>导出企业客户excel</p>
+     */
+    @RequestMapping("exportEnterpriseCustomerss")
+    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomer(cmd, response);
+    }
+
+
+    /**
      * <b>URL: /customer/exportEnterpriseCustomer</b>
      * <p>导出企业客户excel</p>
      */
     @RequestMapping("exportEnterpriseCustomer")
-    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
-        customerService.exportEnterpriseCustomer(cmd, response);
+    @RestReturn(value = String.class)
+    public RestResponse exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd) {
+        customerService.exportContractListByContractList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
+
+
 
     /**
      * <b>URL: /customer/exportEnterpriseCustomerTemplate</b>
@@ -1153,7 +1171,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("syncEnterpriseCustomers")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
-        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, true));
+        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, false));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1796,4 +1814,20 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/changeCustomerAptitude</b>
+     * <p>列出企业客户(有权限 包括个人权限和权限细化)</p>
+     */
+    @RequestMapping("changeCustomerAptitude")
+    @RestReturn(value = String.class)
+    public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
+        customerService.changeCustomerAptitude(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }

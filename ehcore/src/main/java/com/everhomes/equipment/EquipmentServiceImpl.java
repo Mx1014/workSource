@@ -215,6 +215,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -412,6 +413,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private ServiceModuleService serviceModuleService;
 
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+
+	private final  String queueDelay = "pmtaskdelays";
+	private final  String queueNoDelay = "pmtasknodelays";
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
 		//auth start
@@ -490,8 +497,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.updateEquipmentStandard(standard);
 				equipmentStandardSearcher.feedDoc(standard);
 			}
-
-			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
+			//issue-36509 remove deal this logic for zijing project
+//			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		}
 		createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());//创建新的巡检对象和标准关联表
@@ -1138,8 +1145,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
-			//删除计划关联表中的该设备
-			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+			//删除计划关联表中的该设备 issue-36509 紫荆要求不删
+//			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 			List<Long> updateStandardIds = increamentUpdateEquipmentStandardMap(user, equipment, eqStandardMap);
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -5506,9 +5513,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
+
 		equipmentProvider.updateEquipmentTaskByPlanId(planId);
 		int pageSize = 200;
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		unscheduleRelatedJobAndStatus(planId);
 		for (; ; ) {
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByPlanId(planId, locator, pageSize);
 			LOGGER.debug("inActiveTaskByPlanId tasks size={}", tasks.size());
@@ -5521,6 +5530,33 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (locator.getAnchor() == null) {
 				break;
 			}
+		}
+
+	}
+
+	private void unscheduleRelatedJobAndStatus(Long planId) {
+		// unschedule related task notify job
+		int pageSize = 200;
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		try {
+			for (; ; ) {
+                List<Long> recordIds = equipmentProvider.listNotifyRecordByPlanId(planId, locator, pageSize);
+                if (recordIds != null && recordIds.size() > 0) {
+                    recordIds.forEach((r) -> {
+                        scheduleProvider.unscheduleJob(queueDelay + r.toString());
+                        scheduleProvider.unscheduleJob(queueNoDelay + r.toString());
+                        // invalidate notify records in case core reboot and restore job from it on exception
+						pmNotifyProvider.invalidateNotifyRecord(recordIds);
+
+                    });
+                }
+                if (locator.getAnchor() == null) {
+                    break;
+                }
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error(e.getMessage());
 		}
 
 	}

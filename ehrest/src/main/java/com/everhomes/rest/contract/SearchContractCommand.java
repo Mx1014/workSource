@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>sortType: 排序类型：0 升序， 1 降序</li>
  * <li>sortField: 排序字段名</li>
  * <li>categoryId: 合同类型多入口</li>
+ * <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
  * </ul>
  * Created by ying.xiong on 2017/8/17.
  */
@@ -46,6 +47,8 @@ public class SearchContractCommand {
     private Long buildingId;
     
     private Long categoryId;
+
+    private Long taskId;
 
     public Long getCategoryId() {
 		return categoryId;
@@ -176,8 +179,16 @@ public class SearchContractCommand {
     public void setStatus(Byte status) {
         this.status = status;
     }
-    
-	@Override
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

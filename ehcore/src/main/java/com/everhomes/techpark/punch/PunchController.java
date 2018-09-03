@@ -693,8 +693,8 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getAdjustRuleUrl")
 	@RestReturn(GetAdjustRuleUrlResponse.class)
-	public RestResponse getAdjustRuleUrl(){ 
-		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl()));
+	public RestResponse getAdjustRuleUrl(HttpServletRequest request){
+		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl(request)));
 	}
 
 	/**

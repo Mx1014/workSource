@@ -9,6 +9,8 @@ package com.everhomes.rest.archives;
  */
 public class StickArchivesContactCommand {
 
+    private Integer namespaceId;
+
     private Long organizationId;
 
     private Long detailId;
@@ -16,6 +18,14 @@ public class StickArchivesContactCommand {
     private String stick;
 
     public StickArchivesContactCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {

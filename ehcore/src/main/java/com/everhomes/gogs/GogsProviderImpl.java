@@ -49,8 +49,8 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
         restTemplate.setErrorHandler(ERROR_HANDLER);
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(30);
-        requestFactory.setReadTimeout(30);
+        requestFactory.setConnectTimeout(60000);
+        requestFactory.setReadTimeout(60000);
 
         restTemplate.setRequestFactory(requestFactory);
     }

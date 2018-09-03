@@ -1,24 +1,25 @@
 package com.everhomes.customer;
 
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contract.ContractService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.ZjSyncdataBackup;
-import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.openapi.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.common.SyncDataResultLog;
-import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
-import com.everhomes.rest.customer.SyncDataResult;
-import com.everhomes.rest.customer.SyncDataTaskStatus;
-import com.everhomes.rest.customer.SyncDataTaskType;
-import com.everhomes.rest.customer.SyncResultViewedFlag;
+import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2018/1/13.
@@ -57,6 +59,19 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+
     private static final Long EXPIRE_TIME_DURATION = 1800000L;
 
 
@@ -77,6 +92,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                         runningFlag = requireSyncDataLock(task.getLockKey());
                     }
                     if (runningFlag) {
+
                         callback.syncData();
                     }
                     task.setStatus(SyncDataTaskStatus.FINISH.getCode());
@@ -190,6 +206,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                 } else if (SyncDataTaskStatus.EXECUTING.equals(SyncDataTaskStatus.fromCode(task.getStatus()))) {
                     result.setRateOfProgress(calculateProgress(community, syncType));
                 }
+                result.setId(task.getId());
 
                 if (task.getCreatorUid() == null || task.getCreatorUid() == 0L) {
                     result.setManualFlag((byte) 0);
@@ -239,4 +256,96 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
         return 1.0;
 
     }
+
+
+    @Override
+    public void createSyncErrorMsg(Integer namespaceId, Long taskId){
+        List<Contract> contractList = contractProvider.listContractByNamespaceId(namespaceId);
+        for(Contract contract: contractList){
+            ContractBuildingMapping mapping = addressProvider.findContractBuildingMappingByContractId(contract.getId());
+            if(contract.getCustomerId() == null || StringUtils.isBlank(contract.getCustomerName())){
+                syncDataTaskProvider.createSyncErrorMsg(
+                        namespaceId, "contract", contract.getId(), "contract-customer", "该合同无关联的客户，请确认合同和客户信息", taskId);
+            }else if(mapping.getAddressId() == null || StringUtils.isBlank(mapping.getBuildingName()) || StringUtils.isBlank(mapping.getApartmentName())){
+                syncDataTaskProvider.createSyncErrorMsg(
+                        namespaceId, "contract", contract.getId(), "contract-address", "该合同无关联的门牌，请确认合同和资产信息", taskId);
+            }
+        }
+
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceId(namespaceId);
+        for(EnterpriseCustomer customer: customers){
+            List<CustomerEntryInfo> infos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            if(infos != null && infos.size() > 0){
+                for(int i = 0 ; i < infos.size(); i++){
+                    if(infos.get(i).getAddressId() == null || infos.get(i).getAddressId() == 0 || infos.get(i).getBuildingId() == null || infos.get(i).getBuildingId() == 0){
+                        if(i == infos.size()-1){
+                            syncDataTaskProvider.createSyncErrorMsg(
+                                    namespaceId, "customer", customer.getId(), "customer-address", "该客户无关联的门牌，请确认客户和资产信息", taskId);
+                        }
+                    }else{
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public List<ContractDTO> listContractErrorMsg(SearchContractCommand cmd){
+        List<ContractDTO> contracts = new ArrayList<>();
+        List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), "contract", null, 999999);
+        for(SyncDataError syncDataError : syncDataErrors){
+            Contract contract = contractProvider.findContractById(syncDataError.getOwnerId());
+            ContractDTO contractDTO = ConvertHelper.convert(contract,ContractDTO.class);
+            contractDTO.setSyncErrorMsg(syncDataError.getErrorMessage());
+            contracts.add(contractDTO);
+        }
+        return contracts;
+    }
+
+    @Override
+    public ListSyncDataErrorMsgResponse listSyncErrorMsg(ListSyncErrorMsgCommand cmd){
+        ListSyncDataErrorMsgResponse response = new ListSyncDataErrorMsgResponse();
+
+        Long anchor = 9999999l;
+        if(cmd.getNextPageAnchor() != null) {
+            anchor = cmd.getNextPageAnchor();
+        }
+        if(cmd.getSyncType().equals("customer")){
+            cmd.setTaskId(cmd.getTaskId() + 1);
+        }
+        List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), cmd.getSyncType(), anchor, cmd.getPageSize() + 1);
+        List<SyncDataErrorDTO> results = syncDataErrors.stream().map( r -> {
+            return ConvertHelper.convert(r, SyncDataErrorDTO.class);
+        }).collect(Collectors.toList());
+        if(syncDataErrors.size() > cmd.getPageSize()) {
+            syncDataErrors.remove(syncDataErrors.size() - 1);
+            SyncDataError last = syncDataErrors.get(syncDataErrors.size()-1);
+            response.setNextPageAnchor(last.getId());
+        }
+
+        if(cmd.getSyncType().equals("contract")){
+            for(SyncDataErrorDTO error : results) {
+                String handler = configurationProvider.getValue(cmd.getNamespaceId(), "contractService", "");
+                ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+                FindContractCommand cmdc = new FindContractCommand();
+                cmdc.setCommunityId(cmd.getCommunityId());
+                cmdc.setId(error.getOwnerId());
+                cmdc.setNamespaceId(cmd.getNamespaceId());
+                cmdc.setCategoryId(cmd.getCategoryId());
+                ContractDetailDTO contractDTO = contractService.findContract(cmdc);
+                error.setContract(contractDTO);
+            }
+        }else if(cmd.getSyncType().equals("customer")){
+            for(SyncDataErrorDTO error : results) {
+                EnterpriseCustomerDTO customer = ConvertHelper.convert(enterpriseCustomerProvider.findById(error.getOwnerId()), EnterpriseCustomerDTO.class);
+                error.setCustomerDTO(customer);
+            }
+        }
+        response.setResults(results);
+        return response;
+    }
+
+
 }

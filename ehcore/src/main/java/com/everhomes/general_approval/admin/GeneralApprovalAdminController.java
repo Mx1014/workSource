@@ -57,7 +57,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/general_approval/getApprovalForm</b>
-     * <p> 获取 公司的表单    </p>
+     * <p> 获取公司的表单    </p>
      * @return
      */
     @RequestMapping("getApprovalForm")

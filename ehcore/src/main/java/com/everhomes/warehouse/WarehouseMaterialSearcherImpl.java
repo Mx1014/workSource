@@ -120,7 +120,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
 
     @Override
     public SearchWarehouseMaterialsResponse query(SearchWarehouseMaterialsCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
+        //checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_MATERIAL_INFO_ALL,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
@@ -144,7 +144,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         if(cmd.getCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
-        if(cmd.getMaterialNumber() != null) {
+        if(cmd.getMaterialNumber() != null && cmd.getMaterialNumber().length()>0) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

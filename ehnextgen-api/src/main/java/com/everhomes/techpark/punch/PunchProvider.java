@@ -95,6 +95,8 @@ public interface PunchProvider {
 
 	public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
 
+	int deletePunchDayLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
+
 	public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate);
 	
 	public void createPunchDayLog(PunchDayLog punchDayLog);
@@ -327,6 +329,8 @@ public interface PunchProvider {
 	public void deletePunchTimeIntervalByPunchRuleId(Long id);
 
 	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status);
+	
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwnerAndStatusList(String ownerType, Long ownerId, List<Byte> statusList);
 
 	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
 
@@ -384,7 +388,10 @@ public interface PunchProvider {
 	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
 
 	Integer countpunchStatistic(String punchMonth, Long ownerId);
-
+ 
+	List<PunchLog> listPunchLogsForOpenApi(Long ownerId, List<Long> userIds, Long startDay,
+			Long endDay);
+ 
 	void deletePunchLogs(Long ownerId, Date monthBegin, Date monthEnd);
 
 	void filePunchLogs(Long ownerId, Date monthBegin, Date monthEnd, PunchMonthReport report);
@@ -450,4 +457,5 @@ public interface PunchProvider {
 
 	public Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate,
 			Long userId, Long ownerId);
+ 
 }

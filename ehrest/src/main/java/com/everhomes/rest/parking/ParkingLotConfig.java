@@ -1,5 +1,7 @@
 package com.everhomes.rest.parking;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * @author sw on 2017/9/19.
  */
@@ -24,6 +26,24 @@ public class ParkingLotConfig {
     private Byte vipParkingFlag = 0;
     private Byte monthRechargeFlag = 1;
     private Byte identityCardFlag = 0;
+    private Byte monthCardFlag = 0;
+    private Integer flowMode;
+
+    public Integer getFlowMode() {
+        return flowMode;
+    }
+
+    public void setFlowMode(Integer flowMode) {
+        this.flowMode = flowMode;
+    }
+
+    public Byte getMonthCardFlag() {
+        return monthCardFlag;
+    }
+
+    public void setMonthCardFlag(Byte monthCardFlag) {
+        this.monthCardFlag = monthCardFlag;
+    }
 
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
@@ -111,5 +131,10 @@ public class ParkingLotConfig {
 
     public void setMonthRechargeFlag(Byte monthRechargeFlag) {
         this.monthRechargeFlag = monthRechargeFlag;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

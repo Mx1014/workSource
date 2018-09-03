@@ -57,6 +57,8 @@ public class ContractDTO {
 	private Long configId;
 	// dynamic field special name
 	private String contractTypeName;
+
+	private String syncErrorMsg;
 	
 	
 	public Long getConfigId() {
@@ -333,6 +335,14 @@ public class ContractDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getSyncErrorMsg() {
+		return syncErrorMsg;
+	}
+
+	public void setSyncErrorMsg(String syncErrorMsg) {
+		this.syncErrorMsg = syncErrorMsg;
 	}
 
 	@Override

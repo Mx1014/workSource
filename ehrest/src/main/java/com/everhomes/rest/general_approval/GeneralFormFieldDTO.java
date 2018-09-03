@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>fieldAttribute: 字段属性 比如：DEFAULT-系统字段 {@link GeneralFormFieldAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
+ * <li>filterFlag: 是否被筛选 0-不被筛选 1-被筛选</li>
  * </ul>
  * @author janson
  *
@@ -53,6 +54,9 @@ public class GeneralFormFieldDTO {
 	private String fieldAttribute;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
+
+	// added by hpy 20180711
+	private Byte filterFlag;
 
 
 	public String getFieldName() {
@@ -189,6 +193,14 @@ public class GeneralFormFieldDTO {
 
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+
+	public Byte getFilterFlag() {
+		return filterFlag;
+	}
+
+	public void setFilterFlag(Byte filterFlag) {
+		this.filterFlag = filterFlag;
 	}
 
 	@Override
