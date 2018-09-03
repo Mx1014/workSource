@@ -37,7 +37,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
         }
         String version;
         if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
-            version = "2018-08-01";
+            version = "1970-01-01";
         }else {
             version = new Timestamp(DateHelper.currentGMTTime().getTime()).toString();
             //version = contractProvider.findLastContractVersionByCommunity(cmd.getNamespaceId(), community.getId());
