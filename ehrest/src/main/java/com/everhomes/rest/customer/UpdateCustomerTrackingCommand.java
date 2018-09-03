@@ -43,6 +43,8 @@ public class UpdateCustomerTrackingCommand {
 
 	private Long orgId;
 
+	private Byte investmentType;
+
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -185,6 +187,14 @@ public class UpdateCustomerTrackingCommand {
 
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
+	}
+
+	public Byte getInvestmentType() {
+		return investmentType;
+	}
+
+	public void setInvestmentType(Byte investmentType) {
+		this.investmentType = investmentType;
 	}
 
 	@Override
