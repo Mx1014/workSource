@@ -3,34 +3,44 @@ package com.everhomes.investment;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.investment.InvestmentEnterpriseStatus;
+import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentContactDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentDemandDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentNowInfoDao;
-import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentContact;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentDemand;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentNowInfo;
-import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhEnterpriseInvestmentContactRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Conventions;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentEnterpriseProvideImpl.class);
 
     @Autowired
     SequenceProvider sequenceProvider;
@@ -235,6 +245,39 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
         }
     }
 
-
+    @Override
+    public List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
+        Field<?>[] fieldArray = new Field[itemIds.size()];
+        List<Field<?>> fields = new ArrayList<>();
+        itemIds.forEach((itemId) -> {
+            // dynamic build stastics decode
+            Field<Long> staTmp = DSL.decode().when(customer.LEVEL_ITEM_ID.eq(itemId), itemId);
+            fields.add(DSL.count(staTmp).as(itemId.toString()));
+        });
+        fields.toArray(fieldArray);
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(fieldArray);
+        query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(customer.COMMUNITY_ID.eq(communityId));
+        query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
+            LOGGER.debug("count  investment  enterprise , bindValues=" + query.getBindValues());
+        }
+        List<InvestmentStatisticsDTO> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            for (Long itemId : itemIds) {
+                InvestmentStatisticsDTO dto = new InvestmentStatisticsDTO();
+//                dto.setKey(itemId.toString());
+                dto.setKey(itemsMap.get(itemId).getItemDisplayName());
+                dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
+                result.add(dto);
+            }
+            return null;
+        });
+        return result;
+    }
 
 }

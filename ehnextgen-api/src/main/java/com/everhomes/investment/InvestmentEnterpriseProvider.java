@@ -1,8 +1,11 @@
 package com.everhomes.investment;
 
-import com.everhomes.rest.investment.InvestmentStasticsDTO;
+import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface InvestmentEnterpriseProvider {
 
@@ -36,5 +39,5 @@ public interface InvestmentEnterpriseProvider {
 
     EnterpriseInvestmentNowInfo findNewestNowInfoByCustoemrId(Long customerId);
 
-    List<InvestmentStasticsDTO> getInvestmentStastics(Integer namespaceId, Long communityId);
+    List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap);
 }

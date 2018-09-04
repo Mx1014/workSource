@@ -3,7 +3,7 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
-public class InvestmentStasticsDTO {
+public class InvestmentStatisticsDTO {
     private String  key;
     private String value;
 
