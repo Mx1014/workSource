@@ -8,6 +8,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class RecordHelper {
 
@@ -35,6 +40,10 @@ public class RecordHelper {
 			return null;
 		}
 	}*/
+
+	public static Map<Class, Tuple<PropertyDescriptor, Method>[]> PDCACHEMAPS = new HashMap<>();
+
+	public static ReentrantReadWriteLock LOCK = new ReentrantReadWriteLock();
 	
 	public static <T> T convert(Record record, Class<T> clazz){
 		if (record == null) {
@@ -43,11 +52,11 @@ public class RecordHelper {
 
 		try {
 			T t = clazz.newInstance();
-			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
-			if (pds != null && pds.length > 0) {
-				for (PropertyDescriptor pd : pds) {
-					Method wm = pd.getWriteMethod();
+			Tuple<PropertyDescriptor, Method>[] clazzInfos = getClazzInfoFromCaches(clazz);
+			if (clazzInfos != null && clazzInfos.length > 0) {
+				for (Tuple<PropertyDescriptor, Method> info : clazzInfos) {
+					PropertyDescriptor pd = info.first();
+					Method wm = info.second();
 					Object value = getValue(record, pd.getName(), pd.getPropertyType());
 					if (value != null) {
 						wm.invoke(t, value);
@@ -56,10 +65,63 @@ public class RecordHelper {
 			}
 			return t;
 		} catch (InstantiationException | IllegalAccessException
-				|IntrospectionException | InvocationTargetException e) {
+				| InvocationTargetException e) {
 			return null;
 		}
 	}
+
+	public static Tuple<PropertyDescriptor, Method>[] getClazzInfoFromCaches(Class clazz){
+
+		Tuple<PropertyDescriptor, Method>[] pdCaches = null;
+		try {
+			LOCK.readLock().lock();
+			pdCaches = PDCACHEMAPS.get(clazz);
+			LOCK.readLock().unlock();
+		}finally {
+			LOCK.readLock().unlock();
+		}
+
+
+		if(pdCaches != null){
+			return pdCaches;
+		}
+		pdCaches = getClazzInfos(clazz);
+
+		try {
+			LOCK.writeLock().lock();
+			PDCACHEMAPS.put(clazz, pdCaches);
+			LOCK.writeLock().unlock();
+		}finally {
+			LOCK.readLock().unlock();
+		}
+
+		return pdCaches;
+
+	}
+
+	public static Tuple<PropertyDescriptor, Method>[]  getClazzInfos(Class clazz){
+
+		List<Tuple<PropertyDescriptor, Method>> pdCacheList = new ArrayList<>();
+		try {
+			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+
+			if (pds != null && pds.length > 0) {
+				for (PropertyDescriptor pd : pds) {
+					Method wm = pd.getWriteMethod();
+					pdCacheList.add(new Tuple<>(pd, wm) );
+				}
+			}
+
+		} catch (IntrospectionException e) {
+			return null;
+		}
+
+		Tuple<PropertyDescriptor, Method>[] pdCaches = pdCacheList.toArray(new Tuple[0]);
+
+		return pdCaches;
+	}
+
 
 	private static <T> T getValue(Record record, String fieldName, Class<T> clazz){
 		String column = camelToUnderline(fieldName);
