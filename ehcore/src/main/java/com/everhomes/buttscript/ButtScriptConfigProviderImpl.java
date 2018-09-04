@@ -49,6 +49,33 @@ public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
     }
 
     @Override
+    public ButtScriptConfig findButtScriptConfig(Integer namespaceId , String infoType) {
+        if(namespaceId == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId is null  .");
+        }
+
+        if(StringUtils.isBlank(infoType)){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "infoType is null  .");
+        }
+
+        com.everhomes.server.schema.tables.EhButtScriptConfig t = Tables.EH_BUTT_SCRIPT_CONFIG;
+        List<ButtScriptConfig> list =   this.query(new ListingLocator(), 0, (locator1, query) -> {
+
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.INFO_TYPE.eq(infoType));
+
+            return query;
+        });
+
+        if(list != null && list.size() > 0){
+            return list.get(0);
+        }
+        return null ;
+    }
+
+    @Override
     public List<ButtScriptConfig> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback) {
         com.everhomes.server.schema.tables.EhButtScriptConfig t = Tables.EH_BUTT_SCRIPT_CONFIG;
 

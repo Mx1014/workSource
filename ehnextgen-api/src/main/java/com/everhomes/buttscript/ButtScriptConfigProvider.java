@@ -15,5 +15,8 @@ public interface ButtScriptConfigProvider {
     List<ButtScriptConfig> findButtScriptConfigByNamespaceId(Integer namespaceId);
 
 
+    ButtScriptConfig findButtScriptConfig(Integer namespaceId , String infoType);
+
+
     List<ButtScriptConfig> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback);
 }
