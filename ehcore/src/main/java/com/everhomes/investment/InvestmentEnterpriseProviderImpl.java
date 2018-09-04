@@ -38,9 +38,9 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProvider {
+public class InvestmentEnterpriseProviderImpl implements InvestmentEnterpriseProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentEnterpriseProvideImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentEnterpriseProviderImpl.class);
 
     @Autowired
     SequenceProvider sequenceProvider;

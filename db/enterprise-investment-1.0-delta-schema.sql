@@ -83,8 +83,38 @@ CREATE TABLE `eh_enterprise_investment_now_info`
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 对客户表增加招商客户和成交租客的表示加以区分
+
+ALTER TABLE `eh_enterprise_customers` ADD `investment_type` TINYINT null comment '跟进信息类型，0-招商客户，1-成交租客';
+
+-- end
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 对当前跟进表加上类型标识
 
 ALTER TABLE `eh_customer_trackings` ADD `investment_type` TINYINT null comment '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
 
--- END
+-- end
+
+
+-- AUTHOR: jiarui 20180831
+-- REMARK: 客户表增加相关字段
+ALTER TABLE `eh_enterprise_customers`ADD COLUMN `transaction_probability`  varchar(1024) NULL AFTER `financing_demand_item_id`;
+
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `expected_sign_date` datetime NULL  AFTER `transaction_probability`;
+-- end
+
+-- AUTHOR: jiarui  20180831
+-- REMARK: 园区入驻字段及数据迁移
+ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
+-- end
+
+-- 黄鹏宇 2018-9-4
+-- 日志表增加操作对象类型
+ALTER TABLE `eh_customer_events` ADD COLUMN investment_type tinyint null comment '操作客户类型，0-客户管理，1-租客管理';
+
+-- REMARK: 客户表增加是否入驻状态
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `admission_item_id` BIGINT null default null;
+
+-- end
