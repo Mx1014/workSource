@@ -263,7 +263,7 @@ public interface AssetService {
 	/**
 	 * 获取缴费应用列表接口
 	 */
-	public ListAssetServiceModuleAppsResponse listAssetServiceModuleApps(ListServiceModuleAppsCommand cmd);
+	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 	
 	/**
 	 * 业务应用新增缴费映射关系接口

@@ -5670,7 +5670,7 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 	
-	public ListAssetServiceModuleAppsResponse listAssetServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 		ListAssetServiceModuleAppsResponse response = new ListAssetServiceModuleAppsResponse();
 		//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
 //		cmd.setNamespaceId(namespaceId);
