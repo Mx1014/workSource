@@ -866,8 +866,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 		for (MeetingAttachment oldAttachment : oldAttachements) {
             boolean shouldDelete = true;
             for (MeetingAttachment newAttachment : newAttachements) {
-                if (newAttachment.getContentName().equals(oldAttachment.getContentName()) && 
-                		newAttachment.getContentType().equals(oldAttachment.getContentType()) && 
+                if (newAttachment.getContentName().equals(oldAttachment.getContentName()) &&
                 		newAttachment.getContentUri().equals(oldAttachment.getContentUri()) ) {
                     shouldDelete = false;
                     existsAttachements.add(newAttachment);
@@ -1226,7 +1225,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 			attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
 			attachment.setOwnerType(AttachmentOwnerType.EhMeetingRecords.getCode());
 			attachment.setOwnerId(meetingRecord.getId());
-			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName())); 
+			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName()));
 			return attachment;
 		}).collect(Collectors.toList());
 	}
