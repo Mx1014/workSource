@@ -4,6 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -14,9 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,7 +81,7 @@ public interface AssetService {
 
 	void modifyBillStatus(BillIdCommand cmd);
 
-	void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
 
 	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
@@ -223,7 +224,7 @@ public interface AssetService {
     
     ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
-    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    //void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response); -- by djm 对接下载中心
     
     void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
     
@@ -254,4 +255,8 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+	
+	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
+	
+	default void exportAssetListByParams(Object cmd){}
 }

@@ -24,6 +24,7 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -869,20 +870,6 @@ public RestResponse oneKeyNotice(OneKeyNoticeCommand cmd) {
     return response;
 }
 
-// this is for 导出所有账单       4
-/**
- * <p>导出筛选过的所有账单</p>
- * <b>URL: /asset/exportPaymentBills</b>
- */
-@RequestMapping("exportPaymentBills")
-public HttpServletResponse exportPaymentBills(ListBillsCommand cmd,HttpServletResponse response) {
-    assetService.exportPaymentBills(cmd,response);
-    RestResponse restResponse = new RestResponse();
-    restResponse.setErrorDescription("OK");
-    restResponse.setErrorCode(ErrorCodes.SUCCESS);
-    return null;
-}
-
 // this is for 展示账单的减免项           4
 /**
  * <p>展示账单的减免项</p>
@@ -1471,19 +1458,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
-     * <p>对公转账：导出筛选过的所有账单</p>
-     * <b>URL: /asset/exportSettledBillsForEnt</b>
-     */
-    @RequestMapping("exportSettledBillsForEnt")
-    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
-        assetService.exportSettledBillsForEnt(cmd,response);
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        return null;
-    }
-    
-    /**
      * <p>对公转账：结算-账单明细</p>
      * <b>URL: /asset/listPaymentBillForEnt</b>
      */
@@ -1663,5 +1637,61 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    // this is for 导出所有账单       4
+    /**
+     * <p>导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportPaymentBills</b>
+     */
+    /*@RequestMapping("exportPaymentBills")
+    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd,HttpServletResponse response) {
+    	assetService.exportPaymentBills(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }*/
+
+	/**
+	 * <p>导出筛选过的所有账单 (对接下载中心)</p>
+	 * <b>URL: /asset/exportPaymentBills</b>
+	 */
+	@RequestMapping("exportPaymentBills")
+	@RestReturn(value = String.class)
+	public RestResponse exportPaymentBills(@Valid ListBillsCommand cmd) {
+		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单(对接下载中心)</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    /*@RequestMapping("exportSettledBillsForEnt")
+    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
+        assetService.exportSettledBillsForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }*/
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    @RestReturn(value = String.class)
+    public RestResponse exportSettledBillsForEnt(@Valid ListBillsCommandForEnt cmd) {
+    	cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE_FORENT);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
 }
 

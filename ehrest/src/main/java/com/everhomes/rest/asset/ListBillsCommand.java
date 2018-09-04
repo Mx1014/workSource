@@ -53,24 +53,29 @@ public class ListBillsCommand {
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
-
     private Long billGroupId;
-    
     private String buildingName;
     private String apartmentName;
     private Byte status;
     private String targetType;
     private String contractNum;
     private Long organizationId;
-
     private Long categoryId;
-    
     private Long targetIdForEnt;
-    
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
+    
+    private Long moduleId;//用于下载中心
+    
+    public Long getModuleId() {
+		return moduleId;
+	}
 
-    public Long getCategoryId() {
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getCategoryId() {
         return categoryId;
     }
 
@@ -82,8 +87,15 @@ public class ListBillsCommand {
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
+    private Long communityId;
 
+	public Long getCommunityId() {
+		return communityId;
+	}
 
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
