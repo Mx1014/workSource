@@ -10,8 +10,8 @@ import java.util.List;
 public class SearchInvestmentResponse {
     @ItemType(EnterpriseCustomerDTO.class)
     private List<EnterpriseCustomerDTO> dtos;
-    @ItemType(InvestmentStasticsDTO.class)
-    private List<InvestmentStasticsDTO> stastics;
+    @ItemType(InvestmentStatisticsDTO.class)
+    private List<InvestmentStatisticsDTO> stastics;
 
     private Long nextPageAnchor;
 
@@ -23,11 +23,11 @@ public class SearchInvestmentResponse {
         this.dtos = dtos;
     }
 
-    public List<InvestmentStasticsDTO> getStastics() {
+    public List<InvestmentStatisticsDTO> getStastics() {
         return stastics;
     }
 
-    public void setStastics(List<InvestmentStasticsDTO> stastics) {
+    public void setStastics(List<InvestmentStatisticsDTO> stastics) {
         this.stastics = stastics;
     }
 
