@@ -168,7 +168,7 @@ public class CreateInvestmentCommand {
     private List<EnterpriseInvestmentContactDTO>  contacts ;
     private EnterpriseInvestmentDemandDTO demand;
     @ItemType(EnterpriseInvestmentNowInfoDTO.class)
-    private List<EnterpriseInvestmentNowInfoDTO> nowInfos;
+    private EnterpriseInvestmentNowInfoDTO nowInfo;
 
 
     public Long getId() {
@@ -1267,12 +1267,12 @@ public class CreateInvestmentCommand {
         this.demand = demand;
     }
 
-    public List<EnterpriseInvestmentNowInfoDTO> getNowInfos() {
-        return nowInfos;
+    public EnterpriseInvestmentNowInfoDTO getNowInfo() {
+        return nowInfo;
     }
 
-    public void setNowInfos(List<EnterpriseInvestmentNowInfoDTO> nowInfos) {
-        this.nowInfos = nowInfos;
+    public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
+        this.nowInfo = nowInfo;
     }
 
     @Override

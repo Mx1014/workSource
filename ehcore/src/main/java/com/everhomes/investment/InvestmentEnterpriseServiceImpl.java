@@ -3,11 +3,11 @@ package com.everhomes.investment;
 
 import com.everhomes.customer.CustomerService;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.CreateInvestmentCommand;
-import com.everhomes.rest.investment.InvestmentStatisticsDTO;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -61,23 +61,23 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
             investmentEnterpriseProvider.createDemand(investmentDemand);
         }
         // reflush current basic info
-        if(cmd.getNowInfos()!=null && cmd.getNowInfos().size()>0){
-            cmd.getNowInfos().forEach((c)->{
-                EnterpriseInvestmentNowInfo nowInfo = ConvertHelper.convert(c, EnterpriseInvestmentNowInfo.class);
-                nowInfo.setCommunityId(cmd.getCommunityId());
-                nowInfo.setNamespaceId(cmd.getNamespaceId());
-                nowInfo.setStatus(CommonStatus.ACTIVE.getCode());
-                nowInfo.setCustomerId(cmd.getId());
-                investmentEnterpriseProvider.createNowInfo(nowInfo);
-            });
+        if(cmd.getNowInfo()!=null){
+            EnterpriseInvestmentNowInfo nowInfo = ConvertHelper.convert(cmd.getNowInfo(), EnterpriseInvestmentNowInfo.class);
+            nowInfo.setCommunityId(cmd.getCommunityId());
+            nowInfo.setNamespaceId(cmd.getNamespaceId());
+            nowInfo.setStatus(CommonStatus.ACTIVE.getCode());
+            nowInfo.setCustomerId(cmd.getId());
+            investmentEnterpriseProvider.createNowInfo(nowInfo);
         }
         // todo: update main record data
+
 
     }
 
     @Override
     public void deleteInvestment(CreateInvestmentCommand cmd) {
         customerSearcher.deleteById(cmd.getId());
+
         investmentEnterpriseProvider.deleteInvestment(cmd.getId());
     }
 
@@ -116,6 +116,17 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
             }
         }
         return result;
+    }
+
+    public EnterpriseInvestmentDTO viewInvestmentDetail(ViewInvestmentDetailCommand cmd){
+        GetEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, GetEnterpriseCustomerCommand.class);
+        EnterpriseCustomerDTO customerDTO = customerService.getEnterpriseCustomer(cmd2);
+        if(customerDTO != null) {
+            EnterpriseInvestmentDTO investmentDTO = ConvertHelper.convert(customerDTO, EnterpriseInvestmentDTO.class);
+            return investmentDTO;
+        }
+
+        return null;
     }
 }
 

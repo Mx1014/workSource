@@ -6,7 +6,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CreateInvestmentCommand;
+import com.everhomes.rest.investment.EnterpriseInvestmentDTO;
 import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,15 +76,15 @@ public class InvestmentEnterpriseController {
     }
 
     /**
-     * <b>URL: /investment/viewInvestment</b>
-     * <p> 删除招商客户 </p>
+     * <b>URL: /investment/viewInvestmentDetail</b>
+     * <p> 查看招商客户 </p>
      */
-    @RequestMapping("viewInvestment")
-    @RestReturn(value=String.class)
-    public RestResponse viewInvestment(CreateInvestmentCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RequestMapping("viewInvestmentDetail")
+    @RestReturn(value=EnterpriseInvestmentDTO.class)
+    public RestResponse viewInvestmentDetail(ViewInvestmentDetailCommand cmd) {
         // cmd.getId() cmd.getNameSpaceId()
-        investmentEnterpriseService.deleteInvestment(cmd);
+        EnterpriseInvestmentDTO dto = investmentEnterpriseService.viewInvestmentDetail(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -2,7 +2,9 @@ package com.everhomes.investment;
 
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CreateInvestmentCommand;
+import com.everhomes.rest.investment.EnterpriseInvestmentDTO;
 import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 
 public interface InvestmentEnterpriseService {
 
@@ -14,4 +16,6 @@ public interface InvestmentEnterpriseService {
     void deleteInvestment(CreateInvestmentCommand cmd);
 
     SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd);
+
+    EnterpriseInvestmentDTO viewInvestmentDetail(ViewInvestmentDetailCommand cmd);
 }
