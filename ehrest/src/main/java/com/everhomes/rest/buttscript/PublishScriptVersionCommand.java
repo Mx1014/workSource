@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
 public class PublishScriptVersionCommand {
 
     private Integer namespaceId ;
+    private String   infoType ;
     private String   commitVersion  ;
 
     public Integer getNamespaceId() {
@@ -28,6 +29,14 @@ public class PublishScriptVersionCommand {
 
     public void setCommitVersion(String commitVersion) {
         this.commitVersion = commitVersion;
+    }
+
+    public String getInfoType() {
+        return infoType;
+    }
+
+    public void setInfoType(String infoType) {
+        this.infoType = infoType;
     }
 
     @Override

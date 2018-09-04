@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 下一页开始锚点</li>
+ * <li>id: 主键</li>
  * <li>namespaceId: 域空间ID</li>
  * <li>infoType: 类型</li>
  * <li>infoDescribe: 描述</li>
