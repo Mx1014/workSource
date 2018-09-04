@@ -42,6 +42,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
 
     @Override
     public void deleteInvestment(CreateInvestmentCommand cmd) {
+        customerSearcher.deleteById(cmd.getId());
         investmentEnterpriseProvider.deleteInvestment(cmd.getId());
     }
 
@@ -55,7 +56,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
         // only the first time we requested, populate stastics data
         if (cmd.getPageAnchor() == 0 || cmd.getPageAnchor() == null) {
             List<InvestmentStatisticsDTO> statistics = null;
-            // this module should add investment stastics to response
+            // this module should add investment statistics to response
             ListFieldItemCommand fieldItemCommand = new ListFieldItemCommand();
             fieldItemCommand.setNamespaceId(cmd.getNamespaceId());
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
