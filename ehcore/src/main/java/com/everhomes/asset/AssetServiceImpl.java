@@ -117,6 +117,7 @@ import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -5685,6 +5686,15 @@ public class AssetServiceImpl implements AssetService {
 	}
 	
 	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd) {
+		AssetModuleAppMappingAndConfigs response = new AssetModuleAppMappingAndConfigs();
+		
+		
+		
+		
+		return response;
+	}
+	
+	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(AssetModuleAppMappingAndConfigsCmd cmd) {
 		AssetModuleAppMappingAndConfigs response = new AssetModuleAppMappingAndConfigs();
 		
 		

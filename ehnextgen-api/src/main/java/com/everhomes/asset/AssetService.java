@@ -10,6 +10,7 @@ import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -274,8 +275,7 @@ public interface AssetService {
 	/**
 	 * 业务应用查询缴费映射关系接口
 	 */
-	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(Long originId);
-	
+	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(AssetModuleAppMappingAndConfigsCmd cmd);
 	
 	
 }
