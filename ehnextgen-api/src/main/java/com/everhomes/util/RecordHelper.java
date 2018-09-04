@@ -76,7 +76,6 @@ public class RecordHelper {
 		try {
 			LOCK.readLock().lock();
 			pdCaches = PDCACHEMAPS.get(clazz);
-			LOCK.readLock().unlock();
 		}finally {
 			LOCK.readLock().unlock();
 		}
@@ -90,9 +89,8 @@ public class RecordHelper {
 		try {
 			LOCK.writeLock().lock();
 			PDCACHEMAPS.put(clazz, pdCaches);
-			LOCK.writeLock().unlock();
 		}finally {
-			LOCK.readLock().unlock();
+			LOCK.writeLock().unlock();
 		}
 
 		return pdCaches;
