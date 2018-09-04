@@ -280,4 +280,13 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
         return result;
     }
 
+    @Override
+    public void deleteInvestment(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
+        context.update(customer)
+                .set(customer.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(customer.ID.eq(id))
+                .execute();
+    }
 }

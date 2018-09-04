@@ -11,5 +11,7 @@ public interface InvestmentEnterpriseService {
 
     void updateInvestment(CreateInvestmentCommand cmd);
 
+    void deleteInvestment(CreateInvestmentCommand cmd);
+
     SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd);
 }

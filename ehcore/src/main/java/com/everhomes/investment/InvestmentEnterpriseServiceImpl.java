@@ -41,6 +41,11 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
     }
 
     @Override
+    public void deleteInvestment(CreateInvestmentCommand cmd) {
+        investmentEnterpriseProvider.deleteInvestment(cmd.getId());
+    }
+
+    @Override
     public SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd) {
         Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         SearchEnterpriseCustomerResponse searchResponse = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
