@@ -333,6 +333,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 if (r.getPaymentParams() != null) {
+                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
+                     convert.setPaymentParams(paymentParamsDTO);
+                 }
                  convert.setExtendInfo(getPayMethodExtendInfo());
                  return convert;
              }).collect(Collectors.toList()));
@@ -580,6 +585,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 if (r.getPaymentParams() != null) {
+                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
+                     convert.setPaymentParams(paymentParamsDTO);
+                 }
                  convert.setExtendInfo(getPayMethodExtendInfo());
                  return convert;
              }).collect(Collectors.toList()));

@@ -209,6 +209,8 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listTasksByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
 
+	List<Long> listNotifyRecordByPlanId(Long planId, CrossShardListingLocator locator, int pageSize);
+
     List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id);
 
     List<EquipmentStandardMap> listAllActiveEquipmentStandardMap();
@@ -256,4 +258,6 @@ public interface EquipmentProvider {
     void updateEquipmentTaskByPlanId(Long planId);
 
     List<EquipmentInspectionTasks> listPersonalDoneTasks(Long targetId, Long inspectionCategoryId, int pageSize, Integer offset, Timestamp startTime);
+
+
 }

@@ -2,7 +2,7 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>打卡规则的状态
- * <li>DELETE(5): 删除次日生效</li>
+ * <li>DELETING(5): 删除次日生效</li>
  * <li>NEW(4): 新规则次日生效</li>
  * <li>MODIFYED(3): 修改次日生效</li>
  * <li>ACTIVE(2): 生效中</li>

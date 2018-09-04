@@ -74,13 +74,16 @@ public class AllianceClickStatEventHandlerImpl implements StatEventHandler{
 	@Override
 	public void processStat(Namespace namespace, StatEvent statEvent, LocalDate statTime,
 			StatEventStatTimeInterval interval) {
+		
+		//当前statEvent都是所有域空间的，所以不做域空间筛选判断了
+		
 		// 前一天的最早时间
 		Timestamp minTime = Timestamp.valueOf(statTime.atTime(LocalTime.MIN));
 		// 前一天的最晚时间
 		Timestamp maxTime = Timestamp.valueOf(statTime.atTime(LocalTime.MAX));
 
 //		每次统计前一天的。
-		List<Map<String, Object>> ret = detailProvider.countClickDetailsByDate(minTime, maxTime);
+		List<Map<String, Object>> ret = detailProvider.countClickDetailsByDate(namespace.getId(), minTime, maxTime);
 
 		// 创建记录
 		Date date = new Date(minTime.getTime());

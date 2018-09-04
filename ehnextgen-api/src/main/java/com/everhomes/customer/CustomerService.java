@@ -395,4 +395,6 @@ public interface CustomerService {
     OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd);
 
     OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd);
+
+    void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
 }

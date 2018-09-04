@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
+import com.everhomes.rest.portal.PortalPublishType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -461,15 +462,23 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 
 	@Override
-	public void deleteLaunchPadLayout(Integer namespaceId, String name) {
+	public void deleteLaunchPadLayout(Integer namespaceId, String name, Byte publishType) {
 
 		assert namespaceId != null;
 		assert name != null;
+		assert publishType != null;
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLaunchPadLayouts.class));
 		DeleteQuery<EhLaunchPadLayoutsRecord> query = context.deleteQuery(Tables.EH_LAUNCH_PAD_LAYOUTS);
 		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name));
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+			query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNull());
+		}else {
+			query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNotNull());
+		}
+
 		query.execute();
 	}
 

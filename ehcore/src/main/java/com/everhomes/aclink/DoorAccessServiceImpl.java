@@ -131,7 +131,9 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
-    
+
+    @Autowired
+    UclbrtHttpClient uclbrtHttpClient;
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
@@ -2584,7 +2586,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
-        	qr.setQrCodeKey(UclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
+        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
         	}
@@ -4397,28 +4399,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			String arg3) {
         //Must be
         try {
-        	ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					LOGGER.info("start run.....");
-					 Long id = (Long)arg2;
-			         if(null == id) {
-			              LOGGER.error("None of UserIdentifier");
-			         } else {
-			        	 if(LOGGER.isDebugEnabled()) {
-			        		 LOGGER.debug("newUserAutoAuth id= " + id); 
-			        	 }
-			              
-		              try {
-		            	  newUserAutoAuth(id);
-		              } catch(Exception exx) {
-		            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
-		            	  }
+        	//以前的平台包会在监听到publish之前就执行完update,所以没有问题;更新之后会在事务提交前就监听到,如果另起一个线程,查到的是更新前的数据,授权失败;暂改成同步执行  by liuyilin 20180827
+			LOGGER.info("start run.....");
+			 Long id = (Long)arg2;
+	         if(null == id) {
+	              LOGGER.error("None of UserIdentifier");
+	         } else {
+	        	 if(LOGGER.isDebugEnabled()) {
+	        		 LOGGER.debug("newUserAutoAuth id= " + id); 
+	        	 }
+	              
+              try {
+            	  newUserAutoAuth(id);
+              } catch(Exception exx) {
+            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
+            	  }
 
-			         }
-				}
-			});
-			
+	         }
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
         } finally{

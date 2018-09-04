@@ -99,6 +99,8 @@ public class GeneralFormController extends ControllerBase {
 
 		return response;
 	}
+
+
 	
 	/**
      * <b>URL: /general_form/listDefaultFields</b>
@@ -136,7 +138,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("deleteGeneralFormVal")
 	@RestReturn(value=Long.class)
 	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
-		Long id = generalFormService.deleteGeneralFormVal(cmd);
+		Long id = generalFormService.deleteGeneralFormValWithPrivi(cmd);
 		RestResponse response = new RestResponse(id);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -152,7 +154,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("getGeneralFormVal")
 	@RestReturn(value=GeneralFormValDTO.class, collection = true)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormVal(cmd);
+		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormValWithPrivi(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -167,7 +169,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("saveGeneralFormVal")
 	@RestReturn(value=Long.class)
 	public RestResponse saveGeneralFormVal(PostGeneralFormValCommand cmd) {
-		Long sourceId = generalFormService.saveGeneralForm(cmd);
+		Long sourceId = generalFormService.saveGeneralFormVal(cmd);
 		RestResponse response = new RestResponse(sourceId);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

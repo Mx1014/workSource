@@ -408,7 +408,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 					
 					e = new FlowCaseEntity();
 					e.setEntityType(FlowCaseEntityType.LIST.getCode());
-					e.setKey("截至日期");
+					e.setKey("截止日期");
 					e.setValue(timeToStr2(contractDetailDTO.getChargingItems().get(i).getChargingExpiredTime()));
 					entities.add(e);
 				}

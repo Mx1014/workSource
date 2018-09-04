@@ -274,33 +274,36 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
 			.join(Tables.EH_RENTALV2_ORDERS)
 			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
-			.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
-				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
 			.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+                .and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+                .and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()));
 		if (!StringUtils.isBlank(rentalCell.getResourceNumber())){
 			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_NUMBER.eq(rentalCell.getResourceNumber()));
 		}
 		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
 			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
-			if (rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) {
-				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
-				if (amorpm != null) {
-					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
+			if ((rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) &&
+					amorpm != null) {
+					step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
 									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())))
-							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm))
+							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm)
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
 									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate()))))
 					        .or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							        .and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
-				}
+
 			}else {
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -311,7 +314,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
 			if (rentalTypes.contains(RentalType.HOUR.getCode())) {
 				Timestamp[] beginEndTime = calculateHalfDayBeginEndTime(rentalResource, rentalCell);
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME.ge(beginEndTime[0]).and(Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME.le(beginEndTime[1])))
@@ -320,7 +324,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}else {
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -329,7 +334,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.DAY) {
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.in(Arrays.asList(RentalType.HOUR.getCode(), RentalType.HALFDAY.getCode(), RentalType.THREETIMEADAY.getCode()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -337,13 +343,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.MONTH) { //对于自然周跨月的处理 区间判断可以处理首尾跨界问题的其中一个 另一个用首日所属解决
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.ge(initToMonthFirstDay(rentalCell.getResourceRentalDate()))
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.le(initToMonthLastDay(rentalCell.getResourceRentalDate()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.WEEK){
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.ge(initToWeekFirstDay(rentalCell.getResourceRentalDate()))
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.le(initToWeekLastDay(rentalCell.getResourceRentalDate()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -1536,7 +1544,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
 		step.where(condition);
 		List<RentalResourcePic> result = step
-				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourcePic.class);
 				});
@@ -2365,13 +2373,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
 		step.where(condition);
+		Record record = step.fetchAny();
+		if (record == null)
+			return null;
 
-		RentalResourceType result = step.fetchAny()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalResourceType.class);
-				});
-
-		return result;
+		return ConvertHelper.convert(record, RentalResourceType.class);
 
 	}
 

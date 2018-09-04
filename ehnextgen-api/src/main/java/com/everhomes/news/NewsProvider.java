@@ -50,4 +50,9 @@ public interface NewsProvider {
 	void increaseViewCount(Long newsId, Long nViewCount);
 
 	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
+
+	Long createNewPreview(News news);
+
+	News findNewPreview(Long id);
+
 }

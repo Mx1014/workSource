@@ -141,7 +141,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
 
-    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
 
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);

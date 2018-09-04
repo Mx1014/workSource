@@ -427,6 +427,21 @@ public class NewsController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /news/getNewsPreview</b>
+	 * <p>
+	 * 返回预览内容
+	 * </p>
+	 */
+	@RequestMapping("getNewsPreview")
+	@RestReturn(GetNewsDetailInfoResponse.class)
+	public RestResponse getNewsPreview(GetNewsContentCommand cmd) {
+		RestResponse response = new RestResponse(newsService.getNewsPreview(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
 
 
