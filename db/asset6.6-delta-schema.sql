@@ -3,6 +3,8 @@
 CREATE TABLE `eh_asset_module_app_mappingAndConfigs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,
+  `owner_id` BIGINT COMMENT '园区ID',
+  `owner_type` VARCHAR(64) COMMENT '园区类型',
   `origin_id` BIGINT COMMENT '各个业务应用的originId（公共平台定义的唯一标识）',
   `asset_category_id` BIGINT COMMENT '缴费的多入口应用ID',
   `bill_group_id` BIGINT COMMENT '缴费的账单组ID',

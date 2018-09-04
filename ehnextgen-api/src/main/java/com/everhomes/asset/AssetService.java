@@ -271,4 +271,11 @@ public interface AssetService {
 	 */
 	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd);
 	
+	/**
+	 * 业务应用查询缴费映射关系接口
+	 */
+	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(Long originId);
+	
+	
+	
 }

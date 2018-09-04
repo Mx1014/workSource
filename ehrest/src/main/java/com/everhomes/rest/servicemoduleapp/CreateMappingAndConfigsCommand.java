@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 /**
  *<ul>
  * <li>namespaceId:域空间id</li>
+ * <li>ownerId: 园区id</li>
+ * <li>ownerType: 园区type</li>
  * <li>originId:各个业务应用的originId（公共平台定义的唯一标识）</li>
  * <li>assetCategoryId:缴费的多入口应用ID</li>
  * <li>billGroupId:账单组ID</li>
@@ -23,6 +25,8 @@ import javax.validation.constraints.NotNull;
 public class CreateMappingAndConfigsCommand {
 	
     private Integer namespaceId;
+    private Long ownerId;
+    private String ownerType;
     private Long originId;
     private Long assetCategoryId;
     private Long billGroupId;
@@ -78,6 +82,18 @@ public class CreateMappingAndConfigsCommand {
 	}
 	public void setCreatorId(Long creatorId) {
 		this.creatorId = creatorId;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
     
 }
