@@ -66,7 +66,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
- VALUES(@b_id:= @b_id +1,'server.point.url','http://test105.zuolin.com','the point url','0',NULL,NULL);
+ VALUES(@b_id:= @b_id +1,'server.point.url','https://core.zuolin.com','the point url','0',NULL,NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
  VALUES(@b_id:= @b_id +1,'server.point.secretKey','OMtTBDhmVQSIP6oJBZ+mw+9i8+wnS1WAwsEVRoFvGXfNmCokOamwScJLdilQ3CuCXYb5J7HK+aua8sifKcEsiQ==','the point secretKey','0',NULL,NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
@@ -85,6 +85,9 @@ VALUES(16023600 ,'积分池',42000000,NULL,'integral-pool',1,2,'/40000040/420000
 
 INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid) VALUES(4800,'积分银行',80000,'/200/80000/4800',1,3,2,110,1,'module',0,0);
 INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid) VALUES(4900,'积分池',80000,'/200/80000/4900',1,3,2,120,1,'module',0,0);
+
+INSERT INTO `eh_apps` ( `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`)
+ VALUES('1','d80e06ca-3766-11e5-b18f-b083fe4e159f','g1JOZUM3BYzWpZD5Q7p3z+i/z0nj2TcokTFx2ic53FCMRIKbMhSUCi7fSu9ZklFCZ9tlj68unxur9qmOji4tNg==','server.core.url','server.core.url','1',NULL,NULL,NULL);
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 导入模板备注文字
