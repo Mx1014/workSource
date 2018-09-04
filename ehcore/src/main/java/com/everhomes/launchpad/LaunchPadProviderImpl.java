@@ -888,6 +888,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
 		Condition previewCondition = getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName());
 		query.addConditions(previewCondition);
+		query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
 		query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
 
 		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));

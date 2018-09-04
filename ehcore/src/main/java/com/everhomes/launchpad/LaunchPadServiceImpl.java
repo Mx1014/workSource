@@ -3058,7 +3058,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 categoryDtos.add(categoryDto);
 			}
 
-			response.setCategoryDtos(categoryDtos);
 		}else {
 			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, null);
 			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
