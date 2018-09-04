@@ -7,9 +7,11 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId:所属组织Id</li>
  * <li>ownerType：所属组织类型 0小区 1企业 2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
- * <li>eventType:事件类型 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 人脸开门</li>
- * <li>keyWord:关键字</li>
- * <li>doorId:门禁id</li>
+ * <li>keyWord:操作用户 可输入姓名或手机号码</li>
+ * <li>eventType:开门方式 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 人脸开门</li>
+ * <li>doorId:门禁名称</li>
+ * <li>startTime:开门时间区间起点 yyyy-MM-dd</li>
+ * <li>endTime:开门时间区间终点 yyyy-MM-dd ,只允许选择当前时间之前的日期区间</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:分页大小</li>
  * </ul>
@@ -23,6 +25,8 @@ public class AclinkQueryLogCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Long doorId;
+    private Long startTime;
+    private Long endTime;
     
     public Long getEventType() {
         return eventType;
@@ -68,6 +72,21 @@ public class AclinkQueryLogCommand {
     public void setDoorId(Long doorId) {
         this.doorId = doorId;
     }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+    public void set(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

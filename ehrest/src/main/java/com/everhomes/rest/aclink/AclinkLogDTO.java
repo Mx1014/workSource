@@ -6,6 +6,16 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ *     <li>userName:用户姓名</li>
+ *     <li>userIdentifier:手机号码</li>
+ *     <li>doorName:门禁名称</li>
+ *     <li>doorType:授权类型</li>
+ *     <li>eventType:开门方式</li>
+ *     <li>logTime:开门时间 </li>
+ * </ul>
+ */
 public class AclinkLogDTO {
     private Long     keyId;
     private Long     eventType;
