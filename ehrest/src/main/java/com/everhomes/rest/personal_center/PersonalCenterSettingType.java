@@ -16,20 +16,20 @@ package com.everhomes.rest.personal_center;
  * SETTING：设置
  */
 public enum PersonalCenterSettingType {
-    MEMBER_LEVEL((byte)0), POINT((byte)1), WALLET((byte)2), ORDER((byte) 3), COUPON((byte) 4),
-    INVOICE((byte) 5), MY_APPLY((byte) 6), MY_ADDRESS((byte) 7), MY_SHOP((byte) 8), MY_PUBLISH((byte) 9),
-    MY_COLLECT((byte) 10), MY_ENROLL((byte) 11), SETTING((byte) 12);
+    MEMBER_LEVEL(0), POINT(1), WALLET(2), ORDER(3), COUPON(4),
+    INVOICE(5), MY_APPLY(6), MY_ADDRESS( 7), MY_SHOP(8), MY_PUBLISH(9),
+    MY_COLLECT(10), MY_ENROLL(11), SETTING(12);
 
-    private Byte code;
-    private PersonalCenterSettingType(Byte code) {
+    private Integer code;
+    private PersonalCenterSettingType(Integer code) {
         this.code = code;
     }
 
-    public Byte getCode() {
+    public Integer getCode() {
         return this.code;
     }
 
-    public static PersonalCenterSettingType fromCode(Byte code) {
+    public static PersonalCenterSettingType fromCode(Integer code) {
         if(code != null) {
             PersonalCenterSettingType[] values = PersonalCenterSettingType.values();
             for(PersonalCenterSettingType value : values) {
