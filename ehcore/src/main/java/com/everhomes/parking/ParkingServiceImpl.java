@@ -3434,7 +3434,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
-		String parkingUrlFormat = configProvider.getValue("parking.wxparking.urlformat","%s/pp/b/a.html#/home?token=%s&ns=%s");
+		String parkingUrlFormat = configProvider.getValue("parking.wxparking.urlformat","%s/pp/b/a.html?token=%s&ns=%s#/home");
 		String parkingUrl = String.format(parkingUrlFormat, configProvider.getValue("home.url",""),transformToken(cmd.getParkingLotId()+""),UserContext.getCurrentNamespaceId());
 		BufferedOutputStream bos = null;
 		ByteArrayOutputStream out = null;
