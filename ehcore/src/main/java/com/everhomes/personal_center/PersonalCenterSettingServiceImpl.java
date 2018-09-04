@@ -203,6 +203,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 personalCenterSetting.setVersion(version);
                 personalCenterSetting.setCreateTime(new Timestamp(new Date().getTime()));
                 personalCenterSetting.setCreateUid(UserContext.currentUserId());
+                personalCenterSetting.setNamespaceId(cmd.getNamespaceId());
                 this.personalCenterSettingProvider.createPersonalCenterSetting(personalCenterSetting);
                 PersonalCenterSettingDTO returnDto = ConvertHelper.convert(personalCenterSetting, PersonalCenterSettingDTO.class);
                 returnDto.setIconUrl(parseUrl(returnDto.getIconUri(),cmd.getNamespaceId()));
