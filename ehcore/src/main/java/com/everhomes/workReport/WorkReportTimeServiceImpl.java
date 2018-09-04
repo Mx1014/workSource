@@ -2,12 +2,14 @@ package com.everhomes.workReport;
 
 import com.everhomes.rest.workReport.ReportValiditySettingDTO;
 import com.everhomes.rest.workReport.WorkReportType;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
+@Component
 public class WorkReportTimeServiceImpl implements WorkReportTimeService{
 
     /**

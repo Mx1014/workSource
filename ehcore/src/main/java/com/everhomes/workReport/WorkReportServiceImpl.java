@@ -919,4 +919,14 @@ public class WorkReportServiceImpl implements WorkReportService {
             workReportValProvider.updateWorkReportValReceiverMap(r);
         }
     }
+
+/*    @Override
+    public void updateWorkReportReceiverReportId(){
+        List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
+        for (WorkReportValReceiverMap r : receivers) {
+            WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
+            r.setReportId(val.getReportId());
+            workReportValProvider.updateWorkReportValReceiverMap(r);
+        }
+    }*/
 }

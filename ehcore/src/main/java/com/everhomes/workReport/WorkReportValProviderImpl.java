@@ -10,10 +10,7 @@ import com.everhomes.rest.workReport.WorkReportReadStatus;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentsDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValReceiverMapDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
@@ -319,6 +316,53 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         query.addConditions(Tables.EH_WORK_REPORT_VAL_COMMENT_ATTACHMENTS.STATUS.eq(WorkReportStatus.VALID.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportValCommentAttachment.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValReceiverMsg.class));
+        msg.setId(id);
+        msg.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMsgDao dao = new EhWorkReportValReceiverMsgDao(context.configuration());
+        dao.insert(msg);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMsg.class, null);
+        return msg.getId();
+    }
+
+    @Override
+    public void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMsgDao dao = new EhWorkReportValReceiverMsgDao(context.configuration());
+        dao.update(msg);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportValReceiverMsg.class, msg.getId());
+    }
+
+    @Override
+    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp time){
+        List<WorkReportValReceiverMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.eq(time));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportValReceiverMsg.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime){
+        List<WorkReportValReceiverMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_TIME.eq(reportTime));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportValReceiverMsg.class));
             return null;
         });
         return results;

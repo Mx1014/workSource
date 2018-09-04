@@ -48,5 +48,13 @@ public interface WorkReportValProvider {
 
     List<WorkReportValCommentAttachment> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds);
 
+    Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
+
+    void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
+
+    List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp time);
+
+    List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime);
+
     List<WorkReportValReceiverMap> listWorkReportReceivers();
 }
