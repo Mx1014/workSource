@@ -2963,7 +2963,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		params.put("namespaceId", cmd.getNamespaceId());
 		params.put("communityId", cmd.getCommunityId());
 		params.put("categoryId", cmd.getCategoryId());
-		//params.put("task_Id", cmd.getTaskId());
+		params.put("task_Id", cmd.getTaskId());
 		String fileName = String.format(localeStringService.getLocalizedString("contract.export","1",UserContext.current().getUser().getLocale(),"") +  com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
