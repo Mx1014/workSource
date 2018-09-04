@@ -15,6 +15,7 @@ public class SearchRentalOrdersCommand {
     private String tag1;
     private String tag2;
     private Byte billStatus;
+    private String vendorType;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -110,5 +111,13 @@ public class SearchRentalOrdersCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getVendorType() {
+        return vendorType;
+    }
+
+    public void setVendorType(String vendorType) {
+        this.vendorType = vendorType;
     }
 }

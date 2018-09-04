@@ -16,8 +16,7 @@ import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
-import com.everhomes.rest.yellowPage.stat.TestAddClickDetailCommand;
-import com.everhomes.rest.yellowPage.stat.TestPocessStatCommand;
+import com.everhomes.rest.yellowPage.stat.TestClickStatCommand;
 
 public interface AllianceClickStatService {
 	
@@ -54,7 +53,5 @@ public interface AllianceClickStatService {
 
 	List<IdNameDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd);
 
-	String testPocessStat(TestPocessStatCommand cmd);
-
-	String testAddClickDetail(TestAddClickDetailCommand cmd);
+	String testClickStat(TestClickStatCommand cmd);
 }

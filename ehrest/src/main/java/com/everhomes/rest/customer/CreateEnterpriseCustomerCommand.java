@@ -224,6 +224,9 @@ public class CreateEnterpriseCustomerCommand {
     private String dropBox8ItemName;
     private String dropBox9ItemName;
 
+    private Long aptitudeFlagItemId;
+    private String aptitudeFlagItemName;
+
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -1280,6 +1283,23 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setDropBox9ItemName(String dropBox9ItemName) {
         this.dropBox9ItemName = dropBox9ItemName;
+    }
+
+
+    public Long getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Long aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
+    }
+
+    public String getAptitudeFlagItemName() {
+        return aptitudeFlagItemName;
+    }
+
+    public void setAptitudeFlagItemName(String aptitudeFlagItemName) {
+        this.aptitudeFlagItemName = aptitudeFlagItemName;
     }
 
     @Override

@@ -8,6 +8,7 @@ package com.everhomes.rest.rentalv2;
  * <li>SUCCESS(2): 已预约,待使用</li>
  * <li>PAYINGFINAL(3): 待支付全款</li>
  * <li>FAIL(4): 已取消</li>
+ * <li>FAIL_PAID(5): 已取消(已付款) 只做展示用</li>
  * <li>COMPLETE(7): 完成使用</li>
  * <li>OVERTIME(8): 超时未完成(已预约成功，但是使用完没有手动完成，超时)</li>
  * <li>REFUNDING(9): 退款中</li>
@@ -22,6 +23,7 @@ public enum SiteBillStatus {
 	SUCCESS((byte)2,"已预约"),
 	PAYINGFINAL((byte)3,"待付款"),
 	FAIL((byte)4,"已取消"),
+    FAIL_PAID((byte)5,"已取消(已付款)"),
 
 	COMPLETE((byte)7,"已完成"),
 	OVERTIME((byte)8,"已过期"),

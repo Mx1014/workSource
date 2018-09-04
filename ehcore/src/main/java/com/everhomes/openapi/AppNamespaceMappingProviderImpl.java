@@ -100,7 +100,18 @@ public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvi
                 .fetchInto(App.class);
     }
 
-    @Override
+	@Override
+	public AppNamespaceMapping findAppNamespaceMappingByNamespaceId(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_APP_NAMESPACE_MAPPINGS)
+				.where(Tables.EH_APP_NAMESPACE_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+				.fetchAny();
+		if (record != null) {
+			return ConvertHelper.convert(record, AppNamespaceMapping.class);
+		}
+		return null;
+	}
+
+	@Override
     public void deleteNamespaceMapping(AppNamespaceMapping mapping) {
         getReadWriteDao().delete(mapping);
     }

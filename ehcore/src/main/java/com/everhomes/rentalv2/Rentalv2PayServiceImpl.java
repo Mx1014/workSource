@@ -326,6 +326,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 if (r.getPaymentParams() != null) {
+                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
+                     convert.setPaymentParams(paymentParamsDTO);
+                 }
                  convert.setExtendInfo(getPayMethodExtendInfo());
                  return convert;
              }).collect(Collectors.toList()));
@@ -361,7 +366,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     private String getPayMethodExtendInfo(){
-        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
         String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
 
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
@@ -492,6 +497,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 if (r.getPaymentParams() != null) {
+                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
+                     convert.setPaymentParams(paymentParamsDTO);
+                 }
                  convert.setExtendInfo(getPayMethodExtendInfo());
                  return convert;
              }).collect(Collectors.toList()));

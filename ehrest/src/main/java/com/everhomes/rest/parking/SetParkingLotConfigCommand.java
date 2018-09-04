@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>monthlyDiscount: 月卡优惠折扣</li>
  * <li>tempFeeDiscountFlag: 临时车是否启用优惠 0：不启用，1：启用 {@link ParkingConfigFlag}</li>
  * <li>tempFeeDiscount: 临时车优惠折扣</li>
+ * <li>contact: 联系电话</li>
  * </ul>
  */
 public class SetParkingLotConfigCommand {
@@ -42,6 +43,15 @@ public class SetParkingLotConfigCommand {
 
 	private Byte tempFeeDiscountFlag;
 	private String tempFeeDiscount;
+	private String contact;
+
+	public String getContact() {
+		return contact;
+	}
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
 
 	public Byte getMonthlyDiscountFlag() {
 		return monthlyDiscountFlag;

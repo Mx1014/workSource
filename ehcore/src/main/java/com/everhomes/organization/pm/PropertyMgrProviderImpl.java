@@ -2057,12 +2057,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Override
     public CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+        List<CommunityPmOwner> list = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"))
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
-                .fetchOneInto(CommunityPmOwner.class);
+                .fetchInto(CommunityPmOwner.class);
+        if(list != null && list.size()>0){
+        	return list.get(0);
+        }
+        return null ;
     }
 
     @Override

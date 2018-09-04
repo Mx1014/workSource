@@ -22,11 +22,15 @@ import java.util.List;
  *     <li>sortField: 排序字段名</li>
  		<li>trackingUid: 跟进人uid</li>
  *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户 现在换成 1：无  2：有跟进人  3：无跟进人</li>
- *     
  *     <li>lastTrackingTime: 最近跟进时间（天）</li>
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
  *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
+ *     <li>searchFromCustomerPageFlag : 0-不是从企业客户管理进入搜索，1-从企业客户管理进入搜索</li>
+ *     <li>aptitudeFlag : 是否筛选资质客户</li>
+ *
+ *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
+ *     <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -84,6 +88,22 @@ public class SearchEnterpriseCustomerCommand {
     private Long sourceItemId;
 
     private String sourceType;
+
+    private Byte aptitudeFlagItemId;
+
+    private Byte abnormalFlag;
+
+    private Byte ContractSearchCustomerFlag;
+
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public Long getOwnerId() {
         return ownerId;
@@ -295,8 +315,27 @@ public class SearchEnterpriseCustomerCommand {
         this.sourceType = sourceType;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public Byte getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
+    }
+
+    public Byte getAbnormalFlag() {
+        return abnormalFlag;
+    }
+
+    public void setAbnormalFlag(Byte abnormalFlag) {
+        this.abnormalFlag = abnormalFlag;
+    }
+
+    public Byte getContractSearchCustomerFlag() {
+        return ContractSearchCustomerFlag;
+    }
+
+    public void setContractSearchCustomerFlag(Byte contractSearchCustomerFlag) {
+        ContractSearchCustomerFlag = contractSearchCustomerFlag;
     }
 }

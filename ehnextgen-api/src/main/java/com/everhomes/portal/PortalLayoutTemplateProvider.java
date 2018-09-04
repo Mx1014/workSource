@@ -13,4 +13,5 @@ public interface PortalLayoutTemplateProvider {
 
 	List<PortalLayoutTemplate> listPortalLayoutTemplate();
 
+    PortalLayoutTemplate findPortalLayoutTemplateByType(Byte type);
 }

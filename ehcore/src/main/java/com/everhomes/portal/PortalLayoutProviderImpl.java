@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.portal.PortalLayoutStatus;
+import com.everhomes.rest.portal.PortalLayoutType;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
@@ -120,6 +122,17 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 				.where(Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
+	}
+
+	@Override
+	public PortalLayout findIndexPortalLayout(Long versionId, Byte type) {
+
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
+				.where(Tables.EH_PORTAL_LAYOUTS.VERSION_ID.eq(versionId))
+				.and(Tables.EH_PORTAL_LAYOUTS.TYPE.eq(type))
+				.and(Tables.EH_PORTAL_LAYOUTS.INDEX_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
+				.and(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
+				.fetchAnyInto(PortalLayout.class);
 	}
 
 	@Override

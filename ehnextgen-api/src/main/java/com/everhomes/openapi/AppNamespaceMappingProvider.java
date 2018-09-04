@@ -21,4 +21,6 @@ public interface AppNamespaceMappingProvider {
     List<App> listAppsByAppKey(List<String> appKeys);
 
     void deleteNamespaceMapping(AppNamespaceMapping mapping);
+
+	AppNamespaceMapping findAppNamespaceMappingByNamespaceId(Integer namespaceId);
 }
