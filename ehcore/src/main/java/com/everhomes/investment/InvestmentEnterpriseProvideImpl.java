@@ -6,6 +6,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.investment.InvestmentEnterpriseStatus;
 import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -244,7 +246,7 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
     }
 
     @Override
-    public List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds) {
+    public List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         Field<?>[] fieldArray = new Field[itemIds.size()];
@@ -268,7 +270,8 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
         query.fetch().map((r) -> {
             for (Long itemId : itemIds) {
                 InvestmentStatisticsDTO dto = new InvestmentStatisticsDTO();
-                dto.setKey(itemId.toString());
+//                dto.setKey(itemId.toString());
+                dto.setKey(itemsMap.get(itemId).getItemDisplayName());
                 dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
                 result.add(dto);
             }

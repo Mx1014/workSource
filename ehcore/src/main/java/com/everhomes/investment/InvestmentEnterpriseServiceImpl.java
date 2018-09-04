@@ -59,7 +59,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
-                statistics = investmentEnterpriseProvider.getInvestmentStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), itemsMap.keySet());
+                statistics = investmentEnterpriseProvider.getInvestmentStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), itemsMap.keySet(),itemsMap);
             }
             response.setStastics(statistics);
         }
