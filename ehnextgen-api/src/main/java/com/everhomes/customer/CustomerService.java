@@ -397,4 +397,6 @@ public interface CustomerService {
     OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd);
 
     void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
+
+    Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId);
 }

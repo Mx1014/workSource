@@ -192,17 +192,47 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
 
     @Override
     public Long updateNowInfo(EnterpriseInvestmentNowInfo nowInfo) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
+
+        User user = UserContext.current().getUser();
+        nowInfo.setOperatorBy(user.getNickName());
+
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        nowInfo.setOperatorTime(new Timestamp(l2));
+
+        EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
+        dao.update(nowInfo);
+        return nowInfo.getId();
     }
 
     @Override
     public EnterpriseInvestmentNowInfo findNowInfoById(Long id) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
+
+
+        EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), EnterpriseInvestmentNowInfo.class);
     }
 
     @Override
     public EnterpriseInvestmentNowInfo findNewestNowInfoByCustoemrId(Long customerId) {
-        return null;
+        try {
+            EnterpriseInvestmentNowInfo[] result = new EnterpriseInvestmentNowInfo[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseInvestmentNowInfo.class));
+            result[0] = context.select().from(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO)
+                    .where(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.CUSTOMER_ID.eq(customerId))
+                    .and(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
+                    .orderBy(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.ID.desc()).fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, EnterpriseInvestmentNowInfo.class);
+                    });
+            return result[0];
+        } catch (Exception ex) {
+            // fetchAny() maybe return null
+            ex.printStackTrace();
+            return null;
+        }
     }
 
 

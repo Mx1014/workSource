@@ -1,5 +1,7 @@
 package com.everhomes.investment;
 
+import com.everhomes.rest.investment.InvestmentStasticsDTO;
+
 import java.util.List;
 
 public interface InvestmentEnterpriseProvider {
@@ -34,5 +36,5 @@ public interface InvestmentEnterpriseProvider {
 
     EnterpriseInvestmentNowInfo findNewestNowInfoByCustoemrId(Long customerId);
 
-
+    List<InvestmentStasticsDTO> getInvestmentStastics(Integer namespaceId, Long communityId);
 }
