@@ -32,7 +32,7 @@ public class InvestmentEnterpriseController {
         return response;
     }
     /**
-     * <b>URL: /investment/createInvestment</b>
+     * <b>URL: /investment/updateInvestment</b>
      * <p> 修改招商客户 </p>
      */
     @RequestMapping("updateInvestment")
@@ -67,7 +67,8 @@ public class InvestmentEnterpriseController {
     public RestResponse deleteInvestment(CreateInvestmentCommand cmd) {
         RestResponse response = new RestResponse();
         // cmd.getId() cmd.getNameSpaceId()
-        response.setErrorCode(ErrorCodes.SUCCESS);
+        investmentEnterpriseService.deleteInvestment(cmd);
+        response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
