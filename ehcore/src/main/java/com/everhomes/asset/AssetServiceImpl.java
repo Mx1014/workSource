@@ -118,6 +118,7 @@ import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
@@ -5678,6 +5679,15 @@ public class AssetServiceImpl implements AssetService {
 //		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
 //		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
 		//解析instance_config获取categoryId
+		
+		
+		return response;
+	}
+	
+	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd) {
+		AssetModuleAppMappingAndConfigs response = new AssetModuleAppMappingAndConfigs();
+		
+		
 		
 		
 		return response;

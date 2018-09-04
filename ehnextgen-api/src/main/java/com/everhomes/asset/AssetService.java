@@ -11,6 +11,7 @@ import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 
@@ -268,7 +269,6 @@ public interface AssetService {
 	/**
 	 * 业务应用新增缴费映射关系接口
 	 */
-	//public createAssetModuleAppMappingAndConfigs(CreateAnAppMappingCommand cmd);
-	
+	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd);
 	
 }
