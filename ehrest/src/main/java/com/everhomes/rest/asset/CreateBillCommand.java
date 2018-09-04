@@ -29,6 +29,7 @@ import java.util.List;
  * <li>customerTel:客户手机号，用来滞后定位用户</li>
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  * <li>source:账单来源</li>
+ * <li>produceUid:企业下面的某个人的ID</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -52,6 +53,7 @@ public class CreateBillCommand {
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
     private String source;
+    private Long produceUid;
     
     public Long getCategoryId() {
         return categoryId;
@@ -232,6 +234,14 @@ public class CreateBillCommand {
 
 	public void setSource(String source) {
 		this.source = source;
+	}
+
+	public Long getProduceUid() {
+		return produceUid;
+	}
+
+	public void setProduceUid(Long produceUid) {
+		this.produceUid = produceUid;
 	}
 
 }
