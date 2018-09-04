@@ -1,8 +1,8 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR: 
--- REMARK: 
+-- AUTHOR:
+-- REMARK:
 ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
 
 -- AUTHOR: 杨崇鑫  20180811
@@ -22,7 +22,7 @@ CREATE TABLE `eh_payment_bill_orders`(
   `payment_channel` INTEGER DEFAULT 0 COMMENT '支付渠道: 0-未知、1-微信、2-支付宝、3-现金',
   `uid` BIGINT COMMENT '缴费人',
   `create_time` DATETIME,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -57,8 +57,4 @@ CREATE TABLE `eh_community_general_form`(
   `type` VARCHAR(32) COMMENT '类型',
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '表单与项目关系表';
-
--- AUTHOR: 梁燕龙 20180830
--- REMARK: 增加字段判断认证的来源
-ALTER TABLE `eh_organization_members` ADD COLUMN `source_type` TINYINT COMMENT '认证来源';
 -- --------------------- SECTION END ---------------------------------------------------------

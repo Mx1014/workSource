@@ -3810,17 +3810,20 @@ public class CommunityServiceImpl implements CommunityService {
         List<ComOrganizationMemberDTO> dtoList = organizationMembers.stream()
             .map((c) -> {
                 ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
-                if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
-                    User operator = userProvider.findUserById(c.getOperatorUid());
-                    UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-                    dto.setOperatorName(operator != null ? operator.getNickName() : "");
-                    dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
-                    dto.setOperateType(OperateType.MANUAL.getCode());
-                } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
-                    // FIXME 临时解决   2017/07/27  xq.tian
-                    dto.setOperatorName("--");
-                    dto.setOperateType(OperateType.NOT_MANUAL.getCode());
-                }
+				if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
+					User operator = userProvider.findUserById(c.getOperatorUid());
+					UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+					dto.setOperatorName(operator != null ? operator.getNickName() : "");
+					dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                    if (OperateType.IMPORT.getCode().equals(c.getSourceType())) {
+                        dto.setOperateType(OperateType.IMPORT.getCode());
+                    }else {
+                        dto.setOperateType(OperateType.MANUAL.getCode());
+                    }
+				} else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+					dto.setOperatorName("--");
+                    dto.setOperateType(OperateType.EMAIL.getCode());
+				}
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
