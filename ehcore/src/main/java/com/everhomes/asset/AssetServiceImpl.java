@@ -5702,5 +5702,13 @@ public class AssetServiceImpl implements AssetService {
 		
 		return response;
 	}
+	
+	public ListBillsDTO createGeneralBill(CreateBillCommand cmd) {
+		ListBillsDTO response = new ListBillsDTO();
+		//cmd.setTargetType(Asset);//默认是企业级别
+		
+		
+		return response;
+	}
 
 }

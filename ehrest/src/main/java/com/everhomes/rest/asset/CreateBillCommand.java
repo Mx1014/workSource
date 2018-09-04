@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  *<ul>
+ * <li>namespaceId:域空间ID</li>
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
  * <li>dateStr:账期</li>
@@ -27,9 +28,11 @@ import java.util.List;
  * <li>isOwed:是否欠费，0：正常；1：欠费</li>
  * <li>customerTel:客户手机号，用来滞后定位用户</li>
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
+ * <li>source:账单来源</li>
  *</ul>
  */
 public class CreateBillCommand {
+	private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private String noticeTel;
@@ -48,6 +51,8 @@ public class CreateBillCommand {
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
+    private String source;
+    
     public Long getCategoryId() {
         return categoryId;
     }
@@ -211,6 +216,22 @@ public class CreateBillCommand {
 
 	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
 		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 }

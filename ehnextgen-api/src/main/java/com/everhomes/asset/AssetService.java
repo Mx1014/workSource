@@ -277,5 +277,11 @@ public interface AssetService {
 	 */
 	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(AssetModuleAppMappingAndConfigsCmd cmd);
 	
+	/**
+	 * 创建统一账单接口
+	 */
+	public ListBillsDTO createGeneralBill(CreateBillCommand cmd);
+	
+	
 	
 }

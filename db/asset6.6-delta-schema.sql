@@ -17,3 +17,8 @@ CREATE TABLE `eh_asset_module_app_mappingAndConfigs` (
   `update_uid` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务应用与缴费的关联关系表';
+
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.6（对接统一账单） 账单要增加来源字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `source` VARCHAR(1024) COMMENT ' 账单来源（如：停车缴费）';
