@@ -285,8 +285,11 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     boolean payTempCardFee(ParkingRechargeOrder order){
 
         JSONObject param = new JSONObject();
+        param.put("credentialtype", "1");
+        param.put("credential", order.getPlateNumber());
         param.put("orderNo", order.getOrderToken());
-        param.put("amount", (order.getOriginalPrice().movePointLeft(2).toString()));
+        param.put("parkcost", order.getOriginalPrice().toString());
+        param.put("amount", order.getOriginalPrice().toString());
         param.put("discount", 0);
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);
