@@ -2361,6 +2361,11 @@ public class FamilyServiceImpl implements FamilyService {
                 FamilyDTO dto = ConvertHelper.convert(family,FamilyDTO.class);
 
 
+                if(family.getIntegralTag1() == null){
+                    LOGGER.error("Address id not found, family.id = " + family.getId());
+                    continue;
+                }
+
                 Address address = this.addressProvider.findAddressById(family.getIntegralTag1());
                 if (address == null) {
                     LOGGER.error("Address is not found,addressId=" + family.getIntegralTag1());
