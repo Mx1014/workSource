@@ -977,7 +977,13 @@ public class UserActivityServiceImpl implements UserActivityService {
             long orderCount = response.getResponse().orderCount;
 
             rsp.setCoupon(promotionCount + shoppingCardCount);
+            if (rsp.getCoupon() == null) {
+                rsp.setCoupon(0L);
+            }
             rsp.setOrder(orderCount);
+            if (rsp.getOrder() == null) {
+                rsp.setOrder(0L);
+            }
         }
         UserTreasureDTO point = pointService.getPointTreasure();
         rsp.setPoint(point.getCount());

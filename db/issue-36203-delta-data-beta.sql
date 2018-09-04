@@ -1,10 +1,9 @@
 -- add by yanlong.liang 20180831
 -- 初始化个人中心配置数据
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('personal.wallet.home.url', 'https://payv2.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
+VALUES ('personal.wallet.home.url', 'https://payv2-beta.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
-VALUES ('personal.order.home.url', 'https://biz.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
-
+VALUES ('personal.order.home.url', 'https://biz-beta.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
 
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)

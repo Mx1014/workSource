@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.personal_center;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -118,6 +119,10 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             if (PersonalCenterSettingType.ORDER.getCode().equals(r.getType())) {
                 String homeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
+            }
+            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
+                String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+                dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
             }
              switch (dto.getRegion()) {
                  case 0 :
