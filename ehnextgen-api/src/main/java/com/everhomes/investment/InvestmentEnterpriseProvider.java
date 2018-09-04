@@ -42,4 +42,6 @@ public interface InvestmentEnterpriseProvider {
     List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap);
 
     void deleteInvestment(Long id);
+
+    void deleteInvestmentContacts(Long id);
 }

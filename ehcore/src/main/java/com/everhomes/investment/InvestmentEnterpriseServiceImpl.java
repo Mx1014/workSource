@@ -2,6 +2,7 @@ package com.everhomes.investment;
 
 
 import com.everhomes.customer.CustomerService;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.investment.CreateInvestmentCommand;
@@ -10,6 +11,7 @@ import com.everhomes.rest.investment.SearchInvestmentResponse;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.varField.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,6 +39,39 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
 
     @Override
     public void updateInvestment(CreateInvestmentCommand cmd) {
+        // reflush contacts
+        investmentEnterpriseProvider.deleteInvestmentContacts(cmd.getId());
+        if (cmd.getContacts() != null && cmd.getContacts().size() > 0) {
+            cmd.getContacts().forEach((c) -> {
+                EnterpriseInvestmentContact contact = ConvertHelper.convert(c, EnterpriseInvestmentContact.class);
+                contact.setCustomerId(cmd.getId());
+                contact.setCommunityId(cmd.getCommunityId());
+                contact.setNamespaceId(cmd.getNamespaceId());
+                contact.setStatus(CommonStatus.ACTIVE.getCode());
+                investmentEnterpriseProvider.createContact(contact);
+            });
+        }
+        // reflush demend
+        if (cmd.getDemand() != null) {
+            EnterpriseInvestmentDemand investmentDemand = ConvertHelper.convert(cmd.getDemand(), EnterpriseInvestmentDemand.class);
+            investmentDemand.setCommunityId(cmd.getCommunityId());
+            investmentDemand.setNamespaceId(cmd.getNamespaceId());
+            investmentDemand.setCustomerId(cmd.getId());
+            investmentDemand.setStatus(CommonStatus.ACTIVE.getCode());
+            investmentEnterpriseProvider.createDemand(investmentDemand);
+        }
+        // reflush current basic info
+        if(cmd.getNowInfos()!=null && cmd.getNowInfos().size()>0){
+            cmd.getNowInfos().forEach((c)->{
+                EnterpriseInvestmentNowInfo nowInfo = ConvertHelper.convert(c, EnterpriseInvestmentNowInfo.class);
+                nowInfo.setCommunityId(cmd.getCommunityId());
+                nowInfo.setNamespaceId(cmd.getNamespaceId());
+                nowInfo.setStatus(CommonStatus.ACTIVE.getCode());
+                nowInfo.setCustomerId(cmd.getId());
+                investmentEnterpriseProvider.createNowInfo(nowInfo);
+            });
+        }
+        // todo: update main record data
 
     }
 

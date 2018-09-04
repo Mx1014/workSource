@@ -289,4 +289,14 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
                 .where(customer.ID.eq(id))
                 .execute();
     }
+
+    @Override
+    public void deleteInvestmentContacts(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhEnterpriseInvestmentContact contact = Tables.EH_ENTERPRISE_INVESTMENT_CONTACT;
+        context.update(contact)
+                .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(contact.CUSTOMER_ID.eq(id))
+                .execute();
+    }
 }

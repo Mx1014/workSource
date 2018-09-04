@@ -166,8 +166,7 @@ public class CreateInvestmentCommand {
     private List<CreateCustomerTrackingCommand> trackingInfos;
     @ItemType(EnterpriseInvestmentContactDTO.class)
     private List<EnterpriseInvestmentContactDTO>  contacts ;
-    @ItemType(EnterpriseInvestmentDemandDTO.class)
-    private List<EnterpriseInvestmentDemandDTO> demands;
+    private EnterpriseInvestmentDemandDTO demand;
     @ItemType(EnterpriseInvestmentNowInfoDTO.class)
     private List<EnterpriseInvestmentNowInfoDTO> nowInfos;
 
@@ -1260,12 +1259,12 @@ public class CreateInvestmentCommand {
         this.contacts = contacts;
     }
 
-    public List<EnterpriseInvestmentDemandDTO> getDemands() {
-        return demands;
+    public EnterpriseInvestmentDemandDTO getDemand() {
+        return demand;
     }
 
-    public void setDemands(List<EnterpriseInvestmentDemandDTO> demands) {
-        this.demands = demands;
+    public void setDemand(EnterpriseInvestmentDemandDTO demand) {
+        this.demand = demand;
     }
 
     public List<EnterpriseInvestmentNowInfoDTO> getNowInfos() {
