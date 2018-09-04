@@ -3842,7 +3842,7 @@ public class AssetServiceImpl implements AssetService {
     public ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
         ListChargingItemsForBillGroupResponse response = new ListChargingItemsForBillGroupResponse();
         if(cmd.getPageSize()==null){
-            cmd.setPageSize(20);
+            cmd.setPageSize(100);
         }
         if(cmd.getPageAnchor()== null){
             cmd.setPageAnchor(0l);
@@ -5670,14 +5670,17 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 	
-	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+	public ListAssetServiceModuleAppsResponse listAssetServiceModuleApps(ListServiceModuleAppsCommand cmd) {
+		ListAssetServiceModuleAppsResponse response = new ListAssetServiceModuleAppsResponse();
 		//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
-		cmd.setNamespaceId(namespaceId);
-		cmd.setModuleId(moduleId);
-		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
-		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+//		cmd.setNamespaceId(namespaceId);
+//		cmd.setModuleId(moduleId);
+//		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
+//		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
 		//解析instance_config获取categoryId
 		
+		
+		return response;
 	}
 
 }

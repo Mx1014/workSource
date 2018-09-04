@@ -13,6 +13,8 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+
+import org.elasticsearch.index.engine.Engine.Create;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -261,11 +263,12 @@ public interface AssetService {
 	/**
 	 * 获取缴费应用列表接口
 	 */
-	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
+	public ListAssetServiceModuleAppsResponse listAssetServiceModuleApps(ListServiceModuleAppsCommand cmd);
 	
 	/**
 	 * 业务应用新增缴费映射关系接口
 	 */
-	public 
+	//public createAssetModuleAppMappingAndConfigs(CreateAnAppMappingCommand cmd);
+	
 	
 }

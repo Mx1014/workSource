@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>bizPayeeAccount:收款方账户</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
+ * <li>accountAliasName:收款方名称</li>
  *</ul>
  */
 public class ListBillGroupsDTO {
