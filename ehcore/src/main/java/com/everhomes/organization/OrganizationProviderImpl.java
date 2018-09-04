@@ -475,23 +475,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(conditionkeyword);
         }
 
-        //添加查询条件为有效的，active表示的是有效的数据
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
         //添加查询条件为：节点为企业
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-        //判断传进来的organizationType字段是否存在值，有值的话我们就需要根据organizationType字段进行条件筛选
         if (!StringUtils.isEmpty(organizationType)) {
             //说明传进来的organizationType字段是有值的，那么我们现在也不知道该值具体是什么呢，在这里我们的organziationType字段有三个类型
             //ENTERPRISE表示的是普通公司、PM表示的是管理公司、SERVICE表示的是服务商，所以我们需要一一进行判断
             if(OrganizationTypeEnum.ENTERPRISE.getCode().equals(organizationType)){
-                //说明传进来的是普通公司，那么我们就查eh_organizations表中的pm_flag字段为0，表示的是普通公司
-                query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
+                query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())
+                        .or(Tables.EH_ORGANIZATIONS.PM_FLAG.isNull()));
             }else if(OrganizationTypeEnum.PM.getCode().equals(organizationType)){
-                //表示的是管理公司，那么我们就查eh_ORGANIZATIONS表中的pm_flag字段为1，表示的是管理公司
                 query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
             }else if(OrganizationTypeEnum.SERVICE.getCode().equals(organizationType)){
-                //说明是服务商，那么我们就查eh_organizations表中的service_support_flag字段为1，表示的是服务商
                 query.addConditions(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
             }
         }
