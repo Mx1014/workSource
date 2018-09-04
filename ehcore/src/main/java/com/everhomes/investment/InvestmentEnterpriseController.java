@@ -4,8 +4,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.CreateInvestmentCommand;
-import com.everhomes.rest.investment.SearchInvestmentCommand;
 import com.everhomes.rest.investment.SearchInvestmentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +50,7 @@ public class InvestmentEnterpriseController {
      */
     @RequestMapping("listInvestment")
     @RestReturn(value=Long.class)
-    public RestResponse listInvestment(SearchInvestmentCommand cmd) {
+    public RestResponse listInvestment(SearchEnterpriseCustomerCommand cmd) {
         SearchInvestmentResponse searchInvestmentResponse =  investmentEnterpriseService.listInvestment(cmd);
         RestResponse response = new RestResponse(searchInvestmentResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

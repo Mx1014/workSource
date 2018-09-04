@@ -10,6 +10,8 @@ import java.util.List;
 public class SearchInvestmentResponse {
     @ItemType(EnterpriseCustomerDTO.class)
     private List<EnterpriseCustomerDTO> dtos;
+    @ItemType(InvestmentStasticsDTO.class)
+    private List<InvestmentStasticsDTO> stastics;
 
     private Long nextPageAnchor;
 
@@ -19,6 +21,14 @@ public class SearchInvestmentResponse {
 
     public void setDtos(List<EnterpriseCustomerDTO> dtos) {
         this.dtos = dtos;
+    }
+
+    public List<InvestmentStasticsDTO> getStastics() {
+        return stastics;
+    }
+
+    public void setStastics(List<InvestmentStasticsDTO> stastics) {
+        this.stastics = stastics;
     }
 
     public Long getNextPageAnchor() {

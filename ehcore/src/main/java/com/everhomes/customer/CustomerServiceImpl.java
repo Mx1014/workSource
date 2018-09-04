@@ -545,8 +545,8 @@ public class CustomerServiceImpl implements CustomerService {
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
     }
-
-    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+    @Override
+    public Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
         ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
         listServiceModuleAppsCommand.setNamespaceId(namespaceId);
         listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
