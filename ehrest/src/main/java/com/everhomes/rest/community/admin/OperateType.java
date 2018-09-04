@@ -4,7 +4,7 @@ package com.everhomes.rest.community.admin;
 /**
  * <ul>审核类型
  * <li>MANUAL(1): 人工审核</li>
- * <li>EMAIL(2): 邮箱审核</li>
+ * <li>EMAIL(2): 邮箱认证</li>
  * <li>IMPORT(3): 通讯录导入</li>
  * </ul>
  */
