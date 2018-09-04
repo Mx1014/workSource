@@ -191,4 +191,5 @@ public interface CommunityService {
 	void caculateAllBuildingArea();
 
 
+    ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
 }

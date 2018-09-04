@@ -5899,5 +5899,60 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
+
+
+	@Override
+	public ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		final List<Long> projectIds = new ArrayList<>();
+
+		if(namespaceId == 2){
+			//标准版
+			List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getOrgId(), cmd.getAppId());
+
+			if(authorizations.size() > 0){
+				authorizations.forEach(r -> projectIds.add(r.getProjectId()));
+			}
+
+		}else {
+			//定制版
+
+			List<OrganizationCommunity> organizationCommunities = organizationProvider.listOrganizationCommunities(cmd.getOrgId());
+
+			if(organizationCommunities.size() > 0){
+				organizationCommunities.forEach(r -> projectIds.add(r.getCommunityId()));
+			}
+		}
+
+
+		List<Community> communities = communityProvider.listCommunities(namespaceId, new ListingLocator(), 1000000, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_COMMUNITIES.ID.in(projectIds));
+				return query;
+			}
+		});
+
+		List<ProjectDTO> dtos = new ArrayList<>();
+
+		if(communities != null && communities.size() > 0){
+
+			for (Community community: communities) {
+				ProjectDTO dto = new ProjectDTO();
+				dto.setProjectName(community.getName());
+				dto.setProjectId(community.getId());
+				dto.setCommunityType(community.getCommunityType());
+				dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+				dtos.add(dto);
+			}
+		}
+
+		ListCommunitiesByOrgIdAndAppIdResponse response = new ListCommunitiesByOrgIdAndAppIdResponse();
+		response.setDtos(dtos);
+
+		return response;
+	}
 }
 
