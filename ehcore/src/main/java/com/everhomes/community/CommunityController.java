@@ -682,6 +682,7 @@ public class CommunityController extends ControllerBase {
      */
     @RequestMapping("listCommunitiesByOrgIdAndAppId")
     @RestReturn(value=ListCommunitiesByOrgIdResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
 
         ListCommunitiesByOrgIdAndAppIdResponse cmdResponse = this.communityService.listCommunitiesByOrgIdAndAppId(cmd);
