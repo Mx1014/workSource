@@ -99,6 +99,12 @@ INSERT into `eh_locale_strings`(`scope`,`code`,`locale`,`text`) VALUES ('activit
 SET @id = (SELECT max(id) from eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@id:=@id+1), 'activity.notification', '21', 'zh_CN', '活动报名成功', '您在「${postName}」的报名已提交。', '0');
+
+
+-- AUTHOR: 严军
+-- REMARK: 更新收款账户模块的权限控制类型你给。
+UPDATE eh_service_modules SET path = '/200/140000/58000', module_control_type = 'community_control' WHERE id = 58000;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
