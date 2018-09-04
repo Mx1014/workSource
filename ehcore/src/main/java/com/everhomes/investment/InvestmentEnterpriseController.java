@@ -73,6 +73,21 @@ public class InvestmentEnterpriseController {
         return response;
     }
 
+    /**
+     * <b>URL: /investment/viewInvestment</b>
+     * <p> 删除招商客户 </p>
+     */
+    @RequestMapping("viewInvestment")
+    @RestReturn(value=String.class)
+    public RestResponse viewInvestment(CreateInvestmentCommand cmd) {
+        RestResponse response = new RestResponse();
+        // cmd.getId() cmd.getNameSpaceId()
+        investmentEnterpriseService.deleteInvestment(cmd);
+        response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 
 }
