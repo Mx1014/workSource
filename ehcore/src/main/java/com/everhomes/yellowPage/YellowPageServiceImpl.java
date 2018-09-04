@@ -860,7 +860,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 根据community和type获取所有项目id
 			List<Long> authProjectIds = getProjectIdsByScene(cmd.getOwnerId(), cmd.getParentId());
 			if (CollectionUtils.isEmpty(authProjectIds)) {
-//				return response;
+				return response;
 			}
 			
 			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),

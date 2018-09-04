@@ -20,6 +20,7 @@ import com.everhomes.common.IdentifierTypeEnum;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -92,6 +93,8 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
@@ -404,6 +407,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Autowired
     private ServiceModuleService serviceModuleService;
+    
+    
+    @Autowired
+    private CommunityService communityService;
+    
     
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -14513,18 +14521,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId) {
-
-		ListAppAuthorizationsByOrganizatioinIdCommand cmd = new ListAppAuthorizationsByOrganizatioinIdCommand();
-		cmd.setOrganizationId(organizationId);
-		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ListAppAuthorizationsByOwnerIdResponse resp = serviceModuleAppAuthorizationService
-				.listAppAuthorizationsByOrganizatioinId(cmd);
-		List<ServiceModuleAppAuthorizationDTO> dtos = resp.getDtos();
-		if (CollectionUtils.isEmpty(dtos)) {
-			return null;
-		}
-		return dtos.stream().filter(r -> r.getAppId() == originAppId)
-				.map(ServiceModuleAppAuthorizationDTO::getProjectId).collect(Collectors.toList());
+		ListCommunitiesByOrgIdAndAppIdCommand listCmd = new ListCommunitiesByOrgIdAndAppIdCommand();
+		listCmd.setOrgId(organizationId);
+		listCmd.setAppId(originAppId);
+		ListCommunitiesByOrgIdAndAppIdResponse resp = communityService.listCommunitiesByOrgIdAndAppId(listCmd);
+		
+		return resp.getDtos() == null ? null : resp.getDtos().stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
+		
 	}
 
 }
