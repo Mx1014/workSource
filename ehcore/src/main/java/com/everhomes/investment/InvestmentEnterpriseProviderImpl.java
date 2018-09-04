@@ -4,6 +4,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.investment.InvestmentEnterpriseStatus;
+import com.everhomes.rest.investment.InvestmentStasticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentContactDao;
@@ -30,7 +31,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProvider {
+public class InvestmentEnterpriseProviderImpl implements InvestmentEnterpriseProvider {
 
     @Autowired
     SequenceProvider sequenceProvider;
@@ -235,6 +236,10 @@ public class InvestmentEnterpriseProvideImpl implements InvestmentEnterpriseProv
         }
     }
 
+    @Override
+    public List<InvestmentStasticsDTO> getInvestmentStastics(Integer namespaceId, Long communityId) {
+        return null;
+    }
 
 
 }
