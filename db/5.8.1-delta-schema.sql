@@ -57,4 +57,8 @@ CREATE TABLE `eh_community_general_form`(
   `type` VARCHAR(32) COMMENT '类型',
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '表单与项目关系表';
+
+-- AUTHOR: 梁燕龙 20180830
+-- REMARK: 增加字段判断认证的来源
+ALTER TABLE `eh_organization_members` ADD COLUMN `source_type` TINYINT COMMENT '认证来源';
 -- --------------------- SECTION END ---------------------------------------------------------
