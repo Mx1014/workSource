@@ -83,8 +83,8 @@ VALUES(16022600 ,'积分银行',42000000,NULL,'integral-bank',1,2,'/40000040/420
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(16023600 ,'积分池',42000000,NULL,'integral-pool',1,2,'/40000040/42000000/16023600','park',130,4900,3,'system','module',NULL);
 
-INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) VALUES(4800,'积分银行',80000,'/200/80000/4800',1,3,2,110,1,'module');
-INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) VALUES(4900,'积分池',80000,'/200/80000/4900',1,3,2,120,1,'module');	
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid) VALUES(4800,'积分银行',80000,'/200/80000/4800',1,3,2,110,1,'module',0,0);
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid) VALUES(4900,'积分池',80000,'/200/80000/4900',1,3,2,120,1,'module',0,0);
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 导入模板备注文字
