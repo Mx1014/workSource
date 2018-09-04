@@ -6,12 +6,7 @@ import com.everhomes.bus.LocalEventBus;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.point.PointEventLogStatus;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,14 +73,14 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null
-                && serverId != null && serverId.trim().length() > 0
-                && serverIdList != null && serverIdList.size() > 0) {
-            registerPointRuleCategory();
-            initPointRuleCategoryQueue();
-            initScheduledExecutorService();
-            initVMShutdownHook();
-        }
+        // if (event.getApplicationContext().getParent() == null
+        //         && serverId != null && serverId.trim().length() > 0
+        //         && serverIdList != null && serverIdList.size() > 0) {
+        //     registerPointRuleCategory();
+        //     initPointRuleCategoryQueue();
+        //     initScheduledExecutorService();
+        //     initVMShutdownHook();
+        // }
     }
 
     private void initScheduledExecutorService() {
@@ -216,7 +211,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
 
     @Override
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
-        LocalEvent localEvent = (LocalEvent) args;
+        /*LocalEvent localEvent = (LocalEvent) args;
 
         PointEventProcessorHolder processorHolder = pointEventLogScheduler.getPointEventProcessor(localEvent.getEventName());
         PointEventProcessorHolder processorHolder1 = pointEventLogScheduler.getPointEventProcessor(subscriptionPath);
@@ -267,7 +262,7 @@ public class PointLocalBusSubscriber implements LocalBusSubscriber, ApplicationL
                 }
                 return pointEventLogs;
             });
-        });
+        });*/
         return Action.none;
     }
 

@@ -62,7 +62,7 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
@@ -2476,7 +2476,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rentalv2Provider.updateRentalBill(order);//更新新的订单号
 		}
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
-		Long amount = changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
+		BigDecimal amount = order.getPayTotalMoney().subtract(order.getPaidMoney());
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(order.getRentalUid());
@@ -3975,6 +3975,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		rentalCommonService.sendMessageToUser(order.getRentalUid(), notifyTextForOther);
 	}
 
+	public BigDecimal changePayAmount(Long amount){
+
+		if(amount == null){
+			return new BigDecimal(0);
+		}
+		return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+	}
+
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 
@@ -4054,6 +4062,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				LocalEventContext context = new LocalEventContext();
 				context.setUid(order.getRentalUid());
 				context.setNamespaceId(order.getNamespaceId());
+				context.setCommunityId(order.getCommunityId());
 				event.setContext(context);
 				event.setEntityType(EhRentalv2Orders.class.getSimpleName());
 				event.setEntityId(order.getId());
@@ -4183,8 +4192,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
-		Long amount = changePayAmount(order.getPayTotalMoney());
-		preOrderCommand.setAmount(amount);
+		preOrderCommand.setAmount(order.getPayTotalMoney());
 
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -4209,7 +4217,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		PreOrderDTO callBack = null;
-		if (amount > 0)
+		if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0 )
 			callBack = rentalv2PayService.createPreOrder(preOrderCommand,order);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
@@ -4220,21 +4228,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return response;
 	}
 
-	public Long changePayAmount(BigDecimal amount){
 
-		if(amount == null){
-			return 0L;
-		}
-		return  amount.multiply(new BigDecimal(100)).longValue();
-	}
-
-	public BigDecimal changePayAmount(Long amount){
-
-		if(amount == null){
-			return new BigDecimal(0);
-		}
-		return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
-	}
 
 	@Override
 	public AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd) {
@@ -4558,6 +4552,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			LocalEventContext context = new LocalEventContext();
 			context.setUid(order.getRentalUid());
 			context.setNamespaceId(order.getNamespaceId());
+			context.setCommunityId(order.getCommunityId());
 			event.setContext(context);
 			event.setEntityType(EhRentalv2Orders.class.getSimpleName());
 			event.setEntityId(order.getId());

@@ -1,0 +1,160 @@
+package com.everhomes.rest.news.open;
+
+import java.util.List;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * 参数
+ * <li>title: 文章标题</li>
+ * <li>contentAbstract: 摘要</li>
+ * <li>coverUrl: 封面图url</li>
+ * <li>content: 文章内容 html 或文本格式</li>
+ * <li>author: 作者</li>
+ * <li>publishTime: 发布时间戳</li>
+ * <li>sourceDesc: 文章来源</li>
+ * <li>sourceUrl: 原文章链接</li>
+ * <li>phone: 咨询电话</li>
+ * <li>projectIds: 可见项目 id</li>
+ * <li>newsTagIds: 文章标签 id (子标签)</li>
+ * <li>status: 状态 2-发布状态 1-草稿状态 参考{@link com.everhomes.rest.news.NewsStatus}</li>
+ * <li>ownerId: 所属项目 id</li>
+ * <li>categoryId: 所属应用标志</li>
+ * </ul>
+ */
+public class GetOpenNewsDetailResponse {
+
+	private String title;
+	private String contentAbstract;
+	private String coverUrl;
+	private String content;
+	private String author;
+	private Long publishTime;
+	private String sourceDesc;
+	private String sourceUrl;
+	private String phone;
+	private List<Long> projectIds;
+	private List<Long> newsTagIds;
+	private Byte status;
+    private Long ownerId;
+    private Long categoryId;
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getContentAbstract() {
+		return contentAbstract;
+	}
+
+	public void setContentAbstract(String contentAbstract) {
+		this.contentAbstract = contentAbstract;
+	}
+
+	public String getCoverUrl() {
+		return coverUrl;
+	}
+
+	public void setCoverUrl(String coverUrl) {
+		this.coverUrl = coverUrl;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public Long getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Long publishTime) {
+		this.publishTime = publishTime;
+	}
+
+	public String getSourceDesc() {
+		return sourceDesc;
+	}
+
+	public void setSourceDesc(String sourceDesc) {
+		this.sourceDesc = sourceDesc;
+	}
+
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
+
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public List<Long> getProjectIds() {
+		return projectIds;
+	}
+
+	public void setProjectIds(List<Long> projectIds) {
+		this.projectIds = projectIds;
+	}
+
+	public List<Long> getNewsTagIds() {
+		return newsTagIds;
+	}
+
+	public void setNewsTagIds(List<Long> newsTagIds) {
+		this.newsTagIds = newsTagIds;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+}
+

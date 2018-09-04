@@ -4,18 +4,14 @@ package com.everhomes.sensitiveWord;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.forum.ForumModuleType;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
 import com.everhomes.rest.sensitiveWord.SensitiveWordErrorCodes;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -55,39 +51,44 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     }
 
     private void init(InitSensitiveWordTrieCommand cmd) {
-        TreeMap<String, String> map = new TreeMap<String, String>();
+        try {
+            TreeMap<String, String> map = new TreeMap<String, String>();
 
-        if (null == acdat) {
-            acdat = new AhoCorasickDoubleArrayTrie<String>();
-        }
-        BufferedReader in = null;
-        try{
-            URL realUrl = new URL(cmd.getUrl());
-            String s = null;
-
-            URLConnection connection = connect(realUrl);
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            while((s = in.readLine())!=null){//使用readLine方法，一次读一行
-                map.put(s.trim().toUpperCase(), s.trim().toUpperCase());
+            if (null == acdat) {
+                acdat = new AhoCorasickDoubleArrayTrie<String>();
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }finally {
-            try {
-                if (in != null) {
-                    in.close();
+
+            BufferedReader in = null;
+            try{
+                URL realUrl = new URL(cmd.getUrl());
+                String s = null;
+
+                URLConnection connection = connect(realUrl);
+                in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                while((s = in.readLine())!=null){//使用readLine方法，一次读一行
+                    map.put(s.trim().toUpperCase(), s.trim().toUpperCase());
                 }
-            } catch (IOException e) {
+            }catch(Exception e){
                 e.printStackTrace();
-            }
+            }finally {
+                try {
+                    if (in != null) {
+                        in.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-        }
-        if (map.size() > 0) {
-            acdat.build(map);
-        }else {
+            }
+            if (map.size() > 0) {
+                acdat.build(map);
+            }else {
             acdat = null;
         }
-        fileUrl = cmd.getUrl();
+            fileUrl = cmd.getUrl();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //校验是否需要重新构建敏感词库

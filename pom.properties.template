@@ -5,6 +5,7 @@ ehutil-common.version=1.0.0-SNAPSHOT
 ehplatform.version=1.0.1-SNAPSHOT
 ehplatform-persist.version=1.0.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
+ehorder-sdk.version=1.0.0-SNAPSHOT
 
 bluto.version=1.0.3
 scrabbler.version=1.0.0
@@ -91,3 +92,4 @@ alpn-boot.version = 8.1.4.v20150727
 pay-sdk.version=1.0.0-SNAPSHOT
 sensitive-word.version=1.2.0
 
+spring-kafka.version=1.2.2.RELEASE
