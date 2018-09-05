@@ -7,6 +7,7 @@ import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class CreateInvestmentCommand {
@@ -155,7 +156,10 @@ public class CreateInvestmentCommand {
 
     private Long aptitudeFlagItemId;
     private String aptitudeFlagItemName;
-
+    private String transactionProbability;
+    private Timestamp expectedSignDate;
+    private Byte investmentType;
+    private Long admissionItemId;
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -167,7 +171,6 @@ public class CreateInvestmentCommand {
     @ItemType(EnterpriseInvestmentContactDTO.class)
     private List<EnterpriseInvestmentContactDTO>  contacts ;
     private EnterpriseInvestmentDemandDTO demand;
-    @ItemType(EnterpriseInvestmentNowInfoDTO.class)
     private EnterpriseInvestmentNowInfoDTO nowInfo;
 
 
@@ -1273,6 +1276,38 @@ public class CreateInvestmentCommand {
 
     public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
         this.nowInfo = nowInfo;
+    }
+
+    public String getTransactionProbability() {
+        return transactionProbability;
+    }
+
+    public void setTransactionProbability(String transactionProbability) {
+        this.transactionProbability = transactionProbability;
+    }
+
+    public Timestamp getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Timestamp expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Byte getInvestmentType() {
+        return investmentType;
+    }
+
+    public void setInvestmentType(Byte investmentType) {
+        this.investmentType = investmentType;
+    }
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
     }
 
     @Override

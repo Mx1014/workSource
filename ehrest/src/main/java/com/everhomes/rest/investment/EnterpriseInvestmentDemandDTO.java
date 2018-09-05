@@ -5,6 +5,28 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>expectedLocation: 期望地段</li>
+ *     <li>demandAreaMin: 期望最小面积</li>
+ *     <li>demandAreaMax: 期望最大面积</li>
+ *     <li>demandPriceMin: 期望最小价格</li>
+ *     <li>demandPriceMax: 期望最大价格</li>
+ *     <li>demandPriceUnit: 期望价格单位</li>
+ *     <li>buyOrLease: 租赁还是购买</li>
+ *     <li>expectAddress: 期望房源</li>
+ *     <li>demandVersion: demandVersion</li>
+ *     <li>status: 信息状态</li>
+ *     <li>customerId: customerId</li>
+ *     <li>createTime: createTime</li>
+ *     <li>createBy: createBy</li>
+ *     <li>operatorTime: operatorTime</li>
+ *     <li>operatorBy: operatorBy</li>
+ * </ul>
+ */
 public class EnterpriseInvestmentDemandDTO {
 
     private Long id;

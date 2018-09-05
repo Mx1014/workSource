@@ -5,6 +5,24 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>nowAddress: 当前地址</li>
+ *     <li>nowRental: 当前租金</li>
+ *     <li>nowRentalUnit: 当前租金单位</li>
+ *     <li>nowArea: 当前面积</li>
+ *     <li>nowContractEndDate: 当前合同结束日</li>
+ *     <li>status: status</li>
+ *     <li>customerId: customerId</li>
+ *     <li>createTime: createTime</li>
+ *     <li>createBy: createBy</li>
+ *     <li>operatorTime: operatorTime</li>
+ *     <li>operatorBy: operatorBy</li>
+ * </ul>
+ */
 public class EnterpriseInvestmentNowInfoDTO {
 
     private Long id;

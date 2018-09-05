@@ -115,6 +115,6 @@ ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
 ALTER TABLE `eh_customer_events` ADD COLUMN investment_type tinyint null comment '操作客户类型，0-客户管理，1-租客管理';
 
 -- REMARK: 客户表增加是否入驻状态
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `admission_item_id` BIGINT null default null;
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `admission_item_id` BIGINT null default null ;
 
 -- end

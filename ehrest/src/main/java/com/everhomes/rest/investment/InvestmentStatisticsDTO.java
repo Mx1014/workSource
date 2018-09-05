@@ -3,8 +3,14 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>key: 客户状态</li>
+ *     <li>value: 统计组数</li>
+ * </ul>
+ */
 public class InvestmentStatisticsDTO {
-    private String  key;
+    private String key;
     private String value;
 
     public String getKey() {
