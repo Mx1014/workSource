@@ -936,24 +936,6 @@ public class PunchAdminController extends ControllerBase {
 
     /**
      * <p>
-     * 查询公司某部门/某人 考勤规则
-     * 已经废弃-by 2.5
-     * </p>
-     * <b>URL: /punch/getTargetPunchAllRule</b>
-     */
-    @Deprecated
-    @RequestMapping("getTargetPunchAllRule")
-    @RestReturn(value = GetTargetPunchAllRuleResponse.class)
-    public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
-        GetTargetPunchAllRuleResponse resp = punchService.getTargetPunchAllRule(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <p>
      * 设置公司某部门/某人 考勤规则
      * 已经废弃-by2.5
      * </p>
