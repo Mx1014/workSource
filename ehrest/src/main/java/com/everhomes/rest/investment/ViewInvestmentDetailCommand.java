@@ -2,12 +2,20 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>id: customerId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>orgId: orgId</li>
+ * </ul>
+ */
 public class ViewInvestmentDetailCommand {
     private Long id;
 
     private Long communityId;
 
     private Long orgId;
+
 
     public Long getId() {
         return id;

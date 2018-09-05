@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
  *     <li>searchFromCustomerPageFlag : 0-不是从企业客户管理进入搜索，1-从企业客户管理进入搜索</li>
  *     <li>aptitudeFlag : 是否筛选资质客户</li>
+ *     <li>admissionItemId : 是否入驻</li>
  *
  *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
  *     <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
@@ -96,6 +97,26 @@ public class SearchEnterpriseCustomerCommand {
     private Byte ContractSearchCustomerFlag;
 
     private Long taskId;
+
+    private Long admissionItemId;
+
+    private Byte customerSource;
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
+    }
 
     public Long getTaskId() {
         return taskId;

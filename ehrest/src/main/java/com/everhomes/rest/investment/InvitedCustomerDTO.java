@@ -7,9 +7,10 @@ import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
-public class EnterpriseInvestmentDTO {
+public class InvitedCustomerDTO {
 
     private Long id ;
     private Integer namespaceId;
@@ -157,17 +158,76 @@ public class EnterpriseInvestmentDTO {
     private String aptitudeFlagItemName;
 
 
+
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
+
+    private String transactionRatio;
+    private Timestamp expectedSignDate;
+    private Byte customerSource;
+    private Long admissionItemId;
+    private String admissionItemName;
 
     // we should add new module fields
     // investment enterprise tracking infos
     @ItemType(CreateCustomerTrackingCommand.class)
     private List<CreateCustomerTrackingCommand> trackingInfos;
-    @ItemType(EnterpriseInvestmentContactDTO.class)
-    private List<EnterpriseInvestmentContactDTO>  contacts ;
-    private EnterpriseInvestmentDemandDTO demand;
-    private EnterpriseInvestmentNowInfoDTO nowInfo;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
+
+
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
+        return trackingInfos;
+    }
+
+    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
+        this.trackingInfos = trackingInfos;
+    }
+
+    public Timestamp getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Timestamp expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
+    }
+
+    public String getAdmissionItemName() {
+        return admissionItemName;
+    }
+
+    public void setAdmissionItemName(String admissionItemName) {
+        this.admissionItemName = admissionItemName;
+    }
 
     public Long getId() {
         return id;
@@ -1241,36 +1301,37 @@ public class EnterpriseInvestmentDTO {
         this.attachments = attachments;
     }
 
-    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
-        return trackingInfos;
-    }
 
-    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
-        this.trackingInfos = trackingInfos;
-    }
-
-    public List<EnterpriseInvestmentContactDTO> getContacts() {
+    public List<CustomerContactDTO> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<EnterpriseInvestmentContactDTO> contacts) {
+    public void setContacts(List<CustomerContactDTO> contacts) {
         this.contacts = contacts;
     }
 
-    public EnterpriseInvestmentDemandDTO getDemand() {
-        return demand;
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
     }
 
-    public void setDemand(EnterpriseInvestmentDemandDTO demand) {
-        this.demand = demand;
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
     }
 
-    public EnterpriseInvestmentNowInfoDTO getNowInfo() {
-        return nowInfo;
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
     }
 
-    public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
-        this.nowInfo = nowInfo;
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
+    }
+
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
+    }
+
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
     }
 
     @Override

@@ -7,11 +7,18 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 
+/**
+ * <ul>
+ *     <li>dtos: dtos {@link com.everhomes.rest.customer.EnterpriseCustomerDTO}</li>
+ *     <li>stastics: stastics {@link InvitedCustomerStatisticsDTO}</li>
+ *     <li>nextPageAnchor: nextPageAnchor</li>
+ * </ul>
+ */
 public class SearchInvestmentResponse {
     @ItemType(EnterpriseCustomerDTO.class)
     private List<EnterpriseCustomerDTO> dtos;
-    @ItemType(InvestmentStatisticsDTO.class)
-    private List<InvestmentStatisticsDTO> stastics;
+    @ItemType(InvitedCustomerStatisticsDTO.class)
+    private List<InvitedCustomerStatisticsDTO> stastics;
 
     private Long nextPageAnchor;
 
@@ -23,11 +30,11 @@ public class SearchInvestmentResponse {
         this.dtos = dtos;
     }
 
-    public List<InvestmentStatisticsDTO> getStastics() {
+    public List<InvitedCustomerStatisticsDTO> getStastics() {
         return stastics;
     }
 
-    public void setStastics(List<InvestmentStatisticsDTO> stastics) {
+    public void setStastics(List<InvitedCustomerStatisticsDTO> stastics) {
         this.stastics = stastics;
     }
 

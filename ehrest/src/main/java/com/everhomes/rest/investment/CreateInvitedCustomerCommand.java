@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class CreateInvestmentCommand {
+public class CreateInvitedCustomerCommand {
 
     private Long id ;
     private Integer namespaceId;
@@ -157,6 +157,13 @@ public class CreateInvestmentCommand {
     private String aptitudeFlagItemName;
 
 
+
+
+    private String transactionRatio;
+    private Long expectedSignDate;
+    private Byte customerSource;
+    private Long admissionItemId;
+
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
 
@@ -164,11 +171,12 @@ public class CreateInvestmentCommand {
     // investment enterprise tracking infos
     @ItemType(CreateCustomerTrackingCommand.class)
     private List<CreateCustomerTrackingCommand> trackingInfos;
-    @ItemType(EnterpriseInvestmentContactDTO.class)
-    private List<EnterpriseInvestmentContactDTO>  contacts ;
-    private EnterpriseInvestmentDemandDTO demand;
-    @ItemType(EnterpriseInvestmentNowInfoDTO.class)
-    private EnterpriseInvestmentNowInfoDTO nowInfo;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
 
 
     public Long getId() {
@@ -1251,28 +1259,68 @@ public class CreateInvestmentCommand {
         this.trackingInfos = trackingInfos;
     }
 
-    public List<EnterpriseInvestmentContactDTO> getContacts() {
+    public List<CustomerContactDTO> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<EnterpriseInvestmentContactDTO> contacts) {
+    public void setContacts(List<CustomerContactDTO> contacts) {
         this.contacts = contacts;
     }
 
-    public EnterpriseInvestmentDemandDTO getDemand() {
-        return demand;
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
     }
 
-    public void setDemand(EnterpriseInvestmentDemandDTO demand) {
-        this.demand = demand;
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
     }
 
-    public EnterpriseInvestmentNowInfoDTO getNowInfo() {
-        return nowInfo;
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
     }
 
-    public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
-        this.nowInfo = nowInfo;
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
+    }
+
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Long getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Long expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
+    }
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
     }
 
     @Override

@@ -3,9 +3,17 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
-public class InvestmentStatisticsDTO {
-    private String  key;
+/**
+ * <ul>
+ *     <li>key: 客户状态</li>
+ *     <li>value: 统计组数</li>
+ *     <li>itemId: 用于搜索</li>
+ * </ul>
+ */
+public class InvitedCustomerStatisticsDTO {
+    private String key;
     private String value;
+    private Long itemId;
 
     public String getKey() {
         return key;
@@ -21,6 +29,14 @@ public class InvestmentStatisticsDTO {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
     @Override

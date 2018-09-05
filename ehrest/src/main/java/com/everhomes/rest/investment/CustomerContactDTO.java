@@ -4,24 +4,45 @@ import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
 
-public class EnterpriseInvestmentContactDTO {
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>customerId: customerId</li>
+ *     <li>name: name</li>
+ *     <li>phoneNumber: phoneNumber</li>
+ *     <li>email: email</li>
+ *     <li>position: position</li>
+ *     <li>address: address</li>
+ *     <li>contactType: contactType</li>
+ *     <li>sourceType: sourceType</li>
+ *     <li>status: status</li>
+ *     <li>createTime: createTime</li>
+ *     <li>creatorUid: creatorUid</li>
+ *     <li>operatorTime: operatorTime</li>
+ *     <li>operatorUid: operatorUid</li>
+ * </ul>
+ */
+public class CustomerContactDTO {
+
 
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private Long customerId;
     private String name;
     private Long phoneNumber;
     private String email;
     private String position;
     private String address;
-    private Byte type;
-    private Byte originType;
+    private Byte contactType;
+    private Byte customerSource;
     private Byte status;
-    private Long customerId;
     private Timestamp createTime;
-    private String createBy;
+    private Long creatorUid;
     private Timestamp operatorTime;
-    private String operatorBy;
+    private Long operatorUid;
 
     public Long getId() {
         return id;
@@ -45,6 +66,14 @@ public class EnterpriseInvestmentContactDTO {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     public String getName() {
@@ -87,20 +116,20 @@ public class EnterpriseInvestmentContactDTO {
         this.address = address;
     }
 
-    public Byte getType() {
-        return type;
+    public Byte getContactType() {
+        return contactType;
     }
 
-    public void setType(Byte type) {
-        this.type = type;
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
     }
 
-    public Byte getOriginType() {
-        return originType;
+    public Byte getCustomerSource() {
+        return customerSource;
     }
 
-    public void setOriginType(Byte originType) {
-        this.originType = originType;
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
     }
 
     public Byte getStatus() {
@@ -111,14 +140,6 @@ public class EnterpriseInvestmentContactDTO {
         this.status = status;
     }
 
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
     public Timestamp getCreateTime() {
         return createTime;
     }
@@ -127,12 +148,12 @@ public class EnterpriseInvestmentContactDTO {
         this.createTime = createTime;
     }
 
-    public String getCreateBy() {
-        return createBy;
+    public Long getCreatorUid() {
+        return creatorUid;
     }
 
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     public Timestamp getOperatorTime() {
@@ -143,12 +164,12 @@ public class EnterpriseInvestmentContactDTO {
         this.operatorTime = operatorTime;
     }
 
-    public String getOperatorBy() {
-        return operatorBy;
+    public Long getOperatorUid() {
+        return operatorUid;
     }
 
-    public void setOperatorBy(String operatorBy) {
-        this.operatorBy = operatorBy;
+    public void setOperatorUid(Long operatorUid) {
+        this.operatorUid = operatorUid;
     }
 
     @Override
