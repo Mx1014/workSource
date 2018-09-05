@@ -5,10 +5,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.investment.CreateInvestmentCommand;
-import com.everhomes.rest.investment.EnterpriseInvestmentDTO;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
-import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
+import com.everhomes.rest.investment.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,6 +82,36 @@ public class InvestmentEnterpriseController {
         // cmd.getId() cmd.getNameSpaceId()
         EnterpriseInvestmentDTO dto = investmentEnterpriseService.viewInvestmentDetail(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /investment/changeInvestmentToCustomer</b>
+     * <p> 转换招商客户为已成交客户 </p>
+     */
+    @RequestMapping("changeInvestmentToCustomer")
+    @RestReturn(value=String.class)
+    public RestResponse changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd) {
+        //createCustomerEntryInfo
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /investment/changeApplyToInvestment</b>
+     * <p> 转换申请客户为招商客户 </p>
+     */
+    @RequestMapping("changeApplyToInvestment")
+    @RestReturn(value=String.class)
+    public RestResponse changeApplyToInvestment(ChangeApplyToInvestmentCommand cmd) {
+
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;
