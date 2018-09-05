@@ -201,6 +201,13 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             ratedtos.add(cardRate);
         }
 
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            ratedtos.forEach(dto ->{
+                dto.setPrice(new BigDecimal(debugfee));
+            });
+        }
+
         return ratedtos;
     }
 
