@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -134,10 +135,10 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportType(cmd.getReportType());
         report.setValiditySetting(JSON.toJSONString(cmd.getValiditySetting()));
         report.setReceiverMsgType(cmd.getRxMsgType());
-        if(cmd.getRxMsgSetting() != null)
+        if (cmd.getRxMsgSetting() != null)
             report.setReceiverMsgSeeting(JSON.toJSONString(cmd.getRxMsgSetting()));
         report.setAuthorMsgType(cmd.getAuMsgType());
-        if(cmd.getAuMsgSetting() != null)
+        if (cmd.getAuMsgSetting() != null)
             report.setAuthorMsgSeeting(JSON.toJSONString(cmd.getAuMsgSetting()));
         report.setFormOriginId(cmd.getFormOriginId());
         if (cmd.getFormOriginId() == 0)
@@ -463,12 +464,12 @@ public class WorkReportServiceImpl implements WorkReportService {
         User user = UserContext.current().getUser();
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         WorkReportVal reportVal = new WorkReportVal();
-        ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
+        ReportValiditySettingDTO validity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
 
-        LocalDateTime startTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getStartType(),
-                setting.getStartMark(), setting.getStartTime());        //  获取汇报有效起始时间
-        LocalDateTime endTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), setting.getEndType(),
-                setting.getEndMark(), setting.getEndTime());            //  获取汇报有效截止时间
+        LocalDateTime startTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), validity.getStartType(),
+                validity.getStartMark(), validity.getStartTime());        //  获取汇报有效起始时间
+        LocalDateTime endTime = workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), validity.getEndType(),
+                validity.getEndMark(), validity.getEndTime());            //  获取汇报有效截止时间
 
         //  whether the post time is valid
         if (checkPostTime(LocalDateTime.now(), startTime, endTime))
@@ -500,20 +501,28 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setValues(cmd.getValues());
 
         dbProvider.execute((TransactionStatus status) -> {
+            Timestamp reminderTime = null;
+            if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.SUMMARY){
+                ReportMsgSettingDTO msg = JSON.parseObject(report.getReceiverMsgSeeting(), ReportMsgSettingDTO.class);
+                reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), msg.getMsgTimeType(), msg.getMsgTimeMark(), msg.getMsgTime()));
+            }
+
+            //  create the val
             Long reportValId = workReportValProvider.createWorkReportVal(reportVal);
             formCommand.setSourceId(reportValId);
+            //  create the content
             generalFormService.postGeneralForm(formCommand);
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportValId, receiverId, user.getId(), cmd.getOrganizationId());
                 //  create the receiver.
-                workReportValProvider.createWorkReportValReceiverMap(receiver);
+                createWorkReportValReceiverMap(reportVal, receiverId);
                 //  send message to the receiver.
-                if(ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY)
+                if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY)
                     workReportMessageService.workReportPostMessage(report, reportVal, receiverId, user);
+                else
+                    createWorkReportValReceiverMsg(report,reportVal,reminderTime,receiverId);
             }
             return null;
         });
-
         //  return back.
         WorkReportValDTO dto = new WorkReportValDTO();
         dto.setReportId(report.getId());
@@ -531,18 +540,31 @@ public class WorkReportServiceImpl implements WorkReportService {
         return true;
     }
 
-    private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
+    private WorkReportValReceiverMap createWorkReportValReceiverMap(WorkReportVal reportVal, Long receiverId) {
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
-        receiver.setNamespaceId(namespaceId);
-        receiver.setOrganizationId(organizationId);
-        receiver.setReportValId(reportValId);
+        receiver.setNamespaceId(reportVal.getNamespaceId());
+        receiver.setOrganizationId(reportVal.getOrganizationId());
+        receiver.setReportValId(reportVal.getId());
         receiver.setReceiverUserId(receiverId);
-        receiver.setReceiverName(fixUpUserName(receiverId, organizationId));
+        receiver.setReceiverName(fixUpUserName(receiverId, reportVal.getOrganizationId()));
         receiver.setReceiverAvatar(getUserAvatar(receiverId));
         receiver.setReadStatus(WorkReportReadStatus.UNREAD.getCode());
-        if (receiverId.longValue() == applierId.longValue())
+        if (receiverId.longValue() == reportVal.getApplierUserId().longValue())
             receiver.setReadStatus(WorkReportReadStatus.READ.getCode());
+        workReportValProvider.createWorkReportValReceiverMap(receiver);
         return receiver;
+    }
+
+    private WorkReportValReceiverMsg createWorkReportValReceiverMsg(WorkReport report, WorkReportVal reportVal, Timestamp reminderTime, Long receiverId){
+        WorkReportValReceiverMsg msg = new WorkReportValReceiverMsg();
+        msg.setNamespaceId(reportVal.getNamespaceId());
+        msg.setReportId(report.getId());
+        msg.setReportName(report.getReportName());
+        msg.setReportTime(reportVal.getReportTime());
+        msg.setReminderTime(reminderTime);
+        msg.setReceiverUserId(receiverId);
+        workReportValProvider.createWorkReportValReceiverMsg(msg);
+        return msg;
     }
 
     @Override
@@ -589,9 +611,10 @@ public class WorkReportServiceImpl implements WorkReportService {
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
-                WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user.getId(), cmd.getOrganizationId());
                 //  create the receiver.
-                workReportValProvider.createWorkReportValReceiverMap(receiver);
+                createWorkReportValReceiverMap(reportVal, receiverId);
+                /*  WorkReportValReceiverMap receiver = packageWorkReportValReceiverMap(namespaceId, reportVal.getId(), receiverId, user.getId(), cmd.getOrganizationId());
+                  workReportValProvider.createWorkReportValReceiverMap(receiver); */
                 //  send message to the receiver.
                 workReportMessageService.workReportUpdateMessage(report, reportVal, receiverId, user);
             }
