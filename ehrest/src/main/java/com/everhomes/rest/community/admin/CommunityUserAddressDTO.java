@@ -27,6 +27,7 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>memberLogDTOs: 用户认证记录， 参考{@link com.everhomes.rest.community.admin.OrganizationMemberLogDTO}</li>
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
+ *     <li>email: 邮箱</li>
  * </ul>
  */
 public class CommunityUserAddressDTO {
@@ -67,6 +68,16 @@ public class CommunityUserAddressDTO {
 	private Byte userSourceType;
 
 	private Long recentlyActiveTime;
+
+	private String email;
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public Long getCreateTime() {
 		return createTime;

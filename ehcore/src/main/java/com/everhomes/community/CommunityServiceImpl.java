@@ -2250,9 +2250,13 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		User user = userProvider.findUserById(cmd.getUserId());
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
+		UserIdentifier emailIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.EMAIL.getCode());
+		if (emailIdentifier != null) {
+		    dto.setEmail(emailIdentifier.getIdentifierToken());
+        }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2261,6 +2265,7 @@ public class CommunityServiceImpl implements CommunityService {
 			for (OrganizationMember member : members) {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+					break;
 				}
 			}
 		}
@@ -2361,6 +2366,10 @@ public class CommunityServiceImpl implements CommunityService {
 					communityUserOrgDetailDTO.setDetailId(userOrg.getId());
 					communityUserOrgDetailDTO.setExecutiveFlag(userOrg.getExecutiveTag());
 					communityUserOrgDetailDTO.setPositionTag(userOrg.getPositionTag());
+                    communityUserOrgDetailDTO.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())) {
+					    communityUserOrgDetailDTO.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+                    }
 					detailDto.setCommunityUserOrgDetailDTO(communityUserOrgDetailDTO);
 				}
 
@@ -2507,11 +2516,22 @@ public class CommunityServiceImpl implements CommunityService {
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
 					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
-					cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + cmd.getKeywords() + "%"));
-					cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
 				}
 
+				if (!StringUtils.isBlank(cmd.getOrganizationNames())) {
+				    String[] organizationName = cmd.getOrganizationNames().split(";");
+				    Condition cond = Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[0] + "%");
+				    if (organizationName.length > 1) {
+				        for (int i=1;i<organizationName.length-1;i++) {
+				            cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[i] + "%"));
+                        }
+                    }
+				    query.addConditions(cond);
+                }
+                if (!StringUtils.isBlank(cmd.getPhone())) {
+				    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like("%" + cmd.getPhone() + "%"));
+                }
 				if(null != UserGender.fromCode(cmd.getGender())){
 					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));
 				}
@@ -2526,7 +2546,9 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()));
 				}else if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull());
-				}
+				}else if(AuthFlag.ALL == AuthFlag.fromCode(cmd.getIsAuth())) {
+				    query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNotNull());
+                }
 
 				if(cmd.getStartTime() != null){
 					query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
