@@ -6766,4 +6766,10 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
+	public void tranferAssetMappings() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		
+	}
+
 }

@@ -1663,5 +1663,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移</p>
+     * <b>URL: /asset/tranferAssetMappings</b>
+     */
+    @RequestMapping("tranferAssetMappings")
+    @RestReturn(value = String.class)
+    public RestResponse tranferAssetMappings(HttpServletResponse response) {
+        assetService.tranferAssetMappings();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    
 }
 

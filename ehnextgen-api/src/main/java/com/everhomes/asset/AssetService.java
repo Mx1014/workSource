@@ -272,7 +272,7 @@ public interface AssetService {
 	 * 创建统一账单接口
 	 */
 	public ListBillsDTO createGeneralBill(CreateBillCommand cmd);
-	
-	
+
+	void tranferAssetMappings();
 	
 }

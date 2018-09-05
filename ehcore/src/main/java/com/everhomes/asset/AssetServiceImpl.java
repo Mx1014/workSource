@@ -5717,4 +5717,8 @@ public class AssetServiceImpl implements AssetService {
 		return null;
 	}
 
+	public void tranferAssetMappings() {
+		assetProvider.tranferAssetMappings();
+	}
+
 }
