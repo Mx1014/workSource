@@ -3,18 +3,20 @@ package com.everhomes.rest.activity;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
  *<ul>
  *<li>activityId:活动ID</li>
  *<li>adultCount:成人数</li>
  *<li>childCount:小孩数</li>
- *<li>phone:手机</li>
- *<li>realName:姓名</li>
- *<li>organizationId:公司Id，如果用户使用自定义的公司，则不传id仅传名称</li>
- *<li>organizationName:公司名称</li>
- *<li>position:职位</li>
- *<li>email:邮箱</li>
+ *<li>formOriginId: 表单formOriginID</li>
+ *<li>formId: 表单ID</li>
+ *<li>values: 报名中，每项对应的值{@link PostApprovalFormItem} </li>
  *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  *<li>signupSourceFlag: 来源  参考{@link com.everhomes.rest.activity.ActivityRosterSourceFlag}</li>
  *</ul>
@@ -27,18 +29,33 @@ public class ActivitySignupCommand {
     private Integer adultCount;
     @NotNull
     private Integer childCount;
-    
-    private String phone;
-    private String realName;
-    private Long organizationId;
-    private String organizationName;
-    private String position;
-    private String email;
+
+    private Long formId;
+    private Long formOriginId;
+
+	@ItemType(PostApprovalFormItem.class)
+	List<PostApprovalFormItem> values;
     private String payFlag;
 	private Byte signupSourceFlag;
     
     
     public ActivitySignupCommand() {
+    }
+
+    public Long getFormId() {
+        return formId;
+    }
+
+    public void setFormId(Long formId) {
+        this.formId = formId;
+    }
+
+    public Long getFormOriginId() {
+        return formOriginId;
+    }
+
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
     }
 
     public Long getActivityId() {
@@ -64,53 +81,13 @@ public class ActivitySignupCommand {
     public void setChildCount(Integer childCount) {
         this.childCount = childCount;
     }
-    
-    public String getPhone() {
-		return phone;
+
+	public List<PostApprovalFormItem> getValues() {
+		return values;
 	}
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-	public String getRealName() {
-		return realName;
-	}
-
-	public void setRealName(String realName) {
-		this.realName = realName;
-	}
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-	public String getOrganizationName() {
-		return organizationName;
-	}
-
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
-
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
+	public void setValues(List<PostApprovalFormItem> values) {
+		this.values = values;
 	}
 
 	public String getPayFlag() {

@@ -364,6 +364,9 @@ public class ForumServiceImpl implements ForumService {
             LocalEventContext context = new LocalEventContext();
             context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //add by liangming.huang 20180813
+            context.setCommunityId(cmd.getCommunityId());
+
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
@@ -721,7 +724,7 @@ public class ForumServiceImpl implements ForumService {
         if(handler != null) {
             handler.preProcessEmbeddedObject(post);
             forumProvider.createPost(post);
-            handler.postProcessEmbeddedObject(post);
+            handler.postProcessEmbeddedObject(post, cmd.getCommunityId());
         } else {
             forumProvider.createPost(post);
 

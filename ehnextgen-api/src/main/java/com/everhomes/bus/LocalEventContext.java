@@ -14,6 +14,9 @@ public class LocalEventContext {
     private Integer namespaceId;
     private Long uid;
     private String sceneType;
+    //add by liangming.huang 20180831 新积分系统需要
+    private Long communityId;
+    private Long appId;
 
     public LocalEventContext() {
     }
@@ -22,6 +25,22 @@ public class LocalEventContext {
         this.sceneType = sceneType;
         this.namespaceId = namespaceId;
         this.uid = uid;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public String getSceneType() {

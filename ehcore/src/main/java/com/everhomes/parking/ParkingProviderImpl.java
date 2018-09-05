@@ -142,6 +142,15 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 
 	@Override
+	public ParkingRechargeOrder findParkingRechargeOrderByBizOrderNum(String bizOrderNum) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.BIZ_ORDER_NO.eq(bizOrderNum));
+		return ConvertHelper.convert(query.fetchAny(), ParkingRechargeOrder.class);
+	}
+
+	@Override
 	public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);

@@ -87,6 +87,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
@@ -266,7 +267,7 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private ServiceModuleService serviceModuleService;
-    
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -3098,7 +3099,7 @@ public class AssetServiceImpl implements AssetService {
             }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
                 hasPay = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
-                hasUploadCertificate = view.getHasView();
+                hasUploadCertificate = view.getHasView();                
             }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
             	hasEnergy = view.getHasView();
             }
@@ -3417,10 +3418,11 @@ public class AssetServiceImpl implements AssetService {
 
 
     @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+    public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd) {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        return handler.placeAnAssetOrder(cmd);
+        cmd.setSourceType(SourceType.MOBILE.getCode());
+        return handler.createOrder(cmd);
     }
 
     @Override
@@ -4879,7 +4881,12 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listPayeeAccounts(cmd);
+        //调接口从电商获取收款方账户
+    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    	}else {
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    	}
     }
 
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
@@ -5422,7 +5429,7 @@ public class AssetServiceImpl implements AssetService {
 		} catch (Exception e) {
 			LOGGER.error("exportOrdersUtil cmd={}, Exception={}", cmd, e);
 		}
-    }
+    }	
 	
 	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
 		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
@@ -5646,10 +5653,11 @@ public class AssetServiceImpl implements AssetService {
 	
 	
 
-	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
+        cmd.setSourceType(SourceType.PC.getCode());
+        PreOrderDTO preOrderDTO = handler.createOrder(cmd);
         return preOrderDTO;
 	}
 
@@ -5667,5 +5675,6 @@ public class AssetServiceImpl implements AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
+
 
 }

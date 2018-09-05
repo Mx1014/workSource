@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,21 +27,22 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
-import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
-import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.news.*;
+import com.everhomes.rest.news.open.CreateOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsResponse;
+import com.everhomes.rest.news.open.OpenBriefNewsDTO;
+import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.base.Joiner;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +96,6 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import sun.reflect.CallerSensitive;
-import sun.reflect.Reflection;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -104,6 +104,9 @@ public class NewsServiceImpl implements NewsService {
 	private static final Long NEWS_MODULE_ID = 10800L;
 
 	private static final Integer NEWS_CONTENT_ABSTRACT_DEFAULT_LEN = 100;
+	
+	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
+	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
 
 	@Autowired
 	private UserService userService;
@@ -185,37 +188,108 @@ public class NewsServiceImpl implements NewsService {
 
 		// 检查用户的项目权限是否合法
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
-
-		News news = processNewsCommand(userId, namespaceId, cmd);
-
-		dbProvider.execute((TransactionStatus status) -> {
-			Long id = newsProvider.createNews(news);
-
-			if (null != cmd.getCommunityIds()) {
-				cmd.getCommunityIds().forEach(m -> {
-					NewsCommunity newsCommunity = new NewsCommunity();
-					newsCommunity.setNewsId(news.getId());
-					newsCommunity.setCommunityId(m);
-					newsProvider.createNewsCommunity(newsCommunity);
-				});
-			}
-			if (null != cmd.getNewsTagVals())
-				cmd.getNewsTagVals().forEach(r -> {
-					if (r != null && r.getNewsTagId() != null) {
-						NewsTagVals newsTagVals = new NewsTagVals();
-						newsTagVals.setNewsTagId(r.getNewsTagId());
-						newsTagVals.setNewsId(news.getId());
-						newsProvider.createNewsTagVals(newsTagVals);
-					}
-				});
-			return null;
-		});
-
-		syncNews(news.getId());
-
+		
+		// 创建新闻
+		News news = createNewsByAdmin(namespaceId, cmd);
+		
 		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
 		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		return response;
+	}
+
+	private News createNewsByAdmin(Integer namespaceId, CreateNewsCommand cmd) {
+		return createNews(namespaceId, cmd, TYPE_CREATE_BY_ADMIN);
+	}
+	
+	@Override
+	public News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd) {
+		return createNews(namespaceId, cmd, TYPE_CREATE_BY_THIRD_PARTY);
+	}
+
+	public News createNews(Integer namespaceId, Object cmdObject, byte createType) {
+
+		// 准备创建的News
+		News news = buildCreateNews(namespaceId, cmdObject, createType);
+
+		// 准备创建的tags
+		List<Long> newsTagIds = null;
+		List<Long> communityIds = null;
+		if (TYPE_CREATE_BY_ADMIN == createType) {
+			CreateNewsCommand cmd = (CreateNewsCommand) cmdObject;
+			if (null != cmd.getNewsTagVals()) {
+				newsTagIds = cmd.getNewsTagVals().stream().map(r -> {
+					return r.getNewsTagId();
+				}).collect(Collectors.toList());
+			}
+
+			communityIds = cmd.getCommunityIds();
+		} else {
+			CreateOpenNewsCommand cmd = (CreateOpenNewsCommand) cmdObject;
+			newsTagIds = cmd.getNewsTagIds();
+			communityIds = cmd.getProjectIds();
+		}
+
+		createNews(news, communityIds, newsTagIds, createType);
+		return news;
+	}
+
+	private void createNews(News news, List<Long> communityIds, List<Long> newsTagIds, byte createType) {
+
+		news.setCreateType(createType);
+
+		dbProvider.execute((TransactionStatus status) -> {
+			newsProvider.createNews(news);
+			createCommunityIds(news.getId(), communityIds);
+			createNewsTagVals(news.getId(), newsTagIds);
+			return null;
+
+		});
+
+		syncNews(news.getId());
+	}
+
+	private void createNewsTagVals(Long newsId, List<Long> newsTagIds) {
+		processNewsTagVals(newsId, newsTagIds, false);
+	}
+
+	private void processNewsTagVals(Long newsId, List<Long> newsTagIds, boolean isUpdate) {
+		if (CollectionUtils.isEmpty(newsTagIds)) {
+			return;
+		}
+
+		if (isUpdate) {
+			newsProvider.deletNewsTagVals(newsId);
+		}
+
+		newsTagIds.forEach(r -> {
+			if (r != null) {
+				NewsTagVals val = new NewsTagVals();
+				val.setNewsTagId(r);
+				val.setNewsId(newsId);
+				newsProvider.createNewsTagVals(val);
+			}
+		});
+	}
+
+	private void createCommunityIds(Long newsId, List<Long> communityIds) {
+		processCommunityIds(newsId, communityIds, false);
+	}
+
+	private void processCommunityIds(Long newsId, List<Long> communityIds, boolean isUpdate) {
+		if (CollectionUtils.isEmpty(communityIds)) {
+			return;
+		}
+
+		if (isUpdate) {
+			newsProvider.deleteNewsCommunity(newsId);
+		}
+
+		communityIds.forEach(m -> {
+			NewsCommunity newsCommunity = new NewsCommunity();
+			newsCommunity.setNewsId(newsId);
+			newsCommunity.setCommunityId(m);
+			newsProvider.createNewsCommunity(newsCommunity);
+		});
 	}
 
 	@Override
@@ -237,50 +311,97 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());
 
-		// 设置新的值
-		news.setTitle(cmd.getTitle());
-		news.setAuthor(cmd.getAuthor());
-		news.setCoverUri(cmd.getCoverUri());
-		news.setContentAbstract(cmd.getContentAbstract());
-		news.setContent(cmd.getContent());
-		news.setSourceDesc(cmd.getSourceDesc());
-		news.setSourceUrl(cmd.getSourceUrl());
-		news.setPhone(cmd.getPhone());
-		news.setVisibleType(cmd.getVisibleType());
-		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		// 更新操作
+		updateNewsByAdmin(news, cmd);
+	}
+	
+	private void updateNewsByAdmin(News originNews, UpdateNewsCommand cmd) {
+		updateNews(originNews, cmd, TYPE_CREATE_BY_ADMIN);
+	}
+	
+	@Override
+	public void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd) {
+		updateNews(originNews, cmd, TYPE_CREATE_BY_THIRD_PARTY);
+	}
+	
+	public void updateNews(News originNews, Object cmdObject, byte createType) {
 
-		// 调整摘要
-		adjustNewsContentAbstract(news);
+		// 准备创建的News
+		buildUpdateNews(originNews, cmdObject, createType);
 
-		if (cmd.getPublishTime() != null) {
-			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		// 准备创建的tags
+		List<Long> newsTagIds = null;
+		List<Long> communityIds = null;
+		if (TYPE_CREATE_BY_ADMIN == createType) {
+			UpdateNewsCommand cmd = (UpdateNewsCommand) cmdObject;
+			if (null != cmd.getNewsTagVals()) {
+				newsTagIds = cmd.getNewsTagVals().stream().map(r -> {
+					return r.getNewsTagId();
+				}).collect(Collectors.toList());
+			}
+
+			communityIds = cmd.getCommunityIds();
+		} else {
+			UpdateOpenNewsCommand cmd = (UpdateOpenNewsCommand) cmdObject;
+			newsTagIds = cmd.getNewsTagIds();
+			communityIds = cmd.getProjectIds();
 		}
 
+		// 实际更新
+		updateNews(originNews, communityIds, newsTagIds);
+
+		return;
+	}
+
+	private void buildUpdateNews(News originNews, Object cmdObject, byte createType) {
+
+		UpdateNewsCommand cmd = null;
+		if (TYPE_CREATE_BY_ADMIN == createType) {
+			cmd = (UpdateNewsCommand) cmdObject;
+		} else {
+			UpdateOpenNewsCommand cmd2 = (UpdateOpenNewsCommand) cmdObject;
+			cmd = ConvertHelper.convert(cmd2, UpdateNewsCommand.class);
+			cmd.setCoverUri(cmd2.getCoverUrl());
+		}
+
+		// 设置新的值
+		originNews.setTitle(cmd.getTitle());
+		originNews.setAuthor(cmd.getAuthor());
+		originNews.setCoverUri(cmd.getCoverUri());
+		originNews.setContentAbstract(cmd.getContentAbstract());
+		// news.setCategoryId(cmd.getCategoryId());
+		originNews.setContent(cmd.getContent());
+		originNews.setSourceDesc(cmd.getSourceDesc());
+		originNews.setSourceUrl(cmd.getSourceUrl());
+		originNews.setPhone(cmd.getPhone());
+//		originNews.setVisibleType(cmd.getVisibleType());
+		originNews.setStatus(generateNewsStatus(cmd.getStatus()));
+
+		// 调整摘要
+		adjustNewsContentAbstract(originNews);
+		
+		return;
+	}
+
+	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
+		
 		dbProvider.execute((TransactionStatus status) -> {
 			newsProvider.updateNews(news);
-
-			if (null != cmd.getCommunityIds()) {
-				newsProvider.deleteNewsCommunity(news.getId());
-				cmd.getCommunityIds().forEach(m -> {
-					NewsCommunity newsCommunity = new NewsCommunity();
-					newsCommunity.setNewsId(news.getId());
-					newsCommunity.setCommunityId(m);
-					newsProvider.createNewsCommunity(newsCommunity);
-				});
-			}
-
-			if (null != cmd.getNewsTagVals()) {
-				newsProvider.deletNewsTagVals(news.getId());
-				cmd.getNewsTagVals().forEach(r -> {
-					NewsTagVals newsTagVals = new NewsTagVals();
-					newsTagVals.setNewsTagId(r.getNewsTagId());
-					newsTagVals.setNewsId(news.getId());
-					newsProvider.createNewsTagVals(newsTagVals);
-				});
-			}
+			updateCommunityIds(news.getId(), communityIds);
+			updateNewsTagVals(news.getId(), newsTagIds);
 			return null;
 		});
+
 		syncNews(news.getId());
+	}
+
+	private void updateNewsTagVals(Long newsId, List<Long> newsTagIds) {
+		processNewsTagVals(newsId, newsTagIds, true);
+		
+	}
+
+	private void updateCommunityIds(Long newsId, List<Long> communityIds) {
+		processCommunityIds(newsId, communityIds, true);
 	}
 
 	private void checkBlacklist(String ownerType, Long ownerId) {
@@ -290,26 +411,36 @@ public class NewsServiceImpl implements NewsService {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
 	}
+	
+	private News buildCreateNewsAdmin(Integer namespaceId, CreateNewsCommand cmd) {
+		return buildCreateNews(namespaceId, cmd, TYPE_CREATE_BY_ADMIN);
+	}
 
-	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
-		News news = ConvertHelper.convert(cmd, News.class);
+	private News buildCreateNews(Integer namespaceId,  Object cmdObject, byte createType) {
+		News news = null;
+		Long publishTime = null;
+		if (TYPE_CREATE_BY_ADMIN == createType) {
+			CreateNewsCommand cmd = (CreateNewsCommand)cmdObject;
+			news = ConvertHelper.convert(cmd, News.class);
+			publishTime = cmd.getPublishTime();
+		} else {
+			CreateOpenNewsCommand cmd = (CreateOpenNewsCommand)cmdObject;
+			news = ConvertHelper.convert(cmd, News.class);
+			publishTime = cmd.getPublishTime();
+			news.setCoverUri(cmd.getCoverUrl());
+		}
+		
 		news.setNamespaceId(namespaceId);
-		news.setOwnerType(cmd.getOwnerType());
+		news.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
-		news.setTopIndex(0L);
-		news.setTopFlag(NewsTopFlag.NONE.getCode());
-		news.setStatus(generateNewsStatus(cmd.getStatus()));
-		news.setCreatorUid(userId);
-		news.setDeleterUid(0L);
-		news.setPhone(cmd.getPhone());
+		news.setStatus(generateNewsStatus(news.getStatus()));
+		news.setCreateType(createType);
+		if (publishTime != null) {
+			news.setPublishTime(new Timestamp(publishTime));
+		}
 		
 		//调整摘要
 		adjustNewsContentAbstract(news);
-		
-		if (cmd.getPublishTime() != null) {
-			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
-		}
-		
 		return news;
 	}
 
@@ -474,7 +605,7 @@ public class NewsServiceImpl implements NewsService {
 					command.setSourceUrl(sourceUrl);
 					command.setCategoryId(cmd.getCategoryId());
 					checkNewsParameterOfImport(userId, command);
-					newsList.add(processNewsCommand(userId, namespaceId, command));
+					newsList.add(buildCreateNewsAdmin(namespaceId, command));
 				}
 			}
 			return newsList;
@@ -549,23 +680,60 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		// 有关键字的查询
-		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 		SearchNewsResponse response = null;
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
 			response = searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
-					pageAnchor, pageSize, isScene, cmd.getStatus());
+					cmd.getPageAnchor(), cmd.getPageSize(), isScene, cmd.getStatus());
 		} else {
 			response = searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
-					cmd.getTagIds(), pageAnchor, pageSize, isScene, cmd.getStatus());
+					cmd.getTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), isScene, cmd.getStatus());
 		}
 		return ConvertHelper.convert(response, ListNewsResponse.class);
 	}
+	
+	@Override
+	public ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId) {
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, List<Long> communityIds, Long categoryId,
-			Long pageAnchor, Integer pageSize, Byte status) {
-		return listNews(userId, namespaceId, communityIds, categoryId, pageAnchor, pageSize, false, status);
+		// 若无关键字查询，直接返回简单查询
+		Long userId = 0L;
+		List<BriefNewsDTO> newsList = null;
+		Long nextPageAnchor = null;
+		
+		if (StringUtils.isEmpty(cmd.getKeyword()) && CollectionUtils.isEmpty(cmd.getNewsTagIds())) {
+			List<Long> ownerIds = null == cmd.getOwnerId() ? null : Arrays.asList(cmd.getOwnerId());
+			ListNewsResponse resp = listNews(userId, namespaceId, ownerIds, cmd.getCategoryId(), cmd.getPageAnchor(),
+					cmd.getPageSize(), false, cmd.getStatus());
+			newsList = resp.getNewsList();
+			nextPageAnchor = resp.getNextPageAnchor();
+
+		} else {
+
+			SearchNewsResponse resp = searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(),
+					cmd.getKeyword(), cmd.getNewsTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), false,
+					cmd.getStatus());
+			newsList = resp.getNewsList();
+			nextPageAnchor = resp.getNextPageAnchor();
+		}
+
+		ListOpenNewsResponse resp = new ListOpenNewsResponse();
+		resp.setNextPageAnchor(nextPageAnchor);
+		resp.setNewsList(convertToOpenNewsList(newsList));
+		return resp;
+	}
+	
+
+	private List<OpenBriefNewsDTO> convertToOpenNewsList(List<BriefNewsDTO> newsList) {
+		if (CollectionUtils.isEmpty(newsList)) {
+			return null;
+		}
+		
+		return newsList.stream().map(r->{
+			OpenBriefNewsDTO openNewsDto = ConvertHelper.convert(r, OpenBriefNewsDTO.class);
+			openNewsDto.setPublishTime(r.getPublishTime().getTime());
+			openNewsDto.setCoverUrl(r.getCoverUri());
+			return openNewsDto;
+		}).collect(Collectors.toList());
 	}
 
 	private ListNewsResponse listNews(Long userId, Integer namespaceId, List<Long> communityIds, Long categoryId,
@@ -662,18 +830,16 @@ public class NewsServiceImpl implements NewsService {
 		}
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
 			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
-					pageAnchor, pageSize, false, cmd.getStatus());
+					cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
 
 		} else {
 			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
-					cmd.getTagIds(), pageAnchor, pageSize, false, cmd.getStatus());
+					cmd.getTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
 		}
 	}
 
@@ -681,7 +847,7 @@ public class NewsServiceImpl implements NewsService {
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理 xiongying
 	 */
 	private String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,
-			List<Long> tagIds, Long pageAnchor, Integer pageSize, Byte status) {
+			List<Long> tagIds, Long pageAnchor, Integer pageSize, Byte status, boolean isScene) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
@@ -729,7 +895,11 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		if (null != communityId) {
-			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
+			if (isScene) {
+				must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
+			} else {
+				must.add(JSONObject.parse("{\"term\":{\"ownerId\":" + communityId + "}}"));
+			}
 		}
 
 		// 设置过滤条件
@@ -750,15 +920,15 @@ public class NewsServiceImpl implements NewsService {
 
 	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId,
 			String keyword, List<Long> tagIds, Long pageAnchor, Integer pageSize, boolean isScene, Byte status) {
-
-		// 更新tagId
-//		updateTagIds(namespaceId, tagIds);
+		
+		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
+		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 
 		String jsonString = getSearchJson(communityId, userId, namespaceId, categoryId, keyword, tagIds, pageAnchor,
-				pageSize, status);
+				pageSize, status, isScene);
 
 		// 需要查询的字段
-		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType,tag,status";
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType,tag,status,ownerId,categoryId,phone";
 
 		// 从es查询
 		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
@@ -786,6 +956,9 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeCount(o.getLong("likeCount"));
 			newsDTO.setChildCount(o.getLong("childCount"));
 			newsDTO.setTopFlag(o.getByte("topFlag"));
+			newsDTO.setOwnerId(o.getLong("ownerId"));
+			newsDTO.setCategoryId(o.getLong("categoryId"));
+			newsDTO.setPhone(o.getString("phone"));
 			if (!isScene) {
 				newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			}
@@ -1056,9 +1229,15 @@ public class NewsServiceImpl implements NewsService {
 
 		// 权限核实
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), newsChk.getOwnerId(), cmd.getAppId());
+		
+		//删除
+		deleteNews(userId, newsChk);
+	}
+	
+	@Override
+	public void deleteNews(Long userId, News news) {
 
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
-			News news = findNewsById(userId, newsId);
 			news.setDeleterUid(userId);
 			news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			news.setStatus(NewsStatus.INACTIVE.getCode());
@@ -1066,7 +1245,7 @@ public class NewsServiceImpl implements NewsService {
 			return null;
 		});
 
-		syncNewsWhenDelete(newsId);
+		syncNewsWhenDelete(news.getId());
 	}
 
 	@Override
@@ -1741,7 +1920,7 @@ public class NewsServiceImpl implements NewsService {
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
 		String jsonString = getSearchJson(null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
-				NewsStatus.ACTIVE.getCode());
+				NewsStatus.ACTIVE.getCode(), true);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
@@ -2294,4 +2473,28 @@ public class NewsServiceImpl implements NewsService {
 		response.setContent(content);
 		return response;
 	}
+	
+
+	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
+		News news = ConvertHelper.convert(cmd, News.class);
+		news.setNamespaceId(namespaceId);
+		news.setOwnerType(cmd.getOwnerType());
+		news.setContentType(NewsContentType.RICH_TEXT.getCode());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		news.setCreatorUid(userId);
+		news.setDeleterUid(0L);
+		news.setPhone(cmd.getPhone());
+		
+		//调整摘要
+		adjustNewsContentAbstract(news);
+		
+		if (cmd.getPublishTime() != null) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
+		
+		return news;
+	}
+
 }

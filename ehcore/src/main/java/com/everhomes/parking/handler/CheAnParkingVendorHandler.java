@@ -134,8 +134,13 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
             parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
             parkingCardDTO.setParkingLotId(parkingLot.getId());
+            List<ParkingCardRequest> cardRequests = parkingProvider.listParkingCardRequests(null,null,null,parkingLot.getId(),plateNumber,ParkingCardRequestStatus.PROCESSING.getCode(),null,null,null,20);
+            ParkingCardRequest cardRequest = null;
+            if(null != cardRequests && cardRequests.size() > 0){
+                cardRequest = cardRequests.get(0);
+                parkingCardDTO.setPlateOwnerName(cardRequest.getPlateOwnerName());// 车主名称
 
-            parkingCardDTO.setPlateOwnerName(card.getName());// 车主名称
+            }
             parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
             parkingCardDTO.setEndTime(endTime);
 
@@ -194,6 +199,13 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             cardRate.setRateName(i + "个月");
             cardRate.setMonthCount(new BigDecimal(i));
             ratedtos.add(cardRate);
+        }
+
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            ratedtos.forEach(dto ->{
+                dto.setPrice(new BigDecimal(debugfee));
+            });
         }
 
         return ratedtos;
@@ -285,8 +297,11 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     boolean payTempCardFee(ParkingRechargeOrder order){
 
         JSONObject param = new JSONObject();
+        param.put("credentialtype", "1");
+        param.put("credential", order.getPlateNumber());
         param.put("orderNo", order.getOrderToken());
-        param.put("amount", (order.getOriginalPrice().movePointLeft(2).toString()));
+        param.put("parkcost", order.getOriginalPrice().toString());
+        param.put("amount", order.getOriginalPrice().toString());
         param.put("discount", 0);
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);

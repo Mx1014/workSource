@@ -4,6 +4,11 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.flow.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
@@ -15,10 +20,14 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.gorder.order.*;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -83,6 +92,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private ContentServerService contentServerService;
     @Value("${server.contextPath:}")
     private String contextPath;
+    @Autowired
+    protected GeneralOrderService orderService;
 
     @Override
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
@@ -276,7 +287,6 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public PreOrderDTO createPreOrder(PreOrderCommand cmd,RentalOrder order) {
-        //UserContext.setCurrentNamespaceId(1);
         PreOrderDTO preOrderDTO = null;
         //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
         Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(cmd.getOrderId());
@@ -285,14 +295,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             return preOrderDTO;
         }
         //2、检查买方（付款方）是否有会员，无则创建
-        Long payerAccount = this.checkAndCreatePaymentUser(UserContext.currentUserId(),UserContext.getCurrentNamespaceId());
-        if (payerAccount == null){
-            LOGGER.error("payerUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                    "payerUserId no find");
-        }else{
-            cmd.setPayerId(payerAccount);
-        }
+//        Long payerAccount = this.checkAndCreatePaymentUser(UserContext.currentUserId(),UserContext.getCurrentNamespaceId());
+//        if (payerAccount == null){
+//            LOGGER.error("payerUserId no find, cmd={}", cmd);
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//                    "payerUserId no find");
+//        }else{
+//            cmd.setPayerId(payerAccount);
+//        }
 
         //3、收款方是否有会员，无则报错
         cmd.setBizPayeeId(this.getRentalOrderPayeeAccount(order.getId()));
@@ -304,7 +314,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
 
         //4、组装报文，发起下单请求
-        OrderCommandResponse orderCommandResponse = createOrder(cmd);
+        PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd);
 
         //5、组装支付方式
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
@@ -316,10 +326,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         return preOrderDTO;
     }
 
-    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
-        dto.setAmount(cmd.getAmount());
-        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = orderCommandResponse.getPaymentMethods();
+    private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
+        OrderCommandResponse response = orderCommandResponse.getPayResponse();
+        PreOrderDTO dto = ConvertHelper.convert(response, PreOrderDTO.class);
+        dto.setAmount(changePayAmount(cmd.getAmount()));
+        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
@@ -335,33 +346,6 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         return dto;
     }
 
-    public List<PayMethodDTO> getPayMethods() {
-        List<PayMethodDTO> payMethods = new ArrayList<>();
-        PayMethodDTO alipay = new PayMethodDTO();
-        alipay.setPaymentName("支付宝支付");
-        PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
-        alipayParamsDTO.setPayType("A01");
-        alipay.setExtendInfo(getPayMethodExtendInfo());
-        String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
-        alipay.setPaymentLogo(url);
-        alipay.setPaymentParams(alipayParamsDTO);
-        alipay.setPaymentType(8);
-        payMethods.add(alipay);
-
-        PayMethodDTO wxpay = new PayMethodDTO();
-        wxpay.setPaymentName("微信支付");
-        wxpay.setExtendInfo(getPayMethodExtendInfo());
-        url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
-        wxpay.setPaymentLogo(url);
-        PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
-        wxParamsDTO.setPayType("no_credit");
-        wxpay.setPaymentParams(wxParamsDTO);
-        wxpay.setPaymentType(1);
-
-        payMethods.add(wxpay);
-        return payMethods;
-    }
-
     private String getPayMethodExtendInfo(){
         String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.payHomeUrl", "");
         String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
@@ -372,60 +356,168 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public void refundOrder(RentalOrder order,Long amount) {
-        CreateOrderCommand cmd = new CreateOrderCommand();
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-        cmd.setRefundOrderId(record.getPayOrderId());
-        cmd.setBizOrderNum(record.getOrderNo().toString());
-        cmd.setAmount(amount);
+
+        CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        createRefundOrderCommand.setAccountCode("NS"+record.getNamespaceId().toString());
+        createRefundOrderCommand.setBusinessOrderNumber(record.getBizOrderNum());
+        createRefundOrderCommand.setAmount(amount);
+        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"refund.v2.callback.url.rental", "");
         String backUrl = homeUrl + contextPath + backUri;
-        cmd.setBackUrl(backUrl);
-        cmd.setAccountCode("NS"+record.getNamespaceId().toString());
-        CreateOrderRestResponse refundOrder = payServiceV2.createRefundOrder(cmd);
-        if(refundOrder != null && refundOrder.getErrorCode() != null
-                && refundOrder.getErrorCode().equals(HttpStatus.OK.value())){
+        createRefundOrderCommand.setCallbackUrl(backUrl);
+        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+
+        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
         } else{
             LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", order.getOrderNo(), order,
-                    refundOrder);
+                    refundOrderRestResponse);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
                     RentalServiceErrorCode.ERROR_REFUND_ERROR,
                     "bill refund error");
         }
+
     }
 
-    private void saveOrderRecord(PreOrderCommand cmd , OrderCommandResponse orderCommandResponse) {
+    private void saveOrderRecord(PreOrderCommand cmd , PurchaseOrderCommandResponse orderCommandResponse) {
+        OrderCommandResponse response = orderCommandResponse.getPayResponse();
         Rentalv2OrderRecord record = new Rentalv2OrderRecord();
         record.setOrderNo(cmd.getOrderId());
-        record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
-        record.setPayOrderId(orderCommandResponse.getOrderId());
+        record.setBizOrderNum(response.getBizOrderNum());
+        record.setPayOrderId(response.getOrderId());
         record.setAccountId(cmd.getBizPayeeId());
-        record.setAmount(cmd.getAmount());
-        record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
-        record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
-        record.setOrderCommitToken(orderCommandResponse.getOrderCommitToken());
-        record.setOrderCommitUrl(orderCommandResponse.getOrderCommitUrl());
-        record.setPayInfo(orderCommandResponse.getPayInfo());
+        record.setAmount(changePayAmount(cmd.getAmount()));
+        record.setOrderCommitNonce(response.getOrderCommitNonce());
+        record.setOrderCommitTimestamp(response.getOrderCommitTimestamp());
+        record.setOrderCommitToken(response.getOrderCommitToken());
+        record.setOrderCommitUrl(response.getOrderCommitUrl());
+        record.setPayInfo(response.getPayInfo());
 
         this.rentalv2AccountProvider.createOrderRecord(record);
     }
 
-    private OrderCommandResponse createOrder(PreOrderCommand preOrderCommand){
+    private PurchaseOrderCommandResponse createOrder(PreOrderCommand preOrderCommand){
         //组装参数
-        CreateOrderCommand createOrderCommand = newCreateOrderCommandForPay(preOrderCommand);
-        //向支付预下单
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-command=" + GsonUtil.toJson(createOrderCommand));}
-        CreateOrderRestResponse createOrderResp = payServiceV2.createCustomOrder(createOrderCommand);
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(createOrderResp));}
-        if(!createOrderResp.getErrorCode().equals(200)) {
-            LOGGER.error("create order fail");
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                    "create order fail");
+//        CreateOrderCommand createOrderCommand = newCreateOrderCommandForPay(preOrderCommand);
+//
+//
+//        //向支付预下单
+//        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-command=" + GsonUtil.toJson(createOrderCommand));}
+//        CreateOrderRestResponse createOrderResp = payServiceV2.createCustomOrder(createOrderCommand);
+//        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(createOrderResp));}
+//        if(!createOrderResp.getErrorCode().equals(200)) {
+//            LOGGER.error("create order fail");
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+//                    "create order fail");
+//        }
+//
+//        OrderCommandResponse  response = createOrderResp.getResponse();
+
+        CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(preOrderCommand);
+        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
         }
 
-        OrderCommandResponse  response = createOrderResp.getResponse();
-        return response;
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+        return orderCommandResponse;
+    }
+
+    /*
+     * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+       CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+     */
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
+
+    private CreatePurchaseOrderCommand preparePaymentBillOrder(PreOrderCommand cmd) {
+        CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+        //PaymentParamsDTO转为Map
+        Map<String, String> flattenMap = new HashMap<>();
+        StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
+
+        BigDecimal totalAmountCents = cmd.getAmount();
+        preOrderCommand.setAmount(changePayAmount(totalAmountCents));
+
+
+        String accountCode = "NS"+cmd.getNamespaceId();
+
+        preOrderCommand.setAccountCode(accountCode);
+        preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        preOrderCommand.setBusinessOrderType(cmd.getOrderType());
+        // 移到统一订单系统完成
+        // String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        // preOrderCommand.setBizOrderNum(BizOrderNum);
+        BusinessPayerType payerType = BusinessPayerType.USER;
+        preOrderCommand.setBusinessPayerType(payerType.getCode());
+        preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+        String businessPayerParams = getBusinessPayerParams(cmd);
+        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+       // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
+        preOrderCommand.setPaymentPayeeId(cmd.getBizPayeeId());
+
+        preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+        preOrderCommand.setPaymentParams(flattenMap);
+        //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.rental", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        preOrderCommand.setCallbackUrl(backUrl);
+        preOrderCommand.setExtendInfo(cmd.getExtendInfo());
+        preOrderCommand.setGoodsName("资源预订");
+        preOrderCommand.setGoodsDescription(null);
+        preOrderCommand.setIndustryName(null);
+        preOrderCommand.setIndustryCode(null);
+        preOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        preOrderCommand.setOrderRemark1("资源预订");
+        //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+        preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
+        preOrderCommand.setOrderRemark4(null);
+        preOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+        return preOrderCommand;
+    }
+
+    private String getBusinessPayerParams(PreOrderCommand cmd) {
+
+        Long businessPayerId = UserContext.currentUserId();
+
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
     }
 
     private CreateOrderCommand newCreateOrderCommandForPay(PreOrderCommand cmd){
@@ -436,7 +528,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         CreateOrderCommand createOrderCmd = new CreateOrderCommand();
         //业务系统中的订单号，请在整个业务系统中约定好唯一规则；
         createOrderCmd.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-        createOrderCmd.setAmount(cmd.getAmount());//需要将元转化为分，使用此类: AmountUtil.unitToCent()
+        createOrderCmd.setAmount(changePayAmount(cmd.getAmount()));//需要将元转化为分，使用此类: AmountUtil.unitToCent()
         String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
         LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
         createOrderCmd.setBizOrderNum(BizOrderNum);
@@ -486,7 +578,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     private PreOrderDTO recordToDto(Rentalv2OrderRecord record, PreOrderCommand cmd){
         PreOrderDTO dto = ConvertHelper.convert(record, PreOrderDTO.class);
-        dto.setAmount(cmd.getAmount());
+        dto.setAmount(changePayAmount(cmd.getAmount()));
         dto.setExtendInfo(cmd.getExtendInfo());
         ListClientSupportPayMethodCommandResponse response = payServiceV2.listClientSupportPayMethod("NS"+UserContext.getCurrentNamespaceId(),
                 cmd.getClientAppName());
@@ -644,4 +736,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 //			rentalService.cancelOrderSendMessage(bill);
 
     }
+
+    public Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
 }

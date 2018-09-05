@@ -41,7 +41,7 @@ public class LostAndFoundEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
         String embeddedJson = post.getEmbeddedJson();
         try {
             if(embeddedJson != null && embeddedJson.trim().length() > 0) {
