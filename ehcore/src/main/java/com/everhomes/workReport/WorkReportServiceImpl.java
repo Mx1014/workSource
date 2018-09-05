@@ -502,7 +502,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         dbProvider.execute((TransactionStatus status) -> {
             Timestamp reminderTime = null;
-            if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.SUMMARY){
+            if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.SUMMARY) {
                 ReportMsgSettingDTO msg = JSON.parseObject(report.getReceiverMsgSeeting(), ReportMsgSettingDTO.class);
                 reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), msg.getMsgTimeType(), msg.getMsgTimeMark(), msg.getMsgTime()));
             }
@@ -519,7 +519,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.IMMEDIATELY)
                     workReportMessageService.workReportPostMessage(report, reportVal, receiverId, user);
                 else
-                    createWorkReportValReceiverMsg(report,reportVal,reminderTime,receiverId);
+                    createWorkReportValReceiverMsg(report, reportVal, reminderTime, receiverId);
             }
             return null;
         });
