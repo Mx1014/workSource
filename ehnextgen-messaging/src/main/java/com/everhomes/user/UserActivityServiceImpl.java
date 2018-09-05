@@ -987,7 +987,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
         UserTreasureDTO point = pointService.getPointTreasure();
         rsp.setPoint(point.getCount());
-
+        if (rsp.getPoint() == null) {
+            rsp.setPoint(0L);
+        }
         return rsp;
     }
 

@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.point.PointService;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.personal_center.CreatePersonalCenterSettingsResponse;
@@ -23,11 +25,13 @@ import com.everhomes.rest.personal_center.PersonalCenterSettingDTO;
 import com.everhomes.rest.personal_center.PersonalCenterSettingRegionType;
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import com.everhomes.rest.personal_center.PersonalCenterSettingType;
+import com.everhomes.rest.personal_center.ShopMallId;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -70,6 +74,8 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
 
     @Autowired
     private UserActivityProvider userActivityProvider;
+    @Autowired
+    private PointService pointService;
     @Override
     public void createUserEmail(CreateUserEmailCommand cmd) {
         Long userId = UserContext.currentUserId();
@@ -130,8 +136,11 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
             if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-                dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+                UserTreasureDTO point = pointService.getPointTreasure();
+                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
+                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+                }
             }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
@@ -170,7 +179,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or apply path, homeUrl=" + homeurl + ", applyShopPath=" + applyShopPath);
             return null;
         } else {
-            return homeurl + applyShopPath;
+            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+            if (mallId != null) {
+                applyShopPath = applyShopPath.replace("?","&");
+                return homeurl +"?mallId=" +mallId + applyShopPath;
+            }else {
+                return homeurl + applyShopPath;
+            }
         }
     }
 
@@ -182,7 +197,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or manage path, homeUrl=" + homeurl + ", manageShopPath=" + manageShopPath);
             return null;
         } else {
-            return homeurl + manageShopPath;
+            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+            if (mallId != null) {
+                manageShopPath = manageShopPath.replace("?","&");
+                return homeurl +"?mallId=" +mallId + manageShopPath;
+            }else {
+                return homeurl + manageShopPath;
+            }
         }
     }
 
@@ -246,6 +267,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 personalCenterSetting.setCreateTime(new Timestamp(new Date().getTime()));
                 personalCenterSetting.setCreateUid(UserContext.currentUserId());
                 personalCenterSetting.setNamespaceId(cmd.getNamespaceId());
+                personalCenterSetting.setLinkUrl(getLinkUrl(personalCenterSetting.getType()));
                 this.personalCenterSettingProvider.createPersonalCenterSetting(personalCenterSetting);
                 PersonalCenterSettingDTO returnDto = ConvertHelper.convert(personalCenterSetting, PersonalCenterSettingDTO.class);
                 returnDto.setIconUrl(parseUrl(returnDto.getIconUri(),cmd.getNamespaceId()));
@@ -303,5 +325,17 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         Timestamp dayEnd = new Timestamp(getTime(23,59,59).getTime());
         int count = this.personalCenterSettingProvider.countPersonalCenterSettingVersion(namespaceId, dayStart, dayEnd);
         return version+count+1;
+    }
+
+    private String getLinkUrl(Integer type){
+        List<PersonalCenterSetting> list = this.personalCenterSettingProvider.queryDefaultPersonalCenterSettings();
+        String linkUrl = "";
+        for (PersonalCenterSetting personalCenterSetting : list) {
+            if (personalCenterSetting.getType().equals(type)) {
+                linkUrl =  personalCenterSetting.getLinkUrl();
+                break;
+            }
+        }
+        return linkUrl;
     }
 }

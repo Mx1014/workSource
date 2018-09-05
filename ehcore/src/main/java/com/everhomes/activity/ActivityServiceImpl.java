@@ -7512,7 +7512,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
             List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别"));
             List<PostApprovalFormItem> itemList = new ArrayList<>();
-            if (rosters.size() >= 1) {
+            if (rosters.size() > 1) {
                 itemList = signupInfoDTOs.get(1).getValues();
                 if (!CollectionUtils.isEmpty(itemList)) {
                     for (PostApprovalFormItem postApprovalFormItem : itemList) {
@@ -7567,8 +7567,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 signupValue.add(signupInfoDTO.getSourceFlagText());
                 signupValue.add(signupInfoDTO.getSignupStatusText());
                 if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-                    signupValue.add(signupInfoDTO.getPayAmount().toString());
-                    signupValue.add(signupInfoDTO.getRefundAmount().toString());
+                    signupValue.add(String.valueOf(signupInfoDTO.getPayAmount()));
+                    signupValue.add(String.valueOf(signupInfoDTO.getRefundAmount()));
                 }
                 if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
                     signupValue.add(signupInfoDTO.getCheckinFlagText());

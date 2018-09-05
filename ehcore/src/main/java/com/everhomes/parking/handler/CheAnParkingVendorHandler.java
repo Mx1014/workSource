@@ -101,7 +101,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         }
 
         dto.setParkingTime(tempFee.getParktime());
-//        dto.setDelayTime(tempFee.getDelayTime());
+        dto.setDelayTime(15);
         dto.setPrice(new BigDecimal(tempFee.getAmount()));
 
         dto.setOrderToken(tempFee.getOrderNo());
@@ -201,6 +201,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             ratedtos.add(cardRate);
         }
 
+//      测试用配置费用
         String debugfee = configProvider.getValue("parking.test.monthfee","0");
         if(!debugfee.equals("0")){
             ratedtos.forEach(dto ->{
@@ -535,6 +536,12 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
                 dto.setPayMoney(price);
             }
             dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+        }
+
+//      测试用配置费用
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            dto.setPayMoney(new BigDecimal(debugfee));
         }
 
         return dto;
