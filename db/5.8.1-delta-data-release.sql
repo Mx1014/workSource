@@ -112,6 +112,16 @@ VALUES ((@id:=@id+1), 'activity.notification', '21', 'zh_CN', '活动报名成�
 -- REMARK: 更新收款账户模块的权限控制类型你给。
 UPDATE eh_service_modules SET path = '/200/140000/58000', module_control_type = 'community_control' WHERE id = 58000;
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('personal.wallet.home.url', 'https://payv2.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('personal.order.home.url', 'https://biz.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'会员等级','会员等级',0,1,0,1,0,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'积分','积分',0,2,0,1,1,2,'',1,1,'/integral-management/build/index.html?systemId=%s&ehnavigatorstyle=2#/home#sign_suffix');
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -126,6 +136,30 @@ DELETE FROM `eh_configurations` WHERE `name`='pay.v2.callback.url.pmsy';
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('pay.v2.callback.url.asset', '/pmsy/payNotify', '物业缴费新支付回调接口', 999993, NULL, 0);
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'订单','订单',1,2,1,0,3,2,'',1,1,'/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'卡券','卡券',1,3,1,0,4,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'发票','发票',1,4,0,1,5,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的申请','我的申请',2,1,1,1,0,6,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的地址','我的地址',2,1,2,1,0,7,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的店铺','我的店铺',2,1,3,1,1,8,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的发布','我的发布',2,2,1,1,1,9,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的收藏','我的收藏',2,2,2,1,1,10,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -146,10 +180,30 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zijing
 -- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
--- AUTHOR:
--- REMARK:
-
-
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=14#/');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'订单','订单',1,2,1,0,3,2,'',1,1,'/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'卡券','卡券',1,3,1,0,4,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'发票','发票',1,4,0,1,5,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的申请','我的申请',2,1,1,1,0,6,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的地址','我的地址',2,1,2,1,0,7,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的店铺','我的店铺',2,1,3,1,1,8,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的发布','我的发布',2,2,1,1,1,9,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的收藏','我的收藏',2,2,2,1,1,10,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -158,8 +212,31 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guangda
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=12#/');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'订单','订单',1,2,1,0,3,2,'',1,1,'/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'卡券','卡券',1,3,1,0,4,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'发票','发票',1,4,0,1,5,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的申请','我的申请',2,1,1,1,0,6,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的地址','我的地址',2,1,2,1,0,7,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的店铺','我的店铺',2,1,3,1,1,8,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的发布','我的发布',2,2,1,1,1,9,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的收藏','我的收藏',2,2,2,1,1,10,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -170,8 +247,31 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay
 -- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
--- AUTHOR: 
--- REMARK: 
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=11#/');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'订单','订单',1,2,1,0,3,2,'',1,1,'/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'卡券','卡券',1,3,1,0,4,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'发票','发票',1,4,0,1,5,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的申请','我的申请',2,1,1,1,0,6,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的地址','我的地址',2,1,2,1,0,7,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的店铺','我的店铺',2,1,3,1,1,8,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的发布','我的发布',2,2,1,1,1,9,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的收藏','我的收藏',2,2,2,1,1,10,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -193,8 +293,30 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: anbang
 -- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心初始化数据
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=13#/');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
+VALUES ((@id := @id + 1),0,'订单','订单',1,2,1,0,3,2,'',1,1,'/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix');
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'卡券','卡券',1,3,1,0,4,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'发票','发票',1,4,0,1,5,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的申请','我的申请',2,1,1,1,0,6,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的地址','我的地址',2,1,2,1,0,7,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的店铺','我的店铺',2,1,3,1,1,8,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的发布','我的发布',2,2,1,1,1,9,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的收藏','我的收藏',2,2,2,1,1,10,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
+INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
+VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
