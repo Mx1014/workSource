@@ -115,7 +115,6 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -5675,9 +5674,13 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 	
-	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
-		ListAssetServiceModuleAppsResponse response = new ListAssetServiceModuleAppsResponse();
-		List<AssetServiceModuleAppDTO> assetServiceModuleApps = new ArrayList<AssetServiceModuleAppDTO>();
+	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId){
+		List<AssetServiceModuleAppDTO> response = new ArrayList<AssetServiceModuleAppDTO>();
+		
+		
+		//eh_asset_app_categories : 查询出所有的缴费应用
+		
+		/*List<AssetServiceModuleAppDTO> assetServiceModuleApps = new ArrayList<AssetServiceModuleAppDTO>();
 		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
 		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
 		if(listServiceModuleAppsResponse != null) {
@@ -5695,26 +5698,15 @@ public class AssetServiceImpl implements AssetService {
 			}
 			//解析instance_config获取categoryId
 		}
-		response.setServiceModuleApps(assetServiceModuleApps);
-		return response;
+		response.setServiceModuleApps(assetServiceModuleApps);*/
+		return null;
 	}
 	
-	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd) {
-		AssetModuleAppMappingAndConfigs response = new AssetModuleAppMappingAndConfigs();
+	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
 		
 		
 		
-		
-		return response;
-	}
-	
-	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(AssetModuleAppMappingAndConfigsCmd cmd) {
-		AssetModuleAppMappingAndConfigs response = new AssetModuleAppMappingAndConfigs();
-		
-		
-		
-		
-		return response;
+		return null;
 	}
 	
 	public ListBillsDTO createGeneralBill(CreateBillCommand cmd) {
@@ -5722,12 +5714,6 @@ public class AssetServiceImpl implements AssetService {
 		//cmd.setTargetType(Asset);//默认是企业级别
 		
 		
-		return response;
-	}
-
-	@Override
-	public ListAssetServiceModuleAppsResponse listServiceModuleApps() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

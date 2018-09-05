@@ -1,30 +1,26 @@
 
 package com.everhomes.asset;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-
-import org.elasticsearch.index.engine.Engine.Create;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -265,17 +261,12 @@ public interface AssetService {
 	/**
 	 * 获取缴费应用列表接口
 	 */
-	public ListAssetServiceModuleAppsResponse listServiceModuleApps();
+	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId);
 
 	/**
 	 * 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMappingAndConfigs createAssetModuleAppMappingAndConfigs(CreateMappingAndConfigsCommand cmd);
-	
-	/**L
-	 * 业务应用查询缴费映射关系接口
-	 */
-	public AssetModuleAppMappingAndConfigs getAssetModuleAppMappingAndConfigsByOriginId(AssetModuleAppMappingAndConfigsCmd cmd);
+	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd);
 	
 	/**
 	 * 创建统一账单接口
