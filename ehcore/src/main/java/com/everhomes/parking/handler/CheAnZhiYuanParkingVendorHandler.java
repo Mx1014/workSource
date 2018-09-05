@@ -381,15 +381,22 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 //      下单
 //        bean.createOrder("粤BCC345",new BigDecimal(300),"2018-08-15 00:00:00","2018-10-15 00:00:00");
 //      支付
-        ParkingRechargeOrder order = new ParkingRechargeOrder();
-        order.setPlateNumber("粤B998LL");
+//        ParkingRechargeOrder order = new ParkingRechargeOrder();
+//        order.setPlateNumber("粤B998LL");
 //        order.setMonthCount(new BigDecimal(1));
-        order.setPaidType("10001");
+//        order.setPaidType("10001");
 //        bean.addMonthCard(order,null);
 //        LOGGER.info("amount={}",new BigDecimal("24.00"))
-        order.setOriginalPrice(new BigDecimal("0.01"));
-        order.setOrderNo(32L);
-        bean.payTempCardFee(order);
-//
+//        order.setOriginalPrice(new BigDecimal("0.01"));
+//        order.setOrderNo(32L);
+//        bean.payTempCardFee(order);
+        GetCarLocationCommand cmd = new GetCarLocationCommand();
+        cmd.setPlateNumber("粤B12121");
+        ParkingLot pl = new ParkingLot();
+        pl.setOwnerType("1");
+        pl.setOwnerId(1L);
+        pl.setId(1L);
+        pl.setName("1");
+        bean.getCarLocation(pl,cmd);
     }
 }
