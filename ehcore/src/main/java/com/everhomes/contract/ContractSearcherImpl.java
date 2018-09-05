@@ -375,13 +375,13 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                     }
                 }
                 
-                if(contract.getSponsor() != null) {
-    					//用户可能不在组织架构中 所以用nickname
-    					User user = userProvider.findUserById(contract.getSponsor());
-    					if(user != null) {
-    						dto.setSponsorName(user.getNickName());
-    				}
-                }
+				if (contract.getSponsorUid() != null) {
+					// 用户可能不在组织架构中 所以用nickname
+					User user = userProvider.findUserById(contract.getSponsorUid());
+					if (user != null) {
+						dto.setSponsorName(user.getNickName());
+					}
+				}
                 
                 processContractApartments(dto);
                 dtos.add(dto);

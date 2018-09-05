@@ -8,26 +8,25 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.ContractTrackingTemplateCode;
-import com.everhomes.rest.contract.ContractType;
-import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.slf4j.Logger;
@@ -39,6 +38,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +82,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     
     @Autowired
 	private AssetProvider assetProvider;
-
+    
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> list = new ArrayList<>();
@@ -443,7 +443,83 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         return sdf.format(time);
     }
 
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
 
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("合同房价");
+		dto.setValue("contractApartPrice");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		// dto.setOperators(new ArrayList<>());
+		// dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		list.add(dto);
+
+		dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("资产房间");
+		dto.setValue("ApartPrice");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		// dto.setOperators(new ArrayList<>());
+		// dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		// dto.setOptions(Arrays.asList("一栋", "二栋", "三栋"));
+		list.add(dto);
+
+		return list;
+	}
+	
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("step into onFlowConditionVariableRender, ctx: {}", ctx);
+		}
+		FlowCase flowCase = ctx.getFlowCase();
+		// 合同的租金信息
+		if ("contractApartPrice".equals(variable)) {
+			FindContractCommand cmd = new FindContractCommand();
+			cmd.setId(flowCase.getReferId());
+			cmd.setNamespaceId(flowCase.getNamespaceId());
+			cmd.setCommunityId(flowCase.getProjectId());
+			cmd.setCategoryId(flowCase.getOwnerId());
+			ContractService contractService = getContractService(flowCase.getNamespaceId());
+			ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+			
+			BigDecimal totalSum = BigDecimal.ZERO; // 合同租赁总额
+			if (contractDetailDTO.getChargingItems() != null) {
+				for (int i = 0; i < contractDetailDTO.getChargingItems().size(); i++) {
+					String chargingVariables = contractDetailDTO.getChargingItems().get(i).getChargingVariables();
+					if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
+						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+								.fromJsonString(chargingVariables, ChargingVariables.class);
+						if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+							for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+								if (chargingVariable.getVariableIdentifier() != null
+										&& chargingVariable.getVariableIdentifier().equals("gdje")
+										&& contractDetailDTO.getChargingItems().get(i).getApartments() != null) {
+									totalSum = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""))
+											.multiply(BigDecimal.valueOf(contractDetailDTO.getChargingItems().get(i)
+													.getApartments().size()));
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(totalSum);
+			return flowConditionNumberVariable;
+		}
+		// 查询资产设置的租赁金额
+		if ("ApartPrice".equals(variable)) {
+			
+			int gdje = 50000;// 固定金额(含税)
+
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(gdje);
+			return flowConditionNumberVariable;
+		}
+		return null;
+	}
+    
+    
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
         return null;

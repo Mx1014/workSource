@@ -1867,9 +1867,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contract.setSponsorUid(UserContext.currentUserId());
 				contract.setSponsorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				
-				//工作流不存在，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致
-				contract.setStatus(cmd.getResult());
-				contractProvider.updateContract(contract);
 				//工作流未开启，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致  更新完所有的操作，要在最后同步es by -- dingjianmin 
 				contract.setStatus(cmd.getResult());
 				Contract exist = checkContract(cmd.getId());
