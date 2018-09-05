@@ -164,4 +164,8 @@ public interface ParkingProvider {
     List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 
     List<ParkingLot> findParkingLotByIdHash(String parkingLotToken);
+
+    ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo);
+
+    ParkingLot userNoticeFindByParkingLotId(long owerId);
 }

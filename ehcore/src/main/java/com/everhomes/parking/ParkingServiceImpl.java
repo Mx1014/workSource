@@ -3577,4 +3577,23 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 	}
+	@Override
+	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
+		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(cmd.getParkingLotId());
+		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
+		newParkingLot.setId(parkingLot.getId());
+		newParkingLot.setCreateTime(parkingLot.getCreateTime());
+		newParkingLot.setCreatorUid(parkingLot.getCreatorUid());
+		newParkingLot.setNamespaceId(parkingLot.getNamespaceId());
+		newParkingLot.setOwnerType(parkingLot.getOwnerType());
+		newParkingLot.setOwnerId(parkingLot.getOwnerId());
+		newParkingLot.setSummary(cmd.getSummary());
+		parkingProvider.updateParkingLot(newParkingLot);
+	}
+
+	@Override
+	public ParkingLot getParkingUserNotice(long parkingLotId) {
+		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
+		return parkingLot;
+	}
 }

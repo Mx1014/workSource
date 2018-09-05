@@ -35,7 +35,9 @@ public class InvoiceServiceImpl implements InvoiceService{
     public ListNotInvoicedOrdersResponse listNotInvoicedOrders(ListNotInvoicedOrdersCommand cmd) {
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor()==null?0:cmd.getPageAnchor();
+        ParkingRechargeOrder parkingRechargeOrder = parkingProvider.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
         List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrdersByUserId(cmd.getUserId(),cmd.getStartCreateTime(),cmd.getEndCreateTime(),pageSize,pageAnchor);
+        list.add(0, parkingRechargeOrder);
         Map<String,ParkingLot> lotsMap = new HashMap<String,ParkingLot>();
         ListNotInvoicedOrdersResponse response = new ListNotInvoicedOrdersResponse();
         if(list !=null && list.size()>0 ){

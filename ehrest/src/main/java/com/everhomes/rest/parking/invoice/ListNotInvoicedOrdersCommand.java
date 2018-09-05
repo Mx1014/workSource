@@ -21,6 +21,7 @@ public class ListNotInvoicedOrdersCommand {
     private Long pageAnchor;
     private Long startCreateTime;
     private Long endCreateTime;
+    private Long orderNo;
 
     public Long getUserId() {
         return userId;
@@ -70,6 +71,9 @@ public class ListNotInvoicedOrdersCommand {
         this.endCreateTime = endCreateTime;
     }
 
+    public Long getOrderNo() { return orderNo; }
+
+    public void setOrderNo(Long orderNo) { this.orderNo = orderNo; }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
