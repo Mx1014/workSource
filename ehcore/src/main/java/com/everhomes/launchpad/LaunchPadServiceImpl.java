@@ -3210,6 +3210,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			AppDTO dto = ConvertHelper.convert(item, AppDTO.class);
 			ServiceModuleApp app = appMap.get(item.getAppId());
 
+			//“全部/更多”
+			if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+				app = new ServiceModuleApp();
+				app.setModuleId(-10000L);
+				app.setOriginId(0L);
+			}
+
+
 			if(app != null){
 				dto.setModuleId(app.getModuleId());
 				ServiceModule serviceModule = moduleMap.get(app.getModuleId());
