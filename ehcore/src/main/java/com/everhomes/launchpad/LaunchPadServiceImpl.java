@@ -1903,67 +1903,97 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
-	    User user = UserContext.current().getUser();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-        
-        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
-        String baseScene = sceneToken.getScene();
-        if(sceneInfo != null) {
-            baseScene = sceneInfo.getName();
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
-            }
-        } else {
-            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
-        }
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        Community community = null;
+//	    User user = UserContext.current().getUser();
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//
+//        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+//        String baseScene = sceneToken.getScene();
+//        if(sceneInfo != null) {
+//            baseScene = sceneInfo.getName();
+//            if(LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+//            }
+//        } else {
+//            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+//        }
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//        Community community = null;
+//        ScopeType scopeType = null;
+//        Long scopeId = null;
+//		//检查游客是否能继续访问此场景 by sfyan 20161009
+//		userService.checkUserScene(sceneType);
+//        switch(sceneType) {
+//        case DEFAULT:
+//        case PARK_TOURIST:
+//            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//            if(community != null) {
+//            	scopeId = sceneToken.getEntityId();
+//            	scopeType = ScopeType.COMMUNITY;
+//            }else{
+//            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+//            }
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            if(community != null) {
+//            	scopeId = community.getId();
+//            	scopeType = ScopeType.COMMUNITY;
+//            }else{
+//            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+//            }
+//            break;
+//        case PM_ADMIN:// 无小区ID
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        	scopeId = sceneToken.getEntityId();
+//        	scopeType = ScopeType.ORGANIZATION;
+//            break;
+//        default:
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//            break;
+//        }
+//
+
+
         ScopeType scopeType = null;
         Long scopeId = null;
-		//检查游客是否能继续访问此场景 by sfyan 20161009
-		userService.checkUserScene(sceneType);
-        switch(sceneType) {
-        case DEFAULT:
-        case PARK_TOURIST:
-            community = communityProvider.findCommunityById(sceneToken.getEntityId());
-            if(community != null) {
-            	scopeId = sceneToken.getEntityId();
-            	scopeType = ScopeType.COMMUNITY;
-            }else{
-            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
-            }
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-            if(family != null) {
-                community = communityProvider.findCommunityById(family.getCommunityId());
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-                }
-            }
-            if(community != null) {
-            	scopeId = community.getId();
-            	scopeType = ScopeType.COMMUNITY;
-            }else{
-            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
-            }
-            break;
-        case PM_ADMIN:// 无小区ID
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        	scopeId = sceneToken.getEntityId();
+		String baseScene = SceneType.PARK_TOURIST.getCode();
+
+		//实际上只存在两种场景，一是公司场景，一是园区场景。家庭场景最后会转换成园区场景。
+        AppContext appContext = UserContext.current().getAppContext();
+        if(appContext.getOrganizationId() != null){
         	scopeType = ScopeType.ORGANIZATION;
-            break;
-        default:
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-            break;
-        }
-        
+        	scopeId = appContext.getOrganizationId();
+		}else if(appContext.getCommunityId() != null){
+			scopeId = appContext.getCommunityId();
+			scopeType = ScopeType.COMMUNITY;
+		}else if(appContext.getFamilyId() != null){
+			FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+			if(family != null) {
+				Community community = communityProvider.findCommunityById(family.getCommunityId());
+				if(community != null) {
+					scopeId = community.getId();
+					scopeType = ScopeType.COMMUNITY;
+				}else {
+					LOGGER.error("community not found, family.id =" + appContext.getFamilyId());
+				}
+			} else {
+				LOGGER.error("family not found, family.id =" + appContext.getFamilyId());
+			}
+		}
+
+
         GetLaunchPadLayoutByVersionCodeCommand getCmd = new GetLaunchPadLayoutByVersionCodeCommand();
         getCmd.setVersionCode(cmd.getVersionCode());
         getCmd.setName(cmd.getName());
-        getCmd.setNamespaceId(sceneToken.getNamespaceId());
+        getCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         getCmd.setSceneType(baseScene);
         
         return getLastLaunchPadLayoutByVersionCode(getCmd, scopeType, scopeId);
