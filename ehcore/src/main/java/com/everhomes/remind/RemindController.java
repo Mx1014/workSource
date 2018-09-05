@@ -294,21 +294,6 @@ public class RemindController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /remind/triggerRemindSchedule</b>
-     * <p>手动触发提醒</p>
-     */
-    @RequestMapping("triggerRemindSchedule")
-    @RestReturn(String.class)
-    public RestResponse triggerRemindSchedule() {
-        remindService.remindSchedule();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-
-    /**
      * <b>URL: /remind/getCurrentUserContactSimpleInfo</b>
      * <p>获取用户档案id</p>
      */
