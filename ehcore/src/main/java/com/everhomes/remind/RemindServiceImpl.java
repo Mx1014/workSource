@@ -709,6 +709,8 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     }
 
     private boolean shareMemberDTOcontainsShareId(List<ShareMemberDTO> shareToMembers, Long id) {
+    	if(CollectionUtils.isEmpty(shareToMembers))
+    		return false;
         for (ShareMemberDTO dto : shareToMembers) {
             if (dto.getSourceId().equals(id)) {
                 return true;
