@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -24,7 +26,7 @@ import com.everhomes.remind.RemindService;
  */
 @Component
 public abstract class DailyBatchScheduleJob extends QuartzJobBean implements ApplicationListener<ContextRefreshedEvent> { 
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DailyBatchScheduleJob.class);
     @Autowired
     protected RemindService remindService;
     @Autowired
@@ -91,6 +93,12 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
     		String o = vo.get(key);
     		objects.add(o);
     	});
+    	try{
+    		//清除已经提取过的元素
+        	zSetOperations.removeRangeByScore(ZSET_KEY, 0.0, endTime.doubleValue());
+    	}catch(Exception e){
+    		LOGGER.error("remove zset error :", e);
+    	}
     	return objects;
     }
     /**
@@ -105,7 +113,6 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * */
     public void set(Long targetId, Long timestampLong, String VOKeyPrefix , String i, String ZSET_KEY, int timeout, TimeUnit unit){
     	ZSetOperations<String, Long> zSetOperations = getZSetOperations(ZSET_KEY); 
-    	zSetOperations.remove(ZSET_KEY, targetId);
     	setZSet(targetId, timestampLong, ZSET_KEY);
     	setVO(VOKeyPrefix + targetId, i, timeout, unit);
     }
@@ -121,7 +128,7 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * */
     public void cancel(Long targetId, String VOKeyPrefix , Object i, String ZSET_KEY, int timeout, TimeUnit unit){
     	ZSetOperations<String, Long> zSetOperations = getZSetOperations(ZSET_KEY); 
-    	zSetOperations.remove(ZSET_KEY, targetId);
-    	setVO(VOKeyPrefix + targetId, null, timeout, unit);
+    	//1毫秒后过期删除
+    	setVO(VOKeyPrefix + targetId, null, 1, TimeUnit.MICROSECONDS);
     }
 }

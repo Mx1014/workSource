@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
  */
 @Component
 public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
-	 private static final Logger LOGGER = LoggerFactory.getLogger(CalendarRemindScheduleJob.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CalendarRemindScheduleJob.class);
     public static final String MODULE = "calendar-remind-";
     public static String CRON_EXPRESSION = "0 0/5 * * * ? ";
     protected static final String ZSET_KEY = "daily-remind-zset";
