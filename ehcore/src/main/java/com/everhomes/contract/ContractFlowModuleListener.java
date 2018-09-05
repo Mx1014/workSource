@@ -1,6 +1,8 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
@@ -26,6 +28,7 @@ import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
@@ -38,7 +41,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,6 +84,9 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     
     @Autowired
 	private AssetProvider assetProvider;
+    
+    @Autowired
+    private AddressProvider addressProvider;
     
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
@@ -467,58 +472,187 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		return list;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("step into onFlowConditionVariableRender, ctx: {}", ctx);
 		}
+		// 基本的信息
 		FlowCase flowCase = ctx.getFlowCase();
-		// 合同的租金信息
+		FindContractCommand cmd = new FindContractCommand();
+		cmd.setId(flowCase.getReferId());
+		cmd.setNamespaceId(flowCase.getNamespaceId());
+		cmd.setCommunityId(flowCase.getProjectId());
+		cmd.setCategoryId(flowCase.getOwnerId());
+		ContractService contractService = getContractService(flowCase.getNamespaceId());
+		ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+
+		// 合同产生的租赁金额
 		if ("contractApartPrice".equals(variable)) {
-			FindContractCommand cmd = new FindContractCommand();
-			cmd.setId(flowCase.getReferId());
-			cmd.setNamespaceId(flowCase.getNamespaceId());
-			cmd.setCommunityId(flowCase.getProjectId());
-			cmd.setCategoryId(flowCase.getOwnerId());
-			ContractService contractService = getContractService(flowCase.getNamespaceId());
-			ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
-			
-			BigDecimal totalSum = BigDecimal.ZERO; // 合同租赁总额
-			if (contractDetailDTO.getChargingItems() != null) {
-				for (int i = 0; i < contractDetailDTO.getChargingItems().size(); i++) {
-					String chargingVariables = contractDetailDTO.getChargingItems().get(i).getChargingVariables();
-					if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
-						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
-								.fromJsonString(chargingVariables, ChargingVariables.class);
-						if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
-							for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
-								if (chargingVariable.getVariableIdentifier() != null
-										&& chargingVariable.getVariableIdentifier().equals("gdje")
-										&& contractDetailDTO.getChargingItems().get(i).getApartments() != null) {
-									totalSum = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""))
-											.multiply(BigDecimal.valueOf(contractDetailDTO.getChargingItems().get(i)
-													.getApartments().size()));
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(totalSum);
+			BigDecimal contractMonthRent = contractGetMonthRent(contractDetailDTO);
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(contractMonthRent);
 			return flowConditionNumberVariable;
 		}
-		// 查询资产设置的租赁金额
+		
+		// 房源产生的租赁金额
 		if ("ApartPrice".equals(variable)) {
-			
-			int gdje = 50000;// 固定金额(含税)
-
-			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(gdje);
+			BigDecimal apartmentMonthRent = apartmentGetMonthRent(contractDetailDTO);
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(apartmentMonthRent);
 			return flowConditionNumberVariable;
 		}
 		return null;
 	}
+	
+	//计算合同产生的租赁金额
+	public BigDecimal contractGetMonthRent(ContractDetailDTO contractDetailDTO) {
+		BigDecimal totalSum = BigDecimal.ZERO; // 合同租赁总额
+		if (contractDetailDTO.getChargingItems() != null) {
+			for (int i = 0; i < contractDetailDTO.getChargingItems().size(); i++) {
+				if (contractDetailDTO.getChargingItems().get(i).getChargingItemId() != 1) {
+					return totalSum;
+				}
+				String chargingVariables = contractDetailDTO.getChargingItems().get(i).getChargingVariables();
+				if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null && chargingVariable.getVariableIdentifier().equals("gdje")
+									&& contractDetailDTO.getChargingItems().get(i).getApartments() != null) {
+
+								//一个固定金额的计价条款上面有几个房源
+								BigDecimal apartmentSize = BigDecimal.valueOf(contractDetailDTO.getChargingItems().get(i).getApartments().size());
+								BigDecimal gdje = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+								
+								if (null != contractDetailDTO.getChargingItems().get(i).getBillingCycle()) {// 为null代表无此分类的应用
+									switch (ApartmentRentType.fromCode(contractDetailDTO.getChargingItems().get(i).getBillingCycle())) {
+									case DAY:
+										totalSum = totalSum.add(gdje.multiply(apartmentSize).multiply(BigDecimal.valueOf(ApartmentRentType.DAY.getOffset())));
+										break;
+									case NATURAL_MONTH:
+										totalSum = totalSum.add(gdje.multiply(apartmentSize));
+										break;
+									case NATURAL_QUARTER:
+										totalSum = totalSum.add(gdje.multiply(apartmentSize).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+										break;
+									case NATURAL_YEAR:
+										totalSum = totalSum.add(gdje.multiply(apartmentSize).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+										break;
+									default:
+										break;
+									}
+								} else {
+									LOGGER.error("contractGetMonthRent waiting for launch contract can launch!");
+									throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+											ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+											"contract status is not waiting for launch!");
+								}
+							}
+						}
+					}
+				} else if (chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {// 单价
+					ChargingVariables chargingVariableList = (ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
+					if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+						BigDecimal dj = BigDecimal.ZERO;// 单价
+						BigDecimal mj = BigDecimal.ZERO;
+						for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+							if (chargingVariable.getVariableIdentifier() != null) {
+								if (chargingVariable.getVariableIdentifier().equals("dj")) {
+									dj = BigDecimal
+											.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+								}
+								if (chargingVariable.getVariableIdentifier().equals("mj")) {
+									mj = BigDecimal
+											.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+								}
+							}
+
+						}
+						if (null != contractDetailDTO.getChargingItems().get(i).getBillingCycle()) {// 为null代表无此分类的应用
+							switch (ApartmentRentType.fromCode(contractDetailDTO.getChargingItems().get(i).getBillingCycle())) {
+							case DAY:
+								totalSum = totalSum.add(dj.multiply(mj).multiply(BigDecimal.valueOf(ApartmentRentType.DAY.getOffset())));
+								break;
+							case NATURAL_MONTH:
+								totalSum = totalSum.add(dj.multiply(mj));
+								break;
+							case NATURAL_QUARTER:
+								totalSum = totalSum.add(dj.multiply(mj).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+								break;
+							case NATURAL_YEAR:
+								totalSum = totalSum.add(dj.multiply(mj).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+								break;
+							default:
+								break;
+							}
+						} else {
+							LOGGER.error("only waiting for launch contract can launch!");
+							throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+									ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+									"contract status is not waiting for launch!");
+						}
+					}
+				}
+			}
+		}
+
+		return totalSum;
+	}
     
+	// 计算房源产生的租赁金额
+	public BigDecimal apartmentGetMonthRent(ContractDetailDTO contractDetailDTO) {
+		BigDecimal monthRent = BigDecimal.ZERO; // 每个月的租赁总额
+		// 查询合同关联房源
+		if (contractDetailDTO.getApartments() != null) {
+			for (int i = 0; i < contractDetailDTO.getApartments().size(); i++) {
+				Long addressId = contractDetailDTO.getApartments().get(i).getAddressId();
+				// 获得房源的详细信息
+				Address address = addressProvider.findAddressById(addressId);
+				// 房源设置的租金
+				BigDecimal apartmentRent = address.getApartmentRent();
+				// 房源租金类型
+				address.getApartmentRentType();
+				// 收费面积
+				BigDecimal chargeArea = BigDecimal.valueOf(address.getChargeArea());
+				if (null != address.getApartmentRentType()) {// 为null代表无此分类的应用
+					switch (ApartmentRentType.fromCode(address.getApartmentRentType())) {
+					case DAY:
+						monthRent = monthRent.add(apartmentRent.multiply(BigDecimal.valueOf(ApartmentRentType.DAY.getOffset())));
+						break;
+					case NATURAL_MONTH:
+						monthRent = monthRent.add(apartmentRent);
+						break;
+					case NATURAL_QUARTER:
+						monthRent = monthRent.add(apartmentRent.divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+						break;
+					case NATURAL_YEAR:
+						monthRent = monthRent.add(apartmentRent.divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+						break;
+					case DAY_SQUARE_METRE:
+						monthRent = monthRent.add(apartmentRent.multiply(chargeArea).multiply(BigDecimal.valueOf(ApartmentRentType.DAY_SQUARE_METRE.getOffset())));
+						break;
+					case NATURAL_MONTH_SQUARE_METRE:
+						monthRent = monthRent.add(apartmentRent.multiply(BigDecimal.valueOf(address.getChargeArea())));
+						break;
+					case NATURAL_QUARTER_SQUARE_METRE:
+						monthRent = monthRent.add(apartmentRent.multiply(chargeArea).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_QUARTER_SQUARE_METRE.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+						break;
+					case NATURAL_YEAR_SQUARE_METRE:
+						monthRent = monthRent.add(apartmentRent.multiply(chargeArea).divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_YEAR_SQUARE_METRE.getOffset()), 2, BigDecimal.ROUND_HALF_UP));
+						break;
+					}
+				} else {
+					LOGGER.error("only waiting for launch contract can launch!");
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+							ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+							"contract status is not waiting for launch!");
+				}
+			}
+		}
+
+		return monthRent;
+	}
+	
     
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
