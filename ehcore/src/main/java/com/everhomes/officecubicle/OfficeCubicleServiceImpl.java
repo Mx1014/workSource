@@ -949,6 +949,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
 			}else{
 				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+				if(StringUtils.isNotEmpty(oldOfficeCubicleCity.getOwnerType()) || null != oldOfficeCubicleCity.getOwnerId()){
+					oldOfficeCubicleCity = null;
+				}
 			}
 			if(oldOfficeCubicleCity!=null){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
