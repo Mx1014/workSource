@@ -72,7 +72,12 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         //组装返回值
         String script = new String(file, Charset.forName("UTF-8"));
-        return null;
+        ScriptDTO dto = new ScriptDTO();
+        dto.setCommitVersion(lastCommit);
+        dto.setInfoType(cmd.getInfoType());
+        dto.setNamespaceId(namespaceId);
+        dto.setScript(script);
+        return dto;
     }
 
     /**
@@ -82,6 +87,11 @@ public class ButtScriptServiceImpl implements ButtScriptService {
      */
     @Override
     public ScriptVersionInfoDTO saveScript(SaveScriptCommand cmd) {
+        //先检查有没有建仓库,没有得先建仓库
+
+        //保存脚本到仓库中,返回版本号
+        //如果选择了发布,在发布信息表创建或更新一条数据
+
         return null;
     }
 
