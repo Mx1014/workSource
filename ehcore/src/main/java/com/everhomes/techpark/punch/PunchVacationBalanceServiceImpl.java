@@ -265,7 +265,7 @@ public class PunchVacationBalanceServiceImpl implements PunchVacationBalanceServ
                 cmd1.setIsBatch(NormalFlag.YES.getCode());
                 cmd1.setDetailId(detailId);
                 PunchVacationBalance punchVacationBalance = updateVacationBalances(cmd1);
-                String notificationContent = buildVacationBalanceChangedNotificationContent(cmd1.getAnnualLeaveBalanceCorrection(), cmd.getOvertimeCompensationBalanceCorrection(),
+                String notificationContent = buildVacationBalanceChangedNotificationContent(cmd1.getAnnualLeaveBalanceCorrection(), cmd1.getOvertimeCompensationBalanceCorrection(),
                         null, punchVacationBalance, null, ApprovalServiceConstants.VACATION_BALANCE_CHANGED_NOTIFICATION_CONTENT_BY_ADMIN);
                 sendMessageWhenVacationBalanceChanged(organizationMemberDetail, notificationContent);
             }

@@ -43,13 +43,12 @@ public class EnterpriseApprovalAbnormalPunchHandler extends EnterpriseApprovalPu
     public void onFlowCaseDeleted(FlowCase flowCase) {
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
         PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
-        if (request == null || ApprovalStatus.REJECTION == ApprovalStatus.fromCode(request.getStatus())) {
+        if (request == null) {
             return;
         }
         // 如果流程删除之前是审批通过状态，则删除以后，需要重新校准考勤状态，否则不需要
         boolean showRefreshPunchDayLog = ApprovalStatus.AGREEMENT == ApprovalStatus.fromCode(request.getStatus());
-        request.setStatus(ApprovalStatus.REJECTION.getCode());
-        punchProvider.updatePunchExceptionRequest(request);
+        punchProvider.deletePunchExceptionRequest(request);
 
         if (!showRefreshPunchDayLog) {
             return;

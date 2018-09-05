@@ -158,17 +158,19 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 	public void onFlowCaseDeleted(FlowCase flowCase) {
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
 		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
-		if (request == null || ApprovalStatus.REJECTION == ApprovalStatus.fromCode(request.getStatus())) {
+		if (request == null) {
 			return;
 		}
 		// 如果流程删除之前是审批通过状态，则删除以后，需要重新校准考勤状态，否则不需要
 		boolean showRefreshPunchDayLog = ApprovalStatus.AGREEMENT == ApprovalStatus.fromCode(request.getStatus());
-		request.setStatus(ApprovalStatus.REJECTION.getCode());
-		punchProvider.updatePunchExceptionRequest(request);
-		String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.VACATION_BALANCE_INCR_FOR_REJECT_ASK_FOR_LEAVE), UserContext.current().getUser().getLocale(), "");
-		// 返还假期余额
-		updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) 1, description);
-
+		boolean showUpdateVacationBalance = ApprovalStatus.REJECTION != ApprovalStatus.fromCode(request.getStatus());
+		punchProvider.deletePunchExceptionRequest(request);
+		// 审批单被驳回后已经退回余额，所以删除以后不需要再退
+		if (showUpdateVacationBalance) {
+			String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.VACATION_BALANCE_INCR_FOR_REJECT_ASK_FOR_LEAVE), UserContext.current().getUser().getLocale(), "");
+			// 返还假期余额
+			updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) 1, description);
+		}
 		if (!showRefreshPunchDayLog) {
 			return;
 		}
