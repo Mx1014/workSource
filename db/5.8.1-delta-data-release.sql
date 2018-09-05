@@ -5,6 +5,10 @@
 -- AUTHOR: liangqishi 20180823
 -- REMARK: 为统一订单申请专有域名gorder.zuolin.com
 
+-- AUTHOR: 黄良铭 20180905
+-- REMARK: coreserver 配置中需加入kafka的配置信息.具体请见(http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011)
+--         网址中的 "修改服务器配置" 一项
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
