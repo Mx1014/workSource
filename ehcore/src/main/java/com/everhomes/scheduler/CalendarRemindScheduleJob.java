@@ -70,6 +70,7 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
                      reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
                      isProcess = !CollectionUtils.isEmpty(reminds);
                  }
+                 LOGGER.debug("load data complete : size{}, begintime {} end time{}",reminds==null?0:reminds.size(),remindStartTime ,remindEndTime);
          	});
          }
 	}
