@@ -6768,8 +6768,27 @@ public class AssetProviderImpl implements AssetProvider {
 
 	public void tranferAssetMappings() {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		
-		
+		EhAssetModuleAppMappings tMappings = Tables.EH_ASSET_MODULE_APP_MAPPINGS.as("tMappings"); 
+		EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(context.configuration());
+		List<AssetModuleAppMapping> list = context.select()
+				.from(tMappings)
+				.where(tMappings.ENERGY_FLAG.eq((byte)1))//只查找出关联了能耗的数据
+				.fetchInto(AssetModuleAppMapping.class);
+		for(AssetModuleAppMapping assetModuleAppMapping : list) {
+			AssetModuleAppMapping newEnergyAssetMapping = new AssetModuleAppMapping();
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings.class));
+			newEnergyAssetMapping.setId(id);
+			newEnergyAssetMapping.setNamespaceId(assetModuleAppMapping.getNamespaceId());
+			newEnergyAssetMapping.setAssetCategoryId(assetModuleAppMapping.getAssetCategoryId());
+			newEnergyAssetMapping.setSourceType("energy");
+			newEnergyAssetMapping.setConfig("{\"energyFlag\":\"1\"}");
+			newEnergyAssetMapping.setStatus((byte)2);
+			newEnergyAssetMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			newEnergyAssetMapping.setCreateUid(assetModuleAppMapping.getCreateUid());
+			
+	        dao.insert(newEnergyAssetMapping);
+	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetModuleAppMappings.class, null);
+		}
 	}
 
 }

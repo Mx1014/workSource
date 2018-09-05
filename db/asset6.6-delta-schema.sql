@@ -9,6 +9,10 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `owner_id` BIGINT COMMENT 
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `owner_type` VARCHAR(64) COMMENT '园区类型' after `owner_id`;
 -- REMARK: 3、删除无效字段
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_category_id`;
+-- REMARK: 4、去掉原来的限制索引
+ALTER TABLE eh_asset_module_app_mappings DROP INDEX u_asset_category_id;
+ALTER TABLE eh_asset_module_app_mappings DROP INDEX u_contract_category_id;
+
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费V6.6（对接统一账单） 账单要增加来源字段
@@ -17,6 +21,10 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `produce_uid` BIGINT COMMENT '企业�
 
 
 
+
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
 
 
 

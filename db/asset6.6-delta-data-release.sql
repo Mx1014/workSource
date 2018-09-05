@@ -13,5 +13,6 @@
 -- REMARK: 物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移
 update eh_asset_module_app_mappings set config=concat('{"contractOriginId":', contract_originId , ',' , '"contractChangeFlag":' , '"', contract_changeFlag , '"' , '}') 
 	where contract_originId is not null;
+update eh_asset_module_app_mappings set source_type='contract' where source_type is null;
 	
 	
