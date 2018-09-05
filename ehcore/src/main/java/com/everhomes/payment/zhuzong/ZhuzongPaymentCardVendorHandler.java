@@ -67,7 +67,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
         List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
         if (cardList == null || cardList.size() == 0)
-            return null;
+            return result;
         PaymentCard card = cardList.get(0);
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", ACCOUNT_QUERY_TYPE);
