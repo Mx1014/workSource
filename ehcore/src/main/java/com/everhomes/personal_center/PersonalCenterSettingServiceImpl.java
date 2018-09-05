@@ -25,6 +25,7 @@ import com.everhomes.rest.personal_center.PersonalCenterSettingDTO;
 import com.everhomes.rest.personal_center.PersonalCenterSettingRegionType;
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import com.everhomes.rest.personal_center.PersonalCenterSettingType;
+import com.everhomes.rest.personal_center.ShopMallId;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -178,7 +179,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or apply path, homeUrl=" + homeurl + ", applyShopPath=" + applyShopPath);
             return null;
         } else {
-            return homeurl + applyShopPath;
+            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+            if (mallId != null) {
+                applyShopPath = applyShopPath.replace("?","&");
+                return homeurl +"?mallId=" +mallId + applyShopPath;
+            }else {
+                return homeurl + applyShopPath;
+            }
         }
     }
 
@@ -190,7 +197,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or manage path, homeUrl=" + homeurl + ", manageShopPath=" + manageShopPath);
             return null;
         } else {
-            return homeurl + manageShopPath;
+            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+            if (mallId != null) {
+                manageShopPath = manageShopPath.replace("?","&");
+                return homeurl +"?mallId=" +mallId + manageShopPath;
+            }else {
+                return homeurl + manageShopPath;
+            }
         }
     }
 
