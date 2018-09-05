@@ -74,7 +74,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
 import org.jooq.SortField;
+import org.jooq.TableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -1162,27 +1164,32 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 //		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-		SortField order = null;
+		int order = 1;
+		TableField field = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME;
 		//排序
 		if (null != cmd.getStatus()) {
 			ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 			Integer flowMode = parkingLot.getFlowMode();
 			if (ParkingCardRequestStatus.AUDITING.getCode() == cmd.getStatus()) {
-				order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
+				field = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME;
 			}else if (ParkingCardRequestStatus.QUEUEING.getCode() == cmd.getStatus()) {
 				if (ParkingRequestFlowType.QUEQUE.getCode().equals(flowMode)) {
-					order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
+					field = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME;
 				}else {
-					order = Tables.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME.asc();
+					field = Tables.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME;
 				}
 			}else if (ParkingCardRequestStatus.PROCESSING.getCode() == cmd.getStatus()) {
-				order = Tables.EH_PARKING_CARD_REQUESTS.ISSUE_TIME.desc();
+				field = Tables.EH_PARKING_CARD_REQUESTS.ISSUE_TIME;
+				order = -1;
 			}else if (ParkingCardRequestStatus.SUCCEED.getCode() == cmd.getStatus()) {
-				order = Tables.EH_PARKING_CARD_REQUESTS.PROCESS_SUCCEED_TIME.desc();
+				field = Tables.EH_PARKING_CARD_REQUESTS.PROCESS_SUCCEED_TIME;
+				order = -1;
 			}else if (ParkingCardRequestStatus.OPENED.getCode() == cmd.getStatus()) {
-				order = Tables.EH_PARKING_CARD_REQUESTS.OPEN_CARD_TIME.desc();
+				field = Tables.EH_PARKING_CARD_REQUESTS.OPEN_CARD_TIME;
+				order = -1;
 			}else if (ParkingCardRequestStatus.INACTIVE.getCode() == cmd.getStatus()) {
-				order = Tables.EH_PARKING_CARD_REQUESTS.CANCEL_TIME.desc();
+				field = Tables.EH_PARKING_CARD_REQUESTS.CANCEL_TIME;
+				order = -1;
 			}
 
 		}
@@ -1190,7 +1197,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(),
-				cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), order, cmd.getCardTypeId(),cmd.getOwnerKeyWords(),
+				cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(),field, order, cmd.getCardTypeId(),cmd.getOwnerKeyWords(),
 				cmd.getPageAnchor(), pageSize);
 
 		Long userId = UserContext.current().getUser().getId();
@@ -1212,7 +1219,7 @@ public class ParkingServiceImpl implements ParkingService {
 			if(size != pageSize){
 				response.setNextPageAnchor(null);
 			}else{
-				response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+				response.setNextPageAnchor(list.get(size-1).getAnchor().getTime());
 			}
 		}
 		return response;
