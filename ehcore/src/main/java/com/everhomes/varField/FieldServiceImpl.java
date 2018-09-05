@@ -102,7 +102,6 @@ import com.everhomes.rest.varField.UpdateFieldItemsCommand;
 import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
-import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesAdminResponse;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
@@ -320,7 +319,8 @@ public class FieldServiceImpl implements FieldService {
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
+                // for equipment inspection custom design
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==cmd.getInspectionCategoryId()));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
@@ -932,7 +932,12 @@ public class FieldServiceImpl implements FieldService {
                         cmd0.setTrackingUids(Collections.singletonList(Long.valueOf(exportcmd.getTrackingUids())));
                     }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    SearchEnterpriseCustomerResponse response;
+                    if(cmd0.getTaskId() != null && cmd0.getTaskId() != 0){
+                        response = customerService.listSyncErrorCustomer(cmd0);
+                    }else{
+                        response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    }
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
@@ -1257,7 +1262,10 @@ public class FieldServiceImpl implements FieldService {
         checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
         checkModuleManageCommand.setOrganizationId(ownerId);
         checkModuleManageCommand.setOwnerType(ownerType);
-        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if(UserContext.currentUserId() != null)
+            checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        else
+            return true;
         if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
             checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
         }

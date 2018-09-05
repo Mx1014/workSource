@@ -16,7 +16,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyConfigurationsDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyRecordsDao;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,6 +157,18 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         }
 
         return false;
+    }
+
+    @Override
+    public void invalidateNotifyRecord(List<Long> recordIds) {
+        if (recordIds == null || recordIds.size() < 1) {
+            return;
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.update(Tables.EH_PM_NOTIFY_RECORDS)
+                .set(Tables.EH_PM_NOTIFY_RECORDS.STATUS, PmNotifyRecordStatus.INVAILD.getCode())
+                .where(Tables.EH_PM_NOTIFY_RECORDS.ID.in(recordIds))
+                .execute();
     }
 
     @Override

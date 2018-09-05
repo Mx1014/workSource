@@ -1,9 +1,9 @@
 package com.everhomes.rentalv2;
 
-import com.everhomes.server.schema.tables.pojos.EhRentalv2ResourcePics;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2SiteResources;
 import com.everhomes.util.StringHelper;
 
-public class RentalResourcePic extends EhRentalv2ResourcePics {
+public class RentalResourcePic extends EhRentalv2SiteResources {
 
 	/**
 	 * 

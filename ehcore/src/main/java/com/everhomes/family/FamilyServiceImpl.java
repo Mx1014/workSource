@@ -632,8 +632,8 @@ public class FamilyServiceImpl implements FamilyService {
         if(families == null) {
         	families = new ArrayList<FamilyDTO>();
         }
-        //Merge histories, add by Janson
-	        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
+        //Merge histories, add by Janson  update by huangliangming 20180830 后台拒绝后不应该显示出来,所以这张表相当于无用了,不查询.
+	       /* List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
 	        for(UserGroupHistory o : histories) {
 	            if(!checkList.containsKey(o.getAddressId())) {
 	                
@@ -667,7 +667,7 @@ public class FamilyServiceImpl implements FamilyService {
 	                families.add(family);
 	                
 	            }
-	        }
+	        }*/
         
         return families;
     }
@@ -869,14 +869,14 @@ public class FamilyServiceImpl implements FamilyService {
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
         addGroupMemberLog(member, group);
-        //Create reject history
-        UserGroupHistory history = new UserGroupHistory();
+        //Create reject history  // update by huangliangming 20180830 后台拒绝后不应该显示出来,所以这张表相当于无用了,不查询.
+        /*UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
         history.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
         history.setOwnerUid(memberUid);
         history.setAddressId(address.getId());
         history.setCommunityId(group.getIntegralTag2());
-        this.userGroupHistoryProvider.createUserGroupHistory(history);
+        this.userGroupHistoryProvider.createUserGroupHistory(history);*/
         
         if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
@@ -911,8 +911,13 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+           // sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            
+            //给客户端发一条通知 ,MetaObjectType由于没设置拒绝类型,但同意类型应该也可以用,因为都只是触发刷新地址而已
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
@@ -938,7 +943,12 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            
+            //给客户端发一条通知 ,MetaObjectType由于没设置拒绝类型,但同意类型应该也可以用,因为都只是触发刷新地址而已
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OPERATOR;
@@ -1107,7 +1117,7 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 
             //给客户端发一条通知
             Map<String, String> meta = new HashMap<>();
@@ -1146,7 +1156,7 @@ public class FamilyServiceImpl implements FamilyService {
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
             //给用户发一条
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 
             //给客户端发一条通知
             Map<String, String> meta = new HashMap<>();

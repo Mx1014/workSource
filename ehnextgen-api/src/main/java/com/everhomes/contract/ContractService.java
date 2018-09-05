@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -17,11 +18,15 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
@@ -44,23 +49,18 @@ import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
 public interface ContractService {
 	String CONTRACT_PREFIX = "contract-";
 
 	public ListContractsResponse listContracts(ListContractsCommand cmd);
-
 	void contractSchedule();
-
 	ListContractsResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd);
-
-
     List<Object> findCustomerByContractNum(String contractNum,Long ownerId,String ownerType);
-
 	ContractDetailDTO createContract(CreateContractCommand cmd);
 	ContractDetailDTO updateContract(UpdateContractCommand cmd);
-
 	void denunciationContract(DenunciationContractCommand cmd);
 	ContractDetailDTO findContract(FindContractCommand cmd);
 	void deleteContract(DeleteContractCommand cmd);
@@ -68,27 +68,18 @@ public interface ContractService {
 	List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd);
 	List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd);
 	List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd);
-
-
 	void entryContract(EntryContractCommand cmd);
 	void reviewContract(ReviewContractCommand cmd);
-
 	void setContractParam(SetContractParamCommand cmd);
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
-
 	String generateContractNumber(GenerateContractNumberCommand cmd);
 	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag);
-
 	Boolean checkAdmin(CheckAdminCommand cmd);
 	ContractDetailDTO findContractForApp(FindContractCommand cmd);
-
 	ContractDetailDTO updatePaymentContract(UpdatePaymentContractCommand cmd);
 	ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
-
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
-
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
-    
     //add by jm.ding
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response);
 	ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd);
@@ -100,6 +91,24 @@ public interface ContractService {
 	List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd);
 
     //add by tangcen
+	DurationParamDTO getDuration(GetDurationParamCommand cmd);
+
+	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
+		return null;
+	}
+
+	default AptitudeCustomerFlagDTO updateAptitudeCustomer(UpdateContractAptitudeFlagCommand cmd){
+		return null;
+	}
+
+	default OutputStream exportOutputStreamContractListByContractList(SearchContractCommand cmd, Long taskId){return null;}
+
+	default void exportContractListByContractList(SearchContractCommand cmd){}
+   
+
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+
+	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
+	void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd);
    
 }

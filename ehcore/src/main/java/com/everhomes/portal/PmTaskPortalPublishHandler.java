@@ -1,11 +1,13 @@
 package com.everhomes.portal;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.pmtask.PmTaskProvider;
+import com.everhomes.pmtask.PmTaskTarget;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.FlowConstants;
@@ -13,11 +15,14 @@ import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.portal.PmTaskInstanceConfig;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,28 +43,37 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    public final static String SEPARATOR = "/";
+
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
-//        if(null == pmTaskInstanceConfig.getTaskCategoryId()){
-//            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig.getPageType());
-//            rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
-//        }else{
-//            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
-//        }
+
         Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
         Byte agentSwitch = pmTaskInstanceConfig.getAgentSwitch();
         Byte feeModel = pmTaskInstanceConfig.getFeeModel();
-        if(null != taskCategoryId && null != agentSwitch){
-            if(0 == agentSwitch.byteValue()){
-                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
-            } else if (1 == agentSwitch.byteValue()){
-                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
-            }
+        if(null == taskCategoryId){
+            if(999983 == namespaceId)
+                taskCategoryId = 1L;
+            else
+                taskCategoryId = 6L;
+            pmTaskInstanceConfig.setTaskCategoryId(taskCategoryId);
         }
-        if(null != taskCategoryId && null != feeModel){
-            configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
+        if(null == agentSwitch){
+            agentSwitch = (byte)1;
+            pmTaskInstanceConfig.setAgentSwitch(agentSwitch);
         }
+        if(null == feeModel){
+            feeModel = (byte)0;
+            pmTaskInstanceConfig.setFeeModel(feeModel);
+        }
+
+        if(0 == agentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+        } else if (1 == agentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+        }
+        configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
 
@@ -70,7 +84,30 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        return instanceConfig;
+        String homeUrl = configurationProvider.getValue(namespaceId,"home.url","");
+        String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix");
+        String Url = homeUrl + SEPARATOR + Uri;
+        PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
+        Long taskCategoryId =  pmTaskInstanceConfig.getTaskCategoryId();
+        if(null == taskCategoryId){
+            if(999983 == namespaceId)
+                taskCategoryId = 1L;
+            else
+                taskCategoryId = 6L;
+        }
+        String displayname = "物业报修";
+        if(9L == taskCategoryId){
+            displayname = "投诉与建议";
+        }
+        try {
+            displayname = URLEncoder.encode(displayname,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("url encode error.");
+        }
+        Url = String.format(Url,namespaceId,taskCategoryId,displayname);
+        JSONObject actionData = new JSONObject();
+        actionData.put("url",Url);
+        return actionData.toJSONString();
     }
 
 //    private RentalResourceType createPmTask(Integer namespaceId, String name, Byte type){

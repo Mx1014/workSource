@@ -19,6 +19,15 @@ public class ParkingRechargeConfig {
 
     private Byte tempFeeDiscountFlag;
     private String tempFeeDiscount;
+    private String contact;
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
 
     public Byte getMonthlyDiscountFlag() {
         return monthlyDiscountFlag;

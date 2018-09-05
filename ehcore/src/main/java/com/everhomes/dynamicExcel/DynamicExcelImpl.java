@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -168,6 +169,93 @@ public class DynamicExcelImpl implements DynamicExcelService{
             }
         }
     }
+
+
+
+    public OutputStream exportDynamicExcel(String code, String baseInfo, List<String> sheetNames,
+                                           Object params, boolean enumSupport, boolean withData, String excelName){
+        LOGGER.info("export dynamic excel sheetNames = {} , params = {}, code = {}",sheetNames,params,code);
+        Workbook workbook = new XSSFWorkbook();
+        DynamicExcelHandler h = getHandler(code);
+        Map<Object,Object> context = new HashMap<>();
+        //遍历筛选过的sheet
+        for (int i = 0; i < sheetNames.size(); i++) {
+            List<DynamicSheet> sheets = h.getDynamicSheet(sheetNames.get(i), params, null, false, withData);
+            LOGGER.info("export dyanmic excel dynamic sheets include = {}", sheets);
+            for (DynamicSheet sheet : sheets) {
+                List<DynamicField> fields = sheet.getDynamicFields();
+                List<List<String>> data = null;
+                StringBuilder intro = null;
+                if (baseInfo == null) {
+                    intro = new StringBuilder();
+                } else {
+                    intro = new StringBuilder(baseInfo);
+                }
+                if (withData) {
+                    //获取数据
+                    data = h.getExportData(sheet, params, context);
+                }
+                if (StringUtils.isEmpty(baseInfo)) {
+                    intro = new StringBuilder(DynamicExcelStrings.baseIntro);
+                }
+                // remove excel header infos if sheet is not customer basic info
+                if (!withData && sheet.getGroupId() != 1) {
+                    intro = new StringBuilder(DynamicExcelStrings.baseIntroManager);
+                }
+                if (enumSupport) {
+                    intro.append(DynamicExcelStrings.enumNotice);
+                    for (DynamicField df : fields) {
+                        if (df.getAllowedValued() != null) {
+                            StringBuilder enumItem = new StringBuilder();
+                            enumItem.append(df.getDisplayName());
+                            enumItem.append(":");
+                            for (String enumStr : df.getAllowedValued()) {
+                                enumItem.append(enumStr);
+                                enumItem.append(",");
+                            }
+                            if (enumItem.lastIndexOf(",") == enumItem.length() - 1) {
+                                enumItem.deleteCharAt(enumItem.length() - 1);
+                            }
+                            enumItem.append("\n");
+                            intro.append(enumItem.toString());
+                        }
+                    }
+                }
+                if(Arrays.stream(params.getClass().getDeclaredFields()).map(Field::getName).collect(Collectors.toList()).contains("headerDisplay")){
+                    intro = new StringBuilder("");
+                }
+                try {
+                    DebugExcelUtil.exportExcel(workbook, dynamicSheetNum.get(), sheet.getDisplayName(), intro.toString(), fields, data);
+                    dynamicSheetNum.set(dynamicSheetNum.get() + 1);
+                } catch (Exception e) {
+                    LOGGER.info("one sheet export failed, sheet name = {}", sheet.getDisplayName());
+                }
+            }
+        }
+        dynamicSheetNum.remove();
+        //写入流
+        ServletOutputStream out;
+        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+        if (excelName == null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            excelName = "客户数据导出" + sdf.format(Calendar.getInstance().getTime());
+            excelName = excelName + ".xls";
+        }
+
+        try {
+            workbook.write(byteArray);
+            return byteArray;
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error("IoException",e);
+            return null;
+        } finally {
+            if (byteArray != null) {
+                byteArray = null;
+            }
+        }
+    }
+
 
     /**
      *

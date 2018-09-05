@@ -100,6 +100,7 @@ public enum CoordinationLocks {
     PAY_CREATE_PREORDER("pay.create.preorder"),
 
     BILL_STATUS_UPDATE("bill.status.update"),
+    BILL_DUEDAYCOUNT_UPDATE("bill.duedaycount.update"),//欠费天数
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
     SYNC_THIRD_CONTRACT("sync.third.contract"),
     SYNC_THIRD_CUSTOMER("sync.third.customer"),
@@ -140,14 +141,19 @@ public enum CoordinationLocks {
     MEETING_ROOM_RESOURCE_RECOVERY("meeting_room_resource_recovery"),
     MEETING_REMIND("meeting_remind"),
 
+    PORTAL_PUBLISH("portal.publish"),
+
     ARCHIVES_CONFIGURATION("archives_configuration"),
     ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
     VISITOR_SYS_CONFIG("visitor_sys_config"),
+	
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
+    PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
+    PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
 
 

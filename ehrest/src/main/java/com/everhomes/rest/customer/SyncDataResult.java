@@ -26,6 +26,16 @@ public class SyncDataResult {
 
     private String result;
 
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Timestamp getEndTime() {
         return endTime;
     }

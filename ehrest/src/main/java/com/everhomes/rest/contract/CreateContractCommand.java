@@ -59,6 +59,7 @@ import java.util.List;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型categoryId，用于多入口</li>
+ *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
  *      <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
@@ -110,7 +111,17 @@ public class CreateContractCommand {
     private String layout;
     private String settled;
     private Long categoryId;
+    private Byte costGenerationMethod;
     private Byte contractApplicationScene = 0;
+	
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+    
     
 	public Byte getContractApplicationScene() {
 		return contractApplicationScene;

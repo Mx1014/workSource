@@ -28,6 +28,8 @@ public class ListFieldGroupCommand {
     // 暂时增加用于物业巡检使用
     private String  equipmentCategoryName;
 
+    private Long inspectionCategoryId;
+
     //客户有根据权限区分动态excel的cell
     private Boolean isAdmin;
 
@@ -94,6 +96,23 @@ public class ListFieldGroupCommand {
     }
 
     public void setIsAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
+
+
+    public Long getInspectionCategoryId() {
+        return inspectionCategoryId;
+    }
+
+    public void setInspectionCategoryId(Long inspectionCategoryId) {
+        this.inspectionCategoryId = inspectionCategoryId;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
         isAdmin = admin;
     }
 

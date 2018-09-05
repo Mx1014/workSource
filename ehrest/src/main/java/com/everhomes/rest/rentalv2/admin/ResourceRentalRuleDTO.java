@@ -17,6 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
+ * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
+ * <li>remark: 备注显示文案</li>
  * </ul>
  */
 public class ResourceRentalRuleDTO {
@@ -38,6 +40,9 @@ public class ResourceRentalRuleDTO {
     private Byte rentalStartTimeFlag;
     private Long rentalEndTime;
     private Long rentalStartTime;
+
+    private Byte remarkFlag;
+    private String remark;
 
     @Override
     public String toString() {
@@ -130,5 +135,21 @@ public class ResourceRentalRuleDTO {
 
     public void setRentalStartTime(Long rentalStartTime) {
         this.rentalStartTime = rentalStartTime;
+    }
+
+    public Byte getRemarkFlag() {
+        return remarkFlag;
+    }
+
+    public void setRemarkFlag(Byte remarkFlag) {
+        this.remarkFlag = remarkFlag;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

@@ -22,7 +22,7 @@ public enum ImportFileTaskType {
     SOCIAL_SERCURITY_PAYMENTS("social_sercurity_payments"),
     SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter"), ENERGY_PLAN_TASK("energy_plan_task"),
     FIXED_ASSET("fixed_asset_"),
-    PUNCH_VACATION("punch_vacation"), CUSTOMER_TASK("customer_task"),
+    PUNCH_VACATION("punch_vacation"), CUSTOMER_TASK("customer_task"),WAREHOUSESTOCK("warehouse_stock"),
     INDIVIDUAL_CUSTOMER("individual customer");
 
 	private String code;

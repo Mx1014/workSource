@@ -18,6 +18,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.IterationMapReduceCallback;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -671,6 +672,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_WAREHOUSE_STOCKS)
                 .set(Tables.EH_WAREHOUSE_STOCKS.AMOUNT,Tables.EH_WAREHOUSE_STOCKS.AMOUNT.add(purchaseQuantity))
+                .set(Tables.EH_WAREHOUSE_STOCKS.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
                 .where(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId))
                 .and(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId))
                 .execute();
@@ -847,6 +849,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public void insertWarehouseStockLog(WarehouseStockLogs logs) {
+    	logs.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
         dao.insert(logs);
