@@ -40,4 +40,5 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_ADDRESS_ISNULL = 10032;  //地址参数未填写
     int ERROR_CUSTOMER_PRIVILGE_ERROR = 10033;  //线索客户操作权限不足
     int ERROR_CUSTOMER_ADDRESS_NOT_EXIST = 10034;  //openApi address 不存在
+    int ERROR_CUSTOMER_HAS_REQUISITION = 10035; //客户存在请示单
 }
