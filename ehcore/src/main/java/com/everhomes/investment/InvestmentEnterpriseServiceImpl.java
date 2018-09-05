@@ -2,12 +2,21 @@ package com.everhomes.investment;
 
 
 import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.CustomerTracking;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.*;
+import com.everhomes.rest.investment.CreateInvestmentCommand;
+import com.everhomes.rest.investment.EnterpriseInvestmentDTO;
+import com.everhomes.rest.investment.InvestmentEnterpriseType;
+import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -26,6 +35,9 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
 
     @Autowired
     private InvestmentEnterpriseProvider investmentEnterpriseProvider;
@@ -69,8 +81,26 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
             nowInfo.setCustomerId(cmd.getId());
             investmentEnterpriseProvider.createNowInfo(nowInfo);
         }
+        if (cmd.getTrackingInfos() != null) {
+            cmd.getTrackingInfos().forEach((c) -> {
+                CustomerTracking customerTracking = ConvertHelper.convert(c, CustomerTracking.class);
+                customerTracking.setStatus(CommonStatus.ACTIVE.getCode());
+                customerTracking.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                customerTracking.setInvestmentType(InvestmentEnterpriseType.INVESTMENT_ENTERPRISE.getCode());
+            });
+        }
+        EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         // todo: update main record data
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+        customerProvider.updateEnterpriseCustomer(customer);
+//        //sync tenant info into organization
+//        ExecutorUtil.submit(() -> {
+//            syncInvestmentInfoToOrganization(cmd);
+//        });
+        customerSearcher.feedDoc(customer);
+    }
 
+    private void syncInvestmentInfoToOrganization(CreateInvestmentCommand cmd) {
 
     }
 
