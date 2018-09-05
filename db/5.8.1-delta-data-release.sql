@@ -118,6 +118,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 VALUES ('personal.wallet.home.url', 'https://payv2.zuolin.com', '个人中心我的钱包跳转URL域名', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
 VALUES ('personal.order.home.url', 'https://biz.zuolin.com', '个人中心我的订单跳转URL域名', '0', NULL, '1');
+
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
 VALUES ((@id := @id + 1),0,'会员等级','会员等级',0,1,0,1,0,2,'',1,1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
@@ -138,6 +140,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet');
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
@@ -182,6 +185,7 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=14#/');
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
@@ -214,6 +218,7 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=12#/');
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
@@ -249,6 +254,7 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=11#/');
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
@@ -295,6 +301,7 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
 -- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'',1,1,'/app/wallet?systemId=13#/');
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
