@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.remind.Remind;
@@ -43,7 +44,8 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
     private RemindProvider remindProvider;
     @Autowired
     private ScheduleProvider scheduleProvider;
-
+    protected static int timeout = 25;
+    protected static TimeUnit unit = TimeUnit.HOURS;
     /**
      * 每天早上0点2分加载今天的remind到redis
      * */
@@ -78,7 +80,7 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
     
     /**
      * 每次取redis的数据 发消息
-     * 然后remove之前的数据 updateremind
+     * 然后remove之前的数据 update remind
      * */
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -88,10 +90,10 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
         		//改成每次提醒6分钟前到现在的
                 Long remindEndTime = DateHelper.currentGMTTime().getTime();
                 Long remindStartTime = DateHelper.currentGMTTime().getTime() - 6*60*1000L;
-                Set<Object> reminds = range(remindStartTime, remindEndTime, ZSET_KEY, MODULE);
-                reminds.forEach(obj -> {
+                Set<String> reminds = range(remindStartTime, remindEndTime, ZSET_KEY, MODULE);
+                reminds.forEach(jsonStr -> {
                     try {
-                    	Remind remind =(Remind) obj;
+                    	Remind remind =  (Remind) StringHelper.fromJsonString(jsonStr, Remind.class);
                     	if(remind == null || remind.getRemindTime() == null){
                     		return;
                     	}
@@ -102,7 +104,7 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
                         set(remind.getId(), remind.getRemindTime().getTime(), remind);
                     } catch (Exception e) {
                         // 忽略单个错误，以免影响到所有提醒消息的推送
-                        LOGGER.error("remindSchedule error,remind = {}", StringHelper.toJsonString(obj) , e);
+                        LOGGER.error("remindSchedule error,remind = {}", jsonStr , e);
                     }
                 });
            	 	 
@@ -130,10 +132,11 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
     }
 
     public void cancel(Long targetId){
-    	cancel(targetId, MODULE  + targetId, null, ZSET_KEY);
+    	cancel(targetId, MODULE  + targetId, null, ZSET_KEY, timeout, unit);
     }
 
 	public void set(Long targetId, long timestampLong, Remind remind) {
-		set(targetId, timestampLong, MODULE  + targetId, remind, ZSET_KEY);
+		String remindJsonString = StringHelper.toJsonString(remind);
+		set(targetId, timestampLong, MODULE  + targetId, remindJsonString, ZSET_KEY, timeout, unit);
 	}
 }

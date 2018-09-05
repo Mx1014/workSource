@@ -39,11 +39,11 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
     @Autowired
     protected CoordinationProvider coordinationProvider;
  
-    private ValueOperations<String, Object> getValueOperations(String key) {
+    private ValueOperations<String, String> getValueOperations(String key) {
         final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 
         return valueOperations;
     }
@@ -52,10 +52,9 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * */
     protected abstract void load();
     
-    private void setVO(String key , Object i) {
-        ValueOperations<String, Object> valueOperations = getValueOperations(key);
-        int timeout = 25;
-        TimeUnit unit = TimeUnit.HOURS;
+    private void setVO(String key , String i, int timeout, TimeUnit unit) {
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+       
         valueOperations.set(key, i, timeout, unit);
     }
  
@@ -87,14 +86,14 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * 
      * @return : 返回数据对象的排序Set
      * */
-    public Set<Object> range(Long beginTime,Long endTime,String ZSET_KEY, String VOKeyPrefix){
-    	Set<Object> objects = new HashSet<>();
+    public Set<String> range(Long beginTime,Long endTime,String ZSET_KEY, String VOKeyPrefix){
+    	Set<String> objects = new HashSet<>();
     	ZSetOperations<String, Long> zSetOperations = getZSetOperations(ZSET_KEY); 
     	Set<Long> ids = zSetOperations.rangeByScore(ZSET_KEY, beginTime.doubleValue(), endTime.doubleValue());
     	ids.forEach(id ->{
     		String key = VOKeyPrefix + id;
-    		ValueOperations<String, Object> vo = getValueOperations(key);
-    		Object o = vo.get(key);
+    		ValueOperations<String, String> vo = getValueOperations(key);
+    		String o = vo.get(key);
     		objects.add(o);
     	});
     	return objects;
@@ -104,14 +103,16 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * @param targetId : 目标对象的唯一id
      * @param timestampLong : 提醒时间 用以zset排序和到期提醒
      * @param VOKeyPrefix : valueOperation的key前缀每个业务都必须不一样(前缀+id 作为key)
-     * @param i : 缓存的业务对象
+     * @param i : 缓存的业务对象的jsonString
      * @param ZSET_KEY : zSetOperations的key 每个业务都不一样
+     * @param timeout : 数据超时时间
+     * @param unit : 超时时间单位
      * */
-    public void set(Long targetId, Long timestampLong, String VOKeyPrefix , Object i, String ZSET_KEY){
+    public void set(Long targetId, Long timestampLong, String VOKeyPrefix , String i, String ZSET_KEY, int timeout, TimeUnit unit){
     	ZSetOperations<String, Long> zSetOperations = getZSetOperations(ZSET_KEY); 
     	zSetOperations.remove(ZSET_KEY, targetId);
     	setZSet(targetId, timestampLong, ZSET_KEY);
-    	setVO(VOKeyPrefix + targetId, i);
+    	setVO(VOKeyPrefix + targetId, i, timeout, unit);
     }
 
     /**
@@ -120,10 +121,12 @@ public abstract class DailyBatchScheduleJob extends QuartzJobBean implements App
      * @param VOKeyPrefix : valueOperation的key前缀每个业务都必须不一样(前缀+id 作为key)
      * @param i : 缓存的业务对象
      * @param ZSET_KEY : zSetOperations的key 每个业务都不一样
+     * @param timeout : 数据超时时间
+     * @param unit : 超时时间单位
      * */
-    public void cancel(Long targetId, String VOKeyPrefix , Object i, String ZSET_KEY){
+    public void cancel(Long targetId, String VOKeyPrefix , Object i, String ZSET_KEY, int timeout, TimeUnit unit){
     	ZSetOperations<String, Long> zSetOperations = getZSetOperations(ZSET_KEY); 
     	zSetOperations.remove(ZSET_KEY, targetId);
-    	setVO(VOKeyPrefix + targetId, null);
+    	setVO(VOKeyPrefix + targetId, null, timeout, unit);
     }
 }
