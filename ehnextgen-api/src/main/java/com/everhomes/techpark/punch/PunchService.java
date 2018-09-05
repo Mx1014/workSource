@@ -251,8 +251,6 @@ public interface PunchService {
 
 	Time getEndTime(Time startTime, Time workTime);
 
-	public GetTargetPunchAllRuleResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
-
 	public void updateTargetPunchAllRule(UpdateTargetPunchAllRuleCommand cmd);
 
 	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
