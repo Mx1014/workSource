@@ -101,7 +101,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         }
 
         dto.setParkingTime(tempFee.getParktime());
-//        dto.setDelayTime(tempFee.getDelayTime());
+        dto.setDelayTime(15);
         dto.setPrice(new BigDecimal(tempFee.getAmount()));
 
         dto.setOrderToken(tempFee.getOrderNo());
