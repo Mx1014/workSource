@@ -8184,7 +8184,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalOrderRule> overTimeRules = rentalv2Provider.listRentalOrderRules(rule.getResourceType(), rule.getSourceType(),
 				rule.getId(), RentalOrderHandleType.OVERTIME.getCode());
-
+		
+        if (RuleSourceType.DEFAULT.getCode().equals(rule.getSourceType())) {
+            cmd.setSourceId(rule.getId());
+        }
 		List<RentalRefundTip> refundTips = rentalv2Provider.listRefundTips(cmd.getResourceType(),cmd.getSourceType(),cmd.getSourceId(),
 				null);
 
