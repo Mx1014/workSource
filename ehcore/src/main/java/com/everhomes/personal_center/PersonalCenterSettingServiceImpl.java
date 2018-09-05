@@ -246,6 +246,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 personalCenterSetting.setCreateTime(new Timestamp(new Date().getTime()));
                 personalCenterSetting.setCreateUid(UserContext.currentUserId());
                 personalCenterSetting.setNamespaceId(cmd.getNamespaceId());
+                personalCenterSetting.setLinkUrl(getLinkUrl(personalCenterSetting.getType()));
                 this.personalCenterSettingProvider.createPersonalCenterSetting(personalCenterSetting);
                 PersonalCenterSettingDTO returnDto = ConvertHelper.convert(personalCenterSetting, PersonalCenterSettingDTO.class);
                 returnDto.setIconUrl(parseUrl(returnDto.getIconUri(),cmd.getNamespaceId()));
@@ -303,5 +304,17 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         Timestamp dayEnd = new Timestamp(getTime(23,59,59).getTime());
         int count = this.personalCenterSettingProvider.countPersonalCenterSettingVersion(namespaceId, dayStart, dayEnd);
         return version+count+1;
+    }
+
+    private String getLinkUrl(Integer type){
+        List<PersonalCenterSetting> list = this.personalCenterSettingProvider.queryDefaultPersonalCenterSettings();
+        String linkUrl = "";
+        for (PersonalCenterSetting personalCenterSetting : list) {
+            if (personalCenterSetting.getType().equals(type)) {
+                linkUrl =  personalCenterSetting.getLinkUrl();
+                break;
+            }
+        }
+        return linkUrl;
     }
 }
