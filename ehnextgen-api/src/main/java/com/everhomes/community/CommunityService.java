@@ -161,5 +161,7 @@ public interface CommunityService {
 		//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
 
+	ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
+
 
 }
