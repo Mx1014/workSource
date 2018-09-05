@@ -241,5 +241,10 @@ public class DateStatisticHelper {
 		result += calendar.get(Calendar.MILLISECOND);
 		return result;
 	}
-	
+	public static Boolean isSameDay(Date d1, Date d2){
+		if(null == d1 || null == d2)
+			return false;
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+		return df.format(d1).equals(df.format(d2));
+	}
 }

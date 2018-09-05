@@ -99,7 +99,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
-public class RemindServiceImpl implements RemindService, ApplicationListener<ContextRefreshedEvent> {
+public class RemindServiceImpl implements RemindService  {
         private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
     private static final String DEFAULT_CATEGORY_NAME = "默认分类";
     private static final int FETCH_SIZE = 2000;
@@ -128,26 +128,8 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     private ExecutorService bgThreadPool = Executors.newFixedThreadPool(1);
     @Autowired
     private ScheduleProvider scheduleProvider;
-
-    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
-    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
-    //@PostConstruct
-    public void setup() {
-        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            String triggerName = CalendarRemindScheduleJob.CALENDAR_REMIND_SCHEDULE + System.currentTimeMillis();
-            String jobName = triggerName;
-            String cronExpression = CalendarRemindScheduleJob.CRON_EXPRESSION;
-            //启动定时任务
-            scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, CalendarRemindScheduleJob.class, null);
-        }
-    }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext().getParent() == null) {
-            setup();
-        }
-    }
+    @Autowired
+    private CalendarRemindScheduleJob calendarRemindScheduleJob;
     
     @Override
     public GetRemindCategoryColorsResponse getRemindCategoryColors() {
@@ -628,6 +610,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
         dbProvider.execute(transactionStatus -> {
             remindProvider.createRemind(remind);
+            setRemindRedis(remind);
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), remind));
             return null;
         });
@@ -685,6 +668,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         List<Remind> unSubscribeReminds = new ArrayList<>();
         dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(existRemind);
+            setRemindRedis(existRemind);
             remindProvider.deleteRemindSharesByRemindId(existRemind.getId());
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind));
             Iterator<Remind> iterator = trackReminds.iterator();
@@ -694,6 +678,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                 if (!shareMemberDTOcontainsShareId(cmd.getShareToMembers(), member.getId())) {
                     //取消共享,删日程发消息
                     remindProvider.deleteRemind(trackRemind);
+                    deleteRemindRedis(trackRemind);
                     unSubscribeReminds.add(trackRemind);
                     iterator.remove();
                 }
@@ -707,7 +692,22 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
         return existRemind.getId();
     }
+    
+    private boolean remindTimeIsToday(Remind remind){
+    	return DateStatisticHelper.isSameDay(DateHelper.currentGMTTime(),remind.getRemindTime());
+    }
+    
+    private void deleteRemindRedis(Remind remind){
+    	if(remindTimeIsToday(remind)){
+    		calendarRemindScheduleJob.cancel(remind.getId());
+    	}
+    }
 
+    private void setRemindRedis(Remind remind){
+    	if(remindTimeIsToday(remind)){
+    		calendarRemindScheduleJob.set(remind.getId(), remind.getRemindTime().getTime(), remind);
+    	}
+    }
     private boolean shareMemberDTOcontainsShareId(List<ShareMemberDTO> shareToMembers, Long id) {
         for (ShareMemberDTO dto : shareToMembers) {
             if (dto.getSourceId().equals(id)) {
@@ -729,6 +729,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
         dbProvider.execute(transactionStatus -> {
             remindProvider.deleteRemind(remind);
+            deleteRemindRedis(remind);
             remindProvider.deleteRemindSharesByRemindId(remind.getId());
             remindProvider.deleteRemindsByTrackRemindId(Collections.singletonList(remind.getId()));
             return null;
@@ -854,6 +855,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                 Remind remind = targetSortedReminds.get(i);
                 remind.setDefaultOrder(defaultOrder++);
                 remindProvider.updateRemind(remind);
+                setRemindRedis(remind);
             }
             return null;
         });
@@ -986,6 +988,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
         Remind repeat = dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(remind);
+            setRemindRedis(remind);
             Remind repeatRemind = createRepeatRemind(remind, originRepeatType);
             updateTrackReminds(trackReminds, remind, true);
             return repeatRemind;
@@ -1059,6 +1062,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         subscribe.setTrackContractName(remind.getContactName());
         subscribe.setDefaultOrder(nextOrder != null ? nextOrder : Integer.valueOf(1));
         remindProvider.createRemind(subscribe);
+        setRemindRedis(subscribe);
 
     }
 
@@ -1071,6 +1075,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             return;
         }
         remindProvider.deleteRemind(remind);
+        deleteRemindRedis(remind);
     }
 
     @Override
@@ -1085,37 +1090,6 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         response.setContactName(detail.getContactName());
         response.setContactToken(detail.getContactToken());
         return response;
-    }
-
-    @Override
-    public void remindSchedule() {
-        this.coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode()).tryEnter(() -> {
-            //改成每次提醒6分钟前到现在的
-            Timestamp remindEndTime = new Timestamp(DateHelper.currentGMTTime().getTime());
-            Timestamp remindStartTime = new Timestamp(DateHelper.currentGMTTime().getTime() - 6*60*1000L);
-            LOGGER.info("remindSchedule begin, reminder bigin time is {}  reminder end time is {}"
-                    , DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindStartTime.getTime()),
-                    DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+08:00"), remindEndTime.getTime()));
-            List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
-            long count = 0;
-            boolean isProcess = !CollectionUtils.isEmpty(reminds);
-            while (isProcess) {
-                count += reminds.size();
-                reminds.forEach(remind -> {
-                    try {
-                        sendRemindMessage(remind);
-                        remind.setActRemindTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        remindProvider.updateRemind(remind);
-                    } catch (Exception e) {
-                        // 忽略单个错误，以免影响到所有提醒消息的推送
-                        LOGGER.error("remindSchedule error,remindId = {}", remind.getId(), e);
-                    }
-                });
-                reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
-                isProcess = !CollectionUtils.isEmpty(reminds);
-            }
-            LOGGER.info("remindSchedule end,remind count = {}", count);
-        });
     }
 
     private String getContractNameByUserId(Long userId, Long organizationId) {
@@ -1172,6 +1146,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             if (!isCreated2) {
                 dbProvider.execute(transactionStatus -> {
                     remindProvider.createRemind(remind);
+                    setRemindRedis(remind);
                     remindProvider.createRemindDemoCreateLog(remindDemoCreateLog);
                     return null;
                 });
@@ -1276,6 +1251,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
 
         dbProvider.execute(transactionStatus -> {
             remindProvider.createRemind(repeatRemind);
+            setRemindRedis(repeatRemind);
             remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind));
             //origin日程点完成后,origin日程被追踪的日程也会重复一份
             originSubscribeReminds.stream().map(remind -> {
@@ -1422,8 +1398,8 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         boolean isDeleted = RemindModifyType.DELETE == modifyType;
         sendMessage(trackRemind.getUserId(), content, trackRemind, isDeleted);
     }
-
-    private void sendRemindMessage(Remind remind) {
+    @Override
+    public void sendRemindMessage(Remind remind) {
     	SimpleDateFormat timeDF = new SimpleDateFormat("HH:mm");
     	RemindSetting remindSetting = null;
     	//兼容5.9.0之前的 需要取remindSetting 的时间
@@ -1485,6 +1461,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                     trackRemind.setDefaultOrder(nextOrder != null ? nextOrder : Integer.valueOf(1));
                 }
                 remindProvider.updateRemind(trackRemind);
+                setRemindRedis(trackRemind);
             });
         }
     }
