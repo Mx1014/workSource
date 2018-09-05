@@ -134,6 +134,46 @@ SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 21110, 0, 21116, '一键转为资质客户', 13, SYSDATE());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21116, null, '客户管理 一键转为资质客户权限', '客户管理 业务模块权限', NULL);
 
+update `eh_general_form_templates` set `template_text` = '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼栋门牌",
+	"fieldDisplayName": "楼栋门牌",
+	"fieldExtra": "{}",
+	"fieldName": "楼栋门牌",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]' where id = 2500001;
+
 -- END
 
 
