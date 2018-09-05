@@ -40,6 +40,7 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -50,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -938,9 +938,18 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCity.setIconUri(cmd.getIconUri());
 			officeCubicleCity.setOrgId(cmd.getOrgId());
 			officeCubicleCity.setStatus((byte)2);
+			if(StringUtils.isNotEmpty(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+				officeCubicleCity.setOwnerType(cmd.getOwnerType());
+				officeCubicleCity.setOwnerId(cmd.getOwnerId());
+			}
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
-			OfficeCubicleCity oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			OfficeCubicleCity oldOfficeCubicleCity = null;
+			if(StringUtils.isNotEmpty(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+			}else{
+				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			}
 			if(oldOfficeCubicleCity!=null){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
 						"城市已存在，不能重复添加");

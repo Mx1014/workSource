@@ -76,6 +76,22 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 		return null;
 	}
 
+	@Override
+	public OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName,String cityName,Integer namespaceId,String ownerType,Long ownerId) {
+		List<OfficeCubicleCity> map = getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.CITY_NAME.eq(cityName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+		if(map!=null && map.size()>0){
+			return map.get(0);
+		}
+		return null;
+	}
+
 
 	@Override
 	public List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId) {
