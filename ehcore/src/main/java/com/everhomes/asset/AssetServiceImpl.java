@@ -114,8 +114,11 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListAssetServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
@@ -5674,14 +5677,25 @@ public class AssetServiceImpl implements AssetService {
 	
 	public ListAssetServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 		ListAssetServiceModuleAppsResponse response = new ListAssetServiceModuleAppsResponse();
-		//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
-//		cmd.setNamespaceId(namespaceId);
-//		cmd.setModuleId(moduleId);
-//		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
-//		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
-		//解析instance_config获取categoryId
-		
-		
+		List<AssetServiceModuleAppDTO> assetServiceModuleApps = new ArrayList<AssetServiceModuleAppDTO>();
+		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
+		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
+		if(listServiceModuleAppsResponse != null) {
+			List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
+			for(ServiceModuleAppDTO serviceModuleAppDTO : serviceModuleApps) {
+				String instanceConfig = serviceModuleAppDTO.getInstanceConfig();
+				IsContractChangeFlagDTO isContractChangeFlagDTO = 
+						(IsContractChangeFlagDTO) StringHelper.fromJsonString(instanceConfig, IsContractChangeFlagDTO.class);
+				if(isContractChangeFlagDTO != null) {
+					AssetServiceModuleAppDTO dto = new AssetServiceModuleAppDTO();
+					dto.setName(serviceModuleAppDTO.getName());
+					dto.setCategoryId(isContractChangeFlagDTO.getCategoryId());
+					assetServiceModuleApps.add(dto);
+				}
+			}
+			//解析instance_config获取categoryId
+		}
+		response.setServiceModuleApps(assetServiceModuleApps);
 		return response;
 	}
 	
@@ -5709,6 +5723,12 @@ public class AssetServiceImpl implements AssetService {
 		
 		
 		return response;
+	}
+
+	@Override
+	public ListAssetServiceModuleAppsResponse listServiceModuleApps() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

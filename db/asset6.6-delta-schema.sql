@@ -1,6 +1,6 @@
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费V6.6（对接统一账单） 业务应用与缴费的关联关系表
-CREATE TABLE `eh_asset_module_app_mappingAndConfigs` (
+CREATE TABLE `eh_asset_module_app_mapping_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,
   `owner_id` BIGINT COMMENT '园区ID',
