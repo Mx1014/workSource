@@ -29,12 +29,18 @@ import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +52,7 @@ import java.util.List;
 
 @Component
 public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonalCenterSettingServiceImpl.class);
 
     @Autowired
     private UserProvider userProvider;
@@ -61,6 +68,8 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     @Override
     public void createUserEmail(CreateUserEmailCommand cmd) {
         Long userId = UserContext.currentUserId();
@@ -124,6 +133,16 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
                 dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
             }
+            if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
+                User user = UserContext.current().getUser();
+                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
+                        UserProfileContstant.IS_APPLIED_SHOP);
+                dto.setLinkUrl(getApplyShopUrl());
+                if (applied != null) {
+                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
+                        dto.setLinkUrl(getManageShopUrl(user.getId()));
+                }
+            }
              switch (dto.getRegion()) {
                  case 0 :
                      basicDtos.add(dto);
@@ -142,6 +161,29 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         response.setBlockDtos(blockDtos);
         response.setListDtos(listDtos);
         return response;
+    }
+
+    private String getApplyShopUrl() {
+        String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
+        String applyShopPath = configurationProvider.getValue(ConfigConstants.APPLY_SHOP_URL, "");
+        if(homeurl.length() == 0 || applyShopPath.length() == 0) {
+            LOGGER.error("Invalid home url or apply path, homeUrl=" + homeurl + ", applyShopPath=" + applyShopPath);
+            return null;
+        } else {
+            return homeurl + applyShopPath;
+        }
+    }
+
+    private String getManageShopUrl(Long userId) {
+        String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
+        String manageShopPath = configurationProvider.getValue(ConfigConstants.MANAGE_SHOP_URL, "");
+
+        if(homeurl.length() == 0 || manageShopPath.length() == 0) {
+            LOGGER.error("Invalid home url or manage path, homeUrl=" + homeurl + ", manageShopPath=" + manageShopPath);
+            return null;
+        } else {
+            return homeurl + manageShopPath;
+        }
     }
 
     @Override
