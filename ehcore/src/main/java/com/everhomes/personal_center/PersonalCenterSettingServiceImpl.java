@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.point.PointService;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.personal_center.CreatePersonalCenterSettingsResponse;
@@ -28,6 +30,7 @@ import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserTreasureDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -70,6 +73,8 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
 
     @Autowired
     private UserActivityProvider userActivityProvider;
+    @Autowired
+    private PointService pointService;
     @Override
     public void createUserEmail(CreateUserEmailCommand cmd) {
         Long userId = UserContext.currentUserId();
@@ -130,8 +135,11 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
             if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-                dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+                UserTreasureDTO point = pointService.getPointTreasure();
+                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
+                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+                }
             }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
