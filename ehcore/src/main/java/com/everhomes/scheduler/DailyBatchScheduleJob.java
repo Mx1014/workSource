@@ -4,16 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.remind.RemindService;
-import com.everhomes.techpark.punch.PunchConstants;
-import com.everhomes.techpark.punch.PunchMonthReport;
-import com.fasterxml.jackson.databind.Module;
-
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -23,6 +13,11 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.remind.RemindService;
 
 /**
  * 日定时处理任务

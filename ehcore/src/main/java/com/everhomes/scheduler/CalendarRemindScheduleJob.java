@@ -3,17 +3,7 @@ package com.everhomes.scheduler;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.remind.Remind;
-import com.everhomes.remind.RemindProvider;
-import com.everhomes.remind.RemindService;
-import com.everhomes.techpark.punch.PunchServiceImpl;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateStatisticHelper;
-import com.everhomes.util.StringHelper;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,11 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.remind.Remind;
+import com.everhomes.remind.RemindProvider;
+import com.everhomes.remind.RemindService;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateStatisticHelper;
+import com.everhomes.util.StringHelper;
 
 /**
  * 日程定时提醒任务
