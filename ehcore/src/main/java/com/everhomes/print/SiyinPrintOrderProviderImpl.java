@@ -274,4 +274,16 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		return dto;
 	}
+
+	@Override
+	public SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum) {
+		
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.GENERAL_ORDER_ID.eq(BizOrderNum));
+		LOGGER.info("findSiyinPrintOrderByBizOrderNum sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		if(list!=null && list.size()>0)
+			return list.get(0);
+		return null;
+	}
 }

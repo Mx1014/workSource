@@ -142,4 +142,16 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public ExpressOrder findExpressOrderByBizOrderNum(String bizOrderNum) {
+		List<ExpressOrder> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
+		.where(Tables.EH_EXPRESS_ORDERS.GENERAL_ORDER_ID.eq(bizOrderNum))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ExpressOrder.class));
+		if(list != null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
 }

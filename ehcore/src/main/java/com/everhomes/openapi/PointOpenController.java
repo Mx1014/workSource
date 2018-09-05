@@ -1,12 +1,19 @@
 package com.everhomes.openapi;
 
+import com.everhomes.bus.LocalEvent;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.point.PointService;
+import com.everhomes.point.rpc.PointServiceRPCRest;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.point.*;
+import com.everhomes.util.StringHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +25,12 @@ public class PointOpenController extends ControllerBase {
 
     @Autowired
     private PointService pointService;
+    
+    @Autowired
+    private PointServiceRPCRest pointServiceRPCRest;
+    
+
+ 
 
     private static final RestResponse SUCCESS = new RestResponse() {
         {
@@ -38,13 +51,45 @@ public class PointOpenController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /openapi/point/publishEventTest</b>
+     * <p>发布事件测试</p>
+     */
+    @RestReturn(PublishEventResultDTO.class)
+    @RequestMapping("publishEventTest")
+    public RestResponse publishEventTest( ) {
+    	
+    	PublishEventCommand cmd = new PublishEventCommand();
+
+        LocalEvent localEvent = new LocalEvent();
+        localEvent.setEventName(SystemEvent.BIZ_ORDER_CREATE.dft());
+        localEvent.setEntityType("EhBiz");
+        localEvent.setEntityId(1L);
+        localEvent.setCreateTime(System.currentTimeMillis());
+
+        LocalEventContext context = new LocalEventContext();
+        context.setUid(505362L);
+        context.setNamespaceId(11);
+        localEvent.setContext(context);
+        localEvent.setSyncFlag(TrueOrFalseFlag.TRUE.getCode());
+
+        localEvent.addParam("score", "100");
+
+        cmd.setEventJson(StringHelper.toJsonString(localEvent));
+
+        PublishEventResultDTO dto = pointService.publishEvent(cmd);
+        return success(dto);
+    }
+    
+    
+    /**
      * <b>URL: /openapi/point/getUserPoint</b>
      * <p>获取用户积分</p>
      */
     @RestReturn(PointScoreDTO.class)
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
-        PointScoreDTO dto = pointService.getUserPointForOpenAPI(cmd);
+       // PointScoreDTO dto = pointService.getUserPointForOpenAPI(cmd);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);    
         return success(dto);
     }
 
