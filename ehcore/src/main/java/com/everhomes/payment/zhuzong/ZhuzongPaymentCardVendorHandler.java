@@ -101,8 +101,8 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     public CardInfoDTO applyCard(ApplyCardCommand cmd, PaymentCardIssuer cardIssuer) {
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", APPLT_CARD_TYPE);
-        jo.put("UserName ",cmd.getName());
-        jo.put("UserID ",cmd.getUserId());
+        jo.put("UserName",cmd.getName());
+        jo.put("UserID",cmd.getUserId());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongApplyCard applyCard = (ZhuzongApplyCard)StringHelper.fromJsonString(response, ZhuzongApplyCard.class);
         if ("1".equals(applyCard.getResultID())) //失败
@@ -311,7 +311,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
 
         MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();
         //String body = "{\"FunctionID\":\"1\",\"UserID\":\"1\"}";
-        String body = "{\"FunctionId\":\"0\",\"UserId\":\"0000001\",\"UserName\":\"张三\"}";
+        String body = "{\"FunctionID\":\"0\",\"UserID\":\"123\",\"UserName\":\"ewew\"}";
         try {
             httpPost.setEntity(new StringEntity(body));
             httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");

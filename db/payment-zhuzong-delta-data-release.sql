@@ -10,3 +10,6 @@ update eh_service_modules set name = '用户管理' where id = 41210;
 update eh_service_modules set name = '交易记录' where id = 41230;
 delete from eh_service_modules where id in (41220,41240);
 
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ( 'paymentCard.zhuzong.url', '111.207.114.167:9010', '住总一卡通地址', '0', NULL, NULL);
+
+
