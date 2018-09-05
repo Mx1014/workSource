@@ -4863,7 +4863,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         SearchEnterpriseCustomerResponse res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
         for(EnterpriseCustomerDTO dto : res.getDtos()){
