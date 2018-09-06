@@ -29,6 +29,7 @@ import java.util.List;
  *     <li>userSourceType: userSourceType</li>
  *     <li>organizations: organizations {@link OrganizationDetailDTO}</li>
  *     <li>email: 邮箱</li>
+ *     <li>identifierNumberTag: 身份证号</li>
  * </ul>
  */
 public class ExportCommunityUserDto {
@@ -76,7 +77,17 @@ public class ExportCommunityUserDto {
 
 	private String email;
 
-    public String getEmail() {
+	private String identifierNumberTag;
+
+	public String getIdentifierNumberTag() {
+		return identifierNumberTag;
+	}
+
+	public void setIdentifierNumberTag(String identifierNumberTag) {
+		this.identifierNumberTag = identifierNumberTag;
+	}
+
+	public String getEmail() {
         return email;
     }
 

@@ -20,6 +20,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.group.Group;
@@ -185,6 +186,8 @@ import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
@@ -281,6 +284,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -396,6 +400,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+	private TaskService taskService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -2754,115 +2761,38 @@ public class CommunityServiceImpl implements CommunityService {
 
 	public void exportCommunityUsersForCommercial(ListCommunityUsersCommand cmd, HttpServletResponse response) {
 
-		CommunityUserResponse resp = listUserCommunitiesV2(cmd);
-
-		List<CommunityUserDto> dtos = resp.getUserCommunities();
-
-		Workbook wb = new XSSFWorkbook();
-
-		Font font = wb.createFont();
-		font.setFontName("黑体");
-		font.setFontHeightInPoints((short) 16);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String fileName = "userlist";
+        Map<String, Object> params = new HashMap<>();
+        try {
+            params = objectToMap(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String fileName = "用户列表";
 		Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
 		if (namespace != null) {
 			fileName = namespace.getName()+"用户列表";
 		}
-		Sheet sheet = wb.createSheet(fileName);
-		sheet.setDefaultColumnWidth(20);
-		sheet.setDefaultRowHeightInPoints(20);
-		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("姓名");
-		row.createCell(1).setCellValue("昵称");
-		row.createCell(2).setCellValue("手机号");
-		row.createCell(3).setCellValue("性别");
-		row.createCell(4).setCellValue("企业");
-		row.createCell(5).setCellValue("是否高管");
-		row.createCell(6).setCellValue("职位");
-		row.createCell(7).setCellValue("用户状态");
-		row.createCell(8).setCellValue("社交账号绑定");
-		row.createCell(9).setCellValue("注册时间");
-		row.createCell(10).setCellValue("最近活跃时间");
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityUserApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-		int size = dtos.size();
-		for(int i = 0; i < size; i++){
-			Row tempRow = sheet.createRow(i + 1);
-			CommunityUserDto dto = dtos.get(i);
-			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
-
-			String name = "";
-			StringBuilder enterprises = new StringBuilder();
-			StringBuilder executiveFlag = new StringBuilder();
-			StringBuilder positionFlag = new StringBuilder();
-            if (organizations != null) {
-                for (int k = 0; k < organizations.size(); k++) {
-					OrganizationDetailDTO org = organizations.get(k);
-
-					if(StringUtils.isNotEmpty(org.getOrganizationMemberName()) && StringUtils.isEmpty(name)){
-						name = org.getOrganizationMemberName();
-					}
-
-					enterprises.append(organizations.get(k).getDisplayName() + ",");
-
-					//是否高管、职位
-					if(org.getCommunityUserOrgDetailDTO() != null){
-						if(org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == null || org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == 0){
-							executiveFlag.append("否,");
-						}else {
-							executiveFlag.append("是,");
-						}
-
-						if(org.getCommunityUserOrgDetailDTO().getPositionTag() == null || org.getCommunityUserOrgDetailDTO().getPositionTag().equals("")){
-							positionFlag.append("#,");
-						}else {
-							positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
-						}
-
-					}else {
-						executiveFlag.append("#,");
-						positionFlag.append("#,");
-					}
-                }
-            }
-
-            if(enterprises != null && enterprises.length() > 0 && executiveFlag != null && executiveFlag.length() > 0 && positionFlag != null && positionFlag.length() > 0){
-				enterprises.deleteCharAt(enterprises.length() - 1);
-				executiveFlag.deleteCharAt(executiveFlag.length() - 1);
-				positionFlag.deleteCharAt(positionFlag.length() - 1);
-			}
-
-			tempRow.createCell(0).setCellValue(name);
-			tempRow.createCell(1).setCellValue(dto.getNickName());
-			tempRow.createCell(2).setCellValue(dto.getPhone());
-			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
-			tempRow.createCell(4).setCellValue(enterprises.toString());
-			tempRow.createCell(5).setCellValue(executiveFlag.toString());
-			tempRow.createCell(6).setCellValue(positionFlag.toString());
-			tempRow.createCell(7).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
-			tempRow.createCell(8).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-			tempRow.createCell(9).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(10).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
-
-		}
-		ByteArrayOutputStream out = null;
-		try {
-			out = new ByteArrayOutputStream();
-			wb.write(out);
-			DownloadUtils.download(out, response,fileName);
-		} catch (IOException e) {
-			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"exportParkingRechageOrders is fail.");
-		}
 	}
+    private Map<String, Object> objectToMap(Object obj) throws Exception {
+        if(obj == null){
+            return null;
+        }
 
+        Map<String, Object> map = new HashMap<String, Object>();
 
-	public void exportCommunityUsersForResidential(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+        Field[] declaredFields = obj.getClass().getDeclaredFields();
+        for (Field field : declaredFields) {
+            field.setAccessible(true);
+            map.put(field.getName(), field.get(obj));
+        }
+
+        return map;
+    }
+
+    public void exportCommunityUsersForResidential(ListCommunityUsersCommand cmd, HttpServletResponse response) {
 
 		CommunityUserAddressResponse resp = listUserBycommunityIdV2(cmd);
 
@@ -3087,54 +3017,29 @@ public class CommunityServiceImpl implements CommunityService {
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
-		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
-		if(users == null){
-			users = new ArrayList<>();
-		}
-		int notAuthCount = users.size();
 
 		//认证中 = 已认证、认证中 - 已认证
 		int authingCount = communityUserCount - authCount;
 
 		//总用户 =  已认证 + 认证中 + 未认证
-		int allCount = authCount + authingCount + notAuthCount;
+		int allCount = authCount + authingCount;
 
-        //未认证中绑定微信的、男性、女性
-        Set<Long> wxMemberIds = new HashSet<>();
-        Set<Long> maleMemberIds = new HashSet<>();
-        Set<Long> femaleMemberIds = new HashSet<>();
 
-        if(users != null){
-			for(User u: users){
-				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
-					wxMemberIds.add(u.getId());
-				}
-                if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
-                    femaleMemberIds.add(u.getId());
-                }
-                if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
-                    maleMemberIds.add(u.getId());
-                }
-			}
-		}
-
-		//微信用户 = 已认证、认证中的微信微信用户 + 未认证中绑定微信的
-		int wxCount =  wxAuthCount + wxMemberIds.size();
+		//微信用户 = 已认证、认证中的微信微信用户
+		int wxCount =  wxAuthCount;
 
         //男性用户
         //已认证、认证中
         int maleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.MALE.getCode());
-        int maleCount = maleMemberIds.size() + maleAuthCount;
+        int maleCount = maleAuthCount;
         //女性用户
         int femaleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.FEMALE.getCode());
-        int femaleCount = femaleMemberIds.size() + femaleAuthCount;
+        int femaleCount = femaleAuthCount;
 
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(allCount);
 		resp.setAuthUsers(authCount);
 		resp.setAuthingUsers(authingCount);
-		resp.setNotAuthUsers(notAuthCount);
 		resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
 		resp.setMaleCount(maleCount);
