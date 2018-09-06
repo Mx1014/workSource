@@ -241,6 +241,10 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setEntryTime(tempfee.getEntryTime());
             dto.setParkingTime(String.valueOf(tempfee.getParkingTime()));
 
+        }else{
+            LOGGER.error("get car location error, msg={}", entity.getMessage());
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.CAR_ENTRY_INFO_NOT_FOUND,
+                    "get car location error");
         }
         return dto;
     }
