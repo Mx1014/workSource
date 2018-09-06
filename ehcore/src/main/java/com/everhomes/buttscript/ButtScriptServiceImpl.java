@@ -194,7 +194,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
             return res ;
         }
         //查询所有版本脚本
-        List<GogsCommit> gogsList = gogsService.listCommits(repo,this.getPath(namespaceId),cmd.getPageOffset(),cmd.getPageSize());
+        List<GogsCommit> gogsList = gogsService.listCommits(repo,this.getPath(namespaceId),cmd.getPageOffset()== null ? 1 : cmd.getPageOffset(),cmd.getPageSize());
         ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId ,cmd.getInfoType());
         if(gogsList != null && gogsList.size()>0){
             //组装返回值
@@ -222,7 +222,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
              }
             res.setDtos(dtos);
         }
-
+        res.setNextPageOffset(cmd.getPageOffset()==null?1:cmd.getPageOffset() + 1);
         return res;
     }
 
