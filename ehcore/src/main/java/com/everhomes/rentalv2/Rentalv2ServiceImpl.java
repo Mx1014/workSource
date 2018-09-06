@@ -7155,7 +7155,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getResourceId());
 
-//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getResourceId());
 		if (rs == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"rental resource (site) cannot found ");
@@ -7190,83 +7189,75 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 			List<RentalCell> changeRentalSiteRules = null;
-			if (RentalType.fromCode(cmd.getRentalType()) == RentalType.MONTH ||
-					RentalType.fromCode(cmd.getRentalType()) == RentalType.WEEK) {
-				updateRSRs(Collections.singletonList(choseRSR), cmd);
-			} else {
-				if (cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())) {
-					//当天的
+			Long cellDayBeginTime = choseRSR.getBeginTime().getTime();
+			Long cellDayEndTime = choseRSR.getEndTime().getTime();
+			if (cmd.getWholeDayFlag() != null && TrueOrFalseFlag.TRUE.getCode() == cmd.getWholeDayFlag()){
+				cellDayBeginTime = choseRSR.getResourceRentalDate().getTime();
+				cellDayEndTime = choseRSR.getResourceRentalDate().getTime() + 24*3600*1000 - 1;
+			}
+			if (cmd.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())) {
+				//当天的
+				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
+					//按小时
+					changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(),
+							new Timestamp(cellDayBeginTime), new Timestamp(cellDayEndTime),
+							null, dateSF.get().format(choseRSR.getResourceRentalDate()), cmd.getRentalType());
+				} else {
+					changeRentalSiteRules = Collections.singletonList(choseRSR);
+				}
 
+				updateRSRs(changeRentalSiteRules, cmd);
+			} else {
+				//需要循环的
+				Calendar chooseCalendar = Calendar.getInstance();
+				Calendar start = Calendar.getInstance();
+				Calendar end = Calendar.getInstance();
+				chooseCalendar.setTime(new Date(choseRSR.getResourceRentalDate().getTime()));
+
+				start.setTime(new Date(cmd.getBeginDate()));
+				end.setTime(new Date(cmd.getEndDate()));
+
+				for (; !start.after(end); start.add(Calendar.DAY_OF_MONTH, 1)) {
+					Integer weekday = start.get(Calendar.DAY_OF_WEEK);
+					Integer monthDay = start.get(Calendar.DAY_OF_MONTH);
+					//按周循环的,如果不对就继续循环
+					if (cmd.getLoopType().equals(LoopType.EVERYWEEK.getCode()) &&
+							!weekday.equals(chooseCalendar.get(Calendar.DAY_OF_WEEK)))
+						continue;
+					//按月循环的，如果不对就继续循环
+					if (cmd.getLoopType().equals(LoopType.EVERYMONTH.getCode()) &&
+							!monthDay.equals(chooseCalendar.get(Calendar.DAY_OF_MONTH)))
+						continue;
+					//每天循环的
 					if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 						//按小时
-						Timestamp beginTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getBeginTime().getTime()));
-						Timestamp endTime = Timestamp.valueOf(datetimeSF.get().format(choseRSR.getEndTime().getTime()));
-						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
-								null, dateSF.get().format(choseRSR.getResourceRentalDate()),cmd.getRentalType());
+						Timestamp beginTime = new Timestamp(start.getTime().getTime() + getDayTime(cellDayBeginTime));
+						Timestamp endTime = new Timestamp(start.getTime().getTime() + getDayTime(cellDayEndTime));
+						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
+								null, null, cmd.getRentalType());
 					} else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
 							cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
 						List<Byte> ampmList = new ArrayList<>();
 						//0早上1下午2晚上
 						ampmList.add(choseRSR.getAmorpm());
-						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-								ampmList, dateSF.get().format(choseRSR.getResourceRentalDate()),cmd.getRentalType());
+						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
+								ampmList, dateSF.get().format(new java.util.Date(start.getTimeInMillis())), cmd.getRentalType());
 					} else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
-						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-								null, dateSF.get().format(choseRSR.getResourceRentalDate()),cmd.getRentalType());
-					}
 
+						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
+								null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())), cmd.getRentalType());
+					} else if (cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
+						// TODO
+						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
+								null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())), cmd.getRentalType());
+					} else if (cmd.getRentalType().equals(RentalType.WEEK.getCode())) {
+						changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(), choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
+								null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())), cmd.getRentalType());
+					}
 					updateRSRs(changeRentalSiteRules, cmd);
-				} else {
-					//需要循环的
-					Calendar chooseCalendar = Calendar.getInstance();
-					Calendar start = Calendar.getInstance();
-					Calendar end = Calendar.getInstance();
-					chooseCalendar.setTime(new Date(choseRSR.getResourceRentalDate().getTime()));
-
-					start.setTime(new Date(cmd.getBeginDate()));
-					end.setTime(new Date(cmd.getEndDate()));
-
-					for (; !start.after(end); start.add(Calendar.DAY_OF_MONTH, 1)) {
-						Integer weekday = start.get(Calendar.DAY_OF_WEEK);
-						Integer monthDay = start.get(Calendar.DAY_OF_MONTH);
-						//按周循环的,如果不对就继续循环
-						if (cmd.getLoopType().equals(LoopType.EVERYWEEK.getCode()) &&
-								!weekday.equals(chooseCalendar.get(Calendar.DAY_OF_WEEK)))
-							continue;
-						//按月循环的，如果不对就继续循环
-						if (cmd.getLoopType().equals(LoopType.EVERYMONTH.getCode()) &&
-								!monthDay.equals(chooseCalendar.get(Calendar.DAY_OF_MONTH)))
-							continue;
-						//每天循环的
-						if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
-							//按小时
-							Timestamp beginTime = new Timestamp(start.getTime().getTime() + getDayTime(choseRSR.getBeginTime().getTime()));
-							Timestamp endTime = new Timestamp(start.getTime().getTime() + getDayTime(choseRSR.getEndTime().getTime()));
-							changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), beginTime, endTime,
-									null, null,cmd.getRentalType());
-						} else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
-								cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
-							List<Byte> ampmList = new ArrayList<>();
-							//0早上1下午2晚上
-							ampmList.add(choseRSR.getAmorpm());
-							changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-									ampmList, dateSF.get().format(new java.util.Date(start.getTimeInMillis())),cmd.getRentalType());
-						} else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
-
-							changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-									null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())),cmd.getRentalType());
-						} else if (cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
-							// TODO
-							changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-									null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())),cmd.getRentalType());
-						} else if (cmd.getRentalType().equals(RentalType.WEEK.getCode())) {
-							changeRentalSiteRules = findRentalSiteRuleByDate(rs.getResourceType(),choseRSR.getRentalResourceId(), choseRSR.getResourceNumber(), null, null,
-									null, dateSF.get().format(new java.util.Date(start.getTimeInMillis())),cmd.getRentalType());
-						}
-						updateRSRs(changeRentalSiteRules, cmd);
-					}
 				}
 			}
+
 			return null;
 		});
 
