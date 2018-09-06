@@ -53,6 +53,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     private static final String MONTHCARD_CHARGE = "api.aspx/park.mcard.charge";//月卡缴费
 
     private static final String GET_CAR_LOCATION = "api.aspx/pls.car.pos.getByLP";
+    private static final String GET_CAR_BY_LOCATION = "api.aspx/pls.car.pos.getByNo";
 
     private static final String IN_INFO = "api.aspx/park.in.info";
 
@@ -236,11 +237,33 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
 
-            ParkingTempFeeDTO tempfee = getParkingTempFee(parkingLot,cmd.getPlateNumber());
+            JSONObject param1 = new JSONObject();
+            param1.put("parkLotName",location.getParkLotName());
 
-            dto.setEntryTime(tempfee.getEntryTime());
-            dto.setParkingTime(String.valueOf(tempfee.getParkingTime()));
+            String json1 = post(param1,GET_CAR_BY_LOCATION);
+            CheanJsonEntity<JSONObject> entity1 = JSONObject.parseObject(json1,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+            if(null != entity1 && entity1.getStatus()){
+                JSONObject timeInfo = entity1.getData();
+                Date intime = new Date();
+                Date now = new Date();
+                try {
+                    intime = DATE_FORMAT.get().parse(timeInfo.getString("InDate"));
+                    now = DATE_FORMAT.get().parse(entity1.getTime());
+                } catch (ParseException e) {
+                    LOGGER.error("parse expiry date error, date={}", timeInfo.getString("InDate"));
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            "Parse expiry date error.");
+                }
+                dto.setEntryTime(intime.getTime());
+                Long parkingTime = now.getTime() - intime.getTime();
+                dto.setParkingTime(String.valueOf(parkingTime/(60*1000)));
+            }
 
+
+        }else{
+            LOGGER.error("get car location error, msg={}", entity.getMessage());
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.CAR_ENTRY_INFO_NOT_FOUND,
+                    "get car location error");
         }
         return dto;
     }
@@ -313,11 +336,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);
 
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String returnFlag = jsonObject.getString("flag");
-        if(null != returnFlag && "1".equals(returnFlag)) {
-            Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
-            return true;
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject jsonObject = entity.getData();
+            String returnFlag = jsonObject.getString("flag");
+            if(null != returnFlag && "1".equals(returnFlag)) {
+                Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
+                return true;
+            }
         }
         return false;
     }
@@ -652,12 +678,16 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     protected String post(JSONObject data, String type) {
 
         String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
+//        String url = "http://113.98.59.44:9022";
 
         url += CATEGORY_SEPARATOR + type;
 
         String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","UT");
         String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
         String branchno = configProvider.getValue("parking.chean.branchno","0");
+//        String accessKeyId = "UT";
+//        String key = "71cfa1c59773ddfa289994e6d505bba3";
+//        String branchno ="0";
 
         String iv = DATE_FORMAT.get().format(new Date());
         int nonce = (int) (Math.random() * 100);
@@ -691,9 +721,20 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return result;
     }
 
+//    private String test(){
+//        JSONObject param = new JSONObject();
+//        post(param,"api.aspx/pls.parkLots.get");
+//        for(int i = 1;i<4;i++){
+//            JSONObject param1 = new JSONObject();
+//            param1.put("parkLotName","A" + i);
+//            post(param1,"api.aspx/pls.car.pos.getByNo");
+//        }
+//        return "";
+//    }
+
 //    public static void main(String[] args) {
 //        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
-//        bean.getParkingTempFee(null,"粤BMP525");
+//        bean.getParkingTempFee(null,"粤B571B5");
 //        bean.getCardInfo("粤BMP525",null);
 //      卡类型接口
 //        bean.getParkingRechargeRates(null,null,null);
@@ -709,5 +750,17 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 //        bean.addMonthCard(order,null);
 //        LOGGER.info("amount={}",new BigDecimal("24.00"));
 //
+//        GetCarLocationCommand cmd = new GetCarLocationCommand();
+//        cmd.setPlateNumber("粤B571B5");
+//        ParkingLot pl = new ParkingLot();
+//        pl.setOwnerType("1");
+//        pl.setOwnerId(1L);
+//        pl.setId(1L);
+//        pl.setName("1");
+//        ParkingCarLocationDTO dto = bean.getCarLocation(pl,cmd);
+//        System.out.println(dto.getEntryTime());
+//        System.out.println(dto.getParkingTime());
+
+//        bean.test();
 //    }
 }

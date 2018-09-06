@@ -727,8 +727,7 @@ public class BannerServiceImpl implements BannerService {
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
             if(!org.apache.commons.lang.StringUtils.isEmpty(uri)) {
-                String url = contentServerService.parserUri(uri, ownerType, ownerId);
-                return url + "&w=750&h=450";
+                return contentServerService.parserUri(uri, ownerType, ownerId);
             }
             
         } catch (Exception e) {

@@ -182,7 +182,12 @@ update `eh_general_form_templates` set `template_text` = '[{
 
 -- END
 
-
+-- AUTHOR: xq.tian  20180906
+-- REMARK: 电商相关的配置都允许后台修改 add
+UPDATE eh_configurations
+SET is_readonly = 0
+WHERE name IN ('user.order.url', 'apply.shop.url', 'manage.shop.url', 'user.coupon.url', 'business.detail.url', 'prefix.url');
+-- END
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
