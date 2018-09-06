@@ -6,14 +6,14 @@ package com.everhomes.rest.buttscript;
  *     <li>((byte) 1): TRUE</li>
  * </ul>
  */
-public enum PublicCode {
+public enum PublishCode {
 
     FALSE((byte) 0),
     TRUE((byte) 1);
 
     private Byte code;
 
-    PublicCode(Byte code) {
+    PublishCode(Byte code) {
         this.code = code;
     }
 
@@ -21,9 +21,9 @@ public enum PublicCode {
         return code;
     }
 
-    public static PublicCode fromCode(Byte code) {
+    public static PublishCode fromCode(Byte code) {
         if (code != null) {
-            for (PublicCode type : PublicCode.values()) {
+            for (PublishCode type : PublishCode.values()) {
                 if (type.getCode().equals(code)) {
                     return type;
                 }

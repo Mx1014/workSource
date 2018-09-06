@@ -2,10 +2,7 @@ package com.everhomes.buttscript;
 
 import com.everhomes.configurations.ConfigurationsAdminProviderImpl;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.gogs.*;
 import com.everhomes.rest.buttscript.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
@@ -17,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +28,9 @@ public class ButtScriptServiceImpl implements ButtScriptService {
 
     @Autowired
     private ButtScriptConfigProvider buttScriptConfigProvider ;
+
+    @Autowired
+    private ButtScriptLastCommitProvider buttScriptLastCommitProvider ;
 
     @Autowired
     private GogsService gogsService ;
@@ -110,16 +112,64 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         //保存脚本到仓库中,返回版本号
         GogsRawFileParam param = new GogsRawFileParam();
         String path = this.getPath(namespaceId);
-        //尝试获取仓库中的最新版本文件,若能获取到,说明
-        byte[] file = gogsService.getFile(repo, path, null);
-  /*      param.setCommitMessage(gogsCommitMessage());
-        param.setNewFile(isNewFile);
-        param.setContent(content);
-        param.setLastCommit(lastCommit);
-        return gogsService.commitFile(repo, path, param);*/
-        //如果选择了发布,在发布信息表创建或更新一条数据
+        //尝试获取仓库中的最后一次提交信息,若能获取到,说明
+        ButtScriptLastCommit lastCommitInfo = buttScriptLastCommitProvider.getButtScriptLastCommit(namespaceId ,cmd.getInfoType());
+        param.setCommitMessage("");
+        param.setContent(cmd.getScript());
+        param.setNewFile(true);
+        if(lastCommitInfo !=null){
+            param.setLastCommit(lastCommitInfo.getLastCommit());
+            param.setNewFile(false);
+        }
 
-        return null;
+        GogsCommit gogsCommit = gogsService.commitFile(repo, path, param);
+        //更新版本号表的信息
+        if(lastCommitInfo !=null){
+            lastCommitInfo.setCommitTime(DateUtils.currentTimestamp());
+            lastCommitInfo.setLastCommit(gogsCommit.getId());
+            LOGGER.info("update ButtScriptLastCommit info .lastCommit:{}",gogsCommit.getId());
+            buttScriptLastCommitProvider.updateButtScriptLastCommit(lastCommitInfo);
+        }else{
+            lastCommitInfo = new ButtScriptLastCommit();
+            lastCommitInfo.setLastCommit(gogsCommit.getId());
+            lastCommitInfo.setCommitTime(DateUtils.currentTimestamp());
+            lastCommitInfo.setInfoType(cmd.getInfoType());
+            lastCommitInfo.setNamespaceId(namespaceId);
+            LOGGER.info("add ButtScriptLastCommit info .lastCommit:{}",gogsCommit.getId());
+            buttScriptLastCommitProvider.crteateButtScriptLastCommit(lastCommitInfo);
+
+        }
+        ScriptVersionInfoDTO dto = new ScriptVersionInfoDTO();
+        dto.setPublishCode(PublishCode.FALSE.getCode());
+        //如果选择了发布,在发布信息表创建或更新一条数据
+        if(PublishCode.TRUE.getCode().equals(cmd.getPublicCode())){
+            ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId ,cmd.getInfoType());
+            if(publishInfo == null){
+                publishInfo = new ButtScriptPublishInfo();
+                publishInfo.setNamespaceId(namespaceId);
+                publishInfo.setInfoType(cmd.getInfoType());
+                publishInfo.setPublishTime(DateUtils.currentTimestamp());
+                publishInfo.setCommitVersion(gogsCommit.getId());
+                LOGGER.info("add ButtScriptPublishInfo  .commitVersion:{}",gogsCommit.getId());
+                buttScriptPublishInfoProvider.crteateButtScriptPublishInfo(publishInfo);
+            }else{
+                publishInfo.setCommitVersion(gogsCommit.getId());
+                publishInfo.setPublishTime(DateUtils.currentTimestamp());
+                LOGGER.info("update ButtScriptPublishInfo  .commitVersion:{}",gogsCommit.getId());
+                buttScriptPublishInfoProvider.updateButtScriptPublishInfo(publishInfo);
+            }
+
+            dto.setPublishCode(PublishCode.TRUE.getCode());
+            dto.setPublishTime(DateUtils.currentTimestamp());
+        }
+
+        dto.setCommitVersion(gogsCommit.getId());
+        dto.setCreateTime(gogsCommit.getCommitTime()==null?null:new Timestamp(gogsCommit.getCommitTime().getTime()));
+        dto.setId(gogsCommit.getId());
+        dto.setInfoType(cmd.getInfoType());
+        dto.setNamespaceId(namespaceId);
+
+        return dto;
     }
 
     /**
@@ -129,7 +179,51 @@ public class ButtScriptServiceImpl implements ButtScriptService {
      */
     @Override
     public ScriptVersionInfoResponse findScriptVersionInfoByNamespaceId(FindScriptVersionInfoCommand cmd) {
-        return null;
+        ScriptVersionInfoResponse res = new ScriptVersionInfoResponse();
+        //获取配置信息
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        //先从配置表获取相关配置信息
+        ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(namespaceId ,cmd.getInfoType());
+        if(cof == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not found and buttScriptConfig info .namespaceId:{};infoType:{} .",namespaceId,cmd.getInfoType());
+        }
+        //获取仓库
+        GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
+        if(repo == null){
+            return res ;
+        }
+        //查询所有版本脚本
+        List<GogsCommit> gogsList = gogsService.listCommits(repo,this.getPath(namespaceId),cmd.getPageOffset(),cmd.getPageSize());
+        ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId ,cmd.getInfoType());
+        if(gogsList != null && gogsList.size()>0){
+            //组装返回值
+            List<ScriptVersionInfoDTO> dtos = new ArrayList<ScriptVersionInfoDTO>();
+             String publishVersion="";
+             Timestamp publishTime = null;
+             if(publishInfo != null){
+                 publishVersion = publishInfo.getCommitVersion();
+                 publishTime = publishInfo.getPublishTime();
+             }
+             for(GogsCommit gogs : gogsList){
+                 ScriptVersionInfoDTO dto = new ScriptVersionInfoDTO();
+                 dto.setPublishCode(PublishCode.FALSE.getCode());
+                 if(gogs.getId().equals(publishVersion)){
+                     dto.setPublishCode(PublishCode.TRUE.getCode());
+                     dto.setPublishTime(publishTime);
+                 }
+                 dto.setNamespaceId(namespaceId);
+                 dto.setInfoType(cmd.getInfoType());
+                 dto.setCommitVersion(gogs.getId());
+                 dto.setCreateTime(gogs.getCommitTime()==null?null:new Timestamp(gogs.getCommitTime().getTime()));
+                 dto.setId(gogs.getId());
+
+                 dtos.add(dto);
+             }
+            res.setDtos(dtos);
+        }
+
+        return res;
     }
 
     /**

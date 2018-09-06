@@ -14,6 +14,7 @@ public class SaveScriptCommand {
     private Integer namespaceId;
     private String    infoType ;
     private Byte        publicCode  ;
+    private String    script     ;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -37,6 +38,14 @@ public class SaveScriptCommand {
 
     public void setPublicCode(Byte publicCode) {
         this.publicCode = publicCode;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
     }
 
     @Override

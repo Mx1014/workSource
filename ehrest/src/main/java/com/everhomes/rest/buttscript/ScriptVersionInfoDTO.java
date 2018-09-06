@@ -3,6 +3,7 @@ package com.everhomes.rest.buttscript;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -16,18 +17,19 @@ import java.sql.Date;
  */
 public class ScriptVersionInfoDTO {
 
-    private Long    id ;
-    private Integer   namespaceId ;String   infoType ;
+    private String    id ;
+    private Integer   namespaceId ;
+    private String   infoType ;
     private String   commitVersion ;
-    private Date createTime ;
-    private Date   publishTime ;
+    private Timestamp createTime ;
+    private Timestamp   publishTime ;
     private Byte   publishCode ;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -55,19 +57,19 @@ public class ScriptVersionInfoDTO {
         this.commitVersion = commitVersion;
     }
 
-    public Date getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
-    public Date getPublishTime() {
+    public Timestamp getPublishTime() {
         return publishTime;
     }
 
-    public void setPublishTime(Date publishTime) {
+    public void setPublishTime(Timestamp publishTime) {
         this.publishTime = publishTime;
     }
 

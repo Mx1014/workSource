@@ -13,16 +13,17 @@ import java.util.List;
  */
 public class ScriptVersionInfoResponse {
 
-    private Long nextPageAnchor;
+    private Integer nextPageOffset;
     private List<ScriptVersionInfoDTO> dtos ;
 
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
+    public Integer getNextPageOffset() {
+        return nextPageOffset;
     }
 
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
+    public void setNextPageOffset(Integer nextPageOffset) {
+        this.nextPageOffset = nextPageOffset;
     }
+
 
     public List<ScriptVersionInfoDTO> getDtos() {
         return dtos;

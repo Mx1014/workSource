@@ -15,7 +15,7 @@ public class FindScriptVersionInfoCommand {
     private  Integer namespaceId ;
     private  String   infoType ;
     private  Integer   pageSize ;
-    private  Long   pageAnchor;
+    private  Integer   pageOffset;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -41,13 +41,14 @@ public class FindScriptVersionInfoCommand {
         this.pageSize = pageSize;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
+
 
     @Override
     public String toString() {
