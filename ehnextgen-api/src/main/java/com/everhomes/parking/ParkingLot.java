@@ -45,6 +45,8 @@ public class ParkingLot extends EhParkingLots {
     private Byte identityCardFlag;
     private Byte monthCardFlag;//是否支持月卡申请，用于应用创建。
     private Integer flowMode;
+    private Byte enableNotice;
+    private Byte enableInvoice;
 
     public Integer getFlowMode() {
         return flowMode;
@@ -217,7 +219,23 @@ public class ParkingLot extends EhParkingLots {
         this.contact = contact;
     }
 
-    @Override
+    public Byte getEnableNotice() {
+		return enableNotice;
+	}
+
+	public void setEnableNotice(Byte enableNotice) {
+		this.enableNotice = enableNotice;
+	}
+
+	public Byte getEnableInvoice() {
+		return enableInvoice;
+	}
+
+	public void setEnableInvoice(Byte enableInvoice) {
+		this.enableInvoice = enableInvoice;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

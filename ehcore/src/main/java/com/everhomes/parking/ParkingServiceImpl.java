@@ -3465,15 +3465,17 @@ public class ParkingServiceImpl implements ParkingService {
 	public GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
 		GetParkingBussnessStatusResponse response  = new GetParkingBussnessStatusResponse();
 		List<ParkingFuncDTO> dockingFuncLists = new ArrayList<>();
+		List<ParkingFuncDTO> funcLists = new ArrayList<>();
 		ArrayList<Byte> flowModeList = new ArrayList<>(Arrays.asList((byte) 1, (byte) 2));
 		ParkingLot lot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 		if(lot.getFuncList()!=null && lot.getFuncList().contains("[")){
 			JSONArray array = JSONObject.parseArray(lot.getFuncList());
 			for (Object o : array) {
-				//暂时如此
-				if(ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())){
-					continue;
-				}
+//				//暂时如此
+//				if(ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())){
+//					continue;
+//				}
+				
 				ParkingFuncDTO dto = new ParkingFuncDTO();
 				dto.setCode(o.toString());
 				dto.setEnableFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
@@ -3495,16 +3497,21 @@ public class ParkingServiceImpl implements ParkingService {
 						break;
 					}
 				}
-				dockingFuncLists.add(dto);
+				if (ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString()) 
+						|| ParkingBusinessType.USER_NOTICE.getCode().equals(o.toString()) 
+						|| ParkingBusinessType.INVOICE_APPLY.getCode().equals(o.toString())) {
+					funcLists.add(dto);
+				} else {
+					dockingFuncLists.add(dto);
+				}
 			}
 		}
 		response.setDockingFuncLists(dockingFuncLists);
 
-		List<ParkingFuncDTO> funcLists = new ArrayList<>();
-		ParkingFuncDTO dto = new ParkingFuncDTO();
-		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
-		dto.setEnableFlag(lot.getVipParkingFlag());
-		funcLists.add(dto);
+//		ParkingFuncDTO dto = new ParkingFuncDTO();
+//		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
+//		dto.setEnableFlag(lot.getVipParkingFlag());
+//		funcLists.add(dto);
 		response.setFuncLists(funcLists);
 
 		response.setEnableMonthCard(lot.getMonthCardFlag());

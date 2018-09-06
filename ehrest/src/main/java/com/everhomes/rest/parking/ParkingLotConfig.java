@@ -28,8 +28,7 @@ public class ParkingLotConfig {
     private Byte identityCardFlag = 0;
     private Byte monthCardFlag = 0;
     private Integer flowMode;
-    private Byte enableInvoice;
-    private Byte enbleNotice;
+    private Byte noticeFlag = 0;
 
     public Integer getFlowMode() {
         return flowMode;
@@ -135,15 +134,15 @@ public class ParkingLotConfig {
         this.monthRechargeFlag = monthRechargeFlag;
     }
 
-    public Byte getEnableInvoice() { return enableInvoice; }
+    public Byte getNoticeFlag() {
+		return noticeFlag;
+	}
 
-    public void setEnableInvoice(Byte enableInvoice) { this.enableInvoice = enableInvoice; }
+	public void setNoticeFlag(Byte noticeFlag) {
+		this.noticeFlag = noticeFlag;
+	}
 
-    public Byte getEnbleNotice() { return enbleNotice; }
-
-    public void setEnbleNotice(Byte enbleNotice) { this.enbleNotice = enbleNotice; }
-
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
