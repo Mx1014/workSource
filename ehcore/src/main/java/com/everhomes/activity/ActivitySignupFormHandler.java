@@ -3,6 +3,9 @@ package com.everhomes.activity;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
@@ -58,6 +61,9 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
 
     @Autowired
     private ActivityProivider activityProivider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
         if (StringUtils.isBlank(cmd.getSourceType())) {
@@ -90,6 +96,12 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         activitySignupCommand.setFormOriginId(generalForm.getFormOriginId());
         activitySignupCommand.setValues(cmd.getValues());
         activitySignupCommand.setFormId(generalForm.getId());
+        if (cmd.getCommunityId() != null) {
+            Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+            if (community != null) {
+                activitySignupCommand.setCommunityName(community.getName());
+            }
+        }
         LOGGER.info("activity signup, cmd={}",activitySignupCommand);
         ActivityDTO activityDTO = this.activityService.signup(activitySignupCommand);
 

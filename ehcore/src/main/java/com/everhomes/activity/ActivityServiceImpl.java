@@ -229,6 +229,7 @@ import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
@@ -1793,9 +1794,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
-		User user = getUserFromPhone(activityRoster.getPhone());
-		signupInfoDTO.setNickName(user.getNickName());
-		signupInfoDTO.setType(getAuthFlag(user));
 		if (activity != null && activityRoster.getUid().longValue() == activity.getCreatorUid().longValue()) {
 			signupInfoDTO.setCreateFlag((byte)1);
 		}else {
@@ -1838,6 +1836,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             }
             signupInfoDTO.setValues(results);
         }
+        User user = getUserFromPhone(signupInfoDTO.getPhone());
+        signupInfoDTO.setNickName(user.getNickName());
+        signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
@@ -2050,7 +2051,21 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     ActivityRoster r = rosters.get(i);
                     ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
                     if(oldRoster != null){
-                        getNewForImport(oldRoster, r);
+                        if (form != null) {
+                            //表单数据更新时，先删除旧的数据，在增加新的数据.
+                            PostGeneralFormValCommand postGeneralFormValCommand = new PostGeneralFormValCommand();
+                            postGeneralFormValCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+                            postGeneralFormValCommand.setOwnerId(form.getOwnerId());
+                            postGeneralFormValCommand.setSourceId(oldRoster.getId());
+                            this.generalFormService.deleteGeneralFormVal(postGeneralFormValCommand);
+
+                            addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                            addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
+                            addGeneralFormValuesCommand.setSourceId(oldRoster.getId());
+                            addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                            addGeneralFormValuesCommand.setValues(values.get(i));
+                            this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        }
                         activityProvider.updateRoster(oldRoster);
                     }else {
                         r.setConfirmUid(user.getId());
@@ -2655,6 +2670,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setActivityId(activity.getId());
         roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setConfirmFamilyId(user.getAddressId());
+        roster.setCommunityName(cmd.getCommunityName());
         if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
@@ -7510,7 +7526,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
         if (rosters.size() > 0) {
             List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
-            List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别"));
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别", "项目名称"));
             List<PostApprovalFormItem> itemList = new ArrayList<>();
             if (rosters.size() > 1) {
                 itemList = signupInfoDTOs.get(1).getValues();
@@ -7539,7 +7555,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 }
                 ExportActivitySignupDTO exportActivitySignupDTO = new ExportActivitySignupDTO();
                 List<String> signupValue = new ArrayList<>();
-                if (i == 0) {
+                if (signupInfoDTO.getCreateFlag().equals((byte)1)) {
                     signupValue.add("创建者");
                 }else {
                     signupValue.add(i+"");
@@ -7551,6 +7567,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 }else {
                     signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
                 }
+                signupValue.add(signupInfoDTO.getCommunityName());
                 if (i == 0) {
                     if (!CollectionUtils.isEmpty(itemList)) {
                         for (PostApprovalFormItem postApprovalFormItem : itemList) {
@@ -7567,8 +7584,17 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 signupValue.add(signupInfoDTO.getSourceFlagText());
                 signupValue.add(signupInfoDTO.getSignupStatusText());
                 if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-                    signupValue.add(String.valueOf(signupInfoDTO.getPayAmount()));
-                    signupValue.add(String.valueOf(signupInfoDTO.getRefundAmount()));
+                    if (signupInfoDTO.getPayAmount() == null) {
+                        signupValue.add("0");
+                    }else {
+                        signupValue.add(String.valueOf(signupInfoDTO.getPayAmount()));
+                    }
+                    if (signupInfoDTO.getRefundAmount() == null) {
+                        signupValue.add("0");
+                    }else {
+                        signupValue.add(String.valueOf(signupInfoDTO.getRefundAmount()));
+
+                    }
                 }
                 if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
                     signupValue.add(signupInfoDTO.getCheckinFlagText());

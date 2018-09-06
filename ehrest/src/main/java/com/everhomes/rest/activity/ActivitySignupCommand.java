@@ -37,8 +37,17 @@ public class ActivitySignupCommand {
 	List<PostApprovalFormItem> values;
     private String payFlag;
 	private Byte signupSourceFlag;
-    
-    
+
+	private String communityName;
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
     public ActivitySignupCommand() {
     }
 
