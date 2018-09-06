@@ -313,11 +313,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);
 
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String returnFlag = jsonObject.getString("flag");
-        if(null != returnFlag && "1".equals(returnFlag)) {
-            Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
-            return true;
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject jsonObject = entity.getData();
+            String returnFlag = jsonObject.getString("flag");
+            if(null != returnFlag && "1".equals(returnFlag)) {
+                Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
+                return true;
+            }
         }
         return false;
     }
