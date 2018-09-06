@@ -1,10 +1,8 @@
 package com.everhomes.flow.vars;
 
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.flow.FlowVariableTextResolver;
-import com.everhomes.rest.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,35 +14,19 @@ import java.util.List;
  *
  */
 @Component("flow-variable-text-button-msg-curr-processors-phone")
-public class FlowVarsTextButtonCurrentAllProcessorsPhone extends FlowVarsButtonMsgCurrentProcessors implements FlowVariableTextResolver {
+public class FlowVarsTextButtonCurrentAllProcessorsPhone implements FlowVariableTextResolver {
 
     @Autowired
     FlowService flowService;
 
     @Autowired
-    FlowEventLogProvider flowEventLogProvider;
+    FlowVarsButtonMsgCurrentProcessors flowVarsButtonMsgCurrentProcessors;
 
     @Override
     public String variableTextRender(FlowCaseState ctx, String variable) {
-        List<Long> userIdList = variableUserResolve(ctx, null, null, null, null, 10);
+        List<Long> userIdList = flowVarsButtonMsgCurrentProcessors.variableUserResolve(
+                ctx, null, null, null, null, 10);
 
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for (Long uid : userIdList) {
-            UserInfo ui = flowService.getUserInfoInContext(ctx, uid);
-            if (ui != null && ui.getPhones().size() > 0) {
-                sb.append(ui.getPhones().iterator().next()).append(", ");
-                i++;
-                if (i >= 3) {
-                    break;
-                }
-            }
-        }
-
-        if (sb.length() > 2) {
-            return sb.substring(0, sb.length() - 2);
-        }
-        return sb.toString();
+        return displayText(flowService, ctx, userIdList, this::getPhone);
     }
-
 }

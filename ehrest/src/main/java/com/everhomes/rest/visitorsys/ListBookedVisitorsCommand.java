@@ -13,8 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerToken: (必填)公司/园区访客注册地址标识</li>
  * <li>keyWords: (选填)访客信息,访客姓名手机号码模糊搜索</li>
  * <li>visitorType: (选填)访客类型，{@link com.everhomes.rest.visitorsys.VisitorsysVisitorType}</li>
- * <li>visitStatus: (选填)访客状态，{@link VisitorsysStatus}</li>
- * <li>bookingStatus: (选填)预约状态，{@link VisitorsysStatus}</li>
+ * <li>visitStatus: (选填)访客状态，{@link com.everhomes.rest.visitorsys.VisitorsysStatus}</li>
+ * <li>bookingStatus: (选填)预约状态，{@link com.everhomes.rest.visitorsys.VisitorsysStatus}</li>
  * <li>startPlannedVisitTime: (选填)计划到访时间开始，预约管理用</li>
  * <li>endPlannedVisitTime: (选填)计划到访时间结束，预约管理用</li>
  * <li>officeLocationId: (选填)办公地点id，企业访客模块用</li>

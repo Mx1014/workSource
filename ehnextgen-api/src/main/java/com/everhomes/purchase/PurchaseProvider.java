@@ -18,7 +18,7 @@ public interface PurchaseProvider {
 
     void changePurchaseOrderStatus2Target(byte code, Long referId);
 
-    List<SearchPurchasesDTO> findPurchaseOrders(Long pageAnchor, Integer integer, Byte submissionStatus, Byte warehouseStatus, String applicant, Long ownerId, String ownerType, Integer namespaceId);
+    List<SearchPurchasesDTO> findPurchaseOrders(Long pageAnchor, Integer integer, Byte submissionStatus, Byte warehouseStatus, String applicant, Long ownerId, String ownerType, Integer namespaceId, Long communityId);
 
     PurchaseOrder getPurchaseOrderById(Long purchaseRequestId);
 

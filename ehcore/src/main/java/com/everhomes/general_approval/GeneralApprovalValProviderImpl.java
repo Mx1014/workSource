@@ -107,13 +107,13 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 
     }
 	@Override
-	public GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName){
+	public GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long flowCaseId, String fieldName) {
 		try {
 	        GeneralApprovalVal[] result = new GeneralApprovalVal[1];
 	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovalVals.class));
 
 	        result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
-	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id))
+	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(flowCaseId))
                     .and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
 	            .fetchAny().map((r) -> ConvertHelper.convert(r, GeneralApprovalVal.class));
 
@@ -122,7 +122,29 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 	            //fetchAny() maybe return null
 	            return null;
 	        }
-		
+
+	}
+
+	@Override
+	public GeneralApprovalVal getGeneralApprovalVal(Long formOriginId, Long formVersion,
+                                                                  Long flowCaseId, String fieldName) {
+		try {
+	        GeneralApprovalVal[] result = new GeneralApprovalVal[1];
+	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovalVals.class));
+
+	        result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
+	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(flowCaseId))
+                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FORM_ORIGIN_ID.eq(formOriginId))
+                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FORM_VERSION.eq(formVersion))
+                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
+	            .fetchAny().map((r) -> ConvertHelper.convert(r, GeneralApprovalVal.class));
+
+	        return result[0];
+	        } catch (Exception ex) {
+	            //fetchAny() maybe return null
+	            return null;
+	        }
+
 	}
 
     @Override

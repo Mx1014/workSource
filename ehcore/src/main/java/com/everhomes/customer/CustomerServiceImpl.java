@@ -23,6 +23,8 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -49,11 +51,13 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -213,7 +217,10 @@ import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
+import com.everhomes.rest.equipment.findScopeFieldItemCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -226,13 +233,17 @@ import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -242,9 +253,12 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdCommand;
+import com.everhomes.rest.requisition.GetGeneralFormByCustomerIdResponse;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
@@ -265,6 +279,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
@@ -371,6 +386,9 @@ public class CustomerServiceImpl implements CustomerService {
     private UserService userService;
 
     @Autowired
+    private EquipmentService equipmentService;
+
+    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -396,6 +414,15 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private ActivityProivider activityProivider;
+
+    @Autowired
+    private SyncDataTaskProvider syncDataTaskProvider;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private RequisitionService requisitionService;
 
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
@@ -557,6 +584,19 @@ public class CustomerServiceImpl implements CustomerService {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
+    }
+
+    @Override
+    public OutputStream exportEnterpriseCustomer(ExportEnterpriseCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
     }
 
     @Override
@@ -864,6 +904,32 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if (null != dto.getAptitudeFlagItemId()) {
+            findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();
+            cmd.setNamespaceId(customer.getNamespaceId());
+            cmd.setBusinessValue(Byte.valueOf(dto.getAptitudeFlagItemId().toString()));
+            cmd.setModuleName("enterprise_customer");
+            cmd.setCommunityId(customer.getCommunityId());
+            Field field = fieldProvider.findField(10L, "aptitudeFlagItemId");
+            if (field != null)
+                cmd.setFieldId(field.getId());
+            FieldItemDTO aptitudeFlag = equipmentService.findScopeFieldItemByFieldItemId(cmd);
+
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
+            }
+        }
+        /*if (null != dto.getAptitudeFlagItemId()) {
+            ScopeFieldItem aptitudeFlag = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getAptitudeFlagItemId());
+            if (null != aptitudeFlag) {
+                dto.setAptitudeFlagItemName(aptitudeFlag.getItemDisplayName());
+            } else {
+                dto.setAptitudeFlagItemName(null);
+            }
+        }*/
+
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if (!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
@@ -920,6 +986,7 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
+                detail.setOrganizationId(org.getId());
                 detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
                 detail.setStringTag1(customer.getCorpEmail());
                 detail.setDescription(customer.getCorpDescription());
@@ -1130,7 +1197,7 @@ public class CustomerServiceImpl implements CustomerService {
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if (deleteCustomer) {
+        if (deleteCustomer && originalTrackingUid != null) {
             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
             return;
         }
@@ -1200,6 +1267,17 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
+        GetGeneralFormByCustomerIdCommand cmd2 = new GetGeneralFormByCustomerIdCommand();
+        cmd2.setCommunityId(cmd.getCommunityId());
+        cmd2.setCustomerId(customer.getId());
+        cmd2.setModuleId(25000L);
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        GetGeneralFormByCustomerIdResponse response = requisitionService.getGeneralFormByCustomerId(cmd2);
+        if(response != null && response.getSourceId() != null && response.getSourceId() != 0){
+            LOGGER.error("this customer has a requisition , ", customer);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_HAS_REQUISITION,
+                    "enterprise customer has requisition");
+        }
         List<Contract> contracts = contractProvider.listContractByCustomerId(customer.getCommunityId(), customer.getId(), CustomerType.ENTERPRISE.getCode());
         for (Contract contract : contracts) {
             if (contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
@@ -1222,10 +1300,10 @@ public class CustomerServiceImpl implements CustomerService {
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
                 command.setId(customer.getOrganizationId());
-                organizationService.deleteEnterpriseById(command, false);
+                ExecutorUtil.submit(() -> organizationService.deleteEnterpriseById(command, false));
             }
         }
-        routeMsgForTrackingChanged(null, null, null, null
+        routeMsgForTrackingChanged(customer.getTrackingUid(), null, null, null
                 , customer.getName(), null, true, cmd.getOrgId());
 
     }
@@ -2543,19 +2621,23 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setOrganizationId(organizationDTO.getId());
         //管理员同步过去
 //        dbProvider.execute((TransactionStatus status) -> {
-            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
-            if (untrackAdmins != null && untrackAdmins.size() > 0) {
-                untrackAdmins.forEach((r)->{
-                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
-                    cmd.setContactName(r.getContactName());
-                    cmd.setContactToken(r.getContactToken());
-                    cmd.setOrganizationId(customer.getOrganizationId());
-                    cmd.setNamespaceId(customer.getNamespaceId());
+        List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
+        if (untrackAdmins != null && untrackAdmins.size() > 0) {
+            untrackAdmins.forEach((r) -> {
+                CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                cmd.setContactName(r.getContactName());
+                cmd.setContactToken(r.getContactToken());
+                cmd.setOrganizationId(customer.getOrganizationId());
+                cmd.setNamespaceId(customer.getNamespaceId());
+                try {
                     rolePrivilegeService.createOrganizationAdmin(cmd);
-                });
+                } catch (Exception e) {
+                    LOGGER.debug("set organization admin errro organization id = {},exception ={}", cmd.getOrganizationId(), e);
+                }
+            });
 //                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
-                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            }
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        }
         refreshCustomerAdminStatus(untrackAdmins);
 //            return null;
 //        });
@@ -2738,13 +2820,21 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (dto.getAddressId() != null) {
             Address address = addressProvider.findAddressById(dto.getAddressId());
-            if (address != null) {
+            // only hook active address info
+            if (address != null && AddressAdminStatus.ACTIVE.equals(AddressAdminStatus.fromCode(address.getStatus()))) {
                 dto.setAddressName(address.getAddress());
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddressId(address.getId());
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
+                
+                if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
+                	dto.setAddressExists((byte)1);
+				}else {
+					dto.setAddressExists((byte)0);
+				}
+                
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -2756,10 +2846,13 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setApartmentLivingStatus(address.getLivingStatus());
                 //issue-34394,添加buildingId信息，避免前端无法获取buildingId，导致没办法和楼栋门牌匹配上
                 Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-                dto.setBuildingId(building.getId());
+
+                if(building != null) {
+                    dto.setBuildingId(building.getId());
+                }
+
             }
         }
-
         return dto;
     }
 
@@ -3227,6 +3320,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken(), task.getId());
@@ -3242,7 +3336,12 @@ public class CustomerServiceImpl implements CustomerService {
             if (syncCount > 0) {
                 return "1";
             }
-            String version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            String version;
+            if(cmd.getAllSyncFlag() != null && cmd.getAllSyncFlag() == 1) {
+                version = "0";
+            }else{
+                version = enterpriseCustomerProvider.findLastEnterpriseCustomerVersionByCommunity(cmd.getNamespaceId(), community.getId());
+            }
             CustomerHandle customerHandle = PlatformContext.getComponent(CustomerHandle.CUSTOMER_PREFIX + cmd.getNamespaceId());
             if (customerHandle != null) {
                 SyncDataTask task = new SyncDataTask();
@@ -3250,6 +3349,7 @@ public class CustomerServiceImpl implements CustomerService {
                 task.setOwnerId(community.getId());
                 task.setType(SyncDataTaskType.CUSTOMER.getCode());
                 task.setCreatorUid(UserContext.currentUserId());
+                task.setLockKey(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
                 syncDataTaskService.executeTask(() -> {
                     SyncDataResponse response = new SyncDataResponse();
                     customerHandle.syncEnterprises("1", version, community.getNamespaceCommunityToken(), task.getId());
@@ -3972,10 +4072,20 @@ public class CustomerServiceImpl implements CustomerService {
                         relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
 
                 } else if (EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())) {
-                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
-                    if (members != null && members.size() > 0) {
-                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+//                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(p.getTargetId());
+                    // organization manager module has their children apartment concept
+                    ListOrganizationContactCommand memberCommand = new ListOrganizationContactCommand();
+                    memberCommand.setOrganizationId(p.getTargetId());
+                    memberCommand.setNamespaceId(cmd.getNamespaceId());
+                    memberCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode()));
+                    memberCommand.setTargetTypes(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                    memberCommand.setPageSize(Integer.MAX_VALUE-1);
+                    ListOrganizationMemberCommandResponse membersResponse = organizationService.listOrganizationPersonnelsWithDownStream(memberCommand);
+                    if (membersResponse.getMembers() != null && membersResponse.getMembers().size() > 0) {
+//                        relatedMembers.addAll(members.stream().map((member) -> ConvertHelper.convert(member, OrganizationMemberDTO.class)).collect(Collectors.toList()));
+                        relatedMembers.addAll(membersResponse.getMembers());
                     }
+
                 }
             });
         });
@@ -4003,7 +4113,21 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             });
         }
-        return relatedMembers;
+        // remove duplicated members
+        return removeDuplicatedMembers(relatedMembers);
+    }
+
+    private List<OrganizationMemberDTO> removeDuplicatedMembers(List<OrganizationMemberDTO> relatedMembers) {
+        Map<Long, OrganizationMemberDTO> map = new HashMap<>();
+        if (relatedMembers != null && relatedMembers.size() > 0) {
+            relatedMembers.forEach(r ->{
+                if(r.getTargetId() != 0) {
+                    map.putIfAbsent(r.getTargetId(), r);
+                }
+            });
+            return new ArrayList<>(map.values());
+        }
+        return new ArrayList<>();
     }
 
     private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
@@ -4016,6 +4140,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                dto.setOrganizationId(s.getOrganizationId());
                 users.add(dto);
             });
         }
@@ -4034,6 +4159,7 @@ public class CustomerServiceImpl implements CustomerService {
                     dto.setContactName(r.getContactName());
                     dto.setGender(r.getGender());
                     dto.setContactToken(r.getIdentifierToken());
+                    dto.setOrganizationId(r.getOwnerId());
                     users.add(dto);
                 }
             });
@@ -4599,6 +4725,7 @@ public class CustomerServiceImpl implements CustomerService {
         //add service alliance categories
         ListServiceAllianceCategoriesCommand command = new ListServiceAllianceCategoriesCommand();
         command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        
         List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(command);
         if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
             serviceAllianceCategories.forEach((r) -> {
@@ -4664,4 +4791,82 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setOrganizationId(customer.getOrganizationId());
         return dto;
     }
+
+    @Override
+    public SearchEnterpriseCustomerResponse listSyncErrorCustomer(SearchEnterpriseCustomerCommand cmd){
+        List<EnterpriseCustomerDTO> customers = new ArrayList<>();
+        List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), "customer", null, 999999);
+
+        for(SyncDataError syncDataError : syncDataErrors){
+            EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(syncDataError.getOwnerId());
+            EnterpriseCustomerDTO customerDTO = ConvertHelper.convert(enterpriseCustomer,EnterpriseCustomerDTO.class);
+            customerDTO.setSyncErrorMsg(syncDataError.getErrorMessage());
+            customers.add(customerDTO);
+        }
+        SearchEnterpriseCustomerResponse response = new SearchEnterpriseCustomerResponse();
+        response.setDtos(customers);
+        return response;
+    }
+
+    @Override
+    public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd) {
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("namespaceId", cmd.getNamespaceId());
+        params.put("communityId", cmd.getCommunityId());
+        params.put("moduleName", cmd.getModuleName());
+        params.put("trackingUids", cmd.getTrackingUids());
+        params.put("trackingUid", cmd.getTrackingUid());
+        params.put("orgId", cmd.getOrgId());
+        params.put("abnormalFlag", cmd.getAbnormalFlag());
+        params.put("addressId", cmd.getAddressId());
+        params.put("adminFlag", cmd.getAdminFlag());
+        params.put("buildingId", cmd.getBuildingId());
+        params.put("type", cmd.getType());
+        params.put("trackingName", cmd.getTrackingName());
+        params.put("aptitudeFlagItemId" ,cmd.getAptitudeFlagItemId());
+        params.put("corpIndustryItemId", cmd.getCorpIndustryItemId());
+        params.put("customerCategoryId", cmd.getCustomerCategoryId());
+        params.put("includedGroupIds", cmd.getIncludedGroupIds());
+        params.put("infoFLag", cmd.getInfoFLag());
+        params.put("keyword", cmd.getKeyword());
+        params.put("lastTrackingTime", cmd.getLastTrackingTime());
+        params.put("levelId", cmd.getLevelId());
+        params.put("ownerId", cmd.getOwnerId());
+        params.put("ownerType", cmd.getOwnerType());
+        params.put("propertyArea", cmd.getPropertyArea());
+        params.put("propertyUnitPrice", cmd.getPropertyUnitPrice());
+        params.put("propertyType", cmd.getPropertyType());
+        params.put("sortField", cmd.getSortField());
+        params.put("sortType", cmd.getSortType());
+        params.put("task_Id", cmd.getTaskId());
+        String fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+
+    @Override
+    public OutputStream exportEnterpriseCustomerWihtOutPrivilege(ExportEnterpriseCustomerCommand cmd) {
+        ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
+//        command.setIncludedGroupIds("10,11,12");
+        List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        if (results != null && results.size() > 0) {
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
+            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+        }
+        return null;
+    }
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            enterpriseCustomerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
+    }
+
 }

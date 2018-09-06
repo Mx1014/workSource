@@ -31,6 +31,7 @@ import java.sql.Timestamp;
  * <li>invoiceFlag: 是否支持发票 {@link ParkingConfigFlag} 0：不支持，1：支持</li>
  * <li>businessLicenseFlag: 申请月卡 是否需要 营业执照 0：不需要， 1：需要{@link ParkingConfigFlag}</li>
  * <li>identityCardFlag: 是否支持填写身份证号码 0：不支持，1：支持 {@link ParkingConfigFlag}</li>
+ * <li>flowId: 工作流id</li>
  * </ul>
  */
 public class ParkingLotDTO {
@@ -79,6 +80,7 @@ public class ParkingLotDTO {
     private Byte monthRechargeFlag;
     private String vipParkingUrl;
     private Byte identityCardFlag;
+    private Long flowId;
 
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
@@ -298,6 +300,14 @@ public class ParkingLotDTO {
 
     public void setLockCarFlag(Byte lockCarFlag) {
         this.lockCarFlag = lockCarFlag;
+    }
+
+    public Long getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
     }
 
     @Override

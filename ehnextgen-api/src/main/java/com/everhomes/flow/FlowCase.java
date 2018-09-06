@@ -64,11 +64,19 @@ public class FlowCase extends EhFlowCases {
 	    this.setStepCount(this.getStepCount() + 1);
     }
 
-    public void addPath(Long flowCaseId) {
-        if (this.getPath() == null) {
-            this.setPath(String.valueOf(flowCaseId));
+    public void addPath(FlowCase parentCase) {
+        if (parentCase != null) {
+            this.setPath(String.format("%s/%s", parentCase.getPath(), this.getId()));
         } else {
-            this.setPath(String.format("%s/%s", this.getPath(), flowCaseId));
+            this.setPath(String.valueOf(this.getId()));
+        }
+    }
+
+    public void addSubFlowPath(FlowCase parentCase) {
+        if (parentCase != null) {
+            this.setSubFlowPath(String.format("%s/%s", parentCase.getSubFlowPath(), this.getId()));
+        } else {
+            this.setSubFlowPath(String.valueOf(this.getId()));
         }
     }
 
@@ -77,6 +85,13 @@ public class FlowCase extends EhFlowCases {
             return this.getId();
         }
         return Long.valueOf(this.getPath().split("/")[0]);
+    }
+
+    public Long getSubFlowRootFlowCaseId() {
+        if (this.getSubFlowPath() == null) {
+            return this.getId();
+        }
+        return Long.valueOf(this.getSubFlowPath().split("/")[0]);
     }
 
     public void flushCurrentNode(FlowNode currentNode) {

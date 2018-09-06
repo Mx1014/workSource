@@ -1006,11 +1006,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 || "dropBox2ItemId".equals(column.getFieldName()) || "dropBox3ItemId".equals(column.getFieldName())
                 || "dropBox4ItemId".equals(column.getFieldName()) || "dropBox5ItemId".equals(column.getFieldName())
                 || "dropBox6ItemId".equals(column.getFieldName()) || "dropBox7ItemId".equals(column.getFieldName())
-                || "dropBox8ItemId".equals(column.getFieldName()) || "dropBox9ItemId".equals(column.getFieldName())) {
+                || "dropBox8ItemId".equals(column.getFieldName()) || "dropBox9ItemId".equals(column.getFieldName())
+                || "aptitudeFlagItemId".equals(column.getFieldName())) {
            // 历史bug
             ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
             if(item != null) {
-                column.setValue(item.getItemId().toString());
+                if(!column.getFieldName().equals("aptitudeFlagItemId")) {
+                    column.setValue(item.getItemId().toString());
+                }else {
+                    column.setValue(item.getBusinessValue().toString());
+                }
             }else {
                 Map<String, String> dataMap = new LinkedHashMap<>();
                 columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));

@@ -462,6 +462,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 			cmd1.setModuleId(20100L);
 //			cmd1.setAppId(cmd.getAppId());
 //			cmd1.setOrganizationId(cmd.getCurrentPMId());
+			if(null != cmd.getOrganizationId())
+				cmd1.setOrganizationId(cmd.getOrganizationId());
 			List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
 			ownerIds.addAll(dtos.stream().map(elem -> elem.getProjectId()).collect(Collectors.toList()));
 		} else {

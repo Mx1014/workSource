@@ -4,26 +4,16 @@ package com.everhomes.techpark.punch;
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
-import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
-import com.everhomes.rest.filedownload.TaskStatus;
-import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO;
-import com.everhomes.sms.DateUtil;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.excel.ExcelUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class PunchExportTaskHandler implements FileDownloadTaskHandler {
@@ -79,7 +69,6 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         if (params.get("exceptionStatus") != null) {
             exceptionStatus = Byte.valueOf(String.valueOf(params.get("exceptionStatus")));
         }
-
         Long queryTime = null;
         if (params.get("queryTime") != null) {
             queryTime = Long.valueOf(String.valueOf(params.get("queryTime")));

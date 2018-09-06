@@ -30,4 +30,5 @@ public interface ActivityLocalStringCode {
 	static final int ACTIVITY_REPEAT_ALREADY_EXISTS_UPDATE = 25;
 	 
 	static final int ACTIVITY_HAVE_CHANGE = 26;
+	static final int ACTIVITY_AUTO_CANCEL = 28;
 }

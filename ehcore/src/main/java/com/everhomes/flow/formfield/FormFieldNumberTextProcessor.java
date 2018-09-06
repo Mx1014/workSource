@@ -34,7 +34,7 @@ public class FormFieldNumberTextProcessor implements FormFieldProcessor {
 
         dto.setFieldType(fieldDTO.getFieldType());
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
-        dto.setName(fieldDTO.getFieldName());
+        dto.setValue(fieldDTO.getFieldName());
         // dto.setExtra("{'url':'http://zdadasd'}");
 
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));

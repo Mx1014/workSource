@@ -195,11 +195,12 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
 //                    .field("meterNumber", 5.0f)
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);
+                    .field("name", 5.0f);
+            if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+                qb = QueryBuilders.boolQuery().must(qb).must( QueryBuilders.queryString("*" + cmd.getMeterNumber() + "*"));
+            }
         }
 
         if (cmd.getAddressId() != null) {
@@ -214,9 +215,21 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         List<FilterBuilder> filterBuilders = new ArrayList<>();
         //编号精确搜索 by xiongying20170525
         if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
-            TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
-            filterBuilders.add(meterNumberTermFilter);
+            /*TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
+            filterBuilders.add(meterNumberTermFilter);*/
+        	//支持模糊搜索 --by djm 缺陷 #34940
+            String pattern = "*" + cmd.getMeterNumber() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("meterNumber", pattern));
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("meterNumber");
         }
+//        //编号精确搜索 by xiongying20170525
+//        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+//            TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
+//            filterBuilders.add(meterNumberTermFilter);
+//        }
         if (cmd.getCommunityId() != null) {
             TermFilterBuilder communityIdTermFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
             filterBuilders.add(communityIdTermFilter);

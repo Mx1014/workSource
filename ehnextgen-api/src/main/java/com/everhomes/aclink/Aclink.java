@@ -24,6 +24,14 @@ public class Aclink extends EhAclinks {
     public void setLinglingSDKKey(String key) {
         AclinkCustomField.AUTH_LINGLING_SDK_KEY.setStringValue(this, key);
     }
+
+    public String getUclbrtParams() {
+        return AclinkCustomField.AUTH_UCLBRT_PARAMES.getStringValue(this);
+    }
+    
+    public void setUclbrtParams(String params) {
+        AclinkCustomField.AUTH_UCLBRT_PARAMES.setStringValue(this, params);
+    }
     
     @Override
     public String toString() {

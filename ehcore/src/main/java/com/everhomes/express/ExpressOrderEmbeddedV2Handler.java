@@ -18,9 +18,6 @@ public class ExpressOrderEmbeddedV2Handler implements PaymentCallBackHandler {
 	@Autowired
 	private ExpressService expressService;
 
-//	@Autowired
-//	private PayService payService;
-
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 		expressService.paySuccess(changeCmd(cmd));

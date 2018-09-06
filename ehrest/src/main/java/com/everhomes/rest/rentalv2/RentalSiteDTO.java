@@ -52,6 +52,7 @@ import com.everhomes.util.StringHelper;
  * <li>	siteNumbers：资源编号列表 {String}</li>
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
+ * <li>	sitefiles： List资源文件列表 {@link com.everhomes.rest.rentalv2.RentalSiteFileDTO}</li>
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.rentalv2.admin.SiteOwnerDTO}</li>
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
@@ -115,6 +116,7 @@ public class RentalSiteDTO {
 //	private List<RentalSiteRulesDTO> siteRules;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
+	private List<RentalSiteFileDTO> siteFiles;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
 	@ItemType(AttachmentConfigDTO.class)
@@ -691,5 +693,13 @@ public class RentalSiteDTO {
 
 	public void setRefundTip(String refundTip) {
 		this.refundTip = refundTip;
+	}
+
+	public List<RentalSiteFileDTO> getSiteFiles() {
+		return siteFiles;
+	}
+
+	public void setSiteFiles(List<RentalSiteFileDTO> siteFiles) {
+		this.siteFiles = siteFiles;
 	}
 }

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>ownerType: 所属类型,填organization</li>
  * <li>ownerId: 公司id</li>
+ * <li>punchYear: 查询年份</li>
  * </ul>
  */
 public class ListPunchMonthReportsCommand {
@@ -21,17 +22,20 @@ public class ListPunchMonthReportsCommand {
 	private String ownerType;
 
 	private Long ownerId;
+	
+	private String punchYear;
 
 	public ListPunchMonthReportsCommand() {
 
 	}
 
-	public ListPunchMonthReportsCommand(Long pageAnchor, Integer pageSize, String ownerType, Long ownerId) {
+	public ListPunchMonthReportsCommand(Long pageAnchor, Integer pageSize, String ownerType, Long ownerId, String punchYear) {
 		super();
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.setPunchYear(punchYear);
 	}
 
 	public Long getPageAnchor() {
@@ -69,6 +73,14 @@ public class ListPunchMonthReportsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getPunchYear() {
+		return punchYear;
+	}
+
+	public void setPunchYear(String punchYear) {
+		this.punchYear = punchYear;
 	}
 
 }

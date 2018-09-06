@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowNodeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -91,12 +92,14 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
             query.addConditions(Tables.EH_FLOW_NODES.ID.gt(locator.getAnchor()));
         }
 
-        query.addLimit(count);
+        if (count > 0) {
+            query.addLimit(count);
+        }
         List<FlowNode> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, FlowNode.class);
         });
 
-        if (objs.size() >= count) {
+        if (objs.size() >= count && count > 0) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -170,5 +173,20 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
                 .and(t.FLOW_VERSION.eq(flowVersion))
                 .and(t.ID.notIn(retainNodeIdList))
                 .execute();
+    }
+
+    @Override
+    public List<FlowNode> listFlowNodeBySubFlow(String projectType, Long projectId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        com.everhomes.server.schema.tables.EhFlowNodes t = Tables.EH_FLOW_NODES;
+        return this.queryFlowNodes(new ListingLocator(), -1, (locator, query) -> {
+            query.addConditions(t.SUB_FLOW_PROJECT_TYPE.eq(projectType));
+            query.addConditions(t.SUB_FLOW_PROJECT_ID.eq(projectId));
+            query.addConditions(t.SUB_FLOW_MODULE_TYPE.eq(moduleType));
+            query.addConditions(t.SUB_FLOW_MODULE_ID.eq(moduleId));
+            query.addConditions(t.SUB_FLOW_OWNER_TYPE.eq(ownerType));
+            query.addConditions(t.SUB_FLOW_OWNER_ID.eq(ownerId));
+            query.addConditions(t.FLOW_VERSION.eq(FlowConstants.FLOW_CONFIG_VER));
+            return query;
+        });
     }
 }

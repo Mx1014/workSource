@@ -1,10 +1,13 @@
 package com.everhomes.statistics.terminal;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
@@ -18,6 +21,7 @@ import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -338,6 +344,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     }
                 } catch (Exception e) {
                     LOGGER.error("sync user error ns = " + namespace.getId(), e);
+                    sendExceptionMail(e, namespace.getId(), new TerminalStatisticsTask());
                 }
             }
             if (genData) {
@@ -543,7 +550,12 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
         try {
             if (TerminalStatisticsTaskStatus.fromCode(task.getStatus()) == TerminalStatisticsTaskStatus.CORRECT_USER_ACTIVITY) {
-                this.correctUserActivity(namespaceId, date);
+                try {
+                    this.correctUserActivity(namespaceId, date);
+                } catch (Exception e) {
+                    LOGGER.error("correct user activity error", e);
+                    sendExceptionMail(e, namespaceId, task);
+                }
                 task.setStatus(TerminalStatisticsTaskStatus.GENERATE_HOUR_STAT.getCode());
                 statTerminalProvider.updateTerminalStatisticsTask(task);
             }
@@ -573,8 +585,32 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             }
         } catch (Exception e) {
             LOGGER.error("production statistical data error, date = " + date, e);
+            sendExceptionMail(e, namespaceId, task);
         }
         return ConvertHelper.convert(task, TerminalStatisticsTaskDTO.class);
+    }
+
+    private void sendExceptionMail(Exception e, Integer namespaceId, TerminalStatisticsTask task) {
+        // ------------------------------------------------------------------------
+        String xqt = "xq.tian@zuolin.com";
+        String home = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             PrintStream stream = new PrintStream(out)) {
+            e.printStackTrace(stream);
+
+            stream.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            stream.println(StringHelper.toJsonString(task));
+            stream.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+            String message = out.toString("UTF-8");
+            handler.sendMail(0, account, xqt,
+                    String.format("terminal stat error (%s, %s)", home, namespaceId), message);
+        } catch (Exception ignored) { }
+        // ------------------------------------------------------------------------
     }
 
     private void generateTerminalAppVersionActive(Integer namespaceId, LocalDate date) {
@@ -767,7 +803,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             activityList.add(activity);
         }
-        userActivityProvider.addActivities(activityList);
+        if (activityList.size() > 0) {
+            userActivityProvider.addActivities(activityList);
+        }
 
         ListingLocator locator = new ListingLocator();
         do {

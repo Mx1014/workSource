@@ -13,8 +13,10 @@ import javax.validation.constraints.NotNull;
  *     <li>pageOffset: pageOffset</li>
  *     <li>pageAnchor: 页码</li>
  *     <li>pageSize: 每页大小</li>
- *     <li>userInfoKeyword: 昵称姓名手机号关键字</li>
+ *     <li>userInfoKeyword: 昵称姓名关键字</li>
+ *     <li>identifierToken: 手机号</li>
  *     <li>orgNameKeyword: 公司名称关键字</li>
+ *     <li>currentOrgId: 当前用户的组织ID</li>
  * </ul>
  */
 public class ListCommunityAuthPersonnelsCommand {
@@ -27,7 +29,26 @@ public class ListCommunityAuthPersonnelsCommand {
     private Integer pageSize;
 
     private String userInfoKeyword;
+    private String identifierToken;
     private String orgNameKeyword;
+
+    private Long currentOrgId;
+
+    public Long getCurrentOrgId() {
+        return currentOrgId;
+    }
+
+    public void setCurrentOrgId(Long currentOrgId) {
+        this.currentOrgId = currentOrgId;
+    }
+
+    public String getIdentifierToken() {
+        return identifierToken;
+    }
+
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
+    }
 
     public Byte getIsSignedup() {
         return isSignedup;
