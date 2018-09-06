@@ -16,9 +16,11 @@ import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
 
     @Autowired
