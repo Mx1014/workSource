@@ -22,6 +22,9 @@ public class WorkReportController extends ControllerBase{
     @Autowired
     private WorkReportService workReportService;
 
+    @Autowired
+    private WorkReportMessageService workReportMessageService;
+
     /**
      * <b>URL: /workReport/addWorkReport</b>
      * <p>1-1.新增汇报</p>
@@ -333,4 +336,17 @@ public class WorkReportController extends ControllerBase{
         return response;
     }
 
+    /**
+     * <b>URL: /workReport/workReportRxMessage</b>
+     * <p>测试接收信息 </p>
+     */
+    @RequestMapping("workReportRxMessage")
+    @RestReturn(value=String.class)
+    public RestResponse workReportRxMessage() {
+        workReportMessageService.workReportRxMessage();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
