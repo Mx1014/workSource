@@ -21,7 +21,7 @@ CREATE TABLE `eh_customer_contacts`
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
 	primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户联系人表';
-ALTER TABLE `eh_customer_contacts` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_customer_contacts` ADD INDEX idx_namespace_id(namespace_id);
 
 -- end
 
@@ -45,7 +45,7 @@ CREATE TABLE `eh_customer_trackers`
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
 	primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户跟进人表';
-ALTER TABLE `eh_customer_trackers` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_customer_trackers` ADD INDEX idx_namespace_id(namespace_id);
 
 -- end
 
@@ -76,7 +76,7 @@ CREATE TABLE `eh_customer_requirements`
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
 
-ALTER TABLE `eh_customer_requirements` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_customer_requirements` ADD INDEX idx_namespace_id(namespace_id);
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
@@ -97,7 +97,7 @@ CREATE TABLE `eh_customer_requirement_addresses`
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
-ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(namespace_id);
 
 -- END
 
@@ -115,7 +115,7 @@ CREATE TABLE `eh_var_field_ranges`
     `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
-ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
@@ -141,7 +141,7 @@ CREATE TABLE `eh_customer_current_rents`
    primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';
-ALTER TABLE `eh_customer_current_rents` ADD INDEX idx_namespace_id(columnName);
+ALTER TABLE `eh_customer_current_rents` ADD INDEX idx_namespace_id(namespace_id);
 
 -- end
 
