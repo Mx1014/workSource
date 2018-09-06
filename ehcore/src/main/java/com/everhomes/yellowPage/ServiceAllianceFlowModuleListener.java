@@ -414,7 +414,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		syncRequest(ctx);
+//		syncRequest(ctx);
 	}
 	
 	private void syncRequest(FlowCaseState ctx) {
@@ -677,6 +677,16 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		// 将工作流状态转成服务状态
 		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(flowCaseStatus);
+		
+		//获取储存在数据库的记录
+		ServiceAllianceApplicationRecord record = saapplicationRecordProvider.findServiceAllianceApplicationRecordByFlowCaseId(flowCaseId);
+		if (null == record) {
+			return ;
+		}
+		
+		//更新数据库记录
+		record.setWorkflowStatus(newStatus.getCode());
+		saapplicationRecordProvider.updateServiceAllianceApplicationRecord(record);
 
 		// 更新es存储的服务状态
 		serviceAllianceRequestInfoSearcher.updateDocByField(flowCaseId, ALLIANCE_TEMPLATE_TYPE,
