@@ -200,8 +200,12 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
         jo.put("UserID",vendorDate.getUserId());
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        jo.put("StartDate",format.format(new Date(cmd.getStartTime())));
-        jo.put("EndDate",format.format(new Date(cmd.getEndTime())));
+        if (cmd.getStartTime() != null) {
+            jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
+            jo.put("EndDate", format.format(new Date(cmd.getEndTime())));
+        }else{
+            jo.put("DayNum", "0");
+        }
         jo.put("PageIndex",cmd.getPageAnchor() != null ? cmd.getPageAnchor().toString():"1");
         jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
         String response = postToZhuzong(jo.toJSONString());
