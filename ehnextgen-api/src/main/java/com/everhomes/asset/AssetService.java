@@ -259,17 +259,17 @@ public interface AssetService {
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 	
 	/**
-	 * 获取缴费应用列表接口
+	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
 	 */
 	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId);
 
 	/**
-	 * 业务应用新增缴费映射关系接口
+	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
 	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd);
 	
 	/**
-	 * 创建统一账单接口
+	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
 	 */
 	public ListBillsDTO createGeneralBill(CreateBillCommand cmd);
 

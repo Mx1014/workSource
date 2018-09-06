@@ -6702,4 +6702,13 @@ public class AssetProviderImpl implements AssetProvider {
         return ret;
     }
 
+	public List<AppAssetCategory> listAssetAppCategory(Integer namespaceId) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<AppAssetCategory> list = dslContext.select()
+	        .from(Tables.EH_ASSET_APP_CATEGORIES)
+	        .where(Tables.EH_ASSET_APP_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+	        .fetchInto(AppAssetCategory.class);
+		return list;
+	}
+
 }

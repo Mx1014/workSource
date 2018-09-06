@@ -435,4 +435,6 @@ public interface AssetProvider {
 	
 	void tranferAssetMappings();
 	
+	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
+	
 }

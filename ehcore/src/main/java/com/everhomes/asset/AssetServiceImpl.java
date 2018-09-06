@@ -148,6 +148,8 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.pojos.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
@@ -275,6 +277,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private ServiceModuleService serviceModuleService;
+    
+    @Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
     
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -5676,31 +5681,24 @@ public class AssetServiceImpl implements AssetService {
 	}
 	
 	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId){
-		List<AssetServiceModuleAppDTO> response = new ArrayList<AssetServiceModuleAppDTO>();
-		
-		
-		//eh_asset_app_categories : 查询出所有的缴费应用
-		
-		/*List<AssetServiceModuleAppDTO> assetServiceModuleApps = new ArrayList<AssetServiceModuleAppDTO>();
-		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);//缴费模块的ID为：ServiceModuleConstants.ASSET_MODULE
-		ListServiceModuleAppsResponse listServiceModuleAppsResponse = portalService.listServiceModuleApps(cmd);
-		if(listServiceModuleAppsResponse != null) {
-			List<ServiceModuleAppDTO> serviceModuleApps = listServiceModuleAppsResponse.getServiceModuleApps();
-			for(ServiceModuleAppDTO serviceModuleAppDTO : serviceModuleApps) {
-				String instanceConfig = serviceModuleAppDTO.getInstanceConfig();
-				IsContractChangeFlagDTO isContractChangeFlagDTO = 
-						(IsContractChangeFlagDTO) StringHelper.fromJsonString(instanceConfig, IsContractChangeFlagDTO.class);
-				if(isContractChangeFlagDTO != null) {
-					AssetServiceModuleAppDTO dto = new AssetServiceModuleAppDTO();
-					dto.setName(serviceModuleAppDTO.getName());
-					dto.setCategoryId(isContractChangeFlagDTO.getCategoryId());
-					assetServiceModuleApps.add(dto);
+		List<AssetServiceModuleAppDTO> dtos = new ArrayList<AssetServiceModuleAppDTO>();
+		//1、根据域空间ID查询出所有的缴费应用eh_asset_app_categories
+		List<AppAssetCategory> appAssetCategorieList = assetProvider.listAssetAppCategory(namespaceId);
+		for(AppAssetCategory appAssetCategory : appAssetCategorieList) {
+			//2、根据categoryId查询eh_service_module_apps表的custom_tag，取出应用名称
+			Long categoryId = appAssetCategory.getCategoryId();
+			AssetServiceModuleAppDTO dto = new AssetServiceModuleAppDTO();
+			dto.setCategoryId(categoryId);
+			if(categoryId != null) {
+				ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(
+						namespaceId, null, ServiceModuleConstants.ASSET_MODULE, categoryId.toString());
+				if(serviceModuleApp != null) {
+					dto.setName(serviceModuleApp.getName());
+					dtos.add(dto);//只有categoryId，没有缴费应用名称，说明该缴费应用已在公共平台那边删除
 				}
 			}
-			//解析instance_config获取categoryId
 		}
-		response.setServiceModuleApps(assetServiceModuleApps);*/
-		return null;
+		return dtos;
 	}
 	
 	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
