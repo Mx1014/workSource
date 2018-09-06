@@ -7,6 +7,7 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.CustomerEntryInfo;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
@@ -17,6 +18,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.ChargingVariable;
 import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -222,6 +224,14 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 addressMapping.setLivingStatus(livingStatus);
                 propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
             }
+            //#37329 企业客户管理-入驻信息tab里面关联的该楼栋门牌清理掉
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listAddressEntryInfos(mapping.getAddressId());
+            entryInfos.forEach(entryInfo -> {
+            	CustomerEntryInfo customerEntryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(entryInfo.getId());
+            	customerEntryInfo.setStatus(CommonStatus.INACTIVE.getCode());
+            	enterpriseCustomerProvider.updateCustomerEntryInfo(customerEntryInfo);
+                
+            });
         });
     }
 

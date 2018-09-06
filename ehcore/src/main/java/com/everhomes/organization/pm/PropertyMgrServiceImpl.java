@@ -2606,6 +2606,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             //房源所在楼层
             address.setApartmentFloor(cmd.getApartmentFloor());
             address.setIsFutureApartment((byte)0);
+            address.setApartmentRent(cmd.getApartmentRent());
+            address.setApartmentRentType(cmd.getApartmentRentType());
+            
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
@@ -2662,6 +2665,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            address.setApartmentRent(cmd.getApartmentRent());
+            address.setApartmentRentType(cmd.getApartmentRentType());
+        
             addressProvider.updateAddress(address);
         } else {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
@@ -2851,6 +2857,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (cmd.getApartmentFloor() != null) {
             address.setApartmentFloor(cmd.getApartmentFloor());
         }
+        
+        if (cmd.getApartmentRent() != null) {
+            address.setApartmentRent(cmd.getApartmentRent());
+        }
+        if (cmd.getApartmentRentType() != null) {
+            address.setApartmentRentType(cmd.getApartmentRentType());
+        }
+        
         addressProvider.updateAddress(address);
 
         communityProvider.updateBuilding(building);
@@ -2875,6 +2889,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             response.setStatus(communityAddressMapping.getLivingStatus());
         } else {
             response.setStatus(address.getLivingStatus());
+        }
+        //房源的租金
+        if (address.getApartmentRent() != null) {
+            response.setApartmentRent(address.getApartmentRent());
+        }
+        //房源的租金类型
+        if (address.getApartmentRentType() != null) {
+            response.setApartmentRentType(address.getApartmentRentType());
         }
 
         if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
