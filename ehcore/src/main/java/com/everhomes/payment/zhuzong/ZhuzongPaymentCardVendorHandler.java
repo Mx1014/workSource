@@ -310,7 +310,12 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("FunctionID", UNBUNDLE_CARD_TYPE);
         jo.put("UserID",vendorDate.getUserId());
         jo.put("UserName ",paymentCard.getUserName());
-        postToZhuzong(jo.toJSONString());
+        String response = postToZhuzong(jo.toJSONString());
+        ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
+        if ("0".equals(cardInfo.getResultID())){//返回正常
+            paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
+            paymentCardProvider.updatePaymentCard(paymentCard);
+        }
     }
 
     public static void main (String[] args){
