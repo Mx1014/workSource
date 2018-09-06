@@ -64,7 +64,7 @@ CREATE TABLE `eh_customer_requirements`
 	 `max_area`			DECIMAL(10,2) COMMENT '期望最大面积',
 	 `min_rent_price`			DECIMAL(10,2) COMMENT '期望最小租金-单价',
 	 `max_rent_price`			DECIMAL(10,2) COMMENT '期望最大租金-单价',
-	 `rent_price_unit`		TINYINT OMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
+	 `rent_price_unit`		TINYINT COMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
 	 `rent_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
 	 `version`				      LONG COMMENT '记录版本',
 	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
