@@ -2942,7 +2942,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //设置所在楼宇的楼层数
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         response.setBuildingFloorNumber(building.getFloorNumber());
-        
+        response.setBuildingId(building.getId());
+
         return response;
     }
     
