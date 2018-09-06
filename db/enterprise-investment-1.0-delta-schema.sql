@@ -4,9 +4,9 @@
 CREATE TABLE `eh_customer_contacts`
 (
 	`id`                   BIGINT NOT NULL,
-	`namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	`community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	`customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	`namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
 	`name`             		VARCHAR(64)  COMMENT '联系人名称',
 	`phone_number`         BIGINT  COMMENT '联系人电话',
 	`email`           			VARCHAR(128)  COMMENT '联系人邮箱',
@@ -32,9 +32,9 @@ ALTER TABLE `eh_customer_contacts` ADD INDEX idx_namespace_id(namespace_id);
 CREATE TABLE `eh_customer_trackers`
 (
 	`id`                   BIGINT NOT NULL,
-	`namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	`community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	`customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	`namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
 	`tracker_uid`           BIGINT COMMENT '跟进人id',
 	`tracker_type`				   TINYINT COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
 	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
@@ -56,9 +56,9 @@ ALTER TABLE `eh_customer_trackers` ADD INDEX idx_namespace_id(namespace_id);
 CREATE TABLE `eh_customer_requirements`
 (
    `id`                   BIGINT NOT NULL,
-	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
    `intention_location`    VARCHAR(256) COMMENT '期望地段',
 	 `min_area`			DECIMAL(10,2) COMMENT '期望最小面积',
 	 `max_area`			DECIMAL(10,2) COMMENT '期望最大面积',
@@ -85,10 +85,10 @@ ALTER TABLE `eh_customer_requirements` ADD INDEX idx_namespace_id(namespace_id);
 CREATE TABLE `eh_customer_requirement_addresses`
 (
    `id`                   BIGINT NOT NULL,
-	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	 `requirement_id` 			BIGINT NOT NULL DEFAULT 0 COMMENT '关联的需求ID',
-	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `requirement_id` 			BIGINT NOT NULL DEFAULT '0' COMMENT '关联的需求ID',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
 	 `address_id`			      LONG NULL COMMENT '意向房源',
 	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
 	 `create_time`          DATETIME COMMENT '创建日期',
@@ -108,9 +108,9 @@ ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(names
 CREATE TABLE `eh_var_field_ranges`
 (
    `id`                   BIGINT NOT NULL,
-	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	 `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_field_groups',
-    `field_id` BITINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_field_groups',
+    `field_id` BITINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
     `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id)
@@ -124,9 +124,9 @@ ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
 CREATE TABLE `eh_customer_current_rents`
 (
    `id`                   BIGINT NOT NULL,
-	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
-	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
    `address`    			    VARCHAR(256) COMMENT '当前地址',
 	 `rent_price`						DECIMAL(10,2) COMMENT '当前租金',
 	 `rent_price_unit`		  TINYINT COMMENT '租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
