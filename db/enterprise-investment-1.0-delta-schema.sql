@@ -1,27 +1,27 @@
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户联系人表
 
-CREATE TABLE `eh_enterprise_investment_contact`
+CREATE TABLE `eh_customer_contacts`
 (
-	`id`                   bigint not null,
-	`namespace_id` 				int(11) NOT NULL DEFAULT '0' COMMENT 'namespaceId',
-	`community_id`         bigint not null DEFAULT '0' COMMENT 'communityId',
-	`name`             		VARCHAR(64) null comment '联系人名称',
-	`phone_number`         bigint null comment '联系人电话',
-	`email`           			VARCHAR(128) null comment '联系人邮箱',
-	`position`         		VARCHAR(64) null comment '联系人职务',
-	`address`							VARCHAR(256) null comment '联系人通讯地址',
-	`type`				   TINYINT NULL COMMENT '联系人类型，0-客户联系人、1-渠道联系人',
-	`origin_type`					TINYINT NULL COMMENT '联系人来源，0-客户管理，1-租客管理',
-	`status`								TINYINT NULL COMMENT '联系人状态，0-invalid ,2-valid',
-	`customer_id` 					BIGINT not null comment '关联的客户ID',
-	`create_time`          DATETIME null comment '创建日期',
-	`create_by` 						VARCHAR(64) null comment '创建人',
-	`operator_time` 				DATETIME null comment '最近修改时间',
-	`operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+	`id`                   BIGINT NOT NULL,
+	`namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	`name`             		VARCHAR(64)  COMMENT '联系人名称',
+	`phone_number`         BIGINT  COMMENT '联系人电话',
+	`email`           			VARCHAR(128)  COMMENT '联系人邮箱',
+	`position`         		VARCHAR(128)  COMMENT '联系人职务',
+	`address`							VARCHAR(256)  COMMENT '联系人通讯地址',
+	`contact_type`				   TINYINT  COMMENT '联系人类型，0-客户联系人、1-渠道联系人',
+	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`status`								TINYINT  COMMENT '联系人状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
 	primary key (id)
 
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_contact in dev mode';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户联系人表';
 
 -- end
 
@@ -29,22 +29,23 @@ CREATE TABLE `eh_enterprise_investment_contact`
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户跟进人表
 
-CREATE TABLE `eh_enterprise_investment_trackers`
+CREATE TABLE `eh_customer_trackers`
 (
-	`id`                   bigint not null,
-	`namespace_id` 				int(11) NOT NULL DEFAULT '0' COMMENT 'namespaceId',
-	`community_id`         bigint not null DEFAULT '0' COMMENT 'communityId',
-	`tracking_uid`           bigint null comment '跟进人id',
-	`type`				   TINYINT NULL COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
-	`status`								TINYINT NULL COMMENT '跟进人状态，0-invalid ,2-valid',
-	`customer_id` 					BIGINT not null comment '关联的客户ID',
-	`create_time`          DATETIME null comment '创建日期',
-	`create_by` 						VARCHAR(64) null comment '创建人',
-	`operator_time` 				DATETIME null comment '最近修改时间',
-	`operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+	`id`                   BIGINT NOT NULL,
+	`namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+	`tracker_uid`           BIGINT COMMENT '跟进人id',
+	`tracker_type`				   TINYINT COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
+	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`status`								TINYINT  COMMENT '联系人状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
 	primary key (id)
 
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_trackers in dev mode';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户跟进人表';
 
 -- end
 
@@ -52,29 +53,49 @@ CREATE TABLE `eh_enterprise_investment_trackers`
 -- REMARK 招商客户需求信息表
 
 
-CREATE TABLE `eh_enterprise_investment_demand`
+CREATE TABLE `eh_customer_requirements`
 (
-     `id`                   bigint not null,
-	 `namespace_id` 				int(11) NOT NULL DEFAULT '0' COMMENT 'namespaceId',
-	 `community_id`         bigint not null DEFAULT '0' COMMENT 'communityId',
-     `expected_location`    VARCHAR(256) null comment '期望地段',
-	 `demand_area_min`			DOUBLE NULL COMMENT '期望最小面积',
-	 `demand_area_max`			DOUBLE NULL COMMENT '期望最大面积',
-	 `demand_price_min`			decimal(10,2) DEFAULT NULL COMMENT '期望最小租金-单价',
-	 `demand_price_max`			decimal(10,2) DEFAULT NULL COMMENT '期望最大租金-单价',
-	 `demand_price_unit`		TINYINT NULL COMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
-	 `buy_or_lease`					TINYINT NULL COMMENT '租赁/购买：0-租赁，1-购买',
-	 `expect_address`			  Long NULL COMMENT '意向房源',
-	 `demand_version`				LONG NULL COMMENT '客户需求版本',
-	 `status`								TINYINT NULL COMMENT '需求状态，0-invalid ,2-valid',
-	 `customer_id` 					BIGINT not null comment '关联的客户ID',
-	 `create_time`          DATETIME null comment '创建日期',
-	 `create_by` 						VARCHAR(64) null comment '创建人',
-	 `operator_time` 				DATETIME null comment '最近修改时间',
-	 `operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+   `intention_location`    VARCHAR(256) COMMENT '期望地段',
+	 `min_area`			DECIMAL(10,2) COMMENT '期望最小面积',
+	 `max_area`			DECIMAL(10,2) COMMENT '期望最大面积',
+	 `min_rent_price`			DECIMAL(10,2) COMMENT '期望最小租金-单价',
+	 `max_rent_price`			DECIMAL(10,2) COMMENT '期望最大租金-单价',
+	 `rent_price_unit`		TINYINT OMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
+	 `investment_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
+	 `intention_address`			  LONG COMMENT '意向房源',-- 加表
+	 `version`				      LONG COMMENT '记录版本',
+	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
+	 `create_time`          DATETIME COMMENT '创建日期',
+	 `create_by` 						VARCHAR(64) COMMENT '创建人',
+	 `operator_time` 				DATETIME COMMENT '最近修改时间',
+	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
    primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户需求房源关系表
+
+CREATE TABLE `eh_customer_requirement_addresses`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
+	 `requirement_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的需求ID',
+	 `address_id`			      LONG NULL COMMENT '意向房源',
+	 `version`				      LONG NULL COMMENT '记录版本',
+	 `status`								TINYINT NULL COMMENT '需求状态，0-invalid ,2-valid',
+	 `create_time`          DATETIME null COMMENT '创建日期',
+	 `create_by` 						VARCHAR(64) null COMMENT '创建人',
+	 `operator_time` 				DATETIME null COMMENT '最近修改时间',
+	 `operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+   primary key (id)
+
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
 
 -- END
 
@@ -82,25 +103,26 @@ CREATE TABLE `eh_enterprise_investment_demand`
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户当前信息表
 
-CREATE TABLE `eh_enterprise_investment_now_info`
+CREATE TABLE `eh_customer_current_rents`
 (
-     `id`                   bigint not null,
-	 `namespace_id` 				int(11) NOT NULL DEFAULT '0' COMMENT 'namespaceId',
-	 `community_id`         bigint not null DEFAULT '0' COMMENT 'communityId',
-     `now_address`    			VARCHAR(256) null comment '当前地址',
-	 `now_rental`						decimal(10,2) NULL COMMENT '当前租金',
-	 `now_rental_unit`		  TINYINT NULL COMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
-	 `now_area`							DOUBLE NULL COMMENT '当前租赁面积',
-	 `now_contract_end_date` DATETIME NULL COMMENT '当前合同到期日',
-	 `status`								TINYINT NULL COMMENT '生效状态，0-invalid ,2-valid',
-	 `customer_id` 					BIGINT not null comment '关联的客户ID',
-	 `create_time`          DATETIME null comment '创建日期',
-	 `create_by` 						VARCHAR(64) null comment '创建人',
-	 `operator_time` 				DATETIME null comment '最近修改时间',
-	 `operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
+   `address`    			    VARCHAR(256) COMMENT '当前地址',
+	 `rent_price`						DECIMAL(10,2) COMMENT '当前租金',
+	 `rent_price_unit`		  TINYINT COMMENT '租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
+	 `rent_area`							DECIMAL(10,2) COMMENT '当前租赁面积',
+	 `contract_intention_date` DATETIME COMMENT '当前合同到期日',
+	 `version`				      LONG COMMENT '记录版本',
+	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
+	 `create_time`          DATETIME COMMENT '创建日期',
+	 `create_by` 						VARCHAR(64) COMMENT '创建人',
+	 `operator_time` 				DATETIME COMMENT '最近修改时间',
+	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
    primary key (id)
 
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_now_info in dev mode';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';
 
 -- end
 

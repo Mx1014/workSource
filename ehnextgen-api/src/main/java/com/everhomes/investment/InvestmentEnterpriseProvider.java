@@ -21,6 +21,18 @@ public interface InvestmentEnterpriseProvider {
 
     List<EnterpriseInvestmentContact> findContactByCustomerIdAndType(Long customerId, Byte type);
 
+    //跟进人provider
+
+    Long createTracker(EnterpriseInvestmentTracker contact);
+
+    Long updateTracker(EnterpriseInvestmentTracker contact);
+
+    EnterpriseInvestmentTracker findTrackerById(Long id);
+
+    List<EnterpriseInvestmentTracker> findTrackerByCustomerId(Long customerId);
+
+    List<EnterpriseInvestmentTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type);
+
     //客户需求provider
     Long createDemand(EnterpriseInvestmentDemand demand);
 
