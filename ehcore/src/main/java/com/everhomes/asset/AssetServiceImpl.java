@@ -5714,11 +5714,12 @@ public class AssetServiceImpl implements AssetService {
 		Integer namespaceId;
 		Long categoryId = null;
 		String moduleName = "";
+		taskService.updateTaskProcess(taskId, 10);
 		if (cmd instanceof ListBillsCommand) {
 			//缴费下载
 			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
 			communityId = ListBillsCMD.getCommunityId();
-			ListBillsCMD.setPageSize(10000);
+			ListBillsCMD.setPageSize(100000);
 			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMD.getNamespaceId());
 			dtos = listBills(ListBillsCMD).getListBillsDTOS();
 			command = ConvertHelper.convert(ListBillsCMD, ListFieldCommand.class);
@@ -5733,7 +5734,7 @@ public class AssetServiceImpl implements AssetService {
 			//对公转账下载
 			ListBillsCommandForEnt ListBillsCMDForEnt = (ListBillsCommandForEnt) cmd;
 			communityId = ListBillsCMDForEnt.getOwnerId();
-			ListBillsCMDForEnt.setPageSize(10000);
+			ListBillsCMDForEnt.setPageSize(100000);
 			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMDForEnt.getNamespaceId());
 			dtos = listBillsForEnt(ListBillsCMDForEnt).getListBillsDTOS();
 			command = ConvertHelper.convert(ListBillsCMDForEnt, ListFieldCommand.class);
@@ -5748,7 +5749,7 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
 		}
 		
-		taskService.updateTaskProcess(taskId, 20);
+		taskService.updateTaskProcess(taskId, 25);
 		
 		//初始化 字段信息
         List<String> propertyNames = new ArrayList<String>();
@@ -5809,6 +5810,7 @@ public class AssetServiceImpl implements AssetService {
                 titleSize.add(30);
         	}
         }
+        taskService.updateTaskProcess(taskId, 40);
         propertyNames.add("addresses");
         titleName.add("楼栋/门牌");
         titleSize.add(20);
@@ -5832,6 +5834,7 @@ public class AssetServiceImpl implements AssetService {
         titleSize.add(20);
 		
         List<Map<String, String>> dataList = new ArrayList<>();
+        taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {
             ListBillsDTO dto = dtos.get(i);
@@ -5931,7 +5934,7 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
 		Community community = communityProvider.findCommunityById(communityId);
-		taskService.updateTaskProcess(taskId, 50);
+		taskService.updateTaskProcess(taskId, 90);
 		if (community == null) {
 			LOGGER.error("Community is not exist.");
 			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
@@ -5946,5 +5949,4 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-
 }
