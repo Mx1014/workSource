@@ -10,12 +10,17 @@ import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentContactDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentDemandDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentNowInfoDao;
+import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentContact;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentDemand;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentNowInfo;
+import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseInvestmentContactRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -48,78 +53,78 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     DbProvider dbProvider;
 
     @Override
-    public Long createContact(EnterpriseInvestmentContact contact) {
+    public Long createContact(CustomerContact contact) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
-                .getSequenceDomainFromTablePojo(EhEnterpriseInvestmentContact.class));
+                .getSequenceDomainFromTablePojo(EhCustomerContacts.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentContact.class));
+                .readWriteWith(EhCustomerContacts.class));
         contact.setId(id);
 
         User user = UserContext.current().getUser();
-        contact.setOperatorBy(user.getNickName());
-        contact.setCreateBy(user.getNickName());
+        contact.setOperatorUid(user.getId());
+        contact.setCreatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
         contact.setCreateTime(new Timestamp(l2));
         contact.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentContactDao dao = new EhEnterpriseInvestmentContactDao(context.configuration());
+        EhCustomerContactsDao dao = new EhCustomerContactsDao(context.configuration());
         dao.insert(contact);
         return id;
     }
 
     @Override
-    public Long updateContact(EnterpriseInvestmentContact contact) {
+    public Long updateContact(CustomerContact contact) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentContact.class));
+                .readWriteWith(EhCustomerContacts.class));
 
         User user = UserContext.current().getUser();
-        contact.setOperatorBy(user.getNickName());
+        contact.setOperatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
         contact.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentContactDao dao = new EhEnterpriseInvestmentContactDao(context.configuration());
+        EhCustomerContactsDao dao = new EhCustomerContactsDao(context.configuration());
         dao.update(contact);
         return contact.getId();
     }
 
     @Override
-    public EnterpriseInvestmentContact findContactById(Long id) {
+    public CustomerContact findContactById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentContact.class));
+                .readWriteWith(EhCustomerContacts.class));
 
-        EhEnterpriseInvestmentContactDao dao = new EhEnterpriseInvestmentContactDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), EnterpriseInvestmentContact.class);
+        EhCustomerContactsDao dao = new EhCustomerContactsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerContact.class);
     }
 
     @Override
-    public List<EnterpriseInvestmentContact> findContactByCustomerId(Long customerId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEnterpriseInvestmentContact.class));
+    public List<CustomerContact> findContactByCustomerId(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerContacts.class));
 
-        SelectQuery<EhEnterpriseInvestmentContactRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT);
-        query.addConditions(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
-        return query.fetch().map(r -> ConvertHelper.convert(r, EnterpriseInvestmentContact.class));
+        SelectQuery<EhCustomerContactsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CONTACTS);
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
+        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerContact.class));
     }
 
     @Override
-    public List<EnterpriseInvestmentContact> findContactByCustomerIdAndType(Long customerId, Byte type) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEnterpriseInvestmentContact.class));
+    public List<CustomerContact> findContactByCustomerIdAndType(Long customerId, Byte contactType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerContacts.class));
 
-        SelectQuery<EhEnterpriseInvestmentContactRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT);
-        query.addConditions(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT.TYPE.eq(type));
-        query.addConditions(Tables.EH_ENTERPRISE_INVESTMENT_CONTACT.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
-        return query.fetch().map(r -> ConvertHelper.convert(r, EnterpriseInvestmentContact.class));
+        SelectQuery<EhCustomerContactsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CONTACTS);
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CONTACT_TYPE.eq(contactType));
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
+        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerContact.class));
     }
 
     @Override
-    public Long createDemand(EnterpriseInvestmentDemand demand) {
+    public Long createDemand(CustomerRequirement demand) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
-                .getSequenceDomainFromTablePojo(EhEnterpriseInvestmentDemand.class));
+                .getSequenceDomainFromTablePojo(EhCustomerRequirements.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentDemand.class));
+                .readWriteWith(EhCustomerRequirements.class));
         demand.setId(id);
 
         User user = UserContext.current().getUser();
@@ -130,13 +135,13 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
         demand.setCreateTime(new Timestamp(l2));
         demand.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentDemandDao dao = new EhEnterpriseInvestmentDemandDao(context.configuration());
+        EhCustomerRequirementsDao dao = new EhCustomerRequirementsDao(context.configuration());
         dao.insert(demand);
         return id;
     }
 
     @Override
-    public Long updateDemand(EnterpriseInvestmentDemand demand) {
+    public Long updateDemand(CustomerRequirement demand) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhEnterpriseInvestmentDemand.class));
         User user = UserContext.current().getUser();
@@ -151,25 +156,25 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public EnterpriseInvestmentDemand findDemandById(Long id) {
+    public CustomerRequirement findDemandById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhEnterpriseInvestmentDemand.class));
 
         EhEnterpriseInvestmentDemandDao dao = new EhEnterpriseInvestmentDemandDao(context.configuration());
 
-        return ConvertHelper.convert(dao.findById(id), EnterpriseInvestmentDemand.class);
+        return ConvertHelper.convert(dao.findById(id), CustomerRequirement.class);
     }
 
     @Override
-    public EnterpriseInvestmentDemand findNewestDemandByCustoemrId(Long customerId) {
+    public CustomerRequirement findNewestDemandByCustoemrId(Long customerId) {
         try {
-            EnterpriseInvestmentDemand[] result = new EnterpriseInvestmentDemand[1];
+            CustomerRequirement[] result = new CustomerRequirement[1];
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseInvestmentDemand.class));
             result[0] = context.select().from(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND)
                     .where(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.CUSTOMER_ID.eq(customerId))
                     .and(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
                     .orderBy(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.DEMAND_VERSION.desc()).fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, EnterpriseInvestmentDemand.class);
+                        return ConvertHelper.convert(r, CustomerRequirement.class);
                     });
             return result[0];
         } catch (Exception ex) {
@@ -180,7 +185,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public Long createNowInfo(EnterpriseInvestmentNowInfo nowInfo) {
+    public Long createNowInfo(CustomerCurrentRent nowInfo) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhEnterpriseInvestmentNowInfo.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
@@ -201,7 +206,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public Long updateNowInfo(EnterpriseInvestmentNowInfo nowInfo) {
+    public Long updateNowInfo(CustomerCurrentRent nowInfo) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
 
@@ -217,25 +222,25 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public EnterpriseInvestmentNowInfo findNowInfoById(Long id) {
+    public CustomerCurrentRent findNowInfoById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
 
 
         EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), EnterpriseInvestmentNowInfo.class);
+        return ConvertHelper.convert(dao.findById(id), CustomerCurrentRent.class);
     }
 
     @Override
-    public EnterpriseInvestmentNowInfo findNewestNowInfoByCustoemrId(Long customerId) {
+    public CustomerCurrentRent findNewestNowInfoByCustoemrId(Long customerId) {
         try {
-            EnterpriseInvestmentNowInfo[] result = new EnterpriseInvestmentNowInfo[1];
+            CustomerCurrentRent[] result = new CustomerCurrentRent[1];
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseInvestmentNowInfo.class));
             result[0] = context.select().from(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO)
                     .where(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.CUSTOMER_ID.eq(customerId))
                     .and(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
                     .orderBy(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.ID.desc()).fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, EnterpriseInvestmentNowInfo.class);
+                        return ConvertHelper.convert(r, CustomerCurrentRent.class);
                     });
             return result[0];
         } catch (Exception ex) {

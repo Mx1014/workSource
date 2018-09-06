@@ -65,7 +65,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
         }
         // reflush demend
         if (cmd.getDemand() != null) {
-            EnterpriseInvestmentDemand investmentDemand = ConvertHelper.convert(cmd.getDemand(), EnterpriseInvestmentDemand.class);
+            CustomerRequirement investmentDemand = ConvertHelper.convert(cmd.getDemand(), CustomerRequirement.class);
             investmentDemand.setCommunityId(cmd.getCommunityId());
             investmentDemand.setNamespaceId(cmd.getNamespaceId());
             investmentDemand.setCustomerId(cmd.getId());
@@ -74,7 +74,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
         }
         // reflush current basic info
         if(cmd.getNowInfo()!=null){
-            EnterpriseInvestmentNowInfo nowInfo = ConvertHelper.convert(cmd.getNowInfo(), EnterpriseInvestmentNowInfo.class);
+            CustomerCurrentRent nowInfo = ConvertHelper.convert(cmd.getNowInfo(), CustomerCurrentRent.class);
             nowInfo.setCommunityId(cmd.getCommunityId());
             nowInfo.setNamespaceId(cmd.getNamespaceId());
             nowInfo.setStatus(CommonStatus.ACTIVE.getCode());

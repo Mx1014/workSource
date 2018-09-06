@@ -38,7 +38,7 @@ CREATE TABLE `eh_customer_trackers`
 	`tracker_uid`           BIGINT COMMENT '跟进人id',
 	`tracker_type`				   TINYINT COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
 	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
-	`status`								TINYINT  COMMENT '联系人状态，0-invalid ,2-valid',
+	`status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
 	`create_time`          DATETIME  COMMENT '创建日期',
 	`creator_uid` 						BIGINT  COMMENT '创建人',
 	`operator_time` 				DATETIME  COMMENT '最近修改时间',
@@ -67,11 +67,11 @@ CREATE TABLE `eh_customer_requirements`
 	 `rent_price_unit`		TINYINT COMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
 	 `rent_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
 	 `version`				      LONG COMMENT '记录版本',
-	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
-	 `create_time`          DATETIME COMMENT '创建日期',
-	 `create_by` 						VARCHAR(64) COMMENT '创建人',
-	 `operator_time` 				DATETIME COMMENT '最近修改时间',
-	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
    primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
@@ -90,11 +90,11 @@ CREATE TABLE `eh_customer_requirement_addresses`
 	 `requirement_id` 			BIGINT NOT NULL DEFAULT '0' COMMENT '关联的需求ID',
 	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
 	 `address_id`			      LONG NULL COMMENT '意向房源',
-	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
-	 `create_time`          DATETIME COMMENT '创建日期',
-	 `create_by` 						VARCHAR(64) COMMENT '创建人',
-	 `operator_time` 				DATETIME COMMENT '最近修改时间',
-	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
 ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(namespace_id);
@@ -133,11 +133,11 @@ CREATE TABLE `eh_customer_current_rents`
 	 `rent_area`							DECIMAL(10,2) COMMENT '当前租赁面积',
 	 `contract_intention_date` DATETIME COMMENT '当前合同到期日',
 	 `version`				      LONG COMMENT '记录版本',
-	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
-	 `create_time`          DATETIME COMMENT '创建日期',
-	 `create_by` 						VARCHAR(64) COMMENT '创建人',
-	 `operator_time` 				DATETIME COMMENT '最近修改时间',
-	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
    primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';

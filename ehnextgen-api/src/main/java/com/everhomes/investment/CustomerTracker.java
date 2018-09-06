@@ -1,9 +1,9 @@
 package com.everhomes.investment;
 
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentTrackers;
-import com.everhomes.util.StringHelper;
+        import com.everhomes.server.schema.tables.pojos.EhCustomerTrackers;
+        import com.everhomes.util.StringHelper;
 
-public class EnterpriseInvestmentTracker extends EhEnterpriseInvestmentTrackers {
+public class CustomerTracker extends EhCustomerTrackers {
 
     private static final long serialVersionUID = -3230993663167759962L;
 
