@@ -15,6 +15,7 @@ package com.everhomes.rest.community.admin;
  *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
  *     <li>organizationNames: 企业名称,分号隔开</li>
  *     <li>phone: 手机号码</li>
+ *     <li>address: 家庭地址，小区的时候使用</li>
  *     <li>startTime: 注册时间-开始</li>
  *     <li>endTime: 注册时间-结束</li>
  * </ul>
@@ -48,6 +49,16 @@ public class ListCommunityUsersCommand {
 	private String organizationNames;
 
 	private String phone;
+
+	private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getOrganizationNames() {
         return organizationNames;

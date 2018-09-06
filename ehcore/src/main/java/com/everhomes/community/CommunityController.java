@@ -610,4 +610,18 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /community/listAllCommunityUsers</b>
+     * <p>查询域空间所有项目用户列表</p>
+     */
+    @RequestMapping("listAllCommunityUsers")
+    @RestReturn(value=CommunityUserResponse.class)
+    public RestResponse listAllCommunityUsers(ListCommunityUsersCommand cmd) {
+        CommunityUserResponse res = communityService.listUserCommunitiesV2(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
