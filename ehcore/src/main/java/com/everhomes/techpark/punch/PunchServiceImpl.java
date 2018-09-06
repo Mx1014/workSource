@@ -8384,14 +8384,15 @@ public class PunchServiceImpl implements PunchService {
                 //2018年4月11日 修改: 之前punCalendar就没用了,所以没有赋值为计算出来的打卡日,但是现在使用了punCalendar作为后面计算所以要赋值
                 punCalendar.setTime(punchTime);
             }
+            //前段有用这个punchDate做分割今天还是明天,所以没有pr也要返回一个今天给客户端
+            response.setPunchDate(pDate.getTime());
 
         } else {
             punchTime = new Date(cmd.getQueryTime());
             pDate = new java.sql.Date(punchTime.getTime());
             punCalendar.setTime(punchTime);
         }
-        //前段有用这个punchDate做分割今天还是明天,所以没有pr也要返回一个今天给客户端
-        response.setPunchDate(pDate.getTime());
+
         response.setIntervals(new ArrayList<>());
         //这里之前用cmd.getQueryTime 查询,现在改用punchTime ,他们的区别是查当天的时候是查出来今天的还是打卡日的
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(punchTime.getTime()));
@@ -8447,7 +8448,7 @@ public class PunchServiceImpl implements PunchService {
         	if(null != pdl && !pdl.getStatusList().equals(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode() + "")){
         		//这里判断如果没有pdl 或者pdl的状态是无规则就是没有规则,不去统计intervals
                 if (PunchDayType.WORKDAY == ptr.getPunchDayType()) {
-                    response = processWorkdayPunchIntervalDTO(response, pr, ptr, punchLogs, statusList, approvalStatus);
+                    response = processWorkdayPunchIntervalDTO(response, pr, ptr, punchLogs, statusList, approvalStatus, pDate);
                 } else {
                     PunchOvertimeRule por = getPunchOvertimeRuleByPunchDayType(pr, ptr.getPunchDayType());
                     if (por != null) {
@@ -8457,7 +8458,7 @@ public class PunchServiceImpl implements PunchService {
             }
             //在今天之后的工作日也要组装intervals modify by wh:包括今天,所以只要大于今天0点0分0秒0毫秒
             if (PunchDayType.WORKDAY == ptr.getPunchDayType() && pDate.after(PunchDateUtils.getDateBeginDate(DateHelper.currentGMTTime()))) {
-                response = processWorkdayPunchIntervalDTO(response, pr, ptr, punchLogs, statusList, approvalStatus);
+                response = processWorkdayPunchIntervalDTO(response, pr, ptr, punchLogs, statusList, approvalStatus, pDate);
             }
             //找到用户当日申请列表
             List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
@@ -8581,17 +8582,15 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
-    private GetPunchDayStatusResponse processWorkdayPunchIntervalDTO(
-            GetPunchDayStatusResponse response, PunchRule pr, PunchTimeRule ptr, List<PunchLog> punchLogs,
-            String[] statusList, String[] approvalStatus) {
-    	response.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
+    private GetPunchDayStatusResponse processWorkdayPunchIntervalDTO(GetPunchDayStatusResponse response, PunchRule pr, PunchTimeRule ptr, List<PunchLog> punchLogs, String[] statusList, String[] approvalStatus, Date punchDate) {
+        response.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
         for (Integer punchIntervalNo = 1; punchIntervalNo <= ptr.getPunchTimesPerDay() / 2; punchIntervalNo++) {
             PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
             intervalDTO.setPunchIntervalNo(punchIntervalNo);
             intervalDTO.setPunchLogs(new ArrayList<>());
             PunchLog pl = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
             if (null == pl) {
-                pl = getNewPunchLog(new Date(response.getPunchDate()), response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
+                pl = getNewPunchLog(punchDate, response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
                 pl.setStatus(PunchStatus.UNPUNCH.getCode());
                 if (null != ptr)
                     pl.setRuleTime(findRuleTime(ptr, PunchType.ON_DUTY.getCode(), punchIntervalNo));
@@ -8606,7 +8605,7 @@ public class PunchServiceImpl implements PunchService {
 
             pl = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
             if (null == pl) {
-                pl = getNewPunchLog(new Date(response.getPunchDate()), response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
+                pl = getNewPunchLog(punchDate, response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
                 pl.setStatus(PunchStatus.UNPUNCH.getCode());
                 if (null != ptr)
                     pl.setRuleTime(findRuleTime(ptr, PunchType.OFF_DUTY.getCode(), punchIntervalNo));
