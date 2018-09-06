@@ -351,11 +351,12 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp time){
+    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime){
         List<WorkReportValReceiverMsg> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValReceiverMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.eq(time));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.ge(startTime));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.le(endTime));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, WorkReportValReceiverMsg.class));
             return null;

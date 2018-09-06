@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -196,24 +197,39 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         return subject;
     }
 
+    /**
+     * 汇总提醒消息发送
+     */
     @Scheduled(cron = "0 30 * * * ?")
     @Override
     public void workReportRxMessage() {
-        Timestamp reminderTime = Timestamp.valueOf(LocalDateTime.now().withSecond(0));
-        List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(reminderTime);
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
+        Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
+        Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
+        List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(startTime, endTime);
         if (results.size() == 0)
             return;
         Map<Long, List<WorkReportValReceiverMsg>> group1 = results.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReceiverUserId));
         group1.forEach((k1, v1) -> {
             Map<Long, List<WorkReportValReceiverMsg>> group2 = v1.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReportId));
             group2.forEach((k2, v2) -> {
-                String content = "截止于" + reminderTime.toString()
+                String content = "截止于" + formatter.format(currentTime)
                         + "，共接收到" + v2.size() + "条"
                         + v2.get(0).getReportName() + "（"
                         + workReportTimeService.displayReportTime(v2.get(0).getReportType(), v2.get(0).getReportTime().getTime()) + "）";
                 sendIndexMessage(content, "汇报情况", k1);
             });
         });
+    }
+
+    /**
+     * 定时清除汇总信息
+     * 确保汇总信息表的数据不要太多
+     */
+    @Scheduled(cron = "0 0 4 * * ?")
+    private void deleteWorkReportRxMessage(){
+
     }
 
     @Scheduled(cron = "0 30 * * * ?")
