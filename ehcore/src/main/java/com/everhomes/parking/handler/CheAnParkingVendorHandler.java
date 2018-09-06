@@ -670,6 +670,33 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     }
 
     @Override
+    public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+        ParkingExpiredRechargeInfoDTO dto = null;
+        List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(parkingLot,cmd.getPlateNumber(),null);
+        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
+        if(null != card) {
+            long now = System.currentTimeMillis();
+            long expireTime = Long.valueOf(card.getExpirydate());
+            BigDecimal price = new BigDecimal(0);
+            for(ParkingRechargeRateDTO rate: rates) {
+                price = rate.getPrice();
+                break;
+            }
+            if(expireTime < now) {
+                dto.setOwnerId(cmd.getOwnerId());
+                dto.setOwnerType(cmd.getOwnerType());
+                dto.setParkingLotId(parkingLot.getId());
+                dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+                dto.setPrice(price.multiply(dto.getMonthCount()));
+                dto.setStartPeriod(expireTime);
+                dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
+            }
+        }
+        return dto;
+    }
+
+
+    @Override
     public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 
     }
@@ -739,7 +766,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 //      卡类型接口
 //        bean.getParkingRechargeRates(null,null,null);
 //      开卡
-//        bean.createMonthCard("粤B32345","2018-08-22 00:00:00","2018-09-22 00:00:00");
+//        bean.createMonthCard("粤B861A2","2018-08-22 00:00:00","2018-09-01 00:00:00");
 //      下单
 //        bean.createOrder("粤BCC345",new BigDecimal(300),"2018-08-15 00:00:00","2018-10-15 00:00:00");
 //      支付
