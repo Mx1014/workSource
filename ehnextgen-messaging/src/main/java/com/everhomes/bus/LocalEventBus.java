@@ -12,7 +12,7 @@ public class LocalEventBus {
     private volatile static LocalEventBus localEventBus;
 
     private LocalBus localBus;
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     private LocalEventBus() {
         localBus = PlatformContext.getComponent(LocalBusProvider.class);
@@ -34,7 +34,7 @@ public class LocalEventBus {
         getLocalEventBus().populateEvent(event);
         getLocalEventBus().localBus.publish(getLocalEventBus(), event.getEventName(), event);
         int partition = (int) (event.getContext().getUid()%100);
-        getLocalEventBus().kafkaTemplate.send("system-event", partition, event.toString());
+        getLocalEventBus().kafkaTemplate.send("system-event", partition, String.valueOf(partition), event.toString());
     }
 
     public static void publish(LocalEventBuilder builder) {

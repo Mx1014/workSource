@@ -58,7 +58,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
     	if(post != null){
     		CommunityPmTasks task = propertyMgrProvider.findPmTaskById(post.getEmbeddedId());
     		if(task != null){

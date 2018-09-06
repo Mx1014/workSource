@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
 
@@ -616,6 +617,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("approveForEnterpriseContact")
     @RestReturn(value = String.class)
     public RestResponse approveForEnterpriseContact(@Valid ApproveContactCommand cmd) {
+        cmd.setOperateType(OperateType.MANUAL.getCode());
         this.organizationService.approveForEnterpriseContact(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);

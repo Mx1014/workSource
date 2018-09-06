@@ -1702,5 +1702,18 @@ public class UserController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: /user/getTopAdministrator</b>
+	 * <p>查询当前企业的超管</p>
+	 * @return
+	 */
+	@RequestMapping("getTopAdministrator")
+	@RestReturn(UserDTO.class)
+	public RestResponse getTopAdministrator( GetTopAdministratorCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getTopAdministrator(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 
 }

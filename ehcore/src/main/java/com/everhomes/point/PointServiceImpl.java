@@ -261,7 +261,7 @@ public class PointServiceImpl implements PointService {
         ValidatorUtil.validate(cmd);
     }
 
-    @Override
+   /* @Override
     public UserTreasureDTO getPointTreasure() {
         UserTreasureDTO point = new UserTreasureDTO();
         point.setCount(0L);
@@ -299,6 +299,37 @@ public class PointServiceImpl implements PointService {
         if (flag != null) {
             point.setUrlStatus(flag.getCode());
         }
+        return point;
+    }*/
+
+    /**
+     * 调用积分新系统的接口获取用户积分
+     * @return
+     */
+    @Override
+    public UserTreasureDTO getPointTreasure() {
+        UserTreasureDTO point = new UserTreasureDTO();
+        point.setCount(0L);
+        //设置积分默认可见
+        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        GetUserPointCommand cmd = new GetUserPointCommand();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        Long currentUserId = UserContext.currentUserId();
+        if (currentUserId == null) {
+            return point;
+        }
+        cmd.setUid(currentUserId);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        if(dto != null){
+            point.setCount(dto.getScore());
+        }
+
+        String url = getPointSystemUrl(1L);
+        point.setUrl(url);
+
         return point;
     }
 

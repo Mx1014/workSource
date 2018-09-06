@@ -94,6 +94,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setEntryTime(entertime.getTime());
             Date calcendtime = DATE_FORMAT.get().parse(tempFee.getCalcendtime());
             dto.setPayTime(calcendtime.getTime());
+            dto.setParkingTime(tempFee.getParktime());
         } catch (ParseException e) {
             LOGGER.error("Parse time error,EntryTime={},PayTime={}",tempFee.getEntertime(),tempFee.getCalcendtime());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -101,7 +102,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         }
 
         dto.setParkingTime(tempFee.getParktime());
-//        dto.setDelayTime(tempFee.getDelayTime());
+        dto.setDelayTime(15);
         dto.setPrice(new BigDecimal(tempFee.getAmount()));
 
         dto.setOrderToken(tempFee.getOrderNo());
@@ -134,8 +135,13 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
             parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
             parkingCardDTO.setParkingLotId(parkingLot.getId());
+            List<ParkingCardRequest> cardRequests = parkingProvider.listParkingCardRequests(null,null,null,parkingLot.getId(),plateNumber,ParkingCardRequestStatus.PROCESSING.getCode(),null,null,null,20);
+            ParkingCardRequest cardRequest = null;
+            if(null != cardRequests && cardRequests.size() > 0){
+                cardRequest = cardRequests.get(0);
+                parkingCardDTO.setPlateOwnerName(cardRequest.getPlateOwnerName());// 车主名称
 
-            parkingCardDTO.setPlateOwnerName(card.getName());// 车主名称
+            }
             parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
             parkingCardDTO.setEndTime(endTime);
 
@@ -196,6 +202,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             ratedtos.add(cardRate);
         }
 
+//      测试用配置费用
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            ratedtos.forEach(dto ->{
+                dto.setPrice(new BigDecimal(debugfee));
+            });
+        }
+
         return ratedtos;
     }
 
@@ -218,9 +232,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setParkingName(parkingLot.getName());
 
             dto.setSpaceNo(location.getParkLotName());
-//            dto.setLocation(location.getParkLotName());
+            dto.setLocation(location.getFloorName() + location.getParkLotName());
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
+
+            ParkingTempFeeDTO tempfee = getParkingTempFee(parkingLot,cmd.getPlateNumber());
+
+            dto.setEntryTime(tempfee.getEntryTime());
+            dto.setParkingTime(String.valueOf(tempfee.getParkingTime()));
 
         }
         return dto;
@@ -285,8 +304,11 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
     boolean payTempCardFee(ParkingRechargeOrder order){
 
         JSONObject param = new JSONObject();
+        param.put("credentialtype", "1");
+        param.put("credential", order.getPlateNumber());
         param.put("orderNo", order.getOrderToken());
-        param.put("amount", (order.getOriginalPrice().movePointLeft(2).toString()));
+        param.put("parkcost", order.getOriginalPrice().toString());
+        param.put("amount", order.getOriginalPrice().toString());
         param.put("discount", 0);
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);
@@ -520,6 +542,12 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
                 dto.setPayMoney(price);
             }
             dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+        }
+
+//      测试用配置费用
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            dto.setPayMoney(new BigDecimal(debugfee));
         }
 
         return dto;

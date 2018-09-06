@@ -9,6 +9,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.flow.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
@@ -682,7 +683,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 //		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
             rentalProvider.updateRentalBill(order);
             FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
-
+            FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+            flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
             FlowAutoStepDTO dto = new FlowAutoStepDTO();
             dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             dto.setFlowCaseId(flowCase.getId());
