@@ -182,7 +182,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
             if (mallId != null) {
                 applyShopPath = applyShopPath.replace("?","&");
-                return homeurl +"?mallId=" +mallId + applyShopPath;
+                return homeurl +"?mallId=" +mallId.getCode() + applyShopPath;
             }else {
                 return homeurl + applyShopPath;
             }
@@ -200,7 +200,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
             if (mallId != null) {
                 manageShopPath = manageShopPath.replace("?","&");
-                return homeurl +"?mallId=" +mallId + manageShopPath;
+                return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
             }else {
                 return homeurl + manageShopPath;
             }
