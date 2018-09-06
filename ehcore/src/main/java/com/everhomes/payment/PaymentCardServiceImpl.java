@@ -928,4 +928,18 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		hotline.setHotline(cmd.getHotline());
 		paymentCardProvider.updatePaymentCardIssuerCommunity(hotline);
 	}
+
+	@Override
+	public void freezeCard(FreezeCardCommand cmd) {
+		PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		handler.freezeCard(cmd);
+	}
+
+	@Override
+	public void unbunleCard(Long cardId) {
+		PaymentCard paymentCard = checkPaymentCard(cardId);
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		handler.unbundleCard(paymentCard);
+	}
 }

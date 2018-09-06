@@ -23,4 +23,6 @@ public interface PaymentCardVendorHandler {
     void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card);
 
     default void freezeCard(FreezeCardCommand cmd){}
+
+    default void unbundleCard(PaymentCard paymentCard){}
 }

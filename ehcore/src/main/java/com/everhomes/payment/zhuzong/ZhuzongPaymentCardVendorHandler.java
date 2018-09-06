@@ -58,6 +58,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     private static final String FREEZE_ACCOUNT_TYPE = "4";
     private static final String CONSUME_TRANSACTION_TYPE = "5";
     private static final String RECHARGE_TRANSACTION_TYPE = "6";
+    private static final String UNBUNDLE_CARD_TYPE = "7";
 
     public static final String vendorName = "ZHUZONG";
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -298,6 +299,18 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("LossType",cmd.getLossType().toString());
         postToZhuzong(jo.toJSONString());
 
+    }
+
+    @Override
+    public void unbundleCard(PaymentCard paymentCard) {
+        if (paymentCard == null )
+            return ;
+        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(paymentCard.getVendorCardData(), ZhuzongVendorDate.class);
+        JSONObject jo = new JSONObject();
+        jo.put("FunctionID", UNBUNDLE_CARD_TYPE);
+        jo.put("UserID",vendorDate.getUserId());
+        jo.put("UserName ",paymentCard.getUserName());
+        postToZhuzong(jo.toJSONString());
     }
 
     public static void main (String[] args){

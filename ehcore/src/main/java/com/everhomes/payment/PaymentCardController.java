@@ -205,13 +205,27 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("freezeCard")
     @RestReturn(value=String.class)
     public RestResponse freezeCard(FreezeCardCommand cmd) {
-       // ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);
+        paymentCardService.freezeCard(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /payment/unbundleCard</b>
+     * <p>解绑 账户</p>
+     */
+    @RequestMapping("unbundleCard")
+    @RestReturn(value=String.class)
+    public RestResponse unbundleCard(Long cardId) {
+        paymentCardService.unbunleCard(cardId);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /*---------web ---------- */
     /**
      * <b>URL: /payment/searchCardUsers</b>

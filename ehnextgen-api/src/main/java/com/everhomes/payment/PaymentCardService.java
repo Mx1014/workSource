@@ -56,4 +56,8 @@ public interface PaymentCardService {
     PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd);
 
     void updateHotline(UpdateHotlineCommand cmd);
+
+    void freezeCard(FreezeCardCommand cmd);
+
+    void unbunleCard(Long cardId);
 }
