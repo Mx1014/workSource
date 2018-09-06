@@ -76,6 +76,14 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("UserID", vendorDate.getUserId());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
+        if ("4".equals(cardInfo.getResultID())) {//销户
+            CardInfoDTO cardInfoDTO = new CardInfoDTO();
+            cardInfoDTO.setStatus("2");
+            cardInfoDTO.setCardId(card.getId());
+
+            result.add(cardInfoDTO);
+            return result;
+        }
         if (!"0".equals(cardInfo.getResultID())){//返回报错
             LOGGER.error("paymentCard getCardInfoByVendor error, param={} response = {}", jo,response);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -312,7 +320,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("UserName ",paymentCard.getUserName());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
-        if ("0".equals(cardInfo.getResultID())){//返回正常
+        if (!"1".equals(cardInfo.getResultID())){//没有失败时
             paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
             paymentCardProvider.updatePaymentCard(paymentCard);
         }
