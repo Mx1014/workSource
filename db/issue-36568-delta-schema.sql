@@ -42,7 +42,16 @@ CREATE TABLE `eh_butt_info_type_event_mapping` (
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '脚本与事件映射表';
 
+CREATE TABLE `eh_butt_script_last_commit` (
+  `id`  BIGINT(20)  NOT NULL COMMENT '主键',
+  `info_type` VARCHAR(64)  COMMENT '分类 ,对应 eh_butt_script_config 表',
+  `namespace_id` INT(11)  COMMENT '域空间ID',
+  `last_commit`  VARCHAR(128)  COMMENT  '最后一次提交版本号',
+  `commit_msg`  VARCHAR(256)  COMMENT  '提交相关信息',
+  `commit_time`  DATETIME    COMMENT  '提交时间',
 
+  PRIMARY KEY(`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'last_commit 存储表';
 -- END
 
 -- --------------------- SECTION END ---------------------------------------------------------

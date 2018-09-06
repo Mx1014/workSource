@@ -2,7 +2,9 @@ package com.everhomes.buttscript;
 
 import com.everhomes.configurations.ConfigurationsAdminProviderImpl;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.gogs.GogsRawFileParam;
 import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsRepoType;
 import com.everhomes.gogs.GogsService;
 import com.everhomes.rest.buttscript.*;
 import com.everhomes.user.UserContext;
@@ -59,10 +61,8 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         //先从配置表获取相关配置信息
         ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(namespaceId ,cmd.getInfoType());
         if(cof == null){
-            if(namespaceId == null){
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "can not found and buttScriptConfig info .namespaceId:{};infoType:{} .",namespaceId,cmd.getInfoType());
-            }
         }
         //组装入参
         String lastCommit = cmd.getCommitVersion();
@@ -87,9 +87,36 @@ public class ButtScriptServiceImpl implements ButtScriptService {
      */
     @Override
     public ScriptVersionInfoDTO saveScript(SaveScriptCommand cmd) {
-        //先检查有没有建仓库,没有得先建仓库
-
+        //1)先检查有没有建仓库,没有得先建仓库
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        //先从配置表获取相关配置信息
+        ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(namespaceId ,cmd.getInfoType());
+        if(cof == null){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "can not found and buttScriptConfig info .namespaceId:{};infoType:{} .",namespaceId,cmd.getInfoType());
+        }
+        GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
+        if(repo == null){//建仓库
+            repo = new GogsRepo();
+            repo.setName(cof.getInfoDescribe());
+            repo.setNamespaceId(GOS_NAMESPACEID);
+            repo.setModuleType(cof.getModuleType());
+            repo.setModuleId(cof.getModuleId());
+            repo.setOwnerType(cof.getOwnerType());
+            repo.setOwnerId( cof.getOwnerId());
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
         //保存脚本到仓库中,返回版本号
+        GogsRawFileParam param = new GogsRawFileParam();
+        String path = this.getPath(namespaceId);
+        //尝试获取仓库中的最新版本文件,若能获取到,说明
+        byte[] file = gogsService.getFile(repo, path, null);
+  /*      param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);*/
         //如果选择了发布,在发布信息表创建或更新一条数据
 
         return null;
