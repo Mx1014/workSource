@@ -110,7 +110,7 @@ CREATE TABLE `eh_var_field_ranges`
    `id`                   BIGINT NOT NULL,
 	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
 	 `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_field_groups',
-    `field_id` BITINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
+    `field_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
     `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id)
