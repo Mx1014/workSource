@@ -4,6 +4,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.user.UserContext;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.util.function.Consumer;
+
 /**
  * Created by xq.tian on 2017/12/5.
  */
@@ -14,6 +16,7 @@ public class LocalEventBus {
     private LocalBus localBus;
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    @SuppressWarnings("unchecked")
     private LocalEventBus() {
         localBus = PlatformContext.getComponent(LocalBusProvider.class);
         kafkaTemplate = PlatformContext.getComponent(KafkaTemplate.class);
@@ -33,13 +36,15 @@ public class LocalEventBus {
     public static void publish(LocalEvent event) {
         getLocalEventBus().populateEvent(event);
         getLocalEventBus().localBus.publish(getLocalEventBus(), event.getEventName(), event);
-        int partition = (int) (event.getContext().getUid()%100);
-        getLocalEventBus().kafkaTemplate.send("system-event", partition, String.valueOf(partition), event.toString());
+        if (getLocalEventBus().kafkaTemplate != null) {
+            int partition = (int) (event.getContext().getUid()%100);
+            getLocalEventBus().kafkaTemplate.send("system-event", partition, String.valueOf(partition), event.toString());
+        }
     }
 
-    public static void publish(LocalEventBuilder builder) {
+    public static void publish(Consumer<LocalEvent> builder) {
         LocalEvent event = new LocalEvent();
-        builder.build(event);
+        builder.accept(event);
         publish(event);
     }
 
@@ -52,9 +57,9 @@ public class LocalEventBus {
         publish(event);
     }
 
-    public static void publishWithUserContext(LocalEventBuilder builder) {
+    public static void publishWithUserContext(Consumer<LocalEvent> builder) {
         LocalEvent event = new LocalEvent();
-        builder.build(event);
+        builder.accept(event);
         publishWithUserContext(event);
     }
 
@@ -75,9 +80,5 @@ public class LocalEventBus {
     private void populateUserContext(LocalEvent event) {
         LocalEventContext context = new LocalEventContext(null, UserContext.getCurrentNamespaceId(), UserContext.currentUserId());
         event.setContext(context);
-    }
-
-    public interface LocalEventBuilder {
-        void build(LocalEvent event);
     }
 }

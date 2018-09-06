@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
-    <!--
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    -->
+
     <appender name="filelog"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/core-server.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
@@ -15,67 +13,9 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>logs/core-server.%d{yyyy-MM-dd}.%i.log
-                        </fileNamePattern>
+            </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-        </rollingPolicy>
-
-    </appender>
-
-    <appender name="restlog"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/core-server-rest.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
-            </Pattern>
-        </encoder>
-
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- rollover daily -->
-            <fileNamePattern>logs/core-server-rest.%d{yyyy-MM-dd}.%i.log
-                        </fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-        </rollingPolicy>
-    </appender>
-    
-    <appender name="statisticslog"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>statistics/useractivities.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level [%X{ip}] [%X{uid}] [%X{uri}] - %msg%n
-            </Pattern>
-        </encoder>
-        
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- rollover monthly -->
-            <fileNamePattern>statistics/useractivities.%d{yyyy-MM}.%i.log
-                        </fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-        </rollingPolicy>
-    </appender>
-    
-    <appender name="schedulelog" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/schedule.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level [%X{ip}] [%X{uid}] [%X{uri}] - %msg%n
-            </Pattern>
-        </encoder>
-        
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- rollover monthly -->
-            <fileNamePattern>logs/schedule.%d{yyyy-MM}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
@@ -85,7 +25,7 @@
         <file>logs/message.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level %msg%n
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n
             </Pattern>
         </encoder>
 
@@ -101,43 +41,41 @@
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan([%logger{36}]) [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
             </Pattern>
         </layout>
     </appender>
 
-    <logger name="com.everhomes.controller.WebRequestInterceptor" level="DEBUG">
-        <appender-ref ref="restlog" />
-    </logger>
-
-    <logger name="com.everhomes.controller.ResponseLoggingFilter" level="DEBUG">
-        <appender-ref ref="restlog" />
-    </logger>
     <logger name="com.everhomes.util.MessagePersistWorker" level="INFO" additivity="false">
-        <appender-ref ref="messagelog" />
+        <appender-ref ref="messagelog"/>
     </logger>
 
-    <logger name="com.everhomes" level="DEBUG">
-        <appender-ref ref="console" />
-        <appender-ref ref="filelog" />
-    </logger>
-    
-    <logger name="statisticslog" level="DEBUG">
-    	<appender-ref ref="statisticslog"/>
+    <logger name="com.everhomes" level="DEBUG" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="filelog"/>
     </logger>
 
-    <logger name="schedulelog" level="INFO">
-        <appender-ref ref="console" />
-        <appender-ref ref="schedulelog" />
+    <logger name="statisticslog" level="DEBUG" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="filelog"/>
     </logger>
-    
+
+    <logger name="schedulelog" level="INFO" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="filelog"/>
+    </logger>
+
+    <logger name="com.everhomes.bus.LocalBusMessageClassRegistry" level="INFO"/>
+    <logger name="com.everhomes.util.ReflectionHelper" level="INFO"/>
+
     <logger name="org.apache" level="WARN"/>
-    <logger name="org.springframework" level="WARN"/>
-    <logger name="org.springframework" level="WARN"/>
     <logger name="com.atomikos" level="WARN"/>
-    <root level="WARN">
-        <appender-ref ref="console" />
-        <appender-ref ref="filelog" />
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.elasticsearch.client.transport" level="ERROR"/>
+    <logger name="org.apache.tomcat.util.scan.StandardJarScanner" level="ERROR"/>
+
+    <root level="ERROR">
+        <appender-ref ref="console"/>
+        <appender-ref ref="filelog"/>
     </root>
 </configuration>
-
