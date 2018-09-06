@@ -6,7 +6,7 @@ package com.everhomes.rest.common;
  */
 public interface AssetModuleNotifyConstants {
 
-    //String ASSET_MODULE = "XXXX"; //缴费模块
-	
+    String CONTRACT_MODULE = "contract"; //合同模块
+    String ENERGY_MODULE = "energy"; //能耗模块
 
 }

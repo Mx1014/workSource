@@ -1417,7 +1417,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * it can only have one mate from the same module to prevent a bigamy
      * @param cmd
      * @return OK
-     */
+     *//*
     @RequestMapping("createAnAppMapping")
     @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
     public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
@@ -1427,11 +1427,11 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorDescription("OK");
         return response;
     }
-    /**
+    *//**
      * forcely update a mapping relation to be allocated again
      * @param cmd
      * @return OK
-     */
+     *//*
     @RequestMapping("updateAnAppMapping")
     @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
     public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
@@ -1440,7 +1440,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
     
     /**
      * <b>URL: /asset/isUserExistInAddress</b>

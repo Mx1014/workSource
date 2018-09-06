@@ -22,6 +22,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
@@ -1034,7 +1035,6 @@ public class AssetProviderImpl implements AssetProvider {
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         List<Long> userIds = new ArrayList<Long>();
-        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         SelectQuery<Record> query = context.selectQuery();
@@ -6181,184 +6181,8 @@ public class AssetProviderImpl implements AssetProvider {
         }
 	}
 
-    @Override
-    public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-	    if(moduleId == PrivilegeConstants.ENERGY_MODULE && targetModuleId == PrivilegeConstants.ASSET_MODULE_ID){
-            List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG.eq(AppMappingEnergyFlag.YES.getCode()))
-                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
-            if(records.size() > 0) return records.get(0);
-            return null;
-        }
-        if(originId == null) return null;
-        Long ret = null;
-
-        if(targetModuleId == PrivilegeConstants.ASSET_MODULE_ID && moduleId == PrivilegeConstants.CONTRACT_MODULE){
-            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(originId))
-                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
-        }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
-            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
-                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID);
-        }
-        return ret;
-    }
-
-    @Override
-    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
-        return getOriginIdFromMappingApp(moduleId, originId, targetModuleId, null);
-    }
-
-    @Override
-    public void insertAppMapping(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings relation) {
-        EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
-        dao.insert(relation);
-	}
-
-
-    @Override
-    public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        boolean alreadyPaired = isAlreadyPaired(cmd.getAssetCategoryId(), cmd.getContractCategoryId());
-//        if(alreadyPaired){
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.SUCCESS, "already paired, no need pair again");
-//        }
-//        boolean existAsset = checkExistAsset(cmd.getAssetCategoryId());
-//        boolean existContract = checkExistContract(cmd.getContractCategoryId());
-//        if(existAsset && existContract){
-//            Integer namespaceIdAsset = findNamespaceByAsset(cmd.getAssetCategoryId());
-//            Integer namespaceIdContract = findNamespaceByContractId(cmd.getContractCategoryId());
-//            if(namespaceIdAsset != namespaceIdContract){
-//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//                        "asset app and contract app do not have the same namespaceId");
-//            }
-//            AssetModuleAppMapping mapping = new AssetModuleAppMapping();
-//            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
-//            mapping.setId(nextSequence);
-//            mapping.setAssetCategoryId(cmd.getAssetCategoryId());
-//            mapping.setContractCategoryId(cmd.getContractCategoryId());
-//            mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            mapping.setCreateUid(UserContext.currentUserId());
-//            mapping.setNamespaceId(namespaceIdAsset);
-//            mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
-//            mapping.setEnergyFlag(AppMappingEnergyFlag.NO.getCode());
-//            this.dbProvider.execute((status) -> {
-//                deleteByContractAndAsset(cmd.getContractCategoryId(), cmd.getAssetCategoryId());
-//                insertAppMapping(mapping);
-//                return null;
-//            });
-//        }else if(existAsset && !existContract){
-//            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
-//                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
-//        }else if(!existAsset && existContract){
-//            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID, cmd.getAssetCategoryId())
-//                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(cmd.getContractCategoryId()));
-//        }else{
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//                    "asset category id and contract id does not exist yes");
-//        }
-    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_ORIGINID, cmd.getContractOriginId())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CHANGEFLAG, cmd.getContractChangeFlag())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG, cmd.getEnergyFlag())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
-	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()))
-	        .execute();
-    }
-
-//    private boolean isAlreadyPaired(Long assetCategoryId, Long contractCategoryId) {
-//        List<Long> fetch = this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-//                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-//        return fetch.size() > 0;
-//    }
-//
-//    private void deleteByContractAndAsset(Long contractCategoryId, Long assetCategoryId) {
-//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        dslContext.delete(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-//                .or(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-//                .execute();
-//    }
-//
-//    private Integer findNamespaceByContractId(Long contractCategoryId) {
-//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        Integer namespaceId = null;
-//        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
-//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
-//        if(fetch.size() > 0) return fetch.get(0);
-//        return null;
-//    }
-//
-//    private Integer findNamespaceByAsset(Long assetCategoryId) {
-//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        Integer namespaceId = null;
-//        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
-//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
-//        if(fetch.size() > 0) return fetch.get(0);
-//        return null;
-//    }
-
-    @Override
-    public boolean checkExistAsset(Long assetCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-        return records.size() > 0;
-    }
-
-    @Override
-    public boolean checkExistContract(Long contractCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-        return records.size() > 0;
-    }
-
-    @Override
-    public Long checkEnergyFlag(Integer namespaceID) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceID))
-                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG.eq(AppMappingEnergyFlag.YES.getCode()))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-	    if(records.size()>0){
-	        return records.get(0);
-        }
-        return null;
-    }
-
-    @Override
-    public void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag flag) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG, flag.getCode())
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID.eq(mappingId))
-                .execute();
-    }
     
+
     public String getProjectNameByBillID(Long billId) {
 		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)
 	        .from(Tables.EH_COMMUNITIES,Tables.EH_PAYMENT_BILLS)
@@ -6605,33 +6429,6 @@ public class AssetProviderImpl implements AssetProvider {
         //bill exemption已经减到bill中了
 	}
 	
-	public List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-	    if(moduleId == PrivilegeConstants.ENERGY_MODULE && targetModuleId == PrivilegeConstants.ASSET_MODULE_ID){
-            List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG.eq(AppMappingEnergyFlag.YES.getCode()))
-                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
-            return records;
-        }
-        if(originId == null) return null;
-        List<Long> ret = null;
-
-        if(targetModuleId == PrivilegeConstants.ASSET_MODULE_ID && moduleId == PrivilegeConstants.CONTRACT_MODULE){
-            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(originId))
-                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
-        }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
-            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID)
-                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
-                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID);
-        }
-        return ret;
-    }
-
 	public GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId) {
 		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -6790,5 +6587,119 @@ public class AssetProviderImpl implements AssetProvider {
 	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetModuleAppMappings.class, null);
 		}
 	}
+	
+	public void insertAppMapping(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings relation) {
+        EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
+        dao.insert(relation);
+	}
+
+    public boolean checkExistAssetMapContract(Long assetCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+        return records.size() > 0;
+    }
+    
+    public void updateAssetMapContract(AssetModuleAppMapping mapping) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID, mapping.getSourceId())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG, mapping.getConfig())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
+	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
+	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+	        .execute();
+    }
+    
+    public boolean checkExistAssetMapEnergy(Long assetCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+        return records.size() > 0;
+    }
+    
+    public void updateAssetMapEnergy(AssetModuleAppMapping mapping) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID, mapping.getSourceId())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG, mapping.getConfig())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
+	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
+	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+	        .execute();
+    }
+    
+    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
+        return getOriginIdFromMappingApp(moduleId, originId, targetModuleId, null);
+    }
+	
+    public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	    if(moduleId == PrivilegeConstants.ENERGY_MODULE && targetModuleId == PrivilegeConstants.ASSET_MODULE_ID){
+            List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG.like("%" + "\"energyFlag\":1" + "%"))
+                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+            if(records.size() > 0) return records.get(0);
+            return null;
+        }
+        if(originId == null) return null;
+        Long ret = null;
+        
+        if(targetModuleId == PrivilegeConstants.ASSET_MODULE_ID && moduleId == PrivilegeConstants.CONTRACT_MODULE){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(originId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+        }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID);
+        }
+        return ret;
+    }
+
+	public List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	    if(moduleId == PrivilegeConstants.ENERGY_MODULE && targetModuleId == PrivilegeConstants.ASSET_MODULE_ID){
+	    	List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG.like("%" + "\"energyFlag\":1" + "%"))
+                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+            return records;
+        }
+        if(originId == null) return null;
+        List<Long> ret = null;
+
+        if(targetModuleId == PrivilegeConstants.ASSET_MODULE_ID && moduleId == PrivilegeConstants.CONTRACT_MODULE){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(originId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+        }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID);
+        }
+        return ret;
+    }
 
 }

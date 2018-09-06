@@ -97,6 +97,9 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.AssetMapContractConfig;
+import com.everhomes.rest.common.AssetMapEnergyConfig;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -4969,39 +4972,21 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
-    /**
-     * first checkout if
-     * @param cmd
-     */
-    @Override
     public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
-        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+        AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
         long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
         mapping.setId(nextSequence);
-        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "either assetCategoryId or contractCategory is null");
-        }
-        Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
-        mapping.setAssetCategoryId(cmd.getAssetCategoryId());
-        mapping.setContractCategoryId(cmd.getContractCategoryId());
         mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         mapping.setCreateUid(UserContext.currentUserId());
         mapping.setNamespaceId(cmd.getNamespaceId());
         mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
-        mapping.setEnergyFlag(AppMappingEnergyFlag.fromCodeDefaultNO(cmd.getEnergyFlag()).getCode());
-        // add relation
-        if(mappingId != null && AppMappingEnergyFlag.fromCodeDefaultNO(mapping.getEnergyFlag()) == AppMappingEnergyFlag.YES){
-            assetProvider.changeEnergyFlag(mappingId, AppMappingEnergyFlag.NO);
-        }
+        
         assetProvider.insertAppMapping(mapping);
     }
-
-    @Override
-    public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-        assetProvider.updateAnAppMapping(cmd);
+    
+    public void updateAnAppMapping(AssetModuleAppMapping mapping) {
+        //assetProvider.updateAnAppMapping(mapping);
     }
-
 
     @Override
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
@@ -5539,18 +5524,34 @@ public class AssetServiceImpl implements AssetService {
     }
     
     public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
-        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
-        mapping.setId(nextSequence);
-        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "either assetCategoryId or contractCategory is null");
-        }
-        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
-        if(existAsset){
+        //1、判断缴费是否已经存在关联合同的记录
+        cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+        AssetMapContractConfig config = new AssetMapContractConfig();
+    	config.setContractOriginId(cmd.getContractOriginId());
+    	config.setContractChangeFlag(cmd.getContractChangeFlag());
+    	cmd.setConfig(config.toString());
+        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
+        if(existAssetMapContract){
         	//如果已经存在就是更新
-        	UpdateAnAppMappingCommand updateAnAppMappingCommand = ConvertHelper.convert(cmd, UpdateAnAppMappingCommand.class);
-        	updateAnAppMapping(updateAnAppMappingCommand);
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	mapping.setSourceId(cmd.getContractCategoryId());
+        	assetProvider.updateAssetMapContract(mapping);
+        }else {
+        	//如果不存在就是新增
+        	cmd.setSourceId(cmd.getContractCategoryId());
+        	createAnAppMapping(cmd);
+        }
+        //2、判断缴费是否已经存在关联能耗的记录
+        cmd.setSourceId(null);
+        cmd.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
+        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
+    	cmd.setConfig(energyConfig.toString());
+        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
+        if(existAssetMapEnergy){
+        	//如果已经存在就是更新
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	assetProvider.updateAssetMapEnergy(mapping);
         }else {
         	//如果不存在就是新增
         	createAnAppMapping(cmd);
@@ -5720,5 +5721,6 @@ public class AssetServiceImpl implements AssetService {
 	public void tranferAssetMappings() {
 		assetProvider.tranferAssetMappings();
 	}
+	
 
 }

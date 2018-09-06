@@ -220,7 +220,7 @@ public interface AssetService {
 
 	void createAnAppMapping(CreateAnAppMappingCommand cmd);
 
-	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+	void updateAnAppMapping(AssetModuleAppMapping mapping);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     

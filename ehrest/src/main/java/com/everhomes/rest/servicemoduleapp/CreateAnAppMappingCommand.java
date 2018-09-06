@@ -13,6 +13,11 @@ public class CreateAnAppMappingCommand {
     private Integer namespaceId;
     private Long contractOriginId;
     private Byte contractChangeFlag;
+    private String config;
+    private String sourceType;
+    private Long sourceId;
+    private String ownerType;
+    private Long ownerId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -60,5 +65,45 @@ public class CreateAnAppMappingCommand {
 
 	public void setContractChangeFlag(Byte contractChangeFlag) {
 		this.contractChangeFlag = contractChangeFlag;
+	}
+
+	public String getConfig() {
+		return config;
+	}
+
+	public void setConfig(String config) {
+		this.config = config;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

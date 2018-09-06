@@ -383,16 +383,19 @@ public interface AssetProvider {
 
     void insertAppMapping(EhAssetModuleAppMappings relation);
 
-    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
-
-    boolean checkExistAsset(Long assetCategoryId);
-
-    boolean checkExistContract(Long contractCategoryId);
-
-    Long checkEnergyFlag(Integer namespaceID);
-
-    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    /**
+     * 判断缴费是否已经存在关联合同的记录
+     * @param assetCategoryId
+     * @return
+     */
+    boolean checkExistAssetMapContract(Long assetCategoryId);
     
+    boolean checkExistAssetMapEnergy(Long assetCategoryId);
+    
+    void updateAssetMapContract(AssetModuleAppMapping mapping);
+    
+    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
+
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
     String getProjectNameByBillID(Long billId);
@@ -431,4 +434,5 @@ public interface AssetProvider {
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 	
 	void tranferAssetMappings();
+	
 }

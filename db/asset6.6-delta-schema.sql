@@ -22,9 +22,7 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `produce_uid` BIGINT COMMENT '企业�
 
 
 
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
+
 
 
 
