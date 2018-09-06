@@ -19,6 +19,7 @@ CREATE TABLE `eh_work_report_val_receiver_msg` (
   `namespace_id` INTEGER,
   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
   `report_name` VARCHAR(128) NOT NULL,
+  `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
   `report_time` DATE NOT NULL COMMENT 'the target time of the report',
   `reminder_time` DATETIME COMMENT 'the reminder time of the record',
   `receiver_user_id` BIGINT NOT NULL COMMENT 'the id of the receiver',
