@@ -25,6 +25,29 @@ CREATE TABLE `eh_enterprise_investment_contact`
 
 -- end
 
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户跟进人表
+
+CREATE TABLE `eh_enterprise_investment_trackers`
+(
+	`id`                   bigint not null,
+	`namespace_id` 				int(11) NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id`         bigint not null DEFAULT '0' COMMENT 'communityId',
+	`tracking_uid`           bigint null comment '跟进人id',
+	`type`				   TINYINT NULL COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
+	`status`								TINYINT NULL COMMENT '跟进人状态，0-invalid ,2-valid',
+	`customer_id` 					BIGINT not null comment '关联的客户ID',
+	`create_time`          DATETIME null comment '创建日期',
+	`create_by` 						VARCHAR(64) null comment '创建人',
+	`operator_time` 				DATETIME null comment '最近修改时间',
+	`operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
+	primary key (id)
+
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_trackers in dev mode';
+
+-- end
+
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户需求信息表
 
