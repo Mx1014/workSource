@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>recentlyActiveTime: recentlyActiveTime</li>
  *     <li>userSourceType: userSourceType</li>
  *     <li>organizations: organizations {@link OrganizationDetailDTO}</li>
+ *     <li>email: 邮箱</li>
  * </ul>
  */
 public class ExportCommunityUserDto {
@@ -44,6 +45,7 @@ public class ExportCommunityUserDto {
 
 	private Integer isAuth;
 
+	private String authString;
 	private String enterpriseName;
 
 	private String buildingId;
@@ -55,22 +57,82 @@ public class ExportCommunityUserDto {
 	private String addressName;
 
 	private Timestamp applyTime;
+	private String applyTimeString;
 
 	private String phone;
 
 	private Byte executiveFlag;
+	private String executiveString;
 	private String position;
 	private String identityNumber;
 	private Byte gender;
-
+	private String genderString;
 	private Long recentlyActiveTime;
-
+	private String recentlyActiveTimeString;
 	private Byte userSourceType;
-
+	private String userSourceTypeString;
 	@ItemType(OrganizationDetailDTO.class)
 	private List<OrganizationDetailDTO> organizations;
 
-	public List<OrganizationDetailDTO> getOrganizations() {
+	private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getExecutiveString() {
+        return executiveString;
+    }
+
+    public void setExecutiveString(String executiveString) {
+        this.executiveString = executiveString;
+    }
+
+    public String getAuthString() {
+        return authString;
+    }
+
+    public void setAuthString(String authString) {
+        this.authString = authString;
+    }
+
+    public String getApplyTimeString() {
+        return applyTimeString;
+    }
+
+    public void setApplyTimeString(String applyTimeString) {
+        this.applyTimeString = applyTimeString;
+    }
+
+    public String getGenderString() {
+        return genderString;
+    }
+
+    public void setGenderString(String genderString) {
+        this.genderString = genderString;
+    }
+
+    public String getRecentlyActiveTimeString() {
+        return recentlyActiveTimeString;
+    }
+
+    public void setRecentlyActiveTimeString(String recentlyActiveTimeString) {
+        this.recentlyActiveTimeString = recentlyActiveTimeString;
+    }
+
+    public String getUserSourceTypeString() {
+        return userSourceTypeString;
+    }
+
+    public void setUserSourceTypeString(String userSourceTypeString) {
+        this.userSourceTypeString = userSourceTypeString;
+    }
+
+    public List<OrganizationDetailDTO> getOrganizations() {
 		return organizations;
 	}
 
