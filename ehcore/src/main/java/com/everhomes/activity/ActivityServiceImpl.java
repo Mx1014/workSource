@@ -2053,11 +2053,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     if(oldRoster != null){
                         if (form != null) {
                             //表单数据更新时，先删除旧的数据，在增加新的数据.
-                            PostGeneralFormValCommand postGeneralFormValCommand = new PostGeneralFormValCommand();
-                            postGeneralFormValCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-                            postGeneralFormValCommand.setOwnerId(form.getOwnerId());
-                            postGeneralFormValCommand.setSourceId(oldRoster.getId());
-                            this.generalFormService.deleteGeneralFormVal(postGeneralFormValCommand);
+                            this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,oldRoster.getId());
 
                             addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
                             addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
