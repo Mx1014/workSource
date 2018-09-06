@@ -560,6 +560,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         msg.setNamespaceId(reportVal.getNamespaceId());
         msg.setReportId(report.getId());
         msg.setReportName(report.getReportName());
+        msg.setReportType(report.getReportType());
         msg.setReportTime(reportVal.getReportTime());
         msg.setReminderTime(reminderTime);
         msg.setReceiverUserId(receiverId);
