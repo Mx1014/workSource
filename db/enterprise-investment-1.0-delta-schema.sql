@@ -19,11 +19,9 @@ CREATE TABLE `eh_customer_contacts`
 	`creator_uid` 						BIGINT  COMMENT '创建人',
 	`operator_time` 				DATETIME  COMMENT '最近修改时间',
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
-	primary key (id),
- INDEX [idx_namespace_id] (namespace_id(20))
-
+	primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户联系人表';
-CREATE INDEX
+ALTER TABLE `eh_customer_contacts` ADD INDEX idx_namespace_id(columnName);
 
 -- end
 
@@ -45,9 +43,9 @@ CREATE TABLE `eh_customer_trackers`
 	`creator_uid` 						BIGINT  COMMENT '创建人',
 	`operator_time` 				DATETIME  COMMENT '最近修改时间',
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
-	primary key (id),
-INDEX [idx_namespace_id] (namespace_id(20))
+	primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户跟进人表';
+ALTER TABLE `eh_customer_trackers` ADD INDEX idx_namespace_id(columnName);
 
 -- end
 
@@ -74,10 +72,12 @@ CREATE TABLE `eh_customer_requirements`
 	 `create_by` 						VARCHAR(64) COMMENT '创建人',
 	 `operator_time` 				DATETIME COMMENT '最近修改时间',
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
-   primary key (id),
-   INDEX [idx_namespace_id] (namespace_id(20))
+   primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
+
+ALTER TABLE `eh_customer_requirements` ADD INDEX idx_namespace_id(columnName);
+
 
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户需求房源关系表
@@ -95,10 +95,9 @@ CREATE TABLE `eh_customer_requirement_addresses`
 	 `create_by` 						VARCHAR(64) COMMENT '创建人',
 	 `operator_time` 				DATETIME COMMENT '最近修改时间',
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
-   primary key (id),
-   INDEX [idx_namespace_id] (namespace_id(20))
-
+   primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
+ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(columnName);
 
 -- END
 
@@ -114,9 +113,9 @@ CREATE TABLE `eh_var_field_ranges`
     `field_id` BITINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
     `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
-    primary key (id),
-    INDEX [idx_namespace_id] (namespace_id(20))
+    primary key (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(columnName);
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
@@ -139,10 +138,10 @@ CREATE TABLE `eh_customer_current_rents`
 	 `create_by` 						VARCHAR(64) COMMENT '创建人',
 	 `operator_time` 				DATETIME COMMENT '最近修改时间',
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
-   primary key (id),
-   INDEX [idx_namespace_id] (namespace_id(20))
+   primary key (id)
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';
+ALTER TABLE `eh_customer_current_rents` ADD INDEX idx_namespace_id(columnName);
 
 -- end
 

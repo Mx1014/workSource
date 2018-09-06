@@ -3,7 +3,7 @@ package com.everhomes.investment;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentContact;
 import com.everhomes.util.StringHelper;
 
-public class EnterpriseInvestmentContact extends EhEnterpriseInvestmentContact {
+public class EnterpriseInvestmentContact extends EhCustomerCo {
 
 
     private static final long serialVersionUID = 1063324609381535170L;
