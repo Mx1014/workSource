@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *<li>allowPassportQrcodeFlag : (选填)允许通行证显示基于访客二维码的专属信息，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardId : (选填)门禁id</li>
  *<li>doorGuardName : (选填)门禁名称</li>
+ * <li>allowCardReader : (选填)门禁名称</li>
   *</ul>
   */
 public class VisitorsysBaseConfig {
@@ -36,6 +37,8 @@ public class VisitorsysBaseConfig {
     private Byte allowPassportQrcodeFlag;
     private String doorGuardId;
     private String doorGuardName;
+
+    private Byte allowCardReader;
 
     public void generateDefaultValue(){
         visitorQrcodeFlag=1;

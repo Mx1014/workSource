@@ -87,6 +87,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             dto.setEntryTime(entertime.getTime());
             Date calcendtime = DATE_FORMAT.get().parse(tempFee.getCalcendtime());
             dto.setPayTime(calcendtime.getTime());
+            dto.setParkingTime(tempFee.getParktime());
         } catch (ParseException e) {
             LOGGER.error("Parse time error,EntryTime={},PayTime={}",tempFee.getEntertime(),tempFee.getCalcendtime());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -370,6 +371,19 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         return result;
     }
 
+    private String test(){
+        JSONObject param = new JSONObject();
+        post(param,"api.aspx/pls.parkLots.get");
+
+        for(int i = 1;i < 4;i++){
+            JSONObject param1 = new JSONObject();
+            param1.put("parkLotName","A" + i);
+            post(param1,"api.aspx/pls.car.pos.getByNo");
+        }
+
+        return "";
+    }
+
     public static void main(String[] args) {
         CheAnZhiYuanParkingVendorHandler bean = new CheAnZhiYuanParkingVendorHandler();
 //        bean.getParkingTempFee(null,"粤BMP525");
@@ -391,12 +405,13 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 //        order.setOrderNo(32L);
 //        bean.payTempCardFee(order);
         GetCarLocationCommand cmd = new GetCarLocationCommand();
-        cmd.setPlateNumber("粤B12121");
+        cmd.setPlateNumber("粤B12345");
         ParkingLot pl = new ParkingLot();
         pl.setOwnerType("1");
         pl.setOwnerId(1L);
         pl.setId(1L);
         pl.setName("1");
         bean.getCarLocation(pl,cmd);
+        bean.test();
     }
 }
