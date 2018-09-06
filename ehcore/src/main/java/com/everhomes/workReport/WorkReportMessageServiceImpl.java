@@ -17,7 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class WorkReportMessageServiceImpl implements WorkReportMessageService {
@@ -194,20 +198,22 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Scheduled(cron = "0 30 * * * ?")
     @Override
-    public void workReportRxMessage(){
-        String time = workReportTimeService.currenHHmmTime();
-        List<WorkReport> rxReports = new ArrayList<>();
-        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
-            query.addConditions(Tables.EH_WORK_REPORTS.RECEIVER_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
-            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
-            return query;
+    public void workReportRxMessage() {
+        Timestamp reminderTime = Timestamp.valueOf(LocalDateTime.now().withSecond(0));
+        List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(reminderTime);
+        if (results.size() == 0)
+            return;
+        Map<Long, List<WorkReportValReceiverMsg>> group1 = results.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReceiverUserId));
+        group1.forEach((k1, v1) -> {
+            Map<Long, List<WorkReportValReceiverMsg>> group2 = v1.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReportId));
+            group2.forEach((k2, v2) -> {
+                String content = "截止于" + reminderTime.toString()
+                        + "，共接收到" + v2.size() + "条"
+                        + v2.get(0).getReportName() + "（"
+                        + workReportTimeService.displayReportTime(v2.get(0).getReportType(), v2.get(0).getReportTime().getTime()) + "）";
+                sendIndexMessage(content, "汇报情况", k1);
+            });
         });
-        for (WorkReport r : results) {
-            ReportMsgSettingDTO dto = JSON.parseObject(r.getReceiverMsgSeeting(), ReportMsgSettingDTO.class);
-            if (time.equals(dto.getMsgTime()))
-                rxReports.add(r);
-        }
-
     }
 
     @Scheduled(cron = "0 30 * * * ?")
@@ -233,6 +239,30 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
         }
 */
+    }
+
+    private void sendIndexMessage(String content, String title, Long receiverId){
+        // set the message
+        MessageDTO message = new MessageDTO();
+        message.setBodyType(MessageBodyType.TEXT.getCode());
+        message.setBody(content);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        message.setMeta(meta);
+
+        //  send the message
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(receiverId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
     }
 
 

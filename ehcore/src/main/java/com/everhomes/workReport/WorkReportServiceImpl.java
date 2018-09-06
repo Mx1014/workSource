@@ -603,6 +603,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         formCommand.setValues(cmd.getValues());
 
         dbProvider.execute((TransactionStatus status) -> {
+            Timestamp reminderTime = null;
+            if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.SUMMARY) {
+                ReportMsgSettingDTO msg = JSON.parseObject(report.getReceiverMsgSeeting(), ReportMsgSettingDTO.class);
+                reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), cmd.getReportTime(), msg.getMsgTimeType(), msg.getMsgTimeMark(), msg.getMsgTime()));
+            }
             //  1.update the reportVal's updateTime
             reportVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             workReportValProvider.updateWorkReportVal(reportVal);
@@ -610,6 +615,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             generalFormService.updateGeneralFormVal(formCommand);
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
+            workReportValProvider.deleteReportValReceiverMsg(reportVal.getReportId(), reportVal.getReportTime());
             for (Long receiverId : cmd.getReceiverIds()) {
                 //  create the receiver.
                 createWorkReportValReceiverMap(reportVal, receiverId);
@@ -617,6 +623,8 @@ public class WorkReportServiceImpl implements WorkReportService {
                   workReportValProvider.createWorkReportValReceiverMap(receiver); */
                 //  send message to the receiver.
                 workReportMessageService.workReportUpdateMessage(report, reportVal, receiverId, user);
+                if (ReportReceiverMsgType.fromCode(report.getReceiverMsgType()) == ReportReceiverMsgType.SUMMARY)
+                    createWorkReportValReceiverMsg(report, reportVal, reminderTime, receiverId);
             }
             return null;
         });
