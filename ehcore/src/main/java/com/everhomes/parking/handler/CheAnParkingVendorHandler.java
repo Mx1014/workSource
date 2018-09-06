@@ -94,6 +94,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setEntryTime(entertime.getTime());
             Date calcendtime = DATE_FORMAT.get().parse(tempFee.getCalcendtime());
             dto.setPayTime(calcendtime.getTime());
+            dto.setParkingTime(tempFee.getParktime());
         } catch (ParseException e) {
             LOGGER.error("Parse time error,EntryTime={},PayTime={}",tempFee.getEntertime(),tempFee.getCalcendtime());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -231,9 +232,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
             dto.setParkingName(parkingLot.getName());
 
             dto.setSpaceNo(location.getParkLotName());
-//            dto.setLocation(location.getParkLotName());
+            dto.setLocation(location.getFloorName() + location.getParkLotName());
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
+
+            ParkingTempFeeDTO tempfee = getParkingTempFee(parkingLot,cmd.getPlateNumber());
+
+            dto.setEntryTime(tempfee.getEntryTime());
+            dto.setParkingTime(String.valueOf(tempfee.getParkingTime()));
 
         }
         return dto;
