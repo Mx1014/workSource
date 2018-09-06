@@ -19,9 +19,11 @@ CREATE TABLE `eh_customer_contacts`
 	`creator_uid` 						BIGINT  COMMENT '创建人',
 	`operator_time` 				DATETIME  COMMENT '最近修改时间',
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
-	primary key (id)
+	primary key (id),
+ INDEX [idx_namespace_id] (namespace_id(20))
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户联系人表';
+CREATE INDEX
 
 -- end
 
@@ -43,8 +45,8 @@ CREATE TABLE `eh_customer_trackers`
 	`creator_uid` 						BIGINT  COMMENT '创建人',
 	`operator_time` 				DATETIME  COMMENT '最近修改时间',
 	`operator_uid`					BIGINT  COMMENT '最近修改人',
-	primary key (id)
-
+	primary key (id),
+INDEX [idx_namespace_id] (namespace_id(20))
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户跟进人表';
 
 -- end
@@ -65,15 +67,15 @@ CREATE TABLE `eh_customer_requirements`
 	 `min_rent_price`			DECIMAL(10,2) COMMENT '期望最小租金-单价',
 	 `max_rent_price`			DECIMAL(10,2) COMMENT '期望最大租金-单价',
 	 `rent_price_unit`		TINYINT OMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
-	 `investment_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
-	 `intention_address`			  LONG COMMENT '意向房源',-- 加表
+	 `rent_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
 	 `version`				      LONG COMMENT '记录版本',
 	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
 	 `create_time`          DATETIME COMMENT '创建日期',
 	 `create_by` 						VARCHAR(64) COMMENT '创建人',
 	 `operator_time` 				DATETIME COMMENT '最近修改时间',
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
-   primary key (id)
+   primary key (id),
+   INDEX [idx_namespace_id] (namespace_id(20))
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
 
@@ -85,19 +87,36 @@ CREATE TABLE `eh_customer_requirement_addresses`
    `id`                   BIGINT NOT NULL,
 	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
 	 `community_id`         BIGINT NOT NULL DEFAULT 0 COMMENT 'communityId',
-	 `requirement_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的需求ID',
+	 `requirement_id` 			BIGINT NOT NULL DEFAULT 0 COMMENT '关联的需求ID',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT 0 COMMENT '关联的客户ID',
 	 `address_id`			      LONG NULL COMMENT '意向房源',
-	 `version`				      LONG NULL COMMENT '记录版本',
-	 `status`								TINYINT NULL COMMENT '需求状态，0-invalid ,2-valid',
-	 `create_time`          DATETIME null COMMENT '创建日期',
-	 `create_by` 						VARCHAR(64) null COMMENT '创建人',
-	 `operator_time` 				DATETIME null COMMENT '最近修改时间',
-	 `operator_by`					VARCHAR(64) NULL COMMENT '最近修改人',
-   primary key (id)
+	 `status`								TINYINT COMMENT '需求状态，0-invalid ,2-valid',
+	 `create_time`          DATETIME COMMENT '创建日期',
+	 `create_by` 						VARCHAR(64) COMMENT '创建人',
+	 `operator_time` 				DATETIME COMMENT '最近修改时间',
+	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
+   primary key (id),
+   INDEX [idx_namespace_id] (namespace_id(20))
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
 
 -- END
+
+
+-- AUTHOR 黄鹏宇 2018-9-6
+-- REMARK 动态表单公用组件表
+
+CREATE TABLE `eh_var_field_components`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
+	 `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_field_groups',
+    `field_id` BITINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
+    `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
+    `cluster_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    primary key (id),
+    INDEX [idx_namespace_id] (namespace_id(20))
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
@@ -120,7 +139,8 @@ CREATE TABLE `eh_customer_current_rents`
 	 `create_by` 						VARCHAR(64) COMMENT '创建人',
 	 `operator_time` 				DATETIME COMMENT '最近修改时间',
 	 `operator_by`					VARCHAR(64) COMMENT '最近修改人',
-   primary key (id)
+   primary key (id),
+   INDEX [idx_namespace_id] (namespace_id(20))
 
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';
 
@@ -130,7 +150,7 @@ CREATE TABLE `eh_customer_current_rents`
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 对客户表增加招商客户和成交租客的表示加以区分
 
-ALTER TABLE `eh_enterprise_customers` ADD `investment_type` TINYINT COMMENT '跟进信息类型，0-招商客户，1-成交租客';
+ALTER TABLE `eh_enterprise_customers` ADD `` TINYINT COMMENT '跟进信息类型，0-招商客户，1-成交租客';
 
 -- end
 
@@ -138,21 +158,21 @@ ALTER TABLE `eh_enterprise_customers` ADD `investment_type` TINYINT COMMENT '跟
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 对当前跟进表加上类型标识
 
-ALTER TABLE `eh_customer_trackings` ADD `investment_type` TINYINT COMMENT '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
+ALTER TABLE `eh_customer_trackings` ADD `` TINYINT COMMENT '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
 
 -- end
 
 
 -- AUTHOR: jiarui 20180831
 -- REMARK: 客户表增加相关字段
-ALTER TABLE `eh_enterprise_customers`ADD COLUMN `transaction_probability`  VARCHAR(1024) AFTER `financing_demand_item_id`;
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `transaction_ratio` VARCHAR(64);
 
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `expected_sign_date` DATETIME  AFTER `transaction_probability`;
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `expected_sign_date` DATETIME;
 -- end
 
 -- AUTHOR: jiarui  20180831
 -- REMARK: 园区入驻字段及数据迁移
-ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
+-- ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
 -- end
 
 -- 黄鹏宇 2018-9-4
@@ -160,6 +180,6 @@ ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
 ALTER TABLE `eh_customer_events` ADD COLUMN investment_type TINYINT COMMENT '操作客户类型，0-客户管理，1-租客管理';
 
 -- REMARK: 客户表增加是否入驻状态
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `admission_item_id` BIGINT COMMENT '该用户是否入职';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entry_status` BIGINT COMMENT '该用户是否入驻，1-未入驻，2-入驻';
 
 -- end
