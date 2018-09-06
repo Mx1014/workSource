@@ -386,7 +386,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 
     public static void main(String[] args) {
         CheAnZhiYuanParkingVendorHandler bean = new CheAnZhiYuanParkingVendorHandler();
-//        bean.getParkingTempFee(null,"粤BMP525");
+        bean.getParkingTempFee(null,"粤B571B5");
 //        bean.getCardInfo("粤BMP525",null);
 //      卡类型接口
 //        bean.getParkingRechargeRates(null,null,null);
@@ -405,7 +405,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 //        order.setOrderNo(32L);
 //        bean.payTempCardFee(order);
         GetCarLocationCommand cmd = new GetCarLocationCommand();
-        cmd.setPlateNumber("粤B12345");
+        cmd.setPlateNumber("粤B571B5");
         ParkingLot pl = new ParkingLot();
         pl.setOwnerType("1");
         pl.setOwnerId(1L);
