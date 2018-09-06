@@ -252,7 +252,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         String json = null;
 
         try {
-            httpPost.setEntity(new StringEntity(params));
+            httpPost.setEntity(new StringEntity(params,"UTF-8"));
             httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
             response = httpClient.execute(httpPost);
             int status = response.getStatusLine().getStatusCode();
@@ -311,9 +311,9 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
 
         MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();
         //String body = "{\"FunctionID\":\"1\",\"UserID\":\"1\"}";
-        String body = "{\"FunctionID\":\"0\",\"UserID\":\"123\",\"UserName\":\"ewew\"}";
+        String body = "{\"FunctionID\":\"0\",\"UserID\":\"1\",\"UserName\":\"张三\"}";
         try {
-            httpPost.setEntity(new StringEntity(body));
+            httpPost.setEntity(new StringEntity(body,"UTF-8"));
             httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
             // httpPost.setEntity(stringEntity);
             response = httpclient.execute(httpPost);
