@@ -70,6 +70,9 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         String lastCommit = cmd.getCommitVersion();
         String path = this.getPath(namespaceId);
         GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
+        if(repo == null){
+            return null ;
+        }
         //获取仓库中的文件
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         //组装返回值
