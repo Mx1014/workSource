@@ -379,7 +379,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowNode == null) {
                     return null;
                 }
-                if (flowNode.getFlowMainId().equals(0l)) {
+                if (flowNode.getFlowMainId().equals(0L)) {
                     return null;
                 }
                 return getFlowByEntity(flowNode.getFlowMainId(), FlowEntityType.FLOW, ++loop);
@@ -388,7 +388,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowButton == null) {
                     return null;
                 }
-                if (flowButton.getFlowMainId().equals(0l)) {
+                if (flowButton.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowButton.getFlowNodeId(), FlowEntityType.FLOW_NODE, ++loop);
                     if (flow != null) {
                         flowButton.setFlowMainId(flow.getTopId());
@@ -406,7 +406,7 @@ public class FlowServiceImpl implements FlowService {
                     return null;
                 }
 
-                if (flowAction.getFlowMainId().equals(0l)) {
+                if (flowAction.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowAction.getBelongTo(), FlowEntityType.fromCode(flowAction.getBelongEntity()), ++loop);
                     if (flow != null) {
                         flowAction.setFlowMainId(flow.getTopId());
@@ -422,7 +422,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowSel == null) {
                     return null;
                 }
-                if (flowSel.getFlowMainId().equals(0l)) {
+                if (flowSel.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowSel.getBelongTo(), FlowEntityType.fromCode(flowSel.getBelongEntity()), ++loop);
                     if (flow != null) {
                         flowSel.setFlowMainId(flow.getTopId());
@@ -727,7 +727,7 @@ public class FlowServiceImpl implements FlowService {
     public ListBriefFlowNodeResponse updateNodePriority(
             UpdateFlowNodePriorityCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowMainId());
-        if (flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getTopId().equals(0l)) {
+        if (flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getFlowMainId().equals(0l)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
         }
 
@@ -4047,7 +4047,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void deleteSnapshotProcessUser(Long flowId, Long userId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        if (!flow.getTopId().equals(0L)) {
+        if (!flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");
         }
 
@@ -4076,7 +4076,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void addSnapshotProcessUser(Long flowId, Long userId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        if (!flow.getTopId().equals(0l)) {
+        if (!flow.getFlowMainId().equals(0l)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");
         }
 
@@ -4194,7 +4194,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowEvaluateDetailDTO updateFlowEvaluate(UpdateFlowEvaluateCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null || !flow.getTopId().equals(0L)) {
+        if (flow == null || !flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flowId not exists");
         }
@@ -4289,7 +4289,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowEvaluateDetailDTO getFlowEvaluate(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        if (flow == null || !flow.getTopId().equals(0L)) {
+        if (flow == null || !flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flowId not exists");
         }
@@ -5722,7 +5722,7 @@ public class FlowServiceImpl implements FlowService {
                 LOGGER.error("do snapshot error", ex);
             }
 
-            if (flow.getTopId().equals(0L)) {
+            if (flow.getFlowMainId().equals(0L)) {
                 isOk = false;
             }
 
@@ -7067,7 +7067,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null || !flow.getTopId().equals(0L)) {
+        if (flow == null || !flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flowId not exists");
         }
@@ -7099,7 +7099,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null || !flow.getTopId().equals(0L)) {
+        if (flow == null || !flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flowId not exists");
         }
@@ -7118,7 +7118,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null || !flow.getTopId().equals(0L)) {
+        if (flow == null || !flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flowId not exists");
         }
