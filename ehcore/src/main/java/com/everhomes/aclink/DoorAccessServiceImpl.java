@@ -124,6 +124,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.sql.Timestamp;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -4153,7 +4154,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
+        /*
+        if(cmd.getStartTime() == null) {
+            cmd.setStartTime(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
+        }else{
+            cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
+        }
+        if(cmd.getEndTime() == null) {
+            cmd.setEndTime(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
+        }else{
+            cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
+        }
+        */
+        List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -4174,16 +4187,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getDoorId() != null) {
                     query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
                 }
-                
+                //时间比较
+                if(cmd.getStartTime() != null && cmd.getEndTime() != null ) {
+                    cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
+                    cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
+                    query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+                }
+                //query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+                //query.addConditions(Tables.EH_ACLINK_LOGS.LOG_TIME.between(cmd.getStartTime(), cmd.getEndTime()));
                 return query;
             }
             
         });
         
-        for(AclinkLog obj : objs) {
-            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
-            resp.getDtos().add(dto);
-        }
+//        for(AclinkLog obj : objs) {
+//            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
+//            resp.getDtos().add(dto);
+//        }
+        resp.setDtos(objs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }

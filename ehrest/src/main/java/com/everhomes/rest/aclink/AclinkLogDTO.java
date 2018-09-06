@@ -11,7 +11,7 @@ import com.everhomes.discover.ItemType;
  *     <li>userName:用户姓名</li>
  *     <li>userIdentifier:手机号码</li>
  *     <li>doorName:门禁名称</li>
- *     <li>doorType:授权类型</li>
+ *     <li>authType:授权类型 (0为常规授权，1为临时授权)</li>
  *     <li>eventType:开门方式</li>
  *     <li>logTime:开门时间 </li>
  * </ul>
@@ -35,7 +35,7 @@ public class AclinkLogDTO {
     private Long     authId;
     private String     userIdentifier;
     private Long     ownerId;
-
+    private Byte     authType;
 
     public Long getKeyId() {
         return keyId;
@@ -214,6 +214,16 @@ public class AclinkLogDTO {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+
+    public Byte getAuthType() {
+        return authType;
+    }
+
+
+    public void setAuthType(Byte authType) {
+        this.authType = authType;
     }
 
 

@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>keyWord:操作用户 可输入姓名或手机号码</li>
  * <li>eventType:开门方式 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 人脸开门</li>
  * <li>doorId:门禁名称</li>
- * <li>startTime:开门时间区间起点 yyyy-MM-dd</li>
- * <li>endTime:开门时间区间终点 yyyy-MM-dd ,只允许选择当前时间之前的日期区间</li>
+ * <li>startTime:开门时间区间起点 时间戳，精确到日期</li>
+ * <li>endTime:开门时间区间终点 时间戳,只允许选择当前时间之前的日期区间</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:分页大小</li>
  * </ul>
@@ -27,6 +27,8 @@ public class AclinkQueryLogCommand {
     private Long doorId;
     private Long startTime;
     private Long endTime;
+    private String startStr;
+    private String endStr;
     
     public Long getEventType() {
         return eventType;
@@ -76,7 +78,7 @@ public class AclinkQueryLogCommand {
     public Long getStartTime() {
         return startTime;
     }
-    public void set(Long startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
@@ -85,6 +87,20 @@ public class AclinkQueryLogCommand {
     }
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public String getStartStr() {
+        return startStr;
+    }
+    public void setStartStr(String startStr) {
+        this.startStr = startStr;
+    }
+
+    public String getEndStr() {
+        return endStr;
+    }
+    public void setEndStr(String endStr) {
+        this.endStr = endStr;
     }
 
     @Override

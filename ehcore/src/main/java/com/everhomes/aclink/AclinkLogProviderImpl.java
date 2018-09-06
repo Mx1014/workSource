@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -121,8 +122,8 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
     @Override
     public List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
-
         SelectQuery<EhAclinkLogsRecord> query = context.selectQuery(Tables.EH_ACLINK_LOGS);
+        query.addFrom(Tables.EH_ACLINK_LOGS);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
@@ -139,6 +140,49 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         }
         List<AclinkLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AclinkLog.class);
+        });
+
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+            objs.remove(objs.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+
+    public List<AclinkLogDTO> queryAclinkLogDTOsByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_LOGS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        query.addOrderBy(Tables.EH_ACLINK_LOGS.CREATE_TIME.desc());
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
+        }
+
+        //暂过滤掉物理按键开门的日志, by liuyilin 20180625
+        query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
+        //auth_type
+        query.addJoin(Tables.EH_DOOR_AUTH,Tables.EH_ACLINK_LOGS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID));
+        query.addConditions(Tables.EH_ACLINK_LOGS.AUTH_ID.ne(0L));
+        if (count > 0){
+            query.addLimit(count + 1);
+        }
+        List<AclinkLogDTO> objs = query.fetch().map((r) -> {
+            AclinkLogDTO dto = ConvertHelper.convert(r, AclinkLogDTO.class);
+            dto.setId(r.getValue(Tables.EH_ACLINK_LOGS.ID));
+            dto.setCreateTime(r.getValue(Tables.EH_ACLINK_LOGS.CREATE_TIME));
+            dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
+            dto.setUserName(r.getValue(Tables.EH_ACLINK_LOGS.USER_NAME));
+            dto.setUserIdentifier(r.getValue(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER));
+            dto.setDoorName(r.getValue(Tables.EH_ACLINK_LOGS.DOOR_NAME));
+            dto.setEventType(r.getValue(Tables.EH_ACLINK_LOGS.EVENT_TYPE));
+            dto.setLogTime(r.getValue(Tables.EH_ACLINK_LOGS.LOG_TIME));
+            return dto;
         });
 
         if(count > 0 && objs.size() > count) {

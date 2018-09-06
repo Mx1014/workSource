@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.AclinkLogDTO;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 
 public interface AclinkLogProvider {
@@ -20,5 +21,8 @@ public interface AclinkLogProvider {
 
 	List<AclinkLog> queryAclinkLogsByTime(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<AclinkLogDTO> queryAclinkLogDTOsByTime(ListingLocator locator, int count,
+                                             ListingQueryBuilderCallback queryBuilderCallback);
 
 }
