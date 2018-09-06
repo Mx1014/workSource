@@ -1,6 +1,7 @@
 package com.everhomes.scheduler;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -10,12 +11,21 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.remind.Remind;
 import com.everhomes.remind.RemindProvider;
 import com.everhomes.remind.RemindService;
@@ -27,7 +37,7 @@ import com.everhomes.util.StringHelper;
  * 日程定时提醒任务
  */
 @Component
-public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
+public class CalendarRemindScheduleJob extends  QuartzJobBean implements ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CalendarRemindScheduleJob.class);
     public static final String MODULE = "calendar-remind-";
     public static String CRON_EXPRESSION = "0 0/5 * * * ? ";
@@ -39,26 +49,26 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
     @Autowired
     private RemindProvider remindProvider;
     @Autowired
-    private ScheduleProvider scheduleProvider;
-    protected static int timeout = 25;
-    protected static TimeUnit unit = TimeUnit.HOURS;
+    protected ScheduleProvider scheduleProvider;
+    @Autowired
+    protected BigCollectionProvider bigCollectionProvider;
+    @Autowired
+    protected CoordinationProvider coordinationProvider;
+    protected static int TIMEOUT = 25;
+    protected static TimeUnit UNIT = TimeUnit.HOURS;
     /**
      * 每天早上0点2分加载今天的remind到redis
      * */
     @Scheduled(cron = "0 2 0 * * ? ")
-	@Override
 	public void load() {
-		// TODO Auto-generated method stub
     	 if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
          	coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode() + "load").tryEnter(() -> {
          		//取今天0点到第二天0点的数据
                  Timestamp remindEndTime = new Timestamp(DateStatisticHelper.getCurrent0Hour().getTime() + 24*3600*1000L);
                  Timestamp remindStartTime = new Timestamp(DateStatisticHelper.getCurrent0Hour().getTime()); 
                  List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
-                 long count = 0;
                  boolean isProcess = !CollectionUtils.isEmpty(reminds);
                  while (isProcess) {
-                     count += reminds.size();
                      reminds.forEach(remind -> {
                          try {
                              set(remind.getId(), remind.getRemindTime().getTime(), remind);
@@ -115,7 +125,7 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
             String jobName = triggerName;
             String cronExpression = CRON_EXPRESSION;
             //启动定时任务
-            scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, DailyBatchScheduleJob.class, null);
+            scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, CalendarRemindScheduleJob.class, null);
         }
     }
  
@@ -129,11 +139,60 @@ public class CalendarRemindScheduleJob extends DailyBatchScheduleJob {
     }
 
     public void cancel(Long targetId){
-    	cancel(targetId, MODULE  + targetId, null, ZSET_KEY, timeout, unit);
+    	String key = MODULE + targetId;
+    	//1毫秒后过期删除
+        ValueOperations<String, String> valueOperations = getRedisTemplate(key).opsForValue(); 
+        valueOperations.set(key, null, 1, TimeUnit.MICROSECONDS);
     }
 
 	public void set(Long targetId, long timestampLong, Remind remind) {
 		String remindJsonString = StringHelper.toJsonString(remind);
-		set(targetId, timestampLong, MODULE  + targetId, remindJsonString, ZSET_KEY, timeout, unit);
+		String voKey = MODULE + targetId;
+    	ZSetOperations<String, String> zSetOperations = getRedisTemplate(ZSET_KEY).opsForZSet();
+    	zSetOperations.add(ZSET_KEY, String.valueOf(targetId), long2Double(timestampLong));
+        ValueOperations<String, String> valueOperations = getRedisTemplate(voKey).opsForValue(); 
+        valueOperations.set(voKey, remindJsonString, TIMEOUT, UNIT);
+	} 
+  
+	private RedisTemplate<String, String> getRedisTemplate(String key){
+		StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate<String, String> redisTemplate = acc.getTemplate(stringRedisSerializer);
+        return redisTemplate;
+	} 
+    
+    private double long2Double(Long timestampLong) {
+		if(null != timestampLong){
+			return timestampLong.doubleValue();
+		}
+		return 0d;
 	}
+    /**
+     * 根据时间范围提取数据 
+     * @param beginTime : 过滤开始时间
+     * @param endTime : 过滤结束时间
+     * @param VOKeyPrefix : valueOperation的key前缀每个业务都必须不一样(前缀+id 作为key)
+     * @param ZSET_KEY : zSetOperations的key 每个业务都不一样
+     * 
+     * @return : 返回数据对象的排序Set
+     * */
+    public Set<String> range(Long beginTime,Long endTime,String key, String VOKeyPrefix){
+    	Set<String> objects = new HashSet<>();
+    	ZSetOperations<String, String> zSetOperations = getRedisTemplate(key).opsForZSet();
+    	Set<String> ids = zSetOperations.rangeByScore(key, beginTime.doubleValue(), endTime.doubleValue());
+    	ids.forEach(id ->{
+    		String vokey = VOKeyPrefix + id;
+    		ValueOperations<String, String> vo =  getRedisTemplate(vokey).opsForValue(); 
+    		String o = vo.get(vokey);
+    		objects.add(o);
+    	});
+    	try{
+    		//清除已经提取过的元素
+        	zSetOperations.removeRangeByScore(key, 0.0, endTime.doubleValue());
+    	}catch(Exception e){
+    		LOGGER.error("remove zset error :", e);
+    	}
+    	return objects;
+    } 
+ 
 }

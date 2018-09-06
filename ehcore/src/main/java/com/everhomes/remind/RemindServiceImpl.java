@@ -100,7 +100,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class RemindServiceImpl implements RemindService  {
-        private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
     private static final String DEFAULT_CATEGORY_NAME = "默认分类";
     private static final int FETCH_SIZE = 2000;
     private static final int PLAN_DATE_CALCULATE_MAX_LOOP = 365;
@@ -394,6 +394,7 @@ public class RemindServiceImpl implements RemindService  {
             remindProvider.deleteRemindCategoryDefaultSharesByCategoryId(remindCategory.getId());
             remindProvider.deleteRemindsByCategoryId(remindCategory.getId());
             remindProvider.deleteRemindsByTrackRemindId(trackRemindIds);
+            deleteRemindRedis(trackReminds);
             return null;
         });
 
@@ -703,11 +704,27 @@ public class RemindServiceImpl implements RemindService  {
     	}
     }
 
-    private void setRemindRedis(Remind remind){
-    	if(remindTimeIsToday(remind)){
-    		calendarRemindScheduleJob.set(remind.getId(), remind.getRemindTime().getTime(), remind);
+    private void deleteRemindRedis(List<Remind> reminds){
+    	if(CollectionUtils.isEmpty(reminds))
+    		return;
+    	for(Remind remind : reminds){
+	    	if(remindTimeIsToday(remind)){
+	    		calendarRemindScheduleJob.cancel(remind.getId());
+	    	}
     	}
     }
+
+    private void setRemindRedis(Remind remind){
+    	if(remindTimeIsToday(remind)){
+    		if(RemindStatus.fromCode(remind.getStatus()) == RemindStatus.DONE){
+    			calendarRemindScheduleJob.cancel(remind.getId());
+    		}
+    		else{    			
+    			calendarRemindScheduleJob.set(remind.getId(), remind.getRemindTime().getTime(), remind);
+    		}
+    	}
+    }
+    
     private boolean shareMemberDTOcontainsShareId(List<ShareMemberDTO> shareToMembers, Long id) {
     	if(CollectionUtils.isEmpty(shareToMembers))
     		return false;
@@ -733,6 +750,7 @@ public class RemindServiceImpl implements RemindService  {
             remindProvider.deleteRemind(remind);
             deleteRemindRedis(remind);
             remindProvider.deleteRemindSharesByRemindId(remind.getId());
+            deleteRemindRedis(trackReminds);
             remindProvider.deleteRemindsByTrackRemindId(Collections.singletonList(remind.getId()));
             return null;
         });
