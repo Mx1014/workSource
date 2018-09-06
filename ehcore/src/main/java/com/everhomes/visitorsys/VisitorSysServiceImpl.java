@@ -1968,6 +1968,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return convert;
     }
 
+
+
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
