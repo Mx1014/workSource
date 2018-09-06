@@ -146,6 +146,7 @@ import com.everhomes.rest.community.admin.CheckAuditingType;
 import com.everhomes.rest.community.admin.CheckUserAuditingAdminCommand;
 import com.everhomes.rest.community.admin.CheckUserAuditingAdminResponse;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
+import com.everhomes.rest.community.admin.CommunityAllUserDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
@@ -163,6 +164,8 @@ import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
+import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
+import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
 import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
@@ -262,6 +265,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -2458,7 +2462,74 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
-	@Override
+    @Override
+    public ListAllCommunityUserResponse listAllUserCommunities(ListAllCommunityUsersCommand cmd) {
+        ListAllCommunityUserResponse response = new ListAllCommunityUserResponse();
+        Integer namespaceId = cmd.getNamespaceId();
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        Long time = System.currentTimeMillis();
+        List<User> userList = this.userProvider.listUsers(locator, pageSize, new ListingQueryBuilderCallback(){
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+                if(cmd.getStartTime() != null){
+                    query.addConditions(Tables.EH_USERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+                }
+                if(cmd.getEndTime() != null){
+                    query.addConditions(Tables.EH_USERS.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
+                }
+                if (!StringUtils.isBlank(cmd.getPhone())) {
+                    query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getPhone() + "%"));
+                }
+                if(!StringUtils.isEmpty(cmd.getKeywords())){
+                    query.addConditions(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+                }
+
+                if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+                    query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+                }else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+                    query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+                }
+
+                query.addGroupBy(Tables.EH_USERS.ID);
+
+                return query;
+            }
+        });
+        List<CommunityAllUserDTO> communityAllUserDTOS = new ArrayList<>();
+        if (userList != null) {
+            userList.stream().forEach(user -> {
+                CommunityAllUserDTO communityAllUserDTO = new CommunityAllUserDTO();
+                communityAllUserDTO.setUserId(user.getId());
+                communityAllUserDTO.setNickName(user.getNickName());
+                List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(user.getId());
+                StringBuilder realName = new StringBuilder();
+                if (!CollectionUtils.isEmpty(members)) {
+                    for (OrganizationMember organizationMember : members) {
+                        realName.append(organizationMember.getContactName()).append(";");
+                    }
+                }
+                communityAllUserDTO.setUserName(StringUtils.isBlank(realName.toString())?"-":realName.toString().substring(0,realName.toString().length()-1));
+                communityAllUserDTO.setPhone(user.getIdentifierToken());
+                communityAllUserDTO.setGender(user.getGender());
+                if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
+                    communityAllUserDTO.setUserSourceType(UserSourceType.WEIXIN.getCode());
+                }else {
+                    communityAllUserDTO.setUserSourceType(UserSourceType.APP.getCode());
+                }
+                communityAllUserDTO.setApplyTime(user.getCreateTime());
+                communityAllUserDTOS.add(communityAllUserDTO);
+            });
+        }
+        response.setNextPageAnchor(locator.getAnchor());
+        response.setUserCommunities(communityAllUserDTOS);
+        return response;
+    }
+
+    @Override
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
 
@@ -2490,7 +2561,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
-					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
+					Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like("%" + cmd.getKeywords() + "%");
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
 				}
@@ -2506,7 +2577,7 @@ public class CommunityServiceImpl implements CommunityService {
 				    query.addConditions(cond);
                 }
                 if (!StringUtils.isBlank(cmd.getPhone())) {
-				    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like("%" + cmd.getPhone() + "%"));
+				    query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getPhone() + "%"));
                 }
 				if(null != UserGender.fromCode(cmd.getGender())){
 					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));

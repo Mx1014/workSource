@@ -23,7 +23,7 @@ public interface UserProvider {
     User findUserByNamespaceUserTokenAndType(String token, String type);
     User findUserByAccountName(String accountName);
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
-    
+    List<User> listUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
     UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 

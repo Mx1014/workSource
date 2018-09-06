@@ -61,6 +61,8 @@ public interface CommunityService {
 
 	CommunityUserResponse listUserCommunitiesV2(ListCommunityUsersCommand cmd);
 
+	ListAllCommunityUserResponse listAllUserCommunities(ListAllCommunityUsersCommand cmd);
+
 	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
