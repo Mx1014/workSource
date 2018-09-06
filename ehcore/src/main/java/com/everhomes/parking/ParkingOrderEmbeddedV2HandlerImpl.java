@@ -142,6 +142,25 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				}
 
 			}
+
+			if(order.getStatus() == ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode()) {
+				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
+				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setOrderNo(parkingService.createOrderNo(lot));
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+
+			if(order.getStatus() == ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode()) {
+				order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
+				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setOrderNo(parkingService.createOrderNo(lot));
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+
 			return null;
 		});
 
