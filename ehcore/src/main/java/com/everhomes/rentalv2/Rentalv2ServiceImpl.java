@@ -4950,6 +4950,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, cmd.getSceneToken(),
 				cmd.getRentalType(), cmd.getPackageName());
+		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
@@ -5050,7 +5051,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		processWeekRuleDTOs(start, end, response.getSiteDays(), rs, rule,
 				cmd.getSceneToken(), cmd.getRentalType(), cmd.getPackageName());
-
+		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs, cmd.getSceneToken(), cmd.getRentalType(), cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
@@ -5086,9 +5087,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //		response.setSitePics(convertRentalSitePicDTOs(pics));
 
 		response.setAnchorTime(0L);
-
-
-
 		// 查rules
 
 		Calendar start = Calendar.getInstance();
@@ -5103,6 +5101,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		timeStamp = System.currentTimeMillis();
 		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, cmd.getSceneToken(), cmd.getRentalType(),
 				cmd.getPackageName());
+		response.setResourceCounts(rs.getResourceCounts());
 		LOGGER.info("processDayRuleDTO costs time :"+(System.currentTimeMillis()-timeStamp)/1000);
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs, cmd.getSceneToken(), cmd.getRentalType(), cmd.getPackageName());
@@ -5240,6 +5239,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setSiteDays(new ArrayList<>());
 
 		processMonthRuleDTOs(start, end, response, rule, rs, cmd.getSceneToken(), cmd.getPackageName());
+		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs, cmd.getSceneToken(), cmd.getRentalType(), cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
@@ -5320,6 +5320,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
+					dto.setResourceCounts(rsr.getCounts());
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
@@ -5453,6 +5454,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 					// 支持复选，要换一种方式计算剩余数量
+					dto.setResourceCounts(rsr.getCounts());
 					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
@@ -5553,6 +5555,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				//calculateAvailableCount(dto, rs, rsr, priceRules);
 				Double rentedCount = rsr.getCounts() - usedSegment.getMaxCover(rsr.getBeginTime().getTime(), rsr.getEndTime().getTime());
 				dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
+				dto.setResourceCounts(rsr.getCounts());
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
 				//当可预约数量为0时
