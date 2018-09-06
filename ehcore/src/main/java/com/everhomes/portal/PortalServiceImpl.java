@@ -1672,6 +1672,11 @@ public class PortalServiceImpl implements PortalService {
 							deleteLayoutBeforePublish(namespaceId, cmd.getPublishType());
 
 							for (PortalLayout layout: layouts) {
+
+								//标准版不能删除
+								if(namespaceId == 2){
+									continue;
+								}
 								//发布layout
 								publishLayout(layout, cmd.getVersionId(), cmd.getPublishType());
 							}
@@ -1746,6 +1751,11 @@ public class PortalServiceImpl implements PortalService {
 	private void deleteLayoutBeforePublish(Integer namespaceId, Byte publishType){
 
 		assert namespaceId != null;
+
+		//标准版不能删除
+		if(namespaceId == 2){
+			return;
+		}
 
 		launchPadProvider.deleteLaunchPadLayout(namespaceId, "ServiceMarketLayout", publishType);
 		launchPadProvider.deleteLaunchPadLayout(namespaceId, "SecondServiceMarketLayout", publishType);
