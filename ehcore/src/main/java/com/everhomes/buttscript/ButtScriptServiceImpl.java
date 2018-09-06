@@ -59,6 +59,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
      */
     @Override
     public ScriptDTO getScriptByNamespace(GetScriptCommand cmd) {
+        ScriptDTO dto = new ScriptDTO();
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //先从配置表获取相关配置信息
         ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(namespaceId ,cmd.getInfoType());
@@ -71,13 +72,12 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         String path = this.getPath(namespaceId);
         GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
         if(repo == null){
-            return null ;
+            return dto ;
         }
         //获取仓库中的文件
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         //组装返回值
         String script = new String(file, Charset.forName("UTF-8"));
-        ScriptDTO dto = new ScriptDTO();
         dto.setCommitVersion(lastCommit);
         dto.setInfoType(cmd.getInfoType());
         dto.setNamespaceId(namespaceId);
@@ -103,7 +103,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
         if(repo == null){//建仓库
             repo = new GogsRepo();
-            repo.setName(cof.getInfoDescribe());
+            repo.setName(cof.getInfoType());
             repo.setNamespaceId(GOS_NAMESPACEID);
             repo.setModuleType(cof.getModuleType());
             repo.setModuleId(cof.getModuleId());
@@ -117,7 +117,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         String path = this.getPath(namespaceId);
         //尝试获取仓库中的最后一次提交信息,若能获取到,说明
         ButtScriptLastCommit lastCommitInfo = buttScriptLastCommitProvider.getButtScriptLastCommit(namespaceId ,cmd.getInfoType());
-        param.setCommitMessage("");
+        param.setCommitMessage("commit "+path);
         param.setContent(cmd.getScript());
         param.setNewFile(true);
         if(lastCommitInfo !=null){

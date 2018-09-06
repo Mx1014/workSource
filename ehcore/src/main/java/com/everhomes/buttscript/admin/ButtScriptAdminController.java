@@ -100,7 +100,7 @@ public class ButtScriptAdminController extends ControllerBase{
 
 	/**
 	 * <b>URL: /admin/buttScript/publishScriptVersionCancel</b>
-	 * <p>5)查询域空间下脚本分类接口</p>
+	 * <p>6)取消版本发布接口</p>
 	 */
 	@RequestMapping("publishScriptVersionCancel")
 	@RestReturn(value=String.class)
