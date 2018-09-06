@@ -10,6 +10,7 @@ import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
@@ -218,7 +219,7 @@ public class PaymentCardController extends ControllerBase{
      */
     @RequestMapping("unbundleCard")
     @RestReturn(value=String.class)
-    public RestResponse unbundleCard(Long cardId) {
+    public RestResponse unbundleCard(@RequestParam Long cardId) {
         paymentCardService.unbunleCard(cardId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
