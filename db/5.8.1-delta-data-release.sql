@@ -312,6 +312,12 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay
 -- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
+
+
+-- AUTHOR: 黄明波 20180906
+-- REMARK: 调用/yellowPage/syncSARequestInfo 接口
+
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
@@ -338,8 +344,6 @@ VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'cs://1/
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
 VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2UvTVRwaU5tUXhNR013T1RGaVlUVmtNalF6TmpkaVpqZzVNVGhtWlRoaU1XVTRaQQ',1,1);
 
--- AUTHOR: huangmingbo 20180906
--- REMARK: 调用/yellowPage/syncSARequestInfo 接口
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
