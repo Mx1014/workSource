@@ -106,14 +106,14 @@ CREATE TABLE `eh_customer_requirement_addresses`
 -- AUTHOR 黄鹏宇 2018-9-6
 -- REMARK 动态表单公用组件表
 
-CREATE TABLE `eh_var_field_components`
+CREATE TABLE `eh_var_field_ranges`
 (
    `id`                   BIGINT NOT NULL,
 	 `namespace_id` 				INT NOT NULL DEFAULT 0 COMMENT 'namespaceId',
 	 `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_field_groups',
     `field_id` BITINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
-    `cluster_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id),
     INDEX [idx_namespace_id] (namespace_id(20))
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
