@@ -2,7 +2,6 @@ package com.everhomes.domain;
 
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
 import com.everhomes.rest.domain.UpdateDomainInfoCommand;
@@ -16,7 +15,6 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class DomainServiceImpl implements DomainService {
@@ -79,23 +77,23 @@ public class DomainServiceImpl implements DomainService {
         }
 
         if (dto.getFaviconUri() != null) {
-            dto.setFaviconUrl(contentServerService.parserUri(dto.getFaviconUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+            dto.setFaviconUrl(contentServerService.parseSharedUri(dto.getFaviconUri()));
         }
 
         if (dto.getLoginBgUri() != null) {
-            dto.setLoginBgUrl(contentServerService.parserUri(dto.getLoginBgUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+            dto.setLoginBgUrl(contentServerService.parseSharedUri(dto.getLoginBgUri()));
         }
 
         if (dto.getLoginLogoUri() != null) {
-            dto.setLoginLogoUrl(contentServerService.parserUri(dto.getLoginLogoUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+            dto.setLoginLogoUrl(contentServerService.parseSharedUri(dto.getLoginLogoUri()));
         }
 
         if (dto.getMenuLogoUri() != null) {
-            dto.setMenuLogoUrl(contentServerService.parserUri(dto.getMenuLogoUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+            dto.setMenuLogoUrl(contentServerService.parseSharedUri(dto.getMenuLogoUri()));
         }
 
         if (dto.getMenuLogoCollapsedUri() != null) {
-            dto.setMenuLogoCollapsedUrl(contentServerService.parserUri(dto.getMenuLogoCollapsedUri(), EntityType.DOMAIN.getCode(), dto.getId()));
+            dto.setMenuLogoCollapsedUrl(contentServerService.parseSharedUri(dto.getMenuLogoCollapsedUri()));
         }
     }
 
