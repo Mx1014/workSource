@@ -650,7 +650,7 @@ public class FieldProviderImpl implements FieldProvider {
         SelectQuery<EhVarFieldGroupRangesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_RANGES);
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_TYPE.eq(moduleType));
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_NAME.eq(moduleName));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.GROUP_PATH.like(groupPath+"/%"));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.GROUP.like(groupPath+"/%"));
 
         query.fetch().map((record)-> ids.add(record.getId()));
         return ids;

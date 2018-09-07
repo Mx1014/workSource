@@ -108,7 +108,7 @@ ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(names
 CREATE TABLE `eh_var_field_ranges`
 (
    `id`                   BIGINT NOT NULL,
-	 `group_path` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
+	 `group_path` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'refer to eh_var_fields',
     `field_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
     `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
