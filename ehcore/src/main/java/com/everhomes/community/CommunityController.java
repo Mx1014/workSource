@@ -616,9 +616,9 @@ public class CommunityController extends ControllerBase {
      * <p>查询域空间所有项目用户列表</p>
      */
     @RequestMapping("listAllCommunityUsers")
-    @RestReturn(value=CommunityUserResponse.class)
-    public RestResponse listAllCommunityUsers(ListCommunityUsersCommand cmd) {
-        CommunityUserResponse res = communityService.listUserCommunitiesV2(cmd);
+    @RestReturn(value=ListAllCommunityUserResponse.class)
+    public RestResponse listAllCommunityUsers(ListAllCommunityUsersCommand cmd) {
+        ListAllCommunityUserResponse res = communityService.listAllUserCommunities(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

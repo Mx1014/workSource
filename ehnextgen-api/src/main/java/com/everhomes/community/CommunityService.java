@@ -74,7 +74,9 @@ public interface CommunityService {
     CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
-	
+
+	CommunityUserAddressDTO qryCommunityUserAllByUserId(QryCommunityUserAllByUserIdCommand cmd);
+
 	CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd);

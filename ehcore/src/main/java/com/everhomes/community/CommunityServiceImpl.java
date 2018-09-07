@@ -178,6 +178,7 @@ import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
+import com.everhomes.rest.community.admin.QryCommunityUserAllByUserIdCommand;
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
@@ -2287,6 +2288,69 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 		}
 		return dto;
+	}
+
+	@Override
+	public CommunityUserAddressDTO qryCommunityUserAllByUserId(QryCommunityUserAllByUserIdCommand cmd) {
+        CommunityUserAddressDTO communityUserAddressDTO = new CommunityUserAddressDTO();
+        List<Community> communities = this.communityProvider.listNamespaceCommunities(cmd.getNamespaceId());
+        if (!CollectionUtils.isEmpty(communities)) {
+            List<CommunityUserAddressDTO> list = new ArrayList<>();
+            QryCommunityUserAddressByUserIdCommand command = ConvertHelper.convert(cmd,QryCommunityUserAddressByUserIdCommand.class);
+            for (Community community : communities) {
+                if (community == null)
+                    continue;
+
+                if (CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))){
+                    //小区
+                    command.setCommunityId(community.getId());
+                    CommunityUserAddressDTO residential = this.qryCommunityUserAddressByUserId(command);
+                    list.add(residential);
+                } else if (CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    //园区
+                    command.setCommunityId(community.getId());
+                    CommunityUserAddressDTO commercial = this.qryCommunityUserEnterpriseByUserId(command);
+                    list.add(commercial);
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(list)) {
+                communityUserAddressDTO = list.get(0);
+                List<OrganizationDetailDTO> orgDtos = new ArrayList<>();
+                List<AddressDTO> addressDtos = new ArrayList<>();
+                List<OrganizationMemberLogDTO> memberLogDTOs = new ArrayList<>();
+
+                boolean auth = false;
+                boolean pending = false;
+                for (CommunityUserAddressDTO dto : list) {
+                    if (!CollectionUtils.isEmpty(dto.getOrgDtos()) && CollectionUtils.isEmpty(orgDtos)) {
+                        orgDtos.addAll(dto.getOrgDtos());
+                    }
+                    if (!CollectionUtils.isEmpty(dto.getAddressDtos()) && CollectionUtils.isEmpty(addressDtos)) {
+                        addressDtos.addAll(dto.getAddressDtos());
+                    }
+                    if (!CollectionUtils.isEmpty(dto.getMemberLogDTOs()) && CollectionUtils.isEmpty(memberLogDTOs)) {
+                        memberLogDTOs.addAll(dto.getMemberLogDTOs());
+                    }
+                    if (AuthFlag.AUTHENTICATED.getCode().equals(dto.getIsAuth())) {
+                        auth = true;
+                    }else if (AuthFlag.PENDING_AUTHENTICATION.getCode().equals(dto.getIsAuth())) {
+                        pending = true;
+                    }
+                }
+                communityUserAddressDTO.setOrgDtos(orgDtos);
+                communityUserAddressDTO.setAddressDtos(addressDtos);
+                communityUserAddressDTO.setMemberLogDTOs(memberLogDTOs);
+                if (auth) {
+                    communityUserAddressDTO.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+                }else if (pending) {
+                    communityUserAddressDTO.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                }else {
+                    communityUserAddressDTO.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+                }
+            }
+        }
+		return communityUserAddressDTO;
 	}
 
 	private Set<OrganizationDetailDTO> populateOrganizationDetails(List<OrganizationMember> members) {
