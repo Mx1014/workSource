@@ -12,6 +12,7 @@ public interface FieldProvider {
     List<FieldGroup> listFieldGroups(List<Long> ids);
     FieldGroup findFieldGroup(Long id);
     List<FieldGroup> listFieldGroups(String moduleName);
+    List<Long> listFieldGroupRanges(String moduleName,String moduleType);
     Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId);
     List<Field> listFields(List<Long> ids);
     List<Field> listFields(String moduleName, String groupPath);

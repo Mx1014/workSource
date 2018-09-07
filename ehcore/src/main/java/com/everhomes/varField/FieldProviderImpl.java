@@ -354,6 +354,18 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public List<Long> listFieldGroupRanges(String moduleName,String moduleType){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        return context.select(Tables.EH_VAR_FIELD_GROUP_RANGES.GROUP_ID).from(Tables.EH_VAR_FIELD_GROUP_RANGES)
+                .where(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_NAME.eq(moduleName))
+                .and(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_TYPE.eq(moduleType))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, Long.class);
+                });
+    }
+
+    @Override
     public Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 

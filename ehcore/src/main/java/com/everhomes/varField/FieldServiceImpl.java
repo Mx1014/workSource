@@ -223,7 +223,14 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
-        List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        List<FieldGroup> systemGroups = new ArrayList<>();
+        List<Long> groupsIds = fieldProvider.listFieldGroupRanges(cmd.getModuleName(), cmd.getModuleType());
+        systemGroups = fieldProvider.listFieldGroups(groupsIds);
+
+        if(systemGroups.size() == 0){
+            systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        }
+
         if(systemGroups != null && systemGroups.size() > 0) {
             List<SystemFieldGroupDTO> groups = systemGroups.stream().map(systemGroup -> {
                 return ConvertHelper.convert(systemGroup, SystemFieldGroupDTO.class);

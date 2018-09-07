@@ -131,9 +131,9 @@ CREATE TABLE `eh_var_field_group_ranges`
     `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用分组表';
-ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
-ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_name(module_name);
-ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_type(module_type);
+ALTER TABLE `eh_var_field_group_ranges` ADD INDEX idx_namespace_id(namespace_id);
+ALTER TABLE `eh_var_field_group_ranges` ADD INDEX idx_module_name(module_name);
+ALTER TABLE `eh_var_field_group_ranges` ADD INDEX idx_module_type(module_type);
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
