@@ -2,6 +2,7 @@ package com.everhomes.workReport;
 
 import com.everhomes.rest.workReport.ListWorkReportsValCommand;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface WorkReportValProvider {
@@ -51,6 +52,8 @@ public interface WorkReportValProvider {
     Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
 
     void deleteReportValReceiverMsg(Long reportId, java.sql.Date reportTime);
+
+    void deleteReportValReceiverMsg(Timestamp time);
 
     void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
 

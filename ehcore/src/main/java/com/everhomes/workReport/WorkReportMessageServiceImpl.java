@@ -1,7 +1,5 @@
 package com.everhomes.workReport;
 
-import com.alibaba.fastjson.JSON;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -9,7 +7,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.workReport.*;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -18,7 +15,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -67,7 +63,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         );
 
         //  2.send it
-        sendMessage(content, "新的汇报", receiverId, reportVal);
+        sendDetailMessage(content, "新的汇报", receiverId, reportVal);
     }
 
     @Override
@@ -92,7 +88,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         );
 
         //  2.send it
-        sendMessage(content, "汇报更新", receiverId, reportVal);
+        sendDetailMessage(content, "汇报更新", receiverId, reportVal);
     }
 
     /**
@@ -126,7 +122,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_1,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_1);
-                    sendMessage(content, title, parentComment.getCreatorUserId(), reportVal);
+                    sendDetailMessage(content, title, parentComment.getCreatorUserId(), reportVal);
                 }
             } else {
                 content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_2,
@@ -134,7 +130,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_2);
                 List<WorkReportValReceiverMap> receivers = workReportValProvider.listReportValReceiversByValId(reportVal.getId());
                 for (WorkReportValReceiverMap r : receivers)
-                    sendMessage(content, title, r.getReceiverUserId(), reportVal);
+                    sendDetailMessage(content, title, r.getReceiverUserId(), reportVal);
             }
         } else {
             if (parentComment != null) {
@@ -142,23 +138,23 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_3,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_3);
-                    sendMessage(content, title, applierId, reportVal);
+                    sendDetailMessage(content, title, applierId, reportVal);
                 } else {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_4,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_4);
-                    sendMessage(content, title, parentComment.getCreatorUserId(), reportVal);
+                    sendDetailMessage(content, title, parentComment.getCreatorUserId(), reportVal);
 
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5);
-                    sendMessage(content, title, applierId, reportVal);
+                    sendDetailMessage(content, title, applierId, reportVal);
                 }
             } else {
                 content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5,
                         commentatorName, applierName, reportName, reportTime);
                 title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5);
-                sendMessage(content, title, applierId, reportVal);
+                sendDetailMessage(content, title, applierId, reportVal);
             }
         }
     }
@@ -197,6 +193,40 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         return subject;
     }
 
+    private void sendDetailMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
+
+        //  set the route
+        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
+        actionData.setReportId(reportVal.getReportId());
+        actionData.setReportValId(reportVal.getId());
+        actionData.setOrganizationId(reportVal.getOrganizationId());
+        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
+        RouterMetaObject metaObject = new RouterMetaObject();
+        metaObject.setUrl(url);
+
+        // set the message
+        MessageDTO message = new MessageDTO();
+        message.setBodyType(MessageBodyType.TEXT.getCode());
+        message.setBody(content);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        message.setMeta(meta);
+
+        //  send the message
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(receiverId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
+    }
+
     /**
      * 汇总提醒消息发送
      */
@@ -225,11 +255,12 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     /**
      * 定时清除汇总信息
-     * 确保汇总信息表的数据不要太多
+     * 确保汇总信息表的数据可控，提高后续查询速度
      */
     @Scheduled(cron = "0 0 4 * * ?")
     private void deleteWorkReportRxMessage(){
-
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
+        workReportValProvider.deleteReportValReceiverMsg(currentTime);
     }
 
     @Scheduled(cron = "0 30 * * * ?")
@@ -282,37 +313,5 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     }
 
 
-    private void sendMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
 
-        //  set the route
-        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
-        actionData.setReportId(reportVal.getReportId());
-        actionData.setReportValId(reportVal.getId());
-        actionData.setOrganizationId(reportVal.getOrganizationId());
-        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
-        RouterMetaObject metaObject = new RouterMetaObject();
-        metaObject.setUrl(url);
-
-        // set the message
-        MessageDTO message = new MessageDTO();
-        message.setBodyType(MessageBodyType.TEXT.getCode());
-        message.setBody(content);
-        message.setMetaAppId(AppConstants.APPID_DEFAULT);
-        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
-        Map<String, String> meta = new HashMap<>();
-        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
-        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-        message.setMeta(meta);
-
-        //  send the message
-        messagingService.routeMessage(
-                User.SYSTEM_USER_LOGIN,
-                AppConstants.APPID_MESSAGING,
-                ChannelType.USER.getCode(),
-                String.valueOf(receiverId),
-                message,
-                MessagingConstants.MSG_FLAG_STORED.getCode()
-        );
-    }
 }
