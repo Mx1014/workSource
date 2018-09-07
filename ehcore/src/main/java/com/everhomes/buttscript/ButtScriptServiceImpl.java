@@ -188,8 +188,11 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         //先从配置表获取相关配置信息
         ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(namespaceId ,cmd.getInfoType());
         if(cof == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "can not found and buttScriptConfig info .namespaceId:{};infoType:{} .",namespaceId,cmd.getInfoType());
+            LOGGER.info("can not found  buttScriptConfig info .");
+            return res ;
+            /*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not found  buttScriptConfig info .namespaceId:{};infoType:{} .",namespaceId,cmd.getInfoType());*/
+
         }
         //获取仓库
         GogsRepo repo = gogsService.getAnyRepo( GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
