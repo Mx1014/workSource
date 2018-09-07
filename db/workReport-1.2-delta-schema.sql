@@ -31,6 +31,23 @@ CREATE TABLE `eh_work_report_val_receiver_msg` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_work_report_scope_msg` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
+  `report_name` VARCHAR(128) NOT NULL,
+  `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
+  `report_time` DATE NOT NULL COMMENT 'the target time of the report',
+  `reminder_time` DATETIME COMMENT 'the reminder time of the record',
+  `scope_ids` TEXT COMMENT 'the id list of the receiver',
+  `create_time` DATETIME COMMENT 'record create time',
+
+  KEY `i_eh_work_report_scope_msg_reminder_time`(`reminder_time`),
+  KEY `i_eh_work_report_scope_msg_report_id`(`report_id`),
+  KEY `i_eh_work_report_scope_msg_report_time`(`report_time`),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 -- ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `report_id` BIGINT DEFAULT 0 NOT NULL COMMENT 'the report id' AFTER `organization_id`;
 -- ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `reminder_time` DATETIME AFTER `read_status`;
 --
