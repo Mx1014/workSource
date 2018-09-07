@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>userName: 用户名称</li>
  * <li>createTime: 开卡时间 </li>
  * <li>cardNo: 卡号</li>
+ * <li>status: 状态 0无效 2 有效</li>
  * </ul>
  */
 public class CardUserDTO {
@@ -17,6 +18,7 @@ public class CardUserDTO {
 	private String userName;
 	private Timestamp createTime;
 	private String cardNo;
+	private Byte status;
 	
 	public String getMobile() {
 		return mobile;
@@ -43,7 +45,15 @@ public class CardUserDTO {
 	public void setCardNo(String cardNo) {
 		this.cardNo = cardNo;
 	}
-	
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -336,6 +336,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if (!"1".equals(cardInfo.getResultID())){//没有失败时
             paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
+            paymentCard.set(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCard(paymentCard);
         }
     }
