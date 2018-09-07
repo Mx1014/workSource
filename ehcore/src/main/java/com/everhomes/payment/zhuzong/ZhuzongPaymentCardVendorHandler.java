@@ -72,8 +72,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         PaymentCard card = cardList.get(0);
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", ACCOUNT_QUERY_TYPE);
-        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
-        jo.put("UserID", vendorDate.getUserId());
+        jo.put("UserID", card.getCardNo());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if ("4".equals(cardInfo.getResultID())) {//销户
@@ -95,7 +94,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         cardInfoDTO.setMobile(card.getMobile());
         cardInfoDTO.setStatus(cardInfo.getStateID());
         cardInfoDTO.setCardNo(cardInfo.getCardID());
-        vendorDate = new ZhuzongVendorDate();
+        ZhuzongVendorDate vendorDate = new ZhuzongVendorDate();
         vendorDate.setDeptName(cardInfo.getDeptName());
         vendorDate.setUserId(cardInfo.getUserID());
         vendorDate.setUserName(cardInfo.getUserName());
@@ -160,8 +159,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     private List<CardTransactionOfMonth> listConsumeTransactions(ListCardTransactionsCommand cmd, PaymentCard card){
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", CONSUME_TRANSACTION_TYPE);
-        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
-        jo.put("UserID",vendorDate.getUserId());
+        jo.put("UserID",card.getCardNo());
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         if (cmd.getStartTime() != null) {
             jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
@@ -204,8 +202,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     private List<CardTransactionOfMonth> listRechargeTransactions(ListCardTransactionsCommand cmd, PaymentCard card){
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", RECHARGE_TRANSACTION_TYPE);
-        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
-        jo.put("UserID",vendorDate.getUserId());
+        jo.put("UserID",card.getCardNo());
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         if (cmd.getStartTime() != null) {
             jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
@@ -251,8 +248,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", RECHARGE_TYPE);
         jo.put("OrderID", order.getOrderNo().toString());
-        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
-        jo.put("UserID",vendorDate.getUserId());
+        jo.put("UserID",card.getCardNo());
         jo.put("DepositValue",order.getAmount().setScale(2));
         jo.put("DepositType","10001".equals(order.getPaidType())?"2":"1");
         String response = postToZhuzong(jo.toJSONString());
@@ -314,10 +310,9 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         PaymentCard card = paymentCardProvider.findPaymentCardById(cmd.getCardId());
         if (card == null )
             return ;
-        ZhuzongVendorDate vendorDate = (ZhuzongVendorDate) StringHelper.fromJsonString(card.getVendorCardData(), ZhuzongVendorDate.class);
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", FREEZE_ACCOUNT_TYPE);
-        jo.put("UserID",vendorDate.getUserId());
+        jo.put("UserID",card.getCardNo());
         jo.put("LossType",cmd.getLossType().toString());
         postToZhuzong(jo.toJSONString());
 
@@ -336,7 +331,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if (!"1".equals(cardInfo.getResultID())){//没有失败时
             paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
-            paymentCard.set(new Timestamp(System.currentTimeMillis()));
+            //paymentCard.set(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCard(paymentCard);
         }
     }
