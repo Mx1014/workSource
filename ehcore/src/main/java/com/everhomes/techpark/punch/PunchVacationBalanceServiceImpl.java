@@ -281,8 +281,13 @@ public class PunchVacationBalanceServiceImpl implements PunchVacationBalanceServ
         if (cmd.getPageOffset() == null) {
             cmd.setPageOffset(1);
         }
+        // 如果选择的是顶层节点，则查询全公司
+        Long queryDeptId = cmd.getDepartmentId();
+        if (queryDeptId != null && cmd.getOrganizationId() != null && queryDeptId.equals(cmd.getOrganizationId())) {
+            queryDeptId = null;
+        }
         List<VacationBalanceDTO> result = listVacationBalanceDTOs(cmd.getOrganizationId(), cmd.getCheckInStartDay(),
-                cmd.getCheckInEndDay(), cmd.getDepartmentId(), cmd.getKeyWords(), cmd.getPageSize(), cmd.getPageOffset());
+                cmd.getCheckInEndDay(), queryDeptId, cmd.getKeyWords(), cmd.getPageSize(), cmd.getPageOffset());
         if (null == result || result.size() == 0) {
             return response;
         }
