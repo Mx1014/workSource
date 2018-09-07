@@ -829,6 +829,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
         	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingReservation.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
         }
         dbProvider.execute(transactionStatus -> {
             Long id = meetingProvider.updateMeetingReservation(updateMeetingReservation);
@@ -1194,6 +1196,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
         	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingRecord.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
         }
         
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
@@ -1287,6 +1291,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
         if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
         	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingRecord.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
         }
         List<EhMeetingInvitations> newRecordReceivers = buildEhMeetingInvitations(addMeetingInvitations, meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
