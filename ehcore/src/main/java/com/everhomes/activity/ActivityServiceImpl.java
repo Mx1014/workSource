@@ -7268,7 +7268,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
         roster.setPayTime(purchaseOrderDTO.getPaymentTime());
 
-        roster.setPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()/100));
+        String amount = String.valueOf(purchaseOrderDTO.getAmount() * 1.0/100);
+        roster.setPayAmount(new BigDecimal(amount));
+        LOGGER.info("amount = {}, roster amount = {}", amount, roster.getPayAmount());
         roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
         roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
@@ -7521,15 +7523,22 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         rosters.addAll(rostersUnConfirms);
 
         if (rosters.size() > 0) {
+            ActivityRoster creator = new ActivityRoster();
+            for (ActivityRoster roster : rosters) {
+                if (activity.getCreatorUid().equals(roster.getUid())) {
+                    creator = roster;
+                    break;
+                }
+            }
+            GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
             List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
             List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别", "项目名称"));
-            List<PostApprovalFormItem> itemList = new ArrayList<>();
-            if (rosters.size() > 1) {
-                itemList = signupInfoDTOs.get(1).getValues();
-                if (!CollectionUtils.isEmpty(itemList)) {
-                    for (PostApprovalFormItem postApprovalFormItem : itemList) {
-                        titleNames.add(postApprovalFormItem.getFieldDisplayName());
-                    }
+            List<GeneralFormFieldDTO> itemList = new ArrayList<>();
+            if (form != null) {
+                itemList = JSONObject.parseArray(form.getTemplateText(),
+                        GeneralFormFieldDTO.class);
+                for (GeneralFormFieldDTO generalFormFieldDTO : itemList) {
+                    titleNames.add(generalFormFieldDTO.getFieldDisplayName());
                 }
             }
             titleNames.addAll(Arrays.asList("报名时间", "报名来源", "报名状态"));
@@ -7564,16 +7573,22 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
                 }
                 signupValue.add(signupInfoDTO.getCommunityName());
-                if (i == 0) {
+                if (signupInfoDTO.getCreateFlag().equals((byte)1)) {
                     if (!CollectionUtils.isEmpty(itemList)) {
-                        for (PostApprovalFormItem postApprovalFormItem : itemList) {
+                        for (GeneralFormFieldDTO s : itemList) {
                             signupValue.add("");
                         }
                     }
                 }
-                if (!CollectionUtils.isEmpty(signupInfoDTO.getValues())) {
-                    for (PostApprovalFormItem postApprovalFormItem : signupInfoDTO.getValues()) {
-                        signupValue.add(postApprovalFormItem.getFieldValue());
+                if (!CollectionUtils.isEmpty(signupInfoDTO.getValues()) && !CollectionUtils.isEmpty(itemList)) {
+                    for (GeneralFormFieldDTO generalFormFieldDTO : itemList) {
+                        String value = "";
+                        for (PostApprovalFormItem postApprovalFormItem : signupInfoDTO.getValues()) {
+                            if (postApprovalFormItem.getFieldName().equals(generalFormFieldDTO.getFieldName())) {
+                                value = postApprovalFormItem.getFieldValue();
+                            }
+                        }
+                        signupValue.add(value);
                     }
                 }
                 signupValue.add(signupInfoDTO.getSignupTime());
@@ -7581,12 +7596,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 signupValue.add(signupInfoDTO.getSignupStatusText());
                 if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
                     if (signupInfoDTO.getPayAmount() == null) {
-                        signupValue.add("0");
+                        signupValue.add(String.valueOf(new BigDecimal(0)));
                     }else {
                         signupValue.add(String.valueOf(signupInfoDTO.getPayAmount()));
                     }
                     if (signupInfoDTO.getRefundAmount() == null) {
-                        signupValue.add("0");
+                        signupValue.add(String.valueOf(new BigDecimal(0)));
                     }else {
                         signupValue.add(String.valueOf(signupInfoDTO.getRefundAmount()));
 
