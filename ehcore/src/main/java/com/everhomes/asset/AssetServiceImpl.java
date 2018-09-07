@@ -704,7 +704,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-         // set category default is 0 representing the old data
+        // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
@@ -789,7 +789,7 @@ public class AssetServiceImpl implements AssetService {
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();
                     info.setAppName(appName);
-                    info.setPhoneNums(dto.getNoticeTel());
+                    info.setPhoneNums(String.join(",", dto.getNoticeTelList()));
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     info.setDateStr(dto.getDateStr());
@@ -5844,7 +5844,10 @@ public class AssetServiceImpl implements AssetService {
             detail.put("targetName", dto.getTargetName());
             detail.put("contractNum", dto.getContractNum());
             detail.put("customerTel", dto.getCustomerTel());
-            detail.put("noticeTel", dto.getNoticeTel());
+            if (dto.getNoticeTelList() != null) {
+            	detail.put("noticeTel", String.join(",", dto.getNoticeTelList()));
+			}
+            
             //导出增加费项列
             List<BillItemDTO> billItemDTOs = new ArrayList<>();
             List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();

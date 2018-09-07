@@ -56,8 +56,18 @@ public class ListBillDetailVO {
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     private Long contractId;//新增合同ID字段
+  //催缴手机号码列表
+    private List<String> noticeTelList;
     
-    public Byte getBillStatus() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Byte getBillStatus() {
 		return billStatus;
 	}
 

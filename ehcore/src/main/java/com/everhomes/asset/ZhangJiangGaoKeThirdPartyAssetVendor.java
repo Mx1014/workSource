@@ -1016,7 +1016,8 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
                         }
                         phones.append(noticeTel.get(k)+",");
                     }
-                    dto.setNoticeTel(phones.toString());
+                    //dto.setNoticeTelList(phones.toString());
+                    dto.setNoticeTelList(Arrays.asList(phones.toString().split(",")));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
 //                    dto.setDateStr(sourceDto.getBillDate());

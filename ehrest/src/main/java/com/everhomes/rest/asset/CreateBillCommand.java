@@ -32,7 +32,7 @@ import java.util.List;
 public class CreateBillCommand {
     private String ownerType;
     private Long ownerId;
-    private String noticeTel;
+    //private String noticeTel;
     private String targetName;
     private String targetType;
     private Long targetId;
@@ -44,11 +44,20 @@ public class CreateBillCommand {
     private Byte isSettled;
     private String invoiceNum;
     private Long categoryId;
-    
+    //催缴手机号码列表
+    private List<String> noticeTelList;
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
-    public Long getCategoryId() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Long getCategoryId() {
         return categoryId;
     }
 
@@ -179,14 +188,6 @@ public class CreateBillCommand {
 
     public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
         this.billGroupDTO = billGroupDTO;
-    }
-
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
     }
 
     public String getTargetName() {
