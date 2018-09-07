@@ -224,8 +224,10 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
         List<FieldGroup> systemGroups = new ArrayList<>();
-        List<Long> groupsIds = fieldProvider.listFieldGroupRanges(cmd.getModuleName(), cmd.getModuleType());
-        systemGroups = fieldProvider.listFieldGroups(groupsIds);
+        if(StringUtils.isNotBlank(cmd.getModuleType())) {
+            List<Long> groupsIds = fieldProvider.listFieldGroupRanges(cmd.getModuleName(), cmd.getModuleType());
+            systemGroups = fieldProvider.listFieldGroups(groupsIds);
+        }
 
         if(systemGroups.size() == 0){
             systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
@@ -489,7 +491,14 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd) {
-        List<Field> systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        List<Field> systemFields = new ArrayList<>();
+
+        //List<Long> ids =
+        List<Field> systemFields = fieldProvider.listFields(ids);
+
+        systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+
+
         if(systemFields != null && systemFields.size() > 0) {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
