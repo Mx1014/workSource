@@ -97,7 +97,7 @@ public class KetuoYuekongjianParkingVendorHandler extends KetuoParkingVendorHand
 		dto.setPayTime(strToLong(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(100).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(1).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 		//dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 		dto.setOrderToken(tempFee.getOrderNo());
