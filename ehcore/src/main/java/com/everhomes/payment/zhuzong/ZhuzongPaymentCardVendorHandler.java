@@ -166,8 +166,11 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if (cmd.getStartTime() != null) {
             jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
             jo.put("EndDate", format.format(new Date(cmd.getEndTime())));
+            jo.put("DayNum", "");
         }else{
             jo.put("DayNum", "0");
+            jo.put("StartDate", "");
+            jo.put("EndDate", "");
         }
         jo.put("PageIndex",cmd.getPageAnchor() != null ? cmd.getPageAnchor().toString():"1");
         jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
@@ -207,8 +210,11 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if (cmd.getStartTime() != null) {
             jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
             jo.put("EndDate", format.format(new Date(cmd.getEndTime())));
+            jo.put("DayNum", "");
         }else{
             jo.put("DayNum", "0");
+            jo.put("StartDate", "");
+            jo.put("EndDate", "");
         }
         jo.put("PageIndex",cmd.getPageAnchor() != null ? cmd.getPageAnchor().toString():"1");
         jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
