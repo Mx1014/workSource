@@ -671,8 +671,9 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     @Override
     public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
-        ParkingExpiredRechargeInfoDTO dto = null;
+        ParkingExpiredRechargeInfoDTO dto = new ParkingExpiredRechargeInfoDTO();
         List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(parkingLot,cmd.getPlateNumber(),null);
+
         CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
         if(null != card) {
             long now = System.currentTimeMillis();
@@ -789,12 +790,17 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 //        ParkingLot pl = new ParkingLot();
 //        pl.setOwnerType("1");
 //        pl.setOwnerId(1L);
-//        pl.setId(1L);
+//        pl.setId(10931L);
 //        pl.setName("1");
+//        pl.setExpiredRechargeMonthCount(2);
 //        ParkingCarLocationDTO dto = bean.getCarLocation(pl,cmd);
 //        System.out.println(dto.getEntryTime());
 //        System.out.println(dto.getParkingTime());
-
+//        GetExpiredRechargeInfoCommand cmd = new GetExpiredRechargeInfoCommand();
+//        cmd.setPlateNumber("粤B878U1");
+//        cmd.setOwnerId(1L);
+//        cmd.setOwnerType("1");
+//        System.out.println(bean.getExpiredRechargeInfo(pl,cmd).toString());
 //        bean.test();
 //    }
 }
