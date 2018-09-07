@@ -14,3 +14,6 @@ PRIMARY KEY (`id`)
 ALTER TABLE `eh_payment_card_issuer_communities`
 ADD COLUMN `hotline`  varchar(255) NULL AFTER `issuer_id`;
 
+ALTER TABLE `eh_payment_cards`
+ADD COLUMN `update_time`  datetime NULL ON UPDATE CURRENT_TIMESTAMP AFTER `create_time`;
+

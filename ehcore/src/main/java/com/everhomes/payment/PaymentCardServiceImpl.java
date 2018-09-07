@@ -220,7 +220,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PAYMENTCARD.getPycode());
 		preOrderCommand.setOrderId(paymentCardRechargeOrder.getId());
 		preOrderCommand.setAmount(cmd.getAmount().multiply(new BigDecimal(100)).longValue());
-
+		preOrderCommand.setCommunityId(cmd.getOwnerId());
 		preOrderCommand.setPayerId(user.getId());
 		preOrderCommand.setNamespaceId(user.getNamespaceId());
 

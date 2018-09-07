@@ -12,4 +12,4 @@ delete from eh_service_modules where id in (41220,41240);
 
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ( 'paymentCard.zhuzong.url', '111.207.114.167:9010', '住总一卡通地址', '0', NULL, NULL);
 
-
+update `eh_payment_cards` set update_time = create_time where update_time is null;
