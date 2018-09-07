@@ -3982,7 +3982,7 @@ public class AssetProviderImpl implements AssetProvider {
                 isProjectNavigateDefaultCmd.setOwnerType("community");
                 isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
                 	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
                 }
