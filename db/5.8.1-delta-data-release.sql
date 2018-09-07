@@ -180,6 +180,10 @@ update `eh_general_form_templates` set `template_text` = '[{
 	"filterFlag": 1
 }]' where id = 2500001;
 
+update eh_service_modules set action_type = 14 where id = 25000;
+update eh_service_modules set instance_config = '{"url":"${home.url}/requisition/build/index.html?hideNavigationBar=1#/home#sign_suffix"}' where id=25000;
+
+
 -- END
 
 -- AUTHOR: xq.tian  20180906
