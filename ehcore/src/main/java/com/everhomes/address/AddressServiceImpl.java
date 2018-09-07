@@ -2212,7 +2212,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setBuildingId(building.getId());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
-            address.setApartmentFloor(data.getApartmentFloor());
             address.setAreaSize(areaSize);
             address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
@@ -2224,6 +2223,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setNamespaceId(community.getNamespaceId());
             address.setOrientation(data.getOrientation());
             address.setIsFutureApartment((byte)0);
+            if (StringUtils.isNotBlank(data.getApartmentFloor())) {
+            	address.setApartmentFloor(data.getApartmentFloor());
+			}else {
+				address.setApartmentFloor(null);
+			}
         	addressProvider.createAddress(address);
         	//导入房源后，需要更新相应楼宇和园区的面积
             addAreaInBuildingAndCommunity(community, building, address);
@@ -2243,12 +2247,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
-            address.setApartmentFloor(data.getApartmentFloor());
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setOrientation(data.getOrientation());
-			
+            if (StringUtils.isNotBlank(data.getApartmentFloor())) {
+            	address.setApartmentFloor(data.getApartmentFloor());
+			}else {
+				address.setApartmentFloor(null);
+			}
+            
             addressProvider.updateAddress(address);
             //导入房源后，需要更新相应楼宇和园区的面积
             updateAreaInBuildingAndCommunity(community, building, address,oldAreaSize,oldFreeArea,oldChargeArea,oldRentArea);
@@ -2314,7 +2322,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		List<ImportApartmentDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
             RowResult r = (RowResult) resultList.get(i);
-			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) 
+					|| StringUtils.isNotBlank(r.getD()) || StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF())
+					|| StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || StringUtils.isNotBlank(r.getI())
+					|| StringUtils.isNotBlank(r.getJ())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
 				data.setApartmentName(trim(r.getA()));
 				data.setStatus(trim(r.getB()));

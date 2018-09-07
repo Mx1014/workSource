@@ -1946,14 +1946,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
 					
-					if(cmd.getCategoryId() == null){
-			            cmd.setCategoryId(0l);
-			        }else {
-			        	// 转换
-			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-			            cmd.setCategoryId(assetCategoryId);
-					}
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), cmd.getCategoryId(), cmd.getNamespaceId());
+					long assetCategoryId = 0l;
+    				if(contract.getCategoryId() != null){
+    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+    		        }
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), assetCategoryId, cmd.getNamespaceId());
 					parentContract.setRent(totalAmount);
 				}
 
@@ -3747,17 +3744,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 				assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
 				
-				if(contract.getCategoryId() == null){
-					contract.setCategoryId(0l);
-		        }else {
-		        	//合同CategoryId和缴费CategoryId转换
-		            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-		            contract.setCategoryId(assetCategoryId);
-				}
-				BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+				long assetCategoryId = 0l;
+				if(contract.getCategoryId() != null){
+					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+		        }
+				
+				BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), assetCategoryId, contract.getNamespaceId());
 				contract.setRent(totalAmount);
 				contractProvider.updateContract(contract);
-	            contractSearcher.feedDoc(contract);
 			}
 		}
 	}
