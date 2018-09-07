@@ -1703,7 +1703,8 @@ public class PunchServiceImpl implements PunchService {
             return;
         }
         Byte onDutyStatus = onDutyLog.getApprovalStatus() == null ? onDutyLog.getStatus() : onDutyLog.getApprovalStatus();
-        if (PunchStatus.NORMAL != PunchStatus.fromCode(onDutyStatus)) {
+        PunchExceptionRequest punchExceptionRequestOnDuty = getAbnormalExceptionByPunchLog(onDutyLog, abnormalExceptionRequests);
+        if (PunchStatus.NORMAL != PunchStatus.fromCode(onDutyStatus) || punchExceptionRequestOnDuty != null) {
             if (isTimeIntervalCoveredEndTime(new Date(earliestOffDutyTimeLong), approvalTimeIntervalsThisInterval)) {
                 offDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                 updateSmartAlignment(offDutyLog);
