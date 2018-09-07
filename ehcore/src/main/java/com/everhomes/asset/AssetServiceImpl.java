@@ -5536,41 +5536,6 @@ public class AssetServiceImpl implements AssetService {
 			}
     	}
     }
-    
-    public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
-        //1、判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
-        AssetMapContractConfig config = new AssetMapContractConfig();
-    	config.setContractOriginId(cmd.getContractOriginId());
-    	config.setContractChangeFlag(cmd.getContractChangeFlag());
-    	cmd.setConfig(config.toString());
-        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
-        if(existAssetMapContract){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	mapping.setSourceId(cmd.getContractCategoryId());
-        	assetProvider.updateAssetMapContract(mapping);
-        }else {
-        	//如果不存在就是新增
-        	cmd.setSourceId(cmd.getContractCategoryId());
-        	createAnAppMapping(cmd);
-        }
-        //2、判断缴费是否已经存在关联能耗的记录
-        cmd.setSourceId(null);
-        cmd.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
-        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
-        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
-    	cmd.setConfig(energyConfig.toString());
-        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
-        if(existAssetMapEnergy){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	assetProvider.updateAssetMapEnergy(mapping);
-        }else {
-        	//如果不存在就是新增
-        	createAnAppMapping(cmd);
-        }
-    }
 
 	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
 		assetProvider.updatePaymentBillSwitch(cmd);
@@ -5689,6 +5654,48 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 	
+	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
+        //1、判断缴费是否已经存在关联合同的记录
+        cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+        AssetMapContractConfig config = new AssetMapContractConfig();
+    	config.setContractOriginId(cmd.getContractOriginId());
+    	config.setContractChangeFlag(cmd.getContractChangeFlag());
+    	cmd.setConfig(config.toString());
+        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
+        if(existAssetMapContract){
+        	//如果已经存在就是更新
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	mapping.setSourceId(cmd.getContractCategoryId());
+        	assetProvider.updateAssetMapContract(mapping);
+        }else {
+        	//如果不存在就是新增
+        	cmd.setSourceId(cmd.getContractCategoryId());
+        	createAnAppMapping(cmd);
+        }
+        //2、判断缴费是否已经存在关联能耗的记录
+        cmd.setSourceId(null);
+        cmd.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
+        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
+    	cmd.setConfig(energyConfig.toString());
+        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
+        if(existAssetMapEnergy){
+        	//如果已经存在就是更新
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	assetProvider.updateAssetMapEnergy(mapping);
+        }else {
+        	//如果不存在就是新增
+        	createAnAppMapping(cmd);
+        }
+    }
+	
+	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
+		
+		
+		
+		return null;
+	}
+	
 	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId){
 		List<AssetServiceModuleAppDTO> dtos = new ArrayList<AssetServiceModuleAppDTO>();
 		//1、根据域空间ID查询出所有的缴费应用eh_asset_app_categories
@@ -5708,13 +5715,6 @@ public class AssetServiceImpl implements AssetService {
 			}
 		}
 		return dtos;
-	}
-	
-	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
-		
-		
-		
-		return null;
 	}
 	
 	public ListBillsDTO createGeneralBill(CreateBillCommand cmd) {

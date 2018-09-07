@@ -18,6 +18,8 @@ public class CreateAnAppMappingCommand {
     private Long sourceId;
     private String ownerType;
     private Long ownerId;
+    private Long billGroupId;
+    private Long chargingItemId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -105,5 +107,21 @@ public class CreateAnAppMappingCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
+
+	public Long getChargingItemId() {
+		return chargingItemId;
+	}
+
+	public void setChargingItemId(Long chargingItemId) {
+		this.chargingItemId = chargingItemId;
 	}
 }

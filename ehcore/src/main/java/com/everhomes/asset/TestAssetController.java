@@ -16,6 +16,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -62,6 +63,20 @@ public class TestAssetController extends ControllerBase {
 	public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
 	    List<ListChargingItemsDTO> list = assetService.listAvailableChargingItems(cmd);
 	    RestResponse response = new RestResponse(list);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+	 * <p>业务应用新增缴费映射关系</p>
+	 * <b>URL: /test/createOrUpdateAssetMapping</b>
+	 */
+	@RequestMapping("createOrUpdateAssetMapping")
+	@RestReturn(value = AssetModuleAppMapping.class, collection = false)
+	public RestResponse createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
+		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(cmd);
+	    RestResponse response = new RestResponse(dto);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
 	    return response;
