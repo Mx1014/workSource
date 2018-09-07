@@ -1,5 +1,7 @@
 package com.everhomes.workReport;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -7,6 +9,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.workReport.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -287,6 +290,21 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         }
 */
     }
+
+    @Scheduled(cron = "0 0 4 * * ?")
+    private void createWorkReportAuMessage(){
+        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
+            query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
+            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
+            return query;
+        });
+        LocalDateTime time = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0);
+        for (WorkReport r : results) {
+            ReportMsgSettingDTO dto = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
+
+        }
+    }
+
 
     private void sendIndexMessage(String content, String title, Long receiverId){
         // set the message

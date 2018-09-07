@@ -61,5 +61,13 @@ public interface WorkReportValProvider {
 
     List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime);
 
+    Long createWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    void updateWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    WorkReportScopeMsg findWorkReportScopeMsg(Long reportId, java.sql.Date reportTime);
+
+    List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime);
+
     List<WorkReportValReceiverMap> listWorkReportReceivers();
 }
