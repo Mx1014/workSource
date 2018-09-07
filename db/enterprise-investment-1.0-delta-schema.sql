@@ -119,6 +119,22 @@ ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
 ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_name(module_name);
 ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_type(module_type);
 
+-- AUTHOR 黄鹏宇 2018-9-6
+-- REMARK 动态表单公用组件表
+
+CREATE TABLE `eh_var_field_group_ranges`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_field_groups',
+    `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
+    `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    primary key (id)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用分组表';
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_name(module_name);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_type(module_type);
+
 
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 招商客户当前信息表
