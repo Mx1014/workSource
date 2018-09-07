@@ -66,6 +66,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -6588,9 +6589,15 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 	}
 	
-	public void insertAppMapping(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings relation) {
-        EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
-        dao.insert(relation);
+	public void insertAppMapping(AssetModuleAppMapping mapping) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+        mapping.setId(nextSequence);
+        mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        mapping.setCreateUid(UserContext.currentUserId());
+        mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
+		dao.insert(mapping);
 	}
 
     public boolean checkExistAssetMapContract(Long assetCategoryId) {
@@ -6636,6 +6643,44 @@ public class AssetProviderImpl implements AssetProvider {
 	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
 	        .execute();
     }
+    
+	public boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
+        SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
+		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
+		if(ownerId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
+		}
+		if(ownerType != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));
+		}
+		if(sourceId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(sourceId));
+		}
+		if(sourceType != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(sourceType));
+		}
+		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
+        return records.size() > 0;
+	}
+	
+	public boolean updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
+        SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
+		/*query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
+		if(ownerId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
+		}
+		if(ownerType != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));
+		}
+		if(sourceId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(sourceId));
+		}
+		if(sourceType != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(sourceType));
+		}*/
+		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
+        return records.size() > 0;
+	}
     
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
         return getOriginIdFromMappingApp(moduleId, originId, targetModuleId, null);

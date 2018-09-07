@@ -381,7 +381,7 @@ public interface AssetProvider {
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-    void insertAppMapping(EhAssetModuleAppMappings relation);
+    void insertAppMapping(AssetModuleAppMapping mapping);
 
     /**
      * 判断缴费是否已经存在关联合同的记录
@@ -436,5 +436,8 @@ public interface AssetProvider {
 	void tranferAssetMappings();
 	
 	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
+	
+	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,
+			String sourceType);
 	
 }

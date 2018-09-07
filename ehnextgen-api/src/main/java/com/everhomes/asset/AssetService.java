@@ -16,9 +16,7 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 
@@ -218,10 +216,6 @@ public interface AssetService {
 
 	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-	void createAnAppMapping(CreateAnAppMappingCommand cmd);
-
-	void updateAnAppMapping(AssetModuleAppMapping mapping);
-    
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     
     ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
@@ -266,7 +260,7 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd);
+	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口

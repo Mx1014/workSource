@@ -7,7 +7,6 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `source_type` VARCHAR(1024
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `config` VARCHAR(1024) COMMENT '各个业务系统自定义的JSON配置' after `source_type`;
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `owner_id` BIGINT COMMENT '园区ID' after `config`;
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `owner_type` VARCHAR(64) COMMENT '园区类型' after `owner_id`;
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `owner_type` VARCHAR(64) COMMENT '园区类型';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `charging_item_id` BIGINT COMMENT '费项ID';
 -- REMARK: 3、删除无效字段
@@ -15,7 +14,6 @@ ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_category_id`;
 -- REMARK: 4、去掉原来的限制索引
 ALTER TABLE eh_asset_module_app_mappings DROP INDEX u_asset_category_id;
 ALTER TABLE eh_asset_module_app_mappings DROP INDEX u_contract_category_id;
-
 
 
 -- AUTHOR: 杨崇鑫

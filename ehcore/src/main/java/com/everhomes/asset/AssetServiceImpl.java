@@ -4986,27 +4986,6 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
-    public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
-        AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
-        mapping.setId(nextSequence);
-        mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        mapping.setCreateUid(UserContext.currentUserId());
-        mapping.setNamespaceId(cmd.getNamespaceId());
-        mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
-        
-        assetProvider.insertAppMapping(mapping);
-    }
-    
-    public void updateAnAppMapping(AssetModuleAppMapping mapping) {
-        //assetProvider.updateAnAppMapping(mapping);
-    }
-
-    @Override
-    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
-        return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
-    }
-
 	public IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd) {
 		String nickName = cmd.getUsername();
 		Integer namespaceId = cmd.getNamespaceId();
@@ -5669,8 +5648,9 @@ public class AssetServiceImpl implements AssetService {
         	assetProvider.updateAssetMapContract(mapping);
         }else {
         	//如果不存在就是新增
-        	cmd.setSourceId(cmd.getContractCategoryId());
-        	createAnAppMapping(cmd);
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+        	mapping.setSourceId(cmd.getContractCategoryId());
+        	assetProvider.insertAppMapping(mapping);
         }
         //2、判断缴费是否已经存在关联能耗的记录
         cmd.setSourceId(null);
@@ -5685,16 +5665,32 @@ public class AssetServiceImpl implements AssetService {
         	assetProvider.updateAssetMapEnergy(mapping);
         }else {
         	//如果不存在就是新增
-        	createAnAppMapping(cmd);
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+        	assetProvider.insertAppMapping(mapping);
         }
     }
 	
-	public AssetModuleAppMapping createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
-		
-		
-		
+	/**
+	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
+	 */
+	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
+		boolean existGeneralBillAssetMapping = assetProvider.checkExistGeneralBillAssetMapping(assetModuleAppMapping.getNamespaceId(),
+				assetModuleAppMapping.getOwnerId(), assetModuleAppMapping.getOwnerType(),
+				assetModuleAppMapping.getSourceId(), assetModuleAppMapping.getSourceType());
+		if(existGeneralBillAssetMapping) {
+			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数能在映射表查到数据，那判断为更新
+			
+			
+		}else {
+			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查不到数据，那判断为新增
+			//assetProvider.createAnAppMapping(assetModuleAppMapping);
+		}
 		return null;
 	}
+	
+    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
+        return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
+    }
 	
 	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId){
 		List<AssetServiceModuleAppDTO> dtos = new ArrayList<AssetServiceModuleAppDTO>();
@@ -5728,6 +5724,5 @@ public class AssetServiceImpl implements AssetService {
 	public void tranferAssetMappings() {
 		assetProvider.tranferAssetMappings();
 	}
-	
 
 }

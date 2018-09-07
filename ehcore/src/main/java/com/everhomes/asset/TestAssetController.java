@@ -74,7 +74,7 @@ public class TestAssetController extends ControllerBase {
 	 */
 	@RequestMapping("createOrUpdateAssetMapping")
 	@RestReturn(value = AssetModuleAppMapping.class, collection = false)
-	public RestResponse createOrUpdateAssetMapping(CreateAnAppMappingCommand cmd) {
+	public RestResponse createOrUpdateAssetMapping(AssetModuleAppMapping cmd) {
 		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(cmd);
 	    RestResponse response = new RestResponse(dto);
 	    response.setErrorDescription("OK");
