@@ -11,6 +11,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 
@@ -35,5 +37,20 @@ public class TestAssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+	
+	/**
+	 * <p>物业缴费V6.6统一账单：展示账单组列表</p>
+	 * <b>URL: /test/listBillGroups</b>
+	 */
+	@RequestMapping("listBillGroups")
+	@RestReturn(value = ListBillGroupsDTO.class, collection = true)
+	public RestResponse listBillGroups(OwnerIdentityCommand cmd) {
+	    List<ListBillGroupsDTO> list = assetService.listBillGroups(cmd);
+	    RestResponse response = new RestResponse(list);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
 
 }

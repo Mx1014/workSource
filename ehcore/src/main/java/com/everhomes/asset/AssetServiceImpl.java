@@ -676,6 +676,9 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
+        if(cmd.getOwnerType() == null) {
+        	cmd.setOwnerType("community");
+        }
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
