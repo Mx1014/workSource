@@ -3921,6 +3921,14 @@ public class AssetServiceImpl implements AssetService {
     public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
         //获得此rule，ownerid = namesapceid，则在全部操作页面, 修改全部的+bro；如果ownerid != namespaceid，则在single，需要改变，并 不需要 解耦所有账单组合rule
         EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
+        //1、物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
+        boolean workFlag = assetProvider.checkIsUsedByGeneralBill(rule.getBillGroupId(), rule.getChargingItemId());
+        if(workFlag) {
+        	DeleteChargingItemForBillGroupResponse response = new DeleteChargingItemForBillGroupResponse();
+        	response.setFailCause(AssetPaymentConstants.DELETE_GROUP_RULE_UNSAFE);
+        	return response;
+        }
+        //2、缴费模块原来的判断是否可以删除逻辑
         byte deCouplingFlag = 1;
         if(rule.getOwnerid().intValue() == rule.getNamespaceId().intValue()){
             //全部
@@ -3936,6 +3944,14 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
+    	//1、物业缴费V6.6统一账单：如果该账单组被其他模块应用选中了，则不允许删除
+        boolean workFlag = assetProvider.checkIsUsedByGeneralBill(cmd.getBillGroupId(), null);
+        if(workFlag) {
+        	DeleteBillGroupReponse response = new DeleteBillGroupReponse();
+        	response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
+            return response;
+        }
+        //2、缴费模块原来的判断是否可以删除逻辑
         byte deCouplingFlag = 1;
         if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
             deCouplingFlag = 0;

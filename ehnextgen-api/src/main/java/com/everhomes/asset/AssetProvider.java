@@ -442,4 +442,12 @@ public interface AssetProvider {
 	
 	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
+	/**
+	 * 物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
+	 * @param billGroupId
+	 * @param chargingItemId
+	 * @return
+	 */
+	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
+	
 }

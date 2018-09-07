@@ -6775,6 +6775,18 @@ public class AssetProviderImpl implements AssetProvider {
 		return mapping;
 	}
 	
+	public boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId) {
+		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
+		if(billGroupId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.BILL_GROUP_ID.eq(billGroupId));
+		}
+		if(chargingItemId != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CHARGING_ITEM_ID.eq(chargingItemId));
+		}
+		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
+        return records.size() > 0;
+	}
+	
 	public List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
 		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
 		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
@@ -6867,5 +6879,5 @@ public class AssetProviderImpl implements AssetProvider {
 	        .fetchInto(AppAssetCategory.class);
 		return list;
 	}
-
+	
 }
