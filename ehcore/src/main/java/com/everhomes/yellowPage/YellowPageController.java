@@ -16,8 +16,7 @@ import com.everhomes.rest.yellowPage.stat.ListClickStatDetailResponse;
 import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
-import com.everhomes.rest.yellowPage.stat.TestAddClickDetailCommand;
-import com.everhomes.rest.yellowPage.stat.TestPocessStatCommand;
+import com.everhomes.rest.yellowPage.stat.TestClickStatCommand;
 import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.RequireAuthentication;
@@ -898,23 +897,13 @@ public class YellowPageController  extends ControllerBase {
 	}
 	
     /**
-	 * <b>URL: /yellowPage/testPocessStat</b> 
-	 * <p> 获取所有服务名称 </p>
+	 * <b>URL: /yellowPage/testClickStat</b> 
+	 * <p> 测试 </p>
 	 */
-	@RequestMapping("testPocessStat")
+	@RequestMapping("testClickStat")
     @RestReturn(String.class)
-	public RestResponse testPocessStat(TestPocessStatCommand cmd) {
-		String ret = allianceClickStatService.testPocessStat(cmd);
-		RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription(ret);
-        return response;
-	}
-	
-	@RequestMapping("testAddClickDetail")
-    @RestReturn(String.class)
-	public RestResponse testAddClickDetail(TestAddClickDetailCommand cmd) {
-		String ret = allianceClickStatService.testAddClickDetail(cmd);
+	public RestResponse testClickStat(TestClickStatCommand cmd) {
+		String ret = allianceClickStatService.testClickStat(cmd);
 		RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription(ret);

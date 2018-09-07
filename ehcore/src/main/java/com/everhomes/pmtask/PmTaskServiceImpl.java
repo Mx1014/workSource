@@ -3433,7 +3433,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		for (int i = 0 ; i < loopTime ; i++){
 			List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals("EhPmTasks",null,pageAnchor,pageSize);
-			pageAnchor = list.get(list.size() - 1).getId();
+            if(list.size() > 0)
+			    pageAnchor = list.get(list.size() - 1).getId();
 			Map<Long,List<GeneralFormVal>> taskMap = list.stream().collect(Collectors.groupingBy(GeneralFormVal::getSourceId));
 			taskMap.forEach((taskId,task) ->{
 				PmTaskOrder order = new PmTaskOrder();

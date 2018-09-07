@@ -1806,8 +1806,8 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listOrganizationOwnerAddresses")
 	@RestReturn(value=OrganizationOwnerAddressDTO.class, collection = true)
 	public RestResponse listOrganizationOwnerAddresses(@Valid ListOrganizationOwnerAddressesCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.CUSTOMER_LIST);
-
+		// 32207 (应用管理员，签约个人合同时，点击选择资产弹框有个弹框“权限不足) 同企业客户一样，列出入驻信息   customer/listCustomerEntryInfosWithoutAuth -- by djm
+        //checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.CUSTOMER_LIST);
         List<OrganizationOwnerAddressDTO> dtos = propertyMgrService.listOrganizationOwnerAddresses(cmd);
         RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);

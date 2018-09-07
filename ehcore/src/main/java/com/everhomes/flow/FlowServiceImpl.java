@@ -3055,9 +3055,11 @@ public class FlowServiceImpl implements FlowService {
             dto.setCurrentLane(flowNode.getNodeName());
         } else if (flowCase.getCurrentLane() == null || flowCase.getCurrentLane().length() == 0) {
             FlowLane currentLane = flowLaneProvider.findById(flowCase.getCurrentLaneId());
-            dto.setCurrentLane(currentLane.getDisplayName());
-            if (flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-                dto.setCurrentLane(currentLane.getDisplayNameAbsort());
+            if (currentLane != null) {
+                dto.setCurrentLane(currentLane.getDisplayName());
+                if (flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
+                    dto.setCurrentLane(currentLane.getDisplayNameAbsort());
+                }
             }
         }
         // -- end
@@ -5986,6 +5988,9 @@ public class FlowServiceImpl implements FlowService {
 
         if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
+        }
+        if (flowCase.getProjectId() != null) {
+        	dto.setCommunityId(flowCase.getProjectId());
         }
 
         FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();

@@ -17,8 +17,10 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseStockLogSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -32,7 +34,6 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -67,6 +68,9 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
     @Autowired
     private PortalService portalService;
+    
+    @Autowired
+	private UserProvider userProvider;
 
     @Override
     public void deleteById(Long id) {
@@ -124,7 +128,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
     @Override
     public SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
+        //checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
@@ -141,7 +145,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         }
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         //新增， 兼容性还没有
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
@@ -209,6 +213,13 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
                     dto.setRequestUserName(requests.get(0).getContactName());
                 }
             }
+            if (dto.getDeliveryUid() != null) {
+				//用户可能不在组织架构中 所以用nickname
+				User user = userProvider.findUserById(dto.getDeliveryUid());
+				if(user != null) {
+					dto.setDeliveryUserName(user.getNickName());
+				}
+			}
 
             List<OrganizationMember> deliveries = organizationProvider.listOrganizationMembers(log.getDeliveryUid());
             if(deliveries != null && deliveries.size() > 0) {
@@ -243,7 +254,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
     @Override
     public SearchWarehouseStockLogsResponse queryByOrder(SearchWarehouseStockLogsCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
+        //checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 //        Long anchor = 0l;
         Long anchor = 1l;

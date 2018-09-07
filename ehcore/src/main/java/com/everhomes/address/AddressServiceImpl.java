@@ -2042,11 +2042,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 errorLogs.add(log);
                 continue;
             }*/
-
+			
             double areaSize = 0;
             double chargeArea = 0;
             double rentArea = 0;
-            //double shareArea = 0;
             double freeArea = 0;
             
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
@@ -2205,15 +2204,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         if (address == null) {
         	address = new Address();
             address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
             address.setCityId(community.getCityId());
             address.setCityName(community.getCityName());
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
+            address.setBuildingId(building.getId());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
             address.setApartmentFloor(data.getApartmentFloor());
             address.setAreaSize(areaSize);
-            //address.setSharedArea(shareArea);
             address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
@@ -2225,10 +2225,21 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setOrientation(data.getOrientation());
             address.setIsFutureApartment((byte)0);
         	addressProvider.createAddress(address);
+        	//导入房源后，需要更新相应楼宇和园区的面积
+            addAreaInBuildingAndCommunity(community, building, address);
 		}else {
-            //address.setBuildArea(buildArea);
+			//为了兼顾以前的历史数据，需要为这些数据添加CommunityName和BuildingId
+			address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
+            address.setBuildingId(building.getId());
+            address.setBuildingName(building.getName());
+			
+			Double oldAreaSize = address.getAreaSize() == null ? 0.0 : address.getAreaSize();
+            Double oldFreeArea = address.getFreeArea() == null ? 0.0 : address.getFreeArea();
+            Double oldChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
+            Double oldRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
+            
             address.setAreaSize(areaSize);
-            //address.setSharedArea(shareArea);
             address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
@@ -2239,60 +2250,66 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setOrientation(data.getOrientation());
 			
             addressProvider.updateAddress(address);
+            //导入房源后，需要更新相应楼宇和园区的面积
+            updateAreaInBuildingAndCommunity(community, building, address,oldAreaSize,oldFreeArea,oldChargeArea,oldRentArea);
 		}
         Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
         insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
-        //导入房源后，需要更新相应楼宇和园区的面积
-        updateAreaInBuildingAndCommunity(community, building, address);
 	}
 	
-	private void updateAreaInBuildingAndCommunity(Community community, Building building, Address address){
-		if (address.getAreaSize() != null) {
-            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
-            building.setAreaSize(buildingAreaSize + address.getAreaSize());
+	private void updateAreaInBuildingAndCommunity(Community community, Building building, Address address,
+			Double oldAddressAreaSize, Double oldAddressFreeArea, Double oldAddressChargeArea, Double oldAddressRentArea) {
+		
+   	 	Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+        building.setAreaSize(buildingAreaSize - oldAddressAreaSize + address.getAreaSize());
+        Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+        community.setAreaSize(communityAreaSize - oldAddressAreaSize + address.getAreaSize());
+            
+        Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+        building.setRentArea(buildingRentArea - oldAddressRentArea + address.getRentArea());
+        Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+        community.setRentArea(communityRentArea - oldAddressRentArea + address.getRentArea());
 
-            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
-            community.setAreaSize(communityAreaSize + address.getAreaSize());
-        }
-        if (address.getRentArea() != null) {
-            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
-            building.setRentArea(buildingRentArea + address.getRentArea());
+        Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+        building.setChargeArea(buildingChargeArea - oldAddressChargeArea + address.getChargeArea());
+        Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+        community.setChargeArea(communityChargeArea - oldAddressChargeArea + address.getChargeArea());
 
-            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
-            community.setRentArea(communityRentArea + address.getRentArea());
-        }
-        if (address.getSharedArea() != null) {
-            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
-            building.setSharedArea(buildingSharedArea + address.getSharedArea());
+        Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+        building.setFreeArea(buildingFreeArea - oldAddressFreeArea + address.getFreeArea());
+        Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+        community.setFreeArea(communityFreeArea - oldAddressFreeArea + address.getFreeArea());
 
-            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
-            community.setSharedArea(communitySharedArea + address.getSharedArea());
-        }
-        if (address.getBuildArea() != null) {
-            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
-            building.setBuildArea(buildingBuildArea + address.getBuildArea());
-
-            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
-            community.setBuildArea(communityBuildArea + address.getBuildArea());
-        }
-        if (address.getChargeArea() != null) {
-            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
-            building.setChargeArea(buildingChargeArea + address.getChargeArea());
-
-            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
-            community.setChargeArea(communityChargeArea + address.getChargeArea());
-        }
-        if (address.getFreeArea() != null) {
-            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
-            building.setFreeArea(buildingFreeArea + address.getFreeArea());
-
-            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
-            community.setFreeArea(communityFreeArea + address.getFreeArea());
-        }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 	}
 
+	private void addAreaInBuildingAndCommunity(Community community, Building building, Address address){
+		
+        Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+        building.setAreaSize(buildingAreaSize + address.getAreaSize());
+        Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+        community.setAreaSize(communityAreaSize + address.getAreaSize());
+        
+        Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+        building.setRentArea(buildingRentArea + address.getRentArea());
+        Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+        community.setRentArea(communityRentArea + address.getRentArea());
+        
+        Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+        building.setChargeArea(buildingChargeArea + address.getChargeArea());
+        Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+        community.setChargeArea(communityChargeArea + address.getChargeArea());
+       
+        Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+        building.setFreeArea(buildingFreeArea + address.getFreeArea());
+        Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+        community.setFreeArea(communityFreeArea + address.getFreeArea());
+        
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+	
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
 		List<ImportApartmentDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
@@ -3345,6 +3362,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				fileName = String.format("房源信息_%s", cmd.getBuildingName());
 			}
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
 			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());

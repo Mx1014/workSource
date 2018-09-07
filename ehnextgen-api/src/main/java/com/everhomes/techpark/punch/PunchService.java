@@ -5,6 +5,8 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
 import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
@@ -409,6 +411,8 @@ public interface PunchService {
 
 	public void fileMonthReport(FileMonthReportCommand cmd);
 
+	GetOrgCheckInDataResponse getOrgCheckInData(GetOrgCheckInDataCommand cmd);
+
 	ListOrganizationPunchLogsResponse listOrganizationPunchLogs(ListOrganizationPunchLogsCommand cmd);
 
 	Date parseDateTimeByTimeSelectType(Long organizationId, Long userId, String day, ApprovalCategoryTimeSelectType type);
@@ -439,12 +443,13 @@ public interface PunchService {
 	
 	GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd, HttpServletRequest request);
 
-	String getAdjustRuleUrl();
+	String getAdjustRuleUrl(HttpServletRequest request);
 
 	/**
 	 * 用于上线时进行手动初始化操作
 	 */
 	void punchDayLogInitializeByMonth(String initMonth) throws ParseException;
+
 
 
 }

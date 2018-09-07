@@ -64,7 +64,16 @@ public class GetApartmentDetailResponse {
 	private Byte arrangementInvolved;
 	private Byte individualCustomerInvolved;
 	private Byte enterpriseCustomerInvolved;
+	private Integer buildingFloorNumber;
 	
+	public Integer getBuildingFloorNumber() {
+		return buildingFloorNumber;
+	}
+
+	public void setBuildingFloorNumber(Integer buildingFloorNumber) {
+		this.buildingFloorNumber = buildingFloorNumber;
+	}
+
 	public Byte getIndividualCustomerInvolved() {
 		return individualCustomerInvolved;
 	}

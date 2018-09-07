@@ -65,6 +65,14 @@ public class PortalLayoutTemplateProviderImpl implements PortalLayoutTemplatePro
 				.orderBy(Tables.EH_PORTAL_LAYOUT_TEMPLATES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayoutTemplate.class));
 	}
+
+	@Override
+	public PortalLayoutTemplate findPortalLayoutTemplateByType(Byte type) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUT_TEMPLATES)
+				.where(Tables.EH_PORTAL_LAYOUT_TEMPLATES.STATUS.eq(PortalLayoutTemplateStatus.ACTIVE.getCode())
+						.and(Tables.EH_PORTAL_LAYOUT_TEMPLATES.TYPE.eq(type)))
+				.fetchAnyInto(PortalLayoutTemplate.class);
+	}
 	
 	private EhPortalLayoutTemplatesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

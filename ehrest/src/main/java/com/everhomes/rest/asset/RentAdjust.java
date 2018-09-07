@@ -19,6 +19,7 @@ import java.util.List;
  * <li>seperationType:间隔时间的类型；1：日；2：月：3：年</li>
  * <li>adjustAmplitude:调整幅度</li>
  * <li>properties:应用资源</li>
+ * <li>billGroupId : 账单组id</li>
  *</ul>
  */
 public class RentAdjust {
@@ -30,6 +31,7 @@ public class RentAdjust {
     private Byte seperationType;
     private BigDecimal adjustAmplitude;
     private Long chargingItemId;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
 
     public Long getChargingItemId() {
         return chargingItemId;
@@ -97,4 +99,12 @@ public class RentAdjust {
     public void setProperties(List<ContractProperty> properties) {
         this.properties = properties;
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

@@ -67,7 +67,7 @@ public interface ContractProvider {
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
 
-	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId);
 	List<Contract> listContractsByAddressId(Long addressId);
 
     String findContractIdByThirdPartyId(String contractId, String code);
@@ -107,13 +107,28 @@ public interface ContractProvider {
 	ContractTemplate findContractTemplateById(Long id);
 	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, String name, Long pageAnchor, Integer pageSize);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
+	//void deletePrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId);
 	Boolean getContractTemplateById(Long id);
 
 	Double getTotalRentInCommunity(Long communityId);
-	Integer countRelatedContractNumberInBuilding(String buildingName);
+	Integer countRelatedContractNumberInBuilding(String buildingName,Long communityId);
 
 	Double getTotalRentInBuilding(String buildingName);
 
 	List<Contract> findContractByAddressId(Long addressId);
+
+	//合同模块筛选资质用户 by pengyu.huang
+	Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId);
+
+	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
+
+	Long findCategoryIdByNamespaceId(Integer namespaceId);
+
+	Integer getRelatedContractCountByAddressIds(List<Long> addressIdList);
+
+	Double getTotalRentByAddressIds(List<Long> addressIdList);
+
+	
+
 	
 }

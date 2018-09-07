@@ -227,7 +227,12 @@ public enum VersionRealmType {
     ANDROID_ZHENZHIHUI("Android_ZhenZhiHui"),
     IOS_ZHENZHIHUI("iOS_ZhenZhiHui"),
     ANDROID_ZHENJIASU("Android_ZhenJiaSu"),
-    IOS_ZHENJIASU("iOS_ZhenJiaSu")
+    IOS_ZHENJIASU("iOS_ZhenJiaSu"),
+
+    ANDROID_YUESPACE("Android_YueSpace"),
+    IOS_YUESPACE("iOS_YueSpace"),
+    ANDROID_INNOPLUS("Android_InnoPlus"),
+    IOS_INNOPLUS("iOS_InnoPlus")
     ;
 
     private String code;
