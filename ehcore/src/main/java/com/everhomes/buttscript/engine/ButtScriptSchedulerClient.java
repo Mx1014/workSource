@@ -1,17 +1,34 @@
 package com.everhomes.buttscript.engine;
 
 import com.everhomes.bus.LocalEvent;
-import com.everhomes.buttscript.ButtInfoTypeEventMapping;
-import com.everhomes.buttscript.ButtInfoTypeEventMappingProvider;
-import com.everhomes.buttscript.ButtScriptPublishInfo;
-import com.everhomes.buttscript.ButtScriptPublishInfoProvider;
+import com.everhomes.buttscript.*;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsService;
+import com.everhomes.rest.buttscript.SyncCode;
+import com.everhomes.scriptengine.ScriptEngineService;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.LinkedTransferQueue;
 
 public  class ButtScriptSchedulerClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ButtScriptSchedulerClient.class);
+
+
+    @Autowired
+    private ButtScriptConfigProvider buttScriptConfigProvider ;
+
+    @Autowired
+    private ButtScriptLastCommitProvider buttScriptLastCommitProvider ;
 
     @Autowired
     private ButtInfoTypeEventMappingProvider buttInfoTypeEventMappingProvider ;
@@ -19,8 +36,19 @@ public  class ButtScriptSchedulerClient {
     @Autowired
     private ButtScriptPublishInfoProvider buttScriptPublishInfoProvider ;
 
+    @Autowired
+    private GogsService gogsService ;
+
+    @Autowired
+    private ScriptEngineService scriptEngineService;
+
     /**
-     * 该返回JSON形式的字符串
+     * 该返回JSON形式的字符串:
+     * 1.对于异步脚本,目前正常执行的返回值为null;
+     * 2.对于同步脚本,返回执行结果的JSON形式的字符串;
+     * 3.ButtScriptSchedulerResultLog 该类用于日志,它用于记录一个事件所对应的所有脚本的
+     * 基本情况(及部分脚本执行结果:同步脚本及不执行脚本的结果,对于异步的脚本不能马上预知结果,会有单体类进去跟踪打印 )
+     * 4.EventResultLog 单体类,用于跟踪各脚本的执行情况.
      * @param localEvent
      * @return
      */
@@ -34,12 +62,35 @@ public  class ButtScriptSchedulerClient {
         resultLog.setNamespaceId(namespaceId);
         List<ButtInfoTypeEventMapping> buttList =  buttInfoTypeEventMappingProvider.findButtInfoTypeEventMapping(eventName ,namespaceId);
         if(buttList == null || buttList.size() <1){
-            return StringHelper.toJsonString(resultLog);
+            return null;
         }
-        //返回结果已安异步优先在前排序
+        //返回结果已按异步优先在前排序
         for(ButtInfoTypeEventMapping bte : buttList){
             ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId,bte.getInfoType());
-
+            if(publishInfo == null){ //当没有发布的脚本时
+                addResultLog(resultLog,bte,null,null);
+                continue;
+            }
+            //目前设置方案是一个事件中只允许执行一个同步脚本,
+            // 该脚本会在处理完所有异步脚本后执行,遇到同步脚本,执行一次就退出了
+            if(SyncCode.FALSE.getCode().equals(bte.getSyncFlag())){
+               //执行同步脚本并得到返回值
+                Object obj = null ;
+               try{
+                   //执行同步脚本
+                    obj =   doButtScriptTransfer(bte,publishInfo.getCommitVersion());
+                   addResultLog(resultLog,bte,publishInfo.getCommitVersion(),StringHelper.toJsonString(obj));
+               }catch(Exception e){
+                   addResultLog(resultLog,bte,publishInfo.getCommitVersion(),StringHelper.toJsonString(e));
+                   LOGGER.info(StringHelper.toJsonString(resultLog));
+                   throw e ;
+               }
+                LOGGER.info(StringHelper.toJsonString(resultLog));
+                return StringHelper.toJsonString(obj) ;
+            }
+            //对于异步脚本(一般来说1表示异步,但此处认为非0的都是异步的,异步优先嘛,也容忍那些忘了设置的)
+            doButtScriptAsync(bte,publishInfo.getCommitVersion());
+            addResultLog(resultLog,bte,publishInfo.getCommitVersion(),null);
         }
         //查询到该事件影响到哪些脚本,然后分别执行这些脚本
         return null;
@@ -51,18 +102,79 @@ public  class ButtScriptSchedulerClient {
      * @param resultLog
      * @param mapping
      */
-    private void addResultLog(ButtScriptSchedulerResultLog resultLog, ButtInfoTypeEventMapping mapping,String commitVersion){
+    private void addResultLog(ButtScriptSchedulerResultLog resultLog, ButtInfoTypeEventMapping mapping,String commitVersion,String result){
         if(resultLog == null || mapping == null){
             return ;
         }
         EventResultLog log = new EventResultLog();
         log.setSyncFlag(mapping.getSyncFlag());
         log.setInfoType(mapping.getInfoType());
+        log.setResult(result);
         if(StringUtils.isBlank(commitVersion)){
             log.setResult("there is not any publish script .");
         }else{
             log.setCommitVersion(commitVersion);
         }
 
+    }
+
+
+    /**
+     * 执行异步脚本
+     * @param mapping
+     * @param lastCommit
+     * @return
+     */
+    private void doButtScriptAsync(ButtInfoTypeEventMapping mapping ,String lastCommit ){
+
+        GogsRepo anyRepo = getRepo(mapping);
+        Map<String, Object> param = new HashMap<>(3);
+        param.put("scriptPath", myScriptPath);// 脚本路径需要自己保存
+        param.put("lastCommit", lastCommit);// 版本ID
+        param.put("gogsRepo", anyRepo);
+        LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
+        scriptEngineService.push(new ButtScriptAsyncEngine(param));
+    }
+
+    private Object doButtScriptTransfer(ButtInfoTypeEventMapping mapping ,String lastCommit ){
+
+        GogsRepo anyRepo = getRepo(mapping);
+        Map<String, Object> param = new HashMap<>(3);
+        param.put("scriptPath", myScriptPath);// 脚本路径需要自己保存
+        param.put("lastCommit", lastCommit);// 版本ID
+        param.put("gogsRepo", anyRepo);
+        LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
+        scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param));
+        // 这里就获取到了 processInternal 的返回结果 result
+        Object result = scriptEngineService.poll(transferQueue);
+        return result ;
+    }
+
+    /**
+     * 获取仓库信息
+     * @param mapping
+     * @return
+     */
+    private GogsRepo getRepo(ButtInfoTypeEventMapping mapping ){
+        //先从配置表获取相关配置信息
+        ButtScriptConfig cof = buttScriptConfigProvider.findButtScriptConfig(mapping.getNamespaceId() ,mapping.getInfoType());
+        if(cof == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not found and buttScriptConfig info ");
+        }
+        //组装入参
+        String path = this.getPath(mapping.getNamespaceId());
+        GogsRepo repo = gogsService.getAnyRepo( ButtScriptConstants.GOS_NAMESPACEID,  cof.getModuleType(),  cof.getModuleId(),  cof.getOwnerType(),  cof.getOwnerId());
+        return  repo;
+    }
+
+
+    /**
+     * 组装path
+     * @param namespaceId
+     * @return
+     */
+    private String getPath(Integer namespaceId){
+        return  ButtScriptConstants.PRE_PATH+ namespaceId;
     }
 }
