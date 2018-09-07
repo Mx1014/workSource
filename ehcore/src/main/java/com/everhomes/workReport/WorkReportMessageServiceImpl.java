@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -300,8 +301,9 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         });
         LocalDateTime time = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0);
         for (WorkReport r : results) {
-            ReportMsgSettingDTO dto = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
-
+            ReportValiditySettingDTO validity = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
+            ReportMsgSettingDTO auMsg = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
+            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), validity);
         }
     }
 
