@@ -97,7 +97,8 @@ public class KetuoYuekongjianParkingVendorHandler extends KetuoParkingVendorHand
 		dto.setPayTime(strToLong(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(100).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		//dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
@@ -121,7 +122,7 @@ public class KetuoYuekongjianParkingVendorHandler extends KetuoParkingVendorHand
 	
 	private String doJsonPost(String plateNumber, String urlPath) {
 		JSONObject param = new JSONObject();
-		urlPath = configProvider.getValue("parking.yuekongjian.url","")+urlPath;
+		urlPath = configProvider.getValue("parking.yuekongjian.url", "")+urlPath;
 		String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
 		String parkId = "1";
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
