@@ -23,11 +23,14 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.varField.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseService {
 
     @Autowired
