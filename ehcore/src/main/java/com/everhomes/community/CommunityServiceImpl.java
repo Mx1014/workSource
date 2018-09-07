@@ -5505,7 +5505,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setBuildingName(address.getBuildingName());
 		dto.setApartmentFloor(address.getApartmentFloor());
 		dto.setApartmentName(address.getApartmentName());
-		dto.setLivingStatus(livingStatus);
+		dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 		dto.setAreaSize(address.getAreaSize());
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());
