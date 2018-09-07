@@ -946,6 +946,7 @@ public class ParkingServiceImpl implements ParkingService {
 		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
 		preOrderCommand.setPaymentParams(flattenMap);
 		preOrderCommand.setPaymentType(cmd.getPaymentType());
+		preOrderCommand.setCommitFlag(cmd.getCommitFlag());
 		//preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
 		preOrderCommand.setCallbackUrl(cmd.getBackUrl());
 
