@@ -676,7 +676,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
         if(null != card) {
             long now = System.currentTimeMillis();
-            long expireTime = Long.valueOf(card.getExpirydate());
+            long expireTime;
+            try {
+                expireTime = DATE_FORMAT.get().parse(card.getExpirydate()).getTime();
+            } catch (ParseException e) {
+                LOGGER.error("Parse time error,Expirydate={}",card.getExpirydate());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Parse time error");
+            }
             BigDecimal price = new BigDecimal(0);
             for(ParkingRechargeRateDTO rate: rates) {
                 price = rate.getPrice();
