@@ -49,6 +49,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
     private static final String MONTHCARD_CHARGE = "api.aspx/park.mcard.charge";//月卡缴费
 
     private static final String GET_CAR_LOCATION = "api.aspx/pls.car.pos.getByLP";
+    private static final String GET_CAR_BY_LOCATION = "api.aspx/pls.car.pos.getByNo";
 
 
     private ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
@@ -95,7 +96,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         }
 
         dto.setParkingTime(tempFee.getParktime());
-//        dto.setDelayTime(tempFee.getDelayTime());
+        dto.setDelayTime(15);
         dto.setPrice(new BigDecimal(tempFee.getAmount()));
 
         dto.setOrderToken(tempFee.getOrderNo());
@@ -197,12 +198,13 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
     public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
         ParkingCarLocationDTO dto = new ParkingCarLocationDTO();
         JSONObject param = new JSONObject();
-        param.put("licensePlate",cmd.getPlateNumber());
-        String json = post(param,GET_CAR_LOCATION);
+        param.put("licensePlate", cmd.getPlateNumber());
+        String json = post(param, GET_CAR_LOCATION);
 
-        CheanJsonEntity<CheanLocation> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<CheanLocation>>(){});
+        CheanJsonEntity<CheanLocation> entity = JSONObject.parseObject(json, new TypeReference<CheanJsonEntity<CheanLocation>>() {
+        });
 
-        if(null != entity && entity.getStatus() && null != entity.getData()){
+        if (null != entity && entity.getStatus() && null != entity.getData()) {
             CheanLocation location = entity.getData();
 
             dto.setPlateNumber(cmd.getPlateNumber());
@@ -216,6 +218,28 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
 
+            JSONObject param1 = new JSONObject();
+            param1.put("parkLotName", location.getParkLotName());
+
+            String json1 = post(param1, GET_CAR_BY_LOCATION);
+            CheanJsonEntity<JSONObject> entity1 = JSONObject.parseObject(json1, new TypeReference<CheanJsonEntity<JSONObject>>() {
+            });
+            if (null != entity1 && entity1.getStatus()) {
+                JSONObject timeInfo = entity1.getData();
+                Date intime = new Date();
+                Date now = new Date();
+                try {
+                    intime = DATE_FORMAT.get().parse(timeInfo.getString("InDate"));
+                    now = DATE_FORMAT.get().parse(entity1.getTime());
+                } catch (ParseException e) {
+                    LOGGER.error("parse expiry date error, date={}", timeInfo.getString("InDate"));
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            "Parse expiry date error.");
+                }
+                dto.setEntryTime(intime.getTime());
+                Long parkingTime = now.getTime() - intime.getTime();
+                dto.setParkingTime(String.valueOf(parkingTime / (60 * 1000)));
+            }
         }
         return dto;
     }
