@@ -74,6 +74,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -658,6 +659,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //			smsProvider.sendSms(number, txt,null);
         //		}
     }
+    
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param phoneNumber
+     * @param verificationCode
+     */
+    
+    private void sendVerificationCodeSms4Point(Integer namespaceId, String phoneNumber, String verificationCode) {
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+        String templateScope = SmsTemplateCode.SCOPE;
+       // int templateId = SmsTemplateCode.POINT_VERIFICATION_CODE;
+         int templateId = SmsTemplateCode.VERIFICATION_CODE;      
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+    }
 
     private String convert(String template, Map<String, String> variables, String defaultVal) {
         String pattern = "\\$\\{(.*?)\\}";
@@ -741,6 +758,50 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
         }
     }
+    
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param regionCode
+     * @param request
+     */
+    @Override
+    public void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) {
+        LOGGER.info("sendVerficationCode4Point  -->  user:[{}]",user);
+    		//检查用户是否存在
+		String phone = user.getIdentifierToken() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			LOGGER.error("namespaceId or phone is null");
+			return ;
+		}
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        	if (identifier == null) {
+        		LOGGER.error("userIdentifier  is null.namespace:[{}] ;phone:[{}]",namespaceId ,phone);
+    			return ;
+        	}
+
+        	//因为调试需要,先把这段限制去注掉
+            //this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
+            Timestamp ts = identifier.getNotifyTime();
+            //验证码过期了重新生成,没有过期则用原来的
+            if (ts == null || isVerificationExpired(ts)) {
+                String verificationCode = RandomGenerator.getRandomDigitalString(6);
+                identifier.setVerificationCode(verificationCode);
+
+                LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+            } else {
+                // TODO
+                LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());     
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+            }
+
+            identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            identifier.setRegionCode(regionCode);
+            this.userProvider.updateIdentifier(identifier);
+    }
+    
 
     @Override
     public UserLogin verifyAndLogon(VerifyAndLogonCommand cmd) {
@@ -6621,6 +6682,66 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+
+    
+    /**
+     * 根据手机号查询某域空间中的用户
+     * @param cmd
+     * @return
+     */
+    @Override
+    public UserDTO getUserFromPhone(FindUserByPhoneCommand cmd) {
+        LOGGER.info("getUserFromPhone  -->  cmd:[{}]",cmd);
+		Integer namespaceId = cmd.getNamespaceId();
+		String phone = cmd.getPhone() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			return null ;
+		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+		if (userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                return ConvertHelper.convert(user, UserDTO.class);
+            }
+        }
+		return null;
+	}
+    
+    
+    /**
+     * 校验验证码是否正确
+     * @param cmd
+     * @return
+     */
+    @Override
+    public PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) {
+
+        PointCheckVCDTO returnDTO = new PointCheckVCDTO();
+        String verificationCode = cmd.getVerificationCode();
+        String phone = cmd.getPhone();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (identifier == null) {
+            LOGGER.error("User identifier not found in db, namespaceId=" + namespaceId + ", phone="+phone+",cmd=" + cmd);
+            returnDTO.setResultCode(false);
+            returnDTO.setResult("User identifier not found in db");
+            return  returnDTO;
+        }
+
+        //检查传过来的验证码跟生成保存在数据库中的相等即可
+        if (identifier.getVerificationCode() != null
+                && identifier.getVerificationCode().equals(verificationCode)) {
+        	returnDTO.setResultCode(true);
+        	return  returnDTO;
+        	
+        }
+        
+        return null;
+    }
+
     /**
      * 有简称取简称,无简称取全名
      * @param sceneList
@@ -6638,5 +6759,43 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		  }
 		  return sceneList ;
 	  }
-	
+
+      @Override
+	  public UserDTO getTopAdministrator( GetTopAdministratorCommand cmd){
+
+            if(cmd.getOrgId() == null ){
+                LOGGER.error("orgId is null in the  cmd = {}",  cmd);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
+            }
+          Organization org = checkOrganization(cmd.getOrgId());
+        //  Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+          if(org != null) {
+              if (org.getAdminTargetId() != null) {
+                  UserIdentifier userIdentifier = userProvider
+                          .findClaimedIdentifierByOwnerAndType(org.getAdminTargetId(),IdentifierType.MOBILE.getCode());
+                  if (userIdentifier != null) {
+                      User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                      if (user != null) {
+                          user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                          return ConvertHelper.convert(user, UserDTO.class);
+                      }
+                  }
+                  return null;
+              }
+          }
+          return null;
+      }
+
+
+        private Organization checkOrganization(Long organizationId) {
+            Organization org = organizationProvider.findOrganizationById(organizationId);
+            if(org == null){
+                LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
+            }
+            return org;
+        }
+
+
+
 }

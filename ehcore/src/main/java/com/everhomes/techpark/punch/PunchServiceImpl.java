@@ -5364,7 +5364,7 @@ public class PunchServiceImpl implements PunchService {
         locator.setAnchor(cmd.getPageAnchor());
 
         //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
-        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), months.get(0), Integer.MAX_VALUE - 1, cmd.getPageAnchor(), cmd.getUserName());
+        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), months.get(0), Integer.MAX_VALUE - 1, null, cmd.getUserName());
         if (members == null || members.size() == 0) {
             return response;
         }

@@ -128,6 +128,8 @@ public interface ContractProvider {
 
 	Double getTotalRentByAddressIds(List<Long> addressIdList);
 
+	List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode);
+
 	
 
 	

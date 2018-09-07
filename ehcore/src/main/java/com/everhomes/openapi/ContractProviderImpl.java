@@ -1512,4 +1512,15 @@ public class ContractProviderImpl implements ContractProvider {
 		return result;
 	}
 
+	@Override
+	public List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		return context.select()
+					  .from(Tables.EH_CONTRACTS)
+					  .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+					  .and(Tables.EH_CONTRACTS.STATUS.eq(statusCode))
+					  .fetchInto(Contract.class);
+	}
+
 }
