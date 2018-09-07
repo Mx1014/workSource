@@ -1946,14 +1946,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
 					
-					if(cmd.getCategoryId() == null){
-			            cmd.setCategoryId(0l);
-			        }else {
-			        	// 转换
-			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-			            cmd.setCategoryId(assetCategoryId);
-					}
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), cmd.getCategoryId(), cmd.getNamespaceId());
+					long assetCategoryId = 0l;
+    				if(contract.getCategoryId() != null){
+    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+    		        }
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), assetCategoryId, cmd.getNamespaceId());
 					parentContract.setRent(totalAmount);
 				}
 

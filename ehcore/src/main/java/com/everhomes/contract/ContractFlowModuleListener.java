@@ -192,15 +192,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         		if (contract.getCostGenerationMethod()!=null) {
         			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
         			
-        			if(contract.getCategoryId() == null){
-        				contract.setCategoryId(0l);
-			        }else {
-			        	// 转换
-			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-			            contract.setCategoryId(assetCategoryId);
-					}
+        			long assetCategoryId = 0l;
+    				if(contract.getCategoryId() != null){
+    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+    		        }
         			
-        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), contract.getCategoryId(), contract.getNamespaceId());
+        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), assetCategoryId, contract.getNamespaceId());
         			contract.setRent(totalAmount);
         			contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
