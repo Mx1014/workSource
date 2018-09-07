@@ -5679,13 +5679,11 @@ public class AssetServiceImpl implements AssetService {
 				assetModuleAppMapping.getSourceId(), assetModuleAppMapping.getSourceType());
 		if(existGeneralBillAssetMapping) {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数能在映射表查到数据，那判断为更新
-			
-			
+			return assetProvider.updateGeneralBillAssetMapping(assetModuleAppMapping);
 		}else {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查不到数据，那判断为新增
-			//assetProvider.createAnAppMapping(assetModuleAppMapping);
+			return assetProvider.insertAppMapping(assetModuleAppMapping);
 		}
-		return null;
 	}
 	
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {

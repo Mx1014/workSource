@@ -1,5 +1,40 @@
 package com.everhomes.asset;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+//import scala.languageFeature.reflectiveCalls;
+
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
+import org.jooq.Table;
+import org.jooq.UpdateQuery;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -12,22 +47,78 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
-import com.everhomes.organization.pm.DefaultChargingItem;
 import com.everhomes.pay.order.OrderDTO;
-import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetItemFineType;
+import com.everhomes.rest.asset.AssetPaymentBillAttachment;
+import com.everhomes.rest.asset.AssetSubtractionType;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillGroupDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.BillingCycle;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
+import com.everhomes.rest.asset.ConfigChargingItems;
+import com.everhomes.rest.asset.ConfigChargingItemsCommand;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateBillGroupCommand;
+import com.everhomes.rest.asset.DeleteBillGroupReponse;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.IsContractChangeFlagDTO;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ModifyBillGroupCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.SubItemDTO;
+import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
-import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -39,7 +130,6 @@ import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
 import com.everhomes.server.schema.tables.EhContracts;
-import com.everhomes.server.schema.tables.EhDefaultChargingItems;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
@@ -60,37 +150,50 @@ import com.everhomes.server.schema.tables.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetPaymentOrderBillsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetPaymentOrderDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingItemScopesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentChargingStandardsScopesDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentContractReceiverDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentExemptionItemsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentFormulaDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentLateFineDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentSubtractionItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetModuleAppMappingsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DecimalUtils;
+import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.GsonUtil;
+import com.everhomes.util.IntegerUtil;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-
-//import scala.languageFeature.reflectiveCalls;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
-import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 /**
  * Created by Administrator on 2017/2/20.
  */
@@ -6589,7 +6692,7 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 	}
 	
-	public void insertAppMapping(AssetModuleAppMapping mapping) {
+	public AssetModuleAppMapping insertAppMapping(AssetModuleAppMapping mapping) {
 		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
         long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
@@ -6598,6 +6701,7 @@ public class AssetProviderImpl implements AssetProvider {
         mapping.setCreateUid(UserContext.currentUserId());
         mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
 		dao.insert(mapping);
+		return mapping;
 	}
 
     public boolean checkExistAssetMapContract(Long assetCategoryId) {
@@ -6645,7 +6749,28 @@ public class AssetProviderImpl implements AssetProvider {
     }
     
 	public boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
-        SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(namespaceId, ownerId, ownerType, sourceId, sourceType);
+        return records.size() > 0;
+	}
+	
+	public AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping mapping) {
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(mapping.getNamespaceId(), 
+				mapping.getOwnerId(), mapping.getOwnerType(), mapping.getSourceId(), mapping.getSourceType());
+		if(records.size() != 0 && records.get(0) != null) {
+			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
+			Long id = records.get(0).getId();
+			mapping.setId(id);
+			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			mapping.setUpdateUid(UserContext.currentUserId());
+	        dao.update(mapping);
+	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
+		}
+		return mapping;
+	}
+	
+	public List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
+		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
 		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
 		if(ownerId != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
@@ -6660,26 +6785,7 @@ public class AssetProviderImpl implements AssetProvider {
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(sourceType));
 		}
 		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
-        return records.size() > 0;
-	}
-	
-	public boolean updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
-        SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
-		/*query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
-		if(ownerId != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
-		}
-		if(ownerType != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));
-		}
-		if(sourceId != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(sourceId));
-		}
-		if(sourceType != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(sourceType));
-		}*/
-		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
-        return records.size() > 0;
+		return records;
 	}
     
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
