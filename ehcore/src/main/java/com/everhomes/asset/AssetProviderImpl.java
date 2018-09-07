@@ -4464,8 +4464,12 @@ public class AssetProviderImpl implements AssetProvider {
             rules:for(int i = 0; i < rules.size(); i ++){
                 boolean workFlag = isInWorkGroupRule(rules.get(i));
                 if(workFlag){
-                    continue rules;
+                	response.setFailCause(AssetPaymentConstants.DELETE_GROUP_RULE_UNSAFE);
+                    return response;
+                    //continue rules;
                 }
+            }
+            rules:for(int i = 0; i < rules.size(); i ++){
                 context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
                         .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(rules.get(i).getId()))
                         .execute();
@@ -4531,10 +4535,12 @@ public class AssetProviderImpl implements AssetProvider {
             ids:for( int i = 0; i < groupIds.size(); i ++){
                 boolean workFlag = checkBillsByBillGroupId(groupIds.get(i));
                 if(workFlag){
-//                    response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
-//                    return response;
-                    continue ids;
+                    response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
+                    return response;
+                    //continue ids;
                 }
+            }
+            ids:for( int i = 0; i < groupIds.size(); i ++){
                 int finalI = i;
                 this.dbProvider.execute((TransactionStatus status) -> {
                     context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
