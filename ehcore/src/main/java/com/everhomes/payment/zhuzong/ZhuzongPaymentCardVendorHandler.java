@@ -326,7 +326,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", UNBUNDLE_CARD_TYPE);
         jo.put("UserID",vendorDate.getUserId());
-        jo.put("UserName ",paymentCard.getUserName());
+        jo.put("UserName",paymentCard.getUserName());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if (!"1".equals(cardInfo.getResultID())){//没有失败时
