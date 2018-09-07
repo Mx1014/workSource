@@ -13,7 +13,7 @@ public class SaveScriptCommand {
 
     private Integer namespaceId;
     private String    infoType ;
-    private Byte        publicCode  ;
+    private Byte        publishCode  ;
     private String    script     ;
 
     public Integer getNamespaceId() {
@@ -32,12 +32,12 @@ public class SaveScriptCommand {
         this.infoType = infoType;
     }
 
-    public Byte getPublicCode() {
-        return publicCode;
+    public Byte getPublishCode() {
+        return publishCode;
     }
 
-    public void setPublicCode(Byte publicCode) {
-        this.publicCode = publicCode;
+    public void setPublishCode(Byte publishCode) {
+        this.publishCode = publishCode;
     }
 
     public String getScript() {

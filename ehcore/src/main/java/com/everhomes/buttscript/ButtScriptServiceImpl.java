@@ -145,7 +145,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
         ScriptVersionInfoDTO dto = new ScriptVersionInfoDTO();
         dto.setPublishCode(PublishCode.FALSE.getCode());
         //如果选择了发布,在发布信息表创建或更新一条数据
-        if(PublishCode.TRUE.getCode().equals(cmd.getPublicCode())){
+        if(PublishCode.TRUE.getCode().equals(cmd.getPublishCode())){
             ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId ,cmd.getInfoType());
             if(publishInfo == null){
                 publishInfo = new ButtScriptPublishInfo();
