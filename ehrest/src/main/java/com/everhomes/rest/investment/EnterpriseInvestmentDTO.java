@@ -170,11 +170,14 @@ public class EnterpriseInvestmentDTO {
     // we should add new module fields
     // investment enterprise tracking infos
     @ItemType(CreateCustomerTrackingCommand.class)
-    private List<CreateCustomerTrackingCommand> trackingInfos;
-    @ItemType(EnterpriseInvestmentContactDTO.class)
-    private List<EnterpriseInvestmentContactDTO>  contacts ;
-    private EnterpriseInvestmentDemandDTO demand;
-    private EnterpriseInvestmentNowInfoDTO nowInfo;
+    private List<CreateCustomerTrackingCommand> trackings;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+
+    private List<CustomerTrackerDTO> trackers;
+
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
 
 
     public String getTransactionProbability() {
@@ -1289,36 +1292,44 @@ public class EnterpriseInvestmentDTO {
         this.attachments = attachments;
     }
 
-    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
-        return trackingInfos;
+    public List<CreateCustomerTrackingCommand> getTrackings() {
+        return trackings;
     }
 
-    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
-        this.trackingInfos = trackingInfos;
+    public void setTrackings(List<CreateCustomerTrackingCommand> trackings) {
+        this.trackings = trackings;
     }
 
-    public List<EnterpriseInvestmentContactDTO> getContacts() {
+    public List<CustomerContactDTO> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<EnterpriseInvestmentContactDTO> contacts) {
+    public void setContacts(List<CustomerContactDTO> contacts) {
         this.contacts = contacts;
     }
 
-    public EnterpriseInvestmentDemandDTO getDemand() {
-        return demand;
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
     }
 
-    public void setDemand(EnterpriseInvestmentDemandDTO demand) {
-        this.demand = demand;
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
     }
 
-    public EnterpriseInvestmentNowInfoDTO getNowInfo() {
-        return nowInfo;
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
     }
 
-    public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
-        this.nowInfo = nowInfo;
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
+    }
+
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
+    }
+
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
     }
 
     @Override

@@ -11,17 +11,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentContactDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentDemandDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseInvestmentNowInfoDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentContact;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentDemand;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseInvestmentNowInfo;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseInvestmentContactRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -120,60 +115,85 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public Long createDemand(CustomerRequirement demand) {
+    public Long createTracker(CustomerTracker contact) {
+        return null;
+    }
+
+    @Override
+    public Long updateTracker(CustomerTracker contact) {
+        return null;
+    }
+
+    @Override
+    public CustomerTracker findTrackerById(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerTracker> findTrackerByCustomerId(Long customerId) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type) {
+        return null;
+    }
+
+    @Override
+    public Long createRequirement(CustomerRequirement requirement) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhCustomerRequirements.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhCustomerRequirements.class));
-        demand.setId(id);
+        requirement.setId(id);
 
         User user = UserContext.current().getUser();
-        demand.setOperatorBy(user.getNickName());
-        demand.setCreateBy(user.getNickName());
+        requirement.setOperatorUid(user.getId());
+        requirement.setCreatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
-        demand.setCreateTime(new Timestamp(l2));
-        demand.setOperatorTime(new Timestamp(l2));
+        requirement.setCreateTime(new Timestamp(l2));
+        requirement.setOperatorTime(new Timestamp(l2));
 
         EhCustomerRequirementsDao dao = new EhCustomerRequirementsDao(context.configuration());
-        dao.insert(demand);
+        dao.insert(requirement);
         return id;
     }
 
     @Override
-    public Long updateDemand(CustomerRequirement demand) {
+    public Long updateRequirement(CustomerRequirement requirement) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentDemand.class));
+                .readWriteWith(EhCustomerRequirements.class));
         User user = UserContext.current().getUser();
-        demand.setOperatorBy(user.getNickName());
+        requirement.setOperatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
-        demand.setOperatorTime(new Timestamp(l2));
+        requirement.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentDemandDao dao = new EhEnterpriseInvestmentDemandDao(context.configuration());
-        dao.update(demand);
-        return demand.getId();
+        EhCustomerRequirementsDao dao = new EhCustomerRequirementsDao(context.configuration());
+        dao.update(requirement);
+        return requirement.getId();
     }
 
     @Override
-    public CustomerRequirement findDemandById(Long id) {
+    public CustomerRequirement findRequirementById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentDemand.class));
+                .readWriteWith(EhCustomerRequirements.class));
 
-        EhEnterpriseInvestmentDemandDao dao = new EhEnterpriseInvestmentDemandDao(context.configuration());
+        EhCustomerRequirementsDao dao = new EhCustomerRequirementsDao(context.configuration());
 
         return ConvertHelper.convert(dao.findById(id), CustomerRequirement.class);
     }
 
     @Override
-    public CustomerRequirement findNewestDemandByCustoemrId(Long customerId) {
+    public CustomerRequirement findNewestRequirementByCustoemrId(Long customerId) {
         try {
             CustomerRequirement[] result = new CustomerRequirement[1];
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseInvestmentDemand.class));
-            result[0] = context.select().from(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND)
-                    .where(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.CUSTOMER_ID.eq(customerId))
-                    .and(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
-                    .orderBy(Tables.EH_ENTERPRISE_INVESTMENT_DEMAND.DEMAND_VERSION.desc()).fetchAny().map((r) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerRequirements.class));
+            result[0] = context.select().from(Tables.EH_CUSTOMER_REQUIREMENTS)
+                    .where(Tables.EH_CUSTOMER_REQUIREMENTS.CUSTOMER_ID.eq(customerId))
+                    .and(Tables.EH_CUSTOMER_REQUIREMENTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
+                    .orderBy(Tables.EH_CUSTOMER_REQUIREMENTS.VERSION.desc()).fetchAny().map((r) -> {
                         return ConvertHelper.convert(r, CustomerRequirement.class);
                     });
             return result[0];
@@ -185,61 +205,61 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public Long createNowInfo(CustomerCurrentRent nowInfo) {
+    public Long createCurrentRent(CustomerCurrentRent currentRent) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
-                .getSequenceDomainFromTablePojo(EhEnterpriseInvestmentNowInfo.class));
+                .getSequenceDomainFromTablePojo(EhCustomerCurrentRents.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
-        nowInfo.setId(id);
+                .readWriteWith(EhCustomerCurrentRents.class));
+        currentRent.setId(id);
 
         User user = UserContext.current().getUser();
-        nowInfo.setOperatorBy(user.getNickName());
-        nowInfo.setCreateBy(user.getNickName());
+        currentRent.setOperatorUid(user.getId());
+        currentRent.setCreatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
-        nowInfo.setCreateTime(new Timestamp(l2));
-        nowInfo.setOperatorTime(new Timestamp(l2));
+        currentRent.setCreateTime(new Timestamp(l2));
+        currentRent.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
-        dao.insert(nowInfo);
+        EhCustomerCurrentRentsDao dao = new EhCustomerCurrentRentsDao(context.configuration());
+        dao.insert(currentRent);
         return id;
     }
 
     @Override
-    public Long updateNowInfo(CustomerCurrentRent nowInfo) {
+    public Long updateCurrentRent(CustomerCurrentRent currentRent) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
+                .readWriteWith(EhCustomerCurrentRents.class));
 
         User user = UserContext.current().getUser();
-        nowInfo.setOperatorBy(user.getNickName());
+        currentRent.setOperatorUid(user.getId());
 
         Long l2 = DateHelper.currentGMTTime().getTime();
-        nowInfo.setOperatorTime(new Timestamp(l2));
+        currentRent.setOperatorTime(new Timestamp(l2));
 
-        EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
-        dao.update(nowInfo);
-        return nowInfo.getId();
+        EhCustomerCurrentRentsDao dao = new EhCustomerCurrentRentsDao(context.configuration());
+        dao.update(currentRent);
+        return currentRent.getId();
     }
 
     @Override
-    public CustomerCurrentRent findNowInfoById(Long id) {
+    public CustomerCurrentRent findCurrentRentById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
-                .readWriteWith(EhEnterpriseInvestmentNowInfo.class));
+                .readWriteWith(EhCustomerCurrentRents.class));
 
 
-        EhEnterpriseInvestmentNowInfoDao dao = new EhEnterpriseInvestmentNowInfoDao(context.configuration());
+        EhCustomerCurrentRentsDao dao = new EhCustomerCurrentRentsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CustomerCurrentRent.class);
     }
 
     @Override
-    public CustomerCurrentRent findNewestNowInfoByCustoemrId(Long customerId) {
+    public CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId) {
         try {
             CustomerCurrentRent[] result = new CustomerCurrentRent[1];
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseInvestmentNowInfo.class));
-            result[0] = context.select().from(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO)
-                    .where(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.CUSTOMER_ID.eq(customerId))
-                    .and(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
-                    .orderBy(Tables.EH_ENTERPRISE_INVESTMENT_NOW_INFO.ID.desc()).fetchAny().map((r) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCurrentRents.class));
+            result[0] = context.select().from(Tables.EH_CUSTOMER_CURRENT_RENTS)
+                    .where(Tables.EH_CUSTOMER_CURRENT_RENTS.CUSTOMER_ID.eq(customerId))
+                    .and(Tables.EH_CUSTOMER_CURRENT_RENTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
+                    .orderBy(Tables.EH_CUSTOMER_CURRENT_RENTS.ID.desc()).fetchAny().map((r) -> {
                         return ConvertHelper.convert(r, CustomerCurrentRent.class);
                     });
             return result[0];
@@ -298,7 +318,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     @Override
     public void deleteInvestmentContacts(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        com.everhomes.server.schema.tables.EhEnterpriseInvestmentContact contact = Tables.EH_ENTERPRISE_INVESTMENT_CONTACT;
+        com.everhomes.server.schema.tables.EhCustomerContacts contact = Tables.EH_CUSTOMER_CONTACTS;
         context.update(contact)
                 .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
                 .where(contact.CUSTOMER_ID.eq(id))

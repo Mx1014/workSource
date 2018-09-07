@@ -168,10 +168,10 @@ public class CreateInvestmentCommand {
     // investment enterprise tracking infos
     @ItemType(CreateCustomerTrackingCommand.class)
     private List<CreateCustomerTrackingCommand> trackingInfos;
-    @ItemType(EnterpriseInvestmentContactDTO.class)
-    private List<EnterpriseInvestmentContactDTO>  contacts ;
-    private EnterpriseInvestmentDemandDTO demand;
-    private EnterpriseInvestmentNowInfoDTO nowInfo;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    private CustomerRequirementDTO demand;
+    private CustomerCurrentRentDTO nowInfo;
 
 
     public Long getId() {
@@ -1254,27 +1254,27 @@ public class CreateInvestmentCommand {
         this.trackingInfos = trackingInfos;
     }
 
-    public List<EnterpriseInvestmentContactDTO> getContacts() {
+    public List<CustomerContactDTO> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<EnterpriseInvestmentContactDTO> contacts) {
+    public void setContacts(List<CustomerContactDTO> contacts) {
         this.contacts = contacts;
     }
 
-    public EnterpriseInvestmentDemandDTO getDemand() {
+    public CustomerRequirementDTO getDemand() {
         return demand;
     }
 
-    public void setDemand(EnterpriseInvestmentDemandDTO demand) {
+    public void setDemand(CustomerRequirementDTO demand) {
         this.demand = demand;
     }
 
-    public EnterpriseInvestmentNowInfoDTO getNowInfo() {
+    public CustomerCurrentRentDTO getNowInfo() {
         return nowInfo;
     }
 
-    public void setNowInfo(EnterpriseInvestmentNowInfoDTO nowInfo) {
+    public void setNowInfo(CustomerCurrentRentDTO nowInfo) {
         this.nowInfo = nowInfo;
     }
 

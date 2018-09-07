@@ -34,22 +34,22 @@ public interface InvestmentEnterpriseProvider {
     List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type);
 
     //客户需求provider
-    Long createDemand(CustomerRequirement demand);
+    Long createRequirement(CustomerRequirement demand);
 
-    Long updateDemand(CustomerRequirement demand);
+    Long updateRequirement(CustomerRequirement demand);
 
-    CustomerRequirement findDemandById(Long id);
+    CustomerRequirement findRequirementById(Long id);
 
-    CustomerRequirement findNewestDemandByCustoemrId(Long customerId);
+    CustomerRequirement findNewestRequirementByCustoemrId(Long customerId);
 
     //客户当前信息provider
-    Long createNowInfo(CustomerCurrentRent nowInfo);
+    Long createCurrentRent(CustomerCurrentRent nowInfo);
 
-    Long updateNowInfo(CustomerCurrentRent nowInfo);
+    Long updateCurrentRent(CustomerCurrentRent nowInfo);
 
-    CustomerCurrentRent findNowInfoById(Long id);
+    CustomerCurrentRent findCurrentRentById(Long id);
 
-    CustomerCurrentRent findNewestNowInfoByCustoemrId(Long customerId);
+    CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId);
 
     List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap);
 

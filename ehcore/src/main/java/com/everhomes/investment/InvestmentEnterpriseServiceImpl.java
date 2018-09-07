@@ -55,7 +55,7 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
         investmentEnterpriseProvider.deleteInvestmentContacts(cmd.getId());
         if (cmd.getContacts() != null && cmd.getContacts().size() > 0) {
             cmd.getContacts().forEach((c) -> {
-                EnterpriseInvestmentContact contact = ConvertHelper.convert(c, EnterpriseInvestmentContact.class);
+                CustomerContact contact = ConvertHelper.convert(c, CustomerContact.class);
                 contact.setCustomerId(cmd.getId());
                 contact.setCommunityId(cmd.getCommunityId());
                 contact.setNamespaceId(cmd.getNamespaceId());
@@ -65,28 +65,28 @@ public class InvestmentEnterpriseServiceImpl implements InvestmentEnterpriseServ
         }
         // reflush demend
         if (cmd.getDemand() != null) {
-            CustomerRequirement investmentDemand = ConvertHelper.convert(cmd.getDemand(), CustomerRequirement.class);
-            investmentDemand.setCommunityId(cmd.getCommunityId());
-            investmentDemand.setNamespaceId(cmd.getNamespaceId());
-            investmentDemand.setCustomerId(cmd.getId());
-            investmentDemand.setStatus(CommonStatus.ACTIVE.getCode());
-            investmentEnterpriseProvider.createDemand(investmentDemand);
+            CustomerRequirement requirement = ConvertHelper.convert(cmd.getDemand(), CustomerRequirement.class);
+            requirement.setCommunityId(cmd.getCommunityId());
+            requirement.setNamespaceId(cmd.getNamespaceId());
+            requirement.setCustomerId(cmd.getId());
+            requirement.setStatus(CommonStatus.ACTIVE.getCode());
+            investmentEnterpriseProvider.createRequirement(requirement);
         }
         // reflush current basic info
         if(cmd.getNowInfo()!=null){
-            CustomerCurrentRent nowInfo = ConvertHelper.convert(cmd.getNowInfo(), CustomerCurrentRent.class);
-            nowInfo.setCommunityId(cmd.getCommunityId());
-            nowInfo.setNamespaceId(cmd.getNamespaceId());
-            nowInfo.setStatus(CommonStatus.ACTIVE.getCode());
-            nowInfo.setCustomerId(cmd.getId());
-            investmentEnterpriseProvider.createNowInfo(nowInfo);
+            CustomerCurrentRent currentRent = ConvertHelper.convert(cmd.getNowInfo(), CustomerCurrentRent.class);
+            currentRent.setCommunityId(cmd.getCommunityId());
+            currentRent.setNamespaceId(cmd.getNamespaceId());
+            currentRent.setStatus(CommonStatus.ACTIVE.getCode());
+            currentRent.setCustomerId(cmd.getId());
+            investmentEnterpriseProvider.createCurrentRent(currentRent);
         }
         if (cmd.getTrackingInfos() != null) {
             cmd.getTrackingInfos().forEach((c) -> {
                 CustomerTracking customerTracking = ConvertHelper.convert(c, CustomerTracking.class);
                 customerTracking.setStatus(CommonStatus.ACTIVE.getCode());
                 customerTracking.setCustomerType(CustomerType.ENTERPRISE.getCode());
-                customerTracking.setInvestmentType(InvestmentEnterpriseType.INVESTMENT_ENTERPRISE.getCode());
+                customerTracking.setCustomerSource(InvestmentEnterpriseType.INVESTMENT_ENTERPRISE.getCode());
             });
         }
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);

@@ -13,7 +13,7 @@ CREATE TABLE `eh_customer_contacts`
 	`position`         		VARCHAR(128)  COMMENT '联系人职务',
 	`address`							VARCHAR(256)  COMMENT '联系人通讯地址',
 	`contact_type`				   TINYINT  COMMENT '联系人类型，0-客户联系人、1-渠道联系人',
-	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`customer_source`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
 	`status`								TINYINT  COMMENT '联系人状态，0-invalid ,2-valid',
 	`create_time`          DATETIME  COMMENT '创建日期',
 	`creator_uid` 						BIGINT  COMMENT '创建人',
@@ -112,10 +112,12 @@ CREATE TABLE `eh_var_field_ranges`
 	 `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_field_groups',
     `field_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
     `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
-    `sort_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
     primary key (id)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
 ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_namespace_id(namespace_id);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_name(module_name);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_type(module_type);
 
 
 -- AUTHOR 黄鹏宇 2018-8-31
@@ -149,7 +151,7 @@ ALTER TABLE `eh_customer_current_rents` ADD INDEX idx_namespace_id(namespace_id)
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 对客户表增加招商客户和成交租客的表示加以区分
 
-ALTER TABLE `eh_enterprise_customers` ADD `` TINYINT COMMENT '跟进信息类型，0-招商客户，1-成交租客';
+ALTER TABLE `eh_enterprise_customers` ADD `customer_source` TINYINT COMMENT '跟进信息类型，0-招商客户，1-成交租客';
 
 -- end
 
@@ -157,7 +159,7 @@ ALTER TABLE `eh_enterprise_customers` ADD `` TINYINT COMMENT '跟进信息类型
 -- AUTHOR 黄鹏宇 2018-8-31
 -- REMARK 对当前跟进表加上类型标识
 
-ALTER TABLE `eh_customer_trackings` ADD `` TINYINT COMMENT '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
+ALTER TABLE `eh_customer_trackings` ADD `customer_source` TINYINT COMMENT '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
 
 -- end
 

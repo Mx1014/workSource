@@ -23,22 +23,23 @@ import java.sql.Timestamp;
  *     <li>operatorBy: operatorBy</li>
  * </ul>
  */
-public class EnterpriseInvestmentNowInfoDTO {
+public class CustomerCurrentRentDTO {
 
     private Long id;
     private Integer namespaceId;
     private Long communityId;
-    private String nowAddress;
-    private BigDecimal nowRental;
-    private Byte nowRentalUnit;
-    private Double nowArea;
-    private Timestamp nowContractEndDate;
-    private Byte status;
     private Long customerId;
+    private String address;
+    private BigDecimal rentPrice;
+    private Byte rentPriceUnit;
+    private BigDecimal rentArea;
+    private Timestamp contractIntentionDate;
+    private String version;
+    private Byte status;
     private Timestamp createTime;
-    private String createBy;
+    private Long creatorUid;
     private Timestamp operatorTime;
-    private String operatorBy;
+    private Long operatorUid;
 
     public Long getId() {
         return id;
@@ -64,44 +65,60 @@ public class EnterpriseInvestmentNowInfoDTO {
         this.communityId = communityId;
     }
 
-    public String getNowAddress() {
-        return nowAddress;
+    public Long getCustomerId() {
+        return customerId;
     }
 
-    public void setNowAddress(String nowAddress) {
-        this.nowAddress = nowAddress;
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
-    public BigDecimal getNowRental() {
-        return nowRental;
+    public String getAddress() {
+        return address;
     }
 
-    public void setNowRental(BigDecimal nowRental) {
-        this.nowRental = nowRental;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public Byte getNowRentalUnit() {
-        return nowRentalUnit;
+    public BigDecimal getRentPrice() {
+        return rentPrice;
     }
 
-    public void setNowRentalUnit(Byte nowRentalUnit) {
-        this.nowRentalUnit = nowRentalUnit;
+    public void setRentPrice(BigDecimal rentPrice) {
+        this.rentPrice = rentPrice;
     }
 
-    public Double getNowArea() {
-        return nowArea;
+    public Byte getRentPriceUnit() {
+        return rentPriceUnit;
     }
 
-    public void setNowArea(Double nowArea) {
-        this.nowArea = nowArea;
+    public void setRentPriceUnit(Byte rentPriceUnit) {
+        this.rentPriceUnit = rentPriceUnit;
     }
 
-    public Timestamp getNowContractEndDate() {
-        return nowContractEndDate;
+    public BigDecimal getRentArea() {
+        return rentArea;
     }
 
-    public void setNowContractEndDate(Timestamp nowContractEndDate) {
-        this.nowContractEndDate = nowContractEndDate;
+    public void setRentArea(BigDecimal rentArea) {
+        this.rentArea = rentArea;
+    }
+
+    public Timestamp getContractIntentionDate() {
+        return contractIntentionDate;
+    }
+
+    public void setContractIntentionDate(Timestamp contractIntentionDate) {
+        this.contractIntentionDate = contractIntentionDate;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Byte getStatus() {
@@ -112,14 +129,6 @@ public class EnterpriseInvestmentNowInfoDTO {
         this.status = status;
     }
 
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
     public Timestamp getCreateTime() {
         return createTime;
     }
@@ -128,12 +137,12 @@ public class EnterpriseInvestmentNowInfoDTO {
         this.createTime = createTime;
     }
 
-    public String getCreateBy() {
-        return createBy;
+    public Long getCreatorUid() {
+        return creatorUid;
     }
 
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     public Timestamp getOperatorTime() {
@@ -144,12 +153,12 @@ public class EnterpriseInvestmentNowInfoDTO {
         this.operatorTime = operatorTime;
     }
 
-    public String getOperatorBy() {
-        return operatorBy;
+    public Long getOperatorUid() {
+        return operatorUid;
     }
 
-    public void setOperatorBy(String operatorBy) {
-        this.operatorBy = operatorBy;
+    public void setOperatorUid(Long operatorUid) {
+        this.operatorUid = operatorUid;
     }
 
     @Override
