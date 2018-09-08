@@ -5728,11 +5728,33 @@ public class AssetServiceImpl implements AssetService {
 	}
 	
 	public ListBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
-		ListBillsDTO response = new ListBillsDTO();
-		//cmd.setTargetType(Asset);//默认是企业级别
-		
-		
-		return null;
+		ListBillsDTO dto = new ListBillsDTO();
+		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
+		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
+		if(records.size() > 0) {
+			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
+			mapping = records.get(0);
+			Long categoryId = mapping.getAssetCategoryId();
+			Long billGroupId = mapping.getBillGroupId();
+			Long charingItemId = mapping.getChargingItemId();
+			
+			
+			
+		}else {
+			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
+			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
+			if(records.size() > 0) {
+				mapping = records.get(0);
+				
+				
+				
+			}else {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "can not find asset mapping");
+			}
+		}
+		return dto;
 	}
 
 	public void tranferAssetMappings() {

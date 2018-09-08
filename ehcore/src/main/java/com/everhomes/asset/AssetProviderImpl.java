@@ -71,6 +71,7 @@ import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.BillingCycle;
+import com.everhomes.rest.asset.BillsDayType;
 import com.everhomes.rest.asset.ChargingVariable;
 import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.asset.ConfigChargingItems;
@@ -1328,10 +1329,11 @@ public class AssetProviderImpl implements AssetProvider {
             //需要billGroup查看生成账单周期
             PaymentBillGroup group = getBillGroupById(billGroupId);
             List<String> dates = new ArrayList<>();
-            Byte balanceDateType = group.getBalanceDateType();
-            byte dueDayType = group.getDueDayType();
-            Integer dueDay = group.getDueDay();
-            Integer billsDay = group.getBillsDay();
+            BillingCycle balanceDateType = BillingCycle.fromCode(group.getBalanceDateType());//生成账单周期：自然月、自然季等
+            byte dueDayType = group.getDueDayType();//最晚还款日的单位类型，1:日; 2:月
+            Integer dueDay = group.getDueDay();//最晚还款日
+            BillsDayType billsDayType = BillsDayType.fromCode(group.getBillsDayType());//出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
+            Integer billsDay = group.getBillsDay();//出账单日
             Calendar start = Calendar.getInstance();
             try{
                 // 如果传递了计费开始时间
@@ -1344,15 +1346,18 @@ public class AssetProviderImpl implements AssetProvider {
                 dates.add(yyyyMMdd.format(start.getTime()));
                 int cycle = 0;
                 switch(balanceDateType){
-                    case 2:
+                    case NATURAL_MONTH:
                         cycle = 1;
                         break;
-                    case 3:
+                    case NATURAL_QUARTER:
                         cycle = 3;
                         break;
-                    case 4:
+                    case NATURAL_YEAR:
                         cycle = 12;
                         break;
+                    default:
+                    	cycle = 0;
+                    	break;
                 }
                 start.add(Calendar.MONTH,cycle);
                 if(cycle == 0){
@@ -1366,10 +1371,34 @@ public class AssetProviderImpl implements AssetProvider {
                 }else{
                     dates.add(yyyyMMdd.format(start.getTime()));
                 }
+                //计算之后设置出账单日
+                //出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
+                if(billsDayType == null){
+                    billsDayType = BillsDayType.FIRST_MONTH_NEXT_PERIOD;
+                }
+                switch (billsDayType){
+	                case FIRST_MONTH_NEXT_PERIOD:
+	                    //due.setTime(d.getTime());
+	                   // due.add(Calendar.DAY_OF_MONTH,group.getBillsDay());
+	                	start.
+	                    break;
+	                case BEFORE_THIS_PERIOD:
+	                    //due.setTime(a.getTime());
+	                    //due.add(Calendar.DAY_OF_MONTH, -group.getBillsDay());
+	                    break;
+	                case AFTER_THIS_PERIOD:
+	                    //due.setTime(a.getTime());
+	                    //due.add(Calendar.DAY_OF_MONTH, group.getBillsDay() - 1);
+	                    break;
+	                case END_THIS_PERIOD:
+	                    //due.setTime(d.getTime());
+	                    break;
+                }
                 start.add(Calendar.MONTH,1);
                 start.set(Calendar.DAY_OF_MONTH,billsDay);
                 dates.add(yyyyMMdd.format(start.getTime()));
-                if(dueDayType == (byte)1){
+                //计算之后设置最晚还款日
+                if(dueDayType == (byte)1){ 
                     start.add(Calendar.DAY_OF_MONTH,dueDay);
                 }else if(dueDayType == (byte)0){
                     start.add(Calendar.MONTH,dueDay);
@@ -1627,8 +1656,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setDateStr(dateStr);
             newBill.setDateStrBegin(dates.get(0));
             newBill.setDateStrEnd(dates.get(1));
-            newBill.setDateStrDue(dates.get(2));
-            newBill.setDueDayDeadline(dates.get(3));
+            newBill.setDateStrDue(dates.get(2));//出账单日
+            newBill.setDueDayDeadline(dates.get(3));//最晚还款日
             //新增时只填了一个楼栋门牌，所以也可以放到bill里去 by wentian 2018/4/24
             newBill.setBuildingName(buildingName);
             newBill.setApartmentName(apartmentName);
@@ -1833,7 +1862,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
         ListBillDetailVO vo = new ListBillDetailVO();
         BillGroupDTO dto = new BillGroupDTO();
-        List<BillItemDTO> list1 = new ArrayList<>();
+        List<BillItemDTO> list1 = new ArrayList<>();  
         List<ExemptionItemDTO> list2 = new ArrayList<>();
         //根据账单id查找所有的收费细项，并且拼装楼栋门牌
         vo.setAddresses("");//初始化
@@ -6792,9 +6821,13 @@ public class AssetProviderImpl implements AssetProvider {
 		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
 		if(ownerId != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
+		}else {
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 		}
 		if(ownerType != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));
+		}else {
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.isNull());
 		}
 		if(sourceId != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(sourceId));

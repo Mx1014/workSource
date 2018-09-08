@@ -450,4 +450,5 @@ public interface AssetProvider {
 	 */
 	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
 	
+	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 }
