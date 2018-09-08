@@ -4557,6 +4557,25 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
                 .fetchOneInto(PaymentBillGroup.class);
     }
+    
+    public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId) {
+    	SelectQuery<EhPaymentBillGroupsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_GROUPS).getQuery();
+		query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.NAMESPACE_ID.eq(namespaceId));
+		if(ownerId != null){
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(ownerId));
+		}
+		if(ownerType != null){
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(ownerType));
+		}
+		if(categoryId != null){
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId));
+		}
+		if(brotherGroupId != null){
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(brotherGroupId));
+		}
+		List<PaymentBillGroup> records = query.fetchInto(PaymentBillGroup.class);
+		return records.get(0);
+    }
 
     @Override
     public boolean checkBillsByBillGroupId(Long billGroupId) {

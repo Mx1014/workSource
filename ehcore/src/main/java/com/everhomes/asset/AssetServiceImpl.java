@@ -5745,9 +5745,15 @@ public class AssetServiceImpl implements AssetService {
 			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
 			if(records.size() > 0) {
 				mapping = records.get(0);
-				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区，有多少个园区插入多少条账单数据
-				
-				
+				Long categoryId = mapping.getAssetCategoryId();
+				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
+				Long charingItemId = mapping.getChargingItemId();
+				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
+				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), 
+						categoryId, brotherGroupId);
+				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
+				ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+				dtos.add(dto);
 			}else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 	                    "can not find asset mapping");
