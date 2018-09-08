@@ -583,4 +583,17 @@ public class ContractController extends ControllerBase {
 		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
 		return new RestResponse(detail);
 	}
+	
+	/**
+	 * <b>URL: /contract/getContractCategoryList</b>
+	 * <p>获取合同应用的列表</p>
+	 */
+	@RequestMapping("getContractCategoryList")
+	@RestReturn(value = ContractCategoryListDTO.class, collection = true)
+	public RestResponse getContractCategoryList(ContractCategoryCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		List<ContractCategoryListDTO> categoryList = contractService.getContractCategoryList(cmd);
+		return new RestResponse(categoryList);
+	}
 }
