@@ -2484,6 +2484,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					categoryConfigMap.put(contract.getCategoryId(), getConfigId(namespaceId, contract.getCategoryId()));
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}
+				//查询合同适用场景，物业合同不修改资产状态。
+		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+		        if (contractCategory != null) {
+		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
 				return dto;
 			}).collect(Collectors.toList());
 
