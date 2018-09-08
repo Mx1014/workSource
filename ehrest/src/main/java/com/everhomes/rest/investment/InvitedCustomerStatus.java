@@ -1,14 +1,14 @@
 package com.everhomes.rest.investment;
 
-import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.util.StringHelper;
 
-public enum InvestmentEnterpriseType {
-    INVESTMENT_ENTERPRISE((byte)0),ENTEPRIRSE_CUSTOMER((byte)1);
+public enum InvitedCustomerStatus {
+
+    INVALID((byte)0),CONFIG((byte)1),RUNNING((byte)2);
 
     private byte code;
 
-    private InvestmentEnterpriseType(byte code) {
+    private InvitedCustomerStatus(byte code) {
         this.code = code;
     }
 
@@ -16,8 +16,8 @@ public enum InvestmentEnterpriseType {
         return code;
     }
 
-    public static InvestmentEnterpriseType fromCode(byte code) {
-        for (InvestmentEnterpriseType v : InvestmentEnterpriseType.values()) {
+    public static InvitedCustomerStatus fromCode(byte code) {
+        for (InvitedCustomerStatus v : InvitedCustomerStatus.values()) {
             if (v.getCode() == code)
                 return v;
         }
@@ -28,4 +28,5 @@ public enum InvestmentEnterpriseType {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

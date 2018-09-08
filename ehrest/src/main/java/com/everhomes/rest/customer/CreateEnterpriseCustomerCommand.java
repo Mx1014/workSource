@@ -2,9 +2,14 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerCurrentRentDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -230,6 +235,23 @@ public class CreateEnterpriseCustomerCommand {
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
+
+
+
+
+
+    private String transactionRatio;
+    private Timestamp expectedSignDate;
+    private Byte customerSource;
+    private Long admissionItemId;
+
+
+    // we should add new module fields
+    // investment enterprise tracking infos
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
 
 
     public Long getOrgId() {
@@ -1302,6 +1324,53 @@ public class CreateEnterpriseCustomerCommand {
         this.aptitudeFlagItemName = aptitudeFlagItemName;
     }
 
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Timestamp getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Timestamp expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
+    }
+
+    public List<CustomerContactDTO> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<CustomerContactDTO> contacts) {
+        this.contacts = contacts;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -1,13 +1,13 @@
 package com.everhomes.investment;
 
-import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface InvestmentEnterpriseProvider {
+public interface InvitedCustomerProvider {
 
     //联系人provider
 
@@ -51,9 +51,9 @@ public interface InvestmentEnterpriseProvider {
 
     CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId);
 
-    List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap);
+    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap);
 
-    void deleteInvestment(Long id);
+    void deleteInvitedCustomer(Long id);
 
-    void deleteInvestmentContacts(Long id);
+    void deleteCustomerContacts(Long id);
 }

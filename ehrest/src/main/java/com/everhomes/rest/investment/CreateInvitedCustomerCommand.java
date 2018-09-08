@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class CreateInvestmentCommand {
+public class CreateInvitedCustomerCommand {
 
     private Long id ;
     private Integer namespaceId;
@@ -156,9 +156,13 @@ public class CreateInvestmentCommand {
 
     private Long aptitudeFlagItemId;
     private String aptitudeFlagItemName;
-    private String transactionProbability;
+
+
+
+
+    private String transactionRatio;
     private Timestamp expectedSignDate;
-    private Byte investmentType;
+    private Byte customerSource;
     private Long admissionItemId;
 
     @ItemType(CustomerAttachmentDTO.class)
@@ -170,8 +174,10 @@ public class CreateInvestmentCommand {
     private List<CreateCustomerTrackingCommand> trackingInfos;
     @ItemType(CustomerContactDTO.class)
     private List<CustomerContactDTO>  contacts ;
-    private CustomerRequirementDTO demand;
-    private CustomerCurrentRentDTO nowInfo;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
 
 
     public Long getId() {
@@ -1262,28 +1268,28 @@ public class CreateInvestmentCommand {
         this.contacts = contacts;
     }
 
-    public CustomerRequirementDTO getDemand() {
-        return demand;
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
     }
 
-    public void setDemand(CustomerRequirementDTO demand) {
-        this.demand = demand;
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
     }
 
-    public CustomerCurrentRentDTO getNowInfo() {
-        return nowInfo;
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
     }
 
-    public void setNowInfo(CustomerCurrentRentDTO nowInfo) {
-        this.nowInfo = nowInfo;
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
     }
 
-    public String getTransactionProbability() {
-        return transactionProbability;
+    public String getTransactionRatio() {
+        return transactionRatio;
     }
 
-    public void setTransactionProbability(String transactionProbability) {
-        this.transactionProbability = transactionProbability;
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
     }
 
     public Timestamp getExpectedSignDate() {
@@ -1294,12 +1300,20 @@ public class CreateInvestmentCommand {
         this.expectedSignDate = expectedSignDate;
     }
 
-    public Byte getInvestmentType() {
-        return investmentType;
+    public Byte getCustomerSource() {
+        return customerSource;
     }
 
-    public void setInvestmentType(Byte investmentType) {
-        this.investmentType = investmentType;
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
     }
 
     public Long getAdmissionItemId() {

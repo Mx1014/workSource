@@ -226,11 +226,17 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroup> systemGroups = new ArrayList<>();
         if(StringUtils.isNotBlank(cmd.getModuleType())) {
             List<Long> groupsIds = fieldProvider.listFieldGroupRanges(cmd.getModuleName(), cmd.getModuleType());
-            systemGroups = fieldProvider.listFieldGroups(groupsIds);
+            if(groupsIds != null && groupsIds.size() != 0) {
+                systemGroups = fieldProvider.listFieldGroups(groupsIds);
+            }
         }
 
         if(systemGroups.size() == 0){
             systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        }
+
+        for(int i =0 ; i < systemGroups.size(); i++){
+            systemGroups.get(i).setModuleName(cmd.getModuleName());
         }
 
         if(systemGroups != null && systemGroups.size() > 0) {
@@ -493,10 +499,20 @@ public class FieldServiceImpl implements FieldService {
     public List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd) {
         List<Field> systemFields = new ArrayList<>();
 
-        //List<Long> ids =
-        List<Field> systemFields = fieldProvider.listFields(ids);
+        if(StringUtils.isNotBlank(cmd.getModuleType())) {
+            List<Long> ids = fieldProvider.listFieldRanges(cmd.getModuleName(), cmd.getModuleType(), cmd.getGroupPath());
+            if(ids != null && ids.size() != 0) {
+                systemFields = fieldProvider.listFields(ids);
+            }
+        }
 
-        systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        if(systemFields.size() == 0) {
+            systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        }
+
+        for(int i =0 ; i < systemFields.size(); i++){
+            systemFields.get(i).setModuleName(cmd.getModuleName());
+        }
 
 
         if(systemFields != null && systemFields.size() > 0) {

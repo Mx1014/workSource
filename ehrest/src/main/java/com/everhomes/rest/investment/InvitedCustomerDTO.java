@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class EnterpriseInvestmentDTO {
+public class InvitedCustomerDTO {
 
     private Long id ;
     private Integer namespaceId;
@@ -157,35 +157,51 @@ public class EnterpriseInvestmentDTO {
     private Long aptitudeFlagItemId;
     private String aptitudeFlagItemName;
 
-    private String transactionProbability;
-    private Timestamp expectedSignDate;
-    private Byte investmentType;
-    private Long admissionItemId;
-    private String admissionItemName;
 
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
 
+    private String transactionRatio;
+    private Timestamp expectedSignDate;
+    private Byte customerSource;
+    private Long admissionItemId;
+    private String admissionItemName;
+
     // we should add new module fields
     // investment enterprise tracking infos
     @ItemType(CreateCustomerTrackingCommand.class)
-    private List<CreateCustomerTrackingCommand> trackings;
+    private List<CreateCustomerTrackingCommand> trackingInfos;
     @ItemType(CustomerContactDTO.class)
     private List<CustomerContactDTO>  contacts ;
-
+    @ItemType(CustomerTrackerDTO.class)
     private List<CustomerTrackerDTO> trackers;
-
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
 
-    public String getTransactionProbability() {
-        return transactionProbability;
+    public String getTransactionRatio() {
+        return transactionRatio;
     }
 
-    public void setTransactionProbability(String transactionProbability) {
-        this.transactionProbability = transactionProbability;
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
+        return trackingInfos;
+    }
+
+    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
+        this.trackingInfos = trackingInfos;
     }
 
     public Timestamp getExpectedSignDate() {
@@ -196,13 +212,6 @@ public class EnterpriseInvestmentDTO {
         this.expectedSignDate = expectedSignDate;
     }
 
-    public Byte getInvestmentType() {
-        return investmentType;
-    }
-
-    public void setInvestmentType(Byte investmentType) {
-        this.investmentType = investmentType;
-    }
 
     public Long getAdmissionItemId() {
         return admissionItemId;
@@ -1292,13 +1301,6 @@ public class EnterpriseInvestmentDTO {
         this.attachments = attachments;
     }
 
-    public List<CreateCustomerTrackingCommand> getTrackings() {
-        return trackings;
-    }
-
-    public void setTrackings(List<CreateCustomerTrackingCommand> trackings) {
-        this.trackings = trackings;
-    }
 
     public List<CustomerContactDTO> getContacts() {
         return contacts;

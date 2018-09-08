@@ -662,6 +662,57 @@ public class CustomerServiceImpl implements CustomerService {
         return convertToDTO(customer);
     }
 
+    @Override
+    public EnterpriseCustomerDTO createEnterpriseCustomerOutAuth(CreateEnterpriseCustomerCommand cmd) {
+        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
+        EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
+        customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
+        if (cmd.getCorpEntryDate() != null) {
+            customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
+        }
+        if (cmd.getFoundingTime() != null) {
+            customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
+        }
+        customer.setCreatorUid(UserContext.currentUserId());
+        if (null != customer.getLongitude() && null != customer.getLatitude()) {
+            String geohash = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
+            customer.setGeohash(geohash);
+        }
+        if (customer.getTrackingUid() != null) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
+            if (null != detail && null != detail.getContactName()) {
+                customer.setTrackingName(detail.getContactName());
+            }else {
+                User user = userProvider.findUserById(customer.getTrackingUid());
+                if(user!=null)
+                    customer.setTrackingName(user.getNickName());
+            }
+        }
+//        customer.setSourceId(cmd.getSourceItemId());
+        enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+        //创建或更新customer的bannerUri
+        enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
+        // 创建附件
+        if (cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+            cmd.getAttachments().forEach((c) -> {
+                CustomerAttachment attachment = ConvertHelper.convert(c, CustomerAttachment.class);
+                attachment.setCustomerId(customer.getId());
+                attachment.setNamespaceId(customer.getNamespaceId());
+                enterpriseCustomerProvider.createCustomerAttachements(attachment);
+            });
+        }
+
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
+        //add potential data transfer to customer
+        if (cmd.getSourceId() != null) {
+            saveCustomerTransferEvent(UserContext.currentUserId(), customer, cmd.getSourceId(), cmd.getDeviceType());
+        }
+        syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
+        enterpriseCustomerSearcher.feedDoc(customer);
+        return convertToDTO(customer);
+    }
+
     private void saveCustomerTransferEvent(Long uid, EnterpriseCustomer customer,Long sourceId,byte deeviceType) {
         CustomerTalent potentialData = enterpriseCustomerProvider.findPotentialCustomerById(sourceId);
         if (potentialData != null) {

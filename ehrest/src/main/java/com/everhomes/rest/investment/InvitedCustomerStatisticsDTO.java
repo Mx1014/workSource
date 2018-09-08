@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>value: 统计组数</li>
  * </ul>
  */
-public class InvestmentStatisticsDTO {
+public class InvitedCustomerStatisticsDTO {
     private String key;
     private String value;
 

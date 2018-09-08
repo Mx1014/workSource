@@ -359,7 +359,7 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_TYPE.eq(moduleType));
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_NAME.eq(moduleName));
 
-        query.fetch().map((record)-> ids.add(record.getId()));
+        query.fetch().map((record)-> ids.add(record.getGroupId()));
         return ids;
     }
 
@@ -647,12 +647,12 @@ public class FieldProviderImpl implements FieldProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<Long> ids = new ArrayList<>();
-        SelectQuery<EhVarFieldGroupRangesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_RANGES);
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_TYPE.eq(moduleType));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_NAME.eq(moduleName));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.GROUP.like(groupPath+"/%"));
+        SelectQuery<EhVarFieldRangesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_RANGES);
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.MODULE_TYPE.eq(moduleType));
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.GROUP_PATH.like(groupPath+"/%"));
 
-        query.fetch().map((record)-> ids.add(record.getId()));
+        query.fetch().map((record)-> ids.add(record.getFieldId()));
         return ids;
     }
 

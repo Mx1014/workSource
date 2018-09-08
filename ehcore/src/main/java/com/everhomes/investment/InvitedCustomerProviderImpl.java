@@ -4,8 +4,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.investment.InvestmentEnterpriseStatus;
-import com.everhomes.rest.investment.InvestmentStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatus;
+import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -38,9 +38,9 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class InvestmentEnterpriseProviderImpl implements InvestmentEnterpriseProvider {
+public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentEnterpriseProviderImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerProviderImpl.class);
 
     @Autowired
     SequenceProvider sequenceProvider;
@@ -99,7 +99,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
 
         SelectQuery<EhCustomerContactsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CONTACTS);
         query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
         return query.fetch().map(r -> ConvertHelper.convert(r, CustomerContact.class));
     }
 
@@ -110,7 +110,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
         SelectQuery<EhCustomerContactsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CONTACTS);
         query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_CONTACTS.CONTACT_TYPE.eq(contactType));
-        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_CONTACTS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
         return query.fetch().map(r -> ConvertHelper.convert(r, CustomerContact.class));
     }
 
@@ -192,7 +192,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerRequirements.class));
             result[0] = context.select().from(Tables.EH_CUSTOMER_REQUIREMENTS)
                     .where(Tables.EH_CUSTOMER_REQUIREMENTS.CUSTOMER_ID.eq(customerId))
-                    .and(Tables.EH_CUSTOMER_REQUIREMENTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
+                    .and(Tables.EH_CUSTOMER_REQUIREMENTS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()))
                     .orderBy(Tables.EH_CUSTOMER_REQUIREMENTS.VERSION.desc()).fetchAny().map((r) -> {
                         return ConvertHelper.convert(r, CustomerRequirement.class);
                     });
@@ -258,7 +258,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCurrentRents.class));
             result[0] = context.select().from(Tables.EH_CUSTOMER_CURRENT_RENTS)
                     .where(Tables.EH_CUSTOMER_CURRENT_RENTS.CUSTOMER_ID.eq(customerId))
-                    .and(Tables.EH_CUSTOMER_CURRENT_RENTS.STATUS.ne(InvestmentEnterpriseStatus.INVALID.getCode()))
+                    .and(Tables.EH_CUSTOMER_CURRENT_RENTS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()))
                     .orderBy(Tables.EH_CUSTOMER_CURRENT_RENTS.ID.desc()).fetchAny().map((r) -> {
                         return ConvertHelper.convert(r, CustomerCurrentRent.class);
                     });
@@ -271,7 +271,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public List<InvestmentStatisticsDTO> getInvestmentStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds,Map<Long, FieldItemDTO> itemsMap) {
+    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         Field<?>[] fieldArray = new Field[itemIds.size()];
@@ -291,10 +291,10 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
             LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
             LOGGER.debug("count  investment  enterprise , bindValues=" + query.getBindValues());
         }
-        List<InvestmentStatisticsDTO> result = new ArrayList<>();
+        List<InvitedCustomerStatisticsDTO> result = new ArrayList<>();
         query.fetch().map((r) -> {
             for (Long itemId : itemIds) {
-                InvestmentStatisticsDTO dto = new InvestmentStatisticsDTO();
+                InvitedCustomerStatisticsDTO dto = new InvitedCustomerStatisticsDTO();
 //                dto.setKey(itemId.toString());
                 dto.setKey(itemsMap.get(itemId).getItemDisplayName());
                 dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
@@ -306,7 +306,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public void deleteInvestment(Long id) {
+    public void deleteInvitedCustomer(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         context.update(customer)
@@ -316,7 +316,7 @@ public class InvestmentEnterpriseProviderImpl implements InvestmentEnterprisePro
     }
 
     @Override
-    public void deleteInvestmentContacts(Long id) {
+    public void deleteCustomerContacts(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhCustomerContacts contact = Tables.EH_CUSTOMER_CONTACTS;
         context.update(contact)
