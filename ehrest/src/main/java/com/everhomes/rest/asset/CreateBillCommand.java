@@ -28,8 +28,10 @@ import java.util.List;
  * <li>isOwed:是否欠费，0：正常；1：欠费</li>
  * <li>customerTel:客户手机号，用来滞后定位用户</li>
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
- * <li>source:账单来源</li>
- * <li>produceUid:企业下面的某个人的ID</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
  *</ul>
  */
 public class CreateBillCommand {
@@ -52,8 +54,11 @@ public class CreateBillCommand {
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
-    private String source;
-    private Long produceUid;
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
     
     public Long getCategoryId() {
         return categoryId;
@@ -228,20 +233,36 @@ public class CreateBillCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public String getSource() {
-		return source;
+	public String getSourceType() {
+		return sourceType;
 	}
 
-	public void setSource(String source) {
-		this.source = source;
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 
-	public Long getProduceUid() {
-		return produceUid;
+	public Long getSourceId() {
+		return sourceId;
 	}
 
-	public void setProduceUid(Long produceUid) {
-		this.produceUid = produceUid;
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public Long getConsumeUserId() {
+		return consumeUserId;
+	}
+
+	public void setConsumeUserId(Long consumeUserId) {
+		this.consumeUserId = consumeUserId;
 	}
 
 }

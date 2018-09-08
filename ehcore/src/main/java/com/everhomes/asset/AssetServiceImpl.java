@@ -5727,8 +5727,8 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 	
-	public ListBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
-		ListBillsDTO dto = new ListBillsDTO();
+	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListBillsDTO> dtos = new ArrayList<ListBillsDTO>();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
@@ -5738,15 +5738,14 @@ public class AssetServiceImpl implements AssetService {
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
-			
-			
-			
+			ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+			dtos.add(dto);
 		}else {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
 			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
 			if(records.size() > 0) {
 				mapping = records.get(0);
-				
+				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区，有多少个园区插入多少条账单数据
 				
 				
 			}else {
@@ -5754,6 +5753,40 @@ public class AssetServiceImpl implements AssetService {
 	                    "can not find asset mapping");
 			}
 		}
+		return dtos;
+	}
+	
+	public ListBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
+		PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+		String billItemName = assetProvider.findChargingItemNameById(charingItemId);
+		BigDecimal taxRate = assetProvider.getBillItemTaxRate(billGroupId, charingItemId);//后台直接查费项对应的税率
+		//组装创建账单请求
+		CreateBillCommand createBillCommand = ConvertHelper.convert(cmd, CreateBillCommand.class);
+		createBillCommand.setCategoryId(categoryId);
+		
+		BillGroupDTO billGroupDTO = new BillGroupDTO();
+		billGroupDTO.setBillGroupId(billGroupId);
+		billGroupDTO.setBillGroupName(group.getName());
+		
+		List<BillItemDTO> billItemDTOList = new ArrayList<>();
+		BillItemDTO billItemDTO = new BillItemDTO();
+		billItemDTO.setBillItemId(charingItemId);
+		billItemDTO.setBillItemName(billItemName);
+		BigDecimal amountReceivable = cmd.getAmountReceivable();
+		BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+		BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+		//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+		BigDecimal taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
+		billItemDTO.setAmountReceivable(amountReceivable);
+		billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+		billItemDTO.setTaxAmount(taxAmount);
+		billItemDTOList.add(billItemDTO);
+		billGroupDTO.setBillItemDTOList(billItemDTOList);
+		
+		createBillCommand.setBillGroupDTO(billGroupDTO);
+		
+		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);
+		
 		return dto;
 	}
 

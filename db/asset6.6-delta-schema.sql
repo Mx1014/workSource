@@ -19,12 +19,12 @@ ALTER TABLE eh_asset_module_app_mappings DROP INDEX u_contract_category_id;
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费V6.6（对接统一账单） 账单要增加来源字段
 ALTER TABLE `eh_payment_bills` ADD COLUMN `source_type` VARCHAR(1024) COMMENT '各个业务系统定义的唯一标识（类型）';
-ALTER TABLE `eh_payment_bills` ADD COLUMN `source_id` VARCHAR(1024) COMMENT '各个业务系统定义的唯一标识（id）';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `source_id` BIGINT COMMENT '各个业务系统定义的唯一标识（id）';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `source_name` VARCHAR(1024) COMMENT '账单来源（如：停车缴费，缴费的新增/导入等）';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_id` BIGINT COMMENT '企业下面的某个人的ID';
 -- REMARK: 物业缴费V6.6（对接统一账单） 账单费项要增加来源字段
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_type` VARCHAR(1024) COMMENT '各个业务系统定义的唯一标识（类型）';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_id` VARCHAR(1024) COMMENT '各个业务系统定义的唯一标识（id）';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_id` BIGINT COMMENT '各个业务系统定义的唯一标识（id）';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_name` VARCHAR(1024) COMMENT '账单来源（如：停车缴费，缴费的新增/导入等）';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_id` BIGINT COMMENT '企业下面的某个人的ID';
 

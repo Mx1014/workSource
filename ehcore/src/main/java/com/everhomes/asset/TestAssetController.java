@@ -88,9 +88,9 @@ public class TestAssetController extends ControllerBase {
 	 * <b>URL: /test/createGeneralBill</b>
 	 */
 	@RequestMapping("createGeneralBill")
-	@RestReturn(value = ListBillsDTO.class, collection = false)
+	@RestReturn(value = ListBillsDTO.class, collection = true)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
-		ListBillsDTO dto = assetService.createGeneralBill(cmd);
+		List<ListBillsDTO> dto = assetService.createGeneralBill(cmd);
 	    RestResponse response = new RestResponse(dto);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
