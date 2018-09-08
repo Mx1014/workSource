@@ -1301,14 +1301,6 @@ public class AssetProviderImpl implements AssetProvider {
             Long contractId = cmd.getContractId();
             String dateStrBegin = cmd.getDateStrBegin();
             String dateStrEnd = cmd.getDateStrEnd();
-            //账期取的是账单开始时间的yyyy-MM
-            String dateStr;
-			try {
-				dateStr = yyyyMM.format(yyyyMM.parse(dateStrBegin));
-			}catch (Exception e){
-				dateStr = null;
-                LOGGER.error(e.toString());
-            }
             Byte isOwed = cmd.getIsOwed();
             String customerTel = cmd.getCustomerTel();
             String invoiceNum = cmd.getInvoiceNum();
@@ -1335,12 +1327,17 @@ public class AssetProviderImpl implements AssetProvider {
             BillsDayType billsDayType = BillsDayType.fromCode(group.getBillsDayType());//出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
             Integer billsDay = group.getBillsDay();//出账单日
             Calendar start = Calendar.getInstance();
+            //账期取的是账单开始时间的yyyy-MM
+            String dateStr = null;
             try{
                 // 如果传递了计费开始时间
                 if(dateStrBegin != null){
                     start.setTime(yyyyMMdd.parse(dateStrBegin));
+                    dateStr = yyyyMM.format(yyyyMM.parse(dateStrBegin));
                 }else{
+                	dateStr = yyyyMM.format(start.getTime());
                     start.setTime(yyyyMM.parse(dateStr));
+                    //如果没有设置账单的开始时间，那么默认是当前月的第一天
                     start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
                 }
                 dates.add(yyyyMMdd.format(start.getTime()));
@@ -1376,31 +1373,33 @@ public class AssetProviderImpl implements AssetProvider {
                 if(billsDayType == null){
                     billsDayType = BillsDayType.FIRST_MONTH_NEXT_PERIOD;
                 }
+                Date dateStart = yyyyMMdd.parse(dates.get(0));
+                Date dateEnd = yyyyMMdd.parse(dates.get(1));
                 switch (billsDayType){
 	                case FIRST_MONTH_NEXT_PERIOD:
-	                    //due.setTime(d.getTime());
-	                   // due.add(Calendar.DAY_OF_MONTH,group.getBillsDay());
-	                	start.
+	                	start.setTime(dateEnd);
+	                	start.add(Calendar.DAY_OF_MONTH, billsDay);
 	                    break;
 	                case BEFORE_THIS_PERIOD:
-	                    //due.setTime(a.getTime());
-	                    //due.add(Calendar.DAY_OF_MONTH, -group.getBillsDay());
+	                	start.setTime(dateStart);
+	                	start.add(Calendar.DAY_OF_MONTH, -billsDay);
 	                    break;
 	                case AFTER_THIS_PERIOD:
-	                    //due.setTime(a.getTime());
-	                    //due.add(Calendar.DAY_OF_MONTH, group.getBillsDay() - 1);
+	                	start.setTime(dateStart);
+	                	start.add(Calendar.DAY_OF_MONTH, billsDay - 1);
 	                    break;
 	                case END_THIS_PERIOD:
-	                    //due.setTime(d.getTime());
+	                	start.setTime(dateEnd);
 	                    break;
                 }
-                start.add(Calendar.MONTH,1);
-                start.set(Calendar.DAY_OF_MONTH,billsDay);
                 dates.add(yyyyMMdd.format(start.getTime()));
                 //计算之后设置最晚还款日
-                if(dueDayType == (byte)1){ 
+                //日
+                if(dueDayType == (byte)1){
                     start.add(Calendar.DAY_OF_MONTH,dueDay);
-                }else if(dueDayType == (byte)0){
+                }
+                //月
+                else if(dueDayType == (byte)2){
                     start.add(Calendar.MONTH,dueDay);
                 }
                 dates.add(yyyyMMdd.format(start.getTime()));
