@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1535,6 +1536,11 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
                     item.setTaxAmount(dto.getTaxAmount());//增加税额
                     item.setTaxRate(dto.getTaxRate());//费项增加税率信息
+                    //物业缴费V6.6（对接统一账单） 账单要增加来源
+                    item.setSourceId(cmd.getSourceId());
+                    item.setSourceType(cmd.getSourceType());
+                    item.setSourceName(cmd.getSourceName());
+                    item.setConsumeUserId(cmd.getConsumeUserId());
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1686,9 +1692,29 @@ public class AssetProviderImpl implements AssetProvider {
             }else{
                 newBill.setChargeStatus(isOwed);
             }
-            newBill.setSwitch(isSettled);
+            if(isSettled != null) {
+            	newBill.setSwitch(isSettled);
+            }else {
+            	//物业缴费V6.6（对接统一账单）：如果没有传账单是已出或未出，系统根据出账单日和当前日期做比较，判断是已出还是未出
+            	try {
+            		Date today = new Date();
+                	Date billDay = yyyyMMdd.parse(newBill.getDateStrDue());
+                	if(today.compareTo(billDay) >= 0) {
+                		newBill.setSwitch((byte)1);
+                	}else {
+                		newBill.setSwitch((byte)0);
+                	}
+            	} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
             newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
+            //物业缴费V6.6（对接统一账单） 账单要增加来源
+            newBill.setSourceId(cmd.getSourceId());
+            newBill.setSourceType(cmd.getSourceType());
+            newBill.setSourceName(cmd.getSourceName());
+            newBill.setConsumeUserId(cmd.getConsumeUserId());
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
