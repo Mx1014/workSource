@@ -265,7 +265,7 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
 	 */
-	public ListBillsDTO createGeneralBill(CreateBillCommand cmd);
+	public ListBillsDTO createGeneralBill(CreateGeneralBillCommand cmd);
 
 	void tranferAssetMappings();
 	

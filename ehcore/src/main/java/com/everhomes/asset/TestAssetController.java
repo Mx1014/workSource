@@ -11,12 +11,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.CreateGeneralBillCommand;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -76,6 +77,20 @@ public class TestAssetController extends ControllerBase {
 	@RestReturn(value = AssetModuleAppMapping.class, collection = false)
 	public RestResponse createOrUpdateAssetMapping(AssetModuleAppMapping cmd) {
 		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(cmd);
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+	 * <p>创建统一账单接口</p>
+	 * <b>URL: /test/createGeneralBill</b>
+	 */
+	@RequestMapping("createGeneralBill")
+	@RestReturn(value = ListBillsDTO.class, collection = false)
+	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
+		ListBillsDTO dto = assetService.createGeneralBill(cmd);
 	    RestResponse response = new RestResponse(dto);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);

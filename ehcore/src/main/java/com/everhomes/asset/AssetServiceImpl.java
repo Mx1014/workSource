@@ -5727,7 +5727,7 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 	
-	public ListBillsDTO createGeneralBill(CreateBillCommand cmd) {
+	public ListBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
 		ListBillsDTO response = new ListBillsDTO();
 		//cmd.setTargetType(Asset);//默认是企业级别
 		
