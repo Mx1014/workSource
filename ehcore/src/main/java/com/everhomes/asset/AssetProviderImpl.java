@@ -1746,7 +1746,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<SubItemDTO> subItemDTOList = new ArrayList<SubItemDTO>();//增加减免费项
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-                , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM)
+                , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM
+                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1772,6 +1773,11 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBillStatus(f.getValue(r.STATUS));
                     vo.setContractId(f.getValue(r.CONTRACT_ID));
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
+                    //新增账单来源信息
+                    vo.setSourceId(f.getValue(r.SOURCE_ID));
+                    vo.setSourceType(f.getValue(r.SOURCE_TYPE));
+                    vo.setSourceName(f.getValue(r.SOURCE_NAME));
+                    vo.setConsumeUserId(f.getValue(r.CONSUME_USER_ID));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID

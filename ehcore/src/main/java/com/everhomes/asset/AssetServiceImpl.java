@@ -5799,5 +5799,26 @@ public class AssetServiceImpl implements AssetService {
 	public void tranferAssetMappings() {
 		assetProvider.tranferAssetMappings();
 	}
+	
+	/** 
+	 * 物业缴费V6.6 统一账单：账单状态改变回调各个业务系统接口
+	 * @param sourceType
+	 * @param sourceId
+	 * @return
+	 */
+	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId) {
+		AssetGeneralBillHandler handler = null;
+
+        if(sourceType != null && sourceId != null) {
+        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
+            try {
+            	handler = PlatformContext.getComponent(handlerPrefix + sourceType + sourceId);
+			}catch (Exception ex){
+				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}, sourceId = {}", sourceType, sourceId);
+			}
+        }
+
+        return handler;
+    }
 
 }

@@ -269,4 +269,6 @@ public interface AssetService {
 
 	void tranferAssetMappings();
 	
+	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
+	
 }

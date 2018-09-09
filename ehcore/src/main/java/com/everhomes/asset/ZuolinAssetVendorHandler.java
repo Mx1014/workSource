@@ -135,7 +135,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private AssetPayServiceForEnt assetPayServiceForEnt;
-
+    
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
@@ -602,6 +602,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
         assetProvider.modifyBillStatus(Long.parseLong(cmd.getBillId()));
+        //物业缴费V6.6统一账单：账单状态改变回调接口
+        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+        ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+        ListBillDetailResponse billDetail = listBillDetail(ncmd);
+        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
+        if(null != handler){
+        	handler.payNotifyBillSourceModule(billDetail);
+        }
     }
 
     @Override
