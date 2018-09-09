@@ -188,7 +188,7 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
         for(int i = 1;i <= 3;i++){
             ParkingRechargeRateDTO cardRate = new ParkingRechargeRateDTO();
-            cardRate.setCardTypeId(String.valueOf(cardType.getId()));
+            cardRate.setCardTypeId(String.valueOf(cardType.getCardTypeId()));
             cardRate.setCardType(cardType.getCardTypeName());
             cardRate.setPrice(new BigDecimal(monthlyrent).multiply(new BigDecimal(i)).setScale(2));
             cardRate.setRateName(i + "个月");

@@ -381,18 +381,21 @@ public interface AssetProvider {
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-    void insertAppMapping(EhAssetModuleAppMappings relation);
+    AssetModuleAppMapping insertAppMapping(AssetModuleAppMapping mapping);
 
-    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
-
-    boolean checkExistAsset(Long assetCategoryId);
-
-    boolean checkExistContract(Long contractCategoryId);
-
-    Long checkEnergyFlag(Integer namespaceID);
-
-    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    /**
+     * 判断缴费是否已经存在关联合同的记录
+     * @param assetCategoryId
+     * @return
+     */
+    boolean checkExistAssetMapContract(Long assetCategoryId);
     
+    boolean checkExistAssetMapEnergy(Long assetCategoryId);
+    
+    void updateAssetMapContract(AssetModuleAppMapping mapping);
+    
+    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
+
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
     String getProjectNameByBillID(Long billId);
@@ -430,5 +433,26 @@ public interface AssetProvider {
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 	
+	void tranferAssetMappings();
+	
+	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
+	
+	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,
+			String sourceType);
+	
+	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	
+	/**
+	 * 物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
+	 * @param billGroupId
+	 * @param chargingItemId
+	 * @return
+	 */
+	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
+	
+	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
+	
+	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
+		
 	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }
