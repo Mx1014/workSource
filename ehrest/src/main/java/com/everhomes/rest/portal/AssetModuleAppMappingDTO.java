@@ -78,4 +78,10 @@ public class AssetModuleAppMappingDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	public Byte getStatus() {
+		return status;
+	}
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 }
