@@ -76,16 +76,17 @@ public class TestAssetController extends ControllerBase {
 	 * <p>业务应用新增缴费映射关系</p>
 	 * <b>URL: /test/createOrUpdateAssetMapping</b>
 	 */
-	@RequestMapping("createOrUpdateAssetMapping")
-	@RestReturn(value = AssetModuleAppMapping.class, collection = false)
-	public RestResponse createOrUpdateAssetMapping(CreateOrUpdateAssetMappingCmd cmd) {
-		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(assetModuleAppMapping);
-	    RestResponse response = new RestResponse(dto);
-	    response.setErrorDescription("OK");
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    return response;
-	}
+//	@RequestMapping("createOrUpdateAssetMapping")
+//	@RestReturn(value = AssetModuleAppMappingDTO.class, collection = false)
+//	public RestResponse createOrUpdateAssetMapping(CreateOrUpdateAssetMappingCmd cmd) {
+//		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+//		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(assetModuleAppMapping);
+//		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+//	    RestResponse response = new RestResponse(dto);
+//	    response.setErrorDescription("OK");
+//	    response.setErrorCode(ErrorCodes.SUCCESS);
+//	    return response;
+//	}
 	
 	/**
 	 * <p>创建统一账单接口</p>
