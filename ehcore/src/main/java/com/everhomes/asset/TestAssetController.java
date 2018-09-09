@@ -11,13 +11,16 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateGeneralBillCommand;
+import com.everhomes.rest.asset.CreateOrUpdateAssetMappingCmd;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -75,8 +78,9 @@ public class TestAssetController extends ControllerBase {
 	 */
 	@RequestMapping("createOrUpdateAssetMapping")
 	@RestReturn(value = AssetModuleAppMapping.class, collection = false)
-	public RestResponse createOrUpdateAssetMapping(AssetModuleAppMapping cmd) {
-		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(cmd);
+	public RestResponse createOrUpdateAssetMapping(CreateOrUpdateAssetMappingCmd cmd) {
+		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(assetModuleAppMapping);
 	    RestResponse response = new RestResponse(dto);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
