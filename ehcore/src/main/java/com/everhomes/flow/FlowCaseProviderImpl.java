@@ -260,7 +260,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
     private Condition buildSearchFlowCaseCmdCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
         Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
-                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
         if(cmd.getUserId() != null)
             cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));

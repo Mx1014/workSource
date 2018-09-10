@@ -1212,7 +1212,8 @@ public class CommunityServiceImpl implements CommunityService {
 						propertyMgrService.deleteApartment(command);
 					});
 				}
-				customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
+				//删除楼宇下的房源与企业客户的关联
+				//customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
 				//删除楼栋时，用置状态的方式代替直接删除楼栋的方式(影响较大) by tangcen 2018年8月5日15:14:43
 				//this.communityProvider.deleteBuilding(building);
 				building.setStatus(BuildingAdminStatus.INACTIVE.getCode());
@@ -3809,17 +3810,20 @@ public class CommunityServiceImpl implements CommunityService {
         List<ComOrganizationMemberDTO> dtoList = organizationMembers.stream()
             .map((c) -> {
                 ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
-                if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
-                    User operator = userProvider.findUserById(c.getOperatorUid());
-                    UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-                    dto.setOperatorName(operator != null ? operator.getNickName() : "");
-                    dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
-                    dto.setOperateType(OperateType.MANUAL.getCode());
-                } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
-                    // FIXME 临时解决   2017/07/27  xq.tian
-                    dto.setOperatorName("--");
-                    dto.setOperateType(OperateType.NOT_MANUAL.getCode());
-                }
+				if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
+					User operator = userProvider.findUserById(c.getOperatorUid());
+					UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+					dto.setOperatorName(operator != null ? operator.getNickName() : "");
+					dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                    if (OperateType.IMPORT.getCode().equals(c.getSourceType())) {
+                        dto.setOperateType(OperateType.IMPORT.getCode());
+                    }else {
+                        dto.setOperateType(OperateType.MANUAL.getCode());
+                    }
+				} else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+					dto.setOperatorName("--");
+                    dto.setOperateType(OperateType.EMAIL.getCode());
+				}
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
@@ -5083,10 +5087,10 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
     	}
     	
-		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getName());
+		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getId());
 		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
 		
-		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
+		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getId());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
 		
 		if (dto.getAreaSize()!=null) {
@@ -5501,7 +5505,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setBuildingName(address.getBuildingName());
 		dto.setApartmentFloor(address.getApartmentFloor());
 		dto.setApartmentName(address.getApartmentName());
-		dto.setLivingStatus(livingStatus);
+		dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 		dto.setAreaSize(address.getAreaSize());
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());

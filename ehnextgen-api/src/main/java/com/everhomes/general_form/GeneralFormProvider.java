@@ -20,6 +20,8 @@ public interface GeneralFormProvider {
 
     GeneralForm getGeneralFormById(Long id);
 
+    GeneralForm findGeneralFormById(Long id);
+
     List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
                                         ListingQueryBuilderCallback queryBuilderCallback);
 

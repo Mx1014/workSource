@@ -186,7 +186,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
     private Condition buildSearchFlowCaseCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
         Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
-                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {

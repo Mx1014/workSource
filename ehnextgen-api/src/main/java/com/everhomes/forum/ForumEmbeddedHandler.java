@@ -7,7 +7,7 @@ public interface ForumEmbeddedHandler {
     String renderEmbeddedObjectSnapshot(Post post);
     String renderEmbeddedObjectDetails(Post post);
     Post preProcessEmbeddedObject(Post post);
-    Post postProcessEmbeddedObject(Post post);
+    Post postProcessEmbeddedObject(Post post, Long communityId);
     void beforePostDelete(Post post);
     void afterPostDelete(Post post);
 }

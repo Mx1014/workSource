@@ -44,4 +44,6 @@ public interface PmsyService {
 	PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd);
 	
 	void payNotify(@Valid OrderPaymentNotificationCommand cmd);
+	
+	public boolean isZuolinTest();
 }
