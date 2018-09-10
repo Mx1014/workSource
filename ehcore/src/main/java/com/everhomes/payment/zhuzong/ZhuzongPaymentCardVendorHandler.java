@@ -56,8 +56,8 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
     private static final String ACCOUNT_QUERY_TYPE = "1";
     private static final String RECHARGE_TYPE = "3";
     private static final String FREEZE_ACCOUNT_TYPE = "4";
-    private static final String CONSUME_TRANSACTION_TYPE = "5";
-    private static final String RECHARGE_TRANSACTION_TYPE = "6";
+    private static final String CONSUME_TRANSACTION_TYPE = "6";
+    private static final String RECHARGE_TRANSACTION_TYPE = "5";
     private static final String UNBUNDLE_CARD_TYPE = "7";
 
     public static final String vendorName = "ZHUZONG";
