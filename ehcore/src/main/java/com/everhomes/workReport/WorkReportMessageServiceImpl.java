@@ -5,9 +5,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
@@ -18,7 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -41,6 +42,9 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Autowired
     private WorkReportTimeService workReportTimeService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private MessagingService messagingService;
@@ -267,6 +271,30 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         workReportValProvider.deleteReportValReceiverMsg(currentTime);
     }
 
+    private void sendIndexMessage(String content, String title, Long receiverId){
+        // set the message
+        MessageDTO message = new MessageDTO();
+        message.setBodyType(MessageBodyType.TEXT.getCode());
+        message.setBody(content);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        message.setMeta(meta);
+
+        //  send the message
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(receiverId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
+    }
+
     @Scheduled(cron = "0 30 * * * ?")
     @Override
     public void workReportAuMessage() {
@@ -301,37 +329,47 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         });
         LocalDateTime time = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0);
         for (WorkReport r : results) {
-            ReportValiditySettingDTO validity = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
-            ReportMsgSettingDTO auMsg = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
-            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), validity);
+            //  获取汇报时间
+            ReportValiditySettingDTO validitySetting = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
+            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), time, validitySetting);
+            //  获取提醒时间
+            ReportMsgSettingDTO auMsgSetting = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
+            Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(r.getReportType(), reportTime.getTime(),
+                    auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
+            //  生成提醒数据
+            WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(r.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
+            if(msg !=null){
+                msg.setReminderTime(reminderTime);
+                msg.setScopeIds(listScopeIds(r));
+                workReportProvider.updateWorkReportScopeMsg(msg);
+            }
+            else{
+                msg.setNamespaceId(r.getNamespaceId());
+                msg.setReportId(r.getId());
+                msg.setReportName(r.getReportName());
+                msg.setReportType(r.getReportType());
+                msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
+                msg.setReminderTime(reminderTime);
+                msg.setScopeIds(listScopeIds(r));
+                workReportProvider.createWorkReportScopeMsg(msg);
+            }
         }
     }
 
-
-    private void sendIndexMessage(String content, String title, Long receiverId){
-        // set the message
-        MessageDTO message = new MessageDTO();
-        message.setBodyType(MessageBodyType.TEXT.getCode());
-        message.setBody(content);
-        message.setMetaAppId(AppConstants.APPID_DEFAULT);
-        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
-        Map<String, String> meta = new HashMap<>();
-        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
-//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-        message.setMeta(meta);
-
-        //  send the message
-        messagingService.routeMessage(
-                User.SYSTEM_USER_LOGIN,
-                AppConstants.APPID_MESSAGING,
-                ChannelType.USER.getCode(),
-                String.valueOf(receiverId),
-                message,
-                MessagingConstants.MSG_FLAG_STORED.getCode()
-        );
+    private String listScopeIds(WorkReport report) {
+        List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopesMap(report.getId());
+        if(results.size()==0)
+            return null;
+        Set<Long> scopeIds = new HashSet();
+        for(WorkReportScopeMap r : results){
+            if(UniongroupTargetType.fromCode(r.getSourceType()) == UniongroupTargetType.MEMBERDETAIL)
+                scopeIds.add(r.getSourceId());
+            else{
+                List<Long> resultIds = organizationProvider.queryOrganizationPersonnelTargetIds(new ListingLocator(), r.getSourceId(), null);
+                if(resultIds.size() >0)
+                    scopeIds.addAll(resultIds);
+            }
+        }
+        return JSON.toJSONString(scopeIds);
     }
-
-
-
 }

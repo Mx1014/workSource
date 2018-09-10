@@ -25,6 +25,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -282,7 +283,6 @@ public class WorkReportServiceImpl implements WorkReportService {
     public void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
         workReportProvider.disableWorkReportByFormOriginId(formOriginId, moduleId, moduleType);
     }
-
 
     private List<WorkReportScopeMapDTO> listWorkReportScopes(Long reportId) {
         List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopesMap(reportId);
@@ -644,6 +644,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         //  2.the reportValId is not null means updating the report val.
         WorkReportValDTO dto = new WorkReportValDTO();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        LocalDateTime currentTime = LocalDateTime.now();
 
         if (cmd.getReportValId() != null) {
             WorkReport report = workReportProvider.getRunningWorkReportById(cmd.getReportId());
@@ -695,7 +696,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
         ReportValiditySettingDTO setting = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), setting);
+        Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), currentTime, setting);
         LocalDateTime startTime = workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getStartType(),
                 setting.getStartMark(), setting.getStartTime());        //  获取汇报有效起始时间
         LocalDateTime endTime = workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(), setting.getEndType(),

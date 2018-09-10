@@ -13,10 +13,13 @@ import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMsgDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMsg;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
+import com.everhomes.server.schema.tables.records.EhWorkReportScopeMsgRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
 import com.everhomes.user.UserContext;
@@ -232,6 +235,49 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         if (null != results && results.size() > 0)
             return results;
         return null;
+    }
+
+    @Override
+    public Long createWorkReportScopeMsg(WorkReportScopeMsg msg){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportScopeMsg.class));
+        msg.setId(id);
+        msg.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());
+        dao.insert(msg);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMsg.class, null);
+        return msg.getId();
+    }
+
+    @Override
+    public void updateWorkReportScopeMsg(WorkReportScopeMsg msg){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());
+        dao.update(msg);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMsg.class, msg.getId());
+    }
+
+    @Override
+    public WorkReportScopeMsg findWorkReportScopeMsg(Long reportId, java.sql.Date reportTime){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportScopeMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_TIME.eq(reportTime));
+        return query.fetchAnyInto(WorkReportScopeMsg.class);
+    }
+
+    @Override
+    public List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime){
+        List<WorkReportScopeMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportScopeMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.ge(startTime));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.le(endTime));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportScopeMsg.class));
+            return null;
+        });
+        return results;
     }
 
 }

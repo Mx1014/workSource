@@ -38,4 +38,11 @@ public interface WorkReportProvider {
 
     List<WorkReportTemplate> listWorkReportTemplates(Long moduleId);
 
+    Long createWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    void updateWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    WorkReportScopeMsg findWorkReportScopeMsg(Long reportId, java.sql.Date reportTime);
+
+    List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime);
 }

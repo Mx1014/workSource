@@ -14,7 +14,7 @@ public interface WorkReportTimeService {
 
     String displayReportTime(Byte rType, Long rTime);
 
-    Timestamp getReportTime(Byte rType, ReportValiditySettingDTO setting);
+    Timestamp getReportTime(Byte rType, LocalDateTime time, ReportValiditySettingDTO setting);
 
     String formatTime(LocalDateTime time);
 

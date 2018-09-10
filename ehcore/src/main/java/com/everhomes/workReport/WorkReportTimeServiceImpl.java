@@ -127,18 +127,17 @@ public class WorkReportTimeServiceImpl implements WorkReportTimeService{
             3-3-2.currentTime<=endTime -> LastMonth*/
     /* ------------------------------------------- 汇报时间获取规则总结end ------------------------------------------- */
     @Override
-    public Timestamp getReportTime(Byte rType, ReportValiditySettingDTO setting) {
-        LocalDateTime current = LocalDateTime.now();
+    public Timestamp getReportTime(Byte rType, LocalDateTime time, ReportValiditySettingDTO setting) {
         LocalDate temp = null;
         switch (WorkReportType.fromCode(rType)) {
             case DAY:
-                temp = getDayReportTime(current, setting);
+                temp = getDayReportTime(time, setting);
                 break;
             case WEEK:
-                temp = getWeekReportTime(current, setting);
+                temp = getWeekReportTime(time, setting);
                 break;
             case MONTH:
-                temp = getMonthReportTime(current, setting);
+                temp = getMonthReportTime(time, setting);
                 break;
         }
         return Timestamp.valueOf(temp.atTime(0, 0, 0));
