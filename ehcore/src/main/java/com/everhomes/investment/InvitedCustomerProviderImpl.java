@@ -147,6 +147,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhCustomerRequirements.class));
         requirement.setId(id);
+        requirement.setVersion(id);
 
         User user = UserContext.current().getUser();
         requirement.setOperatorUid(user.getId());
@@ -212,6 +213,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhCustomerCurrentRents.class));
         currentRent.setId(id);
+        currentRent.setVersion(id);
 
         User user = UserContext.current().getUser();
         currentRent.setOperatorUid(user.getId());

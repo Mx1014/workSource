@@ -42,7 +42,7 @@ public class CustomerRequirementDTO {
     private BigDecimal maxRentPrice;
     private Byte rentPriceUnit;
     private Byte rentType;
-    private String version;
+    private Long version;
     private List<CustomerRequirementAddressDTO> addresses;
     private Byte status;
     private Timestamp createTime;
@@ -138,11 +138,12 @@ public class CustomerRequirementDTO {
         this.rentType = rentType;
     }
 
-    public String getVersion() {
+
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 

@@ -14,15 +14,7 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
-import com.everhomes.rest.investment.CustomerContactDTO;
-import com.everhomes.rest.investment.CustomerLevelType;
-import com.everhomes.rest.investment.CustomerTrackerDTO;
-import com.everhomes.rest.investment.InvitedCustomerDTO;
-import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
-import com.everhomes.rest.investment.InvitedCustomerType;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
-import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -231,14 +223,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             ListFieldItemCommand fieldItemCommand = new ListFieldItemCommand();
             fieldItemCommand.setNamespaceId(cmd.getNamespaceId());
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
-            // this field id means investment enterprise levelItemId private key
+            // this field id menus investment enterprise levelItemId private key
             fieldItemCommand.setFieldId(5L);
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
                 statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), itemsMap.keySet(),itemsMap);
             }
-            response.setStastics(statistics);
+            response.setStatistics(statistics);
         }
         return response;
     }
@@ -271,6 +263,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 invitedCustomerDTO.setTrackers(dtos);
             }
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(invitedCustomerDTO.getId());
+            invitedCustomerDTO.setRequirement(ConvertHelper.convert(requirement, CustomerRequirementDTO.class));
+
+            CustomerCurrentRent currentRent = invitedCustomerProvider.findNewestCurrentRentByCustomerId(invitedCustomerDTO.getId());
 
 
 

@@ -23,7 +23,7 @@ public class CustomerRequirementAddressDTO {
     private Long communityId;
     private Long requirementId;
     private Long customerId;
-    private String addressId;
+    private Long addressId;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
@@ -62,11 +62,11 @@ public class CustomerRequirementAddressDTO {
         this.customerId = customerId;
     }
 
-    public String getAddressId() {
+    public Long getAddressId() {
         return addressId;
     }
 
-    public void setAddressId(String addressId) {
+    public void setAddressId(Long addressId) {
         this.addressId = addressId;
     }
 
