@@ -140,6 +140,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private Long ORDER_AUTO_CANCEL_TIME = 15 * 60 * 1000L;
 
 	private String queueName = "rentalService";
+	public static final Long moduleId = 40400L;
 
 	private static final String REFER_TYPE = FlowReferType.RENTAL.getCode();
 
@@ -2435,7 +2436,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
 		}
-
+		if (bill.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
+				bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
+			changeRentalOrderStatus(bill,SiteBillStatus.SUCCESS.getCode(),true);
+			return null;
+		}
 		return buildCommonOrderDTO(bill);
 
 	}
@@ -2515,6 +2520,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
 		}
+		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
+				order.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
+			changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+			return null;
+		}
 		PreOrderDTO preOrderDTO = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
 		//保存支付订单信息
 		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
@@ -2546,24 +2556,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//状态为已完成时，不需要验证，之前付款时，已经做过校验
 		// 注意： validateRentalBill 方法校验时，会查出当前资源状态：已预约，此时验证会不通过
 		if (SiteBillStatus.COMPLETE.getCode() != status && SiteBillStatus.FAIL.getCode() != status) {
-
-//			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 			processCells(rs, order.getRentalType());
 			rules.addAll(getBillRules(order));
-//			List<RentalResourceOrder> rsbs = rentalv2Provider
-//					.findRentalResourceOrderByOrderId(order.getId());
-//			for(RentalResourceOrder rsb : rsbs){
-//				RentalBillRuleDTO dto = new RentalBillRuleDTO();
-//				dto.setRentalCount(rsb.getRentalCount());
-//				dto.setRuleId(rsb.getRentalResourceRuleId());
-//				resourceRuleIds.add(rsb.getRentalResourceRuleId());
-//				rules.add(dto);
-//			}
 		}
 
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + order.getRentalResourceId())
 				.enter(() -> {
-
 					//验证订单下的资源是否足够
 					this.validateRentalBill(rules, rs, rule,order.getRentalType());
 
@@ -2576,9 +2574,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					return null;
 				});
 
-		if (SiteBillStatus.SUCCESS.getCode() == status) {
+		if (SiteBillStatus.SUCCESS.getCode() == status){
 			onOrderSuccess(order);
+			//工作流自动进到下一节点
+			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			flowService.processAutoStep(stepDTO);
 		}
+
 
 		//根据产品定义，是在待审批的节点就不允许其他用户预订 同时段统一资源（状态不是已预约成功，比如待付款）
 		if (cancelOtherOrderFlag) {

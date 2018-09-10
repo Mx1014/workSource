@@ -137,7 +137,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
 							cancelOtherOrderFlag = true;
 						}
-						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
+						//rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
 				}
 			}
