@@ -223,6 +223,7 @@ import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -3659,7 +3660,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        if(InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(cmd.getCustomerSource()))){
+            //todo: check invited customer privilege
+        }else {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        }
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
         if (cmd.getTrackingTime() != null) {
