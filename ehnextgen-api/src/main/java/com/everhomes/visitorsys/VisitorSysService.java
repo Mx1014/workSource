@@ -144,5 +144,5 @@ public interface VisitorSysService {
 
     OpenApiCreateVisitorResponse openApiCreateVisitor(OpenApiCreateVisitorCommand cmd);
 
-    IdentifierCardDTO getIDCardInfo()
+    IdentifierCardDTO getIDCardInfo();
 }

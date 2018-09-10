@@ -22,6 +22,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
@@ -60,6 +61,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -2602,5 +2604,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild token "+token);
         }
         return id;
+    }
+
+    @Override
+    public IdentifierCardDTO getIDCardInfo() {
+        IdentifierCardDTO idCard;
+        String url = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"visitorsys.hardware.cardreader","http://localhost:9225/actionapi/ReadCard/Read");
+        Map<String,String> params = new HashMap<>();
+        String json = null;
+        try {
+            json = HttpUtils.post(url,params);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        idCard = JSONObject.parseObject(json,new TypeReference<IdentifierCardDTO>(){});
+        return idCard;
     }
 }

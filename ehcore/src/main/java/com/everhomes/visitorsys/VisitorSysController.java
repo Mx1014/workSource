@@ -890,4 +890,15 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	@RequestMapping("getIDCardInfo")
+	@RestReturn(IdentifierCardDTO.class)
+	public RestResponse getIDCardInfo(BaseVisitorsysCommand cmd) {
+
+		RestResponse response = new RestResponse(visitorSysService.getIDCardInfo());
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 }
