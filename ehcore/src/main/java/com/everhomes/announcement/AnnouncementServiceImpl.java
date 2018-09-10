@@ -79,6 +79,10 @@ public class AnnouncementServiceImpl implements AnnouncementService{
 
     @Override
     public void deleteAnnouncement(DeleteAnnouncementCommand cmd) {
+        Forum forum = forumService.findFourmByNamespaceId(UserContext.getCurrentNamespaceId());
+        if(forum != null){
+            cmd.setForumId(forum.getId());
+        }
         this.forumService.deletePost(cmd.getForumId(), cmd.getAnnouncementId(), null, null, null);
     }
 
