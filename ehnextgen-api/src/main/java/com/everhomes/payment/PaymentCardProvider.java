@@ -24,7 +24,7 @@ public interface PaymentCardProvider {
 	
 	void createPaymentCardRechargeOrder(PaymentCardRechargeOrder paymentCardRechargeOrder);
 	
-	List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Long pageAnchor,Integer pageSize);
+	List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Byte status,Long pageAnchor,Integer pageSize);
 	
 	List<PaymentCardRechargeOrder> searchCardRechargeOrder(String ownerType,Long ownerId,Timestamp startDate,Timestamp endDate,
     		String rechargeType,Byte rechargeStatus,String keyword,Long pageAnchor,Integer pageSize);

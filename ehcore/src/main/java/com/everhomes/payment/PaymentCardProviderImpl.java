@@ -209,7 +209,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
-    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Long pageAnchor,Integer pageSize){
+    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Byte status,Long pageAnchor,Integer pageSize){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
     	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
 
@@ -219,7 +219,8 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
-     
+     	if (status != null)
+			query.addConditions(Tables.EH_PAYMENT_CARDS.STATUS.eq(status));
         if(StringUtils.isNotBlank(keyword))
         	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
         			.or(Tables.EH_PAYMENT_CARDS.MOBILE.eq(keyword)));

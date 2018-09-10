@@ -434,7 +434,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+				cmd.getKeyword(),cmd.getStatus(),cmd.getPageAnchor(), pageSize);
 		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardUserDTO.class))
 				.collect(Collectors.toList()));
     	if(list.size() > 0){
@@ -544,7 +544,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+				cmd.getKeyword(),cmd.getStatus(),cmd.getPageAnchor(), pageSize);
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -559,15 +559,17 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("手机号");
 		row.createCell(1).setCellValue("姓名");
-		row.createCell(2).setCellValue("开卡时间");
+		row.createCell(2).setCellValue("最后修改时间");
 		row.createCell(3).setCellValue("卡号");
+		row.createCell(4).setCellValue("状态");
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PaymentCard paymentCard = list.get(i);
 			tempRow.createCell(0).setCellValue(paymentCard.getMobile());
 			tempRow.createCell(1).setCellValue(paymentCard.getUserName());
-			tempRow.createCell(2).setCellValue(datetimeSF.format(paymentCard.getCreateTime()));
+			tempRow.createCell(2).setCellValue(datetimeSF.format(paymentCard.getUpdateTime()));
 			tempRow.createCell(3).setCellValue(paymentCard.getCardNo());
+			tempRow.createCell(4).setCellValue(paymentCard.getStatus() == PaymentCardStatus.ACTIVE.getCode() ? "已绑定" : "已解绑");
 		}
 		ByteArrayOutputStream out = null;
 		try {
