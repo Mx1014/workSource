@@ -7,7 +7,6 @@ import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 public class CreateInvitedCustomerCommand {
