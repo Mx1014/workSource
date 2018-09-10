@@ -255,6 +255,51 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
 
+    private String transactionRatio;
+    private Long expectedSignDate;
+    private Byte customerSource;
+    private Long entryStatusItemId;
+    private String entryStatusItemName;
+
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Long getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Long expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public String getEntryStatusItemName() {
+        return entryStatusItemName;
+    }
+
+    public void setEntryStatusItemName(String entryStatusItemName) {
+        this.entryStatusItemName = entryStatusItemName;
+    }
 
     public String getSyncErrorMsg() {
         return syncErrorMsg;

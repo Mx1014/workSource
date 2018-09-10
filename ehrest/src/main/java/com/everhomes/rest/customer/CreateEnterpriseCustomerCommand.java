@@ -241,9 +241,9 @@ public class CreateEnterpriseCustomerCommand {
 
 
     private String transactionRatio;
-    private Timestamp expectedSignDate;
+    private Long expectedSignDate;
     private Byte customerSource;
-    private Long admissionItemId;
+    private Long entryStatusItemId;
 
 
     // we should add new module fields
@@ -1332,12 +1332,20 @@ public class CreateEnterpriseCustomerCommand {
         this.transactionRatio = transactionRatio;
     }
 
-    public Timestamp getExpectedSignDate() {
+    public Long getExpectedSignDate() {
         return expectedSignDate;
     }
 
-    public void setExpectedSignDate(Timestamp expectedSignDate) {
+    public void setExpectedSignDate(Long expectedSignDate) {
         this.expectedSignDate = expectedSignDate;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
     }
 
     public Byte getCustomerSource() {
@@ -1346,14 +1354,6 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setCustomerSource(Byte customerSource) {
         this.customerSource = customerSource;
-    }
-
-    public Long getAdmissionItemId() {
-        return admissionItemId;
-    }
-
-    public void setAdmissionItemId(Long admissionItemId) {
-        this.admissionItemId = admissionItemId;
     }
 
     public List<CustomerContactDTO> getContacts() {

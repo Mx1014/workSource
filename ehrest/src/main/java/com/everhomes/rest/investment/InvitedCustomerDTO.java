@@ -163,10 +163,10 @@ public class InvitedCustomerDTO {
     private List<CustomerAttachmentDTO> attachments;
 
     private String transactionRatio;
-    private Timestamp expectedSignDate;
+    private Long expectedSignDate;
     private Byte customerSource;
-    private Long admissionItemId;
-    private String admissionItemName;
+    private Long entryStatusItemId;
+    private String entryStatusItemName;
 
     // we should add new module fields
     // investment enterprise tracking infos
@@ -204,29 +204,29 @@ public class InvitedCustomerDTO {
         this.trackingInfos = trackingInfos;
     }
 
-    public Timestamp getExpectedSignDate() {
+    public Long getExpectedSignDate() {
         return expectedSignDate;
     }
 
-    public void setExpectedSignDate(Timestamp expectedSignDate) {
+    public void setExpectedSignDate(Long expectedSignDate) {
         this.expectedSignDate = expectedSignDate;
     }
 
 
-    public Long getAdmissionItemId() {
-        return admissionItemId;
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
     }
 
-    public void setAdmissionItemId(Long admissionItemId) {
-        this.admissionItemId = admissionItemId;
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
     }
 
-    public String getAdmissionItemName() {
-        return admissionItemName;
+    public String getEntryStatusItemName() {
+        return entryStatusItemName;
     }
 
-    public void setAdmissionItemName(String admissionItemName) {
-        this.admissionItemName = admissionItemName;
+    public void setEntryStatusItemName(String entryStatusItemName) {
+        this.entryStatusItemName = entryStatusItemName;
     }
 
     public Long getId() {

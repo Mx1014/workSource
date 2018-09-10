@@ -162,7 +162,7 @@ public class CreateInvitedCustomerCommand {
     private String transactionRatio;
     private Long expectedSignDate;
     private Byte customerSource;
-    private Long admissionItemId;
+    private Long entryStatusItemId;
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -1315,12 +1315,12 @@ public class CreateInvitedCustomerCommand {
         this.trackers = trackers;
     }
 
-    public Long getAdmissionItemId() {
-        return admissionItemId;
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
     }
 
-    public void setAdmissionItemId(Long admissionItemId) {
-        this.admissionItemId = admissionItemId;
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
     }
 
     @Override

@@ -10,11 +10,11 @@ import java.sql.Timestamp;
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
- *     <li>nowAddress: 当前地址</li>
- *     <li>nowRental: 当前租金</li>
- *     <li>nowRentalUnit: 当前租金单位</li>
- *     <li>nowArea: 当前面积</li>
- *     <li>nowContractEndDate: 当前合同结束日</li>
+ *     <li>address: 当前地址</li>
+ *     <li>rentPrice: 当前租金</li>
+ *     <li>rentPriceUnit: 当前租金单位</li>
+ *     <li>rentArea: 当前面积</li>
+ *     <li>contractIntentionDate: 当前合同结束日</li>
  *     <li>status: status</li>
  *     <li>customerId: customerId</li>
  *     <li>createTime: createTime</li>
@@ -33,8 +33,8 @@ public class CustomerCurrentRentDTO {
     private BigDecimal rentPrice;
     private Byte rentPriceUnit;
     private BigDecimal rentArea;
-    private Timestamp contractIntentionDate;
-    private String version;
+    private Long contractIntentionDate;
+    private Long version;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
@@ -105,19 +105,19 @@ public class CustomerCurrentRentDTO {
         this.rentArea = rentArea;
     }
 
-    public Timestamp getContractIntentionDate() {
+    public Long getContractIntentionDate() {
         return contractIntentionDate;
     }
 
-    public void setContractIntentionDate(Timestamp contractIntentionDate) {
+    public void setContractIntentionDate(Long contractIntentionDate) {
         this.contractIntentionDate = contractIntentionDate;
     }
 
-    public String getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 

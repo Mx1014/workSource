@@ -733,14 +733,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
-        if (null != dto.getDropBox9ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
-            if (null != dropBoxItem) {
-                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
-            } else {
-                dto.setDropBox9ItemName(null);
-            }
-        }
 
         if (null != dto.getAptitudeFlagItemId()) {
             findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();

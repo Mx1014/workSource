@@ -266,6 +266,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             invitedCustomerDTO.setRequirement(ConvertHelper.convert(requirement, CustomerRequirementDTO.class));
 
             CustomerCurrentRent currentRent = invitedCustomerProvider.findNewestCurrentRentByCustomerId(invitedCustomerDTO.getId());
+            invitedCustomerDTO.setCurrentRent(ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class));
+
 
 
 

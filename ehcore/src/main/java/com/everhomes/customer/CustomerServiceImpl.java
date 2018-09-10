@@ -223,6 +223,8 @@ import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.InvitedCustomerStatus;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -545,6 +547,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
+        cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
@@ -674,6 +677,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        if(cmd.getExpectedSignDate() != null){
+            customer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
+        }
         if (cmd.getFoundingTime() != null) {
             customer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
@@ -686,7 +692,7 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
-            }else {
+            }else {p
                 User user = userProvider.findUserById(customer.getTrackingUid());
                 if(user!=null)
                     customer.setTrackingName(user.getNickName());
