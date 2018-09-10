@@ -3921,7 +3921,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+        //SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
 
         //先按域空间查，ownerid和ownertype暂时不用
         ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
