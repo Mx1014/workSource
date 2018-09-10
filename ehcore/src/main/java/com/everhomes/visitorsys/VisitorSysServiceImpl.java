@@ -43,6 +43,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -62,6 +63,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -2617,7 +2619,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        idCard = JSONObject.parseObject(json,new TypeReference<IdentifierCardDTO>(){});
+        IdentifierCardResponse resp = JSONObject.parseObject(json,new TypeReference<IdentifierCardResponse>(){});
+        if(TrueOrFalseFlag.FALSE.getCode().toString().equals(resp.getCode())){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_READ_CARD,
+                    "读卡错误");
+        }
+        idCard = resp.getCardInfo();
         return idCard;
     }
 }

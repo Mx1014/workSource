@@ -69,6 +69,7 @@ public class VisitorsysConstant {
     public final static int ERROR_REGISTED_IPAD= 1409;  //此ipad已被注册过
     public final static int ERROR_PLANNED_VISITTIME= 1410;  //计划到访时间不能早于当前时间
     public final static int ERROR_PAIRING_CODE= 1411;  //非法配对码
+    public final static int ERROR_READ_CARD = 1412;  //读卡错误
 
     //常规常量
     public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id
