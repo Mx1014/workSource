@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 //import net.sf.json.JSONObject;
 
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "CHEAN1")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "CHEANZHIYUAN")
 public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheAnZhiYuanParkingVendorHandler.class);
@@ -130,7 +130,13 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
             parkingCardDTO.setParkingLotId(parkingLot.getId());
 
-            parkingCardDTO.setPlateOwnerName(card.getName());// 车主名称
+            List<ParkingCardRequest> cardRequests = parkingProvider.listParkingCardRequests(null,null,null,parkingLot.getId(),plateNumber,ParkingCardRequestStatus.PROCESSING.getCode(),null,null,null,20);
+            ParkingCardRequest cardRequest = null;
+            if(null != cardRequests && cardRequests.size() > 0){
+                cardRequest = cardRequests.get(0);
+                parkingCardDTO.setPlateOwnerName(cardRequest.getPlateOwnerName());// 车主名称
+
+            }
             parkingCardDTO.setPlateNumber(card.getCarno());// 车牌号
             parkingCardDTO.setEndTime(endTime);
 
@@ -272,11 +278,14 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
         String json = post(param, PAY_TEMP_FEE);
 
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String returnFlag = jsonObject.getString("flag");
-        if(null != returnFlag && "1".equals(returnFlag)) {
-            Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
-            return true;
+        CheanJsonEntity<JSONObject> entity = JSONObject.parseObject(json,new TypeReference<CheanJsonEntity<JSONObject>>(){});
+        if(null != entity && entity.getStatus()){
+            JSONObject jsonObject = entity.getData();
+            String returnFlag = jsonObject.getString("flag");
+            if(null != returnFlag && "1".equals(returnFlag)) {
+                Integer FreeLeaveMinutes = Integer.valueOf(jsonObject.getString("FreeLeaveMinutes"));
+                return true;
+            }
         }
         return false;
     }
@@ -395,22 +404,22 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         return result;
     }
 
-    private String test(){
-        JSONObject param = new JSONObject();
-        post(param,"api.aspx/pls.parkLots.get");
-
-        for(int i = 1;i < 4;i++){
-            JSONObject param1 = new JSONObject();
-            param1.put("parkLotName","A" + i);
-            post(param1,"api.aspx/pls.car.pos.getByNo");
-        }
-
-        return "";
-    }
-
-    public static void main(String[] args) {
-        CheAnZhiYuanParkingVendorHandler bean = new CheAnZhiYuanParkingVendorHandler();
-        bean.getParkingTempFee(null,"粤B571B5");
+//    private String test(){
+//        JSONObject param = new JSONObject();
+//        post(param,"api.aspx/pls.parkLots.get");
+//
+//        for(int i = 1;i < 4;i++){
+//            JSONObject param1 = new JSONObject();
+//            param1.put("parkLotName","A" + i);
+//            post(param1,"api.aspx/pls.car.pos.getByNo");
+//        }
+//
+//        return "";
+//    }
+//
+//    public static void main(String[] args) {
+//        CheAnZhiYuanParkingVendorHandler bean = new CheAnZhiYuanParkingVendorHandler();
+//        bean.getParkingTempFee(null,"粤B571B5");
 //        bean.getCardInfo("粤BMP525",null);
 //      卡类型接口
 //        bean.getParkingRechargeRates(null,null,null);
@@ -428,14 +437,14 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 //        order.setOriginalPrice(new BigDecimal("0.01"));
 //        order.setOrderNo(32L);
 //        bean.payTempCardFee(order);
-        GetCarLocationCommand cmd = new GetCarLocationCommand();
-        cmd.setPlateNumber("粤B571B5");
-        ParkingLot pl = new ParkingLot();
-        pl.setOwnerType("1");
-        pl.setOwnerId(1L);
-        pl.setId(1L);
-        pl.setName("1");
-        bean.getCarLocation(pl,cmd);
-        bean.test();
-    }
+//        GetCarLocationCommand cmd = new GetCarLocationCommand();
+//        cmd.setPlateNumber("粤B571B5");
+//        ParkingLot pl = new ParkingLot();
+//        pl.setOwnerType("1");
+//        pl.setOwnerId(1L);
+//        pl.setId(1L);
+//        pl.setName("1");
+//        bean.getCarLocation(pl,cmd);
+//        bean.test();
+//    }
 }
