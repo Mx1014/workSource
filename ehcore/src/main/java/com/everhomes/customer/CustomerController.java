@@ -1610,7 +1610,7 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("listCommunityRelatedMembers")
     @RestReturn(value = OrganizationMemberDTO.class,collection = true)
-    public RestResponse listCommnityUserRelatedTrackUsers(ListCommnutyRelatedMembersCommand cmd) {
+    public RestResponse listCommunityUserRelatedTrackUsers(ListCommnutyRelatedMembersCommand cmd) {
         RestResponse response = new RestResponse(customerService.listCommunityRelatedMembers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

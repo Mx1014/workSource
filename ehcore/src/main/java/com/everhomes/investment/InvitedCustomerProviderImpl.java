@@ -147,6 +147,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhCustomerRequirements.class));
         requirement.setId(id);
+        requirement.setVersion(id);
 
         User user = UserContext.current().getUser();
         requirement.setOperatorUid(user.getId());

@@ -5,6 +5,8 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.investment.CustomerRequirement;
+import com.everhomes.investment.InvitedCustomerProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
@@ -111,6 +113,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     @Autowired
     private EquipmentService equipmentService;
 
+    @Autowired
+    private InvitedCustomerProvider invitedCustomerProvider;
+
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISE_CUSTOMER;
@@ -171,6 +176,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             builder.field("customerSource" , customer.getCustomerSource());
             builder.field("EntryStatus", customer.getEntryStatus());
+            CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customer.getId());
+            if(requirement != null){
+                builder.field("aptitudeFlagItemId" , requirement.getMinArea());
+                builder.field("aptitudeFlagItemId" , requirement.getMaxArea());
+            }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -186,6 +196,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 //                builder.array("buildings", buildings);
 //                builder.array("addressId", addressIds);
             }
+
+
             builder.endObject();
             return builder;
         } catch (IOException e) {

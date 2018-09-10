@@ -18,7 +18,7 @@ public class SearchInvestmentResponse {
     @ItemType(EnterpriseCustomerDTO.class)
     private List<EnterpriseCustomerDTO> dtos;
     @ItemType(InvitedCustomerStatisticsDTO.class)
-    private List<InvitedCustomerStatisticsDTO> stastics;
+    private List<InvitedCustomerStatisticsDTO> statistics;
 
     private Long nextPageAnchor;
 
@@ -30,12 +30,12 @@ public class SearchInvestmentResponse {
         this.dtos = dtos;
     }
 
-    public List<InvitedCustomerStatisticsDTO> getStastics() {
-        return stastics;
+    public List<InvitedCustomerStatisticsDTO> getStatistics() {
+        return statistics;
     }
 
-    public void setStastics(List<InvitedCustomerStatisticsDTO> stastics) {
-        this.stastics = stastics;
+    public void setStatistics(List<InvitedCustomerStatisticsDTO> statistics) {
+        this.statistics = statistics;
     }
 
     public Long getNextPageAnchor() {

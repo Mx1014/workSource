@@ -14,15 +14,7 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
-import com.everhomes.rest.investment.CustomerContactDTO;
-import com.everhomes.rest.investment.CustomerLevelType;
-import com.everhomes.rest.investment.CustomerTrackerDTO;
-import com.everhomes.rest.investment.InvitedCustomerDTO;
-import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
-import com.everhomes.rest.investment.InvitedCustomerType;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
-import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -107,6 +99,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 requirement.setNamespaceId(cmd.getNamespaceId());
                 requirement.setCustomerId(cmd.getId());
                 requirement.setStatus(CommonStatus.ACTIVE.getCode());
+
                 invitedCustomerProvider.createRequirement(requirement);
             }
             // reflush current basic info
@@ -238,7 +231,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             if (itemsMap != null && itemsMap.size() > 0) {
                 statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), itemsMap.keySet(),itemsMap);
             }
-            response.setStastics(statistics);
+            response.setStatistics(statistics);
         }
         return response;
     }
@@ -271,6 +264,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 invitedCustomerDTO.setTrackers(dtos);
             }
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(invitedCustomerDTO.getId());
+            invitedCustomerDTO.setRequirement(ConvertHelper.convert(requirement, CustomerRequirementDTO.class));
 
 
 
