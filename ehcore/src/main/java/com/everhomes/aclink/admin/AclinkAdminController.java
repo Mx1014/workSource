@@ -447,6 +447,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/exportAclinkLogsXls</b>
+     * <p>导出门禁日志列表</p>
+     */
+    @RequestMapping("exportAclinkLogsXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportAclinkLogsXls(@Valid AclinkQueryLogCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportAclinkLogsXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/aclink/deleteLogById</b>

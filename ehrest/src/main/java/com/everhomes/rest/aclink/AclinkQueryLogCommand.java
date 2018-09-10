@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>endTime:开门时间区间终点 时间戳,只允许选择当前时间之前的日期区间</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:分页大小</li>
+ * <li>namespaceId: 域空间ID</li>
  * </ul>
  *
  */
@@ -29,7 +30,8 @@ public class AclinkQueryLogCommand {
     private Long endTime;
     private String startStr;
     private String endStr;
-    
+    private Integer namespaceId;
+
     public Long getEventType() {
         return eventType;
     }
@@ -101,6 +103,13 @@ public class AclinkQueryLogCommand {
     }
     public void setEndStr(String endStr) {
         this.endStr = endStr;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

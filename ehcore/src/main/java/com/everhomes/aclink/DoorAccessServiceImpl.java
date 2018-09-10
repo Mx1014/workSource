@@ -669,6 +669,26 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
+//add by liqingyan 日志导出
+    @Override
+    public void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse){
+        ByteArrayOutputStream output = null;
+        XSSFWorkbook wb = this.createLogsXSSFWorkbook(cmd);
+        try {
+            output = new ByteArrayOutputStream();
+            wb.write(output);
+            DownloadUtil.download(output, httpResponse);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally{
+            try {
+                wb.close();
+                output.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
 
 
 
@@ -787,6 +807,64 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 row.createCell(cellN ++).setCellValue(user.getUserName());
                 row.createCell(cellN ++).setCellValue(user.getCompany());
                 row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE) : "");
+            }
+
+            if(null == userRes.getNextPageAnchor()){
+                break;
+            }
+            cmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
+        return wb;
+    }
+//add by liqingyan 需要翻译中文
+    /**
+     * 创建导出日志excel
+     * @param cmd
+     * @return
+     */
+    private XSSFWorkbook createLogsXSSFWorkbook(AclinkQueryLogCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "门禁日志列表";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        int cellN = 0;
+        row1.createCell(cellN ++).setCellValue("姓名");
+        row1.createCell(cellN ++).setCellValue("手机号码");
+        row1.createCell(cellN ++).setCellValue("门禁名称");
+        row1.createCell(cellN ++).setCellValue("授权类型");
+        row1.createCell(cellN ++).setCellValue("开门方式");
+        row1.createCell(cellN ++).setCellValue("开门时间");
+
+        cmd.setPageSize(1000);
+        while (true){
+            AclinkQueryLogResponse userRes = this.queryLogs(cmd);
+            for (AclinkLogDTO user: userRes.getDtos()) {
+                cellN = 0;
+                XSSFRow row = sheet.createRow(rowNum ++);
+                row.setRowStyle(style);
+                row.createCell(cellN ++).setCellValue(user.getUserName());
+                row.createCell(cellN ++).setCellValue(user.getUserIdentifier());
+                row.createCell(cellN ++).setCellValue(user.getDoorName());
+                row.createCell(cellN ++).setCellValue(user.getAuthType() > 0 ? "常规授权" : "临时授权");
+                row.createCell(cellN ++).setCellValue(user.getEventType().equals(0L) ? "蓝牙开门": equals(1L)? "二维码开门": equals(2L)? "远程开门":equals(3L)? "人脸开门":"");
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(new Date(user.getLogTime()), DateUtil.DATE_TIME_LINE));
             }
 
             if(null == userRes.getNextPageAnchor()){

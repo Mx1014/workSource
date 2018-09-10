@@ -121,6 +121,8 @@ public interface DoorAccessService {
     DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
+//add by liqingyan
+    void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
 
     String checkAllDoorAuthList();
 
