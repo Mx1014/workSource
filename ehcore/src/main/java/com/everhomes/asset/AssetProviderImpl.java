@@ -6816,7 +6816,7 @@ public class AssetProviderImpl implements AssetProvider {
         scope.setOwnerId(cmd.getOwnerId());
         scope.setOwnerType(cmd.getOwnerType());
         scope.setCategoryId(cmd.getCategoryId());
-        scope.setProjectLevelName(cmd.getProjectLevelNmae());
+        scope.setProjectLevelName(cmd.getProjectLevelName());
         scope.setDecouplingFlag(decouplingFlag);
         scope.setTaxRate(cmd.getTaxRate());//增加税率
         chargingItemScopesDao.insert(scope);

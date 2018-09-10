@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  * <li>namespaceId: 域名</li>
  * <li>categoryId: 多入口id</li>
  * <li>chargingItemName: 收费项名称</li>
- * <li>projectLevelNmae: 费项显示名称</li>
+ * <li>projectLevelName: 费项显示名称</li>
  * <li>taxRate: 税率</li>
  *</ul>
  */
@@ -25,7 +25,7 @@ public class CreateChargingItemCommand {
     private Integer namespaceId;
     private Long categoryId;
     private String chargingItemName;
-    private String projectLevelNmae;
+    private String projectLevelName;
     private BigDecimal taxRate;
     
 	public Long getOwnerId() {
@@ -58,17 +58,17 @@ public class CreateChargingItemCommand {
 	public void setChargingItemName(String chargingItemName) {
 		this.chargingItemName = chargingItemName;
 	}
-	public String getProjectLevelNmae() {
-		return projectLevelNmae;
-	}
-	public void setProjectLevelNmae(String projectLevelNmae) {
-		this.projectLevelNmae = projectLevelNmae;
-	}
 	public BigDecimal getTaxRate() {
 		return taxRate;
 	}
 	public void setTaxRate(BigDecimal taxRate) {
 		this.taxRate = taxRate;
+	}
+	public String getProjectLevelName() {
+		return projectLevelName;
+	}
+	public void setProjectLevelName(String projectLevelName) {
+		this.projectLevelName = projectLevelName;
 	}
     
 }
