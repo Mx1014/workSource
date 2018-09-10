@@ -24,6 +24,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -282,11 +283,12 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             fields.add(DSL.count(staTmp).as(itemId.toString()));
         });
         fields.toArray(fieldArray);
-        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(customer);
+        SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fieldArray);
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(customer.COMMUNITY_ID.eq(communityId));
         query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
+        query.addFrom(customer);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
             LOGGER.debug("count investment  enterprise , bindValues=" + query.getBindValues());
@@ -298,6 +300,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 //                dto.setKey(itemId.toString());
                 dto.setKey(itemsMap.get(itemId).getItemDisplayName());
                 dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
+                dto.setItemId(itemId);
                 result.add(dto);
             }
             return null;
