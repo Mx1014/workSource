@@ -37,7 +37,7 @@ CREATE TABLE `eh_customer_trackers`
 	`customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
 	`tracker_uid`           BIGINT COMMENT '跟进人id',
 	`tracker_type`				   TINYINT COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
-	`source_type`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`customer_source`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
 	`status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
 	`create_time`          DATETIME  COMMENT '创建日期',
 	`creator_uid` 						BIGINT  COMMENT '创建人',
