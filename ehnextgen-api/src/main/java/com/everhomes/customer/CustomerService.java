@@ -401,4 +401,6 @@ public interface CustomerService {
     Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId);
 
     EnterpriseCustomerDTO createEnterpriseCustomerOutAuth(CreateEnterpriseCustomerCommand cmd);
+
+    void deleteCustomerTrackersByCustomerId(Long id, byte code);
 }
