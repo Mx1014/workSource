@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * 深业 停车
  */
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST1")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "TEST")
 public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestParkingVendorHandler.class);
 

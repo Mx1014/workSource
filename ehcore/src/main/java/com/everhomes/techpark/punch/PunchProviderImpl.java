@@ -908,6 +908,16 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
+    public int deletePunchDayLogByDateAndDetailId(Long detailId, Long companyId, String punchDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchDayLogs.class));
+        DeleteQuery<EhPunchDayLogsRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_DAY_LOGS);
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(Date.valueOf(punchDate)));
+        deleteQuery.addConditions(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.eq(detailId));
+        return deleteQuery.execute();
+    }
+
+    @Override
     public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
@@ -2823,7 +2833,23 @@ public class PunchProviderImpl implements PunchProvider {
         step.execute();
 
     }
-
+    @Override
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwnerAndStatusList(String ownerType, Long ownerId, List<Byte> statusList) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_PUNCH_TIME_RULES);
+        Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
+                .and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+                .and(Tables.EH_PUNCH_TIME_RULES.STATUS.in(statusList));
+        step.where(condition);
+        List<PunchTimeRule> result = step
+                .orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, PunchTimeRule.class);
+                });
+        return result;
+    }
+    
     @Override
     public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId, Byte status) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

@@ -102,6 +102,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return handler.postGeneralFormVal(cmd);
     }
 
+
+
     private GeneralFormModuleHandler getOrderHandler(String type) {
         String handler = GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + type;
         return PlatformContext.getComponent(handler);
@@ -111,7 +113,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public void addGeneralFormValues(addGeneralFormValuesCommand cmd) {
         // 把values 存起来
         if (null != cmd.getValues()) {
-                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
+            GeneralForm form;
+            if(cmd.getGeneralFormVersion() != null){
+                form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getGeneralFormId(), cmd.getGeneralFormVersion());
+            }else{
+                form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
+            }
 
             dbProvider.execute(status -> {
                 if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
@@ -663,8 +670,31 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
+            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getSourceId());
+            //generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
+            generalFormSearcher.deleteById(cmd.getSourceId());
+            return cmd.getSourceId();
+        }else{
+            LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
+                    + cmd.getCurrentOrganizationId() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,currentOrganizationId,ownerId,sourceId cannot be null.");
+        }
+
+    }
+
+    @Override
+    public Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.deleteGeneralFormVal(cmd);
+    }
+
+
+    @Override
+    public Long deleteGeneralForm(PostGeneralFormValCommand cmd){
+        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
             //generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
-            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getSourceId(), (byte)0);
+            generalFormProvider.updateGeneralFormValRequestStatus(cmd.getSourceId(), GeneralFormValRequestStatus.DELETE.getCode());
             generalFormSearcher.deleteById(cmd.getSourceId());
             return cmd.getSourceId();
         }else{
@@ -679,7 +709,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
         List<GeneralFormVal> request;
-        List<GeneralFormValDTO> result;
 
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null){
 
@@ -694,14 +723,32 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
     }
 
+
+    @Override
+    public Long saveGeneralFormVal(PostGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.saveGeneralFormVal(cmd);
+    }
+
+    @Override
+    public List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd){
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        return handler.getGeneralFormVal(cmd);
+    }
+
     @Override
     public Long saveGeneralForm(PostGeneralFormValCommand cmd) {
 
         //先新建表单字段的集合
-        Long sourceId = this.dbProvider.execute((status) -> {
+        return this.dbProvider.execute((status) -> {
             Long source_id;
-            if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null) {
-                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+            GeneralForm generalForm = null;
+            GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
+            if(generalApproval != null) {
+                generalForm = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
+            }
+            if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && generalForm != null) {
+                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), generalForm.getFormOriginId(), generalForm.getFormVersion());
             }else{
                 LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                         + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
@@ -712,23 +759,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 
             addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
-            GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
 
-            if(generalApproval != null) {
-                cmd2.setGeneralFormId(generalApproval.getFormOriginId());
-                cmd2.setSourceId(source_id);
-                cmd2.setSourceType(source_type);
-                cmd2.setValues(cmd.getValues());
-                this.addGeneralFormValues(cmd2);
-            }else{
-                LOGGER.error("getGeneralApprovalByNameAndRunning false: can not find running approval. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
-                        + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
-                        "getGeneralApprovalByNameAndRunning false: can not find running approval.");
-            }
+            cmd2.setGeneralFormVersion(generalForm.getFormVersion());
+            cmd2.setGeneralFormId(generalForm.getFormOriginId());
+            cmd2.setSourceId(source_id);
+            cmd2.setSourceType(source_type);
+            cmd2.setValues(cmd.getValues());
+            this.addGeneralFormValues(cmd2);
             return source_id;
         });
-        return sourceId;
     }
 
 
@@ -748,7 +787,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
             if(request != null){
                 Gson gson = new Gson();
-                List<GeneralFormFieldDTO> formFields = gson.fromJson(request.getTemplateText(), new TypeToken<List<GeneralFormFieldDTO>>(){}.getType()); 
+                List<GeneralFormFieldDTO> formFields = gson.fromJson(request.getTemplateText(), new TypeToken<List<GeneralFormFieldDTO>>(){}.getType());
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(), cmd.getFormVersion());
+                List<GeneralFormFieldDTO> allFormFields = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+                for(GeneralFormFieldDTO dto : allFormFields){
+                    if(dto.getFilterFlag() != null && dto.getFilterFlag() == (byte)1){
+                        formFields.add(dto);
+                    }
+                }
                 return formFields.stream().map(GeneralFormFieldDTO::getFieldName).collect(Collectors.toList());
             }else{
                 LOGGER.error("can not find running approval." + cmd.getNamespaceId() + cmd.getModuleId());
@@ -769,8 +815,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
                 for(GeneralFormFieldDTO dto: cmd.getFormFields()){
                     if(StringUtils.isNotBlank(dto.getFieldName())) {
-                        generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
-                                UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        if(!dto.getFieldType().equals(GeneralFormFieldType.FILE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.IMAGE.getCode()) && !dto.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())){
+                            generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                                    UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                        }else{
+                            LOGGER.error("getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                                    "getGeneralFormVal false: can not list this field type. the fieldType is :" + dto.getFieldType());
+                        }
+
                     }else{
                         LOGGER.error("getGeneralFormVal false: param cannot be null. ");
                     }
