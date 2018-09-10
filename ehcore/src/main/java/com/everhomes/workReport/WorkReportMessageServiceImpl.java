@@ -204,7 +204,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     private void sendDetailMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
 
         //  set the route
-        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
+        WorkReportDetailActionData actionData = new WorkReportDetailActionData();
         actionData.setReportId(reportVal.getReportId());
         actionData.setReportValId(reportVal.getId());
         actionData.setOrganizationId(reportVal.getOrganizationId());
@@ -256,7 +256,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                         + "，共接收到" + v2.size() + "条"
                         + v2.get(0).getReportName() + "（"
                         + workReportTimeService.displayReportTime(v2.get(0).getReportType(), v2.get(0).getReportTime().getTime()) + "）";
-                sendIndexMessage(content, "汇报情况", k1);
+                sendIndexMessage(content, "汇报情况", "我接收的", v2.get(0).getOrganizationId(), 2L, k1);
             });
         });
     }
@@ -265,36 +265,15 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      * 定时清除汇总信息
      * 确保汇总信息表的数据可控，提高后续查询速度
      */
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 11 * * ?")
     private void deleteWorkReportRxMessage(){
         Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
         workReportValProvider.deleteReportValReceiverMsg(currentTime);
     }
 
-    private void sendIndexMessage(String content, String title, Long receiverId){
-        // set the message
-        MessageDTO message = new MessageDTO();
-        message.setBodyType(MessageBodyType.TEXT.getCode());
-        message.setBody(content);
-        message.setMetaAppId(AppConstants.APPID_DEFAULT);
-        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
-        Map<String, String> meta = new HashMap<>();
-        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
-//        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-        message.setMeta(meta);
-
-        //  send the message
-        messagingService.routeMessage(
-                User.SYSTEM_USER_LOGIN,
-                AppConstants.APPID_MESSAGING,
-                ChannelType.USER.getCode(),
-                String.valueOf(receiverId),
-                message,
-                MessagingConstants.MSG_FLAG_STORED.getCode()
-        );
-    }
-
+    /**
+     * 员工提交提醒消息发送
+     */
     @Scheduled(cron = "0 30 * * * ?")
     @Override
     public void workReportAuMessage() {
@@ -305,34 +284,26 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         List<WorkReportScopeMsg> results = workReportProvider.listWorkReportScopeMsgByTime(startTime, endTime);
         if (results.size() == 0)
             return;
-        for(WorkReportScopeMsg r:results){
+        results.forEach(r -> {
             String content = "可以提交" + r.getReportName() + "（"
                     + workReportTimeService.displayReportTime(r.getReportType(), r.getReportTime().getTime())
-                    + "）了，截止时间为" +${截止时间}";
-        }
-       /* String time = WorkReportTimeUtil.currenHHmmTime();
-        List<WorkReport> auReports = new ArrayList<>();
-        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
-            query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
-            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
-            return query;
+                    + "）了，截止时间为" + workReportTimeService.formatTime(r.getEndTime().toLocalDateTime());
+            if (r.getScopeIds() != null) {
+                List<Long> scopeIds = JSON.parseArray(r.getScopeIds(), Long.class);
+                scopeIds.forEach(s -> {
+                    sendIndexMessage(content, "汇报填写", "写汇报", r.getOrganizationId(), 0L, s);
+                });
+            }
         });
-        for (WorkReport r : results) {
-            ReportMsgSettingDTO dto = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
-            if (time.equals(dto.getMsgTime()))
-                auReports.add(r);
-        }
-        if (auReports.size() == 0)
-            return;
-
-        for (WorkReport au : auReports) {
-
-        }
-*/
     }
 
-    @Scheduled(cron = "0 0 4 * * ?")
-    private void createWorkReportAuMessage(){
+    /**
+     * 生成员工提交提醒消息
+     * 提前生成避免临时计算量过大
+     */
+    @Scheduled(cron = "0 0 5 * * ?")
+    @Override
+    public void createWorkReportAuMessage(){
         List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
             query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
             query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
@@ -347,10 +318,13 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
             ReportMsgSettingDTO auMsgSetting = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
             Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(r.getReportType(), reportTime.getTime(),
                     auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
+            Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(r.getReportType(), reportTime.getTime(),
+                    validitySetting.getEndType(), validitySetting.getEndMark(), validitySetting.getEndTime()));
             //  生成提醒数据
             WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(r.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
             if(msg !=null){
                 msg.setReminderTime(reminderTime);
+                msg.setEndTime(endTime);
                 msg.setScopeIds(listScopeIds(r));
                 workReportProvider.updateWorkReportScopeMsg(msg);
             }
@@ -361,6 +335,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 msg.setReportType(r.getReportType());
                 msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
                 msg.setReminderTime(reminderTime);
+                msg.setEndTime(endTime);
                 msg.setScopeIds(listScopeIds(r));
                 workReportProvider.createWorkReportScopeMsg(msg);
             }
@@ -381,6 +356,50 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                     scopeIds.addAll(resultIds);
             }
         }
-        return JSON.toJSONString(scopeIds);
+        return JSON.toJSONString(new ArrayList<>(scopeIds));
+    }
+
+    /**
+     * 定时清除汇总信息
+     * 确保汇总信息表的数据可控，提高后续查询速度
+     */
+    @Scheduled(cron = "0 0 12 * * ?")
+    private void deleteWorkReportAuMessage(){
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
+        workReportProvider.deleteWorkReportScopeMsg(currentTime);
+    }
+
+    private void sendIndexMessage(String content, String title, String displayName, Long organizationId, Long tabIndex, Long receiverId){
+        //  set the route
+        WorkReportIndexActionData actionData = new WorkReportIndexActionData();
+        actionData.setDisplayName(displayName);
+        actionData.setAppId(null);
+        actionData.setOrganizationId(organizationId);
+        actionData.setTabIndex(tabIndex);
+        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
+        RouterMetaObject metaObject = new RouterMetaObject();
+        metaObject.setUrl(url);
+
+        // set the message
+        MessageDTO message = new MessageDTO();
+        message.setBodyType(MessageBodyType.TEXT.getCode());
+        message.setBody(content);
+        message.setMetaAppId(AppConstants.APPID_DEFAULT);
+        message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        message.setMeta(meta);
+
+        //  send the message
+        messagingService.routeMessage(
+                User.SYSTEM_USER_LOGIN,
+                AppConstants.APPID_MESSAGING,
+                ChannelType.USER.getCode(),
+                String.valueOf(receiverId),
+                message,
+                MessagingConstants.MSG_FLAG_STORED.getCode()
+        );
     }
 }

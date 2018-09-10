@@ -13,4 +13,6 @@ public interface WorkReportMessageService {
     void workReportRxMessage();
 
     void workReportAuMessage();
+
+    void createWorkReportAuMessage();
 }

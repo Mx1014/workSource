@@ -250,6 +250,14 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
+    public void deleteWorkReportScopeMsg(Timestamp time) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(time));
+        query.execute();
+    }
+
+    @Override
     public void updateWorkReportScopeMsg(WorkReportScopeMsg msg){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());

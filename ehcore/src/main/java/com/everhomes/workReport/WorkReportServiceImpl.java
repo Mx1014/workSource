@@ -558,6 +558,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     private WorkReportValReceiverMsg createWorkReportValReceiverMsg(WorkReport report, WorkReportVal reportVal, Timestamp reminderTime, Long receiverId){
         WorkReportValReceiverMsg msg = new WorkReportValReceiverMsg();
         msg.setNamespaceId(reportVal.getNamespaceId());
+        msg.setOrganizationId(reportVal.getOrganizationId());
         msg.setReportId(report.getId());
         msg.setReportName(report.getReportName());
         msg.setReportType(report.getReportType());

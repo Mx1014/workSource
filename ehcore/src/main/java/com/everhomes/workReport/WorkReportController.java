@@ -337,13 +337,41 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/workReportRxMessage</b>
+     * <b>URL: /workReport/rxMessageTest</b>
      * <p>测试接收信息 </p>
      */
-    @RequestMapping("workReportRxMessage")
+    @RequestMapping("rxMessageTest")
     @RestReturn(value=String.class)
-    public RestResponse workReportRxMessage() {
+    public RestResponse rxMessageTest() {
         workReportMessageService.workReportRxMessage();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/auMessageTest</b>
+     * <p>测试提醒信息 </p>
+     */
+    @RequestMapping("auMessageTest")
+    @RestReturn(value=String.class)
+    public RestResponse auMessageTest() {
+        workReportMessageService.workReportAuMessage();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/createAuMessageTest</b>
+     * <p>测试提醒信息 </p>
+     */
+    @RequestMapping("createAuMessageTest")
+    @RestReturn(value=String.class)
+    public RestResponse createAuMessageTest() {
+        workReportMessageService.createWorkReportAuMessage();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

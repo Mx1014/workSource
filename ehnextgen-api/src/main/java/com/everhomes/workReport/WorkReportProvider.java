@@ -4,6 +4,7 @@ package com.everhomes.workReport;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface WorkReportProvider {
@@ -39,6 +40,8 @@ public interface WorkReportProvider {
     List<WorkReportTemplate> listWorkReportTemplates(Long moduleId);
 
     Long createWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    void deleteWorkReportScopeMsg(Timestamp time);
 
     void updateWorkReportScopeMsg(WorkReportScopeMsg msg);
 
