@@ -146,7 +146,7 @@ CREATE TABLE `eh_customer_current_rents`
 	 `rent_price_unit`		  TINYINT COMMENT '租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
 	 `rent_area`							DECIMAL(10,2) COMMENT '当前租赁面积',
 	 `contract_intention_date` DATETIME COMMENT '当前合同到期日',
-	 `version`				      LONG COMMENT '记录版本',
+	 `version`				      BIGINT COMMENT '记录版本',
 	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
 	`create_time`          DATETIME  COMMENT '创建日期',
 	`creator_uid` 						BIGINT  COMMENT '创建人',

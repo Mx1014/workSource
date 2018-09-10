@@ -90,12 +90,12 @@ public class InvitedCustomerController {
     }
 
     /**
-     * <b>URL: /invitedCustomer/viewInvestmentDetail</b>
+     * <b>URL: /invitedCustomer/viewInvitedCustomerDetail</b>
      * <p> 查看招商客户 </p>
      */
-    @RequestMapping("viewInvestmentDetail")
+    @RequestMapping("viewInvitedCustomerDetail")
     @RestReturn(value=InvitedCustomerDTO.class)
-    public RestResponse viewInvestmentDetail(ViewInvestmentDetailCommand cmd) {
+    public RestResponse viewInvitedCustomerDetail(ViewInvestmentDetailCommand cmd) {
         // cmd.getId() cmd.getNameSpaceId()
         InvitedCustomerDTO dto = invitedCustomerService.viewInvestmentDetail(cmd);
         RestResponse response = new RestResponse(dto);
