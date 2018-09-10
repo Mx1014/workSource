@@ -17,6 +17,7 @@ ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the 
 CREATE TABLE `eh_work_report_val_receiver_msg` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
   `report_name` VARCHAR(128) NOT NULL,
   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
@@ -34,6 +35,7 @@ CREATE TABLE `eh_work_report_val_receiver_msg` (
 CREATE TABLE `eh_work_report_scope_msg` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
   `report_name` VARCHAR(128) NOT NULL,
   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
