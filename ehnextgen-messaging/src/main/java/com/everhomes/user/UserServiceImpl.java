@@ -1785,6 +1785,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         this.userProvider.updateUser(user);
 
+        UserIdentifier emailIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.EMAIL.getCode());
+        if (emailIdentifier != null) {
+            emailIdentifier.setIdentifierToken(cmd.getEmail());
+            this.userProvider.updateIdentifier(emailIdentifier);
+        }else {
+            if (!StringUtils.isBlank(cmd.getEmail())) {
+                UserIdentifier userIdentifier = new UserIdentifier();
+                userIdentifier.setOwnerUid(user.getId());
+                userIdentifier.setIdentifierToken(cmd.getEmail());
+                userIdentifier.setIdentifierType(IdentifierType.EMAIL.getCode());
+                userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                userIdentifier.setNamespaceId(UserContext.getCurrentNamespaceId());
+                userIdentifier.setCreateTime(new Timestamp(new Date().getTime()));
+                userIdentifier.setNotifyTime(new Timestamp(new Date().getTime()));
+                this.userProvider.createIdentifier(userIdentifier);
+            }
+        }
+
         // 完善个人信息事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
