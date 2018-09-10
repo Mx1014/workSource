@@ -343,6 +343,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
+    public void deletePunchLog(PunchLog punchLog) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchLogs.class));
+        EhPunchLogsDao dao = new EhPunchLogsDao(context.configuration());
+        dao.delete(punchLog);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchLogs.class, punchLog.getId());
+    }
+
+    @Override
     public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId) {
         // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
         // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));

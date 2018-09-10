@@ -39,6 +39,8 @@ public interface PunchProvider {
 
 	public void createPunchLog(PunchLog punchLog);
 
+	void deletePunchLog(PunchLog punchLog);
+
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId);
 
 

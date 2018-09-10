@@ -695,7 +695,7 @@ public class PunchServiceImpl implements PunchService {
         pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
 
         try {
-            pdl = calculateDayLog(memberDetail.getTargetId(), memberDetail.getOrganizationId(), logDay, pdl, newPunchDayLog,oldPunchDayLog);
+            pdl = calculateDayLog(memberDetail.getTargetId(), memberDetail.getId(), memberDetail.getOrganizationId(), logDay, pdl, newPunchDayLog, oldPunchDayLog);
         } catch (ParseException e) {
             LOGGER.error("error", e);
         }
@@ -932,8 +932,8 @@ public class PunchServiceImpl implements PunchService {
      * @param companyId   永远为总公司id
      * @param newPunchDayLog
      */
-    private PunchLogsDay calculateDayLog(Long userId, Long companyId, Calendar logDay, PunchLogsDay pdl, PunchDayLog newPunchDayLog, PunchDayLog oldPunchDayLog) throws ParseException {
-        pdl = calculateDayLogByeverypunch(userId, companyId, logDay, pdl, newPunchDayLog, oldPunchDayLog);
+    private PunchLogsDay calculateDayLog(Long userId, Long detailId, Long companyId, Calendar logDay, PunchLogsDay pdl, PunchDayLog newPunchDayLog, PunchDayLog oldPunchDayLog) throws ParseException {
+        pdl = calculateDayLogByeverypunch(userId, detailId, companyId, logDay, pdl, newPunchDayLog, oldPunchDayLog);
         //对statuslist进行统一处理,从每次打卡状态->每个班状态
         String[] statusArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
         String statusList = "";
@@ -1051,15 +1051,18 @@ public class PunchServiceImpl implements PunchService {
         return status;
     }
 
-    private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId, Calendar logDay, PunchLogsDay pdl, PunchDayLog newPunchDayLog, PunchDayLog oldPunchDayLog) {
+    private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long detailId, Long companyId, Calendar logDay, PunchLogsDay pdl, PunchDayLog newPunchDayLog, PunchDayLog oldPunchDayLog) {
         java.sql.Date punchDate = java.sql.Date.valueOf(dateSF.get().format(logDay.getTime()));
         pdl.setPunchDate(punchDate);
-        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId, companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
-        if (null != punchLogs) {
-            for (PunchLog log : punchLogs) {
+        List<PunchLog> currentPunchLogs = punchProvider.listPunchLogsByDate(userId, companyId, dateSF.get().format(punchDate), ClockCode.SUCESS.getCode());
+        List<PunchLog> punchLogs = new ArrayList<>();
+        if (null != currentPunchLogs) {
+            for (PunchLog log : currentPunchLogs) {
                 if (log.getPunchTime() == null || log.getPunchStatus().equals(PunchStatus.UNPUNCH.getCode())) {
+                    punchProvider.deletePunchLog(log);
                     continue;
                 }
+                punchLogs.add(log);
                 pdl.getPunchLogs().add(ConvertHelper.convert(log, PunchLogDTO.class));
                 if (null == pdl.getArriveTime() || pdl.getArriveTime() > log.getPunchTime().getTime())
                     pdl.setArriveTime(log.getPunchTime().getTime());
@@ -1067,7 +1070,7 @@ public class PunchServiceImpl implements PunchService {
                     pdl.setLeaveTime(log.getPunchTime().getTime());
             }
             pdl.setPunchCount(pdl.getPunchLogs().size());
-
+            currentPunchLogs = null;
         } else {
             pdl.setPunchCount(0);
         }
@@ -1142,14 +1145,14 @@ public class PunchServiceImpl implements PunchService {
             Byte punchType = PunchType.ON_DUTY.getCode();
             PunchLog onDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (onDutyLog == null) {
-                onDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                onDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 onDutyLog.setRuleTime(ptr.getStartEarlyTimeLong());
                 onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
             }
             punchType = PunchType.OFF_DUTY.getCode();
             PunchLog offDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (offDutyLog == null) {
-                offDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                offDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 offDutyLog.setRuleTime(ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong());
                 offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
                 pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
@@ -1219,14 +1222,14 @@ public class PunchServiceImpl implements PunchService {
             Byte punchType = PunchType.ON_DUTY.getCode();
             PunchLog onDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (onDutyLog == null) {
-                onDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                onDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 onDutyLog.setRuleTime(ptr.getStartEarlyTimeLong());
                 onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
             }
             punchType = PunchType.OFF_DUTY.getCode();
             PunchLog offDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (offDutyLog == null) {
-                offDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                offDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 offDutyLog.setRuleTime(ptr.getNoonLeaveTimeLong());
                 offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
             }
@@ -1255,7 +1258,7 @@ public class PunchServiceImpl implements PunchService {
             punchType = PunchType.ON_DUTY.getCode();
             onDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (onDutyLog == null) {
-                onDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                onDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 onDutyLog.setRuleTime(ptr.getAfternoonArriveTimeLong());
                 onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
             }
@@ -1263,7 +1266,7 @@ public class PunchServiceImpl implements PunchService {
             punchType = PunchType.OFF_DUTY.getCode();
             offDutyLog = findPunchLog(punchLogs, punchType, punchIntervalNo);
             if (offDutyLog == null) {
-                offDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, punchType, pr);
+                offDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, punchType, pr);
                 offDutyLog.setRuleTime(ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong());
                 offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
             }
@@ -1303,7 +1306,7 @@ public class PunchServiceImpl implements PunchService {
             for (int punchIntervalNo = 1; punchIntervalNo <= intervals.size(); punchIntervalNo++) {
                 PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
                 if (onDutyLog == null) {
-                    onDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
+                    onDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
                     onDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getArriveTimeLong());
                     onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
                     punchLogs.add(onDutyLog);
@@ -1311,7 +1314,7 @@ public class PunchServiceImpl implements PunchService {
                 efficientLogs.add(onDutyLog);
                 PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
                 if (offDutyLog == null) {
-                    offDutyLog = getNewPunchLog(punchDate, userId, companyId, punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
+                    offDutyLog = getNewPunchLog(punchDate, userId, detailId, companyId, punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
                     offDutyLog.setRuleTime(intervals.get(punchIntervalNo - 1).getLeaveTimeLong());
                     offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
                 }
@@ -1603,9 +1606,10 @@ public class PunchServiceImpl implements PunchService {
         return pr;
     }
 
-    private PunchLog getNewPunchLog(Date punchDate, Long userId, Long companyId, Integer punchIntervalNo, Byte punchType, PunchRule pr) {
+    private PunchLog getNewPunchLog(Date punchDate, Long userId, Long detailId, Long companyId, Integer punchIntervalNo, Byte punchType, PunchRule pr) {
         PunchLog pl = new PunchLog();
         pl.setUserId(userId);
+        pl.setDetailId(detailId);
         pl.setEnterpriseId(companyId);
         pl.setPunchDate(new java.sql.Date(punchDate.getTime()));
         pl.setPunchType(punchType);
@@ -2230,10 +2234,12 @@ public class PunchServiceImpl implements PunchService {
         if (null != request && request.getStatus().equals(com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())) {
             punchLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
         }
-        punchProvider.createPunchLog(punchLog);
+
 
         try {
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, cmd.getEnterpriseId());
+            punchLog.setDetailId(memberDetail.getId());
+            punchProvider.createPunchLog(punchLog);
             refreshPunchDayLog(memberDetail, punCalendar);
             punchNotificationService.setPunchNotificationInvalidBackground(memberDetail, punchLog, punchType.getPunchRuleId());
         } catch (ParseException e) {
@@ -6204,7 +6210,14 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public void testDayRefreshLogs(Long runDate) {
-        dayRefreshLogScheduled(new Date(runDate));
+        try {
+            Calendar punCalendar = Calendar.getInstance();
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(505524L, 1045660L);
+            refreshPunchDayLog(memberDetail, punCalendar);
+        } catch (Exception e) {
+
+        }
+//        dayRefreshLogScheduled(new Date(runDate));
     }
     @Deprecated
     public void dayRefreshLogScheduled(Date runDate) {
@@ -8591,7 +8604,7 @@ public class PunchServiceImpl implements PunchService {
             intervalDTO.setPunchLogs(new ArrayList<>());
             PunchLog pl = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
             if (null == pl) {
-                pl = getNewPunchLog(punchDate, response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
+                pl = getNewPunchLog(punchDate, response.getUserId(), response.getDetailId(), response.getEnterpriseId(), punchIntervalNo, PunchType.ON_DUTY.getCode(), pr);
                 pl.setStatus(PunchStatus.UNPUNCH.getCode());
                 if (null != ptr)
                     pl.setRuleTime(findRuleTime(ptr, PunchType.ON_DUTY.getCode(), punchIntervalNo));
@@ -8606,7 +8619,7 @@ public class PunchServiceImpl implements PunchService {
 
             pl = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
             if (null == pl) {
-                pl = getNewPunchLog(punchDate, response.getUserId(), response.getEnterpriseId(), punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
+                pl = getNewPunchLog(punchDate, response.getUserId(), response.getDetailId(), response.getEnterpriseId(), punchIntervalNo, PunchType.OFF_DUTY.getCode(), pr);
                 pl.setStatus(PunchStatus.UNPUNCH.getCode());
                 if (null != ptr)
                     pl.setRuleTime(findRuleTime(ptr, PunchType.OFF_DUTY.getCode(), punchIntervalNo));
