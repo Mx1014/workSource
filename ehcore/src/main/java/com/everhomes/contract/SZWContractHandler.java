@@ -15,6 +15,8 @@ import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractEventDTO;
@@ -318,6 +320,12 @@ public class SZWContractHandler implements ContractService{
 	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
     
 }
