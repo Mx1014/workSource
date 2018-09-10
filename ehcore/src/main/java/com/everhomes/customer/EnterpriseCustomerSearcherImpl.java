@@ -169,6 +169,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
+            builder.field("customerSource" , customer.getCustomerSource());
+            builder.field("EntryStatus", customer.getEntryStatus());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();

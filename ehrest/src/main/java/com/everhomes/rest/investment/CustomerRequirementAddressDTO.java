@@ -6,13 +6,11 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
+ *     <li>requirementId: requirementId</li>
  *     <li>customerId: customerId</li>
- *     <li>trackerUid: trackerUid</li>
- *     <li>trackerType: trackerType</li>
- *     <li>sourceType: sourceType</li>
+ *     <li>addressId: addressId</li>
  *     <li>status: status</li>
  *     <li>createTime: createTime</li>
  *     <li>creatorUid: creatorUid</li>
@@ -20,27 +18,17 @@ import java.sql.Timestamp;
  *     <li>operatorUid: operatorUid</li>
  * </ul>
  */
-public class CustomerTrackerDTO {
-    private Long id;
+public class CustomerRequirementAddressDTO {
     private Integer namespaceId;
     private Long communityId;
+    private Long requirementId;
     private Long customerId;
-    private Long trackerUid;
-    private Byte trackerType;
-    private Byte customerSource;
+    private String addressId;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
     private Timestamp operatorTime;
     private Long operatorUid;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -58,6 +46,14 @@ public class CustomerTrackerDTO {
         this.communityId = communityId;
     }
 
+    public Long getRequirementId() {
+        return requirementId;
+    }
+
+    public void setRequirementId(Long requirementId) {
+        this.requirementId = requirementId;
+    }
+
     public Long getCustomerId() {
         return customerId;
     }
@@ -66,28 +62,12 @@ public class CustomerTrackerDTO {
         this.customerId = customerId;
     }
 
-    public Long getTrackerUid() {
-        return trackerUid;
+    public String getAddressId() {
+        return addressId;
     }
 
-    public void setTrackerUid(Long trackerUid) {
-        this.trackerUid = trackerUid;
-    }
-
-    public Byte getTrackerType() {
-        return trackerType;
-    }
-
-    public void setTrackerType(Byte trackerType) {
-        this.trackerType = trackerType;
-    }
-
-    public Byte getCustomerSource() {
-        return customerSource;
-    }
-
-    public void setCustomerSource(Byte customerSource) {
-        this.customerSource = customerSource;
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
 
     public Byte getStatus() {
