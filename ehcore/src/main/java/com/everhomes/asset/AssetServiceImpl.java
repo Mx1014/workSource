@@ -1246,18 +1246,26 @@ public class AssetServiceImpl implements AssetService {
                 			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
                 		}
                 	}
-                	//物业缴费V6.0（UE优化) 账单区分数据来源
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		//物业缴费V6.0（UE优化) 账单区分数据来源
                 		item.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
                 		item.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
                 	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1373,12 +1381,20 @@ public class AssetServiceImpl implements AssetService {
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	newBill.setCanDelete((byte)1);
+                    	newBill.setCanModify((byte)1);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
                 		newBill.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	newBill.setCanDelete((byte)0);
+                    	newBill.setCanModify((byte)0);
                 	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
@@ -2310,7 +2326,6 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
-
     }
 
     @Override

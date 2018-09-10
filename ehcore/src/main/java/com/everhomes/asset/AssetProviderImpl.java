@@ -3059,6 +3059,9 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
                     dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
+                    
+                    
+                    
                     set.add(dto);
                     return null;
                 });
