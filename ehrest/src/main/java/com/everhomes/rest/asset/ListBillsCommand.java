@@ -36,6 +36,10 @@ import javax.validation.constraints.NotNull;
  * <li>targetIdForEnt: 对公转账的企业id</li>
  * <li>dueDayCountStart: 欠费天数开始范围</li>
  * <li>dueDayCountEnd: 欠费天数结束范围</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -69,21 +73,16 @@ public class ListBillsCommand {
     
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
     
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
 
-
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -294,5 +293,45 @@ public class ListBillsCommand {
 
 	public void setDueDayCountEnd(Long dueDayCountEnd) {
 		this.dueDayCountEnd = dueDayCountEnd;
+	}
+	
+	public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public Long getConsumeUserId() {
+		return consumeUserId;
+	}
+
+	public void setConsumeUserId(Long consumeUserId) {
+		this.consumeUserId = consumeUserId;
 	}
 }

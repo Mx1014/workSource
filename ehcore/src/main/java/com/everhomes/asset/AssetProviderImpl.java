@@ -198,6 +198,8 @@ import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
+
+import javassist.runtime.DotClass;
 /**
  * Created by Administrator on 2017/2/20.
  */
@@ -643,6 +645,7 @@ public class AssetProviderImpl implements AssetProvider {
         Long targetIdForEnt = cmd.getTargetIdForEnt();//对公转账是根据企业id来查询相关的所有账单，如果是对公转账则不能为空
         Long dueDayCountStart = cmd.getDueDayCountStart();//欠费天数开始范围
         Long dueDayCountEnd = cmd.getDueDayCountEnd();//欠费天数结束范围
+        String sourceName = cmd.getSourceName();//新增账单来源信息
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
@@ -654,7 +657,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -711,6 +714,11 @@ public class AssetProviderImpl implements AssetProvider {
         if(isUploadCertificate!=null && isUploadCertificate == 1){
         	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
         }
+        //新增账单来源信息查询条件
+        if(!org.springframework.util.StringUtils.isEmpty(sourceName)) {
+        	query.addConditions(t.SOURCE_NAME.like("%"+sourceName+"%"));
+        }
+        
         query.addGroupBy(t.ID);
         //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
         if(!org.springframework.util.StringUtils.isEmpty(buildingName) || !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
@@ -761,6 +769,11 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setCustomerTel(r.getValue(t.CUSTOMER_TEL));
             //增加欠费天数
             dto.setDueDayCount(r.getValue(t.DUE_DAY_COUNT));
+            //新增账单来源信息
+            dto.setSourceType(r.getValue(t.SOURCE_TYPE));
+            dto.setSourceId(r.getValue(t.SOURCE_ID));
+            dto.setSourceName(r.getValue(t.SOURCE_NAME));
+            dto.setConsumeUserId(r.getValue(t.CONSUME_USER_ID));
             list.add(dto);
             return null;});
         return list;
