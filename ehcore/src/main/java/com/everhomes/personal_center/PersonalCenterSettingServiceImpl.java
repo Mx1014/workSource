@@ -26,6 +26,8 @@ import com.everhomes.rest.personal_center.PersonalCenterSettingRegionType;
 import com.everhomes.rest.personal_center.PersonalCenterSettingStatus;
 import com.everhomes.rest.personal_center.PersonalCenterSettingType;
 import com.everhomes.rest.personal_center.ShopMallId;
+import com.everhomes.rest.personal_center.ShowPrivateSettingCommand;
+import com.everhomes.rest.personal_center.ShowPrivateSettingResponse;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -297,6 +299,17 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     public ListVersionListResponse listVersion(ListVersionListCommand cmd) {
         ListVersionListResponse response = new ListVersionListResponse();
         response.setVersionList(this.personalCenterSettingProvider.getVersionList(cmd.getNamespaceId()));
+        return response;
+    }
+
+    @Override
+    public ShowPrivateSettingResponse showPrivateSetting(ShowPrivateSettingCommand cmd) {
+        ShowPrivateSettingResponse response = new ShowPrivateSettingResponse();
+        response.setShowPrivateSetting(TrueOrFalseFlag.FALSE.getCode());
+        String showFlag = configurationProvider.getValue(cmd.getNamespaceId(),ConfigConstants.SHOW_PRIVATE_FLAG, "");
+        if ("true".equals(showFlag)) {
+            response.setShowPrivateSetting(TrueOrFalseFlag.TRUE.getCode());
+        }
         return response;
     }
 
