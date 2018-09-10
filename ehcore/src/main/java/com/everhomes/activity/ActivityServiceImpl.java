@@ -2810,6 +2810,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+                 ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
+                 if (roster != null && roster.getPayFlag() != null && ActivityRosterPayFlag.REFUND.getCode() == roster.getPayFlag()) {
+                     dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
+                 }
 	             dto.setActivityId(activity.getId());
 	             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 	             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
