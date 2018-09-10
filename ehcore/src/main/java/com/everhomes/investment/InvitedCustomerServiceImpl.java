@@ -99,7 +99,6 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 requirement.setNamespaceId(cmd.getNamespaceId());
                 requirement.setCustomerId(cmd.getId());
                 requirement.setStatus(CommonStatus.ACTIVE.getCode());
-
                 invitedCustomerProvider.createRequirement(requirement);
             }
             // reflush current basic info

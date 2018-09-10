@@ -138,6 +138,7 @@ public class CustomerRequirementDTO {
         this.rentType = rentType;
     }
 
+
     public Long getVersion() {
         return version;
     }
