@@ -1,5 +1,36 @@
 package com.everhomes.asset;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.util.HSSFColor;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -14,19 +45,90 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.module.ServiceModuleService;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.organization.*;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetServiceErrorCode;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BatchImportBillsCommand;
+import com.everhomes.rest.asset.BatchImportBillsResponse;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillForClientV2;
+import com.everhomes.rest.asset.BillGroupDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FieldValueDTO;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.ListUploadCertificatesCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.SimpleAssetBillDTO;
+import com.everhomes.rest.asset.TenantType;
+import com.everhomes.rest.asset.UploadCertificateInfoDTO;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
@@ -48,7 +150,12 @@ import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RegularExpressionUtils;
@@ -57,27 +164,6 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/4/11.
@@ -135,6 +221,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private AssetPayServiceForEnt assetPayServiceForEnt;
+    
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
     
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -596,6 +685,20 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
+    	cmd.setSourceName(localeString.getText());
+        return assetProvider.creatPropertyBill(cmd, null);
+    }
+    
+    public ListBillsDTO createBillFromImport(CreateBillCommand cmd) {
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+    	cmd.setSourceName(localeString.getText());
         return assetProvider.creatPropertyBill(cmd, null);
     }
 
@@ -1282,7 +1385,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             		modifyBillForOrg(command,isCreate);
             	}
             	if(isCreate.get(0)) {
-            		createBill(command);
+            		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
             }
             //设置导出报错的结果excel的标

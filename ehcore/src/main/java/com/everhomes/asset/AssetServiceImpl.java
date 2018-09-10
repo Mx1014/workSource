@@ -1246,6 +1246,18 @@ public class AssetServiceImpl implements AssetService {
                 			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
                 		}
                 	}
+                	//物业缴费V6.0（UE优化) 账单区分数据来源
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		item.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		item.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                	}
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1355,6 +1367,18 @@ public class AssetServiceImpl implements AssetService {
                     if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
                         newBill.setStatus((byte)1);
                     }
+                    //物业缴费V6.0（UE优化) 账单区分数据来源
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                	}
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干

@@ -9,19 +9,19 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public enum AssetPaymentBillSourceId {
-    CREATE((byte)1), IMPORT((byte)2);
+    CREATE(1L), IMPORT(2L);
 
-    private Byte code;
+    private Long code;
 
-    private AssetPaymentBillSourceId(Byte code){
+    private AssetPaymentBillSourceId(Long code){
         this.code = code;
     }
 
-    public Byte getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public static AssetPaymentBillSourceId fromCode(Byte code) {
+    public static AssetPaymentBillSourceId fromCode(Long code) {
         for(AssetPaymentBillSourceId v : AssetPaymentBillSourceId.values()) {
             if(v.getCode() == code)
                 return v;
