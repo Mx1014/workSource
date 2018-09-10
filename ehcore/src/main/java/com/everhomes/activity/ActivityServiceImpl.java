@@ -1836,7 +1836,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             }
             signupInfoDTO.setValues(results);
         }
-        User user = getUserFromPhone(signupInfoDTO.getPhone());
+        User user = getUserFromPhoneWithNamespaceId(signupInfoDTO.getPhone(), activity.getNamespaceId());
         signupInfoDTO.setNickName(user.getNickName());
         signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
@@ -1966,6 +1966,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		user.setExecutiveTag((byte) 0);
 		return user;
 	}
+
+    private User getUserFromPhoneWithNamespaceId(String phone, Integer namespaceId) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                return user;
+            }
+        }
+        User user = new User();
+        user.setId(0L);
+        user.setExecutiveTag((byte) 0);
+        return user;
+    }
 
 	@Override
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
