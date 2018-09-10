@@ -418,6 +418,9 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
-
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心隐私配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('personal.show.private.flag', 'true', '个人中心是否展示隐私设置', '999929', NULL, '1');
 -- --------------------- SECTION END ---------------------------------------------------------
 
