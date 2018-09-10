@@ -4,8 +4,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -17,13 +17,13 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -282,14 +282,14 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             fields.add(DSL.count(staTmp).as(itemId.toString()));
         });
         fields.toArray(fieldArray);
-        SelectQuery<Record> query = context.selectQuery();
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(customer);
         query.addSelect(fieldArray);
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(customer.COMMUNITY_ID.eq(communityId));
         query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
-            LOGGER.debug("count  investment  enterprise , bindValues=" + query.getBindValues());
+            LOGGER.debug("count investment  enterprise , bindValues=" + query.getBindValues());
         }
         List<InvitedCustomerStatisticsDTO> result = new ArrayList<>();
         query.fetch().map((r) -> {

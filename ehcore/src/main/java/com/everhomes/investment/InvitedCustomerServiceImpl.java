@@ -166,6 +166,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             currentRent.setCustomerId(cmd.getId());
             invitedCustomerProvider.createCurrentRent(currentRent);
         }
+        // update tracking user infos
+        if(cmd.getTrackers() != null){
+            customerService.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
+            tracker.setCommunityId(cmd.getCommunityId());
+            tracker.setNamespaceId(cmd.getNamespaceId());
+            tracker.setStatus(CommonStatus.ACTIVE.getCode());
+            tracker.setCustomerId(cmd.getId());
+            invitedCustomerProvider.createTracker(tracker);
+        }
         // todo: update main record data
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setLevelItemId(cmd.getLevelItemId());

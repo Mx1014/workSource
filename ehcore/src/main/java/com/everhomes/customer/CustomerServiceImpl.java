@@ -18,6 +18,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
@@ -269,6 +270,8 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhCustomerTrackers;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -297,6 +300,7 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -4920,4 +4924,14 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    @Override
+    public void deleteCustomerTrackersByCustomerId(Long customerId, byte code) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerTrackers tracker = Tables.EH_CUSTOMER_TRACKERS;
+        context.update(tracker)
+                .set(tracker.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(tracker.CUSTOMER_ID.eq(customerId))
+                .and(tracker.CUSTOMER_SOURCE.eq(code))
+                .execute();
+    }
 }
