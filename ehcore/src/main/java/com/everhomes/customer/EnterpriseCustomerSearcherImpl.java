@@ -169,6 +169,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
+            builder.field("customerSource" , customer.getCustomerSource());
+            builder.field("EntryStatus", customer.getEntryStatus());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -375,6 +377,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getSourceItemId()!=null && StringUtils.isBlank(cmd.getSourceType())){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
             fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
+        }
+
+        if(cmd.getCustomerSource() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerSource", cmd.getCustomerSource()));
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

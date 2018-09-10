@@ -61,7 +61,7 @@ public class InvitedCustomerController {
         return response;
     }
     /**
-     * <b>URL: /invitedCustomer/listInvestments</b>
+     * <b>URL: /invitedCustomer/listInvestment</b>
      * <p> 列出招商客户 </p>
      */
     @RequestMapping("listInvestment")

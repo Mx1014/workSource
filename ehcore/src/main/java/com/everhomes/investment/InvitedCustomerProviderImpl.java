@@ -4,8 +4,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -17,6 +17,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -287,9 +288,10 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(customer.COMMUNITY_ID.eq(communityId));
         query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
+        query.addFrom(customer);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
-            LOGGER.debug("count  investment  enterprise , bindValues=" + query.getBindValues());
+            LOGGER.debug("count investment  enterprise , bindValues=" + query.getBindValues());
         }
         List<InvitedCustomerStatisticsDTO> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -298,6 +300,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 //                dto.setKey(itemId.toString());
                 dto.setKey(itemsMap.get(itemId).getItemDisplayName());
                 dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
+                dto.setItemId(itemId);
                 result.add(dto);
             }
             return null;

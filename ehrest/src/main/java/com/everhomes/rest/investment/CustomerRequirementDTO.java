@@ -4,30 +4,32 @@ import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
+
 
 /**
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
- *     <li>expectedLocation: 期望地段</li>
- *     <li>demandAreaMin: 期望最小面积</li>
- *     <li>demandAreaMax: 期望最大面积</li>
- *     <li>demandPriceMin: 期望最小价格</li>
- *     <li>demandPriceMax: 期望最大价格</li>
- *     <li>demandPriceUnit: 期望价格单位</li>
- *     <li>buyOrLease: 租赁还是购买</li>
- *     <li>expectAddress: 期望房源</li>
- *     <li>demandVersion: demandVersion</li>
- *     <li>status: 信息状态</li>
  *     <li>customerId: customerId</li>
+ *     <li>intentionLocation: intentionLocation</li>
+ *     <li>minArea: minArea</li>
+ *     <li>maxArea: maxArea</li>
+ *     <li>minRentPrice: minRentPrice</li>
+ *     <li>maxRentPrice: maxRentPrice</li>
+ *     <li>rentPriceUnit: rentPriceUnit</li>
+ *     <li>rentType: rentType</li>
+ *     <li>version: version</li>
+ *     <li>status: status</li>
  *     <li>createTime: createTime</li>
- *     <li>createBy: createBy</li>
+ *     <li>creatorUid: creatorUid</li>
  *     <li>operatorTime: operatorTime</li>
- *     <li>operatorBy: operatorBy</li>
+ *     <li>operatorUid: operatorUid</li>
  * </ul>
  */
 public class CustomerRequirementDTO {
+
 
     private Long id;
     private Integer namespaceId;
@@ -41,6 +43,7 @@ public class CustomerRequirementDTO {
     private Byte rentPriceUnit;
     private Byte rentType;
     private String version;
+    private List<CustomerRequirementAddressDTO> addresses;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
@@ -181,6 +184,14 @@ public class CustomerRequirementDTO {
 
     public void setOperatorUid(Long operatorUid) {
         this.operatorUid = operatorUid;
+    }
+
+    public List<CustomerRequirementAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<CustomerRequirementAddressDTO> addresses) {
+        this.addresses = addresses;
     }
 
     @Override

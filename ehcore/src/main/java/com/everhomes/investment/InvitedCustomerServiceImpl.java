@@ -4,18 +4,39 @@ package com.everhomes.investment;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.*;
-import com.everhomes.rest.forum.ForumCategoryDTO;
-import com.everhomes.rest.investment.*;
+import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
+import com.everhomes.rest.investment.InvitedCustomerDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerType;
+import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +44,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class InvitedCustomerServiceImpl implements InvitedCustomerService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerServiceImpl.class);
 
     @Autowired
     private EnterpriseCustomerSearcher customerSearcher;
@@ -35,8 +58,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Autowired
     private InvitedCustomerProvider invitedCustomerProvider;
-
+    @Autowired
     private FieldService fieldService;
+    @Autowired
+    private OrganizationService organizationService;
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
 
     @Override
     public InvitedCustomerDTO createInvitedCustomer(CreateInvitedCustomerCommand cmd) {
@@ -66,10 +96,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     contact.setCommunityId(cmd.getCommunityId());
                     contact.setNamespaceId(cmd.getNamespaceId());
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
+                    contact.setCustomerSource(cmd.getCustomerSource());
                     invitedCustomerProvider.createContact(contact);
                 });
             }
-            // reflush demend
+            // reflush requirement
             if (cmd.getRequirement() != null) {
                 CustomerRequirement requirement = ConvertHelper.convert(cmd.getRequirement(), CustomerRequirement.class);
                 requirement.setCommunityId(cmd.getCommunityId());
@@ -87,6 +118,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 currentRent.setCustomerId(cmd.getId());
                 invitedCustomerProvider.createCurrentRent(currentRent);
             }
+            if(cmd.getTrackers() != null){
+                CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
+                tracker.setCommunityId(cmd.getCommunityId());
+                tracker.setNamespaceId(cmd.getNamespaceId());
+                tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                tracker.setCustomerId(cmd.getId());
+                invitedCustomerProvider.createTracker(tracker);
+            }
 
             return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
         }
@@ -96,6 +135,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void updateInvestment(CreateInvitedCustomerCommand cmd) {
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         // reflush contacts
         invitedCustomerProvider.deleteInvitedCustomer(cmd.getId());
         if (cmd.getContacts() != null && cmd.getContacts().size() > 0) {
@@ -108,7 +148,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 invitedCustomerProvider.createContact(contact);
             });
         }
-        // reflush demend
+        // reflush requirement
         if (cmd.getRequirement() != null) {
             CustomerRequirement requirement = ConvertHelper.convert(cmd.getRequirement(), CustomerRequirement.class);
             requirement.setCommunityId(cmd.getCommunityId());
@@ -126,19 +166,48 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             currentRent.setCustomerId(cmd.getId());
             invitedCustomerProvider.createCurrentRent(currentRent);
         }
-        EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
+        // update tracking user infos
+        if(cmd.getTrackers() != null){
+            customerService.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
+            tracker.setCommunityId(cmd.getCommunityId());
+            tracker.setNamespaceId(cmd.getNamespaceId());
+            tracker.setStatus(CommonStatus.ACTIVE.getCode());
+            tracker.setCustomerId(cmd.getId());
+            invitedCustomerProvider.createTracker(tracker);
+        }
         // todo: update main record data
         customer.setStatus(CommonStatus.ACTIVE.getCode());
+        customer.setLevelItemId(cmd.getLevelItemId());
+        customer.setName(cmd.getName());
+        customer.setSourceId(cmd.getSourceId());
+        customer.setCorpIndustryItemId(cmd.getCorpIndustryItemId());
+        customer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
+        customer.setTransactionRatio(cmd.getTransactionRatio());
         customerProvider.updateEnterpriseCustomer(customer);
-//        //sync tenant info into organization
-//        ExecutorUtil.submit(() -> {
-//            syncInvestmentInfoToOrganization(cmd);
-//        });
+        //sync tenant info into organization
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
+            ExecutorUtil.submit(() -> syncInvestmentInfoToOrganization(cmd, customer.getOrganizationId()));
+        }
         customerSearcher.feedDoc(customer);
     }
 
-    private void syncInvestmentInfoToOrganization(CreateInvitedCustomerCommand cmd) {
+    private EnterpriseCustomer checkEnterpriseCustomer(Long id) {
+        EnterpriseCustomer customer = customerProvider.findById(id);
+        if (customer == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(customer.getStatus()))) {
+            LOGGER.error("enterprise customer is not exist or active. id: {}, customer: {}", id, customer);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
+                    "customer is not exist or active");
+        }
+        return customer;
+    }
 
+    private void syncInvestmentInfoToOrganization(CreateInvitedCustomerCommand cmd, Long organizationId) {
+        Organization organization = organizationProvider.findOrganizationById(organizationId);
+        organization.setName(cmd.getName());
+        // todo : add some filed for sync
+        organizationProvider.updateOrganization(organization);
+        organizationSearcher.feedDoc(organization);
     }
 
     @Override
@@ -156,7 +225,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         response.setDtos(searchResponse.getDtos());
         response.setNextPageAnchor(searchResponse.getNextPageAnchor());
         // only the first time we requested, populate stastics data
-        if (cmd.getPageAnchor() == 0 || cmd.getPageAnchor() == null) {
+        if ( cmd.getPageAnchor() == null || cmd.getPageAnchor() == 0) {
             List<InvitedCustomerStatisticsDTO> statistics = null;
             // this module should add investment statistics to response
             ListFieldItemCommand fieldItemCommand = new ListFieldItemCommand();

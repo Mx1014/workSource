@@ -7,7 +7,6 @@ import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 public class CreateInvitedCustomerCommand {
@@ -161,7 +160,7 @@ public class CreateInvitedCustomerCommand {
 
 
     private String transactionRatio;
-    private Timestamp expectedSignDate;
+    private Long expectedSignDate;
     private Byte customerSource;
     private Long admissionItemId;
 
@@ -1292,11 +1291,11 @@ public class CreateInvitedCustomerCommand {
         this.transactionRatio = transactionRatio;
     }
 
-    public Timestamp getExpectedSignDate() {
+    public Long getExpectedSignDate() {
         return expectedSignDate;
     }
 
-    public void setExpectedSignDate(Timestamp expectedSignDate) {
+    public void setExpectedSignDate(Long expectedSignDate) {
         this.expectedSignDate = expectedSignDate;
     }
 

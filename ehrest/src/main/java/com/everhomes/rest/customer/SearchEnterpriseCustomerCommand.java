@@ -100,6 +100,16 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long admissionItemId;
 
+    private Byte customerSource;
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
     public Long getAdmissionItemId() {
         return admissionItemId;
     }
