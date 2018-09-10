@@ -45,6 +45,20 @@ public class PaymentCardController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /payment/getCardInfo</b>
+     * <p>获取卡信息</p>
+     */
+    @RequestMapping("getCardInfo")
+    @RestReturn(value=CardInfoDTO.class)
+    public RestResponse getCardInfo(@RequestParam Long cardId) {
+        CardInfoDTO cardInfo = paymentCardService.getCardInfo(cardId);
+        RestResponse response = new RestResponse(cardInfo);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /payment/listCardIssuer</b>
@@ -139,6 +153,20 @@ public class PaymentCardController extends ControllerBase{
     public RestResponse rechargeCardV2(RechargeCardCommand cmd) {
         PreOrderDTO dto = paymentCardService.rechargeCardV2(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /payment/refundChargingOrderV2</b>
+     * <p>退款</p>
+     */
+    @RequestMapping("refundChargingOrderV2")
+    @RestReturn(value=String.class)
+    public RestResponse refundChargingOrderV2(@RequestParam Long orderId) {
+        paymentCardService.refundOrderV2(orderId);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -267,6 +295,7 @@ public class PaymentCardController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
     /**
      * <b>URL: /payment/updateCardRechargeOrder</b>
      * <p>更新充值订单</p>
@@ -304,6 +333,22 @@ public class PaymentCardController extends ControllerBase{
     @RestReturn(String.class)
     public RestResponse payNotify(OrderPaymentNotificationCommand cmd) {
         this.paymentCardService.payNotify(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /rental/refundNotify <b>
+     * <p>退款回调</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("refundNotify")
+    @RestReturn(String.class)
+    public RestResponse refundNotify(OrderPaymentNotificationCommand  cmd) {
+        this.paymentCardService.refundNotify(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

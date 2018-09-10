@@ -16,8 +16,11 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.payment.*;
 import org.apache.commons.codec.binary.Base64;
@@ -72,6 +75,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentCardServiceImpl.class);
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
     @Autowired
     private PaymentCardProvider paymentCardProvider;
     
@@ -227,6 +231,12 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand,paymentCardRechargeOrder);
 		return callBack;
+	}
+
+	@Override
+	public void refundOrderV2(Long orderId) {
+		PaymentCardRechargeOrder order = paymentCardProvider.findPaymentCardRechargeOrderById(orderId);
+		payService.refundOrder(order);
 	}
 
 	@Override
@@ -909,6 +919,16 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	}
 
 	@Override
+	public void refundNotify(OrderPaymentNotificationCommand cmd) {
+		if (!PayUtil.verifyCallbackSignature(cmd))
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+					"signature wrong");
+		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
+		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		paymentCardOrderEmbeddedV2Handler.refundSuccess(cmd2);
+	}
+
+	@Override
 	public PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd) {
 		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
 		List<PaymentCardIssuerCommunity> hotlines = paymentCardProvider.listPaymentCardIssuerCommunity(cmd.getOwnerId(), cmd.getOwnerType());
@@ -942,4 +962,12 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		handler.unbundleCard(paymentCard);
 	}
+
+	@Override
+	public CardInfoDTO getCardInfo(Long cardId) {
+		PaymentCard paymentCard = checkPaymentCard(cardId);
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		return handler.getCardInfo(paymentCard);
+	}
+
 }

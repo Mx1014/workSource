@@ -70,18 +70,25 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if (cardList == null || cardList.size() == 0)
             return result;
         PaymentCard card = cardList.get(0);
+        result.add(getCardInfo(card));
+
+        return result;
+    }
+
+    @Override
+    public CardInfoDTO getCardInfo(PaymentCard paymentCard) {
+        if (paymentCard == null)
+            return null;
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", ACCOUNT_QUERY_TYPE);
-        jo.put("UserID", card.getCardNo());
+        jo.put("UserID", paymentCard.getCardNo());
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if ("4".equals(cardInfo.getResultID())) {//销户
             CardInfoDTO cardInfoDTO = new CardInfoDTO();
             cardInfoDTO.setStatus("2");
-            cardInfoDTO.setCardId(card.getId());
-
-            result.add(cardInfoDTO);
-            return result;
+            cardInfoDTO.setCardId(paymentCard.getId());
+            return cardInfoDTO;
         }
         if (!"0".equals(cardInfo.getResultID())){//返回报错
             LOGGER.error("paymentCard getCardInfoByVendor error, param={} response = {}", jo,response);
@@ -91,7 +98,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
 
         CardInfoDTO cardInfoDTO = new CardInfoDTO();
         cardInfoDTO.setBalance(new BigDecimal(cardInfo.getBalance()));
-        cardInfoDTO.setMobile(card.getMobile());
+        cardInfoDTO.setMobile(paymentCard.getMobile());
         cardInfoDTO.setStatus(cardInfo.getStateID());
         cardInfoDTO.setCardNo(cardInfo.getCardID());
         ZhuzongVendorDate vendorDate = new ZhuzongVendorDate();
@@ -99,11 +106,10 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         vendorDate.setUserId(cardInfo.getUserID());
         vendorDate.setUserName(cardInfo.getUserName());
         cardInfoDTO.setVendorCardData(StringHelper.toJsonString(vendorDate));
-        cardInfoDTO.setCardId(card.getId());
-        result.add(cardInfoDTO);
-
-        return result;
+        cardInfoDTO.setCardId(paymentCard.getId());
+        return cardInfoDTO;
     }
+
 
     @Override
     public CardInfoDTO applyCard(ApplyCardCommand cmd, PaymentCardIssuer cardIssuer) {
@@ -137,6 +143,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         paymentCard.setCardNo(applyCard.getUserID());
         paymentCard.setUserId(user.getId());
         paymentCard.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        paymentCard.setUpdateTime(paymentCard.getCreateTime());
         paymentCard.setCreatorUid(user.getId());
         paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
         paymentCard.setVendorName(vendorName);
@@ -316,6 +323,8 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("LossType",cmd.getLossType().toString());
         postToZhuzong(jo.toJSONString());
 
+        card.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+
     }
 
     @Override
@@ -331,7 +340,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         ZhuzongUserCardInfo cardInfo = (ZhuzongUserCardInfo) StringHelper.fromJsonString(response, ZhuzongUserCardInfo.class);
         if (!"1".equals(cardInfo.getResultID())){//没有失败时
             paymentCard.setStatus(PaymentCardStatus.INACTIVE.getCode());
-            //paymentCard.set(new Timestamp(System.currentTimeMillis()));
+            paymentCard.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             paymentCardProvider.updatePaymentCard(paymentCard);
         }
     }

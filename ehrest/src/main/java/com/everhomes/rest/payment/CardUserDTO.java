@@ -17,6 +17,7 @@ public class CardUserDTO {
 	private String mobile;
 	private String userName;
 	private Timestamp createTime;
+	private Timestamp updateTime;
 	private String cardNo;
 	private Byte status;
 	
@@ -52,6 +53,14 @@ public class CardUserDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	@Override

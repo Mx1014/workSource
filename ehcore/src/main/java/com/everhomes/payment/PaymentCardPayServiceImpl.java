@@ -7,12 +7,12 @@ import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.gorder.order.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
+import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.rest.payment.UpdateAccountSettingCommand;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -28,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -273,5 +275,39 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
         if (accounts != null && accounts.size() > 0)
             return accounts.get(0).getAccountId();
         return null;
+    }
+
+    @Override
+    public void refundOrder(PaymentCardRechargeOrder order) {
+        Long amount = order.getAmount().multiply(new BigDecimal(100)).longValue();
+        CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        String sNamespaceId = "NS"+UserContext.getCurrentNamespaceId();
+        createRefundOrderCommand.setAccountCode(sNamespaceId);
+        createRefundOrderCommand.setBusinessOrderNumber(order.getBizOrderNo());
+        createRefundOrderCommand.setAmount(amount);
+        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
+        String homeurl = configurationProvider.getValue("home.url", "");
+        String callbackurl = configurationProvider.getValue("pay.v2.refund.url.paymentCard", "/payment/refundNotify");
+        callbackurl = homeurl + contextPath + callbackurl;
+        createRefundOrderCommand.setCallbackUrl(callbackurl);
+        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+
+        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+        } else{
+            LOGGER.error("Refund failed from vendor, orderId={}, response={}",
+                    order.getId(), refundOrderRestResponse);
+            throw RuntimeErrorException.errorWith(OrderErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
+        }
+
+        order.setPayStatus(CardRechargeStatus.REFUNDING.getCode());
+        paymentCardProvider.updatePaymentCardRechargeOrder(order);
+
     }
 }

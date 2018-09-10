@@ -69,7 +69,14 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     @Override
     public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
-
+        this.checkOrderNoIsNull(cmd.getBizOrderNum());
+        LOGGER.info("PaymentCardOrderEmbeddedV2Handler refundSuccess start cmd = {}", cmd);
+        PaymentCardRechargeOrder order = checkOrder(cmd.getBizOrderNum());
+        this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()+cmd.getOrderId()).tryEnter(()-> {
+            order.setPayStatus(CardRechargeStatus.REFUNDED.getCode());
+            paymentCardProvider.updatePaymentCardRechargeOrder(order);
+        });
+        LOGGER.info("PaymentCardOrderEmbeddedV2Handler refundSuccess end");
     }
 
     @Override

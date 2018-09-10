@@ -19,4 +19,6 @@ public interface PaymentCardPayService {
 
     PreOrderDTO createPreOrder(PreOrderCommand cmd, PaymentCardRechargeOrder order);
 
+    void refundOrder(PaymentCardRechargeOrder order);
+
 }

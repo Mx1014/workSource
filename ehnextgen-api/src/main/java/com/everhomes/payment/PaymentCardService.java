@@ -53,6 +53,8 @@ public interface PaymentCardService {
 
     void payNotify(OrderPaymentNotificationCommand cmd);
 
+    void refundNotify(OrderPaymentNotificationCommand cmd);
+
     PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd);
 
     void updateHotline(UpdateHotlineCommand cmd);
@@ -60,4 +62,8 @@ public interface PaymentCardService {
     void freezeCard(FreezeCardCommand cmd);
 
     void unbunleCard(Long cardId);
+
+    CardInfoDTO getCardInfo(Long cardId);
+
+    void refundOrderV2(Long orderId);
 }

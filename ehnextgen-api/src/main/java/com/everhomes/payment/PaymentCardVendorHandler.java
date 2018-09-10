@@ -9,6 +9,8 @@ public interface PaymentCardVendorHandler {
     String PAYMENTCARD_VENDOR_PREFIX = "PaymentCardVendor-";
     
     List<CardInfoDTO> getCardInfoByVendor(ListCardInfoCommand cmd);
+
+    default CardInfoDTO getCardInfo(PaymentCard paymentCard){return null;}
     
     CardInfoDTO applyCard(ApplyCardCommand cmd,PaymentCardIssuer cardIssuer);
 
