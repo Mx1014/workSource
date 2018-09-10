@@ -4,7 +4,28 @@ import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
 
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>customerId: customerId</li>
+ *     <li>name: name</li>
+ *     <li>phoneNumber: phoneNumber</li>
+ *     <li>email: email</li>
+ *     <li>position: position</li>
+ *     <li>address: address</li>
+ *     <li>contactType: contactType</li>
+ *     <li>sourceType: sourceType</li>
+ *     <li>status: status</li>
+ *     <li>createTime: createTime</li>
+ *     <li>creatorUid: creatorUid</li>
+ *     <li>operatorTime: operatorTime</li>
+ *     <li>operatorUid: operatorUid</li>
+ * </ul>
+ */
 public class CustomerContactDTO {
+
 
     private Long id;
     private Integer namespaceId;
@@ -16,7 +37,7 @@ public class CustomerContactDTO {
     private String position;
     private String address;
     private Byte contactType;
-    private Byte sourceType;
+    private Byte customerSource;
     private Byte status;
     private Timestamp createTime;
     private Long creatorUid;
@@ -103,12 +124,12 @@ public class CustomerContactDTO {
         this.contactType = contactType;
     }
 
-    public Byte getSourceType() {
-        return sourceType;
+    public Byte getCustomerSource() {
+        return customerSource;
     }
 
-    public void setSourceType(Byte sourceType) {
-        this.sourceType = sourceType;
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
     }
 
     public Byte getStatus() {

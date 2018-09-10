@@ -66,6 +66,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     contact.setCommunityId(cmd.getCommunityId());
                     contact.setNamespaceId(cmd.getNamespaceId());
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
+                    contact.setCustomerSource(cmd.getCustomerSource());
                     invitedCustomerProvider.createContact(contact);
                 });
             }
@@ -86,6 +87,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 currentRent.setStatus(CommonStatus.ACTIVE.getCode());
                 currentRent.setCustomerId(cmd.getId());
                 invitedCustomerProvider.createCurrentRent(currentRent);
+            }
+            if(cmd.getTrackers() != null){
+                CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
+                tracker.setCommunityId(cmd.getCommunityId());
+                tracker.setNamespaceId(cmd.getNamespaceId());
+                tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                tracker.setCustomerId(cmd.getId());
+                invitedCustomerProvider.createTracker(tracker);
             }
 
             return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
