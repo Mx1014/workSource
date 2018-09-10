@@ -100,7 +100,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	}
 
 	@Override
-	public Post postProcessEmbeddedObject(Post post) {
+	public Post postProcessEmbeddedObject(Post post,Long communityId) {
 		Long taskId = post.getEmbeddedId();
 		if(taskId == null) {
 			LOGGER.warn("Task id not found, postId=" + post.getId() + ", taskId=" + taskId);

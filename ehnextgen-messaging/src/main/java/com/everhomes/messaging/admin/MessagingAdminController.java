@@ -1,10 +1,12 @@
 package com.everhomes.messaging.admin;
 
-import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.messaging.admin.SendMessageAdminCommand;
 import net.greghaines.jesque.Job;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.queue.taskqueue.JesqueClientFactory;
-import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.messaging.admin.SendMessageAdminCommand;
+import javax.validation.Valid;
 
 @RestDoc(value="Address admin controller", site="core")
 @RestController
@@ -46,10 +44,11 @@ public class MessagingAdminController extends ControllerBase implements Applicat
             setup();
         }
     }
-    
+
+    @RequestMapping("send")
+    @RestReturn(String.class)
     public void sendMessage(@Valid SendMessageAdminCommand cmd) {
-        final Job job = new Job(AdminPusherAction.class.getName(),
-                new Object[]{ cmd });
+        final Job job = new Job(AdminPusherAction.class.getName(), new Object[]{ cmd });
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
 }

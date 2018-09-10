@@ -2942,7 +2942,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //设置所在楼宇的楼层数
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         response.setBuildingFloorNumber(building.getFloorNumber());
-        
+        response.setBuildingId(building.getId());
+
         return response;
     }
     
@@ -2975,11 +2976,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if(mappings != null && mappings.size() > 0) {
             mappings.forEach(mapping -> {
                 Contract contract = contractProvider.findContractById(mapping.getContractId());
-                if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
-                        && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
-                        && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-                    customerIds.add(contract.getCustomerId());
-                }
+                if (contract != null) {
+                	if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+                            && now.after(contract.getContractStartDate()) && now.before(contract.getContractEndDate())
+                            && CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                        customerIds.add(contract.getCustomerId());
+                    }
+				}
             });
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.findActiveCustomerEntryInfoByAddressId(addressId);
