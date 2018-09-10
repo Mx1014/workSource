@@ -33,10 +33,20 @@ public class ListLocalCamerasCommand {
 	private Byte enterStatus;
 	
 	private Byte linkStatus;
+	
+	private String Name;
 
 	private Long pageAnchor;
 
 	private Integer pageSize;
+
+	public String getName() {
+		return Name;
+	}
+
+	public void setName(String name) {
+		Name = name;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;

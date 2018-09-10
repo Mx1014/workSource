@@ -53,6 +53,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Component
@@ -1362,4 +1363,67 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
         return query.fetch().stream().map(r -> ConvertHelper.convert(r,DoorAuth.class)).collect(Collectors.toList());
     }
+
+	@Override
+	public List<AclinkAuthDTO> listFormalAuth(CrossShardListingLocator locator, Integer pageSize,
+			ListFormalAuthCommand cmd) {
+		//TODO 组织架构
+		List<AclinkAuthDTO> dtos = new ArrayList<AclinkAuthDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+		
+		Condition cond = Tables.EH_DOOR_AUTH.ID.isNotNull()
+				.and(Tables.EH_DOOR_AUTH.STATUS.ne(DoorAuthStatus.VALID.getCode()))
+				.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+		Condition userCond = Tables.EH_USERS.ID.isNotNull();
+		Condition creatorCond = Tables.EH_USERS.ID.isNotNull();
+		if(cmd.getDoorId() != null){
+			cond = cond.and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
+		}
+		if(cmd.getCreateTimeStart() != null && cmd.getCreateTimeEnd() != null){
+			cond = cond.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getCreateTimeStart()), new Timestamp(cmd.getCreateTimeStart())));
+		}
+		if(cmd.getCreatorName() != null){
+			creatorCond = creatorCond.and(Tables.EH_USERS.NICK_NAME.like("%"+cmd.getCreatorName()+"%"));
+		}
+		if(cmd.getKeyword() != null){
+			cond = cond.and(Tables.EH_DOOR_AUTH.NICKNAME.like("%"+ cmd.getKeyword() +"%").or(Tables.EH_DOOR_AUTH.PHONE.like("%"+ cmd.getKeyword() +"%")));
+		}
+		
+		com.everhomes.server.schema.tables.EhUsers tc = Tables.EH_USERS.as("tc");
+		com.everhomes.server.schema.tables.EhUsers tu = Tables.EH_USERS.as("tu");
+		
+		SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_AUTH)
+				.join(context.select(Tables.EH_USERS.ID,Tables.EH_USERS.NICK_NAME).from(Tables.EH_USERS).where(userCond).asTable("tu")).on(Tables.EH_DOOR_AUTH.USER_ID.eq(tu.ID))
+				.join(context.select(Tables.EH_USERS.ID,Tables.EH_USERS.NICK_NAME).from(Tables.EH_USERS).where(creatorCond).asTable("tc")).on(Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(tc.ID))
+				.join(Tables.EH_DOOR_ACCESS).on(Tables.EH_DOOR_AUTH.DOOR_ID.eq(Tables.EH_DOOR_ACCESS.ID))
+				.where(cond).orderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc()).limit(pageSize + 1);
+		
+        step.fetch().map(r ->{
+        	AclinkAuthDTO dto = ConvertHelper.convert(r, AclinkAuthDTO.class);
+        	dto.setId(r.getValue(Tables.EH_USERS.ID));
+        	dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
+        	dto.setCreateTime(r.getValue(Tables.EH_DOOR_AUTH.CREATE_TIME));
+        	dto.setCreatorName(r.getValue(tc.NICK_NAME));
+        	dto.setDoorId(r.getValue(Tables.EH_DOOR_AUTH.DOOR_ID));
+        	dto.setDoorName(r.getValue(Tables.EH_DOOR_ACCESS.DISPLAY_NAME));
+        	dto.setCreatorId(r.getValue(tc.ID));
+        	dto.setObjectId(r.getValue(Tables.EH_DOOR_AUTH.USER_ID));
+        	dto.setObjectName(r.getValue(Tables.EH_DOOR_AUTH.NICKNAME));
+        	dto.setObjectType((byte) 0);//TODO
+        	dto.setPhone(r.getValue(Tables.EH_DOOR_AUTH.PHONE));
+        	dto.setRightOpen(r.getValue(Tables.EH_DOOR_AUTH.RIGHT_OPEN));
+        	dto.setRightRemote(r.getValue(Tables.EH_DOOR_AUTH.RIGHT_REMOTE));
+        	dto.setRightVisitor(r.getValue(Tables.EH_DOOR_AUTH.RIGHT_VISITOR));
+        	dto.setStatus(r.getValue(Tables.EH_DOOR_AUTH.STATUS));
+            dtos.add(dto);
+            return null;
+        });
+
+        locator.setAnchor(null);
+        if(dtos.size() > pageSize){
+        	dtos.remove(dtos.size() - 1);
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+        }
+        return dtos;
+	}
 }

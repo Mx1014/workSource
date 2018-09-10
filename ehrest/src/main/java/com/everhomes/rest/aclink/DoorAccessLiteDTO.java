@@ -14,8 +14,6 @@ import com.everhomes.util.StringHelper;
  * <li>displayName: 用户端显示的门禁名字</li>
  * <li>farewareVersion[String]:固件版本</li>
  * </ul>
- * @author janson
- *
  */
 public class DoorAccessLiteDTO {
 	private Long id;

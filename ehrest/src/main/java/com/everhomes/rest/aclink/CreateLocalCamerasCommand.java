@@ -13,6 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>doorAccessId关联门襟</li>
  * <li>enterStatus：进出标识</li>
  * <li>keyCode:摄像头密钥</li>
+ * <li>account:账号</li>
+ * <li>ownerId:所属组织id</li>
+ * <li>ownerType:所属组织类型</li>
  * </ul>
  */
 public class CreateLocalCamerasCommand {

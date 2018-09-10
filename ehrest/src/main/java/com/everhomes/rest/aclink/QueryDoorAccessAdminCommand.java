@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId: 属于的上级ID</li>
  * <li>ownerType: 属于上级的类型</li>
- * <li>groupId: 分组信息，参考{@link com.everhomes.rest.aclink.DoorAccessType}</li>
+ * <li>groupId: 分组信息</li>
  * <li>search: 搜索字符串</li>
  * <li>displayName:名称</li>
  * <li>name:标识</li>
@@ -106,7 +106,7 @@ public class QueryDoorAccessAdminCommand {
         this.pageAnchor = pageAnchor;
     }
     public Integer getPageSize() {
-        return pageSize;
+		return pageSize == null ? 0 : pageSize;
     }
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;

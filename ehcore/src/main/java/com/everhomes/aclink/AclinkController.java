@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.lingling.AclinkLinglingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -82,33 +80,7 @@ import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -118,19 +90,8 @@ public class AclinkController extends ControllerBase {
     private DoorAccessService doorAccessService;
     
     @Autowired
-    private AesServerKeyProvider aesServerKeyProvider;
-
-    @Autowired
-    private DoorAccessProvider doorAccessProvider;
-
-    @Autowired
-    private AclinkLinglingService aclinkLinglingService;
-    
-    @Autowired
-    private RolePrivilegeService rolePrivilegeService;
-    
-    @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    
     @Autowired
     private FaceRecognitionPhotoService faceRecognitionPhotoService;
 
@@ -297,7 +258,22 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * 
+     * <b>URL: /aclink/updateAuthBatch</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("updateAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse updateAuthBatch(@Valid UpdateAuthBatchCommand cmd) {
+        doorAccessService.updateAuthBatch(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * 
@@ -958,6 +934,36 @@ public class AclinkController extends ControllerBase {
 
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/listUserAuth</b>
+     * <p>获取钥匙信息 门禁3.0</p>
+     * @return
+     */
+    @RequestMapping("listUserAuth")
+    @RestReturn(value=ListUserAuthResponse.class)
+    public RestResponse listUserKeys(ListAesUserKeyByUserCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/getUserKeyInfo</b>
+     * <p>获取钥匙信息 门禁3.0</p>
+     * @return
+     */
+    @RequestMapping("getUserKeyInfo")
+    @RestReturn(value=AesUserKeyDTO.class)
+    public RestResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
         return response;
     }
     

@@ -101,7 +101,11 @@ public class AclinkIpadProviderImpl implements AclinkIpadProvider{
 				}
 				
 				if(cmd.getUuid() != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.UUID.eq(cmd.getUuid()));
+					query.addConditions(Tables.EH_ACLINK_IPADS.UUID.like("%" + cmd.getUuid() + "%"));
+				}
+				
+				if(cmd.getName() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.NAME.like("%" + cmd.getName() + "%"));
 				}
 				
 				if(cmd.getOwnerId() != null){
@@ -160,7 +164,7 @@ public class AclinkIpadProviderImpl implements AclinkIpadProvider{
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
 				if(ids != null && ids.size() > 0){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.ID.in(ids));
+					query.addConditions(Tables.EH_ACLINK_IPADS.ID.in(ids));
 				}
                 return query;
 			}

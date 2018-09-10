@@ -798,4 +798,38 @@ ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '
 ALTER TABLE `eh_aclink_ipads` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
 ALTER TABLE `eh_door_access` ADD COLUMN `fareware_version` VARCHAR(64) NULL DEFAULT NULL COMMENT '门禁固件版本' AFTER `id`;
 
+CREATE TABLE `eh_aclink_form_titles` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`owner_id`  bigint(20) NULL COMMENT '所属对象id',
+`owner_type`  bigint(20) NULL COMMENT '所属对象类型 0园区 1公司 2家庭 3门禁',
+`path` varchar(1024) DEFAULT NULL COMMENT '记录更新人userId',
+`name` varchar(64) NULL COMMENT '表单项名称',
+`init_value` varchar(1024) NULL COMMENT '表单项初始值,如select,checkbox等给出的选项',
+`item_type` bigint(20) NULL COMMENT '表单项类型, 0 表单中间结点 1 文本 2 单选 3 多选',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 标题';
+
+CREATE TABLE `eh_aclink_form_values` (
+`id` bigint(20) NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`title_id` bigint(20) NOT NULL COMMENT '对应表单标题的id',
+`value` varchar(1024) NULL COMMENT '表单项的值',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`owner_id` bigint(20) NOT NULL COMMENT '记录所属对象Id',
+`owner_type` bigint(20) NOT NULL COMMENT '记录所属对象类型 0园区 1公司 2家庭 3门禁 4用户 5授权记录',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 输入值';
+
+ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` BIGINT NULL DEFAULT 0 COMMENT '被授权对象的类型' AFTER `user_id`;
+
 -- --------------------- SECTION END ---------------------------------------------------------

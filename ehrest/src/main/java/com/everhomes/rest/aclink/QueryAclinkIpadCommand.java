@@ -31,24 +31,26 @@ public class QueryAclinkIpadCommand {
 	private Byte enterStatus;
 	private Byte linkStatus;
 	private Byte status;
-	private Byte name;
-	private Byte uuid;
+	private String name;
+	private String uuid;
 	private Long pageAnchor;
 	private Integer pageSize;
 
-	public Byte getName() {
+
+
+	public String getName() {
 		return name;
 	}
 
-	public void setName(Byte name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	public Byte getUuid() {
+	public String getUuid() {
 		return uuid;
 	}
 
-	public void setUuid(Byte uuid) {
+	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 

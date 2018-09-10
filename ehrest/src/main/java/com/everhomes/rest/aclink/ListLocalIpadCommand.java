@@ -38,11 +38,21 @@ public class ListLocalIpadCommand {
 	
 	private String uuid;
 	
+	private String name;
+	
 	private Integer count;
 
 	private Long pageAnchor;
 
 	private Integer pageSize;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -141,7 +151,7 @@ public class ListLocalIpadCommand {
 	}
 
 	public Integer getPageSize() {
-		return pageSize;
+		return pageSize == null ? 0 : pageSize;
 	}
 
 	public void setPageSize(Integer pageSize) {

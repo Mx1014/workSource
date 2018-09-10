@@ -188,5 +188,7 @@ public interface DoorAccessService {
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
 
-	public String testUser(Long id);
+	public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
+
+	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
 }

@@ -3,8 +3,10 @@ package com.everhomes.aclink;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.AclinkAuthDTO;
 import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
+import com.everhomes.rest.aclink.ListFormalAuthCommand;
 import com.everhomes.user.User;
 
 import java.util.List;
@@ -100,4 +102,6 @@ public interface DoorAuthProvider {
 
 
     List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
+
+	List<AclinkAuthDTO> listFormalAuth(CrossShardListingLocator locator, Integer pageSize, ListFormalAuthCommand cmd);
 }

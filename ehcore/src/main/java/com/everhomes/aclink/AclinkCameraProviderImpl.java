@@ -93,6 +93,10 @@ public class AclinkCameraProviderImpl implements AclinkCameraProvider{
 					query.addConditions(Tables.EH_ACLINK_CAMERAS.ENTER_STATUS.eq(cmd.getEnterStatus()));
 				}
 				
+				if(cmd.getName() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.NAME.like("%" + cmd.getName() + "%"));
+				}
+				
 				if(cmd.getLinkStatus() != null){
 					query.addConditions(Tables.EH_ACLINK_CAMERAS.LINK_STATUS.eq(cmd.getLinkStatus()));
 				}

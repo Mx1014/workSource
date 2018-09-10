@@ -126,7 +126,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 			}
 		} else if (cmd.getUuidType() == (byte) 1) {
 			ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
-			qryIpadCmd.setSearch(resStr);
+			qryIpadCmd.setUuid(resStr);
 			if (aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), qryIpadCmd).size() > 0){
 				LOGGER.error("uuid is already existed, trying agian ... ");
 				return this.generateUUID(cmd);
@@ -587,7 +587,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		List<AclinkCamera> qryCameras = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), qryCameraCmd);
 		
 		List<Long> reqOutCameraIds = cmd.getExternalCameraIds() == null ? new ArrayList<Long>() : cmd.getExternalCameraIds();
-		List<Long> reqInCameraIds = cmd.getInternalIpadIds() == null ? new ArrayList<Long>() : cmd.getInternalIpadIds();
+		List<Long> reqInCameraIds = cmd.getInternalCameraIds() == null ? new ArrayList<Long>() : cmd.getInternalCameraIds();
 
 		List<Long> reqCameraIds = new ArrayList<Long>();
 		reqCameraIds.addAll(reqOutCameraIds);

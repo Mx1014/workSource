@@ -100,23 +100,6 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/aclink/testUser</b>
-     * <p>根据id获取单个门禁详情</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("testUser")
-    @RestReturn(value=String.class)
-    public RestResponse testUser(@Valid GetDoorAccessByIdCommand cmd) {
-    	RestResponse response = new RestResponse();
-        
-        response.setResponseObject(doorAccessService.testUser(cmd.getId()));
-        
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
      * 
      * <b>URL: /admin/aclink/updateDoorAccess</b>
      * <p>更新门禁信息</p>
@@ -172,6 +155,56 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse exportAclinkUsersXls(@Valid ListAclinkUserCommand cmd, HttpServletResponse httpResponse) {
         doorAccessService.exportAclinkUsersXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/listFormalAuth</b>
+     * <p>正式授权列表,能远程开门必须要有常规开门的权限</p>
+     * @return
+     */
+    @RequestMapping("listFormalAuth")
+    @RestReturn(value=ListFormalAuthResponse.class)
+    public RestResponse listFormalAuth(@Valid ListFormalAuthCommand cmd) {
+    	//TODO 
+        RestResponse response = new RestResponse(doorAccessService.listFormalAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateAuthBatch</b>
+     * <p>批量更新(正式)授权</p>
+     * @return
+     */
+    @RequestMapping("updateAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse updateAuthBatch(@Valid UpdateAuthBatchCommand cmd) {
+//        cmd.setIsOpenAuth((byte)0);
+    	//TODO 
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createFormalAuthBatch</b>
+     * <p>批量创建(正式)授权</p>
+     * @return
+     */
+    @RequestMapping("createAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
+//        cmd.setIsOpenAuth((byte)0);
+    	//TODO 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -334,6 +367,63 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
+    }
+    
+    
+    /**
+     * <b>URL: /admin/aclink/listAccessGroupRel</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listAccessGroupRel")
+    @RestReturn(value=ListAccessGroupRelResponse.class)
+    public RestResponse listDoorGroup(@Valid ListDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/getTempAuthSettings</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("getTempAuthSettings")
+    @RestReturn(value=GetTempAuthSettingsResponse.class)
+    public RestResponse getTempAuthSettings(@Valid GetTempAuthSettingsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/updateAccessGroupRel</b>
+     * <p>更新门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("updateAccessGroupRel")
+    @RestReturn(value=String.class)
+    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/createAccessGroupRel</b>
+     * <p>新增门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("createAccessGroupRel")
+    @RestReturn(value=String.class)
+    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**

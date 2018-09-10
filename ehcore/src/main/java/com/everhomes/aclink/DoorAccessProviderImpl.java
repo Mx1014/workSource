@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -365,10 +366,10 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             if(cmd.getLinkStatus() != null){
             	query.addConditions(Tables.EH_DOOR_ACCESS.LINK_STATUS.eq(cmd.getLinkStatus()));
             }
-
-            if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
-            query.addJoin(Tables.EH_ACLINKS, Tables.EH_ACLINKS.DOOR_ID.eq(Tables.EH_DOOR_ACCESS.ID));
+            if(locator.getAnchor() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
+            }
+                
             query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
             int count = cmd.getPageSize();
             if(count >0){
@@ -377,7 +378,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             
             query.fetch().map((r) -> {
             	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
-            	dto.setVersion(r.getValue(Tables.EH_ACLINKS.FIRWARE_VER));
+            	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
                 objs.add(dto);
                 return null;
             });
@@ -392,6 +393,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             return AfterAction.next;
 
         });
+        objs.removeAll(Collections.singleton(null));
         return objs;
 	}
 
