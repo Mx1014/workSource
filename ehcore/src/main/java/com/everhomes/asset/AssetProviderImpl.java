@@ -656,7 +656,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -779,6 +779,9 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setConsumeUserId(r.getValue(t.CONSUME_USER_ID));
             //物业缴费V6.0 账单、费项表增加是否删除状态字段,0：已删除；1：正常使用
             dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
+            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+            dto.setCanDelete(r.getValue(t.CAN_DELETE));
+            dto.setCanModify(r.getValue(t.CAN_MODIFY));
             list.add(dto);
             return null;});
         return list;
@@ -1561,6 +1564,11 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setSourceType(cmd.getSourceType());
                     item.setSourceName(cmd.getSourceName());
                     item.setConsumeUserId(cmd.getConsumeUserId());
+                    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+                    item.setCanDelete(cmd.getCanDelete());
+                    item.setCanModify(cmd.getCanModify());
+                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+                    item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1735,6 +1743,11 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setSourceType(cmd.getSourceType());
             newBill.setSourceName(cmd.getSourceName());
             newBill.setConsumeUserId(cmd.getConsumeUserId());
+            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+            newBill.setCanDelete(cmd.getCanDelete());
+            newBill.setCanModify(cmd.getCanModify());
+            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+            newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);

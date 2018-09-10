@@ -690,6 +690,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	cmd.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：手动新增的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	cmd.setCanDelete((byte)1);
+    	cmd.setCanModify((byte)1);
         return assetProvider.creatPropertyBill(cmd, null);
     }
     
@@ -699,6 +702,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	cmd.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	cmd.setCanDelete((byte)1);
+    	cmd.setCanModify((byte)1);
         return assetProvider.creatPropertyBill(cmd, null);
     }
 

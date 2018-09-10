@@ -49,7 +49,11 @@ update eh_payment_bills set can_delete = 1 where source_type='contract';
 update eh_payment_bills set can_modify = 1 where source_type='contract';
 update eh_payment_bill_items set can_delete = 0 where source_type='contract';
 update eh_payment_bill_items set can_modify = 0 where source_type='contract';
-	
+-- REMARK: 如果是已出已缴账单，则不允许删除/修改
+update eh_payment_bills set can_delete = 0 where switch=1 and status=1;
+update eh_payment_bills set can_modify = 0 where switch=1 and status=1;
+update eh_payment_bill_items set can_delete = 0 where bill_id in (select id from eh_payment_bills where switch=1 and status=1 );
+update eh_payment_bill_items set can_modify = 0 where bill_id in (select id from eh_payment_bills where switch=1 and status=1 );
 	
 
 
