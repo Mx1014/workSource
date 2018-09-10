@@ -163,6 +163,8 @@ import com.everhomes.rest.community.admin.CreateCommunityCommand;
 import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
+import com.everhomes.rest.community.admin.ExportAllCommunityUsersCommand;
+import com.everhomes.rest.community.admin.ExportBatchCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
 import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
@@ -294,6 +296,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2549,7 +2552,9 @@ public class CommunityServiceImpl implements CommunityService {
                     query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getPhone() + "%"));
                 }
                 if(!StringUtils.isEmpty(cmd.getKeywords())){
-                    query.addConditions(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+                    Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeywords() + "%");
+                    cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+                    query.addConditions(cond);
                 }
 
                 if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
@@ -2565,11 +2570,13 @@ public class CommunityServiceImpl implements CommunityService {
         });
         List<CommunityAllUserDTO> communityAllUserDTOS = new ArrayList<>();
         if (userList != null) {
-            userList.stream().forEach(user -> {
+            for (User user : userList) {
                 CommunityAllUserDTO communityAllUserDTO = new CommunityAllUserDTO();
                 communityAllUserDTO.setUserId(user.getId());
                 communityAllUserDTO.setNickName(user.getNickName());
-                List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByUId(user.getId());
+                List<Long> userIds = new ArrayList<>();
+                userIds.add(user.getId());
+                List<OrganizationMember> members = this.organizationProvider.listAllOrganizationMembersByUID(userIds);
                 StringBuilder realName = new StringBuilder();
                 if (!CollectionUtils.isEmpty(members)) {
                     for (OrganizationMember organizationMember : members) {
@@ -2586,7 +2593,8 @@ public class CommunityServiceImpl implements CommunityService {
                 }
                 communityAllUserDTO.setApplyTime(user.getCreateTime());
                 communityAllUserDTOS.add(communityAllUserDTO);
-            });
+            }
+
         }
         response.setNextPageAnchor(locator.getAnchor());
         response.setUserCommunities(communityAllUserDTOS);
@@ -2625,7 +2633,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
-					Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like("%" + cmd.getKeywords() + "%");
+					Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + cmd.getKeywords() + "%");
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
 				}
@@ -2863,7 +2871,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 	}
 
-	public void exportCommunityUsersForCommercial(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+    @Override
+    public void exportAllCommunityUsers(ExportAllCommunityUsersCommand cmd) {
 
         Map<String, Object> params = new HashMap<>();
         try {
@@ -2872,10 +2881,46 @@ public class CommunityServiceImpl implements CommunityService {
             e.printStackTrace();
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String fileName = "用户列表";
+        String fileName = "用户列表.xlsx";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName()+"用户列表.xlsx";
+        }
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityAllUserApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd) {
+        Map<String, Object> params = new HashMap<>();
+        try {
+            params = objectToMap(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "用户列表.xlsx";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName()+"用户列表.xlsx";
+        }
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityBatchUserApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    public void exportCommunityUsersForCommercial(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+
+        Map<String, Object> params = new HashMap<>();
+        try {
+            params = objectToMap(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String fileName = "用户列表.xlsx";
 		Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
 		if (namespace != null) {
-			fileName = namespace.getName()+"用户列表";
+			fileName = namespace.getName()+"用户列表.xlsx";
 		}
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityUserApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -2905,10 +2950,10 @@ public class CommunityServiceImpl implements CommunityService {
             e.printStackTrace();
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        String fileName = "用户列表";
+        String fileName = "用户列表.xlsx";
         Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
         if (namespace != null) {
-            fileName = namespace.getName()+"用户列表";
+            fileName = namespace.getName()+"用户列表.xlsx";
         }
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityResidentialUserApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 	}
@@ -2930,11 +2975,48 @@ public class CommunityServiceImpl implements CommunityService {
             int maleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.MALE.getCode());
             int femaleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.FEMALE.getCode());
 
+            int authUsers = 0;
+            int authingUsers = 0;
+            int notAuthUsers = 0;
+            List<Community> communities = this.communityProvider.listNamespaceCommunities(namespaceId);
+            if (!CollectionUtils.isEmpty(communities)) {
+                for (Community community : communities) {
+                    if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+                        //小区用户统计
+                        cmd.setCommunityId(community.getId());
+                        CountCommunityUserResponse countCommunityUserResponse = this.countCommunityUsersForResidential(cmd);
+                        authUsers += countCommunityUserResponse.getAuthUsers();
+                        authingUsers += countCommunityUserResponse.getAuthingUsers();
+                        //未认证用户 userprofile表中的用户-已认证或者认证中的用户
+                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+
+                        //未认证
+                        int notAuthCount = 0;
+                        if(users != null){
+                            notAuthCount = users.size();
+                        }
+                        notAuthUsers += notAuthCount;
+                    }else {
+                        //园区用户统计
+                        cmd.setCommunityId(community.getId());
+                        CountCommunityUserResponse countCommunityUserResponse = this.countCommunityUsersForCommercial(cmd);
+                        authUsers += countCommunityUserResponse.getAuthUsers();
+                        authingUsers += countCommunityUserResponse.getAuthingUsers();
+
+                        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+                        if(users == null){
+                            users = new ArrayList<>();
+                        }
+                        int notAuthCount = users.size();
+                        notAuthUsers += notAuthCount;
+                    }
+                }
+            }
             CountCommunityUserResponse resp = new CountCommunityUserResponse();
             resp.setCommunityUsers(allCount);
-            resp.setAuthUsers(0);
-            resp.setAuthingUsers(0);
-            resp.setNotAuthUsers(0);
+            resp.setAuthUsers(authUsers);
+            resp.setAuthingUsers(authingUsers);
+            resp.setNotAuthUsers(notAuthUsers);
             resp.setWxUserCount(wxCount);
             resp.setAppUserCount(allCount - wxCount);
             resp.setMaleCount(maleCount);

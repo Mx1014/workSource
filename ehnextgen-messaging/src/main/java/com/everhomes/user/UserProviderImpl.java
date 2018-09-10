@@ -257,6 +257,7 @@ public class UserProviderImpl implements UserProvider {
                     SelectQuery<Record> query = context.selectQuery();
                     query.addFrom(Tables.EH_USERS);
                     query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+                    query.addJoin(Tables.EH_ORGANIZATION_MEMBERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
 
 
                     if (null != queryBuilderCallback) {

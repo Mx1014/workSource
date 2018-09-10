@@ -182,6 +182,26 @@ public class CommunityController extends ControllerBase {
 
 
     }
+
+    /**
+     * <b>URL: /community/exportCommunityAllUsers</b>
+     * <p>导出域空间下所有用户列表</p>
+     */
+    @RequestMapping("exportCommunityAllUsers")
+    public void exportCommunityAllUsers(ExportAllCommunityUsersCommand cmd) {
+        communityService.exportAllCommunityUsers(cmd);
+
+    }
+
+    /**
+     * <b>URL: /community/exportBatchCommunityUsers</b>
+     * <p>导出域空间下多个项目的用户列表</p>
+     */
+    @RequestMapping("exportBatchCommunityUsers")
+    public void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd) {
+        communityService.exportBatchCommunityUsers(cmd);
+
+    }
 	
 	/**
 	 * <b>URL: /community/countCommunityUsers</b>

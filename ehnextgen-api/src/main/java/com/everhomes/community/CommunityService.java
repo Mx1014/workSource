@@ -64,6 +64,10 @@ public interface CommunityService {
 	ListAllCommunityUserResponse listAllUserCommunities(ListAllCommunityUsersCommand cmd);
 
 	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
+
+	void exportAllCommunityUsers(ExportAllCommunityUsersCommand cmd);
+
+	void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
