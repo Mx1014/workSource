@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.announcement;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -15,6 +18,12 @@ import com.everhomes.rest.announcement.AnnouncementNotificationTemplateCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityUserDto;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -32,6 +41,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.RouterBuilder;
+import org.apache.commons.collections.CollectionUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -69,6 +79,12 @@ public class AnnouncementNoticeJob extends QuartzJobBean {
     @Autowired
     private MessagingService messagingService;
 
+    @Autowired
+    private CommunityService communityService;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try {
@@ -97,19 +113,55 @@ public class AnnouncementNoticeJob extends QuartzJobBean {
         String url = RouterBuilder.build(Router.BULLETIN_DETAIL, actionData);
         Map map = new HashMap();
         map.put("subject", postDTO.getSubject());
-        do {
-            List<UserOrganizations> users = organizationProvider.findUserByCommunityIDAndAuthStatus(namespaceId,
-                    communityIds, status, locator, 200);
-            for (UserOrganizations u : users) {
-                User user = this.userProvider.findUserById(u.getUserId());
-                String subject = localeStringService.getLocalizedString(AnnouncementLocalStringCode.SCOPE,
-                        String.valueOf(AnnouncementLocalStringCode.ANNOUNCEMENT_MESSAGE),
-                        user.getLocale(),
-                        "Announcement create");
-                Map<String, String> meta = createAnnouncementRouterMeta(url, subject);
-                sendMessageCode(user.getId(), user.getLocale(), map, AnnouncementNotificationTemplateCode.ANNOUNCEMENT_CREATE, meta);
+        for (Long communityId : communityIds) {
+            Community community = this.communityProvider.findCommunityById(communityId);
+            if (community == null)
+                return;
+
+            if (CommunityType.COMMERCIAL.getCode() == community.getCommunityType()) {
+                ListCommunityUsersCommand command = new ListCommunityUsersCommand();
+                do {
+                    command.setNamespaceId(namespaceId);
+                    command.setCommunityId(communityId);
+                    command.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+                    command.setPageSize(10000);
+                    CommunityUserResponse res = communityService.listUserCommunitiesV2(command);
+                    if (!CollectionUtils.isEmpty(res.getUserCommunities())) {
+                        for (CommunityUserDto communityUserDto : res.getUserCommunities()) {
+                            User user = this.userProvider.findUserById(communityUserDto.getUserId());
+                            String subject = localeStringService.getLocalizedString(AnnouncementLocalStringCode.SCOPE,
+                                    String.valueOf(AnnouncementLocalStringCode.ANNOUNCEMENT_MESSAGE),
+                                    user.getLocale(),
+                                    "Announcement create");
+                            Map<String, String> meta = createAnnouncementRouterMeta(url, subject);
+                            sendMessageCode(user.getId(), user.getLocale(), map, AnnouncementNotificationTemplateCode.ANNOUNCEMENT_CREATE, meta);
+                        }
+                    }
+                    command.setPageAnchor(res.getNextPageAnchor());
+                }while (command.getPageAnchor() != null);
+            }else {
+                ListCommunityUsersCommand command = new ListCommunityUsersCommand();
+                do {
+                    command.setNamespaceId(namespaceId);
+                    command.setCommunityId(communityId);
+                    command.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+                    command.setPageSize(10000);
+
+                    CommunityUserAddressResponse res =  communityService.listUserBycommunityId(command);
+                    if (!CollectionUtils.isEmpty(res.getDtos())) {
+                        for (CommunityUserAddressDTO communityUserAddressDTO: res.getDtos()) {
+                            User user = this.userProvider.findUserById(communityUserAddressDTO.getUserId());
+                            String subject = localeStringService.getLocalizedString(AnnouncementLocalStringCode.SCOPE,
+                                    String.valueOf(AnnouncementLocalStringCode.ANNOUNCEMENT_MESSAGE),
+                                    user.getLocale(),
+                                    "Announcement create");
+                            Map<String, String> meta = createAnnouncementRouterMeta(url, subject);
+                            sendMessageCode(user.getId(), user.getLocale(), map, AnnouncementNotificationTemplateCode.ANNOUNCEMENT_CREATE, meta);
+                        }
+                    }
+                }while (command.getPageAnchor() != null);
             }
-        } while (locator.getAnchor() != null);
+        }
     }
 
     private Map<String, String> createAnnouncementRouterMeta(String url, String subject){
