@@ -231,7 +231,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             ListFieldItemCommand fieldItemCommand = new ListFieldItemCommand();
             fieldItemCommand.setNamespaceId(cmd.getNamespaceId());
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
-            // this field id menus investment enterprise levelItemId private key
+            // this field id means investment enterprise levelItemId private key
             fieldItemCommand.setFieldId(5L);
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
