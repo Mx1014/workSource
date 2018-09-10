@@ -3,7 +3,6 @@ package com.everhomes.asset;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,6 +59,7 @@ import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
+import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -198,8 +198,6 @@ import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-
-import javassist.runtime.DotClass;
 /**
  * Created by Administrator on 2017/2/20.
  */
@@ -646,6 +644,7 @@ public class AssetProviderImpl implements AssetProvider {
         Long dueDayCountStart = cmd.getDueDayCountStart();//欠费天数开始范围
         Long dueDayCountEnd = cmd.getDueDayCountEnd();//欠费天数结束范围
         String sourceName = cmd.getSourceName();//新增账单来源信息
+        Byte deleteFlag = cmd.getDeleteFlag();//物业缴费V6.0 账单、费项表增加是否删除状态字段
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
@@ -657,7 +656,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -718,6 +717,10 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(sourceName)) {
         	query.addConditions(t.SOURCE_NAME.like("%"+sourceName+"%"));
         }
+        //物业缴费V6.0 账单、费项表增加是否删除状态字段,0：已删除；1：正常使用
+        if(!org.springframework.util.StringUtils.isEmpty(deleteFlag)) {
+        	query.addConditions(t.DELETE_FLAG.eq(deleteFlag));
+        }
         
         query.addGroupBy(t.ID);
         //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
@@ -774,6 +777,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setSourceId(r.getValue(t.SOURCE_ID));
             dto.setSourceName(r.getValue(t.SOURCE_NAME));
             dto.setConsumeUserId(r.getValue(t.CONSUME_USER_ID));
+            //物业缴费V6.0 账单、费项表增加是否删除状态字段,0：已删除；1：正常使用
+            dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
             list.add(dto);
             return null;});
         return list;
@@ -2751,22 +2756,18 @@ public class AssetProviderImpl implements AssetProvider {
     public void deleteBill(Long billId) {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            int execute = context.delete(Tables.EH_PAYMENT_BILLS)
+            //删除账单（置状态）
+            context.update(Tables.EH_PAYMENT_BILLS)
+            		.set(Tables.EH_PAYMENT_BILLS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
-                    .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 0))
                     .execute();
-            if(execute == 0){
-                throw new RuntimeException("删除账单失败，账单已出或者无法找到此账单");
-            }
-            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
-                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
-                    .execute();
-            context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
-                    .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.eq(billId))
-                    .execute();
+            //删除费项（置状态）
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+	    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+	            .execute();
             return null;
         });
-
     }
 
     @Override

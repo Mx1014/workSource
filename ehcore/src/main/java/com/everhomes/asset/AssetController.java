@@ -255,17 +255,18 @@ public RestResponse setBillsUnpaid(@Valid BillIdListCommand cmd) {
  * <b>URL: /asset/deleteBill</b>
  * <p>删除账单</p>
  */
-@RequestMapping("deleteBill")
-@RestReturn(value = String.class)
-public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
+//@RequestMapping("deleteBill")
+//@RestReturn(value = String.class)
+//public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
+//
+//    assetService.deleteBill(cmd);
+//
+//    RestResponse response = new RestResponse();
+//    response.setErrorCode(ErrorCodes.SUCCESS);
+//    response.setErrorDescription("OK");
+//    return response;
+//}
 
-    assetService.deleteBill(cmd);
-
-    RestResponse response = new RestResponse();
-    response.setErrorCode(ErrorCodes.SUCCESS);
-    response.setErrorDescription("OK");
-    return response;
-}
 //    设置用户模板显示顺序
 //    设置用户模板
 /**
@@ -693,11 +694,11 @@ public RestResponse modifySettledBill(ModifySettledBillCommand cmd) {
 // this is for 删除一个账单         2
 /**
  * <p>删除一个账单</p>
- * <b>URL: /asset/deletBill</b>
+ * <b>URL: /asset/deleteBill</b>
  */
-@RequestMapping("deletBill")
+@RequestMapping("deleteBill")
 @RestReturn(value = String.class)
-public RestResponse deletBill(BillIdCommand cmd) {
+public RestResponse deleteBill(BillIdCommand cmd) {
     String result = assetService.deleteBill(cmd);
     RestResponse response = new RestResponse();
     if(result.equals("OK")){
@@ -716,7 +717,7 @@ public RestResponse deletBill(BillIdCommand cmd) {
  */
 @RequestMapping("deletBillItem")
 @RestReturn(value = String.class)
-public RestResponse deletBillItem(BillItemIdCommand cmd) {
+public RestResponse deleteBillItem(BillItemIdCommand cmd) {
     String result = assetService.deleteBillItem(cmd);
     RestResponse response = new RestResponse();
     if(result.equals("OK")){

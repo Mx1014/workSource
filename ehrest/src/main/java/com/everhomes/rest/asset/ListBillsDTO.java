@@ -39,6 +39,7 @@ import java.math.BigDecimal;
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
  * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -78,6 +79,9 @@ public class ListBillsDTO {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
 
     public Integer getPaymentType() {
 		return paymentType;
@@ -341,5 +345,13 @@ public class ListBillsDTO {
 
 	public void setConsumeUserId(Long consumeUserId) {
 		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 }
