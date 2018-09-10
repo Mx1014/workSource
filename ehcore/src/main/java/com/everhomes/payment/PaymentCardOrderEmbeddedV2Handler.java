@@ -7,6 +7,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.util.RuntimeErrorException;
@@ -45,7 +46,13 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
             Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
             order.setPayStatus(CardOrderStatus.PAID.getCode());
             order.setPaidTime(payTimeStamp);
-            order.setPaidType(String.valueOf(cmd.getPaymentType()));
+            switch (cmd.getPaymentType()){
+                case 1:
+                case 7:
+                case 9:
+                case 21: order.setPaidType(VendorType.WEI_XIN.getCode());break;
+                default: order.setPaidType(VendorType.ZHI_FU_BAO.getCode());break;
+            }
             paymentCardProvider.updatePaymentCardRechargeOrder(order);
 
             handler.rechargeCard(order, paymentCard);

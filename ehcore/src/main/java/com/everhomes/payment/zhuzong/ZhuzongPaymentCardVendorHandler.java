@@ -181,12 +181,16 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongConsumeResponse res = (ZhuzongConsumeResponse)StringHelper.fromJsonString(response, ZhuzongConsumeResponse.class);
-        if (!"0".equals(res.getResultID()))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "查询第三方接口失败");
         List<CardTransactionOfMonth> transactions = new ArrayList<>();
         CardTransactionOfMonth month = new CardTransactionOfMonth();
         month.setRequests(new ArrayList<>());
+        transactions.add(month);
+        if ("2".equals(res.getResultID())) //无记录
+            return transactions;
+        if (!"0".equals(res.getResultID()))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "查询第三方接口失败");
+
         List<ZhuzongConsumeDate> dataList = res.getDataList();
         format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (ZhuzongConsumeDate date : dataList){
@@ -202,7 +206,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             }
             month.getRequests().add(dto);
         }
-        transactions.add(month);
+
         return transactions;
     }
 
@@ -224,12 +228,17 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         jo.put("PageSize",cmd.getPageSize() != null ? cmd.getPageSize().toString():"10");
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongRechargeResponse res = (ZhuzongRechargeResponse)StringHelper.fromJsonString(response, ZhuzongRechargeResponse.class);
-        if (!"0".equals(res.getResultID()))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "查询第三方接口失败");
+
         List<CardTransactionOfMonth> transactions = new ArrayList<>();
         CardTransactionOfMonth month = new CardTransactionOfMonth();
         month.setRequests(new ArrayList<>());
+        transactions.add(month);
+        if ("2".equals(res.getResultID())) //无记录
+            return transactions;
+        if (!"0".equals(res.getResultID()))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "查询第三方接口失败");
+
         List<ZhuzongRechargeDate> dataList = res.getDataList();
         format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (ZhuzongRechargeDate date : dataList){
@@ -246,7 +255,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
             dto.setPaidType(date.getDepositType());
             month.getRequests().add(dto);
         }
-        transactions.add(month);
+
         return transactions;
     }
 

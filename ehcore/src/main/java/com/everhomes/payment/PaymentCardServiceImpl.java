@@ -917,6 +917,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 				"signature wrong");
 		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
 		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		cmd2.setOrderId(cmd.getOrderId());
+		cmd2.setPaymentType(cmd.getPaymentType());
 		paymentCardOrderEmbeddedV2Handler.paySuccess(cmd2);
 	}
 
@@ -927,6 +929,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 					"signature wrong");
 		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
 		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		cmd2.setOrderId(cmd.getOrderId());
 		paymentCardOrderEmbeddedV2Handler.refundSuccess(cmd2);
 	}
 
