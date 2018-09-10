@@ -22,6 +22,9 @@ public interface PunchServiceErrorCode {
     static final int ERROR_ENTERPRISE_DIDNOT_SETTING = 10010;  //公司没有设置打卡规则
     static final int ERROR_ENTERPRISE_DIDNOT_FOUND = 10011;  //公司没有
 
+    static final int ERROR_CANNOT_UPDATE_MONTH = 10012;//月报不能更新
+
+    int ERROR_MONTH_STATISTICS_WAITTING_GENERATE = 10300;  // 月报统计还没有生成
 
     static final int ERROR_PUNCH_TOKEN_TIMEOUT = 10100;  //token过期了,返回首页
 

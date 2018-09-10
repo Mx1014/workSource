@@ -158,8 +158,14 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 //                    "用户照片未上传");
 			return;
 		}
-		List<AclinkServer> listAclinkServer = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(),
-				cmd.getOwnerId(), DoorAccessOwnerType.fromCode(cmd.getOwnerType()), null, 0);
+		List<AclinkServer> listAclinkServer = new ArrayList<AclinkServer>();
+		if(cmd.getUserId() != null){
+			//暂不区分域空间
+			listAclinkServer = aclinkServerProvider.listLocalServersByUserAuth(new CrossShardListingLocator(), cmd.getUserId(), null, 0);
+		}else{
+			listAclinkServer = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(),
+					cmd.getOwnerId(), DoorAccessOwnerType.fromCode(cmd.getOwnerType()), null, 0);
+		}
 		//消息拼装
 		AclinkRemotePdu pdu = new AclinkRemotePdu();
         if(listAclinkServer != null && listAclinkServer.size() > 0){
@@ -175,7 +181,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
         			e.printStackTrace();
         		}
         		pdu.setType(1);
-        		pdu.setUuid(server.getUuid());
+        		pdu.setUuid(server.getUuidNum());
             	
             
             	long requestId = LocalSequenceGenerator.getNextSequence();
@@ -206,7 +212,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
     			e.printStackTrace();
     		}
     		pdu.setType(1);
-    		pdu.setUuid(server.getUuid());
+    		pdu.setUuid(server.getUuidNum());
         	long requestId = LocalSequenceGenerator.getNextSequence();
         	borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
         }else{

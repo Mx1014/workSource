@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>lockStatus: 所状态</li>
  * <li>keyword: 关键字</li>
  * <li>pageAnchor: 本页开始的锚点</li>
+ * <li>parkingHubsId: hub的id</li>
  * <li>pageSize: 每页的数量</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
@@ -25,9 +26,10 @@ public class SearchParkingSpacesCommand {
     private Long parkingLotId;
     private String lockStatus;
     private String keyword;
+    private Long parkingHubsId;
     private Long pageAnchor;
     private Integer pageSize;
-	private Long currentPMId;
+    private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
 
@@ -61,6 +63,14 @@ public class SearchParkingSpacesCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getParkingHubsId() {
+        return parkingHubsId;
+    }
+
+    public void setParkingHubsId(Long parkingHubsId) {
+        this.parkingHubsId = parkingHubsId;
     }
 
     public Long getPageAnchor() {

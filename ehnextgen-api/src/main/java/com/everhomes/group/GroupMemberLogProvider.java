@@ -15,5 +15,5 @@ public interface GroupMemberLogProvider {
 
     void createGroupMemberLog(GroupMemberLog groupMemberLog);
 
-    List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword, String communityKeyword, List<Long> communityIds, Byte status, CrossShardListingLocator locator, int pageSize);
+    List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword,String identifierToken, String communityKeyword, List<Long> communityIds, Byte status, CrossShardListingLocator locator, int pageSize);
 }

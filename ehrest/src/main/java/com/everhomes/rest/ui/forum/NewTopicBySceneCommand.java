@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数），服务器端通过该标识填充下面3个参数（客户端不用填该3个参数）</li>
  *     <li>forumId: 论坛ID</li>
+ *     <li>oldId: 编辑的帖子的ID</li>
  *     <li>targetTag: 帖子接收者标签，该标签仍然需要客户端填写，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  *     <li>contentCategory: 内容类型ID，含类和子类</li>
  *     <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
@@ -33,14 +34,18 @@ import com.everhomes.util.StringHelper;
  *     <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  *     <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  *     <li>maxQuantity: 限制人数</li>
+ *     <li>minQuantity: 最低限制人数</li>
  *     <li>tag: 帖子标签</li>
  *     <li>forumEntryId: 论坛应用入口Id</li>
  *     <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
  *     <li>moduleCategoryId: 业务模块的入口id</li>
+ *     <li>communityId: 项目(园区/小区)ID</li>
  * </ul>
  */
 public class NewTopicBySceneCommand {
     private String sceneToken;
+
+    private Long oldId;
 
     @NotNull
     private Long forumId;
@@ -89,6 +94,8 @@ public class NewTopicBySceneCommand {
 
     private Integer maxQuantity;
 
+    private Integer minQuantity;
+
     private String tag;
 
     private Long forumEntryId;
@@ -96,6 +103,24 @@ public class NewTopicBySceneCommand {
     private Byte moduleType;
 
     private Long moduleCategoryId;
+
+    private Long communityId;
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Integer getMaxQuantity() {
         return maxQuantity;
@@ -299,6 +324,14 @@ public class NewTopicBySceneCommand {
 
     public void setModuleCategoryId(Long moduleCategoryId) {
         this.moduleCategoryId = moduleCategoryId;
+    }
+
+    public Long getOldId() {
+        return oldId;
+    }
+
+    public void setOldId(Long oldId) {
+        this.oldId = oldId;
     }
 
     @Override

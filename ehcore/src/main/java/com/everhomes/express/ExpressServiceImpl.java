@@ -12,16 +12,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.paySDK.PayUtil;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.express.*;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.user.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
@@ -38,6 +56,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.express.guomao.pay.PayResponse;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
@@ -59,9 +78,13 @@ public class ExpressServiceImpl implements ExpressService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressServiceImpl.class);
 	
 	private static final int ORDER_NO_LENGTH = 18;
-	
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
+	public static final String BIZ_ORDER_NUM_SPILT = "_";//业务订单分隔符
 	@Autowired
 	private ExpressParamSettingProvider expressParamSettingProvider;
+
+	@Autowired
+	private ExpressOrderEmbeddedV2Handler parkingV2EmbeddedV2Handler;
 	
 	@Autowired
 	private ExpressHotlineProvider expressHotlineProvider;
@@ -117,19 +140,32 @@ public class ExpressServiceImpl implements ExpressService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Autowired
-    private UserActivityProvider userProvider;
-	
+    private UserActivityProvider userActivityProvider;
+
+	@Autowired
+	private UserProvider userProvider;
 	@Autowired
     private AppProvider appProvider;
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 
 	@Autowired
 	private UserService userService;
 
 	@Autowired
 	private UserProvider uProvider;
+
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
+	@Autowired
+	public ExpressPayeeAccountProvider accountProvider;
+	
+    @Autowired
+    protected GeneralOrderService orderService;
+	
+	@Value("${server.contextPath:}")
+	private String contextPath;
 
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -325,11 +361,11 @@ public class ExpressServiceImpl implements ExpressService {
 
 	private boolean checkPrivilege(ExpressOwner owner, Long serviceAddressId, Long expressCompanyId) {
 		//检查该用户是否在权限列表中
-		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), serviceAddressId, expressCompanyId);
-		if (expressUser == null || CommonStatus.fromCode(expressUser.getStatus()) != CommonStatus.ACTIVE) {
-			//检查是否为管理员
-			return checkAdmin(owner);
-		}
+//		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), serviceAddressId, expressCompanyId);
+//		if (expressUser == null || CommonStatus.fromCode(expressUser.getStatus()) != CommonStatus.ACTIVE) {
+//			//检查是否为管理员
+//			return checkAdmin(owner);
+//		}
 		return true;
 	}
 
@@ -346,12 +382,16 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
 		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
 		expressOrderDTO.setReceivePhone(expressOrder.getReceivePhone());
+		expressOrderDTO.setFlowCaseId(expressOrder.getFlowCaseId());
+		expressOrderDTO.setExpressTarget(expressOrder.getExpressTarget());
+		expressOrderDTO.setExpressRemark(expressOrder.getExpressRemark());
+		expressOrderDTO.setExpressWay(expressOrder.getExpressWay());
 		return expressOrderDTO;
 	}
 	
 	private String getExpressCompany(Long id) {
 		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(id);
-		return expressCompany == null ? null : expressCompany.getName();
+		return expressCompany == null ||  expressCompany.getStatus() == 1? null : expressCompany.getName();
 	}
 
 	@Override
@@ -423,8 +463,10 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		return (CommonOrderDTO)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			ExpressSendType sendType = ExpressSendType.fromCode(expressOrder.getSendType());
 			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
-					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
+					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()
+					|| sendType == ExpressSendType.GUO_MAO_EXPRESS) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 			}
 			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
@@ -437,7 +479,7 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
-//			//TODO 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
+//			// 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
 //			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 //			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 //			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
@@ -482,9 +524,15 @@ public class ExpressServiceImpl implements ExpressService {
 			if (expressOrder == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
 			}
-			if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
+			
+			//加一个开关，方便在beta环境测试
+			boolean flag = configProvider.getBooleanValue("beta.express.order.amount", false);
+			if (!flag) {
+				if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
+				}
 			}
+
 			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
@@ -699,6 +747,7 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			handler.createOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			expressOrderProvider.createExpressOrder(expressOrder);
+			handler.afterCreateOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			return null;
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
@@ -833,18 +882,20 @@ public class ExpressServiceImpl implements ExpressService {
 			expressOrder.setReceiveCounty(receiveAddress.getCounty());
 			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		}else{
-			if(cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
-					cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null || 
-					cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+			if(cmd.getSendType().intValue() != ExpressSendType.GUO_MAO_EXPRESS.getCode().intValue()) {
+				if (cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
+						cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null ||
+						cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+				}
+				expressOrder.setReceiveName(cmd.getReceiveName());
+				expressOrder.setReceivePhone(cmd.getReceivePhone());
+				expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
+				expressOrder.setReceiveProvince(cmd.getReceiveProvince());
+				expressOrder.setReceiveCity(cmd.getReceiveCity());
+				expressOrder.setReceiveCounty(cmd.getReceiveCounty());
+				expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 			}
-			expressOrder.setReceiveName(cmd.getReceiveName());
-			expressOrder.setReceivePhone(cmd.getReceivePhone());
-			expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
-			expressOrder.setReceiveProvince(cmd.getReceiveProvince());
-			expressOrder.setReceiveCity(cmd.getReceiveCity());
-			expressOrder.setReceiveCounty(cmd.getReceiveCounty());
-			expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 		}
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
@@ -859,6 +910,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setInvoiceFlag(cmd.getInvoiceFlag());
 		expressOrder.setInvoiceHead(cmd.getInvoiceHead());
 		expressOrder.setPackageType(cmd.getPackageType());
+		expressOrder.setExpressRemark(cmd.getExpressRemark());
+		expressOrder.setExpressTarget(cmd.getExpressTarget());
+		expressOrder.setExpressType(cmd.getExpressType());
+		expressOrder.setExpressWay(cmd.getExpressWay());
 		return expressOrder;
 	}
 
@@ -906,6 +961,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
 		expressOrderDTO.setSendType(expressOrder.getSendType());//加上业务类别
 		expressOrderDTO.setExpressLogoUrl(getUrl(getExpressCompanyLogo(expressOrder.getExpressCompanyId())));
+		expressOrderDTO.setFlowCaseId(expressOrder.getFlowCaseId());
+		expressOrderDTO.setExpressTarget(expressOrder.getExpressTarget());
+		expressOrderDTO.setExpressRemark(expressOrder.getExpressRemark());
+		expressOrderDTO.setExpressWay(expressOrder.getExpressWay());
 		return expressOrderDTO;
 	}
 	
@@ -1031,7 +1090,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
@@ -1041,7 +1100,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if(cmd.getBusinessNote() != null){
@@ -1063,7 +1122,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -1087,7 +1146,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4070040710L, cmd.getAppId(), null,cmd.getCurrentProjectId());//参数设置权限
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressHotline hotline = generateHotline(owner,cmd);
@@ -1138,7 +1197,7 @@ public class ExpressServiceImpl implements ExpressService {
 			expressCompanyId = findTopExpressCompany(expressCompanyId).getId();
 		}
 //		owner.setNamespaceId(23456);
-		List<ExpressCompany> expressCompany = expressCompanyProvider.listExpressCompanyByOwner(owner);
+		List<ExpressCompany> expressCompany = expressCompanyProvider.listNotDeleteExpressCompanyByOwner(owner);
 		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(namespaceId,ownerType,ownerId,expressCompanyId);
 		return new ListExpressSendTypesResponse(list.stream().map(r->{
 			ExpressSendTypeDTO dto = ConvertHelper.convert(r, ExpressSendTypeDTO.class);
@@ -1293,7 +1352,7 @@ public class ExpressServiceImpl implements ExpressService {
 		params.put("randomNum",dto.getRandomNum()+"");
 		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
 			//这里获取用户的微信的openid，在国贸认证的过程中，存在user_profile中的，参考 ExpressThirdCallController.authReq()
-			UserProfile userProfile = userProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), ExpressServiceErrorCode.USER_PROFILE_KEY);
+			UserProfile userProfile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), ExpressServiceErrorCode.USER_PROFILE_KEY);
 			if(userProfile == null){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not find user openId");
 			}
@@ -1318,30 +1377,396 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		return (PreOrderDTO)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
-			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
-			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
-					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
-			}
-			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
-			}
-			if (expressOrder.getPaySummary() == null) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
-			}
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
+		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
+		if(expressOrder.getPayDto()!=null && expressOrder.getPayDto().length()>0){
+			PreOrderDTO preOrder = (PreOrderDTO)StringHelper.fromJsonString(expressOrder.getPayDto(), PreOrderDTO.class);
+			return preOrder;
+		}
+		ExpressSendType sendType = ExpressSendType.fromCode(expressOrder.getSendType());
+		if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
+				|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()
+				|| sendType == ExpressSendType.GUO_MAO_EXPRESS) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
+		if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+		}
+		if (expressOrder.getPaySummary() == null) {
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+		}
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			if (TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) != TrueOrFalseFlag.TRUE) {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
+			return null;
+		});
 
-			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
+		createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
+		
+		
+		// 3、收款方是否有会员，无则报错
+		Long bizPayeeId = getOrderPayeeAccount(cmd);
+		List<PayUserDTO> payUserDTOs = sdkPayService
+				.listPayUsersByIds(Stream.of(bizPayeeId).collect(Collectors.toList()));
+		if (payUserDTOs == null || payUserDTOs.size() == 0) {
+			LOGGER.error("payeeUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001, "暂未绑定收款账户");
+		}
 
-			Long paysummay = payService.changePayAmount(expressOrder.getPaySummary());
-			PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
-					OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(),expressOrder.getId(),UserContext.current().getUser().getId(),paysummay);
-			return dto;
-		}).first();
+		// 4、组装报文，发起下单请求
+		PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd, expressOrder, bizPayeeId);
+
+		// 5、组装支付方式
+		PreOrderDTO preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+
+		// 6、保存订单信息
+		expressOrder.setPayDto(StringHelper.toJsonString(preOrderDTO));
+		expressOrder.setGeneralOrderId(orderCommandResponse.getPayResponse().getBizOrderNum());
+		expressOrderProvider.updateExpressOrder(expressOrder);
+	
+		return preOrderDTO;
+	}
+	
+	private void oldMethod() {
+//
+//		Long amount = expressOrder.getPaySummary().multiply(new BigDecimal(100)).longValue();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//
+//		User user = UserContext.current().getUser();
+//		String sNamespaceId = BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
+//		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+//		ListBizPayeeAccountDTO payerDto = accountProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+//				sNamespaceId, (userTarget == null || userTarget.getUserIdentifier() == null) ? "12000001802" : userTarget.getUserIdentifier(), null, null, null);
+//		List<ExpressPayeeAccount> payeeAccounts = accountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,
+//				expressOrder.getOwnerType(), expressOrder.getOwnerId());
+//		if (payeeAccounts == null || payeeAccounts.size() == 0) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"未设置收款方账号");
+//		}
+//		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+//		createOrderCommand.setAccountCode(sNamespaceId);
+//		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId, OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(), expressOrder.getId()));
+//		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
+//		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+//		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+//		createOrderCommand.setAmount(amount);
+//		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+//		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+//		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
+//		String homeurl = configProvider.getValue("home.url", "");
+//		String callbackurl = String.format(configProvider.getValue("express.pay.callBackUrl", "%s/evh/express/notifyExpressOrderPaymentV2"), homeurl);
+//		createOrderCommand.setBackUrl(callbackurl);
+//		createOrderCommand.setOrderRemark1(configProvider.getValue("express.pay.OrderRemark1", "快递订单"));
+//
+//		LOGGER.info("createPurchaseOrder params" + createOrderCommand);
+//		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+//		if (purchaseOrder == null || 200 != purchaseOrder.getErrorCode() || purchaseOrder.getResponse() == null) {
+//			LOGGER.info("purchaseOrder " + purchaseOrder);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"preorder failed " + StringHelper.toJsonString(purchaseOrder));
+//		}
+//		OrderCommandResponse response = purchaseOrder.getResponse();
+//		PreOrderDTO preDto = ConvertHelper.convert(response, PreOrderDTO.class);
+//		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+//		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+//		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//		if (paymentMethods != null) {
+//			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod -> {
+//				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+//				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+//				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+//				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+//				payMethodDTO.setPaymentLogo(paymentLogo);
+//				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+//				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+//				if (bizPaymentParamsDTO != null) {
+//					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+//				}
+//				payMethodDTO.setPaymentParams(paymentParamsDTO);
+//
+//				return payMethodDTO;
+//			}).collect(Collectors.toList()));
+//		}
+//		expressOrder.setPayDto(StringHelper.toJsonString(preDto));
+//		expressOrderProvider.updateExpressOrder(expressOrder);
+	}
+	
+	private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse,
+			PayExpressOrderCommandV2 cmd) {
+		OrderCommandResponse response = orderCommandResponse.getPayResponse();
+		PreOrderDTO preDto = ConvertHelper.convert(response, PreOrderDTO.class);
+		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		if (paymentMethods != null) {
+			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod -> {
+				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+				payMethodDTO.setPaymentLogo(paymentLogo);
+				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+				if (bizPaymentParamsDTO != null) {
+					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+				}
+				payMethodDTO.setPaymentParams(paymentParamsDTO);
+
+				return payMethodDTO;
+			}).collect(Collectors.toList()));
+		}
+
+		return preDto;
 	}
 
+	private PurchaseOrderCommandResponse createOrder(PayExpressOrderCommandV2 cmd, ExpressOrder expressOrder, Long bizPayeeId) {
+		
+		 CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(cmd, expressOrder, bizPayeeId);
+	        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+	        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+	            String scope = OrderErrorCode.SCOPE;
+	            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+	            String description = "Failed to create order";
+	            if(createOrderResp != null) {
+	                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+	                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+	                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+	            }
+	            throw RuntimeErrorException.errorWith(scope, code, description);
+	        }
+
+	        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+	        return orderCommandResponse;
+	}
+
+	private CreatePurchaseOrderCommand preparePaymentBillOrder(PayExpressOrderCommandV2 cmd, ExpressOrder expressOrder,  Long bizPayeeId) {
+		
+        CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
+
+        preOrderCommand.setAmount(changePayAmount(expressOrder.getPaySummary()));
+
+        String accountCode = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();
+        preOrderCommand.setAccountCode(accountCode);
+        preOrderCommand.setClientAppName(cmd.getClientAppName());
+        preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getV2code());
+        // 移到统一订单系统完成
+        // String BizOrderNum  = getOrderNum(orderId, OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        BusinessPayerType payerType = BusinessPayerType.USER;
+//        preOrderCommand.setBusinessOrderNumber(generateBizOrderNum(accountCode,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
+        preOrderCommand.setBusinessPayerType(payerType.getCode());
+        preOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+        String businessPayerParams = getBusinessPayerParams(cmd);
+        preOrderCommand.setBusinessPayerParams(businessPayerParams);
+
+       // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
+        preOrderCommand.setPaymentPayeeId(bizPayeeId); //不知道填什么
+
+//        preOrderCommand.setPaymentParams(flattenMap);
+        //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+//        String homeUrl = "http://10.1.110.51:9092";
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.express", "/express/notifyExpressOrderPaymentV2");
+        String backUrl = homeUrl + contextPath + backUri;
+        preOrderCommand.setCallbackUrl(backUrl);
+        preOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+        preOrderCommand.setGoodsName("快递订单");
+        preOrderCommand.setGoodsDescription(OrderType.OrderTypeEnum.EXPRESS_ORDER.getMsg());
+        preOrderCommand.setIndustryName(null);
+        preOrderCommand.setIndustryCode(null);
+        preOrderCommand.setSourceType(SourceType.PC.getCode());
+        preOrderCommand.setOrderRemark1(configProvider.getValue("express.pay.OrderRemark1", "快递订单"));
+        //preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+        preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
+        preOrderCommand.setOrderRemark4(null);
+        preOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
+        return preOrderCommand;
+    }
+	
+    private String getBusinessPayerParams(PayExpressOrderCommandV2 cmd) {
+
+        Long businessPayerId = UserContext.currentUserId();
+
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, UserContext.getCurrentNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
+	
+	}
+
+	private Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
+	private Long getOrderPayeeAccount(PayExpressOrderCommandV2 cmd) {
+		ExpressPayeeAccount account = accountProvider.getPayeeAccountByOwner(UserContext.getCurrentNamespaceId(),
+				cmd.getOwnerType(), cmd.getOwnerId());
+		if (account == null) {
+			return null;
+		}
+
+		return account.getPayeeId();
+	}
+
+	private String generateBizOrderNum(String sNamespaceId, String pycode, Long id) {
+		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pycode+BIZ_ORDER_NUM_SPILT+id;
+	}
+
+	@Override
+	public void notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+		//检查签名
+		if(!PayUtil.verifyCallbackSignature(cmd)){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"sign verify faild");
+		}
+
+		// * RAW(0)：
+		// * SUCCESS(1)：支付成功
+		// * PENDING(2)：挂起
+		// * ERROR(3)：错误
+		if(cmd.getPaymentStatus()== null || 1!=cmd.getPaymentStatus()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild paymentstatus,"+cmd.getPaymentStatus());
+		}//检查状态
+
+		//检查orderType
+		//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
+		//充值，体现，支付，退款
+		if(cmd.getOrderType()==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild ordertype,"+cmd.getOrderType());
+		}
+		if(cmd.getOrderType() == 3) {
+			
+			//根据统一订单生成的支付编号获得记录
+			ExpressOrder order = expressOrderProvider.findExpressOrderByBizOrderNum(cmd.getBizOrderNum());
+			if(order == null){
+				LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the order not found.");
+			}
+
+			SrvOrderPaymentNotificationCommand notificationCommand  =  new SrvOrderPaymentNotificationCommand();
+			notificationCommand.setOrderId(order.getId());
+			notificationCommand.setAmount(cmd.getAmount());
+			parkingV2EmbeddedV2Handler.paySuccess(notificationCommand);
+
+		}
+
+	}
+
+	private String transferOrderNo(String bizOrderNum) {
+		String[] split = bizOrderNum.split(BIZ_ORDER_NUM_SPILT);
+		if(split.length==3){
+			return split[2];
+		}
+		return bizOrderNum;
+	}
+
+	@Override
+	public  List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
+		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
+		if(payUserList==null || payUserList.size() == 0){
+			return null;
+		}
+		return payUserList.stream().map(r->{
+			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+			dto.setAccountId(r.getId());
+			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+			dto.setAccountName(r.getUserName());
+			dto.setAccountAliasName(r.getUserAliasName());
+			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<ExpressPayeeAccount> accounts = accountProvider.findRepeatBusinessPayeeAccounts
+				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		if(accounts!=null && accounts.size()>0){
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.ERROR_CREATE_REPEAT_PAYEE_ACCOUNT,
+					"repeat account");
+		}
+		if(cmd.getId()!=null){
+			ExpressPayeeAccount oldPayeeAccount = accountProvider.findExpressPayeeAccountById(cmd.getId());
+			if(oldPayeeAccount == null){
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.ERROR_PAYEE_ACCOUNT_ID_NOT_EXIST,
+						"unknown payaccountid = "+cmd.getId());
+			}
+			ExpressPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ExpressPayeeAccount.class);
+			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
+			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
+			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
+			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
+			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			accountProvider.updateExpressPayeeAccount(newPayeeAccount);
+		}else{
+			ExpressPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ExpressPayeeAccount.class);
+			newPayeeAccount.setStatus((byte)2);
+			accountProvider.createExpressPayeeAccount(newPayeeAccount);
+		}
+	}
+
+	@Override
+	public BusinessPayeeAccountDTO getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		ExpressPayeeAccount account = accountProvider
+				.getPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		if(account==null){
+			return null;
+		}
+		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(new ArrayList<>(Arrays.asList(account.getPayeeId())));
+		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
+		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
+		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+		if(payUserDTO!=null){
+			convert.setPayeeUserType(payUserDTO.getUserType());
+			convert.setPayeeUserName(payUserDTO.getUserName());
+			convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
+			convert.setPayeeAccountCode(payUserDTO.getAccountCode());
+			convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
+			convert.setPayeeRemark(payUserDTO.getRemark());
+		}
+		return convert;
+
+	}
+	
+    /*
+     * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
+       CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
+     */
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
 }

@@ -79,9 +79,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String param = flowNode.getParams();
 		
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-		String tag1 = flow.getStringTag1();
+//		String tag1 = flow.getStringTag1();
 		
-		LOGGER.info("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+		LOGGER.info("update parking request, stepType={}, param={}", stepType, param);
 
 		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
 			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
@@ -277,7 +277,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			Long flowId = flowNode.getFlowMainId();
 			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 			Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-			String tag1 = flow.getStringTag1();
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(flow.getOwnerId());
+			Integer tag1 = parkingLot.getFlowMode();
 
 			long now = System.currentTimeMillis();
 			LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
@@ -407,6 +408,11 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCreating(Flow flow) {
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(flow.getOwnerId());
+		if(parkingLot!=null){
+			flow.setStringTag1(parkingLot.getFlowMode()+"");
+			return;
+		}
 		// TODO Auto-generated method stub
 		if("申请排队模式".equals(flow.getFlowName()))
 			flow.setStringTag1("1");

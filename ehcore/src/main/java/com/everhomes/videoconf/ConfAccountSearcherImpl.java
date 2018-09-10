@@ -259,7 +259,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			
 			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
 			if(org != null) {
-//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
+//				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(account.getOwnerId(), org.getId());
 				dto.setEnterpriseName(org.getName());
 				//分公司和总公司的问题 在分公司通讯录而不在总公司通讯录中 用总公司机构id 拿不到通讯录信息 暂只根据用户id取 by xiongying20170327
 				List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(account.getOwnerId());
@@ -322,7 +322,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 //					b.field("userType", 2);
 //				}
 //			}
-//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), account.getEnterpriseId());
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(account.getOwnerId(), account.getEnterpriseId());
 			//分公司和总公司的问题 在分公司通讯录而不在总公司通讯录中 用总公司机构id 拿不到通讯录信息 暂只根据用户id取 by xiongying20170327
 			List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(account.getOwnerId());
 			if(members != null && members.size() > 0) {

@@ -15,6 +15,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.customer.SyncDataTaskProvider;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.Contract;
@@ -146,8 +147,11 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     @Autowired
     private SyncDataTaskProvider syncDataTaskProvider;
 
+    @Autowired
+    private SyncDataTaskService syncDataTaskService;
+
     @Override
-    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId) {
+    public void syncContractsFromThirdPart(String pageOffset, String version, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene) {
         Map<String, String> params= new HashMap<String,String>();
         if(communityIdentifier == null) {
             communityIdentifier = "";
@@ -183,15 +187,16 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
                 //数据有下一页则继续请求
                 if(entity.getHasNextPag() == 1) {
-                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier, taskId);
+                    syncContractsFromThirdPart(String.valueOf(entity.getCurrentPage()+1), version, communityIdentifier, taskId, categoryId, contractApplicationScene);
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getHasNextPag() == 0) {
-                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId);
+                syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
             }
         }
+
 
     }
 
@@ -314,20 +319,20 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
     }
 
 
-    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId) {
+    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene) {
 
 
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
-
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
             return ;
         }
         try {
             LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
-            updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList);
+            updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList, categoryId, contractApplicationScene);
         } finally {
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
 
             //万一同步时间太长transaction断掉 在这里也要更新下
 //            SyncDataTask task = syncDataTaskProvider.findSyncDataTaskById(taskId);
@@ -353,13 +358,13 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 //        });
     }
 
-    private void updateAllData(Byte dataType, Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList) {
+    private void updateAllData(Byte dataType, Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList, Long categoryId, Byte contractApplicationScene) {
         DataType ebeiDataType = DataType.fromCode(dataType);
         LOGGER.debug("ebei DataType : {}", ebeiDataType);
         switch (ebeiDataType) {
             case CONTRACT:
                 LOGGER.debug("syncDataToDb SYNC CONTRACT");
-                syncAllContracts(namespaceId, communityIdentifier, backupList);
+                syncAllContracts(namespaceId, communityIdentifier, backupList, categoryId, contractApplicationScene);
                 break;
             case APARTMENT_LIVING_STATUS:
                 syncApartmentLivingStatus(namespaceId, backupList);
@@ -370,28 +375,23 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         }
     }
 
-    private void syncAllContracts(Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList) {
+    private void syncAllContracts(Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList, Long categoryId, Byte contractApplicationScene) {
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
         //allFlag为part时，仅更新单个特定的项目数据即可
         Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
         if(community == null) {
             return ;
         }
-        List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCustomerType.EBEI.getCode(), community.getId());
+        List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCustomerType.EBEI.getCode(), community.getId(), categoryId);
 
         List<EbeiContract> mergeContractList = mergeBackupList(backupList, EbeiContract.class);
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
                 namespaceId, myContractList.size(), mergeContractList.size());
-        dbProvider.execute(s->{
-            syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList);
-            return true;
-        });
+        syncAllContracts(namespaceId, community.getId(), myContractList, mergeContractList, categoryId, contractApplicationScene);
 
-        if(mergeContractList != null && mergeContractList.size() > 0) {
-            List<String> ownerIdList = mergeContractList.stream().map(contract -> {
-                return contract.getOwnerId();
-            }).collect(Collectors.toList());
+        if (mergeContractList.size() > 0) {
+            List<String> ownerIdList = mergeContractList.stream().map(EbeiContract::getOwnerId).collect(Collectors.toList());
             String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
             getOwnerStatus(communityIdentifier, ownerIds);
         }
@@ -399,15 +399,18 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
     // state为0的数据删除，state为1的数据：我们有，更新；我们没有则新增
-    private void syncAllContracts(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList) {
+    private void syncAllContracts(Integer namespaceId, Long communityId, List<Contract> myContractList, List<EbeiContract> theirContractList, Long categoryId, Byte contractApplicationScene) {
         if (theirContractList != null) {
             for (EbeiContract ebeiContract : theirContractList) {
-                if("0".equals(ebeiContract.getState())) {
+                if ("0".equals(ebeiContract.getState())) {
                     if (myContractList != null) {
                         for (Contract contract : myContractList) {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
-                                deleteContract(contract);
+//                                dbProvider.execute((s) -> {
+                                    deleteContract(contract,ebeiContract.getHouseInfoList());
+//                                    return true;
+//                                });
                             }
                         }
                     }
@@ -418,20 +421,28 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                             if (NamespaceContractType.EBEI.getCode().equals(contract.getNamespaceContractType())
                                     && contract.getNamespaceContractToken().equals(ebeiContract.getContractId())) {
                                 notdeal = false;
-                                updateContract(contract, communityId, ebeiContract);
+//                                dbProvider.execute((s) -> {
+                                updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
+//                                    return true;
+//                                });
                             }
                         }
                     }
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber());
+                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber(), categoryId);
                         if (contract == null) {
-                            insertContract(NAMESPACE_ID, communityId, ebeiContract);
+//                            dbProvider.execute((s) -> {
+                                insertContract(NAMESPACE_ID, communityId, ebeiContract, categoryId);
+//                                return true;
+//                            });
                         }else {
-                            updateContract(contract, communityId, ebeiContract);
+//                            dbProvider.execute((s) -> {
+                                updateContract(contract, communityId, ebeiContract, categoryId, contractApplicationScene);
+//                                return true;
+//                            });
                         }
                     }
-
                 }
             }
         }
@@ -474,7 +485,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
 
-    private void deleteContract(Contract contract) {
+    private void deleteContract(Contract contract,List<EbeiContractRoomInfo> roomInfos) {
         DeleteContractCommand command = new DeleteContractCommand();
         command.setId(contract.getId());
         command.setCommunityId(contract.getCommunityId());
@@ -488,12 +499,26 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                 customer.setContactAddress("");
                 customerProvider.updateEnterpriseCustomer(customer);
                 List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
-                for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
-                    deleteOrganizationAddress(organizationAddress);
+                List<Long> addressIds = listContractRelatedAddresses(roomInfos);
+                if (myOrganizationAddressList != null && addressIds != null && addressIds.size() > 0) {
+                    List<OrganizationAddress> organizationAddresses = myOrganizationAddressList
+                            .stream().filter((r) -> addressIds.contains(r.getAddressId())).collect(Collectors.toList());
+                    for (OrganizationAddress organizationAddress : organizationAddresses) {
+                        deleteOrganizationAddress(organizationAddress);
+                    }
                 }
             }
         }
 
+    }
+
+    private List<Long> listContractRelatedAddresses(List<EbeiContractRoomInfo> roomInfos) {
+        List<String> addressIds = new ArrayList<>();
+        if(roomInfos!=null && roomInfos.size()>0){
+            addressIds =  roomInfos.stream().map(EbeiContractRoomInfo::getInfoId).collect(Collectors.toList());
+            return addressProvider.listThirdPartRelatedAddresses(NamespaceAddressType.EBEI.getCode(), addressIds);
+        }
+        return new ArrayList<>();
     }
 
     private ContractService getContractService(Integer namespaceId) {
@@ -507,7 +532,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         return ts;
     }
 
-    private void insertContract(Integer namespaceId, Long communityId, EbeiContract ebeiContract) {
+    private void insertContract(Integer namespaceId, Long communityId, EbeiContract ebeiContract, Long categoryId) {
         Contract contract = new Contract();
         contract.setNamespaceId(namespaceId);
         contract.setCommunityId(communityId);
@@ -516,6 +541,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setContractNumber(ebeiContract.getSerialNumber());
         contract.setName(ebeiContract.getSerialNumber());
         contract.setBuildingRename(ebeiContract.getBuildingRename());
+        contract.setCategoryId(categoryId);
         if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
         }
@@ -634,13 +660,16 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         return null;
     }
 
-    private void updateContract(Contract contract, Long communityId, EbeiContract ebeiContract) {
+    private void updateContract(Contract contract, Long communityId, EbeiContract ebeiContract, Long categoryId, Byte contractApplicationScene) {
         contract.setCommunityId(communityId);
         contract.setNamespaceContractType(NamespaceContractType.EBEI.getCode());
         contract.setNamespaceContractToken(ebeiContract.getContractId());
         contract.setContractNumber(ebeiContract.getSerialNumber());
         contract.setName(ebeiContract.getSerialNumber());
         contract.setBuildingRename(ebeiContract.getBuildingRename());
+        
+        contract.setCategoryId(categoryId);
+        
         if(StringUtils.isNotBlank(ebeiContract.getStartDate())) {
             contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getStartDate()));
         }
@@ -660,6 +689,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
         contract.setStatus(convertContractStatus(ebeiContract.getContractStatus()));
         contract.setCustomerName(ebeiContract.getCompanyName());
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
+
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
         if(customer != null) {
 
@@ -803,7 +833,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getHasNextPag() == 0) {
-                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), communityToken, null);
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), communityToken, null, null, null);
             }
         }
     }

@@ -207,7 +207,32 @@ public enum VersionRealmType {
 	ANDROID_GUOMAOWUFUWX("Android_GuoMaoWuFuwx"),
 	IOS_GUOMAOWUFUWX("iOS_GuoMaoWuFuwx"),
 	ANDROID_ZHONGKERUIGU("Android_ZhongKeRuiGu"),
-	IOS_ZHONGKERUIGU("iOS_ZhongKeRuiGu")
+	IOS_ZHONGKERUIGU("iOS_ZhongKeRuiGu"),
+	
+	ANDROID_FUNDTOWN("Android_FundTown"),
+	IOS_FUNDTOWN("iOS_FundTown"),
+	ANDROID_BIZ("Android_Biz"),
+	IOS_BIZ("iOS_Biz"),
+
+    ANDROID_ZHANGSHANGYUQUAN("Android_ZhangShangYuQuan"),
+    IOS_ZHANGSHANGYUQUAN("iOS_ZhangShangYuQuan"),
+    ANDROID_KUNTAIHOTAL("Android_KunTaiHotal"),
+    IOS_KUNTAIHOTAL("iOS_KunTaiHotal"),
+    ANDROID_CHUANGXINYUNGU("Android_ChuangXinYunGu"),
+    IOS_CHUANGXINYUNGU("iOS_ChuangXinYunGu"),
+    ANDROID_OLINK("Android_OLink"),
+    IOS_OLINK("iOS_OLink"),
+    ANDROID_XINGFUNUODE("Android_XingFuNuoDe"),
+    IOS_XINGFUNUODE("iOS_XingFuNuoDe"),
+    ANDROID_ZHENZHIHUI("Android_ZhenZhiHui"),
+    IOS_ZHENZHIHUI("iOS_ZhenZhiHui"),
+    ANDROID_ZHENJIASU("Android_ZhenJiaSu"),
+    IOS_ZHENJIASU("iOS_ZhenJiaSu"),
+
+    ANDROID_YUESPACE("Android_YueSpace"),
+    IOS_YUESPACE("iOS_YueSpace"),
+    ANDROID_INNOPLUS("Android_InnoPlus"),
+    IOS_INNOPLUS("iOS_InnoPlus")
     ;
 
     private String code;

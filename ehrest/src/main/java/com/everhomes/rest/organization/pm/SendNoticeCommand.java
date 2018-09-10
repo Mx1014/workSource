@@ -45,6 +45,15 @@ public class SendNoticeCommand {
     private Integer namespaceId;
 
     private String sendMode;
+    
+    //add by huanglm 20180711
+    @ItemType(Long.class) 
+    private List<Long> communityIds  ;
+    
+    /**
+     * 用于后台保存记录ID
+     */
+    private Long logId ;
 
     public SendNoticeCommand() {
     }
@@ -149,4 +158,26 @@ public class SendNoticeCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
+
+
+	public Long getLogId() {
+		return logId;
+	}
+
+
+	public void setLogId(Long logId) {
+		this.logId = logId;
+	}
+    
+    
 }

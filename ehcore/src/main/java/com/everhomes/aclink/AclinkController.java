@@ -353,6 +353,22 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/serverDisconnected</b>
+     * <p>断开人脸识别服务器的websocket链接</p>
+     * @return
+     */
+    @RequestMapping("serverDisconnected")
+    @RestReturn(value=AclinkServerDTO.class)
+    public RestResponse serverDisconnected(@Valid AclinkDisconnectedCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(aclinkServerService.onServerDisconnecting(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/syncWebsocketMessages</b>
      * <p>消息同步</p>
      * @return
@@ -452,6 +468,24 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/listBusAccessQRKey</b>
+     * <p>列出所有巴士二维码列表 </p>
+     * @return
+     */
+    @RequestMapping("listBusAccessQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listBusAccessQRKey() {
+    	RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listBusAccessQRKey());
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/listDoorAccessWebQRKey</b>
      * <p>列出所有二维码门禁列表 </p>
      * @return
@@ -461,12 +495,13 @@ public class AclinkController extends ControllerBase {
     public RestResponse listDoorAccessWebQRKey() {
         RestResponse response = new RestResponse();
         
-        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(true));
+        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(null, true));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
     
     /**
      * 

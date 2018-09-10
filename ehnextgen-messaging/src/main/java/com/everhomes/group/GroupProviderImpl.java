@@ -77,8 +77,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroups.class, null);
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-            @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -93,8 +92,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGroups.class, group.getId());
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-        @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
         @CacheEvict(value="listGroupMessageMembers", allEntries=true),
         @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -118,7 +116,6 @@ public class GroupProviderImpl implements GroupProvider {
     /**
      * Also used by Enterprise
      */
-    @Cacheable(value = "Group", key="#id", unless="#result == null")
     @Override
     public Group findGroupById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, id));
@@ -847,9 +844,9 @@ public class GroupProviderImpl implements GroupProvider {
     			groupMembers, (DSLContext context, Object reducingContext) -> {
     				SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBERS.fields())
                             .from(Tables.EH_GROUP_MEMBERS).getQuery();
-    				 if(queryBuilderCallback != null) {
+    				/* if(queryBuilderCallback != null) {
     	                    queryBuilderCallback.buildCondition(locator, query);
-    	             }
+    	             }*/
     				 query.addConditions(Tables.EH_GROUP_MEMBERS.GROUP_ID.in(groupIds));
     				 if(null != pageSize){
     					 query.addLimit(count);
@@ -860,6 +857,10 @@ public class GroupProviderImpl implements GroupProvider {
                     query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID));
                     query.addJoin(Tables.EH_ADDRESSES, JoinType.JOIN, Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1));
     				
+                    //update by huanglm ,解决 listCommunityWaitingApproveUserAddress 调用时造成的sql错误，
+                    if(queryBuilderCallback != null) {
+	                    queryBuilderCallback.buildCondition(locator, query);
+	                 }
     				 List<GroupMember> groupList = query.fetch().map((r) -> {
     					 return RecordHelper.convert(r, GroupMember.class);
     	             });

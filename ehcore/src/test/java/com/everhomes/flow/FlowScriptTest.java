@@ -3,10 +3,9 @@ package com.everhomes.flow;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.action.FlowGraphScriptAction;
-import com.everhomes.flow.nashornfunc.NashornScriptMain;
-import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhFlowScriptsRecord;
 import com.everhomes.user.base.LoginAuthTestCase;
@@ -23,11 +22,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.async.DeferredResult;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
 
 public class FlowScriptTest extends LoginAuthTestCase {
@@ -401,9 +396,9 @@ public class FlowScriptTest extends LoginAuthTestCase {
         String js = new Scanner(this.getClass().getResourceAsStream("/flow/demo.js")).useDelimiter("\\A").next();
         script.setScript(js);
 
-        NashornScriptMain main = new NashornScriptMain(state, script, flowAction);
+        // NashornScriptMain main = new NashornScriptMain(state, script, flowAction);
 
-        main.process(nashornEngineService);
+        // main.process(nashornEngineService);
     }
 
     @Test
@@ -419,7 +414,7 @@ public class FlowScriptTest extends LoginAuthTestCase {
         paramMap.put("a", new String[]{"b"});
 
 
-        Object result = new NashornScriptMappingCall(script, "https", paramMap, "body1", new DeferredResult<>()).process(nashornEngineService);
-        LOGGER.info("script mapping: {}", result);
+        // Object result = new NashornScriptMappingCall(script, "https", paramMap, "body1", new DeferredResult<>()).process(nashornEngineService);
+        // LOGGER.info("script mapping: {}", result);
     }
 }

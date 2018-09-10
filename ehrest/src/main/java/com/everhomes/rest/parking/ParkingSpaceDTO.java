@@ -12,7 +12,9 @@ import com.everhomes.util.StringHelper;
  * <li>spaceNo: 车位编号</li>
  * <li>spaceAddress: 车位地址</li>
  * <li>lockId: 锁id</li>
- * <li>lockStatus: 锁状态 up: 车锁升起 , down: 车锁降下{@link com.everhomes.rest.parking.ParkingSpaceLockStatus}</li>
+ * <li>lockStatus: 锁状态，参考{@link ParkingSpaceLockStatus}</li>
+ * <li>parkingHubsId: hub的id</li>
+ * <li>hubName: hub的名称</li>
  * <li>status: 是否开放 1：开放，0：关闭 {@link com.everhomes.rest.parking.ParkingSpaceStatus}</li>
  * </ul>
  */
@@ -27,19 +29,13 @@ public class ParkingSpaceDTO {
     private String spaceAddress;
     private String lockId;
     private String lockStatus;
+    private Long parkingHubsId;
+    private String hubName;
     private Byte status;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
-
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
     }
 
     public Long getId() {
@@ -74,6 +70,14 @@ public class ParkingSpaceDTO {
         this.ownerId = ownerId;
     }
 
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
+    }
+
     public String getSpaceNo() {
         return spaceNo;
     }
@@ -104,6 +108,22 @@ public class ParkingSpaceDTO {
 
     public void setLockStatus(String lockStatus) {
         this.lockStatus = lockStatus;
+    }
+
+    public Long getParkingHubsId() {
+        return parkingHubsId;
+    }
+
+    public void setParkingHubsId(Long parkingHubsId) {
+        this.parkingHubsId = parkingHubsId;
+    }
+
+    public String getHubName() {
+        return hubName;
+    }
+
+    public void setHubName(String hubName) {
+        this.hubName = hubName;
     }
 
     public Byte getStatus() {

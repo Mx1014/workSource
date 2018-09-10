@@ -13,9 +13,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
-import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.app.AppConstants;
@@ -25,7 +23,6 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -58,7 +55,8 @@ public class ContractScheduleJob extends QuartzJobBean {
 
     public static final String SCHEDELE_NAME = "contract-";
 
-    public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    //public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    public static String CRON_EXPRESSION = "0 10 * * * ?";
 
     @Autowired
     private ScheduleProvider scheduleProvider;
@@ -106,9 +104,9 @@ public class ContractScheduleJob extends QuartzJobBean {
                     return;
                 }
 
-                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId);
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId, null,null);
                 if(communityExist == null && communityId != null) {
-                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null,null,null);
                 }
                 ContractParam param = communityExist;
 
@@ -160,7 +158,7 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             if(userIds.size() > 0) {
                                                 String notifyText = getNotifyMessage(contract.getName(), contract.getContractEndDate());
                                                 userIds.forEach(userId -> {
-                                                    sendMessageToUser(userId, notifyText);
+                                                    sendMessageToUser (userId, notifyText);
                                                 });
                                             }
 

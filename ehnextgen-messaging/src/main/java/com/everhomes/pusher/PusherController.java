@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,8 +150,28 @@ public class PusherController extends ControllerBase {
             device.setDeviceModel(cmd.getDeviceModel());
             device.setSystemVersion(cmd.getSystemVersion());
             device.setMeta(cmd.getMeta());
+           
+            //add by huanglm IOS推送升级需在注册设备时多传两个参数
+            device.setBundleId(cmd.getBundleId());
+            device.setPusherServiceType(cmd.getPusherServiceType());
+            
             this.deviceProvider.registDevice(device);
+            
+            //用于开发阶段服务器后台打印信息，最后要注掉
+           // LOGGER.error("registDevice create new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
         }
+        //else if(StringUtils.isBlank(device.getBundleId())||StringUtils.isBlank(device.getPusherServiceType()))
+        else{
+        	//add by huanglm IOS推送升级需在注册设备时多传两个参数
+            device.setBundleId(cmd.getBundleId());
+            device.setPusherServiceType(cmd.getPusherServiceType());
+            
+            this.deviceProvider.updateDevice(device);
+          //用于开发阶段服务器后台打印信息，最后要注掉
+          //  LOGGER.error("registDevice update new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
+        }
+      //用于开发阶段服务器后台打印信息，最后要注掉
+       // LOGGER.error("registDevice  DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
         return new RestResponse(ConvertHelper.convert(device, DeviceDTO.class));
     }
 

@@ -265,7 +265,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
         
-        if(cmd.getTag() != null) {
+        if(StringUtils.isBlank(post.getTag()) && cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
 
@@ -391,12 +391,13 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
         try{
             ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+			cmd.setMinQuantity(post.getMinQuantity());
             //comment by tt, 已经在preProcess里面处理过了
 //            if(cmd.getCategoryId() == null) {
 //            	cmd.setCategoryId(0L);
@@ -409,7 +410,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             	activityService.updatePost(cmd, post.getId());
             }
             else{
-            	activityService.createPost(cmd, post.getId()); 
+            	activityService.createPost(cmd, post.getId(),communityId);
             }
 
             //if 与 try 防止tag保存Elastic异常导致发布活动的失败   add by yanjun

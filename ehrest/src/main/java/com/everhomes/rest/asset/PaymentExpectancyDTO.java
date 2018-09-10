@@ -17,6 +17,10 @@ import java.math.BigDecimal;
  * <li>dateStrEnd:计费结束日期</li>
  * <li>amountReceivable:应收金额</li>
  * <li>dueDateStr:付款日期</li>
+ * <li>amountReceivableWithoutTax:应收不含税</li>
+ * <li>taxAmount:税额</li>
+ * <li>billGroupId : 账单组id</li>
+ * <li>billGroupName : 账单组名称</li>
  *</ul>
  */
 public class PaymentExpectancyDTO {
@@ -25,14 +29,25 @@ public class PaymentExpectancyDTO {
     private String dateStrBegin;
     private String dateStrEnd;
     private BigDecimal amountReceivable;
+    private BigDecimal amountReceivableWithoutTax;
+    private BigDecimal taxAmount;
     private String dueDateStr;
 
     private Long billItemId;
+    
+    private Long chargingItemId;
+    private Long billGroupId;//物业缴费V6.3 签合同选择计价条款前，先选择账单组
+    private String billGroupName;//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
+    
+	public Long getChargingItemId() {
+		return chargingItemId;
+	}
 
+	public void setChargingItemId(Long chargingItemId) {
+		this.chargingItemId = chargingItemId;
+	}
 
-
-
-    @Override
+	@Override
     public int hashCode() {
         return getBillItemId() != null ? getBillItemId().hashCode() : 0;
     }
@@ -46,9 +61,6 @@ public class PaymentExpectancyDTO {
 
         return getBillItemId() != null ? getBillItemId().equals(that.getBillItemId()) : that.getBillItemId() == null;
     }
-
-
-
 
     public Long getBillItemId() {
         return billItemId;
@@ -110,4 +122,36 @@ public class PaymentExpectancyDTO {
     public void setDueDateStr(String dueDateStr) {
         this.dueDateStr = dueDateStr;
     }
+
+	public BigDecimal getAmountReceivableWithoutTax() {
+		return amountReceivableWithoutTax;
+	}
+
+	public void setAmountReceivableWithoutTax(BigDecimal amountReceivableWithoutTax) {
+		this.amountReceivableWithoutTax = amountReceivableWithoutTax;
+	}
+
+	public BigDecimal getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(BigDecimal taxAmount) {
+		this.taxAmount = taxAmount;
+	}
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
 }

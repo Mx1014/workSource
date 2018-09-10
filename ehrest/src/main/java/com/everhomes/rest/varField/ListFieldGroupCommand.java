@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 项目id</li>
  *     <li>orgId: 公司id</li>
  *     <li>ownerType: 公司type</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -27,9 +28,21 @@ public class ListFieldGroupCommand {
     // 暂时增加用于物业巡检使用
     private String  equipmentCategoryName;
 
+    private Long inspectionCategoryId;
+
     //客户有根据权限区分动态excel的cell
     private Boolean isAdmin;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getOrgId() {
         return orgId;
     }
@@ -83,6 +96,23 @@ public class ListFieldGroupCommand {
     }
 
     public void setIsAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
+
+
+    public Long getInspectionCategoryId() {
+        return inspectionCategoryId;
+    }
+
+    public void setInspectionCategoryId(Long inspectionCategoryId) {
+        this.inspectionCategoryId = inspectionCategoryId;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
         isAdmin = admin;
     }
 

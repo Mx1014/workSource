@@ -1,16 +1,15 @@
 package com.everhomes.rest.community;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>buildings: 楼栋信息，参考{@link com.everhomes.rest.community.BuildingDTO}</li>
+ * 	<li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
+ * 	<li>buildings: 楼栋信息，参考{@link com.everhomes.rest.community.BuildingDTO}</li>
  * </ul>
  */
 public class ListBuildingCommandResponse {
@@ -19,9 +18,6 @@ public class ListBuildingCommandResponse {
 	
 	@ItemType(BuildingDTO.class)
 	private List<BuildingDTO> buildings;
-	
-	public ListBuildingCommandResponse() {
-    }
     
     public ListBuildingCommandResponse(Long nextPageAnchor, List<BuildingDTO> buildings) {
         this.nextPageAnchor = nextPageAnchor;

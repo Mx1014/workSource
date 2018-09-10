@@ -4,9 +4,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>namespaceId：域空间id</li>
- * <li>ownerType：ownerType</li>
- * <li>ownerId：ownerId</li>
+ * <li>namespaceId: 域空间id</li>
+ * <li>sourceType: 源类型</li>
+ * <li>sourceId: 源Id</li>
  * </ul>
  */
 public class GetTemplateBySourceIdCommand {

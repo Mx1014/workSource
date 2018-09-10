@@ -7,10 +7,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
@@ -22,6 +25,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -30,6 +34,36 @@ public class ParkingController extends ControllerBase {
     
     @Autowired
     private ParkingService parkingService;
+
+    /**
+     * <b>URL: /parking/getParkingLotByToken</b>
+     * <p>根据token查询停车场</p>
+     */
+    @RequestMapping("getParkingLotByToken")
+    @RestReturn(value=ParkingLotDTO.class)
+    public RestResponse getParkingLotByToken(GetParkingLotByTokenCommand cmd) {
+
+        ParkingLotDTO parkingLot = parkingService.getParkingLotByToken(cmd);
+        RestResponse response = new RestResponse(parkingLot);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/transformToken</b>
+     * <p>停车场id转token</p>
+     */
+    @RequestMapping("transformToken")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse transformToken(TransformTokenCommand cmd) {
+
+        String token = parkingService.transformToken(cmd);
+        RestResponse response = new RestResponse(token);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /parking/listParkingLots</b>
@@ -266,7 +300,96 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
+    /**
+     * <b>URL: /parking/listPayeeAccount </b>
+     * <p>获取收款方账号</p>
+     */
+    @RequestMapping("listPayeeAccount")
+    @RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
+    public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+        List<ListBizPayeeAccountDTO> list = parkingService.listPayeeAccount(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createOrUpdateBusinessPayeeAccount </b>
+     * <p>关联收款方账号到具体业务</p>
+     */
+    @RequestMapping("createOrUpdateBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listBusinessPayeeAccount </b>
+     * <p>获取已关联收款账号的业务列表</p>
+     */
+    @RequestMapping("listBusinessPayeeAccount")
+    @RestReturn(value=ListBusinessPayeeAccountResponse.class)
+    public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listBusinessPayeeAccount(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/delBusinessPayeeAccount </b>
+     * <p>删除已关联收款账号的业务</p>
+     */
+    @RequestMapping("delBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        parkingService.delBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /parking/rechargeOrderMigration </b>
+     * <p>迁移支付系统订单号到停车订单表</p>
+     */
+    @RequestMapping("rechargeOrderMigration")
+    @RestReturn(value=String.class)
+    public RestResponse rechargeOrderMigration() {
+        parkingService.rechargeOrderMigration();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/initPayeeAccount </b>
+     * <p>将老的账户初始化到账号表</p>
+     */
+    @RequestMapping("initPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse initPayeeAccount(@RequestParam("attachment") MultipartFile[] files) {
+        parkingService.initPayeeAccount(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/listParkingCardRequests</b>
      * <p>查询指定园区/小区、停车场、车牌对应的月卡申请列表</p>
@@ -456,6 +579,37 @@ public class ParkingController extends ControllerBase {
     public RestResponse notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
         
     	parkingService.notifyParkingRechargeOrderPayment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/notifyParkingRechargeOrderPaymentV2</b>
+     * <p>支付/退款后,支付系统回调</p>
+     */
+    @RequestMapping("notifyParkingRechargeOrderPaymentV2")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
+        parkingService.notifyParkingRechargeOrderPaymentV2(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/wechatPayNotify</b>
+     * <p>提供微信扫码支付成功后调用(临时)</p>
+     */
+    @RequestMapping("wechatPayNotify")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse wechatPayNotify(WechatPayNotifyCommand cmd) {
+        parkingService.notifyParkingRechargeOrderPaymentWechat(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -676,6 +830,20 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /parking/exportParkingCarVerifications</b>
+     * <p>导出车辆认证申请</p>
+     */
+    @RequestMapping("exportParkingCarVerifications")
+    @RestReturn(value=String.class)
+    public RestResponse exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd,HttpServletResponse resp) {
+        parkingService.exportParkingCarVerifications(cmd,resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/listParkingCarVerifications</b>
      * <p>获取车辆认证申请列表</p>
      */
@@ -733,6 +901,63 @@ public class ParkingController extends ControllerBase {
     }
 
     /*------------------------车位管理-------------------------- */
+
+    /**
+     * <b>URL: /parking/searchParkingHubs</b>
+     * <p>搜索Hub</p>
+     */
+    @RequestMapping("searchParkingHubs")
+    @RestReturn(value=SearchParkingHubsResponse.class)
+    public RestResponse searchParkingHubs(SearchParkingHubsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.searchParkingHubs(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createOrUpdateParkingHub</b>
+     * <p>新增或者修改Hub</p>
+     */
+    @RequestMapping("createOrUpdateParkingHub")
+    @RestReturn(value=ParkingHubDTO.class)
+    public RestResponse createOrUpdateParkingHub(CreateOrUpdateParkingHubCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.createOrUpdateParkingHub(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/deleteParkingHub</b>
+     * <p>删除Hub</p>
+     */
+    @RequestMapping("deleteParkingHub")
+    @RestReturn(value=String.class)
+    public RestResponse deleteParkingHub(DeleteParkingHubCommand cmd) {
+        parkingService.deleteParkingHub(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingSpaceLockFullStatus</b>
+     * <p>获取车位锁全部状态</p>
+     */
+    @RequestMapping("getParkingSpaceLockFullStatus")
+    @RestReturn(value=GetParkingSpaceLockFullStatusDTO.class)
+    public RestResponse getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd) {
+        GetParkingSpaceLockFullStatusDTO fullStatus = parkingService.getParkingSpaceLockFullStatus(cmd);
+        RestResponse response = new RestResponse(fullStatus);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/searchParkingSpaces</b>
      * <p>搜索停车位</p>
@@ -906,6 +1131,54 @@ public class ParkingController extends ControllerBase {
     public RestResponse refreshToken(RefreshTokenCommand cmd) {
 
         parkingService.refreshToken(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getWxParkingQrcode</b>
+     * <p>
+     * 点击下载临时车二维码，扫码支付临时车费用 V6.6
+     * </p>
+     */
+    @RequestMapping("getWxParkingQrcode")
+    @RestReturn(String.class)
+    public RestResponse getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
+        parkingService.getWxParkingQrcode(cmd,resp);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingBussnessStatus</b>
+     * <p>
+     * 获取停车场对接功能，以及对外开放的功能集合 V6.6
+     * </p>
+     */
+    @RequestMapping("getParkingBussnessStatus")
+    @RestReturn(GetParkingBussnessStatusResponse.class)
+    public RestResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
+        GetParkingBussnessStatusResponse baseResponse =  parkingService.getParkingBussnessStatus(cmd);
+
+        RestResponse response = new RestResponse(baseResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/initFuncLists </b>
+     * <p>初始化停车场对接功能表</p>
+     */
+    @RequestMapping("initFuncLists")
+    @RestReturn(value=String.class)
+    public RestResponse initFuncLists(GetParkingBussnessStatusCommand cmd) {
+        parkingService.initFuncLists(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

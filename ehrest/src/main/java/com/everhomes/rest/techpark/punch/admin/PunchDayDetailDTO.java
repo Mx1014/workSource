@@ -1,21 +1,21 @@
 package com.everhomes.rest.techpark.punch.admin;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
+import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>id：</li>
  * <li>userId：用户id</li>
  * <li>userName：用户名称</li>
- * <li>deptName：部门</li>  
- * <li>punchOrgName：所属规则</li>  
+ * <li>deptId：部门id</li>
+ * <li>deptName：部门name</li>
+ * <li>punchOrgName：所属规则</li>
  * <li>punchDate: 打卡日期</li>
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
@@ -24,16 +24,24 @@ import com.everhomes.util.StringHelper;
  * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
  * <li>statuString：状态文字</li>
  * <li>approvalStatuString：校正状态文字</li>
+ * <li>timeIntervals: 上下班时间，参考{@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO}</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
- * <li>approvalRecords：列表 参照{@link com.everhomes.rest.general_approval.GeneralApprovalRecordDTO}</li>
+ * <li>approvalRecords：列表 参照{@link EnterpriseApprovalRecordDTO}</li>
+ * <li>overtimeTotalWorkday: 工作日加班时长（毫秒数）</li>
+ * <li>overtimeTotalWorkdayDisplay: 工作日加班时长,格式化：xx小时xx分钟</li>
+ * <li>overtimeTotalRestday: 休息日加班时长（毫秒数）</li>
+ * <li>overtimeTotalRestdayDisplay: 休息日加班时长,格式化：xx小时xx分钟</li>
+ * <li>overtimeTotalLegalHoliday: 节假日日加班时长（毫秒数）</li>
+ * <li>overtimeTotalLegalHolidayDisplay: 节假日日加班时长,格式化：xx小时xx分钟</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
 	private Long id;
 	private Long userId;
 	private String userName;
-	private String deptName;   
-	private String punchOrgName;   
+	private Long deptId;
+	private String deptName;
+	private String punchOrgName;
 	private Long punchDate;
 	private Long arriveTime;
 	private Long noonLeaveTime;
@@ -52,11 +60,18 @@ public class PunchDayDetailDTO {
     private Byte exceptionStatus ;
     private Byte deviceChangeFlag;
     private String statuString;
-    private String approvalStatuString;
+	private String approvalStatuString;
+	private List<PunchTimeIntervalDTO> timeIntervals;
+	private Long overtimeTotalWorkday;
+	private String overtimeTotalWorkdayDisplay;
+	private Long overtimeTotalRestday;
+	private String overtimeTotalRestdayDisplay;
+	private Long overtimeTotalLegalHoliday;
+	private String overtimeTotalLegalHolidayDisplay;
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
-	@ItemType(GeneralApprovalRecordDTO.class)
-	private List<GeneralApprovalRecordDTO> approvalRecords;
+	@ItemType(EnterpriseApprovalRecordDTO.class)
+	private List<EnterpriseApprovalRecordDTO> approvalRecords;
 	
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
@@ -249,6 +264,13 @@ public class PunchDayDetailDTO {
 		this.punchCount = punchCount;
 	}
 
+	public List<PunchTimeIntervalDTO> getTimeIntervals() {
+		return timeIntervals;
+	}
+
+	public void setTimeIntervals(List<PunchTimeIntervalDTO> timeIntervals) {
+		this.timeIntervals = timeIntervals;
+	}
 
 	public List<PunchLogDTO> getPunchLogs() {
 		return punchLogs;
@@ -266,11 +288,67 @@ public class PunchDayDetailDTO {
 		this.approvalStatuString = approvalStatuString;
 	}
 
-	public List<GeneralApprovalRecordDTO> getApprovalRecords() {
+	public List<EnterpriseApprovalRecordDTO> getApprovalRecords() {
 		return approvalRecords;
 	}
 
-	public void setApprovalRecords(List<GeneralApprovalRecordDTO> approvalRecords) {
+	public void setApprovalRecords(List<EnterpriseApprovalRecordDTO> approvalRecords) {
 		this.approvalRecords = approvalRecords;
+	}
+
+	public Long getDeptId() {
+		return deptId;
+	}
+
+	public void setDeptId(Long deptId) {
+		this.deptId = deptId;
+	}
+
+	public Long getOvertimeTotalWorkday() {
+		return overtimeTotalWorkday;
+	}
+
+	public void setOvertimeTotalWorkday(Long overtimeTotalWorkday) {
+		this.overtimeTotalWorkday = overtimeTotalWorkday;
+	}
+
+	public String getOvertimeTotalWorkdayDisplay() {
+		return overtimeTotalWorkdayDisplay;
+	}
+
+	public void setOvertimeTotalWorkdayDisplay(String overtimeTotalWorkdayDisplay) {
+		this.overtimeTotalWorkdayDisplay = overtimeTotalWorkdayDisplay;
+	}
+
+	public Long getOvertimeTotalRestday() {
+		return overtimeTotalRestday;
+	}
+
+	public void setOvertimeTotalRestday(Long overtimeTotalRestday) {
+		this.overtimeTotalRestday = overtimeTotalRestday;
+	}
+
+	public String getOvertimeTotalRestdayDisplay() {
+		return overtimeTotalRestdayDisplay;
+	}
+
+	public void setOvertimeTotalRestdayDisplay(String overtimeTotalRestdayDisplay) {
+		this.overtimeTotalRestdayDisplay = overtimeTotalRestdayDisplay;
+	}
+
+	public Long getOvertimeTotalLegalHoliday() {
+		return overtimeTotalLegalHoliday;
+	}
+
+	public void setOvertimeTotalLegalHoliday(Long overtimeTotalLegalHoliday) {
+		this.overtimeTotalLegalHoliday = overtimeTotalLegalHoliday;
+	}
+
+	public String getOvertimeTotalLegalHolidayDisplay() {
+		return overtimeTotalLegalHolidayDisplay;
+	}
+
+	public void setOvertimeTotalLegalHolidayDisplay(String overtimeTotalLegalHolidayDisplay) {
+		this.overtimeTotalLegalHolidayDisplay = overtimeTotalLegalHolidayDisplay;
 	}
 }

@@ -183,6 +183,7 @@ public interface PrivilegeConstants {
     long METER_INACTIVE = 21006L;
     long METER_READING_SEARCH = 21007L;
     long METER_READING_DELETE = 21008L;
+    long ENERGY_MODULE = 49100L;
     long ENERGY_STAT_BY_DAY = 21009L;
     long ENERGY_STAT_BY_MONTH = 21010L;
     long ENERGY_STAT_BY_YEAR = 21011L;
@@ -273,7 +274,11 @@ public interface PrivilegeConstants {
 
 
     long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+    long ENTERPRISE_CUSTOMER_CHANGE_APTITUDE = 21116L;// 转为资质客户
 
+
+
+    long CONTRACT_MODULE = 21200L; //合同模块id
     long CONTRACT_CREATE = 21201L;//新增合同
     long CONTRACT_LAUNCH = 21202L;//签约 发起审批
     long CONTRACT_UPDATE = 21203L;//修改
@@ -288,6 +293,9 @@ public interface PrivilegeConstants {
     long CONTRACT_FLOW = 21212L;//合同工作流
     long CONTRACT_SYNC = 21213L;//从第三方同步合同
     long CONTRACT_DENUNCIATION = 21214L;//退约
+    
+    long CONTRACT_PREVIEW = 21215L;//打印预览 
+    long CONTRACT_PRINT = 21216L;//打印
 
 
     long PAYMENT_CONTRACT_CREATE = 21215L;//新增付款合同
@@ -355,6 +363,7 @@ public interface PrivilegeConstants {
     long REQUISITION_MODULE = 25000L;
     long REQUISITION_VIEW = 250001001L;
     long REQUISITION_CREATE = 250001002L;
+    long REQUISITION_DELETE = 250001003L;
 
     //企业管理
     long ORGANIZATION_CREATE = 33001L;
@@ -367,4 +376,19 @@ public interface PrivilegeConstants {
 
     // ------- 启动广告权限 --------
     long LAUNCHAD_ALL = 1090010000L;
+
+    // ------- 园区访客权限 --------
+    long VISITORSYS_BOOKING_MANAGEMENT = 4180041810L;//预约管理权限
+    long VISITORSYS_VISITOR_MANAGEMENT = 4180041820L;//访客管理权限
+    long VISITORSYS_DEV_MANAGEMENT = 4180041840L;//设备管理权限
+    long VISITORSYS_MODILE_MAMAGEMENT = 4180041850L;//移动端管理权限
+
+    // -----------用户认证-------------
+    long AUTHENTIFICATION_LIST_VIEW = 42007; //查看用户认证列表
+    long AUTHENTIFICATION_AUDITING = 42008;; // 审核权限
+    // ----------用户认证 END----------------
+
+    // 停车缴费权限常量
+    long PARKING_APPLY_MANAGERMENT = 4080040810L;//
+    long PARKING_ORDER_MANAGERMENT = 4080040820L;
 }

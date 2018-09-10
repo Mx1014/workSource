@@ -1,5 +1,9 @@
 package com.everhomes.rest.contract;
 
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: 合同id</li>
@@ -11,20 +15,30 @@ package com.everhomes.rest.contract;
  * Created by ying.xiong on 2017/8/2.
  */
 public class FindContractCommand {
-
+	@NotNull
     private Long id;
 
     private String contractNumber;
-
+    @NotNull
     private Integer namespaceId;
-
+    @NotNull
     private Long communityId;
 
     private Long partyAId;
 
     private Long organizationId;
+    @NotNull
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
 
-    public FindContractCommand() {
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public FindContractCommand() {
     }
 
     public FindContractCommand(Long id, String contractNumber, Integer namespaceId, Long communityId, Long partyAId) {
@@ -81,5 +95,10 @@ public class FindContractCommand {
 
     public void setPartyAId(Long partyAId) {
         this.partyAId = partyAId;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

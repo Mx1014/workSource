@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.address.CommunityDTO;
@@ -144,4 +145,17 @@ public interface CommunityProvider {
 
     List<Community> listNamespaceCommunities(Integer namespaceId);
     List<Community> listAllCommunitiesWithNamespaceToken();
+    //导入项目信息，查询项目是否存在
+	Community findCommunityByNamespaceIdAndName(Integer namespaceId, String name);
+	Community findCommunityByNumber(String communityNumber, Integer namespaceId);
+	Integer countActiveBuildingsByCommunityId(Long communityId);
+	Integer countActiveApartmentsByCommunityId(Long communityId);
+	List<Building> listBuildingsByKeywords(Integer namespaceId, Long communityId, Long buildingId, String keyWords,
+			CrossShardListingLocator locator, int pageSize);
+	Integer countRelatedContractNumberInCommunity(Long communityId);
+	List<Community> findCommunitiesByNamespaceId(Integer nameSpaceId);
+	List<Building> findBuildingsByCommunityId(Long communityId);
+	List<Building> findBuildingsByNamespaceId(Integer namespaceId);
+	Map<Long, Building> mapBuildingIdAndBuilding(List<Long> buildingIds);
+	
 }

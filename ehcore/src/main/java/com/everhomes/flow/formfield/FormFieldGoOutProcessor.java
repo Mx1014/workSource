@@ -10,7 +10,7 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormGoOutValue;
+import com.everhomes.rest.enterpriseApproval.ComponentGoOutValue;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -35,21 +35,21 @@ public class FormFieldGoOutProcessor implements FormFieldProcessor{
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("开始时间");
-        dto.setName("开始时间");
+        dto.setValue("开始时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
         dto.setDisplayName("结束时间");
-        dto.setName("结束时间");
+        dto.setValue("结束时间");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.MULTI_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
         dto = new FlowConditionVariableDTO();
         dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
         dto.setDisplayName("外出时长");
-        dto.setName("外出时长");
+        dto.setValue("外出时长");
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.NUMBER_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
         dtoList.add(dto);
 
@@ -59,7 +59,7 @@ public class FormFieldGoOutProcessor implements FormFieldProcessor{
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormGoOutValue goOut = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormGoOutValue.class);
+        ComponentGoOutValue goOut = JSON.parseObject(fieldDTO.getFieldValue(), ComponentGoOutValue.class);
         if ("开始时间".equals(variable)) {
             return new FlowConditionStringVariable(goOut.getStartTime());
         } else if ("结束时间".equals(variable)) {

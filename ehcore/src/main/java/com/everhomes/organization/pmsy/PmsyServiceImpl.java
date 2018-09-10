@@ -1,6 +1,7 @@
 package com.everhomes.organization.pmsy;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,24 +14,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.DefaultAssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
@@ -50,6 +59,8 @@ import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -72,7 +83,7 @@ public class PmsyServiceImpl implements PmsyService{
     private ConfigurationProvider configProvider;
 	
 	@Autowired
-	private PayService payService;
+    private DbProvider dbProvider;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -252,8 +263,40 @@ public class PmsyServiceImpl implements PmsyService{
 		response.setProjectId(cmd.getProjectId());
 		//按时间排序
 		Collections.sort(requests);
+		
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		if(isZuolinTest()) {
+			for(int i = 0;i < 1;i++) {
+				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setCustomerId(cmd.getCustomerId());
+				dto.setBillDateStr(1283901723L);
+				dto.setReceivableAmount(new BigDecimal("0.01"));
+				dto.setDebtAmount(new BigDecimal("0.01"));
+				totalAmount = totalAmount.add(new BigDecimal("0.01"));
+				PmsyBillsDTO newMonthlyBill = new PmsyBillsDTO();
+				newMonthlyBill.setBillDateStr(1283901723L);
+				newMonthlyBill.setMonthlyDebtAmount(new BigDecimal("0.01"));
+				newMonthlyBill.setMonthlyReceivableAmount(new BigDecimal("0.01"));
+				List<PmsyBillItemDTO> newRequests = new ArrayList<PmsyBillItemDTO>();
+				newRequests.add(dto);
+				newMonthlyBill.setRequests(newRequests);
+				requests.add(newMonthlyBill);
+			}
+			response.setTotalAmount(new BigDecimal("0.01"));
+		}
+		
 		return response;
 	}
+	
+	public boolean isZuolinTest() {
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		String haianEnvironment = configProvider.getValue(999993, "pay.v2.asset.haian_environment", "");
+		if(haianEnvironment.equals("beta")) {
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public PmsyBillsDTO getMonthlyPmBill(GetPmsyBills cmd){
 		PmsyBillsDTO mb = new PmsyBillsDTO();
@@ -444,13 +487,13 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	
 	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
-		PmsyOrder order = createPmsyOrder(cmd);
+		/*PmsyOrder order = createPmsyOrder(cmd);
 		
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
 		preOrderCommand.setOrderId(order.getId());
-		Long amount = payService.changePayAmount(order.getOrderAmount());
+		Long amount = changePayAmount(order.getOrderAmount());
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(UserContext.currentUserId());
@@ -459,9 +502,46 @@ public class PmsyServiceImpl implements PmsyService{
 		//preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
-		return callBack;
+		
+		//通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
+        query.addFrom(t);
+        query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
+        query.fetch().map(r -> {
+            preOrderCommand.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));
+            preOrderCommand.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));
+            return null;
+        });
+		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
+		return callBack;*/
+		
+		PmsyOrder order = createPmsyOrder(cmd);
+		
+		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
+        DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
+        CreatePaymentBillOrderCommand createPaymentBillOrderCommand = new CreatePaymentBillOrderCommand(); 
+        createPaymentBillOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+        String amount = changePayAmount(order.getOrderAmount());
+        createPaymentBillOrderCommand.setAmount(amount);
+        createPaymentBillOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        createPaymentBillOrderCommand.setClientAppName(cmd.getClientAppName());
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+  		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+  		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+  		SelectQuery<Record> query = context.selectQuery();
+  		query.addSelect(t.ID, t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
+  			query.addFrom(t);
+  			query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
+  			query.fetch().map(r -> {
+        	  createPaymentBillOrderCommand.setBillGroupId(r.getValue(t.ID));
+              return null;
+        });
+  		createPaymentBillOrderCommand.setSourceType(SourceType.MOBILE.getCode());//手机APP支付
+  			
+        return handler.createOrder(createPaymentBillOrderCommand);
 	}
 	
 	private PmsyOrder createPmsyOrder(CreatePmsyBillOrderCommand cmd){
@@ -555,4 +635,27 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		return null;
 	}
+	
+	private String changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return "0";
+        }
+        return amount.multiply(new BigDecimal(100)).toString();
+    }
+
+	private BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+    }
+	
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
+        DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
+        //支付模块回调接口，通知支付结果
+        handler.payNotify(cmd);
+    }
 }

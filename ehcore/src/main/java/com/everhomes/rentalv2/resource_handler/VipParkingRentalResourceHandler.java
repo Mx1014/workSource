@@ -47,6 +47,8 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
 
     private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
+    private ThreadLocal<SimpleDateFormat> timeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("HH:mm:ss"));
+
     @Override
     public RentalResource getRentalResourceById(Long id) {
 
@@ -89,7 +91,7 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.searchRentalOrders(cmd.getResourceTypeId(), cmd.getResourceType(),
                 cmd.getResourceId(), cmd.getBillStatus(), cmd.getStartTime(), cmd.getEndTime(),cmd.getTag1(),
-                cmd.getTag2(),cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+                cmd.getTag2(),null,cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 
         if(null == bills){
             bills = new ArrayList<>();
@@ -136,12 +138,12 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         row.createCell(++i).setCellValue("序号");
         row.createCell(++i).setCellValue("预约人");
         row.createCell(++i).setCellValue("手机号");
-        row.createCell(++i).setCellValue("公司名称");
         row.createCell(++i).setCellValue("预约车牌");
         row.createCell(++i).setCellValue("预约车位");
-        row.createCell(++i).setCellValue("预约开始时间");
-        row.createCell(++i).setCellValue("预约结束时间");
+        row.createCell(++i).setCellValue("订单时间");
+        row.createCell(++i).setCellValue("预约时间");
         row.createCell(++i).setCellValue("订单金额（元）");
+        row.createCell(++i).setCellValue("支付方式");
         row.createCell(++i).setCellValue("订单状态");
     }
 
@@ -155,27 +157,34 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         row.createCell(++i).setCellValue(dto.getUserName());
         //手机号
         row.createCell(++i).setCellValue(dto.getUserPhone());
-        //公司名称
-        row.createCell(++i).setCellValue(dto.getUserEnterpriseName());
         //预约车牌
         row.createCell(++i).setCellValue(parkingInfo.getPlateNumber());
         //预约车位
         row.createCell(++i).setCellValue(parkingInfo.getSpaceNo());
-        //预约开始时间
-        if(null!=dto.getCreateTime())
-            row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getStartTime())));
-        else
-            row.createCell(++i).setCellValue("");
-        //预约结束时间
-        if(null!=dto.getEndTime())
-            row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getEndTime())));
-        else
-            row.createCell(++i).setCellValue("");
+        //订单时间
+        row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getCreateTime())));
+        StringBuilder sb = new StringBuilder();
+        long dayTime =  24*3600*1000l;
+        //预约时间
+        if(null!=dto.getStartTime()){
+            sb.append(datetimeSF.get().format(new Timestamp(dto.getStartTime())));
+            if ((dto.getStartTime() / dayTime) == (dto.getEndTime() / dayTime)) //同一天
+                sb.append("-").append(timeSF.get().format(new Timestamp(dto.getEndTime())));
+            else
+                sb.append("-").append(datetimeSF.get().format(new Timestamp(dto.getEndTime())));
+        }
+        row.createCell(++i).setCellValue(sb.toString());
         //总价
         if(null != dto.getTotalAmount())
             row.createCell(++i).setCellValue(dto.getTotalAmount().toString());
         else
             row.createCell(++i).setCellValue("0");
+
+        //支付方式
+        if(null != dto.getVendorType())
+            row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
+        else
+            row.createCell(++i).setCellValue("无");
         //订单状态
         if(dto.getStatus() != null)
             row.createCell(++i).setCellValue(statusToString(dto.getStatus()));

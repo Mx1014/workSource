@@ -4,23 +4,34 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 public class ImportApartmentDataDTO {
-	private String buildingName;
+	//private String buildingName;
+	//private String buildArea;
+	//private String sharedArea;
 	private String apartmentName;
 	private String status;
+	private String apartmentFloor;
 	private String areaSize;
-	private String buildArea;
-	private String chargeArea;
-	private String sharedArea;
 	private String rentArea;
+	private String freeArea;
+	private String chargeArea;
+	private String orientation;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
-
-	public String getNamespaceAddressToken() {
-		return namespaceAddressToken;
+	
+	public String getApartmentFloor() {
+		return apartmentFloor;
 	}
 
-	public void setNamespaceAddressToken(String namespaceAddressToken) {
-		this.namespaceAddressToken = namespaceAddressToken;
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public String getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(String freeArea) {
+		this.freeArea = freeArea;
 	}
 
 	public String getNamespaceAddressType() {
@@ -31,12 +42,20 @@ public class ImportApartmentDataDTO {
 		this.namespaceAddressType = namespaceAddressType;
 	}
 
-	public String getBuildingName() {
-		return buildingName;
+	public String getNamespaceAddressToken() {
+		return namespaceAddressToken;
 	}
 
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
+	public void setNamespaceAddressToken(String namespaceAddressToken) {
+		this.namespaceAddressToken = namespaceAddressToken;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
 	}
 
 	public String getApartmentName() {
@@ -55,14 +74,6 @@ public class ImportApartmentDataDTO {
 		this.status = status;
 	}
 
-	public String getBuildArea() {
-		return buildArea;
-	}
-
-	public void setBuildArea(String buildArea) {
-		this.buildArea = buildArea;
-	}
-
 	public String getChargeArea() {
 		return chargeArea;
 	}
@@ -77,14 +88,6 @@ public class ImportApartmentDataDTO {
 
 	public void setRentArea(String rentArea) {
 		this.rentArea = rentArea;
-	}
-
-	public String getSharedArea() {
-		return sharedArea;
-	}
-
-	public void setSharedArea(String sharedArea) {
-		this.sharedArea = sharedArea;
 	}
 
 	public String getAreaSize() {

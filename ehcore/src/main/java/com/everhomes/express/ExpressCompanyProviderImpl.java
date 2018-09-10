@@ -86,6 +86,25 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
 	}
 
+	@Override
+	public List<ExpressCompany> listNotDeleteExpressCompanyByOwner(ExpressOwner owner) {
+		if (owner.getOwnerType() != null && owner.getOwnerId() != null) {
+			return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
+					.where(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+					.and(Tables.EH_EXPRESS_COMPANIES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+					.and(Tables.EH_EXPRESS_COMPANIES.OWNER_ID.eq(owner.getOwnerId()))
+					.and(Tables.EH_EXPRESS_COMPANIES.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+					.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
+					.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
+		}
+		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
+				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(0L))
+				.and(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+				.and(Tables.EH_EXPRESS_COMPANIES.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+				.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
+	}
+
 	private EhExpressCompaniesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

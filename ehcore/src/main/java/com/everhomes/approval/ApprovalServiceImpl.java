@@ -1,21 +1,6 @@
 // @formatter:off
 package com.everhomes.approval;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -24,15 +9,11 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceProvider;
@@ -42,20 +23,18 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Controller;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
+import com.everhomes.rest.approval.ApprovalCategoryReminderFlag;
+import com.everhomes.rest.approval.ApprovalCategoryStatus;
+import com.everhomes.rest.approval.ApprovalCategoryTimeUnit;
 import com.everhomes.rest.approval.ApprovalFlowDTO;
 import com.everhomes.rest.approval.ApprovalFlowLevelDTO;
 import com.everhomes.rest.approval.ApprovalFlowOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
-import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalQueryType;
@@ -92,6 +71,7 @@ import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestBySceneResponse;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestCommand;
 import com.everhomes.rest.approval.GetApprovalBasicInfoOfRequestResponse;
+import com.everhomes.rest.approval.GetApprovalCategoryCommand;
 import com.everhomes.rest.approval.GetTargetApprovalRuleCommand;
 import com.everhomes.rest.approval.GetTargetApprovalRuleResponse;
 import com.everhomes.rest.approval.ListApprovalCategoryBySceneCommand;
@@ -142,10 +122,6 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -175,13 +151,28 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import freemarker.core.ReturnInstruction.Return;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApprovalServiceImpl.class);
+
 	@Autowired
 	private NamespaceProvider namespaceProvider;
 	
@@ -251,44 +242,82 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	@Autowired
 	private MessagingService messagingService;
-	
-	public static ApprovalCategoryDTO defaultCategory = new ApprovalCategoryDTO(0L,ApprovalType.ABSENCE.getCode(),"事假");
+	@Autowired
+	private LocaleStringService localeStringService;
+
+	@Override
+	public ApprovalCategoryDTO getApprovalCategoryDetail(GetApprovalCategoryCommand cmd) {
+		if (cmd.getId() == null || cmd.getOwnerId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					localeStringService.getLocalizedString(ErrorCodes.SCOPE_GENERAL,
+							String.valueOf(ErrorCodes.ERROR_INVALID_PARAMETER),
+							UserContext.current().getUser().getLocale(), "Both id and ownerId are required"));
+		}
+
+		ApprovalCategory category = getAndCheckApprovalCategory(cmd.getId(), UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId());
+		ApprovalCategoryDTO dto = ConvertHelper.convert(category, ApprovalCategoryDTO.class);
+		dto.setTimeStep(category.getTimeStep().doubleValue());
+		return dto;
+	}
+
 	@Override
 	public CreateApprovalCategoryResponse createApprovalCategory(CreateApprovalCategoryCommand cmd) {
-		Long userId = getUserId();
-		if (StringUtils.isBlank(cmd.getCategoryName()) || cmd.getApprovalType() == null || cmd.getCategoryName().equals(defaultCategory.getCategoryName())) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
-					"Invalid parameters: cmd=" + cmd);
+		if (cmd.getApprovalType() == null) {
+			cmd.setApprovalType(ApprovalType.ABSENCE.getCode());
 		}
-		if (cmd.getCategoryName().length() > 8) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE,
-					ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
-					"length of name cannot be greater than 8 words, name=" + cmd.getCategoryName());
-		}
-		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalType(cmd.getApprovalType());
-		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(),
+		checkParameters(cmd.getOwnerId(), cmd.getCategoryName());
+
+		checkApprovalCategoryNameDuplication(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), cmd.getApprovalType(),
 				cmd.getCategoryName(), null);
 
 		ApprovalCategory category = ConvertHelper.convert(cmd, ApprovalCategory.class);
-		category.setApprovalType(cmd.getApprovalType());
-		category.setStatus(CommonStatus.ACTIVE.getCode());
-		category.setCreatorUid(userId);
-		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		category.setUpdateTime(category.getCreateTime());
-		category.setOperatorUid(userId);
-
+		category.setNamespaceId(UserContext.getCurrentNamespaceId());
+		category.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		category.setStatus(ApprovalCategoryStatus.INACTIVE.getCode());
+		category.setTimeUnit(cmd.getTimeUnit() != null ? cmd.getTimeUnit() : ApprovalCategoryTimeUnit.DAY.getCode());
+		category.setTimeStep(cmd.getTimeStep() != null ? BigDecimal.valueOf(cmd.getTimeStep()) : BigDecimal.valueOf(0.5));
+		Integer maxOrder = approvalCategoryProvider.getNextApprovalCategoryDefaultOrder(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId());
+		category.setDefaultOrder(maxOrder != null ? maxOrder : Integer.valueOf(1));
 		approvalCategoryProvider.createApprovalCategory(category);
-		return new CreateApprovalCategoryResponse(ConvertHelper.convert(category, ApprovalCategoryDTO.class));
+		ApprovalCategoryDTO dto = ConvertHelper.convert(category, ApprovalCategoryDTO.class);
+		dto.setTimeStep(category.getTimeStep().doubleValue());
+		return new CreateApprovalCategoryResponse(dto);
+	}
+
+	private void checkParameters(Long ownerId, String categoryName) {
+		if (ownerId == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					localeStringService.getLocalizedString(ErrorCodes.SCOPE_GENERAL,
+							String.valueOf(ErrorCodes.ERROR_INVALID_PARAMETER),
+							UserContext.current().getUser().getLocale(), "Both id and ownerId are required"));
+		}
+		if (StringUtils.isEmpty(categoryName)) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME,
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.CATEGORY_EMPTY_NAME),
+							UserContext.current().getUser().getLocale(),
+							"categoryName is empty"));
+		}
+		if (categoryName.length() > 8) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE,
+					ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT),
+							UserContext.current().getUser().getLocale(),
+							"length of name cannot be greater than 8 words, name=" + categoryName));
+		}
 	}
 
 	private void checkApprovalCategoryNameDuplication(Integer namespaceId, String ownerType, Long ownerId, Byte approvalType,
-			String categoryName, Long id) {
+													  String categoryName, Long id) {
 		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryByName(namespaceId, ownerType, ownerId, approvalType,
 				categoryName);
 		if (category != null && (id == null || id.longValue() != category.getId().longValue())) {
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.CATEGORY_EXIST_NAME,
-					"exist category name: categoryName=" + categoryName);
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.CATEGORY_EXIST_NAME),
+							UserContext.current().getUser().getLocale(),
+							"exist category name: categoryName=" + categoryName));
 		}
 	}
 
@@ -301,95 +330,200 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	@Override
 	public UpdateApprovalCategoryResponse updateApprovalCategory(UpdateApprovalCategoryCommand cmd) {
-		Long userId = getUserId();
-		if (cmd.getId() == null || StringUtils.isBlank(cmd.getCategoryName())|| cmd.getId().equals(defaultCategory.getId())) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"id and categoryName cannot be empty");
+		// 目前假期类型不支持删除操作
+		if (ApprovalCategoryStatus.DELETED == ApprovalCategoryStatus.fromCode(cmd.getStatus())) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_CATEGORY_CAN_NOT_REMOVE_ERROR,
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.APPROVAL_CATEGORY_CAN_NOT_REMOVE_ERROR),
+							UserContext.current().getUser().getLocale(),
+							"status invalid"));
 		}
-		if (cmd.getCategoryName().length() > 8 || cmd.getCategoryName().equals(defaultCategory.getCategoryName())) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE,
-					ApprovalServiceErrorCode.CATEGORY_NAME_LENGTH_GREATER_EIGHT,
-					"length of name cannot be greater than 8 words, name=" + cmd.getCategoryName());
+
+		ApprovalCategory category = getAndCheckApprovalCategory(cmd.getId(), UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId());
+
+		// 假期状态是ACTIVE_FOREVER时，不允许禁用
+		if (ApprovalCategoryStatus.ACTIVE_FOREVER == ApprovalCategoryStatus.fromCode(category.getStatus())
+				&& ApprovalCategoryStatus.INACTIVE == ApprovalCategoryStatus.fromCode(cmd.getStatus())) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_CATEGORY_ACTIVE_FOREVER_ERROR,
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.APPROVAL_CATEGORY_ACTIVE_FOREVER_ERROR),
+							UserContext.current().getUser().getLocale(),
+							"status invalid"));
 		}
-		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalType(cmd.getApprovalType());
-		checkApprovalCategoryNameDuplication(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType(),
-				cmd.getCategoryName(), cmd.getId());
 
-		Tuple<ApprovalCategory, Boolean> tuple = coordinationProvider.getNamedLock(
-				CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode() + cmd.getId()).enter(
-				() -> {
-					ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(),
-							cmd.getOwnerId(), cmd.getApprovalType());
-					category.setCategoryName(cmd.getCategoryName());
-					category.setUpdateTime(category.getCreateTime());
-					category.setOperatorUid(userId);
-					approvalCategoryProvider.updateApprovalCategory(category);
-					return category;
-				});
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode() + cmd.getId()).enter(() -> {
+			if (ApprovalCategoryTimeUnit.fromCode(cmd.getTimeUnit()) != null) {
+				category.setTimeUnit(cmd.getTimeUnit());
+			}
+			if (cmd.getTimeStep() != null) {
+				category.setTimeStep(BigDecimal.valueOf(cmd.getTimeStep()));
+			}
+			if (ApprovalCategoryReminderFlag.fromCode(cmd.getRemainderFlag()) != null) {
+				category.setRemainderFlag(cmd.getRemainderFlag());
+			}
+			if (ApprovalCategoryStatus.fromCode(cmd.getStatus()) != null) {
+				category.setStatus(cmd.getStatus());
+			}
+			approvalCategoryProvider.updateApprovalCategory(category);
+			return category;
+		});
 
-		return new UpdateApprovalCategoryResponse(ConvertHelper.convert(tuple.first(), ApprovalCategoryDTO.class));
-	}
-	@Override
-	public ApprovalCategory findApprovalCategoryById(Long id){
-		if(id.equals(defaultCategory.getId()))
-			return ConvertHelper.convert(defaultCategory, ApprovalCategory.class);
-		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
-		return category;
-		
-	}
-	private ApprovalCategory checkCategoryExist(Long id, Integer namespaceId, String ownerType, Long ownerId, Byte approvalType) {
-		if(id.equals(defaultCategory.getId()))
-			return ConvertHelper.convert(defaultCategory, ApprovalCategory.class);
-		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(id);
-		if (category == null || category.getNamespaceId().intValue() != namespaceId.intValue()
-				|| !ownerType.equals(category.getOwnerType()) || category.getOwnerId().longValue() != ownerId.longValue()
-				|| category.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()
-				|| category.getApprovalType().byteValue() != approvalType.byteValue()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Not exist category: categoryId=" + id + ", namespaceId=" + namespaceId + ", ownerType=" + ownerType
-							+ ", ownerId=" + ownerId);
-		}
-		return category;
-	}
-
-	private ApprovalCategory checkCategoryExist(Long id, ApprovalOwnerInfo ownerInfo, Byte approvalType) {
-		return checkCategoryExist(id, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), approvalType);
+		ApprovalCategoryDTO dto = ConvertHelper.convert(category, ApprovalCategoryDTO.class);
+		dto.setTimeStep(category.getTimeStep().doubleValue());
+		return new UpdateApprovalCategoryResponse(dto);
 	}
 
 	@Override
-	public ListApprovalCategoryResponse listApprovalCategory(ListApprovalCategoryCommand cmd) {
-		Long userId = getUserId();
-		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		checkApprovalType(cmd.getApprovalType());
+	public ApprovalCategory findApprovalCategoryById(Long id){
+		return approvalCategoryProvider.findApprovalCategoryById(id);
+	}
 
-		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(cmd.getNamespaceId(), cmd.getOwnerType(),
-				cmd.getOwnerId(), cmd.getApprovalType());
+	private ApprovalCategory getAndCheckApprovalCategory(Long id, Integer namespaceId, String ownerType, Long ownerId) {
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(namespaceId, ownerType, ownerId, id);
+		if (category == null) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_CATEGORY_NOT_EXIST,
+					localeStringService.getLocalizedString(ApprovalServiceErrorCode.SCOPE,
+							String.valueOf(ApprovalServiceErrorCode.APPROVAL_CATEGORY_NOT_EXIST),
+							UserContext.current().getUser().getLocale(), "The resource can not be found."));
+		}
+		return category;
+	}
 
-		ListApprovalCategoryResponse resp =  new ListApprovalCategoryResponse(categoryList.stream().map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class))
-				.collect(Collectors.toList()) );
-		resp.getCategoryList().add(defaultCategory);
+    private ApprovalCategory getAndCheckApprovalCategory(Long id, ApprovalOwnerInfo ownerInfo) {
+        return getAndCheckApprovalCategory(id, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
+    }
+
+	@Override
+	public List<ApprovalCategoryDTO> listBaseApprovalCategory(List<String> ignoreNames) {
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listBaseApprovalCategory();
+		if (CollectionUtils.isEmpty(categoryList)) {
+			return new ArrayList<>();
+		}
+
+		categoryList = categoryList.stream().filter(c -> !ignoreNames.contains(c.getCategoryName())).collect(Collectors.toList());
+
+		List<ApprovalCategoryDTO> results = categoryList.stream().map(c -> {
+			ApprovalCategoryDTO dto = ConvertHelper.convert(c, ApprovalCategoryDTO.class);
+			dto.setTimeStep(c.getTimeStep().doubleValue());
+			return dto;
+		}).collect(Collectors.toList());
+
+		return results;
+	}
+
+	@Override
+	public ListApprovalCategoryResponse initAndListApprovalCategory(ListApprovalCategoryCommand cmd) {
+		if (cmd.getOwnerId() != null && cmd.getOwnerId() != 0) {
+			cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
+        } else {
+            // 兼容旧APP没有传参数的情况，返回公共基础配置
+            cmd.setOwnerId(0L);
+            cmd.setNamespaceId(0);
+        }
+
+		if (cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		QueryApprovalCategoryCondition condition = new QueryApprovalCategoryCondition();
+		condition.setNamespaceId(cmd.getNamespaceId());
+		condition.setOwnerType(ApprovalOwnerType.ORGANIZATION.getCode());
+		condition.setOwnerId(cmd.getOwnerId());
+		condition.setApprovalType(cmd.getApprovalType());
+		condition.setStatusList(cmd.getStatusList());
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(condition);
+
+		// 第一次查询如果数据没有初始化，进行一次初始化
+		if (CollectionUtils.isEmpty(categoryList)) {
+			initApprovalCategories(cmd.getNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId());
+			categoryList = approvalCategoryProvider.listApprovalCategory(condition);
+		}
+
+		ListApprovalCategoryResponse resp = new ListApprovalCategoryResponse(
+				categoryList.stream().map(c -> {
+					ApprovalCategoryDTO dto = ConvertHelper.convert(c, ApprovalCategoryDTO.class);
+					dto.setTimeStep(c.getTimeStep().doubleValue());
+					return dto;
+				}).collect(Collectors.toList()));
 		return resp;
+	}
+
+	private void initApprovalCategories(Integer namespaceId, String ownerType, Long ownerId) {
+		if (namespaceId == null || namespaceId == 0 || ApprovalOwnerType.fromCode(ownerType) == null || ownerId == null || ownerId == 0) {
+			return;
+		}
+		int count1 = approvalCategoryProvider.countApprovalCategoryInitLogByOwnerId(namespaceId, ownerType, ownerId);
+		if (count1 == 0) {
+			// 从namespace_id=0的基础数据中拷贝
+			coordinationProvider.getNamedLock(CoordinationLocks.INIT_APPROVAL_CATEGORY.getCode() + ownerId).enter(() -> {
+				// 拿到锁后二次判断
+				int count2 = approvalCategoryProvider.countApprovalCategoryInitLogByOwnerId(namespaceId, ownerType, ownerId);
+				if (count2 > 0) {
+					return null;
+				}
+				dbProvider.execute(transactionStatus -> {
+					List<ApprovalCategory> bases = approvalCategoryProvider.listBaseApprovalCategory();
+					if (CollectionUtils.isEmpty(bases)) {
+						return null;
+					}
+					ApprovalCategoryInitLog initLog = new ApprovalCategoryInitLog();
+					initLog.setNamespaceId(namespaceId);
+					initLog.setOwnerType(ownerType);
+					initLog.setOwnerId(ownerId);
+					approvalCategoryProvider.createApprovalCategoryInitLog(initLog);
+
+					bases.forEach(approvalCategory -> {
+						ApprovalCategory exist = approvalCategoryProvider.findApprovalCategoryByName(namespaceId, ownerType, ownerId, approvalCategory.getApprovalType(), approvalCategory.getCategoryName());
+						if (exist == null) {
+							ApprovalCategory newApprovalCategory = ConvertHelper.convert(approvalCategory, ApprovalCategory.class);
+							newApprovalCategory.setId(null);
+							newApprovalCategory.setNamespaceId(namespaceId);
+							newApprovalCategory.setOwnerType(ownerType);
+							newApprovalCategory.setOwnerId(ownerId);
+							newApprovalCategory.setOriginId(approvalCategory.getId());
+							approvalCategoryProvider.createApprovalCategory(newApprovalCategory);
+						}
+					});
+					return null;
+				});
+				return null;
+			});
+		}
+	}
+
+	private Long getTopEnterpriseId(Long organizationId) {
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if (organization == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					localeStringService.getLocalizedString(ErrorCodes.SCOPE_GENERAL,
+							String.valueOf(ErrorCodes.ERROR_INVALID_PARAMETER),
+							UserContext.current().getUser().getLocale(), "parameter error"));
+		}
+		if (organization.getParentId() == null)
+			return organizationId;
+		else {
+			return Long.valueOf(organization.getPath().split("/")[1]);
+		}
 	}
 
 	@Override
 	public void deleteApprovalCategory(DeleteApprovalCategoryCommand cmd) {
-		Long userId = getUserId();
-		if (cmd.getId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "id cannot be empty");
+		if (cmd.getId() == null || cmd.getOwnerId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					localeStringService.getLocalizedString(ErrorCodes.SCOPE_GENERAL,
+							String.valueOf(ErrorCodes.ERROR_INVALID_PARAMETER),
+							UserContext.current().getUser().getLocale(), "Both id and ownerId are required"));
 		}
-		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 
-		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode() + cmd.getId()).enter(
-				() -> {
-					ApprovalCategory category = checkCategoryExist(cmd.getId(), cmd.getNamespaceId(), cmd.getOwnerType(),
-							cmd.getOwnerId(), cmd.getApprovalType());
-					category.setStatus(CommonStatus.INACTIVE.getCode());
-					category.setUpdateTime(category.getCreateTime());
-					category.setOperatorUid(userId);
-					approvalCategoryProvider.updateApprovalCategory(category);
-					return null;
-				});
+		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), cmd.getId());
+		if (category == null) {
+			return;
+		}
+
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_APPROVAL_CATEGORY.getCode() + cmd.getId()).enter(() -> {
+			category.setStatus(ApprovalCategoryStatus.DELETED.getCode());
+			approvalCategoryProvider.updateApprovalCategory(category);
+			return null;
+		});
 	}
 
 	@Override
@@ -550,7 +684,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private OrganizationMember getOrganizationMember(Long userId, Long organizationId) {
-		return organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+		return organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
 	}
 
 	private boolean checkCurrentLevelExist(Long flowId, Byte level) {
@@ -1005,7 +1139,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 
 		checkNamespaceExist(namespaceId);
-		checkOwnerExist(namespaceId, ownerType, ownerId);
 	}
 
 	private void checkPrivilege(Long userId, ApprovalOwnerInfo ownerInfo) {
@@ -1017,33 +1150,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not exist namespace: " + namespaceId);
 		}
-	}
-
-	private void checkOwnerExist(Integer namespaceId, String ownerType, Long ownerId) {
-		ApprovalOwnerType approvalOwnerType = null;
-
-		if ((approvalOwnerType = ApprovalOwnerType.fromCode(ownerType)) == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Not exist ownerType: " + ownerType);
-		}
-
-		switch (approvalOwnerType) {
-		case ORGANIZATION:
-			Organization organization = organizationProvider.findOrganizationById(ownerId);
-			if (organization == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Not exist organization: " + ownerId);
-			}
-			if (organization.getNamespaceId().intValue() != namespaceId.intValue()) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"the organization is beyond the namespace: namespaceId=" + namespaceId + ", organizationId" + ownerId);
-			}
-			break;
-		default:
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "error ownerType: "
-					+ ownerType);
-		}
-
 	}
 
 	@Override
@@ -1398,7 +1504,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkPrivilege(userId, ownerInfo);
 		checkApprovalType(cmd.getApprovalType());
 		if (cmd.getCategoryId() != null) {
-			checkCategoryExist(cmd.getCategoryId(), ownerInfo, cmd.getApprovalType());
+			getAndCheckApprovalCategory(cmd.getCategoryId(), ownerInfo);
 		}
 		ApprovalRequestCondition condition = new ApprovalRequestCondition();
 		condition.setOwnerInfo(ownerInfo);
@@ -1432,9 +1538,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalOwnerInfo ownerInfo = getOwnerInfoFromSceneToken(cmd.getSceneToken());
 		checkPrivilege(userId, ownerInfo);
 		checkApprovalType(cmd.getApprovalType());
-		if (cmd.getCategoryId() != null) {
-			checkCategoryExist(cmd.getCategoryId(), ownerInfo, cmd.getApprovalType());
-		}
+        if (cmd.getCategoryId() != null) {
+            getAndCheckApprovalCategory(cmd.getCategoryId(), ownerInfo);
+        }
 
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
 		CreateApprovalRequestBySceneResponse response = new CreateApprovalRequestBySceneResponse();
@@ -1530,12 +1636,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		checkPrivilege(userId, ownerInfo);
 		checkApprovalType(cmd.getApprovalType());
 
-		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(ownerInfo.getNamespaceId(),
-				ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), cmd.getApprovalType());
+		QueryApprovalCategoryCondition condition = new QueryApprovalCategoryCondition();
+		condition.setNamespaceId(ownerInfo.getNamespaceId());
+		condition.setOwnerType(ownerInfo.getOwnerType());
+		condition.setOwnerId(ownerInfo.getOwnerId());
+		condition.setApprovalType(cmd.getApprovalType());
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory(condition);
 
 		ListApprovalCategoryBySceneResponse resp = new ListApprovalCategoryBySceneResponse(categoryList.stream()
 				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
-		resp.getCategoryList().add(defaultCategory);
 		return resp;
 	}
 
@@ -1765,9 +1874,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 		final Long userId = getUserId();
 		checkPrivilege(userId, cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 //		checkApprovalType(cmd.getApprovalType());
-		if (cmd.getCategoryId() != null) {
-			checkCategoryExist(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getApprovalType());
-		}
+        if (cmd.getCategoryId() != null) {
+            getAndCheckApprovalCategory(cmd.getCategoryId(), cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+        }
 
 		// 根据用户关键字查询匹配的用户id
 		List<Long> userIdList = null;

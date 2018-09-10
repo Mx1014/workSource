@@ -11,6 +11,7 @@ import java.util.List;
  *     <li>communityId: 项目id</li>
  *     <li>fieldIds: 所属字段系统id列表</li>
  *     <li>items: 字段选择项信息， 参考{@link ScopeFieldItemInfo}</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -25,6 +26,16 @@ public class UpdateFieldItemsCommand {
     @ItemType(ScopeFieldItemInfo.class)
     private List<ScopeFieldItemInfo> items;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getCommunityId() {
         return communityId;
     }

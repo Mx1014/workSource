@@ -6,14 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import java.lang.reflect.Method;
@@ -35,6 +34,7 @@ import java.util.concurrent.Executor;
 @EnableCaching
 @EnableAsync
 @EnableScheduling
+@EnableKafka
 public class AppConfig implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -198,6 +199,15 @@ public class UserActivityController extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+
+    /**
+     * <b>URL: /user/exportFeedbacks</b>
+     * <p>导出举报数据</p>
+     */
+    @RequestMapping("exportFeedbacks")
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        this.userActivityService.exportFeedbacks(cmd);
+    }
     
     /**
      * 更新用户反馈 <b>url:/user/updateFeedback</b>
@@ -283,6 +293,17 @@ public class UserActivityController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse getUserTreasure() {
         return new RestResponse(userActivityService.getUserTreasureV2());
+    }
+
+    /**
+     * 新用户财富：<b>url:/user/getUserTreasureNew</b>
+     * 个人中心配置
+     */
+    @RequestMapping("getUserTreasureNew")
+    @RestReturn(GetUserTreasureNewResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse getUserTreasureNew() {
+        return new RestResponse(userActivityService.getUserTreasureNew());
     }
 
     /**

@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
@@ -39,10 +43,10 @@ public class ActivityController extends ControllerBase {
 
     @Autowired
     private ActivityService activityService;
-    
+
     @Autowired
     private AclProvider aclProvider;
-    
+
 //    @RequestMapping("post")
 //    @RestReturn(value=ActivityDTO.class)
 //    public RestResponse signup(@Valid ActivityPostCommand cmd) {
@@ -68,7 +72,7 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(result);
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/createSignupOrder</b>
      * <p>创建活动报名收费订单</p>
@@ -104,7 +108,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("createSignupOrderV2")
     @RestReturn(value=PreOrderDTO.class)
     public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
-        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        PreOrderDTO dto = activityService.createUniteSignupOrder(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -126,9 +130,9 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(result);
         return response;
     }
-    
+
     /**
-     * 
+     *
      * <p>修改活动报名</p>
      * <b>URL: /activity/updateSignupInfo</b>
      */
@@ -142,9 +146,9 @@ public class ActivityController extends ControllerBase {
     	response.setResponseObject(result);
     	return response;
     }
-    
+
     /**
-     * 
+     *
      * <p>导入活动报名</p>
      * <b>URL: /activity/importSignupInfo</b>
      */
@@ -157,9 +161,9 @@ public class ActivityController extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
-    
+
     /**
-     * 
+     *
      * <p>列出活动报名信息</p>
      * <b>URL: /activity/listSignupInfo</b>
      */
@@ -173,20 +177,15 @@ public class ActivityController extends ControllerBase {
     	response.setResponseObject(result);
     	return response;
     }
-    
+
     /**
-     * 
+     *
      * <p>导出活动报名信息</p>
      * <b>URL: /activity/exportSignupInfo</b>
      */
     @RequestMapping("exportSignupInfo")
-    @RestReturn(value=String.class)
-    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd, HttpServletResponse response) {
-    	activityService.exportSignupInfo(cmd, response);
-    	RestResponse restResponse = new RestResponse();
-    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
-    	restResponse.setErrorDescription("OK");
-    	return restResponse;
+    public void exportSignupInfo(@Valid ExportSignupInfoCommand cmd) {
+    	activityService.exportActivitySignupNew(cmd);
     }
 
 //    /**
@@ -203,9 +202,9 @@ public class ActivityController extends ControllerBase {
 //        restResponse.setErrorDescription("OK");
 //        return restResponse;
 //    }
-    
+
     /**
-     * 
+     *
      * <p>删除活动报名信息</p>
      * <b>URL: /activity/deleteSignupInfo</b>
      */
@@ -218,9 +217,9 @@ public class ActivityController extends ControllerBase {
     	restResponse.setErrorDescription("OK");
     	return restResponse;
     }
-    
+
     /**
-     * 
+     *
      * <p>检查手机号</p>
      * <b>URL: /activity/vertifyPersonByPhone</b>
      */
@@ -234,9 +233,9 @@ public class ActivityController extends ControllerBase {
     	restResponse.setResponseObject(signupInfoDTO);
     	return restResponse;
     }
-    
+
     /**
-     * 
+     *
      * @return {@link }
      */
     @RequestMapping("list")
@@ -246,7 +245,7 @@ public class ActivityController extends ControllerBase {
         ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
        return new RestResponse(rsp);
    }
-    
+
     /**
      * 取消报名
      * @return {@link ActivityDTO}
@@ -261,7 +260,7 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(result);
         return response;
     }
-    
+
     /**
      * 签到
      * @return {@link ActivityDTO}
@@ -276,7 +275,7 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(result);
         return response;
     }
-    
+
     /**
      * 查询活动详情
      * @return {@link ActivityListResponse}
@@ -291,7 +290,7 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(activities);
         return response;
     }
-    
+
     /**
      * 确认
      * @return {@link ActivityDTO}
@@ -302,7 +301,7 @@ public class ActivityController extends ControllerBase {
         ActivityDTO confirm = activityService.confirm(cmd);
         return new RestResponse(confirm);
     }
-    
+
     /**
      * 拒绝
      * @return {@link String}
@@ -313,7 +312,7 @@ public class ActivityController extends ControllerBase {
         activityService.rejectPost(cmd);
         return new RestResponse("OK");
     }
-    
+
     /**
      * 查询活动category
      * @return {@link ListActivityCategories}
@@ -328,7 +327,7 @@ public class ActivityController extends ControllerBase {
         categories.setActivityCategories(result.stream().map(r->ConvertHelper.convert(r, CategoryDTO.class)).collect(Collectors.toList()));
         return new RestResponse(categories);
     }
-    
+
     /**
      * 查询周边活动
      * @return
@@ -357,7 +356,7 @@ public class ActivityController extends ControllerBase {
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
-    
+
     /**
      * 查询同城活动
      * @return
@@ -365,14 +364,14 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("listCityActivities")
     @RestReturn(ListNearbyActivitiesResponse.class)
     public RestResponse listCityActivities(@Valid ListNearByActivitiesCommandV2 cmdV2){
-    	
+
         Tuple<Long, List<ActivityDTO>> ret = activityService.listCityActivities(cmdV2);
         ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
         rsp.setActivities(ret.second());
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
-    
+
     /**
      * 查询周边和同城活动：周边活动range传入5，同城活动range传入4
      * @return {@link }
@@ -388,7 +387,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * 查询活动，根据namespaseId，tag
      * @return {@link }
@@ -402,7 +401,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * 查询分享出去的活动信息
      */
@@ -421,7 +420,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/getActivityVideoInfo</b>
      * <p>获取直播信息详情</p>
@@ -434,7 +433,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/setActivityVideoInfo</b>
      * <p>更新直播信息</p>
@@ -462,7 +461,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/devicechange</b>
      * <p>更新直播信息</p>
@@ -477,7 +476,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/getVideoCapability</b>
      * <p>获取直播的能力</p>
@@ -490,9 +489,9 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /*
-     * 
+     *
      * <p>按namespace查询官方活动</p>
      * <b>URL: /activity/listOfficialActivityByNamespace</b>
      */
@@ -514,6 +513,51 @@ public class ActivityController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /activity/setActivityPayee</b>
+     * <p>设置活动收款方</p>
+     */
+    @RequestMapping("setActivityPayee")
+    @RestReturn(value=String .class)
+    public RestResponse setActivityPayee(CreateOrUpdateActivityPayeeCommand cmd){
+        activityService.createOrUpdateActivityPayee(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /activity/getActivityPayee</b>
+     * <p>获取已设置的活动收款方</p>
+     */
+    @RequestMapping("getActivityPayee")
+    @RestReturn(value=GetActivityPayeeDTO.class)
+    public RestResponse getActivityPayee(GetActivityPayeeCommand cmd){
+        return new RestResponse(activityService.getActivityPayee(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/listActivityPayee</b>
+     * <p>获取活动收款方列表</p>
+     */
+    @RequestMapping("listActivityPayee")
+    @RestReturn(value=ActivityPayeeDTO.class,collection = true)
+    public RestResponse listActivityPayee(ListActivityPayeeCommand cmd){
+        List<ActivityPayeeDTO> list = activityService.listActivityPayee(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/checkPayeeIsUseful</b>
+     * <p>校验收款方是否可用</p>
+     */
+    @RequestMapping("checkPayeeIsUseful")
+    @RestReturn(value=CheckPayeeIsUsefulResponse.class)
+    public RestResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd){
+        return new RestResponse(activityService.checkPayeeIsUseful(cmd));
+    }
+
+    /**
      * <b>URL: /activity/setActivityWarning</b>
      * <p>设置活动提醒</p>
      */
@@ -522,7 +566,7 @@ public class ActivityController extends ControllerBase {
     public RestResponse setActivityWarning(SetActivityWarningCommand cmd){
     	return new RestResponse(activityService.setActivityWarning(cmd));
     }
-    
+
     /**
      * <b>URL: /activity/getActivityWarning</b>
      * <p>查询活动提醒</p>
@@ -532,7 +576,7 @@ public class ActivityController extends ControllerBase {
     public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
     	return new RestResponse(activityService.queryActivityWarning(cmd));
     }
-    
+
     /**
      * <b>URL: /activity/setRosterOrderSetting</b>
      * <p>设置订单支付有效期</p>
@@ -542,7 +586,7 @@ public class ActivityController extends ControllerBase {
     public RestResponse setRosterOrderSetting(SetRosterOrderSettingCommand cmd){
     	return new RestResponse(activityService.setRosterOrderSetting(cmd));
     }
-    
+
     /**
      * <b>URL: /activity/getRosterOrderSetting</b>
      * <p>查询订单支付有效期</p>
@@ -552,7 +596,7 @@ public class ActivityController extends ControllerBase {
     public RestResponse getRosterOrderSetting(GetRosterOrderSettingCommand cmd){
     	return new RestResponse(activityService.getRosterOrderSetting(cmd));
     }
-    
+
     /**
      * <b>URL: /activity/setActivityTime</b>
      * <p>设置活动提醒、订单有效期</p>
@@ -562,7 +606,7 @@ public class ActivityController extends ControllerBase {
     public RestResponse setActivityTime(SetActivityTimeCommand cmd){
     	return new RestResponse(activityService.setActivityTime(cmd));
     }
-    
+
     /**
      * <b>URL: /activity/getActivityTime</b>
      * <p>查询活动提醒、订单有效期</p>
@@ -572,8 +616,8 @@ public class ActivityController extends ControllerBase {
     public RestResponse getActivityTime(GetActivityTimeCommand cmd){
     	return new RestResponse(activityService.getActivityTime(cmd));
     }
-    
-    
+
+
     /**
 	 * <b>URL: /activity/listActivityEntryCategories</b>
 	 * <p> 列出活动类型 </p>
@@ -755,7 +799,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /activity/listActivityCategory</b>
      * <p>列出活动分类</p>
@@ -769,7 +813,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * <b>URL: /activity/statisticsSummary</b>
      * <p>统计总览</p>
@@ -783,7 +827,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * <b>URL: /activity/statisticsActivity</b>
      * <p>统计活动</p>
@@ -797,7 +841,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * <b>URL: /activity/statisticsOrganization</b>
      * <p>统计企业</p>
@@ -811,7 +855,7 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
-    
+
     /**
      * <b>URL: /activity/statisticsTag</b>
      * <p>统计标签</p>
@@ -840,5 +884,91 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
-    
+    /**
+     * <b>URL: /activity/payNotify</b>
+     * <p>支付模块回调接口，通知支付结果</p>
+     */
+    @RequestMapping("payNotify")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+        activityService.payNotify(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/exportActivity</b>
+     * <p>导出活动数据</p>
+     */
+    @RequestMapping("exportActivity")
+    public void exportActivity(ExportActivityCommand cmd) {
+        this.activityService.exportActivity(cmd);
+    }
+
+    /**
+     * <b>URL: /activity/exportOrganization</b>
+     * <p>导出活动企业分布数据</p>
+     */
+    @RequestMapping("exportOrganization")
+    public void exportOrganization(ExportOrganizationCommand cmd) {
+        this.activityService.exportOrganization(cmd);
+    }
+
+    /**
+     * <b>URL: /activity/exportTag</b>
+     * <p>导出活动标签分布数据</p>
+     */
+    @RequestMapping("exportTag")
+    public void exportTag(ExportTagCommand cmd) {
+        this.activityService.exportTag(cmd);
+    }
+
+    /**
+     * <b>URL: /activity/exportActivitySignupTemplate</b>
+     * <p>活动报名导入模板</p>
+     */
+    @RequestMapping("exportActivitySignupTemplate")
+    @RestReturn(value = String.class)
+    public RestResponse exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse){
+        activityService.exportActivitySignupTemplate(cmd,httpResponse);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /activity/listActivityForms</b>
+     * <p> 获取活动报名表单列表 </p>
+     * @return
+     */
+    @RequestMapping("listActivityForms")
+    @RestReturn(value=ListGeneralFormResponse.class)
+    public RestResponse listApprovalForms(@Valid ListGeneralFormsCommand cmd) {
+        ListGeneralFormResponse result = activityService.listActivitySignupGeneralForms(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/updateActivityForm</b>
+     * <p> 修改 活动的表单    </p>
+     * @return
+     */
+    @RequestMapping("updateActivityForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse updateActivityForm(@Valid UpdateActivityFormCommand cmd) {
+        GeneralFormDTO generalFormDTO = activityService.updateGeneralForm(cmd);
+        RestResponse response = new RestResponse(generalFormDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
 }

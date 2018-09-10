@@ -1,5 +1,6 @@
 package com.everhomes.user;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.activity.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -16,6 +17,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
@@ -25,6 +27,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
@@ -36,6 +41,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -45,6 +52,7 @@ import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
@@ -65,6 +73,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +90,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,6 +185,12 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private PointService pointService;
 
+    @Autowired
+    private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private TaskService taskService;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -213,49 +237,49 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public void updateActivity(SyncActivityCommand cmd) {
-    	
-        UserActivity activity = new UserActivity();
+        VersionRealmType realmType = VersionRealmType.fromCode(UserContext.current().getVersionRealm());
+        if (realmType == null) {
+            LOGGER.warn("invalid version realm type of [{}], ignored.", UserContext.current().getVersionRealm());
+            return;
+        }
+
+        OSType osType = OSType.fromString(cmd.getOsType());
+        if (osType == OSType.Unknown) {
+            if (realmType.getCode().toLowerCase().startsWith("ios")) {
+                osType = OSType.IOS;
+            } else if (realmType.getCode().toLowerCase().startsWith("android")) {
+                osType = OSType.Android;
+            }
+        }
+        String type = osType.name().toLowerCase();
+
+        String versionName = cmd.getAppVersionName();
+        if (StringUtils.isEmpty(versionName) || versionName.split("\\.").length < 3) {
+            LOGGER.warn("invalid version name of [{}], ignored.", versionName);
+            return;
+        }
+
+        String[] tmp = new String[3];
+        String[] arr = versionName.split("\\.");
+        System.arraycopy(arr, 0, tmp, 0, 3);
+
+        versionName = StringUtils.join(tmp, ".");
+        Version version = null;
         try {
-            BeanUtils.copyProperties(cmd, activity, "activityType", "osType");
+            version = Version.fromVersionString(versionName);
         } catch (Exception e) {
-        	LOGGER.error("some thing error", e);
+            LOGGER.warn("invalid version name of [{}], ignored.", versionName);
+            return;
         }
-        User user = UserContext.current().getUser();
-        activity.setCreateTime(getCreateTime());
-        activity.setUid((long) -1);
-        if (user != null)
-            activity.setUid(user.getId());
-        activity.setActivityType(ActivityType.fromString(cmd.getActivityType()).getCode());
 
-        if(OSType.fromString(cmd.getOsType()) == OSType.Unknown){
-            activity.setOsType(OSType.fromCode(cmd.getOsType()).getCode());
-        }else{
-            activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
-        }
-        activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
-        activity.setNamespaceId(UserContext.getCurrentNamespaceId());
-        activity.setVersionRealm(UserContext.current().getVersionRealm());
-
-        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
-        // if (user != null)
-        // 	userActivityProvider.addActivity(activity, user.getId());
-
-        // 增加版本号 用于运营统计 by sfyan 20170117
-        String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
-        String version = activity.getAppVersionName();
-        if(!org.springframework.util.StringUtils.isEmpty(version)
-                && version.split("\\.").length > 3)
-            version = version.substring(0, version.lastIndexOf("."));
-
-        AppVersion appVersion = statTerminalProvider.findAppVersion(activity.getNamespaceId(), version, type);
-        if(null == appVersion){
+        AppVersion appVersion = statTerminalProvider.findAppVersion(UserContext.getCurrentNamespaceId(), versionName, type);
+        if(null == appVersion) {
             appVersion = new AppVersion();
-            appVersion.setName(version);
+            appVersion.setName(versionName);
             appVersion.setType(type);
-            appVersion.setNamespaceId(activity.getNamespaceId());
-            appVersion.setRealm(activity.getVersionRealm());
-            VersionRange versionRange = new VersionRange("["+version+","+version+")");
-            appVersion.setDefaultOrder((int)versionRange.getUpperBound());
+            appVersion.setNamespaceId(UserContext.getCurrentNamespaceId());
+            appVersion.setRealm(realmType.getCode());
+            appVersion.setDefaultOrder((int) version.getEncodedValue());
             statTerminalProvider.createAppVersion(appVersion);
         }
     }
@@ -547,7 +571,29 @@ public class UserActivityServiceImpl implements UserActivityService {
     	return response;
     }
 
-	@Override
+    @Override
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_举报管理_" + fileNameSdf.format(new Date()) + ".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), FeedbackApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
 	public void updateFeedback(UpdateFeedbackCommand cmd) {
         Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
         if (feedback == null) {
@@ -832,7 +878,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         rsp.setMyOrderUrl(getMyOrderUrl());
         rsp.setPointRuleUrl(getPointRuleUrl());
         rsp.setMyCoupon(getMyCoupon());
-        
+
         if(orderCount != null) {
         	rsp.setOrderCount(NumberUtils.toInt(orderCount.getItemValue(), 0));
         } else {
@@ -907,6 +953,43 @@ public class UserActivityServiceImpl implements UserActivityService {
         order.setUrl(getMyOrderUrl());
         order.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
 
+        return rsp;
+    }
+
+    @Override
+    public GetUserTreasureNewResponse getUserTreasureNew() {
+        GetUserTreasureNewResponse rsp = new GetUserTreasureNewResponse();
+
+        if(!userService.isLogon()) {
+            return rsp;
+        }
+
+        User user = UserContext.current().getUser();
+
+        BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
+
+        // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        // UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if (response != null && response.getResponse() != null) {
+            long promotionCount = response.getResponse().promotionCount;
+            long shoppingCardCount = response.getResponse().shoppingCardCount;
+            long orderCount = response.getResponse().orderCount;
+
+            rsp.setCoupon(promotionCount + shoppingCardCount);
+            rsp.setOrder(orderCount);
+        }
+        if (rsp.getCoupon() == null) {
+            rsp.setCoupon(0L);
+        }
+        if (rsp.getOrder() == null) {
+            rsp.setOrder(0L);
+        }
+        UserTreasureDTO point = pointService.getPointTreasure();
+        rsp.setPoint(point.getCount());
+        if (rsp.getPoint() == null) {
+            rsp.setPoint(0L);
+        }
         return rsp;
     }
 
@@ -1769,10 +1852,4 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		
 	}
-
-    public static void main(String[] args) {
-        System.out.println(ActivityType.fromString("logon").getCode());
-        System.out.println(ActivityType.fromString("1").getCode());
-    }
-
 }

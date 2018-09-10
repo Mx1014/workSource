@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.print;
 
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -22,6 +24,8 @@ public interface SiyinPrintOrderProvider {
 	void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag);
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
+	
+	SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum);
 
 	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 
@@ -29,4 +33,5 @@ public interface SiyinPrintOrderProvider {
 			List<Object> ownerIdList, Timestamp startTime,
 			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
 
+    ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String s, String sNamespaceId, String userIdentifier, Object o, Object o1, Object o2);
 }

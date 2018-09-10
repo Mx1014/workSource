@@ -36,5 +36,18 @@ public interface OrganizationNotificationTemplateCode {
 
 	int DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 20;//${userName}（${contactToken}）的${organizationName}企业管理员身份已被移除。
 	int DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 21;//您的${organizationName}企业管理员身份已被移除。
+	
+	int DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 22;//您在${organizationName}的超级管理员身份已被移除。
+	int CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 23;//您已成为${organizationName}的超级管理员。
+	
+	int DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 24;//${userName}（${contactToken}）的${organizationName}超级管理员身份已被移除。
+	int CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 25;//${userName}（${contactToken}）已被添加为${organizationName}的超级管理员。
+	
+	
+	int DELETE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 26;//您在${organizationName}的系统管理员身份已被移除。
+	int CREATE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_TARGET_TEMPLATE = 27;//您已成为${organizationName}的系统管理员。
+	
+	int DELETE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 28;//${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除。
+	int CREATE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_OTHER_TEMPLATE = 29;//${userName}（${contactToken}）已被添加为${organizationName}的系统管理员。
 
 }

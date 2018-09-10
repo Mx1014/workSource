@@ -146,7 +146,7 @@ public interface DoorAccessService {
 
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
-            boolean generate);
+    		DoorAccessDriverType driverType, boolean generate);
 
     void doAlipayRedirect(HttpServletRequest request,
             HttpServletResponse response);
@@ -169,4 +169,10 @@ public interface DoorAccessService {
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
 
 	public int invalidVistorAuth(Long DoorId, String phone);
+
+	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
+
+	public void updateAccessType(Long doorId, byte doorType);
+
+	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
 }

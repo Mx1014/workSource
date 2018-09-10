@@ -724,7 +724,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     saveImportEmployeeSalary(resultList, cmd.getOrganizationId(), fileLog, response, cmd.getOwnerId());
                 } else {
-                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROR.getCode());
                 }
                 return response;
             }
@@ -1058,23 +1058,23 @@ public class SalaryServiceImpl implements SalaryService {
 //        List<String> titleList = new ArrayList<String>(titleMap.values());
         if (!"手机".equals(titleMap.get("A"))) {
             LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"姓名".equals(titleMap.get("B"))) {
             LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
                 try {
                     if (!groupEntities.get(i).getName().equals(titleMap.get(GetExcelLetter(i + 3)))) {
                         LOGGER.error("第{}列不是{}而是{}", (i + 1), groupEntities.get(i).getName(), titleMap.get(GetExcelLetter(i + 1)));
-                        return ImportFileErrorType.TITLE_ERROE.getCode();
+                        return ImportFileErrorType.TITLE_ERROR.getCode();
                     }
                 } catch (Exception e) {
                     LOGGER.error("检测title报错了,可能是某个数组越界 ", e);
-                    return ImportFileErrorType.TITLE_ERROE.getCode();
+                    return ImportFileErrorType.TITLE_ERROR.getCode();
                 }
             }
         }
@@ -1629,7 +1629,7 @@ public class SalaryServiceImpl implements SalaryService {
         sgf.setFilerUid(userId);
         sgf.setFilerName(findNameByOwnerAndUser(ownerId, userId));
 //        Organization organization = organizationProvider.findOrganizationById(ownerId);
-//        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+//        OrganizationMember member = punchService.findOrganizationMemberByUIdAndOrgId(userId, organization.getPath());
 //        if (null != member) {
 //            sgf.setFilerName(member.getContactName());
 //        }
@@ -1966,8 +1966,8 @@ public class SalaryServiceImpl implements SalaryService {
         return null;
     }
 
-    public String processZLLink2PayslipDetail(Long payslipDetailId, String salaryPeriod) {
-        return "zl://salary/payslip-detail?payslipDetailId=" + payslipDetailId + "&salaryPeriod=" + salaryPeriod;
+    public String processZLLink2PayslipDetail(Long payslipDetailId, String salaryPeriod,Long organizationId) {
+        return "zl://salary/payslip-detail?payslipDetailId=" + payslipDetailId + "&salaryPeriod=" + salaryPeriod + "&organizationId=" + organizationId;
     }
 
     @Override
@@ -2104,6 +2104,9 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryPeriodEmployeeEntityDTO dto = new SalaryPeriodEmployeeEntityDTO();
             dto.setGroupEntityName(entry.getValue());
             dto.setSalaryValue(r.getCells().get(entry.getKey()));
+            if("- 0".equals(dto.getSalaryValue()) || "-0".equals(dto.getSalaryValue())){
+            	dto.setSalaryValue("0");
+            }
             result.add(dto);
         }
         return result;
@@ -2154,11 +2157,11 @@ public class SalaryServiceImpl implements SalaryService {
         map.put("salaryDate", salaryPeriodString);
         String content = localeTemplateService.getLocaleTemplateString(0, SalaryConstants.SEND_NOTIFICATION_SCOPE, SalaryConstants.SEND_NOTIFICATION_CODE,
                 "zh_CN", map, salaryPeriodString + "工资已发放。");
-        sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getSalaryPeriod());
+        sendMessage(content, "工资条发放", spd.getUserId(), spd.getId(), spd.getSalaryPeriod(), spd.getOwnerId());
     }
 
     private void sendMessage(
-            String content, String subject, Long receiverId, Long payslipDetailId, String salaryPeriod) {
+            String content, String subject, Long receiverId, Long payslipDetailId, String salaryPeriod, Long ownerId) {
 
         //  set the message
         MessageDTO message = new MessageDTO();
@@ -2167,7 +2170,7 @@ public class SalaryServiceImpl implements SalaryService {
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
         //  set the route
-        String url = processZLLink2PayslipDetail(payslipDetailId, salaryPeriod);
+        String url = processZLLink2PayslipDetail(payslipDetailId, salaryPeriod, ownerId);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
         Map<String, String> meta = new HashMap<>();

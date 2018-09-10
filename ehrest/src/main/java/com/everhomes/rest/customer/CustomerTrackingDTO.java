@@ -1,10 +1,11 @@
 package com.everhomes.rest.customer;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,7 +23,10 @@ import com.everhomes.util.StringHelper;
  *     <li>trackingTime: 跟进时间</li>
  *     <li>content: 跟进内容</li>
  *     <li>contentImgUriList: 跟进内容图片uri</li>
- *     <li>contentImgUrlList: 跟进内容图片url</li>
+ *     <li>visitTimeLength: 时长</li>
+ *     <li>visitPersonUid: 访问人uid</li>
+ *     <li>visitPersonName: 访问人姓名</li>
+ *     <li>contactPhone: 联系方式</li>
  * </ul>
  * Created by shengyue.wang on 2017/9/20.
  */
@@ -41,6 +45,10 @@ public class CustomerTrackingDTO {
     private String intentionGradeName;
     private Timestamp trackingTime;
     private String content;
+	private BigDecimal visitTimeLength;
+	private  Long visitPersonUid;
+	private  String visitPersonName;
+	private String contactPhone;
     
     @ItemType(String.class)
     private List<String>  contentImgUriList;
@@ -175,6 +183,38 @@ public class CustomerTrackingDTO {
 
 	public void setContentImgUrlList(List<String> contentImgUrlList) {
 		this.contentImgUrlList = contentImgUrlList;
+	}
+
+	public BigDecimal getVisitTimeLength() {
+		return visitTimeLength;
+	}
+
+	public void setVisitTimeLength(BigDecimal visitTimeLength) {
+		this.visitTimeLength = visitTimeLength;
+	}
+
+	public Long getVisitPersonUid() {
+		return visitPersonUid;
+	}
+
+	public void setVisitPersonUid(Long visitPersonUid) {
+		this.visitPersonUid = visitPersonUid;
+	}
+
+	public String getVisitPersonName() {
+		return visitPersonName;
+	}
+
+	public void setVisitPersonName(String visitPersonName) {
+		this.visitPersonName = visitPersonName;
+	}
+
+	public String getContactPhone() {
+		return contactPhone;
+	}
+
+	public void setContactPhone(String contactPhone) {
+		this.contactPhone = contactPhone;
 	}
 
 	@Override

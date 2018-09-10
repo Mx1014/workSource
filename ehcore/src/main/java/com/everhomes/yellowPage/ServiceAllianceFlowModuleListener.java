@@ -1,8 +1,7 @@
 package com.everhomes.yellowPage;
 
+import java.io.File;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,9 +14,10 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
@@ -28,7 +28,9 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -56,13 +58,20 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.file.FileUtils;
+import com.everhomes.util.pdf.PdfUtils;
+import com.everhomes.yellowPage.stat.ClickStatDetail;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
+	
+	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
+	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
+	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	public static final long MODULE_ID = 40500;
@@ -77,18 +86,19 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private MessagingService messagingService;
 
 	@Autowired
-	private LocaleTemplateService localeTemplateService;
-
-	@Autowired
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
 	private GroupProvider groupProvider;
+	
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 	
 	@Autowired
 	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
+	
+	@Autowired
+	ClickStatDetailProvider detailProvider;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -99,37 +109,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
         return moduleInfo;
 	}
 
-	private void changeContentsToObject(String contents,Long userId) {
-		GeneralApproval ga;
-		GeneralForm form;
-		List<PostApprovalFormItem> values;
-		List<GeneralFormFieldDTO> fieldDTOs;
-		ServiceAlliances serviceOrg;
-		ServiceAllianceCategories category = null;
-		User user;
-		PostApprovalFormItem userCompanyItem;
-
-		user = this.userProvider.findUserById(userId);
-		PostApprovalFormCommand cmd = JSONObject.parseObject(contents, PostApprovalFormCommand.class);
-		ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-				.getFormOriginId());
-		values = cmd.getValues();
-		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
-		if(null != sourceVal){
-			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-			serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
-			category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
-		}
-		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
-
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.EMAIL.getCode(),
-				category.getId(), locator, Integer.MAX_VALUE);
-	}
-	
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
 		try{
@@ -148,19 +127,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		// 服务联盟的审批拼接工作流 content字符串
 		
 		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
+		String formItemsInfo = flowCase.getContent();
 		
-		PostApprovalFormCommand cmd = JSONObject.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
-		//and by dengs 20170427 异步发送邮件
-		sendEmailAsynchronizedTask(flowCase.getContent(),flowCase.getApplyUserId());
-		//changeContentsToObject(flowCase.getContent(),flowCase.getApplyUserId());
-
+		PostApprovalFormCommand cmd = JSONObject.parseObject(formItemsInfo, PostApprovalFormCommand.class);
 		StringBuffer contentBuffer = new StringBuffer();
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-				.getFormOriginId());
 		List<PostApprovalFormItem> values = cmd.getValues();
-		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
 		Long yellowPageId = 0l;
 		ServiceAlliances  yellowPage = null;
@@ -178,7 +149,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			request.setType(yellowPage.getParentId());
 			
 		}
+	
 		flowCase.setContent(contentBuffer.toString());
+		
 		
 		Byte status = ServiceAllianceWorkFlowStatus.PROCESSING.getCode();
 		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
@@ -186,8 +159,39 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		}
 		//同步申请到es
 		syncRequest(values, request, flowCase,yellowPage,status);
+		
+		//添加到埋点统计中
+		createCommitStatDetail(flowCase, yellowPage);
+		
 		//发送消息给相关人员
-		sendMessage(yellowPageId,flowCase);
+		sendMessage(yellowPageId,flowCase, formItemsInfo);
+		
+	}
+	
+	private void createCommitStatDetail(FlowCase flowCase, ServiceAlliances service) {
+		if (null == service) {
+			return;
+		}
+
+		ClickStatDetail detail = new ClickStatDetail();
+		detail.setNamespaceId(flowCase.getNamespaceId());
+		detail.setType(service.getParentId());
+		detail.setOwnerId(service.getOwnerId());
+		detail.setCategoryId(service.getCategoryId());
+		detail.setServiceId(service.getId());
+		detail.setClickType(StatClickOrSortType.CLICK_TYPE_COMMIT_TIMES.getCode());
+		detail.setClickTime(System.currentTimeMillis());
+
+		// 设置用户相关信息
+		detail.setUserId(flowCase.getApplyUserId());
+		TargetDTO dto = organizationProvider.findUserContactByUserId(flowCase.getNamespaceId(),
+				flowCase.getApplyUserId());
+		if (null != dto) {
+			detail.setUserName(dto.getTargetName());
+			detail.setUserPhone(dto.getUserIdentifier());
+		}
+
+		detailProvider.createClickStatDetail(detail);
 	}
 
 	private void syncRequest(List<PostApprovalFormItem> values,ServiceAllianceRequestInfo request,FlowCase flowCase,ServiceAlliances  sa, Byte status) {
@@ -216,19 +220,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
         	request.setOwnerId(ocr.getCommunityId());
 		}
-//		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
-//	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-//	       	request.setOwnerId(flowCase.getProjectId());
-//		}else{
-//			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
-//        	if(ocr != null){
-//        		request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-//            	request.setOwnerId(ocr.getCommunityId());
-//        	}else{
-//        		request.setOwnerType(flowCase.getProjectType());
-//            	request.setOwnerId(flowCase.getProjectId());
-//        	}
-//		}
+		
+		
 		request.setFlowCaseId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setSecondCategoryId(sa.getCategoryId());
@@ -236,71 +229,105 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setSecondCategoryId(sa.getCategoryId());
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
-		request.setTemplateType("flowCase");
+		request.setTemplateType(ALLIANCE_TEMPLATE_TYPE);
 		ServiceAllianceApplicationRecord record = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
-		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-		if(org!=null){
-			record.setCreatorOrganization(org.getName());
-          }
-          ServiceAlliances sas = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
-          if(sas!=null){
-        	  record.setServiceOrganization(sas.getName());
-          }
-          record.setNamespaceId(flowCase.getNamespaceId());
-          record.setServiceAllianceId(request.getServiceAllianceId());
+		
+		// issue-32529 web化表单提交成功后，后台不显示表单已填写/自动加载的企业
+		PostApprovalFormItem companyVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
+		String companyName = JSON.parseObject(companyVal.getFieldValue(), PostApprovalFormTextValue.class).getText();
+		if (!StringUtils.isBlank(companyName)) {
+			record.setCreatorOrganization(companyName);
+			request.setCreatorOrganization(companyName);
+		}
+			
+		ServiceAlliances sas = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(),
+				request.getOwnerType(), request.getOwnerId());
+		if (sas != null) {
+			record.setServiceOrganization(sas.getName());
+		}
+		
+		record.setNamespaceId(flowCase.getNamespaceId());
+		record.setServiceAllianceId(request.getServiceAllianceId());
 		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
 
-	private void sendMessage(Long yellowPageId, FlowCase flowCase) {
-		//推送消息
-		//给服务公司留的手机号推消息
-		if (yellowPageId!=0) {
-			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
-			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
-			//发消息给服务联盟机构管理员
-			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getNamespaceId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+	private void sendMessage(Long yellowPageId, FlowCase flowCase, String formItemsInfo) {
 
-			if ((serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) || (targets != null && targets.size() > 0)) {
-				String body = new StringBuffer().append("收到一条").append(category.getName()).append("的申请,服务名称：").append(serviceOrg.getName()).toString();
-				FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
-				actionData.setFlowCaseId(flowCase.getId());
-				actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
-				actionData.setModuleId(flowCase.getModuleId());
-				String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
-				RouterMetaObject metaObject = new RouterMetaObject();
-				metaObject.setUrl(url);
-				Map<String, String> meta = new HashMap<>();
-				meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-				meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
-				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+		if (0 == yellowPageId) {
+			return;
+		}
+	
+		// 获取当前服务和服务类型
+		ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
+		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getParentId());
+		
+		// 推送手机信息
+		sendPhoneMsg(sa, category, flowCase);
+		
+		//异步推送邮件信息
+		sendEmailAsynchronizedTask(sa, category, flowCase, formItemsInfo);
+		
+	}
+	
+	/**   
+	* @Description: 发送短信通知
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月25日 下午2:00:02 
+	*
+	*/
+	private void sendPhoneMsg(ServiceAlliances serviceOrg, ServiceAllianceCategories category, FlowCase flowCase) {
 
-				if(serviceOrg.getContactMemid()!=null && serviceOrg.getContactMemid()!=0) {
-					OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+		// 发消息给服务联盟机构管理员
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(category.getNamespaceId(),
+				ContactType.MOBILE.getCode(), serviceOrg.getParentId(), locator, Integer.MAX_VALUE);
 
-					if(member!=null && member.getTargetId()!=null){
-						MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
-						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-								member.getTargetId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-					}
-				}
+		if ((serviceOrg.getContactMemid() != null && serviceOrg.getContactMemid() != 0)
+				|| (targets != null && targets.size() > 0)) {
+			String body = new StringBuffer().append("收到一条").append(category.getName()).append("的申请,服务名称：")
+					.append(serviceOrg.getName()).toString();
+			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+			actionData.setFlowCaseId(flowCase.getId());
+			actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+			actionData.setModuleId(flowCase.getModuleId());
+			String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
+			RouterMetaObject metaObject = new RouterMetaObject();
+			metaObject.setUrl(url);
+			Map<String, String> meta = new HashMap<>();
+			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
+			meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
-				if (targets != null && targets.size() > 0) {
-					for (ServiceAllianceNotifyTargets target : targets) {
-						if (target.getStatus().byteValue() == 1) {
-							UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
-							if (contact != null) {
-								MessageDTO message = createMessageDto(body, meta, contact.getOwnerUid().toString());
-								messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-										contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-							}
-						}
+			if (serviceOrg.getContactMemid() != null && serviceOrg.getContactMemid() != 0) {
+				OrganizationMember member = organizationProvider
+						.findOrganizationMemberById(serviceOrg.getContactMemid());
 
-					}
+				if (member != null && member.getTargetId() != null) {
+					MessageDTO messageDto = createMessageDto(body, meta, member.getTargetId().toString());
+					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,
+							MessageChannelType.USER.getCode(), member.getTargetId().toString(), messageDto,
+							MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 				}
 			}
 
+			if (targets != null && targets.size() > 0) {
+				for (ServiceAllianceNotifyTargets target : targets) {
+					if (target.getStatus().byteValue() == 1) {
+						UserIdentifier contact = userProvider.findClaimedIdentifierByToken(
+								UserContext.getCurrentNamespaceId(), target.getContactToken());
+						if (contact != null) {
+							MessageDTO message = createMessageDto(body, meta, contact.getOwnerUid().toString());
+							messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,
+									MessageChannelType.USER.getCode(), contact.getOwnerUid().toString(), message,
+									MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+						}
+					}
+
+				}
+			}
 		}
 	}
 
@@ -387,7 +414,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		syncRequest(ctx);
+//		syncRequest(ctx);
 	}
 	
 	private void syncRequest(FlowCaseState ctx) {
@@ -441,80 +468,68 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 				GeneralFormDataSourceType.SOURCE_ID.getCode());
+		if (null == val) {
+			return null;
+		}
+
+		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+		ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
+		entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));
+		entities.add(new FlowCaseEntity("服务类型", yellowPage.getServiceType(), FlowCaseEntityType.MULTI_LINE.getCode()));
+
+		//前面写服务联盟特有的默认字段-姓名-电话-企业-申请类型-申请来源-服务机构
+		//姓名
+		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+				val.getFormOriginId(), val.getFormVersion());
+		List<GeneralFormFieldDTO> fieldDTOs;
+		GeneralFormFieldDTO dto;
+		if (null == form) {
+			return null;
+		}
+
+		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_NAME.getCode());
+		if(val!=null){
+			dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+		}
+		//电话
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_PHONE.getCode());
 		if (val != null) {
-			Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-			ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
-			entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));
-			entities.add(new FlowCaseEntity("服务类型", yellowPage.getServiceType(), FlowCaseEntityType.MULTI_LINE.getCode()));
+			dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+		}
 
-			//前面写服务联盟特有的默认字段-姓名-电话-企业-申请类型-申请来源-服务机构
-			//姓名
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-					val.getFormOriginId(), val.getFormVersion());
-			List<GeneralFormFieldDTO> fieldDTOs;
-			GeneralFormFieldDTO dto;
-			if (form != null) {
-				fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_NAME.getCode());
-				if(val!=null){
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
-				}
-				//电话
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_PHONE.getCode());
-				if (val != null) {
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
-				}
+		//企业
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_COMPANY.getCode());
+		if (val != null) {
+			dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+		}
 
-				//企业
-				OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
-				//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
-				if(ocr != null) {//如果查询出来公司为空，就不显示公司字段
-					val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-							GeneralFormDataSourceType.USER_COMPANY.getCode());
-					if (val != null) {
-						dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-						entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
-					}
-				}
-
-				//楼栋门牌
-				FlowCaseEntity e = new FlowCaseEntity();
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_ADDRESS.getCode());
-				if (val != null) {
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					e.setKey(dto.getFieldDisplayName());
-					e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-					if (JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class) != null) {
-						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-						entities.add(e);
-					}
-				}
-
-
-//		ServiceAllianceCategories  parentPage = null;
-//		////申请来源
-//		if(null != yellowPage){
-//			parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
-//			flowCase.setModuleName(parentPage.getName());
-//		}
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-//		e.setKey("申请来源");
-//		e.setValue(parentPage==null?"未知":parentPage.getName());
-//		entities.add(e);
-
-
-				//后面跟自定义模块--
-				entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
-				return entities;
+		//楼栋门牌
+		FlowCaseEntity e = new FlowCaseEntity();
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_ADDRESS.getCode());
+		if (val != null) {
+			dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			String textValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText();
+			if (!StringUtils.isBlank(textValue)) {
+				e.setValue(textValue);
+				entities.add(e);
 			}
 		}
-		return null;
+
+
+		//后面跟自定义模块--
+		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+		return entities;
+		
 	}
 
 	@Override
@@ -529,9 +544,28 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		
 	}
 	
-	private void sendEmailAsynchronizedTask(String contents,Long userId) {
+	/**   
+	* @Description: 异步邮件请求。
+	* 执行类：ServiceAllianceAsynchronizedAction
+	* 需要参数：namespaceId, serviceAllianceId,  userId, organizationId, formItemsInfo
+	* 注：formItemsInfo格式为PostApprovalFormCommand 的json字符串
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月28日 上午10:49:30 
+	*
+	*/
+	private void sendEmailAsynchronizedTask(ServiceAlliances sa, ServiceAllianceCategories category, FlowCase flowCase, String formItemsInfo) {
+		
+		JSONObject json = new JSONObject();
+		json.put("namespaceId", category.getNamespaceId());
+		json.put("serviceAllianceId", sa.getId());
+		json.put("userId", flowCase.getApplyUserId());
+		json.put("organizationId", flowCase.getApplierOrganizationId());
+		json.put("formItemsInfo", formItemsInfo);
+		
+		//异步邮件
 		ServiceAllianceAsynchronizedServiceImpl handler = PlatformContext.getComponent("serviceAllianceAsynchronizedServiceImpl");
-		handler.pushToQueque(contents,userId);
+		handler.pushToQueque(json.toJSONString());
 	}
 	
 	@Override
@@ -619,5 +653,64 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		return json.toJSONString();
 	}
+	
+	@Override
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+
+		
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		reNewEsWorkFlowStatus(flowCase.getId(), flowCase.getStatus());
+		
+	}
+	
+	/**   
+	* @Function: ServiceAllianceFlowModuleListener.java
+	* @Description: 更新es服务器里服务的状态
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月20日 下午1:54:27 
+	*
+	*/
+	private void reNewEsWorkFlowStatus(Long flowCaseId, Byte flowCaseStatus) {
+
+		// 将工作流状态转成服务状态
+		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(flowCaseStatus);
+		
+		//获取储存在数据库的记录
+		ServiceAllianceApplicationRecord record = saapplicationRecordProvider.findServiceAllianceApplicationRecordByFlowCaseId(flowCaseId);
+		if (null == record) {
+			return ;
+		}
+		
+		//更新数据库记录
+		record.setWorkflowStatus(newStatus.getCode());
+		saapplicationRecordProvider.updateServiceAllianceApplicationRecord(record);
+
+		// 更新es存储的服务状态
+		serviceAllianceRequestInfoSearcher.updateDocByField(flowCaseId, ALLIANCE_TEMPLATE_TYPE,
+				ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME, newStatus.getCode());
+
+	}
+	
+	@Override
+	public void onFlowButtonFired(FlowCaseState ctx) {
+		
+		if (FlowStepType.SUSPEND_STEP != ctx.getStepType() && FlowStepType.ABORT_SUSPEND_STEP != ctx.getStepType()) {
+			return;
+		}
+
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		byte newFlowCaseStatus = FlowCaseStatus.SUSPEND.getCode();
+		if (FlowStepType.ABORT_SUSPEND_STEP == ctx.getStepType()) {
+			newFlowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+		} 
+		
+		//更新es状态 #31378
+		reNewEsWorkFlowStatus(flowCase.getId(), newFlowCaseStatus);
+	}
+
 	
 }

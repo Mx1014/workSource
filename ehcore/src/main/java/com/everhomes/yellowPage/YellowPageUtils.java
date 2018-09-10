@@ -2,115 +2,129 @@ package com.everhomes.yellowPage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import jdk.nashorn.internal.runtime.Context.ThrowErrorManager;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
+import com.everhomes.mail.MailHandler;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
+import com.itextpdf.text.Chapter;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 public class YellowPageUtils {
-
 	
-	
-	
-	/**
-	 * 从网络Url中下载文件
-	 * @param urlStr
-	 * @param fileName
-	 * @param savePath
-	 * @throws IOException
-	 */
-	public static File getFileFormUrl(String urlStr, String fileName, String inputSavePath) throws IOException {
-		
-		if (StringUtils.isEmpty(urlStr)) {
-			return null;
-		}
-		
-		String finalFileName = StringUtils.isEmpty(fileName) ? System.currentTimeMillis() + "" : fileName;
-		
-		String savePath = inputSavePath;
-		if (StringUtils.isBlank(inputSavePath)) {
-			savePath = getTmpDirPath();
-		}
-		
-		URL url = new URL(urlStr);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-		// 设置超时间为10秒
-		conn.setConnectTimeout(10 * 1000);
-
-		// 防止屏蔽程序抓取而返回403错误
-		conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-
-		// 得到输入流
-		InputStream inputStream = conn.getInputStream();
-		// 获取自己数组
-		byte[] getData = readInputStream(inputStream);
-
-		// 文件保存位置
-		File saveDir = new File(savePath);
-		if (!saveDir.exists()) {
-			saveDir.mkdirs();
-		}
-
-		File file = new File(saveDir + File.separator + finalFileName);
-		FileOutputStream fos = new FileOutputStream(file);
-		fos.write(getData);
-		if (fos != null) {
-			fos.close();
-		}
-
-		if (inputStream != null) {
-			inputStream.close();
-		}
-
-		return file;
-	}
+   
 
 	/**
-	 * 获取一个缓存目录
-	 * @return
+	 * 注意：方法最后会删除附件，
+	 * 如果是发送多人的邮件，请使用sendMultiMails
+	 * @param namespaceId
+	 * @param toEmailAddress
+	 *            邮件接收地址
+	 * @param subject
+	 *            主题
+	 * @param body
+	 *            内容
+	 * @param attchments
+	 *            附件地址列表
 	 */
-	public static String getTmpDirPath() {
-		
-		StringBuffer tmpdirBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
-		Long currentMillisecond = System.currentTimeMillis();
-		tmpdirBuffer.append(File.separator);
-		tmpdirBuffer.append(currentMillisecond);
-
-		// 附件目录
-		File baseDir = new File(tmpdirBuffer.toString());
-		if (!baseDir.exists()) {
-			baseDir.mkdirs();
+	public static void sendSingleMail(Integer namespaceId, String toEmailAddress, String subject, String body, List<File> files) {
+		// 获取文件地址
+		List<String> attchments = null;
+		if (!CollectionUtils.isEmpty(files)) {
+			attchments = files.stream().map(r -> {
+				return r.getAbsolutePath();
+			}).collect(Collectors.toList());
 		}
 
-		return tmpdirBuffer.toString();
-	}
+		String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+		MailHandler handler = PlatformContext.getComponent(handlerName);
+		handler.sendMail(namespaceId, null, toEmailAddress, subject, body, attchments);
 
-
-	/**
-	 * 从输入流中获取字节数组
-	 * @param inputStream
-	 * @return
-	 * @throws IOException
-	 */
-	public static byte[] readInputStream(InputStream inputStream) throws IOException {
-		byte[] buffer = new byte[1024];
-		int len = 0;
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		while ((len = inputStream.read(buffer)) != -1) {
-			bos.write(buffer, 0, len);
+		// 发完邮件需要做删除
+		if (!CollectionUtils.isEmpty(files)) {
+			for (File file : files) {
+				if (file.exists()) {
+					file.delete();
+				}
+			}
 		}
-
-		bos.close();
-
-		return bos.toByteArray();
 	}
-
 	
+	
+	/**   
+	* @Description: 发送至多个收件人。
+	* 这里默认用密送方式发给多个人。
+	* 如有其他需要可自行添加或修改方式
+	* 注意：方法最后会删除附件。
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年7月2日 下午6:59:09 
+	*
+	*/
+	public static void sendMultiMails(Integer namespaceId, List<String> toEmailAddressList, String subject, String body, List<File> files) {
+		// 获取文件地址
+		List<String> attchments = null;
+		if (!CollectionUtils.isEmpty(files)) {
+			attchments = files.stream().map(r -> {
+				return r.getAbsolutePath();
+			}).collect(Collectors.toList());
+		}
+
+		String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+		MailHandler handler = PlatformContext.getComponent(handlerName);
+		handler.sendMails(namespaceId, null, null, null, toEmailAddressList, subject, body, attchments);
+		
+
+		// 发完邮件需要做删除
+		if (!CollectionUtils.isEmpty(files)) {
+			for (File file : files) {
+				if (file.exists()) {
+					file.delete();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 默认code为YellowPageServiceErrorCode.SCOPE
+	 * 
+	 * @param errorCode
+	 *            错误码，见YellowPageServiceErrorCode
+	 * @param errorMsg
+	 *            错误信息。
+	 */
+	public static void throwError(int errorCode, String errorMsg) {
+		throw RuntimeErrorException.errorWith(YellowPageServiceErrorCode.SCOPE, errorCode, errorMsg);
+	}
 	
 }

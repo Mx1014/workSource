@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
  * <li>namespaceId: 域名</li>
+ * <li>categoryId: 多入口id</li>
+ * <li>moduleId: 模块id</li>
+ * <li>billGroupId: 账单组id</li>
  *</ul>
  */
 public class OwnerIdentityCommand {
@@ -20,6 +23,25 @@ public class OwnerIdentityCommand {
     private String ownerType;
     @NotNull
     private Integer namespaceId;
+    private Long categoryId;
+    private Long moduleId;
+    private Long billGroupId;
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {
@@ -53,4 +75,12 @@ public class OwnerIdentityCommand {
     public OwnerIdentityCommand() {
 
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

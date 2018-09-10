@@ -27,7 +27,25 @@ public class ListChargingStandardsCommand {
     private Integer pageSize;
 
     private Integer namespaceId;
+    private Long categoryId;
+    private Long moduleId;
+    private Long billGroupId;
 
+    public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -87,4 +105,12 @@ public class ListChargingStandardsCommand {
     public ListChargingStandardsCommand() {
 
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

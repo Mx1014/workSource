@@ -186,7 +186,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
     private Condition buildSearchFlowCaseCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
         Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
-                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
@@ -557,7 +558,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
-				
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 				return query;
 			}
     	});    	

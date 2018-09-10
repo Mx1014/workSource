@@ -121,6 +121,19 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public FlowCase getFlowCaseBySubFlowParentId(Long parentId) {
+        List<FlowCase> list = this.queryFlowCases(new ListingLocator(), 1, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.SUB_FLOW_PARENT_ID.eq(parentId));
+            return query;
+        });
+        if (list.size() > 0) {
+            return list.iterator().next();
+        }
+        return null;
+    }
+
+    @Override
     public Integer countApplierFlowCases(SearchFlowCaseCommand cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
@@ -206,25 +219,25 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getPageAnchor());
-    	}
+        }
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
         if(searchType.equals(FlowCaseSearchType.APPLIER)) {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
 
             Condition cond = buildSearchFlowCaseCmdCondition(locator, cmd);
+            cond = cond.and(t.SUB_FLOW_PARENT_ID.eq(0L));
 
             SelectQuery<Record> query = context
-                    .select(Tables.EH_FLOW_CASES.fields())
-                    .from(Tables.EH_FLOW_CASES).leftOuterJoin(Tables.EH_FLOWS)
-                    .on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
-                            .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                    .select(t.fields())
+                    .from(t)
                     .where(cond)
                     .getQuery();
 
             if (callback != null) {
                 callback.buildCondition(locator, query);
             }
-            query.addOrderBy(Tables.EH_FLOW_CASES.ID.desc());
+            query.addOrderBy(t.ID.desc());
             query.addLimit(count + 1);
 
             List<FlowCaseDetail> objs = query.fetchInto(FlowCaseDetail.class);
@@ -247,7 +260,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
     private Condition buildSearchFlowCaseCmdCondition(ListingLocator locator, SearchFlowCaseCommand cmd) {
         Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
-                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                .and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
         if(cmd.getUserId() != null)
             cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));

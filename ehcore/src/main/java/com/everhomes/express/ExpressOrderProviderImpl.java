@@ -101,7 +101,7 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 		}
 		
 		return step.and(condition.getPageAnchor() == null ? DSL.trueCondition() : Tables.EH_EXPRESS_ORDERS.ID.lt(condition.getPageAnchor()))
-				.orderBy(Tables.EH_EXPRESS_ORDERS.ID.desc())
+				.orderBy(Tables.EH_EXPRESS_ORDERS.CREATE_TIME.desc())
 				.limit(condition.getPageSize()+1)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, ExpressOrder.class));
@@ -135,6 +135,18 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 	public ExpressOrder findExpressOrderByOrderNo(String orderNo) {
 		List<ExpressOrder> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
 		.where(Tables.EH_EXPRESS_ORDERS.ORDER_NO.eq(orderNo))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ExpressOrder.class));
+		if(list != null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public ExpressOrder findExpressOrderByBizOrderNum(String bizOrderNum) {
+		List<ExpressOrder> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
+		.where(Tables.EH_EXPRESS_ORDERS.GENERAL_ORDER_ID.eq(bizOrderNum))
 		.fetch()
 		.map(r->ConvertHelper.convert(r, ExpressOrder.class));
 		if(list != null && list.size()>0){

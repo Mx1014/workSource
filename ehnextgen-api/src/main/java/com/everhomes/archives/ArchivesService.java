@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -26,24 +27,17 @@ public interface ArchivesService {
 
     void stickArchivesContact(StickArchivesContactCommand cmd);
 
-//    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
-
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
-    ImportFileTaskDTO importArchivesContacts(
-            MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
-
-    void exportArchivesContacts(ExportArchivesContactsCommand cmd);
+    void exportArchivesContacts(ListArchivesContactsCommand cmd);
 
     OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
-    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
-
-    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
-
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
+
+    void addArchivesLog(AddArchivesLogCommand cmd);
 
     //  获取员工的部门
     Map<Long, String> getEmployeeDepartment(Long detailId);
@@ -66,51 +60,39 @@ public interface ArchivesService {
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
 
-    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
-
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
-    void executeArchivesConfiguration();
+//    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
 
-    void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
+//    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
 
-    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
-
-    void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd);
-
-    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
-
-    void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd);
-
-    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
+//    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
 
     void deleteArchivesDismissEmployees(Long detailId, Long organizationId);
 
     void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
 
-    GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
+    void executeArchivesConfiguration();
 
-    GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
+    void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
 
-    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
+    void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd);
 
-    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
+    void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd);
 
-    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
+    CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd);
 
-    OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId);
+    ListDismissCategoriesResponse listArchivesDismissCategories();
 
-    void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
-
-    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
+    ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
-    void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
+    void setArchivesNotification(ArchivesNotificationCommand cmd);
 
-//    void initArchivesNotification();
+    ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd);
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
@@ -119,4 +101,11 @@ public interface ArchivesService {
     boolean checkDismiss(OrganizationMemberDetails member);
 
 //    void syncArchivesDismissStatus();
+
+    /* 同步数据接口 start */
+    void makeArchivesCheckInTime();
+
+    void cleanRedundantArchivesDetails();
+    /* 同步数据接口 end */
+
 }

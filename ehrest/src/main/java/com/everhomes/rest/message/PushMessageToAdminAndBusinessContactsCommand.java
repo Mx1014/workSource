@@ -21,6 +21,9 @@ public class PushMessageToAdminAndBusinessContactsCommand {
 	private Byte businessContactFlag;
 	
 	private String content;
+	
+	//记录消息ID
+	private Long logId ;
 
 	public PushMessageToAdminAndBusinessContactsCommand() {
 
@@ -65,6 +68,14 @@ public class PushMessageToAdminAndBusinessContactsCommand {
 
 	public void setBusinessContactFlag(Byte businessContactFlag) {
 		this.businessContactFlag = businessContactFlag;
+	}
+
+	public Long getLogId() {
+		return logId;
+	}
+
+	public void setLogId(Long logId) {
+		this.logId = logId;
 	}
 
 	@Override

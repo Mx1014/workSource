@@ -57,7 +57,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/general_approval/getApprovalForm</b>
-     * <p> 获取 公司的表单    </p>
+     * <p> 获取公司的表单    </p>
      * @return
      */
     @RequestMapping("getApprovalForm")
@@ -259,11 +259,9 @@ public class GeneralApprovalAdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /admin/general_approval/initializeGeneralApprovalScope</b>
 	 * <p> 初始化审批可见范围（上线时执行一次） </p>
-	 * @return
 	 */
-	@RequestMapping("initializeGeneralApprovalScope")
+/*	@RequestMapping("initializeGeneralApprovalScope")
 	@RestReturn(value=String.class)
 	public RestResponse initializeGeneralApprovalScope() {
 		generalApprovalService.initializeGeneralApprovalScope();
@@ -271,5 +269,5 @@ public class GeneralApprovalAdminController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 }

@@ -158,7 +158,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
         return payTempCardFee(order);
     }
     
-    private void checkExpireDateIsNull(String expireDate,String plateNo) {
+    public void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -268,14 +268,21 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long expireTime = strToLong(oldValidEnd);
+		boolean baseNewestTime = configProvider.getBooleanValue("parking.ketuo.baseNewestTime." + order.getParkingLotId(), false);
+		if(baseNewestTime){
+			Long now = System.currentTimeMillis();
+			if(now>expireTime){
+				expireTime=now;
+			}
+		}
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
 		Timestamp tempEnd = null;
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
-			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
+			tempEnd = Utils.getTimestampByAddDistanceMonthV2(expireTime,order.getMonthCount().intValue());
 		}else{
-			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+			tempEnd = new Timestamp(Utils.getLongByAddNatureMonth(expireTime, order.getMonthCount().intValue()));
 
 		}
 		String validStart = sdf1.format(tempStart);
@@ -323,6 +330,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		String iv = sdf2.format(new Date());
         String data = null;
 		try {
+			LOGGER.info("The request info, url={}, not encrypt param={}", url, JSONObject.toJSONString(param));
 			data = EncryptUtil.getEncString(param, key, iv);
 		} catch (Exception e) {
 			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
@@ -476,9 +484,9 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 			dto.setPlateNumber(cmd.getPlateNumber());
-			long now = System.currentTimeMillis();
+			long now = configProvider.getLongValue("parking.opencard.now",System.currentTimeMillis());
 			dto.setOpenDate(now);
-			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
 			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			}else {
@@ -487,9 +495,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 				int today = calendar.get(Calendar.DAY_OF_MONTH);
 
+				BigDecimal firstMonthPrice = dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+						.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP);
+				if(firstMonthPrice.compareTo(dto.getPrice())>0){
+					firstMonthPrice = dto.getPrice();
+				}
 				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
-						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+						.add(firstMonthPrice);
 				dto.setPayMoney(price);
 			}
 			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){

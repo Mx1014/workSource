@@ -12,4 +12,16 @@ public class ActivityNotificationTemplateCode {
     public static final int ACTIVITY_SIGNUP_TO_USER_HAVE_CONFIRM = 9;    //活动被管理员同意，并且不需要支付，通知活动报名者 
     public static final int ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY = 10;    //活动被管理员同意，通知活动报名者去支付
 
+    public static final int ACTIVITY_CHANGE_SUBJECT = 11;        //活动发布后，修改标题
+    public static final int ACTIVITY_CHANGE_TIME = 12;           //活动发布后，修改时间
+    public static final int ACTIVITY_CHANGE_ADDRESS = 13;        //活动发布后，修改地址
+    public static final int ACTIVITY_CHANGE_SUBJECT_TIME = 14;   //活动发布后，修改标题和时间
+    public static final int ACTIVITY_CHANGE_SUBJECT_ADDRESS = 15;   //活动发布后，修改标题和地址
+    public static final int ACTIVITY_CHANGE_TIME_ADDRESS = 16;      //活动发布后，修改时间和地址
+    public static final int ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS = 17;    //活动发布后，修改标题、时间和地点
+
+    public static final int ACTIVITY_SIGNUP_SUCCESS = 21;  //报名成功后，发送消息推送
+    public static final int ACTIVITY_CANCEL_NO_PAY = 18;   //非付费活动，活动报名人数未达到最低限制人数，活动被取消
+    public static final int ACTIVITY_CANCEL_PAY = 19;   //付费活动，活动报名人数未达到最低限制人数，活动被取消
+    public static final int ACTIVITY_CANCEL_SEND_TO_CREATOR = 20; //活动报名人数未达到最低限制人数，通知发起人.
 }

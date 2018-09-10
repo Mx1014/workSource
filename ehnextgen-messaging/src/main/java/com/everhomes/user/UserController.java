@@ -528,15 +528,31 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getUserInfo")
 	@RestReturn(UserInfo.class)
-	public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		UserInfo info = this.userService.getUserInfo();
-		if(info==null){
-			return new RestResponse(info);
-		}
-		if(EtagHelper.checkHeaderEtagOnly(30,info.hashCode()+"", request, response)) {
-			return new RestResponse(info);
-		}
-		return new RestResponse("OK");
+	public RestResponse getUserInfo(GetUserSnapshotInfoCommand cmd) {
+        UserInfo info;
+        if (cmd.getUid() != null) {
+            info = this.userService.getUserSnapshotInfoWithPhone(cmd.getUid());
+        } else {
+            info = this.userService.getUserInfo();
+        }
+		return new RestResponse(info);
+	}
+
+	/**
+	 * <b>URL: /user/validateToken</b>
+	 * <p>校验用户的登录 token</p>
+	 */
+	@RequestMapping("validateToken")
+	@RestReturn(UserInfo.class)
+	public RestResponse validateToken(ValidateUserTokenCommand cmd, HttpServletRequest request) {
+        LoginToken loginToken = userService.getLoginToken(request);
+        if (userService.isValid(loginToken)) {
+            return new RestResponse(userService.getUserSnapshotInfoWithPhone(loginToken.getUserId()));
+        }
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+        response.setErrorDescription("invalid token");
+        return response;
 	}
 
 	/**
@@ -802,6 +818,20 @@ public class UserController extends ControllerBase {
 		assert StringUtils.isNotEmpty(cmd.getIdentifier());
 
 		userService.sendCodeWithPictureValidate(cmd, request);
+		return new RestResponse("OK");
+	}
+
+	/**
+	 * <b>URL: /user/sendCodeWithPictureValidateByApp</b>
+	 * <p></p>
+	 * @return OK
+	 */
+	@RequestMapping("sendCodeWithPictureValidateByApp")
+	@RestReturn(String.class)
+	public RestResponse sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
+		assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+		userService.sendCodeWithPictureValidateByApp(cmd, request);
 		return new RestResponse("OK");
 	}
 
@@ -1400,6 +1430,54 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+    /**
+     * <b>URL: /user/verificationCodeForBindPhoneByApp</b>
+     * <p>微信APP绑定手机号发送验证码</p>
+     */
+    @RequestMapping("verificationCodeForBindPhoneByApp")
+    @RestReturn(value = String.class)
+    public RestResponse verificationCodeForBindPhoneByApp(@Valid VerificationCodeForBindPhoneCommand cmd) {
+        userService.verificationCodeForBindPhoneByApp(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+
+	/**
+	 * <b>URL: /user/bindPhoneByApp</b>
+	 * <p>微信APP登录验证并登录</p>
+	 * @return
+	 */
+	@RequestMapping("bindPhoneByApp")
+	@RestReturn(LogonCommandResponse.class)
+	public RestResponse bindPhoneByApp(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhoneByApp(cmd);
+		LogonCommandResponse logonCommandResponse = new LogonCommandResponse();
+		if(login != null){
+
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			logonCommandResponse.setLoginToken(tokenString);
+			logonCommandResponse.setUid(login.getUserId());
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		}
+
+
+		logonCommandResponse.setAccessPoints(listAllBorderAccessPoints());
+		logonCommandResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse(logonCommandResponse);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 	/**
 	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
 	 * <p>校验验证码并重置密码</p>
@@ -1410,6 +1488,22 @@ public class UserController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
 		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPasswordWithoutIdentifyToken</b>
+	 * <p>校验验证码并重置密码（无需手机号码）</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPasswordWithoutIdentifyToken")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPasswordWithoutIdentifyToken(@Valid CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd) {
+		userService.checkVerifyCodeAndResetPasswordWithoutIdentifyToken(cmd);
 		RestResponse resp = new RestResponse();
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
@@ -1537,6 +1631,63 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/getUserByPhone</b>
+	 * <p>通过域空间和手机号查询用户信息</p>
+	 * @return
+	 */
+	@RequestMapping("getUserByPhone")
+	@RestReturn(UserDTO.class)
+	public RestResponse getUserByPhone(FindUserByPhoneCommand cmd){
+		
+		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+     
+    }
+	
+	/**
+	 * <b>URL: /user/sendVerificationCodeByPhone</b>
+	 * <p>给目标手机发送验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("sendVerificationCodeByPhone")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ,HttpServletRequest request){
+		LOGGER.info("sendVerificationCodeByPhone  -->  cmd:[{}]",cmd);
+		FindUserByPhoneCommand cmd1 = ConvertHelper.convert(cmd, FindUserByPhoneCommand.class);
+		UserDTO  user = this.userService.getUserFromPhone(cmd1);
+		if(user == null) {
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exist");
+		}
+
+
+		this.userService.sendVerficationCode4Point(cmd.getNamespaceId(), user, cmd.getRegionCode(), request);
+		return new RestResponse("OK");
+     
+    }
+	
+	
+	/**
+	 * <b>URL: /user/pointCheckVerificationCode</b>
+	 * <p>积分校验验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("pointCheckVerificationCode")
+	@RestReturn(PointCheckVCDTO.class)
+	public RestResponse pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd){
+
+		PointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
+		RestResponse resp = new RestResponse(dto);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+     
+    }
+	
+	
+	/**
 	 * <b>URL: /user/isUserAuth</b>
 	 * <p>判断用户是否为认证用户</p>
 	 * @return
@@ -1551,5 +1702,18 @@ public class UserController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: /user/getTopAdministrator</b>
+	 * <p>查询当前企业的超管</p>
+	 * @return
+	 */
+	@RequestMapping("getTopAdministrator")
+	@RestReturn(UserDTO.class)
+	public RestResponse getTopAdministrator( GetTopAdministratorCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getTopAdministrator(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 
 }

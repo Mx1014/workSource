@@ -6,6 +6,11 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -15,8 +20,6 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -37,7 +40,7 @@ import com.everhomes.util.DateHelper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PascalCaseStrategy;
 
 @Component
-public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider, ApplicationListener<ContextRefreshedEvent> {
+public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintOrderProviderImpl.class);
 
 	@Autowired
@@ -48,10 +51,10 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider, App
 	
 	@Autowired
     private ScheduleProvider scheduleProvider;
-	
-    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
-    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
-    //@PostConstruct
+
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
+    @PostConstruct
     public void setup(){
         //启动定时任务
     	String triggerName = "SiyinQueryRecord";
@@ -61,13 +64,6 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider, App
         scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,SiyinTaskLogScheduleJob.class , null);
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext().getParent() == null) {
-            setup();
-        }
-    }
-    
 	@Override
 	public void createSiyinPrintOrder(SiyinPrintOrder siyinPrintOrder) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintOrders.class));
@@ -256,5 +252,38 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider, App
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+	}
+
+	@Override
+	public ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode, String userIdentifier, Object o, Object o1, Object o2) {
+		String payerid = OwnerType.USER.getCode()+userId;
+		LOGGER.info("createPersonalPayUserIfAbsent payerid = {}, accountCode = {}, userIdenify={}",payerid,accountCode,userIdentifier);
+		PayUserDTO payUserList = sdkPayService.createPersonalPayUserIfAbsent(payerid, accountCode);
+		if(payUserList==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+					"创建个人付款账户失败");
+		}
+		String s = sdkPayService.bandPhone(payUserList.getId(), userIdentifier);
+		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+		dto.setAccountId(payUserList.getId());
+		dto.setAccountType(payUserList.getUserType()==2? OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+		dto.setAccountName(payUserList.getUserName());
+		dto.setAccountAliasName(payUserList.getUserAliasName());
+		if(payUserList.getRegisterStatus()!=null) {
+			dto.setAccountStatus(Byte.valueOf(payUserList.getRegisterStatus() + ""));
+		}
+		return dto;
+	}
+
+	@Override
+	public SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum) {
+		
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.GENERAL_ORDER_ID.eq(BizOrderNum));
+		LOGGER.info("findSiyinPrintOrderByBizOrderNum sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		if(list!=null && list.size()>0)
+			return list.get(0);
+		return null;
 	}
 }

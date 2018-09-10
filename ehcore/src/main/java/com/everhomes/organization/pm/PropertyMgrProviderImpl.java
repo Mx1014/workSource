@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
@@ -568,6 +569,31 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
 			return null;
 		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmOwner> listCommunityPmOwnersWithLocator(CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result = new ArrayList<>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		if (locator.getAnchor() != null && locator.getAnchor() != 0L) {
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.lt(locator.getAnchor()));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		query.addLimit(pageSize + 1);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		if(result.size()>pageSize){
+			result.remove(result.size()-1);
+			locator.setAnchor(result.get(result.size()-1).getId());
+		}else {
+			locator.setAnchor(null);
+		}
 		return result;
 	}
 
@@ -1274,6 +1300,26 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds, Byte livingStatus) {
+		Map<Long, CommunityAddressMapping> map = new HashMap<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
+        query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.in(addressIds));
+        if(livingStatus != null){
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+        }
+        query
+				.fetch().map(r->{
+			CommunityAddressMapping mapping = ConvertHelper.convert(r, CommunityAddressMapping.class);
+			map.put(mapping.getAddressId(), mapping);
+			return null;
+		});
+
+		return map;
+	}
+
+	@Override
 	public List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds) {
 		List<CommunityAddressMapping> result = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1386,8 +1432,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken)
+				.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like("%" + contactToken + "%")));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listCommunityPmOwnersByToken, sql=" + query.getSQL());
@@ -1431,6 +1478,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerBehaviorsDao.class, id);
 		return id;
     }
+
+	@Override
+	public OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+				.where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(id))
+				.and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(addressId))
+				.fetchAnyInto(OrganizationOwnerBehavior.class);
+	}
 
 	@Override
 	public OrganizationOwnerType findOrganizationOwnerTypeById(Long orgOwnerTypeId) {
@@ -2001,12 +2057,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Override
     public CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+        List<CommunityPmOwner> list = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"))
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
-                .fetchOneInto(CommunityPmOwner.class);
+                .fetchInto(CommunityPmOwner.class);
+        if(list != null && list.size()>0){
+        	return list.get(0);
+        }
+        return null ;
     }
 
     @Override
@@ -2045,6 +2105,91 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public void insertResourceReservation(PmResourceReservation resourceReservation) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		dao.insert(resourceReservation);
+	}
+
+	@Override
+	public List<PmResourceReservation> listReservationsByAddresses(List<Long> ids) {
+		return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.in(ids))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.notEqual(ReservationStatus.DELTED.getCode()))
+				.fetchInto(PmResourceReservation.class);
+	}
+
+	@Override
+	public boolean isInvolvedWithReservation(Long addressId) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> ids = dslContext.select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID)
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ReservationStatus.ACTIVE.getCode()))
+				.fetch(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID);
+		if(ids.size() < 1) return false;
+		return true;
+	}
+
+	@Override
+	public List<PmResourceReservation> findReservationByAddress(Long addressId, ReservationStatus status) {
+		return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(status.getCode()))
+				.fetchInto(PmResourceReservation.class);
+	}
+
+	@Override
+	public void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime, Long enterpriseCustomerId,Long addressId) {
+		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.ENTERPRISE_CUSTOMER_ID ,enterpriseCustomerId)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.START_TIME, startTime)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME, endTime)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID, addressId)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+				.execute();
+	}
+
+	@Override
+	public Long changeReservationStatus(Long reservationId, Byte status) {
+	    LOGGER.info("sdhfsdhfjsdjfsj:   sdfs");
+		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+				.execute();
+		return	this.dbProvider.getDslContext(AccessSpec.readWrite()).select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID)
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+                .fetchOne(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID);
+	}
+
+	@Override
+	public List<ReservationInfo> listRunningReservations() {
+	    List<ReservationInfo> infos = new ArrayList<>();
+	    this.dbProvider.getDslContext(AccessSpec.readOnly())
+				.select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID, Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME, Tables.EH_PM_RESOUCRE_RESERVATIONS.ID)
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+                .where(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ReservationStatus.ACTIVE.getCode()))
+				.fetch()
+				.forEach(r -> {
+					ReservationInfo info = new ReservationInfo();
+					info.setAddressId(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID));
+					info.setEndTime(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME));
+					info.setReservationId(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID));
+					infos.add(info);
+				});
+		return infos;
+	}
+
+    @Override
+    public Byte getReservationPreviousLivingStatusById(Long reservationId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select(Tables.EH_PM_RESOUCRE_RESERVATIONS.PREVIOUS_LIVING_STATUS)
+                .from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+                .where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+                .fetchOne(Tables.EH_PM_RESOUCRE_RESERVATIONS.PREVIOUS_LIVING_STATUS);
+    }
+
+    @Override
     public ParkingCardCategory findParkingCardCategory(Byte cardType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)
@@ -2060,4 +2205,43 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.OWNER_ID.eq(id))
                 .execute();
     }
+
+	@Override
+
+	public List<CommunityPmOwner> listCommunityPmOwnersByTel(Integer namespaceId, Long communityId, String tel) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+        if (!StringUtils.isEmpty(tel)) {
+        	query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like("%"+tel+"%"));
+		}
+        if (communityId != null) {
+        	query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
+		}
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());
+			LOGGER.debug("listCommunityPmOwnersByTel, bindValues = {}" , query.getBindValues());
+		}
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		return result;
+	}
+
+	public PmResourceReservation findReservationById(Long reservationId) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		return ConvertHelper.convert(dao.findById(reservationId), PmResourceReservation.class);
+	}
+
+	@Override
+	public void updateReservation(PmResourceReservation oldReservation) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		dao.update(oldReservation);
+
+	}
 }

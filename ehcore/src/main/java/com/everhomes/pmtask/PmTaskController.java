@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.entity.EntityType;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
 import com.everhomes.pmtask.zhuzong.ZhuzongCreateTask;
 import com.everhomes.pmtask.zhuzong.ZhuzongTaskDetail;
@@ -16,15 +18,19 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -837,5 +843,189 @@ public class PmTaskController extends ControllerBase {
     public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
         pmTaskService.exportTaskStat(cmd, resp);
     }
+
+    /**
+     * <b>URL: /pmtask/searchOrgTasks</b>
+     * <p>查询企业所有的报修</p>
+     */
+    @RequestMapping("searchOrgTasks")
+    @RestReturn(value=SearchTasksByOrgDTO.class,collection = true)
+    public RestResponse searchOrgasks(SearchOrgTasksCommand cmd) {
+        List<SearchTasksByOrgDTO> res = pmTaskService.searchOrgTasks(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+/*------------------------------- 3.6评价统计 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/getEvalStat</b>
+     * <p>查询项目评价统计</p>
+     */
+    @RequestMapping("getEvalStat")
+    @RestReturn(value=PmTaskEvalStatDTO.class,collection = true)
+    public RestResponse getEvalStat(GetEvalStatCommand cmd){
+        List<PmTaskEvalStatDTO> res = pmTaskService.getEvalStat(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+/*------------------------------- 3.7 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/admin/setPmTaskConfig</b>
+     * <p>管理-通用设置</p>
+     */
+    @RequestMapping("admin/setPmTaskConfig")
+    @RestReturn(value=PmTaskConfigDTO.class)
+    public RestResponse setPmTaskConfig(SetPmTaskConfigCommand cmd) {
+        RestResponse response = new RestResponse(pmTaskService.setPmTaskConfig(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/admin/getPmTaskConfig</b>
+     * <p>管理-通用设置查询</p>
+     */
+    @RequestMapping("admin/getPmTaskConfig")
+    @RestReturn(value=PmTaskConfigDTO.class)
+    public RestResponse getPmTaskConfig(GetPmTaskConfigCommand cmd) {
+        PmTaskConfigDTO dto = pmTaskService.searchPmTaskConfigByProject(cmd);
+        RestResponse response = new RestResponse(dto == null ? new PmTaskConfigDTO() : dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/createOrderDetails</b>
+     * <p>新增费用清单</p>
+     */
+    @RequestMapping("createOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse createOrderDetails(CreateOrderDetailsCommand cmd) {
+        pmTaskService.createOrderDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/modifyOrderDetails</b>
+     * <p>修改费用清单</p>
+     */
+    @RequestMapping("modifyOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse modifyOrderDetails(CreateOrderDetailsCommand cmd) {
+        pmTaskService.modifyOrderDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getOrderDetails</b>
+     * <p>查询费用清单明细</p>
+     */
+    @RequestMapping("getOrderDetails")
+    @RestReturn(value=PmTaskOrderDTO.class)
+    public RestResponse getOrderDetails(GetOrderDetailsCommand cmd) {
+        RestResponse response = new RestResponse(pmTaskService.searchOrderDetailsByTaskId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/syncOrderDetails</b>
+     * <p>从工作流表单同步费用清单数据</p>
+     */
+    @RequestMapping("syncOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse syncOrderDetails() {
+        pmTaskService.syncOrderDetails();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/clearOrderDetails</b>
+     * <p></p>
+     */
+    @RequestMapping("clearOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse clearOrderDetails() {
+        pmTaskService.clearOrderDetails();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/listPayeeAccounts</b>
+     * <p>列出当前项目下所有的收款方账户</p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListBizPayeeAccountDTO.class, collection = true)
+    public RestResponse listPayeeAccounts(ListPayeeAccountsCommand cmd){
+        List<ListBizPayeeAccountDTO> list = pmTaskService.listPayeeAccounts(cmd);
+        RestResponse restResponse = new RestResponse(list);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /pmtask/payBills</b>
+     * <p>支付</p>
+     */
+    @RequestMapping("payBills")
+    @RestReturn(PreOrderDTO.class)
+    public RestResponse payBills(CreatePmTaskOrderCommand cmd){
+        PreOrderDTO response = pmTaskService.payBills(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     * <b>URL: /pmtask/payNotify</b>
+     * <p>支付模块回调接口，通知支付结果</p>
+     */
+    @RequestMapping("payNotify")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+        pmTaskService.payNotify(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+//    /**
+//     * <b>URL: /pmtask/listBills</b>
+//     * <p>支付</p>
+//     */
+//    @RequestMapping("listBills")
+//    @RestReturn(value = PayOrderDTO.class,collection = true)
+//    public RestResponse listBills(ListBillsCommand cmd){
+//        List<PayOrderDTO> response = pmTaskService.listBills(cmd);
+//        RestResponse restResponse = new RestResponse(response);
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
 
 }

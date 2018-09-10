@@ -51,4 +51,18 @@ public interface TaskService {
     List<Long> listWaitingTaskIds();
 
     void processUpdateTask(Long taskId, CsFileLocationDTO fileLocationDTO);
+
+    /**
+     * 计算有多少状态为未阅读的下载任务
+     * @param userId
+     * @return
+     */
+    Integer countNotAllReadStatus(Long userId);
+
+    /**
+     * 查询该用户下所有未阅读的下载任务
+     * @param userId
+     * @return
+     */
+    List<Task> listNotReadStatusTasks(Long userId);
 }

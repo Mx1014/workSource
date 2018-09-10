@@ -19,6 +19,9 @@ public class RelocationController extends ControllerBase {
     @Autowired
     private RelocationService relocationService;
 
+    @Autowired
+    private RelocationConfigService relocationConfigService;
+
     /**
      * <b>URL: /relocation/searchRelocationRequests</b>
      * <p>搜索搬迁申请</p>
@@ -70,6 +73,33 @@ public class RelocationController extends ControllerBase {
     public RestResponse requestRelocation(RequestRelocationCommand cmd) {
 
         RestResponse response = new RestResponse(relocationService.requestRelocation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /relocation/admin/setRelocationConfig</b>
+     * <p>配置物品放行参数</p>
+     */
+    @RequestMapping("admin/setRelocationConfig")
+    @RestReturn(value=RelocationConfigDTO.class)
+    public RestResponse setRelocationConfig(SetRelocationConfigCommand cmd) {
+        RestResponse response = new RestResponse(relocationConfigService.setRelocationConfig(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /relocation/admin/getRelocationConfig</b>
+     * <p>获取物品放行参数</p>
+     */
+    @RequestMapping("admin/getRelocationConfig")
+    @RestReturn(value=RelocationConfigDTO.class)
+    public RestResponse getRelocationConfig(GetRelocationConfigCommand cmd) {
+        RelocationConfigDTO dto = relocationConfigService.searchRelocationConfigById(cmd);
+        RestResponse response = new RestResponse(dto == null ? new RelocationConfigDTO() : dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

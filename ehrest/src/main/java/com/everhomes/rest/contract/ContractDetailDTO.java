@@ -1,10 +1,12 @@
 package com.everhomes.rest.contract;
 
-import com.everhomes.discover.ItemType;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowCaseEntity;
 
 /**
  * <ul>
@@ -62,6 +64,10 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
+ *     <li>templateId: 合同模板id</li>
+ *     <li>templateName: 合同模板名称</li>
+ *     <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -120,7 +126,6 @@ public class ContractDetailDTO {
     private String layoutName;
     private String settled;
     private Byte status;
-
     private BigDecimal remainingAmount;
     private Long bidItemId;
     private Long createOrgId;
@@ -144,13 +149,129 @@ public class ContractDetailDTO {
     private BigDecimal lumpSumPayment;
     private String treatyParticulars;
     private Byte paymentFlag;
+    private Long templateId;
+    private String templateName;
+    //add by tangcen 2018年6月13日21:16:10
+    private Byte costGenerationMethod;
+    private String startTime;
+	private String endTimeByPeriod;
+	private String endTimeByDay;
+	
+	@ItemType(ChargingItemVariables.class)
+    private List<ChargingItemVariables> chargingPaymentTypeVariables;
+	
+    public List<ChargingItemVariables> getChargingPaymentTypeVariables() {
+		return chargingPaymentTypeVariables;
+	}
 
-    @ItemType(ContractChargingChangeDTO.class)
+    @ItemType(FlowCaseEntity.class)
+    private List<FlowCaseEntity> price;
+    
+	public void setChargingPaymentTypeVariables(List<ChargingItemVariables> chargingPaymentTypeVariables) {
+		this.chargingPaymentTypeVariables = chargingPaymentTypeVariables;
+	}
+
+	public String getEndTimeByPeriod() {
+		return endTimeByPeriod;
+	}
+
+	public void setEndTimeByPeriod(String endTimeByPeriod) {
+		this.endTimeByPeriod = endTimeByPeriod;
+	}
+
+	public String getEndTimeByDay() {
+		return endTimeByDay;
+	}
+
+	public void setEndTimeByDay(String endTimeByDay) {
+		this.endTimeByDay = endTimeByDay;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+	@ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
+    
+    List<FlowCaseEntity> entities = new ArrayList<>();
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+	public List<FlowCaseEntity> getEntities() {
+		return entities;
+	}
+
+	public void setEntities(List<FlowCaseEntity> entities) {
+		this.entities = entities;
+	}
+
+	public List<FlowCaseEntity> getPrice() {
+		return price;
+	}
+
+	public void setPrice(List<FlowCaseEntity> price) {
+		this.price = price;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+		
+    //add by tangcen
+    private Long communityId;
+    private Integer namespaceId;
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 
@@ -825,4 +946,5 @@ public class ContractDetailDTO {
     public void setApplicationTheme(String applicationTheme) {
         this.applicationTheme = applicationTheme;
     }
+
 }

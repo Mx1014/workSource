@@ -215,6 +215,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EquipmentAccessoriesSearcher;
 import com.everhomes.search.EquipmentPlanSearcher;
 import com.everhomes.search.EquipmentSearcher;
@@ -233,6 +234,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.QRCodeConfig;
 import com.everhomes.util.QRCodeEncoder;
 import com.everhomes.util.RuntimeErrorException;
@@ -411,6 +413,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private ServiceModuleService serviceModuleService;
 
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+
+	private final  String queueDelay = "pmtaskdelays";
+	private final  String queueNoDelay = "pmtasknodelays";
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
 		//auth start
@@ -489,8 +497,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.updateEquipmentStandard(standard);
 				equipmentStandardSearcher.feedDoc(standard);
 			}
-
-			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
+			//issue-36509 remove deal this logic for zijing project
+//			equipmentProvider.deleteEquipmentPlansMapByStandardId(standard.getId());//删除标准对应的巡检对象列表中对应条目
 			equipmentProvider.deleteEquipmentInspectionStandardMapByStandardId(cmd.getId());//删除修改标准相关的巡检对象关联表
 		}
 		createEquipmentStandardsEquipmentsMap(standard, cmd.getEquipments());//创建新的巡检对象和标准关联表
@@ -573,7 +581,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			standardDto.setTemplateName(template.getName());
 //		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(),
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(standard.getOperatorUid(),
 				standard.getOwnerId());
 		if (null != member) {
 			standardDto.setOperatorName(member.getContactName());
@@ -1137,8 +1145,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			checkEquipmentLngAndLat(cmd, equipment);
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
-			//删除计划关联表中的该设备
-			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
+			//删除计划关联表中的该设备 issue-36509 紫荆要求不删
+//			equipmentProvider.deleteEquipmentPlansMapByEquipmentId(equipment.getId());
 			List<Long> updateStandardIds = increamentUpdateEquipmentStandardMap(user, equipment, eqStandardMap);
 
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
@@ -1950,7 +1958,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (task.getExecutorId() != null && task.getExecutorId() != 0) {
 			//总公司分公司 by xiongying20170328
 			List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
+//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getExecutorId(), task.getOwnerId());
 			if (executors != null && executors.size() > 0) {
 				dto.setExecutorName(executors.get(0).getContactName());
 			}
@@ -2146,8 +2154,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 //		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 //				 && cmd.getEndTime() != null) {
-////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getReviewerId(), task.getOwnerId());
-////			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getReviewerId(), task.getOwnerId());
+////			OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getOperatorId(), task.getExecutiveGroupId());
 //			List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(task.getReviewerId());
 //			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
 //			Map<String, Object> map = new HashMap<String, Object>();
@@ -5505,9 +5513,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private void inActiveTaskByPlanId(Long planId) {
+
 		equipmentProvider.updateEquipmentTaskByPlanId(planId);
 		int pageSize = 200;
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		unscheduleRelatedJobAndStatus(planId);
 		for (; ; ) {
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByPlanId(planId, locator, pageSize);
 			LOGGER.debug("inActiveTaskByPlanId tasks size={}", tasks.size());
@@ -5520,6 +5530,33 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (locator.getAnchor() == null) {
 				break;
 			}
+		}
+
+	}
+
+	private void unscheduleRelatedJobAndStatus(Long planId) {
+		// unschedule related task notify job
+		int pageSize = 200;
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		try {
+			for (; ; ) {
+                List<Long> recordIds = equipmentProvider.listNotifyRecordByPlanId(planId, locator, pageSize);
+                if (recordIds != null && recordIds.size() > 0) {
+                    recordIds.forEach((r) -> {
+                        scheduleProvider.unscheduleJob(queueDelay + r.toString());
+                        scheduleProvider.unscheduleJob(queueNoDelay + r.toString());
+                        // invalidate notify records in case core reboot and restore job from it on exception
+						pmNotifyProvider.invalidateNotifyRecord(recordIds);
+
+                    });
+                }
+                if (locator.getAnchor() == null) {
+                    break;
+                }
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error(e.getMessage());
 		}
 
 	}
@@ -5652,8 +5689,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//删除repeatSetting  不删也可
 		//repeatService.deleteRepeatSettingsById(exist.getRepeatSettingId());
 		//删除所有此计划产生的任务
-		//ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId())); this will invoke _exit() and kill all thead include children thread
-		inActiveTaskByPlanId(cmd.getId());
+		ExecutorUtil.submit(()-> inActiveTaskByPlanId(cmd.getId()));
+//		inActiveTaskByPlanId(cmd.getId());
 		equipmentPlanSearcher.deleteById(cmd.getId());
 	}
 

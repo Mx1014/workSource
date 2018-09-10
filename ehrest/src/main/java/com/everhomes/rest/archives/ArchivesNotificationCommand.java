@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>organizationId: 公司 id</li>
  * <li>remindDay: 提醒日, 参考{@link com.everhomes.rest.archives.WeekDaysList}</li>
  * <li>remindTime: 提醒时间点</li>
@@ -16,6 +17,8 @@ import java.util.List;
  * </ul>
  */
 public class ArchivesNotificationCommand {
+
+    private Integer namespaceId;
 
     private Long organizationId;
 
@@ -31,6 +34,14 @@ public class ArchivesNotificationCommand {
     private Byte messageFlag;
 
     public ArchivesNotificationCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {

@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *<li>signupEndTime:活动报名截止时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
  *<li>checkInFlag:报名标签</li>
+ *<li>signupFormFlag: 报名是否使用表单,请参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *<li>confirmFlag:确认</li>
  *<li>enrollUserCount:已报名人数</li>
  *<li>enrollFamilyCount:报名家庭数</li>
@@ -70,6 +71,7 @@ public class ActivityDTO {
     private String signupEndTime;
     private String location;
     private Integer checkinFlag;
+    private Byte signupFormFlag;
     private Integer confirmFlag;
     private Integer enrollUserCount;
     private Integer enrollFamilyCount;
@@ -113,6 +115,7 @@ public class ActivityDTO {
     private String contentType;
     private String content;
     private Integer maxQuantity;
+    private Integer minQuantity;
     private String version;
 
     private String achievementType;
@@ -140,7 +143,25 @@ public class ActivityDTO {
     private Timestamp stickTime;
 
     private Byte status;
-    
+
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
+
+
+    public Byte getSignupFormFlag() {
+        return signupFormFlag;
+    }
+
+    public void setSignupFormFlag(Byte signupFormFlag) {
+        this.signupFormFlag = signupFormFlag;
+    }
+
     public String getSignupEndTime() {
 		return signupEndTime;
 	}

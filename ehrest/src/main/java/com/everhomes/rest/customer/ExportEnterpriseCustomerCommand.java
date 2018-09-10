@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * Created by ying.xiong on 2018/2/5.
  */
+
 public class ExportEnterpriseCustomerCommand {
     private String moduleName;
 
@@ -55,6 +56,24 @@ public class ExportEnterpriseCustomerCommand {
     private String ownerType;
 
     private String trackingName;
+
+    private Long corpIndustryItemId;
+
+    private Boolean infoFLag ;
+
+    private Byte abnormalFlag;
+
+    private Byte aptitudeFlagItemId;
+
+    private Long taskId;
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
     public String getIncludedGroupIds() {
         return includedGroupIds;
@@ -256,6 +275,38 @@ public class ExportEnterpriseCustomerCommand {
 
     public void setTrackingUids(String trackingUids) {
         this.trackingUids = trackingUids;
+    }
+
+    public Long getCorpIndustryItemId() {
+        return corpIndustryItemId;
+    }
+
+    public void setCorpIndustryItemId(Long corpIndustryItemId) {
+        this.corpIndustryItemId = corpIndustryItemId;
+    }
+
+    public Boolean getInfoFLag() {
+        return infoFLag;
+    }
+
+    public void setInfoFLag(Boolean infoFLag) {
+        this.infoFLag = infoFLag;
+    }
+
+    public Byte getAbnormalFlag() {
+        return abnormalFlag;
+    }
+
+    public void setAbnormalFlag(Byte abnormalFlag) {
+        this.abnormalFlag = abnormalFlag;
+    }
+
+    public Byte getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
     }
 
     @Override

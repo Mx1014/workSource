@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>id: id</li>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
@@ -18,7 +19,6 @@ import java.util.List;
  * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link GeneralFormTemplateType}</li>
  * <li>formName: 表单名字</li>
  * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
- * <li>formGroups: 表单控件组 {@link com.everhomes.rest.general_approval.GeneralFormGroupDTO}</li>
  * <li>formAttribute: 表单属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
@@ -27,6 +27,7 @@ import java.util.List;
  *
  */
 public class GeneralFormDTO {
+    private Long     id;
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
@@ -47,14 +48,20 @@ public class GeneralFormDTO {
 	private Byte modifyFlag;
 	private Byte deleteFlag;
 
+	private String operatorName;
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
-    //  added by R 20170830.
-	@ItemType(GeneralFormGroupDTO.class)
-	List<GeneralFormGroupDTO> formGroups;
+    public Long getId() {
+        return id;
+    }
 
-	public Long getOwnerId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getOwnerId() {
 		return ownerId;
 	}
 
@@ -198,13 +205,14 @@ public class GeneralFormDTO {
 		this.deleteFlag = deleteFlag;
 	}
 
-	public List<GeneralFormGroupDTO> getFormGroups() {
-		return formGroups;
+	public String getOperatorName() {
+		return operatorName;
 	}
 
-	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
-		this.formGroups = formGroups;
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

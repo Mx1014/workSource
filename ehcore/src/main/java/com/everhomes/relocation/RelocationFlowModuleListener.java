@@ -3,19 +3,12 @@ package com.everhomes.relocation;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
-import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
@@ -52,7 +45,12 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+//      获取工作流
+        FlowCase flowCase = ctx.getFlowCase();
+//      获取任务修改状态
+        RelocationRequest bean = relocationProvider.findRelocationRequestById(flowCase.getReferId());
+        bean.setStatus(RelocationRequestStatus.CANCELED.getCode());
+        relocationProvider.updateRelocationRequest(bean);
     }
 
     @Override
@@ -129,7 +127,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-
     }
 
     @Override
@@ -189,14 +186,14 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
     public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
 
         FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
-        dto.setName("relocationMode");
+        dto.setValue("relocationMode");
         dto.setDisplayName("relocationMode");
         dto.setOptions(Arrays.stream(RelocationFlowMode.values()).map(RelocationFlowMode::getCode).collect(Collectors.toList()));
 //        dto.setOperators(Collections.singletonList("="));
         return Collections.singletonList(dto);
     }
 
-    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
 
         FlowCase flowCase = ctx.getFlowCase();
 

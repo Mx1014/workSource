@@ -29,14 +29,18 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTalentDTO;
@@ -61,6 +65,8 @@ import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
@@ -129,6 +135,8 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
+import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -255,13 +263,30 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
+     * <b>URL: </b>
+     * <p>导出企业客户excel</p>
+     */
+    @RequestMapping("exportEnterpriseCustomerss")
+    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
+        customerService.exportEnterpriseCustomer(cmd, response);
+    }
+
+
+    /**
      * <b>URL: /customer/exportEnterpriseCustomer</b>
      * <p>导出企业客户excel</p>
      */
     @RequestMapping("exportEnterpriseCustomer")
-    public void exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd, HttpServletResponse response) {
-        customerService.exportEnterpriseCustomer(cmd, response);
+    @RestReturn(value = String.class)
+    public RestResponse exportEnterpriseCustomer(@Valid ExportEnterpriseCustomerCommand cmd) {
+        customerService.exportContractListByContractList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
+
+
 
     /**
      * <b>URL: /customer/exportEnterpriseCustomerTemplate</b>
@@ -280,6 +305,32 @@ public class CustomerController extends ControllerBase {
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomerWithoutAuth(@Valid SearchEnterpriseCustomerCommand cmd) {
         RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd,true));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+     /**
+     * <b>URL: /customer/easySearchEnterpriseCustomers</b>
+     * <p>快速检出列出企业客户（不进行权限校验）</p>
+     */
+    @RequestMapping("easySearchEnterpriseCustomers")
+    @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)
+    public RestResponse easySearchEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = enterpriseCustomerSearcher.easyQueryEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /customer/listEnterpriseCustomers</b>
+     * <p>列出所有企业客户）</p>
+     */
+    @RequestMapping("listEnterpriseCustomers")
+    @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)
+    public RestResponse listEnterpriseCustomer(EasySearchEnterpriseCustomersCommand cmd) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = enterpriseCustomerSearcher.listEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1120,7 +1171,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("syncEnterpriseCustomers")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
-        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, true));
+        RestResponse response = new RestResponse(customerService.syncEnterpriseCustomers(cmd, false));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1654,4 +1705,129 @@ public class CustomerController extends ControllerBase {
     public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse) {
         return customerService.exportCustomerDetails(cmd,httpResponse);
     }
+
+    /**
+     * <b>URL: /customer/getCustomerBasicInfoByOrgId</b>
+     * <p>根据企业id获取客户具体基础信息</p>
+     */
+    @RequestMapping("getCustomerBasicInfoByOrgId")
+    public RestResponse getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerBasicInfoByOrgId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deletePotentialCustomer</b>
+     * <p>删除潜在客户信息</p>
+     */
+    @RequestMapping("deletePotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        customerService.deletePotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updatePotentialCustomer</b>
+     * <p>修改潜在客户信息</p>
+     */
+    @RequestMapping("updatePotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse updatePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        customerService.updatePotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listPotentialCustomers</b>
+     * <p>列表潜在客户信息</p>
+     */
+    @RequestMapping("listPotentialCustomers")
+    @RestReturn(value = CustomerPotentialResponse.class)
+    public RestResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listPotentialCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/setSyncPotentialCustomer</b>
+     * <p>设置客户同步</p>
+     */
+    @RequestMapping("setSyncPotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+        customerService.setSyncPotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listSyncPotentialCustomer</b>
+     * <p>获取客户同步设置</p>
+     */
+    @RequestMapping("listSyncPotentialCustomer")
+    @RestReturn(value = CustomerConfigurationDTO.class,collection = true)
+    public RestResponse listSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+       List<CustomerConfigurationDTO> customerConfigurations =  customerService.listSyncPotentialCustomer(cmd);
+        RestResponse response = new RestResponse(customerConfigurations);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listExpandItems</b>
+     * <p>获取服务联盟和活动多入口列表信息</p>
+     */
+    @RequestMapping("listExpandItems")
+    @RestReturn(value = CustomerExpandItemDTO.class,collection = true)
+    public RestResponse listExpandItems(CustomerConfigurationCommand cmd) {
+       List<CustomerExpandItemDTO> items =  customerService.listExpandItems(cmd);
+        RestResponse response = new RestResponse(items);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listPotentialTalent</b>
+     * <p>获取潜在客户的人才团队</p>
+     */
+    @RequestMapping("listPotentialTalent")
+    @RestReturn(value = CustomerTalentDTO.class,collection = true)
+    public RestResponse listPotentialTalent(DeleteEnterpriseCommand cmd) {
+       List<CustomerTalentDTO> dtos =  customerService.listPotentialTalent(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/changeCustomerAptitude</b>
+     * <p>一键转为资质客户</p>
+     */
+    @RequestMapping("changeCustomerAptitude")
+    @RestReturn(value = String.class)
+    public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
+        customerService.changeCustomerAptitude(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }
