@@ -298,7 +298,18 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Scheduled(cron = "0 30 * * * ?")
     @Override
     public void workReportAuMessage() {
-
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
+        Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
+        Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
+        List<WorkReportScopeMsg> results = workReportProvider.listWorkReportScopeMsgByTime(startTime, endTime);
+        if (results.size() == 0)
+            return;
+        for(WorkReportScopeMsg r:results){
+            String content = "可以提交" + r.getReportName() + "（"
+                    + workReportTimeService.displayReportTime(r.getReportType(), r.getReportTime().getTime())
+                    + "）了，截止时间为" +${截止时间}";
+        }
        /* String time = WorkReportTimeUtil.currenHHmmTime();
         List<WorkReport> auReports = new ArrayList<>();
         List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
