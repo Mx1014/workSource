@@ -6,7 +6,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.gogs.GogsRepo;
 import com.everhomes.gogs.GogsService;
 import com.everhomes.rest.buttscript.SyncCode;
+import com.everhomes.rest.user.UserDTO;
 import com.everhomes.scriptengine.ScriptEngineService;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.jooq.tools.StringUtils;
@@ -27,8 +33,6 @@ public  class ButtScriptSchedulerClient {
     @Autowired
     private ButtScriptConfigProvider buttScriptConfigProvider ;
 
-    @Autowired
-    private ButtScriptLastCommitProvider buttScriptLastCommitProvider ;
 
     @Autowired
     private ButtInfoTypeEventMappingProvider buttInfoTypeEventMappingProvider ;
@@ -41,6 +45,9 @@ public  class ButtScriptSchedulerClient {
 
     @Autowired
     private ScriptEngineService scriptEngineService;
+
+    @Autowired
+    private UserProvider userProvider;
 
     /**
      * 该返回JSON形式的字符串:
@@ -78,7 +85,7 @@ public  class ButtScriptSchedulerClient {
                 Object obj = null ;
                try{
                    //执行同步脚本
-                    obj =   doButtScriptTransfer(bte,publishInfo.getCommitVersion());
+                    obj =   doButtScriptTransfer(bte,publishInfo.getCommitVersion(),localEvent);
                    addResultLog(resultLog,bte,publishInfo.getCommitVersion(),StringHelper.toJsonString(obj));
                }catch(Exception e){
                    addResultLog(resultLog,bte,publishInfo.getCommitVersion(),StringHelper.toJsonString(e));
@@ -89,7 +96,7 @@ public  class ButtScriptSchedulerClient {
                 return StringHelper.toJsonString(obj) ;
             }
             //对于异步脚本(一般来说1表示异步,但此处认为非0的都是异步的,异步优先嘛,也容忍那些忘了设置的)
-            doButtScriptAsync(bte,publishInfo.getCommitVersion());
+            doButtScriptAsync(bte,publishInfo.getCommitVersion(),localEvent);
             addResultLog(resultLog,bte,publishInfo.getCommitVersion(),null);
         }
         //查询到该事件影响到哪些脚本,然后分别执行这些脚本
@@ -125,26 +132,33 @@ public  class ButtScriptSchedulerClient {
      * @param lastCommit
      * @return
      */
-    private void doButtScriptAsync(ButtInfoTypeEventMapping mapping ,String lastCommit ){
-
+    private void doButtScriptAsync(ButtInfoTypeEventMapping mapping ,String lastCommit ,LocalEvent event){
+        String path = this.getPath(mapping.getNamespaceId());
         GogsRepo anyRepo = getRepo(mapping);
         Map<String, Object> param = new HashMap<>(3);
-        param.put("scriptPath", myScriptPath);// 脚本路径需要自己保存
+        param.put("scriptPath", path);// 脚本路径
         param.put("lastCommit", lastCommit);// 版本ID
         param.put("gogsRepo", anyRepo);
         LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
-        scriptEngineService.push(new ButtScriptAsyncEngine(param));
+        scriptEngineService.push(new ButtScriptAsyncEngine(param,getOperator(),event));
     }
 
-    private Object doButtScriptTransfer(ButtInfoTypeEventMapping mapping ,String lastCommit ){
-
+    /**
+     * 执行同步脚本
+     * @param mapping
+     * @param lastCommit
+     * @param event
+     * @return
+     */
+    private Object doButtScriptTransfer(ButtInfoTypeEventMapping mapping ,String lastCommit ,LocalEvent event){
+        String path = this.getPath(mapping.getNamespaceId());
         GogsRepo anyRepo = getRepo(mapping);
         Map<String, Object> param = new HashMap<>(3);
-        param.put("scriptPath", myScriptPath);// 脚本路径需要自己保存
+        param.put("scriptPath", path);// 脚本路径
         param.put("lastCommit", lastCommit);// 版本ID
         param.put("gogsRepo", anyRepo);
         LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
-        scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param));
+        scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param,getOperator(),event));
         // 这里就获取到了 processInternal 的返回结果 result
         Object result = scriptEngineService.poll(transferQueue);
         return result ;
@@ -176,5 +190,32 @@ public  class ButtScriptSchedulerClient {
      */
     private String getPath(Integer namespaceId){
         return  ButtScriptConstants.PRE_PATH+ namespaceId;
+    }
+
+    /**
+     * 获取当前环境用户的信息
+     * @return
+     */
+    private UserDTO getOperator(){
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long operatorUid = UserContext.currentUserId();
+        LOGGER.info("there is get namespaceId:{} ,operatorUid:{}",namespaceId ,operatorUid);
+        User user = userProvider.findUserById(operatorUid);
+
+        if(user != null){
+            UserDTO dto = ConvertHelper.convert(user, UserDTO.class);
+            UserIdentifier identifier = userProvider.findUserIdentifiersOfUser(operatorUid,namespaceId);
+            if(identifier != null){
+                dto.setIdentifierToken(identifier.getIdentifierToken());
+                dto.setIdentifierType(identifier.getIdentifierType());
+                dto.setBirthday(user.getBirthday()==null?"":StringHelper.toJsonString(user.getBirthday()) );
+                dto.setName(user.getNickName());
+                dto.setAvatarUrl(user.getAvatar());
+            }
+            return dto ;
+        }
+        LOGGER.info("can not found any user by  namespaceId:{} ,operatorUid:{}",namespaceId ,operatorUid);
+        return null ;
     }
 }
