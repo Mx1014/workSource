@@ -378,6 +378,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
             fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
         }
+
+        if(cmd.getCustomerSource() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerSource", cmd.getCustomerSource()));
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;

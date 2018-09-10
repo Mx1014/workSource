@@ -215,7 +215,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         response.setDtos(searchResponse.getDtos());
         response.setNextPageAnchor(searchResponse.getNextPageAnchor());
         // only the first time we requested, populate stastics data
-        if (cmd.getPageAnchor() == 0 || cmd.getPageAnchor() == null) {
+        if ( cmd.getPageAnchor() == null || cmd.getPageAnchor() == 0) {
             List<InvitedCustomerStatisticsDTO> statistics = null;
             // this module should add investment statistics to response
             ListFieldItemCommand fieldItemCommand = new ListFieldItemCommand();
