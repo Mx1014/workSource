@@ -71,7 +71,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         );
 
         //  2.send it
-        sendDetailMessage(content, "新的汇报", receiverId, reportVal);
+        sendDetailsMessage(content, "新的汇报", receiverId, reportVal);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         );
 
         //  2.send it
-        sendDetailMessage(content, "汇报更新", receiverId, reportVal);
+        sendDetailsMessage(content, "汇报更新", receiverId, reportVal);
     }
 
     /**
@@ -130,7 +130,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_1,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_1);
-                    sendDetailMessage(content, title, parentComment.getCreatorUserId(), reportVal);
+                    sendDetailsMessage(content, title, parentComment.getCreatorUserId(), reportVal);
                 }
             } else {
                 content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_2,
@@ -138,7 +138,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_2);
                 List<WorkReportValReceiverMap> receivers = workReportValProvider.listReportValReceiversByValId(reportVal.getId());
                 for (WorkReportValReceiverMap r : receivers)
-                    sendDetailMessage(content, title, r.getReceiverUserId(), reportVal);
+                    sendDetailsMessage(content, title, r.getReceiverUserId(), reportVal);
             }
         } else {
             if (parentComment != null) {
@@ -146,23 +146,23 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_3,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_3);
-                    sendDetailMessage(content, title, applierId, reportVal);
+                    sendDetailsMessage(content, title, applierId, reportVal);
                 } else {
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_4,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_4);
-                    sendDetailMessage(content, title, parentComment.getCreatorUserId(), reportVal);
+                    sendDetailsMessage(content, title, parentComment.getCreatorUserId(), reportVal);
 
                     content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5,
                             commentatorName, applierName, reportName, reportTime);
                     title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5);
-                    sendDetailMessage(content, title, applierId, reportVal);
+                    sendDetailsMessage(content, title, applierId, reportVal);
                 }
             } else {
                 content = setCommentMsgContent(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5,
                         commentatorName, applierName, reportName, reportTime);
                 title = setCommentMsgTitle(WorkReportNotificationTemplateCode.COMMENT_MESSAGE_5);
-                sendDetailMessage(content, title, applierId, reportVal);
+                sendDetailsMessage(content, title, applierId, reportVal);
             }
         }
     }
@@ -201,10 +201,10 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         return subject;
     }
 
-    private void sendDetailMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
+    private void sendDetailsMessage(String content, String title, Long receiverId, WorkReportVal reportVal){
 
         //  set the route
-        WorkReportDetailActionData actionData = new WorkReportDetailActionData();
+        WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
         actionData.setReportId(reportVal.getReportId());
         actionData.setReportValId(reportVal.getId());
         actionData.setOrganizationId(reportVal.getOrganizationId());
@@ -329,7 +329,9 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 workReportProvider.updateWorkReportScopeMsg(msg);
             }
             else{
+                msg = new WorkReportScopeMsg();
                 msg.setNamespaceId(r.getNamespaceId());
+                msg.setOrganizationId(r.getOrganizationId());
                 msg.setReportId(r.getId());
                 msg.setReportName(r.getReportName());
                 msg.setReportType(r.getReportType());
@@ -376,7 +378,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         actionData.setAppId(null);
         actionData.setOrganizationId(organizationId);
         actionData.setTabIndex(tabIndex);
-        String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
+        String url = RouterBuilder.build(Router.WORK_REPORT_INDEX, actionData);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
 

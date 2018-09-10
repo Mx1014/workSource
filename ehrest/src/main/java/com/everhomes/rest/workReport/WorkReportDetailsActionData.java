@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 公司企业id</li>
  * </ul>
  */
-public class WorkReportDetailActionData {
+public class WorkReportDetailsActionData {
     private Long reportId;
 
     private Long reportValId;

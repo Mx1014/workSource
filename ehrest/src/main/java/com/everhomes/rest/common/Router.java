@@ -7,7 +7,8 @@ import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
 import com.everhomes.rest.remind.SelfRemindDetailActionData;
 import com.everhomes.rest.remind.TrackRemindDetailActionData;
-import com.everhomes.rest.workReport.WorkReportDetailActionData;
+import com.everhomes.rest.workReport.WorkReportDetailsActionData;
+import com.everhomes.rest.workReport.WorkReportIndexActionData;
 
 /**
  * <ul>
@@ -263,8 +264,9 @@ public enum Router {
      * video-conference
      */
     WORK_REPORT_DETAILS(
-            "zl://work-report/details", WorkReportDetailActionData.class),
-
+            "zl://work-report/details", WorkReportDetailsActionData.class),
+    WORK_REPORT_INDEX(
+            "zl://work-report/index", WorkReportIndexActionData.class),
 
     /**
      * enterprise-notice
