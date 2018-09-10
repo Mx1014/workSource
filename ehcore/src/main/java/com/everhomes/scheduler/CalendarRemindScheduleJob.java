@@ -142,7 +142,7 @@ public class CalendarRemindScheduleJob extends  QuartzJobBean implements Applica
     	String key = MODULE + targetId;
     	//1毫秒后过期删除
         ValueOperations<String, String> valueOperations = getRedisTemplate(key).opsForValue(); 
-        valueOperations.set(key, null, 1, TimeUnit.MICROSECONDS);
+        valueOperations.set(key, "", 1, TimeUnit.MICROSECONDS);
     }
 
 	public void set(Long targetId, long timestampLong, Remind remind) {
