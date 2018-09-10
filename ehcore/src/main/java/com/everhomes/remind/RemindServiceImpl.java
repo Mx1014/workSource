@@ -1396,11 +1396,13 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         Map<String, String> map = new HashMap<String, String>();
         map.put("trackContractName", trackRemind.getTrackContractName());
         map.put("planDescription", trackRemind.getPlanDescription());
-        
+        boolean isDeleted = false;
+
         switch (modifyType) {
             case DELETE:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_DELETE, RemindContants.LOCALE, map, "");
+                isDeleted = true;
                 break;
             case STATUS_UNDO:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
@@ -1413,13 +1415,13 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             case UN_SUBSCRIBE:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_UN_SUBSCRIBE, RemindContants.LOCALE, map, "");
+                isDeleted = true;
                 break;
             default:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_SETTING_UPDATE, RemindContants.LOCALE, map, "");
                 break;
         }
-        boolean isDeleted = RemindModifyType.DELETE == modifyType;
         sendMessage(trackRemind.getUserId(), content, trackRemind, isDeleted);
     }
 
