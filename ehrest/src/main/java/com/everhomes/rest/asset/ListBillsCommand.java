@@ -3,6 +3,8 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -41,6 +43,7 @@ import javax.validation.constraints.NotNull;
  * <li>sourceName:账单来源（如：停车缴费）</li>
  * <li>consumeUserId:企业下面的某个人的ID</li>
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>sorts:参考{@link com.everhomes.rest.asset.ReSortCmd}</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -87,6 +90,9 @@ public class ListBillsCommand {
     
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
+    
+    //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
+    private List<ReSortCmd> sorts;
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -345,5 +351,13 @@ public class ListBillsCommand {
 
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+
+	public List<ReSortCmd> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(List<ReSortCmd> sorts) {
+		this.sorts = sorts;
 	}
 }

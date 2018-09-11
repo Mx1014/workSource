@@ -50,6 +50,7 @@ import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.order.OrderDTO;
+import com.everhomes.pay.order.PaymentAttributes;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PortalService;
@@ -115,6 +116,7 @@ import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.ReSortCmd;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
@@ -729,7 +731,6 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.DELETE_FLAG.eq(deleteFlag));
         	query.addConditions(t2.DELETE_FLAG.eq(deleteFlag));
         }
-        
         query.addGroupBy(t.ID);
         //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
         if(!org.springframework.util.StringUtils.isEmpty(buildingName) || !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
@@ -737,6 +738,33 @@ public class AssetProviderImpl implements AssetProvider {
         	apartmentName = apartmentName != null ? apartmentName : "";
         	String queryAddress = buildingName + "/" + apartmentName;
         	query.addHaving(DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).like("%"+queryAddress+"%"));
+        }
+        //物业缴费V6.0 账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
+        if(cmd.getSorts() != null) {
+        	List<ReSortCmd> sorts = cmd.getSorts();
+        	if(sorts != null && !sorts.isEmpty()) {
+                for(ReSortCmd sort : sorts) {
+                    if(sort.getSortField().equals("amount_receivable")) {
+                        if(sort.getSortType().equals("desc")) {
+                        	query.addOrderBy(t.AMOUNT_RECEIVABLE.desc());
+                        } else {
+                        	query.addOrderBy(t.AMOUNT_RECEIVABLE.asc());
+                        }
+                    }else if(sort.getSortField().equals("amount_received")) {
+                        if(sort.getSortType().equals("desc")) {
+                        	query.addOrderBy(t.AMOUNT_RECEIVED.desc());
+                        } else {
+                        	query.addOrderBy(t.AMOUNT_RECEIVED.asc());
+                        }
+                    }else if(sort.getSortField().equals("amount_owed")) {
+                        if(sort.getSortType().equals("desc")) {
+                        	query.addOrderBy(t.AMOUNT_OWED.desc());
+                        } else {
+                        	query.addOrderBy(t.AMOUNT_OWED.asc());
+                        }
+                    }
+                }
+            }
         }
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
