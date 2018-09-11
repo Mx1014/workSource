@@ -1,7 +1,9 @@
 package com.everhomes.investment;
 
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
@@ -9,13 +11,20 @@ import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhCustomerTrackers;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
+import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackersDao;
+import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -128,7 +137,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         tracker.setOperatorTime(new Timestamp(l2));
         tracker.setCreateTime(new Timestamp(l2));
-
         EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
         dao.insert(tracker);
         return id;
@@ -424,4 +432,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.addConditions(Tables.EH_CUSTOMER_REQUIREMENT_ADDRESSES.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
         return query.fetch().map(r -> ConvertHelper.convert(r, CustomerRequirementAddress.class));    }
 
+    public List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize) {
+        return null;
+    }
 }

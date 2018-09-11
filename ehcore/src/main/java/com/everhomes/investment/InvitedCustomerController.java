@@ -156,7 +156,4 @@ public class InvitedCustomerController {
         return response;
     }
 
-
-
-
 }

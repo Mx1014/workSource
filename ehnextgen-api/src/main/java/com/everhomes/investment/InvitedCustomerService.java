@@ -18,4 +18,6 @@ public interface InvitedCustomerService {
     SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd);
 
     InvitedCustomerDTO viewInvestmentDetail(ViewInvestmentDetailCommand cmd);
+
+    void syncTrackerData();
 }

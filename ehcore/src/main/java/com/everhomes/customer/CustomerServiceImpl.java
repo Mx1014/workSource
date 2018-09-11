@@ -223,7 +223,6 @@ import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -3548,8 +3547,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-        List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
+        if (InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(cmd.getCustomerSource()))) {
+            //todo: check invited customer privilege
+        } else {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        }
+//        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId(),cmd.getCustomerSource());
         if (trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> convertCustomerTrackingDTO(tracking, cmd.getCommunityId())).collect(Collectors.toList());
         }
@@ -3624,7 +3628,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+//        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        if (InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(cmd.getCustomerSource()))) {
+            //todo: check invited customer privilege
+        } else {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        }
         CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
         if (cmd.getTrackingTime() != null) {
@@ -3632,6 +3641,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         tracking.setCreateTime(exist.getCreateTime());
         tracking.setCreatorUid(exist.getCreatorUid());
+        tracking.setCustomerType(exist.getCustomerSource());
         if (null != cmd.getContentImgUri()) {
             tracking.setContentImgUri(cmd.getContentImgUri());
         }
@@ -3646,12 +3656,17 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+//        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        if (InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(cmd.getCustomerSource()))) {
+            //todo: check invited customer privilege
+        } else {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+        }
         CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTracking(tracking);
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
         if (customer != null) {
-            List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId());
+            List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId(),cmd.getCustomerSource());
             if (customerTrackings != null && customerTrackings.size() > 0) {
                 customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -3665,7 +3680,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        if (InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(cmd.getCustomerSource()))) {
+            //todo: check invited customer privilege
+        } else {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+        }
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
         CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
         if (cmd.getTrackingTime() != null) {

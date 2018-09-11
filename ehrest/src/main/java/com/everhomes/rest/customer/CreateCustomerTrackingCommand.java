@@ -41,7 +41,7 @@ public class CreateCustomerTrackingCommand {
 
 	private Long orgId;
 
-	private Byte investmentType;
+	private Byte customerSource;
 
 	public Long getCommunityId() {
 		return communityId;
@@ -199,12 +199,12 @@ public class CreateCustomerTrackingCommand {
 		this.contactPhone = contactPhone;
 	}
 
-	public Byte getInvestmentType() {
-		return investmentType;
+	public Byte getCustomerSource() {
+		return customerSource;
 	}
 
-	public void setInvestmentType(Byte investmentType) {
-		this.investmentType = investmentType;
+	public void setCustomerSource(Byte customerSource) {
+		this.customerSource = customerSource;
 	}
 
 	@Override

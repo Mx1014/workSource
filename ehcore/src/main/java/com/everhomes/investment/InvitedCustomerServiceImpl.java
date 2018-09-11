@@ -17,7 +17,16 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.*;
+import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
+import com.everhomes.rest.investment.InvitedCustomerDTO;
+import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
+import com.everhomes.rest.investment.InvitedCustomerType;
+import com.everhomes.rest.investment.SearchInvestmentResponse;
+import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -322,6 +331,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         }
 
         return null;
+    }
+
+    @Override
+    public void syncTrackerData() {
+
     }
 }
 

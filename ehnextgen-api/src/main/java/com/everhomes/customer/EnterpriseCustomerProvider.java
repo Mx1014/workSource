@@ -135,9 +135,10 @@ public interface EnterpriseCustomerProvider {
 	CustomerTracking findCustomerTrackingById(Long id);
 	void deleteCustomerTracking(CustomerTracking tracking);
 	void updateCustomerTracking(CustomerTracking tracking);
-	List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId);
-	
-	void createCustomerTrackingPlan(CustomerTrackingPlan plan);
+
+    List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId, Byte customerSource);
+
+    void createCustomerTrackingPlan(CustomerTrackingPlan plan);
 	CustomerTrackingPlan findCustomerTrackingPlanById(Long id);
 	void deleteCustomerTrackingPlan(CustomerTrackingPlan plan);
 	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
