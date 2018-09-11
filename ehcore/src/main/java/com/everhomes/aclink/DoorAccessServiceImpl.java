@@ -1711,7 +1711,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	cmd.setPageSize(0);
         }
         //end 20180608
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+        
+        //1.临时授权也要用蓝牙
+        //2.listAesUserKey这个接口只用支持DoorAccessDriverType是左邻的门禁
+        //by liuyilin 20180906
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {

@@ -212,4 +212,6 @@ public interface ConfigConstants {
     public static final String SENSITIVE_SETTING = "sensitiveword.settings";
 
     String ENTERPRISE_NOTICE_WEB_SHARE_URL = "enterprise.notice.share.url";
+
+    public static final String SHOW_PRIVATE_FLAG = "personal.show.private.flag";
 }

@@ -922,8 +922,7 @@ public class ParkingServiceImpl implements ParkingService {
 	private CreatePurchaseOrderCommand convertToGorderCommand(CreateOrderCommand cmd){
 		CreatePurchaseOrderCommand preOrderCommand = new CreatePurchaseOrderCommand();
 		//PaymentParamsDTO转为Map
-		Map<String, String> flattenMap = new HashMap<>();
-		StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
+
 
 		preOrderCommand.setAmount(cmd.getAmount());
 
@@ -944,7 +943,9 @@ public class ParkingServiceImpl implements ParkingService {
 		preOrderCommand.setPaymentPayeeId(cmd.getPayeeUserId());
 
 		preOrderCommand.setExtendInfo(cmd.getExtendInfo());
-		preOrderCommand.setPaymentParams(flattenMap);
+		preOrderCommand.setPaymentParams(cmd.getPaymentParams());
+		preOrderCommand.setPaymentType(cmd.getPaymentType());
+		preOrderCommand.setCommitFlag(cmd.getCommitFlag());
 		//preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
 		preOrderCommand.setCallbackUrl(cmd.getBackUrl());
 

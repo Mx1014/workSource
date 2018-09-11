@@ -3197,10 +3197,15 @@ public class CommunityServiceImpl implements CommunityService {
 			cmd.setAreaId(areaId);
 			Community community = createCommunity(userId, cmd);
 			cs.add(community);
-			
+			//创建经纬度数据
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
-			
+			//添加园区与域空间的关联
 			createNamespaceResource(namespaceId, community.getId());
+			//添加企业可见园区,管理公司可以看到添加的园区
+			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+			organizationCommunity.setCommunityId(community.getId());
+			organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+			organizationProvider.createOrganizationCommunity(organizationCommunity);
 			
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
@@ -3239,8 +3244,16 @@ public class CommunityServiceImpl implements CommunityService {
 		//创建社区
 		Community community = ConvertHelper.convert(cmd, Community.class);
 		community.setAptCount(0);
-		community.setDefaultForumId(1L);
-		community.setFeedbackForumId(2L);
+		//设置默认的forumId，要使用原有的项目里的forumId
+		ListingLocator locator = new ListingLocator();
+		List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+		if(communities != null && communities.size() > 0){
+			community.setDefaultForumId(communities.get(0).getDefaultForumId());
+			community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
+		}else {
+			community.setDefaultForumId(1L);
+			community.setFeedbackForumId(2L);
+		}
 		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		communityProvider.createCommunity(userId, community);
 		

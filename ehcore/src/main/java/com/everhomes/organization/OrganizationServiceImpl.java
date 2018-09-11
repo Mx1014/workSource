@@ -6004,6 +6004,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             event.setEntityType(EntityType.USER.getCode());
             event.setEntityId(cmd.getUserId());
             event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+            LOGGER.info("publish event :[{}]",event);
         });
 
     }

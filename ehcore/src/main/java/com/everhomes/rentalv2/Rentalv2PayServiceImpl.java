@@ -478,6 +478,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         preOrderCommand.setExtendInfo(cmd.getExtendInfo());
         preOrderCommand.setPaymentParams(flattenMap);
+        preOrderCommand.setPaymentType(cmd.getPaymentType());
+        preOrderCommand.setCommitFlag(cmd.getCommitFlag());
         //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.rental", "");

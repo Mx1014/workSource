@@ -38,7 +38,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 -- AUTHOR: liangqishi 20180811
 -- REMARK: 增加连接统一订单服务器的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('gorder.server.connect_url', 'https://gorder.zuolin.com', '连接统一订单服务器的链接', 0, NULL, 0);
+	VALUES ('gorder.server.connect_url', 'https://core.zuolin.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.server.app_key', '69ee0cb3-5afb-4d83-ae12-ef493de48de2', '连接统一订单服务器的appkey', 0, NULL, 0);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
@@ -179,6 +179,10 @@ update `eh_general_form_templates` set `template_text` = '[{
 	"visibleType": "EDITABLE",
 	"filterFlag": 1
 }]' where id = 2500001;
+
+update eh_service_modules set action_type = 14 where id = 25000;
+update eh_service_modules set instance_config = '{"url":"${home.url}/requisition/build/index.html?hideNavigationBar=1#/home#sign_suffix"}' where id=25000;
+
 
 -- END
 
@@ -414,6 +418,9 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
-
+-- AUTHOR: 梁燕龙
+-- REMARK: 个人中心隐私配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('personal.show.private.flag', 'true', '个人中心是否展示隐私设置', '999929', NULL, '1');
 -- --------------------- SECTION END ---------------------------------------------------------
 
