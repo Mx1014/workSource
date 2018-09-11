@@ -1,8 +1,8 @@
 package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -103,6 +103,10 @@ public class SearchEnterpriseCustomerCommand {
     private Long admissionItemId;
 
     private Byte customerSource;
+
+    private BigDecimal startAreaSize;
+    private BigDecimal endAreaSize;
+
 
     public Byte getCustomerSource() {
         return customerSource;
@@ -368,5 +372,21 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public BigDecimal getStartAreaSize() {
+        return startAreaSize;
+    }
+
+    public void setStartAreaSize(BigDecimal startAreaSize) {
+        this.startAreaSize = startAreaSize;
+    }
+
+    public BigDecimal getEndAreaSize() {
+        return endAreaSize;
+    }
+
+    public void setEndAreaSize(BigDecimal endAreaSize) {
+        this.endAreaSize = endAreaSize;
     }
 }

@@ -2,9 +2,11 @@ package com.everhomes.investment;
 
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +55,7 @@ public interface InvitedCustomerProvider {
 
     CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId);
 
-    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap);
+    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, BigDecimal startAreaSize, BigDecimal endAreaSize, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback);
 
     void deleteInvitedCustomer(Long id);
 
