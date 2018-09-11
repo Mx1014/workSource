@@ -3589,6 +3589,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(cmd.getParkingLotId());
 		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
 		newParkingLot.setId(parkingLot.getId());
+		newParkingLot.setContact(parkingLot.getContact());
 		newParkingLot.setCreateTime(parkingLot.getCreateTime());
 		newParkingLot.setCreatorUid(parkingLot.getCreatorUid());
 		newParkingLot.setNamespaceId(parkingLot.getNamespaceId());
