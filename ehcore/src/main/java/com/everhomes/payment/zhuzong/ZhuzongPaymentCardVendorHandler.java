@@ -214,6 +214,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         JSONObject jo = new JSONObject();
         jo.put("FunctionID", RECHARGE_TRANSACTION_TYPE);
         jo.put("UserID",card.getCardNo());
+        jo.put("DepositType","");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         if (cmd.getStartTime() != null) {
             jo.put("StartDate", format.format(new Date(cmd.getStartTime())));
