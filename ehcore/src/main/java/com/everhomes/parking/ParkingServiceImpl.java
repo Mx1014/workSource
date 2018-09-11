@@ -623,7 +623,7 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Invalid MonthCount.");
 		}
-
+		cmd.setPlateNumber(cmd.getPlateNumber().toUpperCase());
 		return (PreOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
 	}
 
@@ -634,7 +634,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setOwnerType(cmd.getOwnerType());
 		param.setOwnerId(cmd.getOwnerId());
 		param.setParkingLotId(cmd.getParkingLotId());
-		param.setPlateNumber(cmd.getPlateNumber());
+		param.setPlateNumber(cmd.getPlateNumber().toUpperCase());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		param.setClientAppName(cmd.getClientAppName());//todoed
@@ -663,7 +663,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setOwnerType(cmd.getOwnerType());
 		param.setOwnerId(cmd.getOwnerId());
 		param.setParkingLotId(cmd.getParkingLotId());
-		param.setPlateNumber(cmd.getPlateNumber());
+		param.setPlateNumber(cmd.getPlateNumber().toUpperCase());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		param.setClientAppName(cmd.getClientAppName());
