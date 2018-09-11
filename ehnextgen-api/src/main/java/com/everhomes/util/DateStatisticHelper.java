@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -204,6 +205,15 @@ public class DateStatisticHelper {
 	 * @return Long 毫秒数
 	 * */
 	public static Long getDateTimeLong(Timestamp planDate) {
+		return getDateTimeLong(planDate.getTime());
+	}
+
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	public static Long getDateTimeLong(Time planDate) {
 		return getDateTimeLong(planDate.getTime());
 	}
 

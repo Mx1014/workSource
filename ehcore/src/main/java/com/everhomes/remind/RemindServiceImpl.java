@@ -786,6 +786,14 @@ public class RemindServiceImpl implements RemindService  {
             //plandate只保留日期部分的时间戳
             remindDTO.setPlanDate(remind.getPlanDate().getTime() - remindDTO.getPlanTime());
         }
+
+        RemindSetting remindSetting = null;
+        if (remind.getRemindTypeId() != null) {
+            remindSetting = remindProvider.getRemindSettingById(remind.getRemindTypeId());
+            if (remindSetting.getFixTime() != null) {
+                remindDTO.setPlanTime(DateStatisticHelper.getDateTimeLong(remindSetting.getFixTime()));
+            }
+        }
         remindDTO.setRemindDisplayName(remind.getRemindType());
         if (remind.getRemindTime() != null) {
             remindDTO.setRemindTime(remind.getRemindTime().getTime());
