@@ -120,16 +120,16 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         String response = postToZhuzong(jo.toJSONString());
         ZhuzongApplyCard applyCard = (ZhuzongApplyCard)StringHelper.fromJsonString(response, ZhuzongApplyCard.class);
         if ("1".equals(applyCard.getResultID())) //失败
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "绑定账户失败");
         if ("2".equals(applyCard.getResultID())) //已绑定
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "该账户已被绑定");
         if ("3".equals(applyCard.getResultID())) //已销户
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "该账户已被销户");
         if ("4".equals(applyCard.getResultID())) //不存在
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,1001,
                     "该账户不存在");
 
         User user = UserContext.current().getUser();
@@ -188,7 +188,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if ("2".equals(res.getResultID())) //无记录
             return transactions;
         if (!"0".equals(res.getResultID()))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "查询第三方接口失败");
 
         List<ZhuzongConsumeDate> dataList = res.getDataList();
@@ -237,7 +237,7 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if ("2".equals(res.getResultID())) //无记录
             return transactions;
         if (!"0".equals(res.getResultID()))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "查询第三方接口失败");
 
         List<ZhuzongRechargeDate> dataList = res.getDataList();
@@ -299,13 +299,13 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
                 }
             }else{
                 LOGGER.error("paymentCard request error, param={} response = {}", params, response);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                         "paymentCard request error.");
             }
 
         }catch (IOException e) {
             LOGGER.error("paymentCard request error, param={}", params, e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
                     "paymentCard request error.");
         }finally {
             if (null != response) {
