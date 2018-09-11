@@ -15,6 +15,8 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -48,6 +50,8 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Autowired
     private MessagingService messagingService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkReportMessageServiceImpl.class);
 
     @Override
     public void workReportPostMessage(WorkReport report, WorkReportVal reportVal, Long receiverId, User user){
@@ -238,7 +242,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     /**
      * 汇总提醒消息发送
      */
-    @Scheduled(cron = "0 30 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     @Override
     public void workReportRxMessage() {
         LocalDateTime currentTime = LocalDateTime.now();
@@ -248,6 +252,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(startTime, endTime);
         if (results.size() == 0)
             return;
+        LOGGER.info("The work report Rx message task start!");
         Map<Long, List<WorkReportValReceiverMsg>> group1 = results.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReceiverUserId));
         group1.forEach((k1, v1) -> {
             Map<Long, List<WorkReportValReceiverMsg>> group2 = v1.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReportId));
@@ -259,6 +264,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 sendIndexMessage(content, "汇报情况", "我接收的", v2.get(0).getOrganizationId(), 2L, k1);
             });
         });
+        LOGGER.info("The work report Rx message task end!");
     }
 
     /**
@@ -274,7 +280,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     /**
      * 员工提交提醒消息发送
      */
-    @Scheduled(cron = "0 30 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     @Override
     public void workReportAuMessage() {
         LocalDateTime currentTime = LocalDateTime.now();
@@ -284,6 +290,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         List<WorkReportScopeMsg> results = workReportProvider.listWorkReportScopeMsgByTime(startTime, endTime);
         if (results.size() == 0)
             return;
+        LOGGER.info("The work report Au message task start!");
         results.forEach(r -> {
             String content = "可以提交" + r.getReportName() + "（"
                     + workReportTimeService.displayReportTime(r.getReportType(), r.getReportTime().getTime())
@@ -295,6 +302,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 });
             }
         });
+        LOGGER.info("The work report Au message task end!");
     }
 
     /**
