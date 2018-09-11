@@ -82,8 +82,6 @@ public class FlowCaseDetailDTOV2 {
     private Long currentNodeFormOriginId;
     private Long currentNodeFormVersion;
 
-    private Long currentNodeFormOriginId;
-    private Long currentNodeFormVersion;
 
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities = new ArrayList<>();
