@@ -1195,6 +1195,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             dto.setDoorGuardId(String.valueOf(r.getId()));
             dto.setDoorGuardName(r.getName());
             dto.setHardwareId(r.getHardwareId());
+            dto.setMaxDuration(r.getMaxDuration());
+            dto.setMaxCount(r.getMaxCount());
             return dto;
         }).collect(Collectors.toList()));
         return response;

@@ -4,16 +4,22 @@ package com.everhomes.rest.visitorsys;
 import com.everhomes.util.StringHelper;
 
 /**
-  *<ul>
- *<li>doorGuardId : (必填)门禁id</li>
- *<li>doorGuardName : (必填)门禁名称</li>
- *<li>hardwareId : (必填)门禁硬件id</li>
-  *</ul>
-  */
+ * <ul>
+ * <li>doorGuardId : (必填)门禁id</li>
+ * <li>doorGuardName : (必填)门禁名称</li>
+ * <li>hardwareId : (必填)门禁硬件id</li>
+ *
+ * <li>maxDuration:访客授权最长有效期(天)</li>
+ * <li>maxCount:访客授权最大次数</li>
+ * </ul>
+ */
 public class BaseDoorGuardDTO {
     private String doorGuardId;
     private String doorGuardName;
     private String hardwareId;
+
+    private Integer maxDuration;
+    private Integer maxCount;
 
     public String getDoorGuardId() {
         return doorGuardId;
@@ -37,6 +43,22 @@ public class BaseDoorGuardDTO {
 
     public void setHardwareId(String hardwareId) {
         this.hardwareId = hardwareId;
+    }
+
+    public Integer getMaxDuration() {
+        return maxDuration;
+    }
+
+    public void setMaxDuration(Integer maxDuration) {
+        this.maxDuration = maxDuration;
+    }
+
+    public Integer getMaxCount() {
+        return maxCount;
+    }
+
+    public void setMaxCount(Integer maxCount) {
+        this.maxCount = maxCount;
     }
 
     @Override

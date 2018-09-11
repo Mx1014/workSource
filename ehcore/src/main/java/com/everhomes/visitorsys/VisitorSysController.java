@@ -393,7 +393,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listDoorGuards</b>
 	 * <p>
-	 * 22.门禁列表-后台管理
+	 * 22.门禁列表-后台管理(从门禁系统获取)
 	 * </p>
 	 */
 	@RequestMapping("listDoorGuards")
