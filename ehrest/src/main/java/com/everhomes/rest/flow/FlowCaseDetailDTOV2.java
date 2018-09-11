@@ -77,6 +77,10 @@ public class FlowCaseDetailDTOV2 {
     private Long rejectCount;
     private String title;
     private Long organizationId;
+    private Long communityId;
+
+    private Long currentNodeFormOriginId;
+    private Long currentNodeFormVersion;
 
     private Long currentNodeFormOriginId;
     private Long currentNodeFormVersion;
@@ -92,7 +96,15 @@ public class FlowCaseDetailDTOV2 {
     @ItemType(FlowButtonDTO.class)
     private List<FlowButtonDTO> moreButtons = new ArrayList<>();
 
-    public Long getId() {
+    public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getId() {
         return id;
     }
 
@@ -292,7 +304,7 @@ public class FlowCaseDetailDTOV2 {
         this.entities = entities;
     }
 
-    public List<FlowLaneLogDTO> getLanes() {
+	public List<FlowLaneLogDTO> getLanes() {
         return lanes;
     }
 

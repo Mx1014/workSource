@@ -16,7 +16,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyConfigurationsDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyRecordsDao;
-import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -24,6 +23,7 @@ import com.everhomes.server.schema.tables.records.EhPmNotifyConfigurationsRecord
 import com.everhomes.server.schema.tables.records.EhPmNotifyRecordsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
     }
 
     @Override
-    public List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId) {
+    public List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId,Long targetId,String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<PmNotifyConfigurations> result  = new ArrayList<PmNotifyConfigurations>();
@@ -85,6 +84,12 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.SCOPE_ID.eq(scopeId));
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
+        if (targetId != null) {
+            query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.TARGET_ID.eq(targetId));
+        }
+        if (StringUtils.isNotBlank(targetType)) {
+            query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.TARGET_TYPE.eq(targetType));
+        }
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PmNotifyConfigurations.class));
             return null;
@@ -159,6 +164,18 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         }
 
         return false;
+    }
+
+    @Override
+    public void invalidateNotifyRecord(List<Long> recordIds) {
+        if (recordIds == null || recordIds.size() < 1) {
+            return;
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.update(Tables.EH_PM_NOTIFY_RECORDS)
+                .set(Tables.EH_PM_NOTIFY_RECORDS.STATUS, PmNotifyRecordStatus.INVAILD.getCode())
+                .where(Tables.EH_PM_NOTIFY_RECORDS.ID.in(recordIds))
+                .execute();
     }
 
     @Override

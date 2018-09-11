@@ -12,6 +12,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.module.GetServiceModuleCommand;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -38,11 +39,23 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageProviderImpl.class);
 	
+	private final com.everhomes.server.schema.tables.EhServiceAlliances SA_TABLE = Tables.EH_SERVICE_ALLIANCES;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAlliances> SA_CLASS = com.everhomes.server.schema.tables.EhServiceAlliances.class;
+
+	private final com.everhomes.server.schema.tables.EhServiceAllianceCategories SA_TYPE_TABLE = Tables.EH_SERVICE_ALLIANCE_CATEGORIES;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAllianceCategories> SA_TYPE_CLASS = com.everhomes.server.schema.tables.EhServiceAllianceCategories.class;
+
+
+	private final com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords SA_COMMITS_TABLE = Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS;
+	private final Class<com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords> SA_COMMITS_CLASS = com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords.class;
+
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -491,15 +504,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
         
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
-        
+
     	if (!StringUtils.isEmpty(ownerType) ) {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
     	}
-    	
+
     	if (null != ownerId) {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
     	}
-        
+
         //topic
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(0L));
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.TYPE.eq(type));
@@ -578,11 +591,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.PARENT_ID.ne(0L));
 			}
 		}
-        
+
         if (null != type) {
         	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.TYPE.eq(type));
         }
-        
+
         if(status != null)
             condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(status.getCode()));
 
@@ -597,13 +610,13 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
 		}
-		
+
 		if (null != locator && null != locator.getAnchor()) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ID.ge(locator.getAnchor()));
 		}
-		
+
         query.addConditions(condition);
-        
+
     	if (null != pageSize) {
 			query.addLimit(pageSize+1);
 		}
@@ -628,7 +641,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				locator.setAnchor(null);
 			}
 		}
-        
+
         return result;
 	}
 
@@ -1277,6 +1290,60 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
+	public List<ServiceAndTypeNameDTO> listServiceNames(Long type, Long ownerId, Long categoryId) {
+
+		Condition condition = SA_TABLE.PARENT_ID.eq(type).and(SA_TABLE.PARENT_ID.ne(0L));
+		if (null != ownerId) {
+			condition = condition.and(SA_TABLE.OWNER_ID.eq(ownerId));
+		}
+
+		if (null != categoryId) {
+			condition = condition.and(SA_TABLE.CATEGORY_ID.eq(categoryId));
+		}
+
+		condition = condition.and(SA_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+
+		return readOnlyContext()
+		.select(SA_TABLE.ID, SA_TABLE.NAME, SA_TABLE.CATEGORY_ID, SA_TABLE.SERVICE_TYPE)
+		.from(SA_TABLE)
+		.where(condition)
+		.fetch()
+		.map(r->{
+			ServiceAndTypeNameDTO dto = new ServiceAndTypeNameDTO();
+			dto.setId(r.getValue(SA_TABLE.ID));
+			dto.setName(r.getValue(SA_TABLE.NAME));
+			dto.setServiceTypeId(r.getValue(SA_TABLE.CATEGORY_ID));
+			dto.setServiceTypeName(r.getValue(SA_TABLE.SERVICE_TYPE));
+			return dto;
+		});
+	}
+
+	@Override
+	public List<IdNameDTO> listServiceTypeNames(Long type) {
+
+		return readOnlyContext()
+		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME)
+		.from(SA_TYPE_TABLE)
+		.where(
+				(SA_TYPE_TABLE.PARENT_ID.eq(type)
+				.or(SA_TYPE_TABLE.ID.eq(type)))
+				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
+		.fetch()
+		.map(r->{
+			IdNameDTO dto = new IdNameDTO();
+			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
+			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
+			return dto;
+		});
+	}
+
+	private DSLContext readOnlyContext() {
+		return dbProvider.getDslContext(AccessSpec.readOnly());
+	}
+
+
+
+	@Override
 	public ServiceAllianceCategories findMainCategory(String ownerType, Long ownerId, Long type) {
 		List<ServiceAllianceCategories> cags = listCategories(null, null, ownerType, ownerId,
 				UserContext.getCurrentNamespaceId(), 0L, type, null, null,false);
@@ -1291,15 +1358,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		com.everhomes.server.schema.tables.EhServiceAllianceAttachments ATTACH = Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 SelectQuery<EhServiceAllianceAttachmentsRecord> query  = context.selectQuery(ATTACH);
-		 
+
 		 if (null != ownerId) {
 			 query.addConditions(ATTACH.OWNER_ID.eq(ownerId));
 		 }
-		 
+
 		 if (null != attachmentType) {
 			 query.addConditions(ATTACH.ATTACHMENT_TYPE.eq(attachmentType));
 		 }
-		
+
 		return query.fetchInto(ServiceAllianceAttachment.class);
 	}
 
@@ -1335,5 +1402,5 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	public List<ServiceAllianceCategories> listChildCategories(Long parentId) {
 		return listCategories(null, null, null, null, UserContext.getCurrentNamespaceId(), parentId, null, null, null, false);
 	}
-	
+
 }

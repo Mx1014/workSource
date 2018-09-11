@@ -9,17 +9,24 @@ import com.everhomes.rest.servicehotline.GetChatGroupListResponse;
 import com.everhomes.rest.servicehotline.GetChatRecordListCommand;
 import com.everhomes.rest.servicehotline.GetChatRecordListResponse;
 import com.everhomes.rest.yellowPage.*;
-import com.everhomes.search.ApartmentRequestInfoSearcher;
-import com.everhomes.search.ReserveRequestInfoSearcher;
+import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
+import com.everhomes.rest.yellowPage.stat.ListClickStatCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailResponse;
+import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
+import com.everhomes.rest.yellowPage.stat.TestClickStatCommand;
+import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.util.RequireAuthentication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.everhomes.yellowPage.stat.AllianceClickStatService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -40,8 +47,11 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private AllianceStandardService allianceStandardService;
-	
-	
+
+
+	@Autowired
+	AllianceClickStatService allianceClickStatService;
+
 	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
@@ -148,7 +158,7 @@ public class YellowPageController  extends ControllerBase {
     
     /**
 	 * <b>URL: /yellowPage/listServiceAllianceCategories</b> 
-	 * <p> 列出服务联盟类型 </p>
+	 * <p> 列出服务联盟类型，前端使用 </p>
 	 */
     @RequireAuthentication(false)
 	@RequestMapping("listServiceAllianceCategories")
@@ -156,9 +166,9 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
-    
+
     /**
-	 * <b>URL: /yellowPage/listServiceAllianceCategoriesAdmin</b> 
+	 * <b>URL: /yellowPage/listServiceAllianceCategoriesAdmin</b>
 	 * <p> 列出服务联盟类型，后台使用 </p>
 	 */
     @RequireAuthentication(false)
@@ -732,7 +742,7 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /yellowPage/getFormList</b>
 	 * <p>
@@ -748,7 +758,7 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-   
+
 	/**
 	 * <b>URL: /yellowPage/getWorkFlowList</b>
 	 * <p>
@@ -764,7 +774,7 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
+
 	/**
 	 * <b>URL: /yellowPage/enableSelfDefinedConfig</b>
 	 * <p>
@@ -780,7 +790,7 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /yellowPage/disableSelfDefinedConfig</b>
 	 * <p>
@@ -796,7 +806,7 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /yellowPage/getSelfDefinedState</b>
 	 * <p>
@@ -810,5 +820,123 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+    /*
+	 * <b>URL: /yellowPage/listInterestStat</b>
+	 * <p> 用户行为统计总览 </p>
+	 */
+	@RequestMapping("listInterestStat")
+	@RestReturn(ListInterestStatResponse.class)
+	public RestResponse listInterestStat(ListStatCommonCommand cmd) {
+		return new RestResponse(allianceClickStatService.listInterestStat(cmd));
+	}
+
+    /**
+	 * <b>URL: /yellowPage/exportInterestStat</b>
+	 * <p> 导出用户行为统计总览 </p>
+	 */
+	@RequestMapping("exportInterestStat")
+    @RestReturn(value = String.class)
+	public RestResponse exportInterestStat(ListStatCommonCommand cmd, HttpServletRequest request, HttpServletResponse resp) {
+		allianceClickStatService.exportInterestStat(cmd, request, resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+    /**
+	 * <b>URL: /yellowPage/listClickStat</b>
+	 * <p> 用户点击明细统计 </p>
+	 */
+
+	@RequestMapping("listClickStat")
+	@RestReturn(ListClickStatResponse.class)
+	public RestResponse listClickStat(ListClickStatCommand cmd) {
+		return new RestResponse(allianceClickStatService.listClickStat(cmd));
+	}
+
+    /**
+	 * <b>URL: /yellowPage/exportClickStat</b>
+	 * <p> 导出用户点击明细统计 </p>
+	 */
+	@RequestMapping("exportClickStat")
+    @RestReturn(value = String.class)
+	public RestResponse exportClickStat(ListClickStatCommand cmd, HttpServletRequest request, HttpServletResponse resp) {
+		allianceClickStatService.exportClickStat(cmd, request, resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+    /**
+	 * <b>URL: /yellowPage/listClickStatDetail</b>
+	 * <p> 用户点击明细 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listClickStatDetail")
+	@RestReturn(ListClickStatDetailResponse.class)
+	public RestResponse listClickStatDetail(ListClickStatDetailCommand cmd) {
+		return new RestResponse(allianceClickStatService.listClickStatDetail(cmd));
+	}
+
+    /**
+	 * <b>URL: /yellowPage/exportClickStatDetail</b>
+	 * <p> 导出用户点击明细 </p>
+	 */
+	@RequestMapping("exportClickStatDetail")
+    @RestReturn(value = String.class)
+	public RestResponse exportClickStatDetail(ListClickStatDetailCommand cmd, HttpServletRequest request, HttpServletResponse resp) {
+		allianceClickStatService.exportClickStatDetail(cmd, request, resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+    /**
+	 * <b>URL: /yellowPage/listClickTypes</b>
+	 * <p> 获取所有点击类型 </p>
+	 */
+	@RequestMapping("listClickTypes")
+    @RestReturn(value = ClickTypeDTO.class, collection = true)
+	public RestResponse listClickTypes() {
+        return new RestResponse(allianceClickStatService.listClickTypes());
+	}
+
+    /**
+	 * <b>URL: /yellowPage/listServiceNames</b>
+	 * <p> 获取所有服务名称 </p>
+	 */
+	@RequestMapping("listServiceNames")
+    @RestReturn(value = IdNameDTO.class, collection = true)
+	public RestResponse listServiceNames(ListServiceNamesCommand cmd) {
+        return new RestResponse(allianceClickStatService.listServiceNames(cmd));
+	}
+
+    /**
+	 * <b>URL: /yellowPage/listServiceTypeNames</b>
+	 * <p> 获取所有服务名称 </p>
+	 */
+	@RequestMapping("listServiceTypeNames")
+    @RestReturn(value = IdNameDTO.class, collection = true)
+	public RestResponse listServiceTypeNames(ListServiceTypeNamesCommand cmd) {
+        return new RestResponse(allianceClickStatService.listServiceTypeNames(cmd));
+	}
+
+    /**
+	 * <b>URL: /yellowPage/testClickStat</b>
+	 * <p> 测试 </p>
+	 */
+	@RequestMapping("testClickStat")
+    @RestReturn(String.class)
+	public RestResponse testClickStat(TestClickStatCommand cmd) {
+		String ret = allianceClickStatService.testClickStat(cmd);
+		RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription(ret);
+        return response;
 	}
 }

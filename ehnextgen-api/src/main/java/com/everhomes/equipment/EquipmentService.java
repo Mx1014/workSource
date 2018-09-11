@@ -248,4 +248,6 @@ public interface EquipmentService {
     void startCrontabTask();
 
     HttpServletResponse exportTaskLogs(ExportTaskLogsCommand cmd, HttpServletResponse response);
+
+	OrganizationDTO getAuthOrgByProjectIdAndModuleId(Long communityId, Integer namespaceId, Long moduleId);
 }

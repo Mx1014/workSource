@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
  * <li>namespaceId: 域名</li>
+ * <li>categoryId: 多入口id</li>
+ * <li>moduleId: 模块id</li>
+ * <li>billGroupId: 账单组id</li>
  *</ul>
  */
 public class OwnerIdentityCommand {
@@ -22,6 +25,11 @@ public class OwnerIdentityCommand {
     private Integer namespaceId;
     private Long categoryId;
     private Long moduleId;
+    private Long billGroupId;
+
+    private Long orgId;
+
+    private Boolean allScope;
 
     public Long getModuleId() {
         return moduleId;
@@ -68,7 +76,31 @@ public class OwnerIdentityCommand {
         this.namespaceId = namespaceId;
     }
 
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
+    public Boolean getAllScope() {
+        return allScope;
+    }
+
+    public void setAllScope(Boolean allScope) {
+        this.allScope = allScope;
+    }
+
     public OwnerIdentityCommand() {
 
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

@@ -1,6 +1,5 @@
 package com.everhomes.launchpadbase;
 
-import com.everhomes.banner.BannerService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -9,7 +8,7 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.rest.launchpadbase.UpdateUserAppsCommand;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,13 +74,13 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpadbase/updateUserLaunchPadApps</b>
-     * <p>编辑用户首页数据</p>
+     * <b>URL: /launchpadbase/updateUserApps</b>
+     * <p>标准版编辑用户首页数据</p>
      */
-    @RequestMapping("updateUserLaunchPadApps")
+    @RequestMapping("updateUserApps")
     @RestReturn(value=String.class)
-    public RestResponse updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
-        serviceModuleAppService.updateUserLaunchPadApps(cmd);
+    public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
+        serviceModuleAppService.updateBaseUserApps(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -106,6 +105,23 @@ public class LaunchPadBaseController extends ControllerBase {
 
 
     /**
+     * <b>URL: /launchpadbase/listAllApps</b>
+     * <p>广场根据组件获取全部应用，包括自定义的</p>
+     */
+    @RequestMapping("listAllApps")
+    @RestReturn(value=ListAllAppsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAllApps(ListAllLaunchPadAppsCommand cmd) {
+        ListAllAppsResponse res = serviceModuleAppService.listAllApps(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
      * <p>获取运营板块信息</p>
      */
@@ -114,6 +130,22 @@ public class LaunchPadBaseController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse listOPPushCards(ListOPPushCardsCommand cmd) {
         ListOPPushCardsResponse res = launchPadService.listOPPushCards(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /launchpadbase/listBulletinsCards</b>
+     * <p>获取公告板块信息</p>
+     */
+    @RequestMapping("listBulletinsCards")
+    @RestReturn(value=ListBulletinsCardsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listBulletinsCards(ListBulletinsCardsCommand cmd) {
+        ListBulletinsCardsResponse res = launchPadService.listBulletinsCards(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

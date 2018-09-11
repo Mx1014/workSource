@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>hardwares: 钥匙支持的设备列表 </li>
  * <li>extra: 额外对象描述</li>
  * <li>webQRCode: web 端可以直接用这个参数生成二维码</li>
+ * <li>uclbrtParams: 锁掌柜对接参数字段 参考{@link  com.everhomes.rest.aclink.UclbrtParamsDTO}</li>
  * </ul>
  * @author janson
  *
@@ -47,7 +48,7 @@ public class DoorAccessQRKeyDTO {
     private String extra;
     
     private String webQRCode;
-
+    private UclbrtParamsDTO uclbrtParams;
     public Long getId() {
         return id;
     }
@@ -188,4 +189,12 @@ public class DoorAccessQRKeyDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public UclbrtParamsDTO getUclbrtParams() {
+		return uclbrtParams;
+	}
+
+	public void setUclbrtParams(UclbrtParamsDTO uclbrtParams) {
+		this.uclbrtParams = uclbrtParams;
+	}
 }

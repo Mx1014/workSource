@@ -15,6 +15,10 @@ public class findScopeFieldItemCommand {
 
     private Integer namespaceId;
 
+    private Long ownerId;
+
+    private String ownerType;
+
     private Long communityId;
 
     private String moduleName;
@@ -61,6 +65,22 @@ public class findScopeFieldItemCommand {
 
     public void setBusinessValue(Byte businessValue) {
         this.businessValue = businessValue;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

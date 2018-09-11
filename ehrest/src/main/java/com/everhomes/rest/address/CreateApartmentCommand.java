@@ -4,7 +4,6 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
  * <li>communityId: 园区id</li>
  * <li>buildingName: 楼栋名称</li>
@@ -19,6 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
+ * <li>freeArea: 可招租面积</li>
+ * <li>apartmentFloor: 房源所在楼层</li>
  * </ul>
  */
 public class CreateApartmentCommand {
@@ -35,6 +36,25 @@ public class CreateApartmentCommand {
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+	private Double freeArea;
+	private String apartmentFloor;
+
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+	private Long  ownerId;
 
 	public Double getBuildArea() {
 		return buildArea;
@@ -138,6 +158,15 @@ public class CreateApartmentCommand {
 
 	public void setAreaSize(Double areaSize) {
 		this.areaSize = areaSize;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

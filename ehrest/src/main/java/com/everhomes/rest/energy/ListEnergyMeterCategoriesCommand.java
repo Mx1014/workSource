@@ -1,9 +1,11 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -18,18 +20,19 @@ public class ListEnergyMeterCategoriesCommand {
 
     @NotNull private Long ownerId;
     @NotNull private String ownerType;
-    private Long communityId;
+    @ItemType(Long.class)
+    private List<Long> communityIds;
     @EnumType(value = EnergyCategoryType.class)
     @NotNull private Byte categoryType;
     
     private Integer namespaceId;
 
-    public Long getCommunityId() {
-        return communityId;
+    public List<Long> getCommunityIds() {
+        return communityIds;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
     }
 
     public Long getOwnerId() {

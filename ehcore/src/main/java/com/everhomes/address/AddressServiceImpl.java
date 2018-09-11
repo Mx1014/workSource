@@ -4,7 +4,11 @@ package com.everhomes.address;
 import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.community.*;
+import com.everhomes.community.Building;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDataInfo;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -22,6 +26,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -33,6 +38,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
@@ -49,14 +55,69 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressArrangementDTO;
+import com.everhomes.rest.address.AddressArrangementStatus;
+import com.everhomes.rest.address.AddressArrangementTemplateCode;
+import com.everhomes.rest.address.AddressArrangementType;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentAttachmentDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.ArrangementApartmentDTO;
+import com.everhomes.rest.address.ArrangementOperationFlag;
+import com.everhomes.rest.address.BetchDisclaimAddressCommand;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateAddressArrangementCommand;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteAddressArrangementCommand;
+import com.everhomes.rest.address.DeleteApartmentAttachmentCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.DownloadApartmentAttachmentCommand;
+import com.everhomes.rest.address.ExcuteAddressArrangementCommand;
+import com.everhomes.rest.address.ExportApartmentsInBuildingDTO;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.address.GetHistoryApartmentCommand;
+import com.everhomes.rest.address.HistoryApartmentDTO;
+import com.everhomes.rest.address.ImportApartmentDataDTO;
+import com.everhomes.rest.address.ListAddressArrangementCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressCommand;
+import com.everhomes.rest.address.ListApartmentAttachmentsCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandV2Response;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.UpdateAddressArrangementCommand;
+import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.BuildingServiceErrorCode;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -65,19 +126,47 @@ import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.UserServiceAddress;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.FileHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
@@ -88,26 +177,48 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.elasticsearch.common.collect.Lists;
-import org.elasticsearch.common.collect.Sets;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record11;
+import org.jooq.Record2;
+import org.jooq.Record5;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
@@ -193,7 +304,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private FieldService fieldService;
-    
+
+    @Autowired
+    private EquipmentService equipmentService;
+
+    @Autowired
+	private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -695,8 +815,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
-                    SelectConditionStep<Record5<Long, String, Double, String, Byte>> selectSql =
-                            context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.APARTMENT_NAME, Tables.EH_ADDRESSES.AREA_SIZE, Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS)
+                    SelectConditionStep<Record11<Long, String, Double, Double,Double, Double,String, Byte, String, String, String>> selectSql =
+                            context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.APARTMENT_NAME,
+                            						Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.FREE_AREA,
+                            						Tables.EH_ADDRESSES.CHARGE_AREA,Tables.EH_ADDRESSES.RENT_AREA,
+                            						Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS,
+                            						Tables.EH_ADDRESSES.ORIENTATION,Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN,
+                            						Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE
+                            						)
                                     .from(Tables.EH_ADDRESSES)
                                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                                             .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -704,8 +830,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                                                     .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
                                             )
                                             .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
-                                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())));
-
+                                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())))
+                    						//不能显示未来房源
+                    						.and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.equal((byte) 0));
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
@@ -721,12 +848,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                         apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                         apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                         apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+                        apartment.setRentArea(r.getValue(Tables.EH_ADDRESSES.RENT_AREA));
+                        apartment.setChargeArea(r.getValue(Tables.EH_ADDRESSES.CHARGE_AREA));
+                        apartment.setFreeArea(r.getValue(Tables.EH_ADDRESSES.FREE_AREA));
                         apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
                         apartment.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+                        apartment.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+                        apartment.setNamespaceAddressToken(r.getValue(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN));
+                        apartment.setNamespaceAddressType(r.getValue(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE));
                         results.add(apartment);
                         return null;
                     });
-
                     return true;
                 });
         Collections.sort(results);
@@ -755,7 +887,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         if(cmd.getBuildingName() != null){
@@ -1846,7 +1978,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
 
 			if(null == resultList || resultList.isEmpty()){
-				LOGGER.error("File content is empty。userId="+userId);
+				LOGGER.error("File content is empty.userId="+userId);
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
 						"File content is empty");
 			}
@@ -2002,38 +2134,31 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         return null;
     }
 
-    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
-			Long userId, ImportAddressCommand cmd) {
+    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		//首先根据项目id来查询eh_buildings表中的该项目下面的所有的楼栋名称的集合
-        List<Building> buildingList = organizationProvider.findBuildingByNamespaceIdAndCommunityId(2,cmd.getCommunityId());
-        //采用forEach循环遍历
-        //创建一个Set<String>集合，用来承载楼栋的名称
-        Set<String> buildingNames = Sets.newHashSet();
-        if(CollectionUtils.isNotEmpty(buildingList)){
-            for(Building building : buildingList){
-                buildingNames.add(building.getName());
-            }
-        }
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+
 		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>();
 		for (ImportApartmentDataDTO data : datas) {
 			ImportFileResultLog<ImportApartmentDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
-			if (StringUtils.isEmpty(data.getBuildingName())) {
-				log.setData(data);
-				log.setErrorLog("building name is null");
-				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
-				errorLogs.add(log);
-				continue;
-			}
+			//校验excel填写内容
+//			if (StringUtils.isEmpty(data.getBuildingName())) {
+//				log.setData(data);
+//				log.setErrorLog("building name is null");
+//				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+//				errorLogs.add(log);
+//				continue;
+//			}
 
-			if(!buildingNames.contains(data.getBuildingName())){
-                log.setData(data);
-                log.setErrorLog("building is not exists");
-                log.setCode(BuildingServiceErrorCode.ERROR_BUILDING_IS_NOT_EXISTS);
-                errorLogs.add(log);
-                continue;
-            }
-			
+
+            //merge conflict
+//			if(!buildingNames.contains(data.getBuildingName())){
+//                log.setData(data);
+//                log.setErrorLog("building is not exists");
+//                log.setCode(BuildingServiceErrorCode.ERROR_BUILDING_IS_NOT_EXISTS);
+//                errorLogs.add(log);
+//                continue;
+//            }
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);
 				log.setErrorLog("apartment name is null");
@@ -2041,7 +2166,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
 			}
-			
+
 //			LOGGER.info(String.valueOf(data.getApartmentName().getBytes().length));
 //            //校验楼栋名称的长度不能大于20个汉字
 //            if(data.getApartmentName().length()> 20){
@@ -2058,8 +2183,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
 			}
-			
-			
 
 			if (StringUtils.isNotEmpty(data.getStatus())) {
 				Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
@@ -2083,11 +2206,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             double areaSize = 0;
             double chargeArea = 0;
             double rentArea = 0;
-            double shareArea = 0;
+            double freeArea = 0;
 
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
                     areaSize = Double.parseDouble(data.getAreaSize());
+                    if (areaSize<0) {
+                    	log.setData(data);
+    					log.setErrorLog("area size should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_AREA_SIZE_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
 				} catch (Exception e) {
 					log.setData(data);
 					log.setErrorLog("area size is not number");
@@ -2100,6 +2230,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if (StringUtils.isNotEmpty(data.getChargeArea())) {
                 try {
                     chargeArea = Double.parseDouble(data.getChargeArea());
+                    if (chargeArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("charge area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("charge area is not number");
@@ -2112,6 +2249,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if (StringUtils.isNotEmpty(data.getRentArea())) {
                 try {
                     rentArea = Double.parseDouble(data.getRentArea());
+                    if (rentArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("rent area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_RENT_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
                     log.setErrorLog("rent area is not number");
@@ -2121,17 +2265,36 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 }
             }
 
-            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+//            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+//                try {
+//                    shareArea = Double.parseDouble(data.getSharedArea());
+//                } catch (Exception e) {
+//                    log.setData(data);
+//                    log.setErrorLog("share area is not number");
+//                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+//                    errorLogs.add(log);
+//                    continue;
+//                }
+//            }
+            if (StringUtils.isNotEmpty(data.getFreeArea())) {
                 try {
-                    shareArea = Double.parseDouble(data.getSharedArea());
+                    freeArea = Double.parseDouble(data.getFreeArea());
+                    if (freeArea<0) {
+                    	log.setData(data);
+    					log.setErrorLog("free area should be greater than zero");
+    					log.setCode(AddressServiceErrorCode.ERROR_FREE_AREA_LESS_THAN_ZERO);
+    					errorLogs.add(log);
+    					continue;
+					}
                 } catch (Exception e) {
                     log.setData(data);
-                    log.setErrorLog("share area is not number");
-                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+                    log.setErrorLog("free area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_FREE_AREA_NOT_NUMBER);
                     errorLogs.add(log);
                     continue;
                 }
             }
+
             if (StringUtils.isNotEmpty(data.getOrientation()) && (data.getOrientation()).length()>20) {
             	log.setData(data);
 				log.setErrorLog("orientation lenth error");
@@ -2139,48 +2302,80 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
             }
+
+            //正则校验数字
+//        	if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
+//    			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+//    			if(!Pattern.compile(reg).matcher(data.getApartmentFloor()).find()){
+//    				log.setData(data);
+//    				log.setErrorLog("FloorNumber format is error");
+//    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
+//    				errorLogs.add(log);
+//    				continue;
+//    			}
+//    		}
+            if (StringUtils.isNotEmpty(data.getApartmentFloor())) {
+    			try {
+    				int apartmentFloor = Integer.parseInt(data.getApartmentFloor());
+    				if (building.getFloorNumber() != null) {
+						if (apartmentFloor <= 0 || apartmentFloor > building.getFloorNumber().intValue()) {
+							log.setData(data);
+		    				log.setErrorLog("FloorNumber is out of range");
+		    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_OUT_OF_RANGE);
+		    				errorLogs.add(log);
+		    				continue;
+						}
+					}
+				} catch (Exception e) {
+					log.setData(data);
+    				log.setErrorLog("FloorNumber format is error");
+    				log.setCode(AddressServiceErrorCode.ERROR_FLOORNUMBER_FORMAT);
+    				errorLogs.add(log);
+    				continue;
+				}
+    		}
             //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
             
-			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
+			importApartment(community, building,data, areaSize, chargeArea, rentArea, freeArea);
 		}
         updateCommunityAptCount(community);
         
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double shareArea) {
+	private void importApartment(Community community, Building building, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double freeArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
-        Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
-
-        if (null == building) {
-            building = new Building();
-            // 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
-            building.setNamespaceId(community.getNamespaceId());
-            building.setCommunityId(community.getId());
-            building.setName(data.getBuildingName());
-            building.setOperatorUid(UserContext.current().getUser().getId());
-            building = communityProvider.createBuilding(building.getOperatorUid(), building);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
-            }
-        }
+//        if (null == building) {
+//            building = new Building();
+//            // 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
+//            building.setNamespaceId(community.getNamespaceId());
+//            building.setCommunityId(community.getId());
+//            building.setName(data.getBuildingName());
+//            building.setOperatorUid(UserContext.current().getUser().getId());
+//            building = communityProvider.createBuilding(building.getOperatorUid(), building);
+//            if(LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
+//            }
+//        }
 
         //Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
-        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), building.getName(), data.getApartmentName());
 
         if (address == null) {
         	address = new Address();
             address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
             address.setCityId(community.getCityId());
             address.setCityName(community.getCityName());
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
+            address.setBuildingId(building.getId());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
-//            address.setBuildArea(buildArea);
+            address.setApartmentFloor(data.getApartmentFloor());
             address.setAreaSize(areaSize);
-            address.setSharedArea(shareArea);
+            address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
@@ -2189,24 +2384,91 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             address.setOrientation(data.getOrientation());
+            address.setIsFutureApartment((byte)0);
         	addressProvider.createAddress(address);
+        	//导入房源后，需要更新相应楼宇和园区的面积
+            addAreaInBuildingAndCommunity(community, building, address);
 		}else {
-//            address.setBuildArea(buildArea);
+			//为了兼顾以前的历史数据，需要为这些数据添加CommunityName和BuildingId
+			address.setCommunityId(community.getId());
+            address.setCommunityName(community.getName());
+            address.setBuildingId(building.getId());
+            address.setBuildingName(building.getName());
+
+			Double oldAreaSize = address.getAreaSize() == null ? 0.0 : address.getAreaSize();
+            Double oldFreeArea = address.getFreeArea() == null ? 0.0 : address.getFreeArea();
+            Double oldChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
+            Double oldRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
+
             address.setAreaSize(areaSize);
-            address.setSharedArea(shareArea);
+            address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
+            address.setApartmentFloor(data.getApartmentFloor());
             address.setNamespaceAddressType(data.getNamespaceAddressType());
             address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            if (StringUtils.isNotBlank(data.getOrientation())) {
-            	address.setOrientation(data.getOrientation());
-			}
-            addressProvider.updateAddress(address);
-		}
+            address.setOrientation(data.getOrientation());
 
+            addressProvider.updateAddress(address);
+            //导入房源后，需要更新相应楼宇和园区的面积
+            updateAreaInBuildingAndCommunity(community, building, address,oldAreaSize,oldFreeArea,oldChargeArea,oldRentArea);
+		}
         Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
         insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
+	}
+
+	private void updateAreaInBuildingAndCommunity(Community community, Building building, Address address,
+			Double oldAddressAreaSize, Double oldAddressFreeArea, Double oldAddressChargeArea, Double oldAddressRentArea) {
+
+   	 	Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+        building.setAreaSize(buildingAreaSize - oldAddressAreaSize + address.getAreaSize());
+        Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+        community.setAreaSize(communityAreaSize - oldAddressAreaSize + address.getAreaSize());
+
+        Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+        building.setRentArea(buildingRentArea - oldAddressRentArea + address.getRentArea());
+        Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+        community.setRentArea(communityRentArea - oldAddressRentArea + address.getRentArea());
+
+        Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+        building.setChargeArea(buildingChargeArea - oldAddressChargeArea + address.getChargeArea());
+        Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+        community.setChargeArea(communityChargeArea - oldAddressChargeArea + address.getChargeArea());
+
+        Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+        building.setFreeArea(buildingFreeArea - oldAddressFreeArea + address.getFreeArea());
+        Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+        community.setFreeArea(communityFreeArea - oldAddressFreeArea + address.getFreeArea());
+
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+
+	private void addAreaInBuildingAndCommunity(Community community, Building building, Address address){
+
+        Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+        building.setAreaSize(buildingAreaSize + address.getAreaSize());
+        Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+        community.setAreaSize(communityAreaSize + address.getAreaSize());
+
+        Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+        building.setRentArea(buildingRentArea + address.getRentArea());
+        Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+        community.setRentArea(communityRentArea + address.getRentArea());
+
+        Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+        building.setChargeArea(buildingChargeArea + address.getChargeArea());
+        Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+        community.setChargeArea(communityChargeArea + address.getChargeArea());
+
+        Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+        building.setFreeArea(buildingFreeArea + address.getFreeArea());
+        Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+        community.setFreeArea(communityFreeArea + address.getFreeArea());
+
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
 	}
 
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
@@ -2216,15 +2478,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
 				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
 	            //在将buildingName封装在ImportApartmentDataDTO对象之前，我们需要
-				data.setBuildingName(trim(r.getA()));
-				data.setApartmentName(trim(r.getB()));
-				data.setStatus(trim(r.getC()));
-                //产品变更模板
-//                data.setBuildArea(trim(r.getD()));
+				data.setApartmentName(trim(r.getA()));
+				data.setStatus(trim(r.getB()));
+				data.setApartmentFloor(trim(r.getC()));
                 data.setAreaSize(trim(r.getD()));
-                data.setChargeArea(trim(r.getE()));
-                data.setSharedArea(trim(r.getF()));
-                data.setRentArea(trim(r.getG()));
+                data.setRentArea(trim(r.getE()));
+                data.setFreeArea(trim(r.getF()));
+                data.setChargeArea(trim(r.getG()));
                 data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
                 data.setNamespaceAddressType(trim(r.getI()));
@@ -2253,7 +2513,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
     public void importAddressData(MultipartFile[] files) {
 
         if (org.springframework.util.StringUtils.isEmpty(files) || files.length == 0) {
-            LOGGER.error("File content is empty。");
+            LOGGER.error("File content is empty.");
             throw new RuntimeErrorException("File content is empty。");
         }
 
@@ -2703,15 +2963,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if(customers != null && customers.size() > 0) {
                 customers.forEach(customer -> {
                     EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+                    OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(customer.getCommunityId(), customer.getNamespaceId(), ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
+                    if(organization!=null){
+                        customer.setOwnerId(organization.getId());
+                    }
+                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
                     if(categoryItem != null) {
                         dto.setCategoryItemName(categoryItem.getItemDisplayName());
                     }
-                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getLevelItemId());
                     if(levelItem != null) {
                         dto.setLevelItemName(levelItem.getItemDisplayName());
                     }
-
                     dtos.add(dto);
                 });
             }
@@ -2758,4 +3021,642 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             });
         }
     }
+
+	@Override
+	public void createAddressArrangement(CreateAddressArrangementCommand cmd) {
+		if (cmd.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			createSplitArrangement(cmd);
+		}else if (cmd.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			createMergeArrangement(cmd);
+		}
+	}
+
+	private void createSplitArrangement(CreateAddressArrangementCommand cmd) {
+		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
+		List<String> targetIds = new ArrayList<>();
+		List<String> originalIds = new ArrayList<>();
+		originalIds.add(cmd.getAddressId().toString());
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		for (ArrangementApartmentDTO apartment : apartments) {
+			Address address = new Address();
+			address.setAreaSize(apartment.getAreaSize());
+			address.setRentArea(apartment.getRentArea());
+			address.setFreeArea(apartment.getFreeArea());
+			address.setChargeArea(apartment.getChargeArea());
+			address.setApartmentName(apartment.getApartmentName());
+			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+			//设置成为未来资产
+			address.setIsFutureApartment((byte) 1);
+			address.setNamespaceId(targetAddress.getNamespaceId());
+			address.setCommunityId(targetAddress.getCommunityId());
+			address.setCityName(targetAddress.getCityName());
+			address.setCityId(targetAddress.getCityId());
+			address.setAreaId(targetAddress.getAreaId());
+			address.setAreaName(targetAddress.getAreaName());
+			address.setApartmentFloor(targetAddress.getApartmentFloor());
+			address.setBuildingName(targetAddress.getBuildingName());
+			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+
+			Long addressId = addressProvider.createAddress3(address);
+			targetIds.add(addressId.toString());
+			//设置房源的具体状态
+			createOrganizationAddressMapping(addressId,address.getAddress(),cmd.getOrganizationId(),cmd.getCommunityId());
+		}
+		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
+		String targetId = StringHelper.toJsonString(targetIds);
+		arrangement.setTargetId(targetId);
+		String originalId = StringHelper.toJsonString(originalIds);
+		arrangement.setOriginalId(originalId);
+		arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
+		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
+		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
+		User user = UserContext.current().getUser();
+		arrangement.setCreatorUid(user.getId());
+		addressProvider.createAddressArrangement(arrangement);
+	}
+
+	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
+		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
+		List<String> targetIds = new ArrayList<>();
+		List<String> originalIds = new ArrayList<>();
+		originalIds.add(targetAddress.getId().toString());
+
+		Address address = new Address();
+		address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+		//设置成为未来资产
+		address.setIsFutureApartment((byte) 1);
+		address.setNamespaceId(targetAddress.getNamespaceId());
+		address.setCommunityId(targetAddress.getCommunityId());
+		address.setCityName(targetAddress.getCityName());
+		address.setCityId(targetAddress.getCityId());
+		address.setAreaId(targetAddress.getAreaId());
+		address.setAreaName(targetAddress.getAreaName());
+		address.setApartmentFloor(targetAddress.getApartmentFloor());
+		address.setBuildingName(targetAddress.getBuildingName());
+		String newInChinese = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+																		AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_NEW_IN_CHINESE,
+																		UserContext.current().getUser().getLocale(), null, "");
+		address.setApartmentName(targetAddress.getApartmentName()+"-"+newInChinese);
+		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+
+		address.setAreaSize(targetAddress.getAreaSize());
+		//address.setChargeArea(targetAddress.getChargeArea());
+		//address.setRentArea(targetAddress.getRentArea());
+		//address.setFreeArea(targetAddress.getFreeArea());
+
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		for (ArrangementApartmentDTO apartment : apartments) {
+			//address.setRentArea((address.getRentArea()!=null ? address.getRentArea() : (double)0) + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
+			//address.setFreeArea((address.getFreeArea()!=null ? address.getFreeArea() : (double)0) + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
+			//address.setChargeArea((address.getChargeArea()!=null ? address.getChargeArea():(double)0) + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
+			address.setAreaSize((address.getAreaSize()!=null ? address.getAreaSize() : (double)0) + (apartment.getAreaSize()!=null ? apartment.getAreaSize() : (double)0));
+			originalIds.add(apartment.getAddressId().toString());
+		}
+		//合并后的房源，在租面积等于0，可招租面积等于建筑面积，收费面积等于建筑面积
+		address.setRentArea(0.0);
+		address.setFreeArea(address.getAreaSize());
+		address.setChargeArea(address.getAreaSize());
+
+		Long newAddressId = addressProvider.createAddress3(address);
+		targetIds.add(newAddressId.toString());
+		//设置房源的具体状态
+		createOrganizationAddressMapping(newAddressId,address.getAddress(),cmd.getOrganizationId(),cmd.getCommunityId());
+
+		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
+		String targetId = StringHelper.toJsonString(targetIds);
+		arrangement.setTargetId(targetId);
+		String originalId = StringHelper.toJsonString(originalIds);
+		arrangement.setOriginalId(originalId);
+		arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
+		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
+		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
+		User user = UserContext.current().getUser();
+		arrangement.setCreatorUid(user.getId());
+		addressProvider.createAddressArrangement(arrangement);
+	}
+
+	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
+	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
+		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
+        communityAddressMapping.setOrganizationId(organizationId);
+        communityAddressMapping.setCommunityId(communityId);
+        communityAddressMapping.setAddressId(addressId);
+        communityAddressMapping.setOrganizationAddress(address);
+        communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+        communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+        organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+	}
+
+	private Timestamp formatTime(Long time){
+		Timestamp result = null;
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String format = simpleDateFormat.format(time);
+		try {
+			Date today = simpleDateFormat.parse(format);
+			result = new Timestamp(today.getTime());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
+		AddressArrangement arrangement = null;
+		//因为用的是like匹配，所以需要对数据进一步过滤
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getAddressId());
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class);
+			if (originalIds.contains(cmd.getAddressId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
+		AddressArrangementDTO dto = null;
+		if (arrangement != null) {
+			dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
+			dto.setOrganizationId(cmd.getOrganizationId());
+			dto.setDateBegin(arrangement.getDateBegin().getTime());
+
+			Address address = addressProvider.findAddressById(arrangement.getAddressId());
+			ArrangementApartmentDTO baseApartment = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			baseApartment.setAddressId(address.getId());
+			dto.setBaseApartment(baseApartment);
+
+			if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+				//获取未来房源（即被拆分产生的房源）
+				List<ArrangementApartmentDTO> targetApartments = generateTargetApartments(arrangement);
+				dto.setApartments(targetApartments);
+				generateApartmentRelatedInfo(dto,targetApartments);
+			}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+				//获取当下房源（即参与合并的房源）
+				List<ArrangementApartmentDTO> OriginalApartments = generateOriginalApartments(arrangement);
+				dto.setApartments(OriginalApartments);
+				List<ArrangementApartmentDTO> targetApartments = generateTargetApartments(arrangement);
+				generateApartmentRelatedInfo(dto,targetApartments);
+			}
+
+		}
+		return dto;
+	}
+
+	//获取未来房源
+	private List<ArrangementApartmentDTO> generateTargetApartments(AddressArrangement arrangement) {
+		List<ArrangementApartmentDTO> results = new ArrayList<>();
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (String addressId : targetIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			dto.setAddressId(address.getId());
+			results.add(dto);
+		}
+		return results;
+	}
+
+	//获取当下房源
+	private List<ArrangementApartmentDTO> generateOriginalApartments(AddressArrangement arrangement) {
+		List<ArrangementApartmentDTO> results = new ArrayList<>();
+		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		originalIds.remove(arrangement.getAddressId().toString());
+		for (String addressId : originalIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			dto.setAddressId(address.getId());
+			results.add(dto);
+		}
+		return results;
+	}
+
+	//需要显示的是所有房源关联的企业客户，个人客户，和合同信息
+	private void generateApartmentRelatedInfo(AddressArrangementDTO dto,List<ArrangementApartmentDTO> apartments){
+		List<EnterpriseCustomerDTO> enterpriseCustomersList = new ArrayList<>();
+	    List<OrganizationOwnerDTO> individualCustomersList = new ArrayList<>();
+	    List<ContractDTO> contractsList = new ArrayList<>();
+		for(ArrangementApartmentDTO apartment:apartments){
+			//企业客户
+			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
+			listApartmentEnterpriseCustomersCommand.setAddressId(apartment.getAddressId());
+			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
+			enterpriseCustomersList.addAll(enterpriseCustomers);
+			//个人客户
+			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
+			listOrganizationOwnersByAddressCommand.setAddressId(apartment.getAddressId());
+			listOrganizationOwnersByAddressCommand.setOrganizationId(dto.getOrganizationId());
+			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
+			individualCustomersList.addAll(individualCustomers);
+			//合同信息
+			List<Contract> contracts = contractProvider.listContractsByAddressId(apartment.getAddressId());
+			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
+				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
+				return contractDTO;
+			}).collect(Collectors.toList());
+			contractsList.addAll(contractDTOs);
+		}
+		dto.setEnterpriseCustomers(enterpriseCustomersList);
+		dto.setIndividualCustomers(individualCustomersList);
+		dto.setContracts(contractsList);
+	}
+
+	@Override
+	public void updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		if (arrangement == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "the addressArrangement does not exist!");
+		}
+		if (cmd.getDateBegin()!=null && formatTime(cmd.getDateBegin()) != arrangement.getDateBegin()) {
+			arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
+			arrangement.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			User user = UserContext.current().getUser();
+			arrangement.setUpdateUid(user.getId());
+			addressProvider.updateAddressArrangement(arrangement);
+		}
+
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		if (apartments!=null) {
+			for (ArrangementApartmentDTO dto : apartments) {
+				Address address = addressProvider.findAddressById(dto.getAddressId());
+				if (address == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		                    "the address does not exist!");
+				}
+				if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
+					address.setApartmentName(dto.getApartmentName());
+					address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+				}
+				address.setAreaSize(dto.getAreaSize());
+				address.setChargeArea(dto.getChargeArea());
+				address.setFreeArea(dto.getFreeArea());
+				address.setRentArea(dto.getRentArea());
+				addressProvider.updateAddress(address);
+			}
+		}
+	}
+
+	@Override
+	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		//删除未来房源
+		for (String addressId : targetIds) {
+			Address futureAddress = addressProvider.findAddressById(Long.parseLong(addressId));
+			futureAddress.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			addressProvider.updateAddress(futureAddress);
+		}
+		addressProvider.deleteAddressArrangement(cmd.getId());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd) {
+		if (cmd.getAddressId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "the addressId should not be null!");
+		}
+		List<HistoryApartmentDTO> results = new ArrayList<>();
+		AddressArrangement arrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(cmd.getAddressId());
+		//因为用的是like匹配，所以需要对数据进一步过滤
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getTargetId(), ArrayList.class);
+			if (targetIds.contains(cmd.getAddressId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
+		if (arrangement != null) {
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+			String remark = null;
+			HashMap<String, String> data = new HashMap<>();
+			StringBuffer targetIdsStringBuffer= new StringBuffer();
+			StringBuffer originalIdsStringBuffer = new StringBuffer();
+			for (String addressId : targetIds) {
+				String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+				targetIdsStringBuffer.append(apartmentName).append(",");
+			}
+			for (String addressId : originalIds) {
+				String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+				originalIdsStringBuffer.append(apartmentName).append(",");
+			}
+			String targetIdsString = targetIdsStringBuffer.toString().length() > 0
+										? targetIdsStringBuffer.toString().substring(0,targetIdsStringBuffer.toString().length() -1)
+										: targetIdsStringBuffer.toString();
+			String originalIdsString = originalIdsStringBuffer.toString().length() > 0
+										? originalIdsStringBuffer.toString().substring(0,originalIdsStringBuffer.toString().length() -1)
+										: originalIdsStringBuffer.toString();
+			data.put("targetIds", targetIdsString);
+			data.put("originalIds", originalIdsString);
+			if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+				//需要获取特定的语句：如101被拆分成101A,101B
+	            remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+	            													AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_SPLIT ,
+	            													UserContext.current().getUser().getLocale(),
+	            													data, "");
+			}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+				//需要获取特定的语句：如101,102,103被合并成101
+				remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+																	AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_MERGE ,
+																	UserContext.current().getUser().getLocale(),
+																	data, "");
+			}
+			for (String addressId : originalIds) {
+				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+				HistoryApartmentDTO dto = ConvertHelper.convert(address, HistoryApartmentDTO.class);
+				dto.setAddressId(address.getId());
+				dto.setDateBegin(arrangement.getDateBegin().getTime());
+				dto.setRemark(remark);
+				results.add(dto);
+			}
+		}
+		return results;
+	}
+
+	@Scheduled(cron = "0 10 0 * * ?")
+	//@Scheduled(cron = "0 */1 * * * ?")
+	@Override
+    public void excuteAddressArrangementOnTime() {
+        LOGGER.debug("start excuting addressArrangement!");
+		try {
+			Calendar calendar = Calendar.getInstance();
+			Date time = calendar.getTime();
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String format = simpleDateFormat.format(time);
+			Date today = simpleDateFormat.parse(format);
+			if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+	            coordinationProvider.getNamedLock(CoordinationLocks.EXCUTE_ADDRESS_ARRANGEMENT.getCode()).tryEnter(() -> {
+	            	List<AddressArrangement> list = addressProvider.listActiveAddressArrangementToday(new Timestamp(today.getTime()));
+	        		for (AddressArrangement arrangement : list) {
+	        			arrangement.setOperationFlag((byte) 1);
+	        			addressProvider.updateAddressArrangement(arrangement);
+	        			//原始房源失效
+	        			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+	        			for (String addressId : originalIds) {
+	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+	        				address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+	        				addressProvider.updateAddress(address);
+	        				//删除个人客户及企业客户的关联关系
+	        		        addressProvider.updateOrganizationAddressMapping(address.getId());
+	        		        addressProvider.updateOrganizationAddress(address.getId());
+	        		        //addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        		        //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        		        subBuildingAndCommunityArea(address);
+	        			}
+	        			//未来房源成为正式房源
+	        			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+	        			for (String addressId : targetIds) {
+	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+	        				address.setIsFutureApartment((byte) 0);
+	        				addressProvider.updateAddress(address);
+	        				addBuildingAndCommunityArea(address);
+	        			}
+	        		}
+	            });
+			}
+			LOGGER.debug("addressArrangement excuted!");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void subBuildingAndCommunityArea(Address address){
+		Community community = checkCommunity(address.getCommunityId());
+        Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize - address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize - address.getAreaSize());
+        }
+        if (address.getRentArea() != null) {
+            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+            building.setRentArea(buildingRentArea - address.getRentArea());
+
+            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+            community.setRentArea(communityRentArea - address.getRentArea());
+        }
+        if (address.getSharedArea() != null) {
+            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+            building.setSharedArea(buildingSharedArea - address.getSharedArea());
+
+            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+            community.setSharedArea(communitySharedArea - address.getSharedArea());
+        }
+//        if (address.getBuildArea() != null) {
+//            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+//            building.setBuildArea(buildingBuildArea - address.getBuildArea());
+//
+//            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+//            community.setBuildArea(communityBuildArea - address.getBuildArea());
+//        }
+        if (address.getChargeArea() != null) {
+            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+            building.setChargeArea(buildingChargeArea - address.getChargeArea());
+
+            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+            community.setChargeArea(communityChargeArea - address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea - address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea - address.getFreeArea());
+        }
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+
+	private void addBuildingAndCommunityArea(Address address){
+		Community community = checkCommunity(address.getCommunityId());
+        Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getAreaSize() != null) {
+            Double buildingAreaSize = building.getAreaSize() == null ? 0.0 : building.getAreaSize();
+            building.setAreaSize(buildingAreaSize + address.getAreaSize());
+
+            Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
+            community.setAreaSize(communityAreaSize + address.getAreaSize());
+        }
+        if (address.getRentArea() != null) {
+            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+            building.setRentArea(buildingRentArea + address.getRentArea());
+
+            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+            community.setRentArea(communityRentArea + address.getRentArea());
+        }
+        if (address.getSharedArea() != null) {
+            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+            building.setSharedArea(buildingSharedArea + address.getSharedArea());
+
+            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+            community.setSharedArea(communitySharedArea + address.getSharedArea());
+        }
+//        if (address.getBuildArea() != null) {
+//            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+//            building.setBuildArea(buildingBuildArea + address.getBuildArea());
+//
+//            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+//            community.setBuildArea(communityBuildArea + address.getBuildArea());
+//        }
+        if (address.getChargeArea() != null) {
+            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+            building.setChargeArea(buildingChargeArea + address.getChargeArea());
+
+            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+            community.setChargeArea(communityChargeArea + address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea + address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea + address.getFreeArea());
+        }
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+
+	 private Community checkCommunity(Long communityId) {
+	        Community community = communityProvider.findCommunityById(communityId);
+	        if (community == null) {
+	            LOGGER.error("Unable to find the community");
+	            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	                    "Unable to find the community.");
+	        }
+	        return community;
+	    }
+
+	@Override
+	public void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd){
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		arrangement.setOperationFlag((byte) 1);
+		addressProvider.updateAddressArrangement(arrangement);
+		//原始房源失效
+		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		for (String addressId : originalIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			addressProvider.updateAddress(address);
+			//删除个人客户及企业客户的关联关系
+	        addressProvider.updateOrganizationAddressMapping(address.getId());
+	        addressProvider.updateOrganizationAddress(address.getId());
+	        //addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        subBuildingAndCommunityArea(address);
+		}
+		//未来房源成为正式房源
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (String addressId : targetIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			address.setIsFutureApartment((byte) 0);
+			addressProvider.updateAddress(address);
+			addBuildingAndCommunityArea(address);
+		}
+	}
+
+	@Override
+	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse response) {
+		List<ApartmentDTO> aptList = this.listApartmentsByKeyword(cmd).second();
+		if (aptList != null && aptList.size()>0) {
+			String fileName = null;
+			if (cmd.getCommunityId() != null) {
+				Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+				fileName = String.format("房源信息_%s_%s", community.getName(),cmd.getBuildingName());
+			}else {
+				fileName = String.format("房源信息_%s", cmd.getBuildingName());
+			}
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
+				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
+				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
+				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
+				return dto;
+			}).collect(Collectors.toList());
+
+			List<ExportApartmentsInBuildingDTO> filterData = filterExportApartmentsInBuildingDTO(data,cmd);
+
+			String[] propertyNames = {"apartmentName", "livingStatus", "apartmentFloor", "areaSize", "rentArea", "freeArea", "chargeArea", "orientation", "namespaceAddressType", "namespaceAddressToken"};
+			String[] titleNames = {"*房源", "*状态", "楼层", "建筑面积", "在租面积", "可招租面积", "收费面积", "朝向","第三方来源", "第三方标识"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, filterData);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+
+	private List<ExportApartmentsInBuildingDTO> filterExportApartmentsInBuildingDTO(List<ExportApartmentsInBuildingDTO> data,ListPropApartmentsByKeywordCommand cmd){
+		List<ExportApartmentsInBuildingDTO>  filterData = new ArrayList<>();
+		for(ExportApartmentsInBuildingDTO dto : data){
+			filterData.add(dto);
+		    //按状态筛选
+			if(cmd.getLivingStatus() != null && AddressMappingStatus.fromDesc(dto.getLivingStatus()).getCode() != cmd.getLivingStatus()){
+				filterData.remove(dto);
+                continue;
+			}
+			//按楼层筛选
+			if (!org.springframework.util.StringUtils.isEmpty(cmd.getApartmentFloor())){
+				if (dto.getApartmentFloor()==null || !dto.getApartmentFloor().equals(cmd.getApartmentFloor())) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			//按建筑面积筛选
+			if (cmd.getAreaSizeFrom() != null) {
+				if (dto.getAreaSize()==null || dto.getAreaSize().doubleValue() < cmd.getAreaSizeFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			if (cmd.getAreaSizeTo() != null) {
+				if (dto.getAreaSize()==null || dto.getAreaSize().doubleValue() > cmd.getAreaSizeTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			//按在租面积筛选
+			if (cmd.getRentAreaFrom() != null) {
+				if (dto.getRentArea()==null || dto.getRentArea().doubleValue() < cmd.getRentAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			if (cmd.getRentAreaTo() != null) {
+				if (dto.getRentArea()==null || dto.getRentArea().doubleValue() > cmd.getRentAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			//按收费面积筛选
+			if (cmd.getChargeAreaFrom() != null) {
+				if (dto.getChargeArea()==null || dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			if (cmd.getChargeAreaTo() != null ) {
+				if (dto.getChargeArea()==null || dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			//按可招租面积筛选
+			if (cmd.getFreeAreaFrom() != null) {
+				if (dto.getFreeArea()==null || dto.getFreeArea().doubleValue() < cmd.getFreeAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+			if (cmd.getFreeAreaTo() != null) {
+				if (dto.getFreeArea()==null || dto.getFreeArea().doubleValue() > cmd.getFreeAreaTo().doubleValue()) {
+					filterData.remove(dto);
+	                continue;
+				}
+			}
+		}
+		return filterData;
+	}
 }

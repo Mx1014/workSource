@@ -4,74 +4,73 @@ package com.everhomes.rest.approval;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>返回值:
+ * <ul>
  * <li>id: id</li>
- * <li>namespaceId: 域空间ID</li>
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.approval.ApprovalOwnerType}</li>
  * <li>ownerId: 所属者ID</li>
- * <li>approvalType: 审批类型，参考{@link com.everhomes.rest.approval.ApprovalType}</li>
- * <li>categoryName: 类别名称</li>
+ * <li>timeUnit: 请假单位,参考{@link com.everhomes.rest.approval.ApprovalCategoryTimeUnit}</li>
+ * <li>timeStep: 最小请假时长，单位对应timeUnit</li>
+ * <li>remainderFlag: 是否支持关联余额，1表示支持，0不支持，参考{@link com.everhomes.rest.approval.ApprovalCategoryReminderFlag}</li>
+ * <li>status: 状态，参考{@link com.everhomes.rest.approval.ApprovalCategoryStatus}</li>
  * </ul>
  */
 public class UpdateApprovalCategoryCommand {
-	private Long id;
-	private Integer namespaceId;
-	private String ownerType;
-	private Long ownerId;
-	private Byte approvalType;
-	private String categoryName;
+    private Long id;
+    private Long ownerId;
+    private String timeUnit;
+    private Double timeStep;
+    private Byte remainderFlag;
+    private Byte status;
 
-	public Byte getApprovalType() {
-		return approvalType;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setApprovalType(Byte approvalType) {
-		this.approvalType = approvalType;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public String getTimeUnit() {
+        return timeUnit;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public void setTimeUnit(String timeUnit) {
+        this.timeUnit = timeUnit;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public Double getTimeStep() {
+        return timeStep;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public void setTimeStep(Double timeStep) {
+        this.timeStep = timeStep;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public Byte getRemainderFlag() {
+        return remainderFlag;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public void setRemainderFlag(Byte remainderFlag) {
+        this.remainderFlag = remainderFlag;
+    }
 
-	public String getCategoryName() {
-		return categoryName;
-	}
+    public Byte getStatus() {
+        return status;
+    }
 
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
-	}
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

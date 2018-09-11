@@ -34,4 +34,4 @@ public class ListServiceAllianceCategoriesAdminResponse {
 	public void setDtos(List<ServiceAllianceCategoryDTO> dtos) {
 		this.dtos = dtos;
 	}
- }
+}

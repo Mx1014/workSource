@@ -8,7 +8,7 @@ import java.util.List;
 public interface PmNotifyProvider {
     void createPmNotifyConfigurations(PmNotifyConfigurations configuration);
     void updatePmNotifyConfigurations(PmNotifyConfigurations configuration);
-    List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId);
+    List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId,Long targetId,String targetType);
     PmNotifyConfigurations findScopePmNotifyConfiguration(Long id, String ownerType,Byte scopeType, Long scopeId);
 
     void createPmNotifyRecord(PmNotifyRecord record);
@@ -17,4 +17,6 @@ public interface PmNotifyProvider {
     List<PmNotifyRecord> listUnsendRecords();
 
     void createPmNotifyLog(PmNotifyLog log);
+
+    void invalidateNotifyRecord(List<Long> recordIds);
 }

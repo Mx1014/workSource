@@ -53,6 +53,11 @@ public interface NewsProvider {
 
 	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
 
+	Long createNewPreview(News news);
+
+	News findNewPreview(Long id);
+
+
 	List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId);
 
 	void deleteProjectNewsTags(Long projectId, Long categoryId);

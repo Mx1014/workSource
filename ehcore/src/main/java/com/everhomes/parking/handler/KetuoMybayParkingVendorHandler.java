@@ -102,7 +102,7 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 			String expireDate = card.getValidTo();
 			long newStartTime = strToLong(expireDate);
 			dto.setStartPeriod(newStartTime);
-			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonth(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonthV2(newStartTime, parkingLot.getExpiredRechargeMonthCount());
 			dto.setEndPeriod(rechargeEndTimestamp.getTime());
 			dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
 			dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.ketuo.rateName","个月"));

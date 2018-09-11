@@ -49,7 +49,7 @@ public interface ParkingProvider {
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                        String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
                                                        Timestamp endDate, Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName,
-                                                       Long flowId, SortField order, String cardTypeId, Long pageAnchor, Integer pageSize);
+                                                       Long flowId, SortField order, String cardTypeId, String ownerKeyWords, Long pageAnchor, Integer pageSize);
     
     void updateParkingLot(ParkingLot parkingLot);
     
@@ -119,7 +119,7 @@ public interface ParkingProvider {
     List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                                String plateNumber, String plateOwnerName, String plateOwnerPhone,
                                                                Timestamp startDate, Timestamp endDate, Byte status,
-                                                               String requestorEnterpriseName, Long pageAnchor, Integer pageSize);
+                                                               String requestorEnterpriseName, String ownerKeyWords, Long pageAnchor, Integer pageSize);
 
     List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
                                                              Long requestorUid, Byte sourceType, Long pageAnchor, Integer pageSize);
@@ -157,9 +157,9 @@ public interface ParkingProvider {
 
     List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
 
-    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
+    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId,Long startCreateTime,Long endCreateTime, Integer pageSize, Long pageAnchor);
 
-    Long ParkingRechargeOrdersByUserId(Long userId);
+    Long ParkingRechargeOrdersByUserId(Long userId,Long startCreateTime,Long endCreateTime);
 
     List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 

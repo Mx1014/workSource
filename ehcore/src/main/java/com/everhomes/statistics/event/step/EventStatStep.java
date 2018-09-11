@@ -1,11 +1,12 @@
 // @formatter:off
 package com.everhomes.statistics.event.step;
 
-import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
-import com.everhomes.statistics.event.*;
+import com.everhomes.statistics.event.StatEvent;
+import com.everhomes.statistics.event.StatEventHandler;
+import com.everhomes.statistics.event.StatEventProvider;
+import com.everhomes.statistics.event.StatEventStepExecution;
 import com.everhomes.statistics.event.handler.StatEventHandlerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +30,7 @@ public class EventStatStep extends AbstractStatEventStep {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventStatStep.class);
 
     @Autowired
-    private DbProvider dbProvider;
-
-    @Autowired
     private StatEventProvider statEventProvider;
-
-    @Autowired
-    private StatEventStatisticProvider statEventStatisticProvider;
 
     @Autowired
     private NamespaceProvider namespaceProvider;
@@ -63,8 +59,7 @@ public class EventStatStep extends AbstractStatEventStep {
                         continue;
                     }
 
-                    // 处理并在事物中保存
-                    save(process(statDate, statEvent, handler, namespace, execution.getInterval()));
+                    handler.processStat(namespace, statEvent, statDate, execution.getInterval());
 
                     // success
                     taskMeta = 1;
@@ -89,17 +84,6 @@ public class EventStatStep extends AbstractStatEventStep {
         } else {
             execution.setStatus(StatEventStepExecution.Status.ERROR);
         }
-    }
-
-    private void save(List<StatEventStatistic> statList) {
-        dbProvider.execute(status -> {
-            statEventStatisticProvider.insertEventStatList(statList);
-            return true;
-        });
-    }
-
-    private List<StatEventStatistic> process(LocalDate statDate, StatEvent statEvent, StatEventHandler handler, Namespace namespace, StatEventStatTimeInterval interval) {
-        return handler.processStat(namespace, statEvent, statDate, interval);
     }
 
     private String getHandlerStepName(StatEventHandler handler, Integer namespaceId) {

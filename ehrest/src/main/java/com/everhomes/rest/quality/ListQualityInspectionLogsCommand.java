@@ -1,8 +1,10 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 
 /**
@@ -29,6 +31,9 @@ public class ListQualityInspectionLogsCommand {
 	private String targetType;
 	
 	private Long targetId;
+
+	@ItemType(Long.class)
+	private List<Long> scopeIds;
 	
 	private Long pageAnchor;
 	
@@ -100,6 +105,14 @@ public class ListQualityInspectionLogsCommand {
 
 	public void setScopeId(Long scopeId) {
 		this.scopeId = scopeId;
+	}
+
+	public List<Long> getScopeIds() {
+		return scopeIds;
+	}
+
+	public void setScopeIds(List<Long> scopeIds) {
+		this.scopeIds = scopeIds;
 	}
 
 	@Override

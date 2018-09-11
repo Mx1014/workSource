@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li> ownerId: 拥有者ID</li>
  *  <li> destination: 输出终端 1：客户端 2：浏览器</li>
  *  <li> pageAnchor: 锚点</li>
- *  <li> pageSize: 页码</li>
+ *  <li> pageSize: 每页大小</li>
  * </ul>
  */
 public class ListServiceAllianceCategoriesCommand {
@@ -24,9 +24,9 @@ public class ListServiceAllianceCategoriesCommand {
 	private Long ownerId;
 
 	private Byte destination;
-	
+
 	private Long pageAnchor;
-	
+
 	private Integer pageSize;
 
 	public Integer getNamespaceId() {

@@ -909,9 +909,16 @@ public class FamilyProviderImpl implements FamilyProvider {
 		query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
 		query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(uid));
 
-		List<Family> response = query.fetch().map(r -> RecordHelper.convert(r, Family.class));
+		List<Group> groups = query.fetch().map(r -> RecordHelper.convert(r, Group.class));
 
-		return response;
+		List<Family> families = new ArrayList<>();
+		if(groups != null){
+			for (Group group:  groups){
+				families.add(ConvertHelper.convert(group, Family.class));
+			}
+		}
+
+		return families;
 	}
 
 

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId:  当前操作的小区id  用于权限校验</li>
  * <li>namespaceId:  namespaceId</li>
  * <li>userId:  用户id</li>
+ * <li>reservePrivilege: 保留管理员权限</li>
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
@@ -34,6 +35,8 @@ public class CreateOrganizationAdminCommand {
 	private Integer namespaceId;
 
 	private Long userId;
+	
+	private Byte reservePrivilege;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -98,12 +101,7 @@ public class CreateOrganizationAdminCommand {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
+	
 	public Long getUserId() {
 		return userId;
 	}
@@ -111,4 +109,17 @@ public class CreateOrganizationAdminCommand {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+
+	public Byte getReservePrivilege() {
+		return reservePrivilege;
+	}
+
+	public void setReservePrivilege(Byte reservePrivilege) {
+		this.reservePrivilege = reservePrivilege;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

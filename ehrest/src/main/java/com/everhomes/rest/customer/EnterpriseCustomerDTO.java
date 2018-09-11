@@ -82,11 +82,14 @@ import java.util.List;
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty: 联系人职务</li>
  *     <li>signedUpCount: 注册人数</li>
+ *     <li>syncErrorMsg: 获取错误日志结果</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
+    private Long ownerId;
+    private String ownerType;
     private Long enterpriseId;
     private Long organizationId;
     private Long communityId;
@@ -192,6 +195,9 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Long sourceId;
     private String sourceType;
 
+    private Long aptitudeFlagItemId;
+    private String aptitudeFlagItemName;
+
     //新增的客户字段
     private Long buyOrLeaseItemId;
     private String buyOrLeaseItemName;
@@ -240,6 +246,9 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String dropBox8ItemName;
     private String dropBox9ItemName;
 
+
+    private String syncErrorMsg;
+
     @ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> enterpriseAdmins;
     @ItemType(CustomerEntryInfoDTO.class)
@@ -248,6 +257,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
 
+
+    public String getSyncErrorMsg() {
+        return syncErrorMsg;
+    }
+
+    public void setSyncErrorMsg(String syncErrorMsg) {
+        this.syncErrorMsg = syncErrorMsg;
+    }
 
     public Long getEnterpriseId() {
         return enterpriseId;
@@ -1440,6 +1457,38 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setDropBox9ItemName(String dropBox9ItemName) {
         this.dropBox9ItemName = dropBox9ItemName;
+    }
+
+    public Long getAptitudeFlagItemId() {
+        return aptitudeFlagItemId;
+    }
+
+    public void setAptitudeFlagItemId(Long aptitudeFlagItemId) {
+        this.aptitudeFlagItemId = aptitudeFlagItemId;
+    }
+
+    public String getAptitudeFlagItemName() {
+        return aptitudeFlagItemName;
+    }
+
+    public void setAptitudeFlagItemName(String aptitudeFlagItemName) {
+        this.aptitudeFlagItemName = aptitudeFlagItemName;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

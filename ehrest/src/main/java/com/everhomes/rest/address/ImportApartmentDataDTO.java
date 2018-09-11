@@ -4,17 +4,35 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 public class ImportApartmentDataDTO {
-	private String buildingName;
+	//private String buildingName;
+	//private String buildArea;
+	//private String sharedArea;
 	private String apartmentName;
 	private String status;
+	private String apartmentFloor;
 	private String areaSize;
-	private String buildArea;
-	private String chargeArea;
-	private String sharedArea;
 	private String rentArea;
+	private String freeArea;
+	private String chargeArea;
+	private String orientation;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
-	private String orientation;
+	
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
+	public String getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(String freeArea) {
+		this.freeArea = freeArea;
+	}
 
 	public String getNamespaceAddressType() {
 		return namespaceAddressType;
@@ -40,14 +58,6 @@ public class ImportApartmentDataDTO {
 		this.orientation = orientation;
 	}
 
-	public String getBuildingName() {
-		return buildingName;
-	}
-
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-
 	public String getApartmentName() {
 		return apartmentName;
 	}
@@ -64,14 +74,6 @@ public class ImportApartmentDataDTO {
 		this.status = status;
 	}
 
-	public String getBuildArea() {
-		return buildArea;
-	}
-
-	public void setBuildArea(String buildArea) {
-		this.buildArea = buildArea;
-	}
-
 	public String getChargeArea() {
 		return chargeArea;
 	}
@@ -86,14 +88,6 @@ public class ImportApartmentDataDTO {
 
 	public void setRentArea(String rentArea) {
 		this.rentArea = rentArea;
-	}
-
-	public String getSharedArea() {
-		return sharedArea;
-	}
-
-	public void setSharedArea(String sharedArea) {
-		this.sharedArea = sharedArea;
 	}
 
 	public String getAreaSize() {

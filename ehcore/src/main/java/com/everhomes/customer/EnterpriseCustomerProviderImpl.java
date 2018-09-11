@@ -57,29 +57,7 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
-import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
-import com.everhomes.server.schema.tables.pojos.EhCustomerAttachments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
-import com.everhomes.server.schema.tables.pojos.EhCustomerConfigutations;
-import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicatorStatistics;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPotentialDatas;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAdmins;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
@@ -263,6 +241,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_NUMBER.eq(number));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
@@ -1669,11 +1664,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                         LOGGER.debug("compareEnterpriseCustomer FieldName: {}; newData: {}; oldData: {}",
                                 field.getFieldName(), newData, oldData);
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
-							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
 					        }
-					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getOwnerId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
 					        if(levelItemOld != null) {
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
@@ -1681,22 +1676,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
-                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
                             if(levelItemNew != null) {
                                 newData = levelItemNew.getItemDisplayName();
                             }
-                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getOwnerId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
                             if(levelItemOld != null) {
                                 oldData = levelItemOld.getItemDisplayName();
                             }
                         }
 
 						if("propertyType".equals(field.getFieldName())){
-							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
 					        }
-					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getOwnerId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
 					        if(levelItemOld != null) {
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
@@ -2425,4 +2420,28 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
                 .fetchInto(CustomerAdminRecord.class);
     }
+
+
+	@Override
+	public List<CustomerEntryInfo> findActiveCustomerEntryInfoByAddressId(Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEntryInfosRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ENTRY_INFOS);
+        
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId));
+        query.addConditions(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        return query.fetchInto(CustomerEntryInfo.class);
+    }
+
+    @Override
+    public void updateCustomerAptitudeFlag(Long id, Long approvalStatus){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class));
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        EhEnterpriseCustomers eepc = dao.findById(id);
+        eepc.setAptitudeFlagItemId(approvalStatus);
+        dao.update(eepc);
+
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.everhomes.rest.user;
 
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -23,7 +24,9 @@ import java.util.List;
  *     <li>capitalPinyin: capitalPinyin</li>
  *     <li>status: status  {@link GroupMemberStatus}</li>
  *     <li>workPlatformFlag: 是否开启工作台标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>managerFlag: 是否为公司管理员，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>addressSiteDtos: 公司办公点或者家庭对应的园区信息参考{@link AddressSiteDTO}</li>
+ *     <li>communityInfoDtos: 所在园区列表 {@link com.everhomes.rest.community.CommunityInfoDTO}</li>
  * </ul>
  */
 public class AddressUserDTO {
@@ -37,7 +40,12 @@ public class AddressUserDTO {
     private String capitalPinyin;
     private Byte status;
     private Byte workPlatformFlag;
+
+    //地址列表需要的默认是否是这个公司的管理员字段
+    private Byte managerFlag;
+
     private List<AddressSiteDTO> addressSiteDtos;
+    private List<CommunityInfoDTO> communityInfoDtos;
 
     public Long getId() {
         return id;
@@ -125,6 +133,22 @@ public class AddressUserDTO {
 
     public void setAddressSiteDtos(List<AddressSiteDTO> addressSiteDtos) {
         this.addressSiteDtos = addressSiteDtos;
+    }
+
+    public Byte getManagerFlag() {
+        return managerFlag;
+    }
+
+    public void setManagerFlag(Byte managerFlag) {
+        this.managerFlag = managerFlag;
+    }
+
+    public List<CommunityInfoDTO> getCommunityInfoDtos() {
+        return communityInfoDtos;
+    }
+
+    public void setCommunityInfoDtos(List<CommunityInfoDTO> communityInfoDtos) {
+        this.communityInfoDtos = communityInfoDtos;
     }
 
     @Override

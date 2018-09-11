@@ -1,5 +1,7 @@
 package com.everhomes.appurl;
 
+import java.util.List;
+
 
 public interface AppUrlProvider {
 	 AppUrls findByNamespaceIdAndOSType(Integer namespaceId, Byte osType);
@@ -16,5 +18,12 @@ public interface AppUrlProvider {
 	* @param bo
 	*/
 	void  updateAppInfo( AppUrls bo);
+	
+	/**
+	 * 通过namespaceId 查询信息
+	 * @param namespaceId
+	 * @return
+	 */
+    List<AppUrls> findByNamespaceId(Integer namespaceId);
 
 }

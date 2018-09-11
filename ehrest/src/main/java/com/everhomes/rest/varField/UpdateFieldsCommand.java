@@ -33,6 +33,8 @@ public class UpdateFieldsCommand {
 
 	private Long categoryId;
 
+    private Long ownerId;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -87,6 +89,15 @@ public class UpdateFieldsCommand {
 
     public void setFields(List<ScopeFieldInfo> fields) {
         this.fields = fields;
+    }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

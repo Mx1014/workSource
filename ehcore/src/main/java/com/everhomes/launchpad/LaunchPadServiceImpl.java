@@ -38,6 +38,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.business.BusinessDTO;
+
+
 import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.category.CategoryConstants;
@@ -49,8 +51,10 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.UpdateUserAppsCommand;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.launchpadbase.*;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.Bulletins;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
@@ -1899,67 +1903,97 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd) {
-	    User user = UserContext.current().getUser();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-        
-        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
-        String baseScene = sceneToken.getScene();
-        if(sceneInfo != null) {
-            baseScene = sceneInfo.getName();
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
-            }
-        } else {
-            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
-        }
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        Community community = null;
+//	    User user = UserContext.current().getUser();
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//
+//        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+//        String baseScene = sceneToken.getScene();
+//        if(sceneInfo != null) {
+//            baseScene = sceneInfo.getName();
+//            if(LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+//            }
+//        } else {
+//            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+//        }
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//        Community community = null;
+//        ScopeType scopeType = null;
+//        Long scopeId = null;
+//		//检查游客是否能继续访问此场景 by sfyan 20161009
+//		userService.checkUserScene(sceneType);
+//        switch(sceneType) {
+//        case DEFAULT:
+//        case PARK_TOURIST:
+//            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//            if(community != null) {
+//            	scopeId = sceneToken.getEntityId();
+//            	scopeType = ScopeType.COMMUNITY;
+//            }else{
+//            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+//            }
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            if(community != null) {
+//            	scopeId = community.getId();
+//            	scopeType = ScopeType.COMMUNITY;
+//            }else{
+//            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+//            }
+//            break;
+//        case PM_ADMIN:// 无小区ID
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        	scopeId = sceneToken.getEntityId();
+//        	scopeType = ScopeType.ORGANIZATION;
+//            break;
+//        default:
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//            break;
+//        }
+//
+
+
         ScopeType scopeType = null;
         Long scopeId = null;
-		//检查游客是否能继续访问此场景 by sfyan 20161009
-		userService.checkUserScene(sceneType);
-        switch(sceneType) {
-        case DEFAULT:
-        case PARK_TOURIST:
-            community = communityProvider.findCommunityById(sceneToken.getEntityId());
-            if(community != null) {
-            	scopeId = sceneToken.getEntityId();
-            	scopeType = ScopeType.COMMUNITY;
-            }else{
-            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
-            }
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-            if(family != null) {
-                community = communityProvider.findCommunityById(family.getCommunityId());
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-                }
-            }
-            if(community != null) {
-            	scopeId = community.getId();
-            	scopeType = ScopeType.COMMUNITY;
-            }else{
-            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
-            }
-            break;
-        case PM_ADMIN:// 无小区ID
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        	scopeId = sceneToken.getEntityId();
+		String baseScene = SceneType.PARK_TOURIST.getCode();
+
+		//实际上只存在两种场景，一是公司场景，一是园区场景。家庭场景最后会转换成园区场景。
+        AppContext appContext = UserContext.current().getAppContext();
+        if(appContext.getOrganizationId() != null){
         	scopeType = ScopeType.ORGANIZATION;
-            break;
-        default:
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-            break;
-        }
-        
+        	scopeId = appContext.getOrganizationId();
+		}else if(appContext.getCommunityId() != null){
+			scopeId = appContext.getCommunityId();
+			scopeType = ScopeType.COMMUNITY;
+		}else if(appContext.getFamilyId() != null){
+			FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+			if(family != null) {
+				Community community = communityProvider.findCommunityById(family.getCommunityId());
+				if(community != null) {
+					scopeId = community.getId();
+					scopeType = ScopeType.COMMUNITY;
+				}else {
+					LOGGER.error("community not found, family.id =" + appContext.getFamilyId());
+				}
+			} else {
+				LOGGER.error("family not found, family.id =" + appContext.getFamilyId());
+			}
+		}
+
+
         GetLaunchPadLayoutByVersionCodeCommand getCmd = new GetLaunchPadLayoutByVersionCodeCommand();
         getCmd.setVersionCode(cmd.getVersionCode());
         getCmd.setName(cmd.getName());
-        getCmd.setNamespaceId(sceneToken.getNamespaceId());
+        getCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         getCmd.setSceneType(baseScene);
         
         return getLastLaunchPadLayoutByVersionCode(getCmd, scopeType, scopeId);
@@ -2914,7 +2948,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null);
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
 		}
@@ -2944,6 +2978,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
 	@Override
+	public BulletinsHandler getBulletinsHandler(Long moduleId) {
+		BulletinsHandler handler = null;
+
+		if(moduleId != null) {
+			String handlerPrefix = BulletinsHandler.BULLETINS_HANDLER_TYPE;
+			try {
+				handler = PlatformContext.getComponent(handlerPrefix + moduleId);
+			}catch (Exception ex){
+				LOGGER.info("OPPushHandler not exist moduleId = {}", moduleId);
+			}
+
+		}
+
+		return handler;
+	}
+
+	@Override
 	public String getSceneTokenByCommunityId(Long communityId){
 		Community community = communityProvider.findCommunityById(communityId);
 		SceneTokenDTO sceneToken = new SceneTokenDTO();
@@ -2954,5 +3005,390 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		sceneToken.setUserId(UserContext.currentUserId());
 
 		return WebTokenGenerator.getInstance().toWebToken(sceneToken);
+	}
+
+
+	@Override
+	public ListBulletinsCardsResponse listBulletinsCards(ListBulletinsCardsCommand cmd) {
+
+		ListBulletinsCardsResponse response = new ListBulletinsCardsResponse();
+
+		Bulletins bulletins = (Bulletins)StringHelper.fromJsonString(cmd.getInstanceConfig(), Bulletins.class);
+
+		//历史是园区公告，默认使用园区公告
+		if(bulletins.getModuleId() == null){
+			bulletins.setModuleId(10300L);
+		}
+
+		//处理方式
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(bulletins.getModuleId());
+		response.setModuleId(serviceModule.getId());
+		response.setClientHandlerType(serviceModule.getClientHandlerType());
+
+		BulletinsHandler bulletinsHandler = getBulletinsHandler(bulletins.getModuleId());
+		if(bulletinsHandler != null){
+			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), bulletins.getRowCount());
+			response.setCards(cards);
+
+			String itemActionData = "{}";
+			String title = serviceModule.getName();
+			if(bulletins.getAppId() != null){
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(bulletins.getAppId());
+				itemActionData = serviceModuleApp.getInstanceConfig();
+				title = serviceModuleApp.getName();
+				if(serviceModuleApp != null){
+					PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
+					if(portalPublishHandler != null){
+						itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+					}
+				}
+			}
+
+			itemActionData = refreshActionData(itemActionData);
+			response.setInstanceConfig(itemActionData);
+
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null);
+			response.setRouterPath(routerInfo.getPath());
+			response.setRouterQuery(routerInfo.getQuery());
+		}
+
+
+		return response;
+	}
+
+
+	@Override
+	public ListAllAppsResponse listAllApps(ListAllAppsCommand cmd) {
+		ListAllAppsResponse response = new ListAllAppsResponse();
+
+
+		List<Tuple<Byte, Long>> scopes = getScope(cmd.getContext());
+		String ownerType = getOwnerType(cmd.getContext());
+		Long ownerId = getOwnerId(cmd.getContext());
+
+        List<LaunchPadCategoryDTO> categoryDtos = new ArrayList<>();
+
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategryByGroupId(cmd.getGroupId(), scopes);
+
+		//1、有分类的--“全部”，按照分类查询。
+        //2、没有分类--“更多”，把所有的查询出来，有客户端判断。
+		if(categories != null && categories.size() > 0){
+			for (ItemServiceCategry categry: categories){
+
+				List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, categry.getName(), null);
+				List<AppDTO> appDtos = itemToAppDto(launchPadItems);
+				LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
+                categoryDto.setAppDtos(appDtos);
+                categoryDto.setName(categry.getLabel());
+				if(categry.getIconUri() != null){
+					String url = contentServerService.parserUri(categry.getIconUri(), ItemServiceCategry.class.getSimpleName(), categry.getId());
+                    categoryDto.setIconUrl(url);
+				}
+
+                categoryDtos.add(categoryDto);
+			}
+
+		}else {
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, null);
+			List<AppDTO> appDtos = itemToAppDto(launchPadItems);
+			LaunchPadCategoryDTO categoryDto = new LaunchPadCategoryDTO();
+            categoryDto.setAppDtos(appDtos);
+            categoryDtos.add(categoryDto);
+		}
+
+		Long userId = UserContext.currentUserId();
+
+		List<AppDTO> appDtos = new ArrayList<>();
+
+		if(userId != null || userId != 0){
+			//查询用户自己编辑的广场信息
+			List<UserLaunchPadItem> userItems = launchPadProvider.listUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, ownerId);
+			appDtos = userItemToAppDto(userItems);
+
+		}
+
+		if(appDtos == null || appDtos.size() == 0){
+			//默认的
+			List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByGroupId(cmd.getGroupId(), scopes, null, ItemDisplayFlag.DISPLAY.getCode());
+			appDtos = itemToAppDto(defaultItems);
+		}
+
+		response.setCategoryDtos(categoryDtos);
+		response.setDefaultDtos(appDtos);
+
+		return response;
+	}
+
+
+	private List<Tuple<Byte, Long>> getScope(AppContext context){
+
+
+		List<Tuple<Byte, Long>> list = new ArrayList<>();
+
+		if(context == null){
+			return list;
+		}
+
+		//communityId必传
+		if(context.getOrganizationId() != null){
+			list.add(new Tuple<>(ScopeType.ORGANIZATION.getCode(), context.getOrganizationId()));
+			list.add(new Tuple<>(ScopeType.ORGANIZATION.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}else if(context.getFamilyId() != null){
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.RESIDENTIAL.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.RESIDENTIAL.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}else{
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), context.getCommunityId()));
+			list.add(new Tuple<>(ScopeType.COMMUNITY.getCode(), 0L));
+			list.add(new Tuple<>(ScopeType.ALL.getCode(), 0L));
+		}
+
+		return list;
+	}
+
+
+	private String getOwnerType(AppContext context){
+		String ownerType = null;
+
+		if(context == null){
+			return null;
+		}
+
+		//communityId必传
+		if(context.getOrganizationId() != null){
+			ownerType = EntityType.ORGANIZATIONS.getCode();
+		}else if(context.getFamilyId() != null){
+			ownerType =  EntityType.COMMUNITY.getCode();
+		}else {
+			ownerType =  EntityType.COMMUNITY.getCode();
+		}
+
+		return ownerType;
+	}
+
+	private Long getOwnerId(AppContext context){
+		Long ownerId = 0L;
+
+		if(context == null){
+			return ownerId;
+		}
+
+		if(context.getOrganizationId() != null){
+			ownerId = context.getOrganizationId();
+		}else if(context.getFamilyId() != null){
+			ownerId = context.getCommunityId();
+		}else {
+			ownerId = context.getCommunityId();
+		}
+
+		return ownerId;
+	}
+
+	private List<AppDTO> itemToAppDto(List<LaunchPadItem> items){
+
+		if(items == null || items.size() == 0){
+			return null;
+		}
+
+		Set<Long> appIds = new HashSet<>();
+		for(LaunchPadItem item: items){
+			appIds.add(item.getAppId());
+		}
+
+		Map<Long, ServiceModuleApp> appMap = getAppMap(new ArrayList<>(appIds));
+		Map<Long, ServiceModule> moduleMap = getModuleMap(new ArrayList<>(appIds));
+
+
+		List<AppDTO> dtos = new ArrayList<>();
+
+		for(LaunchPadItem item: items){
+			AppDTO dto = ConvertHelper.convert(item, AppDTO.class);
+			ServiceModuleApp app = appMap.get(item.getAppId());
+
+			//“全部/更多”
+			if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+				app = new ServiceModuleApp();
+				app.setModuleId(-10000L);
+				app.setOriginId(0L);
+			}
+
+
+			if(app != null){
+				dto.setModuleId(app.getModuleId());
+				ServiceModule serviceModule = moduleMap.get(app.getModuleId());
+				if(serviceModule != null){
+					dto.setClientHandlerType(serviceModule.getClientHandlerType());
+				}
+
+				String actionData = refreshActionData(item.getActionData());
+
+				String path = "/index";
+				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
+					path = "/more";
+				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+					path = "/all";
+				}
+
+				//填充路由信息
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path);
+				dto.setRouterPath(routerInfo.getPath());
+				dto.setRouterQuery(routerInfo.getQuery());
+			}
+
+			dto.setName(item.getItemLabel());
+			dto.setItemId(item.getId());
+
+			if(!org.springframework.util.StringUtils.isEmpty(item.getIconUri())){
+				String url = contentServerService.parserUri(item.getIconUri(), LaunchPadItem.class.getSimpleName(), item.getId());
+				dto.setIconUrl(url);
+			}
+
+			dtos.add(dto);
+		}
+
+		return dtos;
+	}
+
+
+	private List<AppDTO> userItemToAppDto(List<UserLaunchPadItem> items){
+		if(items == null || items.size() == 0){
+			return null;
+		}
+
+		Set<Long> itemIds = new HashSet<>();
+		for(UserLaunchPadItem item: items){
+			itemIds.add(item.getItemId());
+		}
+
+		List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(new ArrayList<>(itemIds));
+
+		List<AppDTO> dtos = itemToAppDto(launchPadItems);
+
+		return dtos;
+	}
+
+
+	private Map<Long, ServiceModuleApp> getAppMap(List<Long> appIds){
+
+		Map<Long, ServiceModuleApp> appMap = new HashMap<>();
+
+		if(appIds == null || appIds.size() == 0){
+			return appMap;
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppsByOriginIds(UserContext.getCurrentNamespaceId(), appIds);
+
+		if(apps == null || apps.size() == 0){
+			return appMap;
+		}
+
+		for(ServiceModuleApp app: apps){
+			appMap.put(app.getOriginId(), app);
+		}
+
+		return appMap;
+	}
+
+
+	private Map<Long, ServiceModule> getModuleMap(List<Long> appIds){
+
+		Map<Long, ServiceModule> moduleMap = new HashMap<>();
+
+		if(appIds == null || appIds.size() == 0){
+			return moduleMap;
+		}
+
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppsByOriginIds(UserContext.getCurrentNamespaceId(), appIds);
+
+		if(apps == null || apps.size() == 0){
+			return moduleMap;
+		}
+
+		Set<Long> moduleIds = new HashSet<>();
+
+		for(ServiceModuleApp app: apps){
+			moduleIds.add(app.getModuleId());
+		}
+
+		if(moduleIds.size() == 0){
+			return moduleMap;
+		}
+
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(new ArrayList<>(moduleIds));
+
+
+		if(serviceModules == null || serviceModules.size() == 0){
+			return moduleMap;
+		}
+
+		for(ServiceModule module: serviceModules){
+			moduleMap.put(module.getId(), module);
+		}
+
+		return moduleMap;
+	}
+
+	@Override
+	public void updateUserApps(UpdateUserAppsCommand cmd) {
+
+		if(cmd.getGroupId() == null || cmd.getItemIds() == null || cmd.getItemIds().size() == 0){
+			LOGGER.error("Invalid paramter, cmd = ", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter, cmd = " + cmd);
+		}
+
+		Long userId = UserContext.currentUserId();
+		String ownerType = getOwnerType(cmd.getContext());
+		Long ownerId = getOwnerId(cmd.getContext());
+
+
+		dbProvider.execute((transactionStatus -> {
+
+			//删除已有的自定义配置
+			launchPadProvider.deleteUserLaunchPadItemByUserId(userId, cmd.getGroupId(), ownerType, ownerId);
+
+			List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(cmd.getItemIds());
+
+			if(launchPadItems == null || launchPadItems.size() == 0){
+				LOGGER.error("launchPadItem not found.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"launchPadItem not found.");
+			}
+
+
+			Integer order = 1;
+			for (LaunchPadItem item: launchPadItems){
+
+				if(!cmd.getGroupId().equals(item.getGroupId())){
+					LOGGER.error("launchPadItem not match. item.groupId=" + item.getGroupId() + " cmd.groupId=" + cmd.getGroupId());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"launchPadItem not match. item.groupId=" + item.getGroupId() + " cmd.groupId=" + cmd.getGroupId());
+				}
+
+				UserLaunchPadItem userItem = new UserLaunchPadItem();
+				userItem.setGroupId(item.getGroupId());
+				userItem.setItemName(item.getItemName());
+				userItem.setItemId(item.getId());
+				userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+				userItem.setDefaultOrder(order);
+				userItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+				userItem.setOwnerId(ownerId);
+				userItem.setOwnerType(ownerType);
+				userItem.setSceneType(item.getSceneType());
+				userItem.setUserId(userId);
+				userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				launchPadProvider.createUserLaunchPadItem(userItem);
+				order = order + 1;
+			}
+			return null;
+		}));
+
+
 	}
 }

@@ -1,24 +1,5 @@
 package com.everhomes.contract;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HTTP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
@@ -29,7 +10,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
@@ -50,11 +30,15 @@ import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractCommand;
+import com.everhomes.rest.contract.EnterpriseContractDTO;
+import com.everhomes.rest.contract.DurationParamDTO;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.GetDurationParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractEventsCommand;
@@ -93,6 +77,23 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/14.
@@ -116,9 +117,6 @@ public class ZJContractHandler implements ContractService{
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private FieldProvider fieldProvider;
 
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
@@ -148,7 +146,7 @@ public class ZJContractHandler implements ContractService{
             String categoryName = "";
             params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         } else {
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(),cmd.getOrgId(), cmd.getCommunityId(), cmd.getCategoryItemId());
             String categoryName = item == null ? "none" : item.getItemDisplayName();
             params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         }
@@ -762,7 +760,7 @@ public class ZJContractHandler implements ContractService{
 	@Override
 	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -798,7 +796,7 @@ public class ZJContractHandler implements ContractService{
 	@Override
 	public void deleteContractTemplate(DeleteContractTemplateCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -807,9 +805,26 @@ public class ZJContractHandler implements ContractService{
 		return null;
 	}
 
-
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 }

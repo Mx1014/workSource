@@ -723,6 +723,20 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/updateFlowFormStatus</b>
+     * <p>表单开关</p>
+     */
+    @RequestMapping("updateFlowFormStatus")
+    @RestReturn(value = String.class)
+    public RestResponse updateFlowFormStatus(@Valid UpdateFlowFormStatusCommand cmd) {
+        flowService.updateFlowFormStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/flow/createFlowForm</b>
      * <p>建立表单关联</p>
      */

@@ -2,6 +2,7 @@
 package com.everhomes.filedownload;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -14,7 +15,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,5 +154,47 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
 
         return dto;
 
+    }
+
+    @Override
+    public GetFileDownloadReadStatusResponse getFileDownloadReadStatus() {
+        GetFileDownloadReadStatusResponse readStatusResponse = new GetFileDownloadReadStatusResponse();
+        readStatusResponse.setAllReadStatus(AllReadStatus.ALLREAD.getCode());
+        Long userId = UserContext.currentUserId();
+        Integer count = this.taskService.countNotAllReadStatus(userId);
+        if (count > 0) {
+            readStatusResponse.setAllReadStatus(AllReadStatus.NOTALLREAD.getCode());
+        }
+        return readStatusResponse;
+    }
+
+    @Override
+    public void updateFileDownloadReadStatus() {
+        Long userId = UserContext.currentUserId();
+        List<Task> taskList = this.taskService.listNotReadStatusTasks(userId);
+        if (!CollectionUtils.isEmpty(taskList)) {
+            for (Task task : taskList) {
+                task.setReadStatus(AllReadStatus.ALLREAD.getCode());
+                this.taskService.updateTask(task);
+            }
+        }
+    }
+
+    @Override
+    public void updateFileDownloadTimes(UpdateDownloadTimesCommand cmd) {
+        if (cmd.getTaskId() == null) {
+            LOGGER.error("taskId is null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "taskId is null.");
+        }
+        Task task = this.taskService.findById(cmd.getTaskId());
+        if (task == null) {
+            LOGGER.error("task not exists.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "task not exists.");
+        }
+        Integer downloadTimes = task.getDownloadTimes() == null ? 0 : task.getDownloadTimes();
+        task.setDownloadTimes(downloadTimes + 1);
+        this.taskService.updateTask(task);
     }
 }

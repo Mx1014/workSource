@@ -6,10 +6,11 @@ package com.everhomes.rest.express;
  * <ul>
  * <li>CASH: 1，寄付现结</li>
  * <li>OFFLINE: 2，线下支付</li>
+ * <li>WORKFLOW: 3，走工作流，不付钱模式(国贸快递定制)</li>
  * </ul>
  */
 public enum ExpressPayType {
-	CASH((byte)1),OFFLINE((byte)2);
+	CASH((byte)1),OFFLINE((byte)2),WORKFLOW((byte)3);
 	
 	private byte code;
 	

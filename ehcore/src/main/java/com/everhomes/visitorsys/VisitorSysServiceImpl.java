@@ -3,7 +3,12 @@ package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -18,9 +23,17 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.parking.handler.Utils;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
@@ -39,6 +52,8 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.VisitorsysSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -46,6 +61,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +129,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     public OrganizationProvider organizationProvider;
     @Autowired
+    public AddressProvider addressProvider;
+    @Autowired
     public VisitorsysSearcher visitorsysSearcher;
     @Autowired
     public OrganizationSearcher organizationSearcher;
@@ -136,14 +154,24 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private DoorAccessService doorAccessService;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private VisitorSysMessageReceiverProvider messageReceiverProvider;
+    @Autowired
+    private PortalVersionProvider portalVersionProvider;
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+    @Autowired
+    private AppProvider appProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
         VisitorsysSearchFlagType searchFlagType = checkSearchFlag(cmd.getSearchFlag());
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041810L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041820L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
         return listBookedVisitorsWithOutACL(cmd);
     }
@@ -335,7 +363,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else{
             VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
             hasSendMessage = oldVisitor!=null && VisitorsysStatus.HAS_VISITED == VisitorsysStatus.fromCode(oldVisitor.getVisitStatus());
+            checkConcurrentModify(cmd,oldVisitor);
             visitor = updateVisitor(cmd,oldVisitor);
+            callbackToQLFK(visitor);//回调访客机
         }
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
         if(!hasSendMessage)
@@ -344,6 +374,132 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    private void callbackToQLFK(VisitorSysVisitor visitor) {
+        VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        VisitorsysSourceType sourceType = VisitorsysSourceType.fromCode(visitor.getSource());
+        VisitorsysNotifyThirdType visitorsysNotifyThirdType = VisitorsysNotifyThirdType.fromCode(visitor.getNotifyThirdSuccessFlag());
+        if(VisitorsysStatus.HAS_VISITED != visitStatus
+                || ownerType!=VisitorsysOwnerType.COMMUNITY
+                || sourceType != VisitorsysSourceType.OUTER
+                || visitorsysNotifyThirdType == VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
+            return;
+        }
+        String callbackurl = configurationProvider.getValue(visitor.getNamespaceId(),"visitorsys.lufu.callback", "");
+        Map<String,String> params = new HashMap();
+        params.put("visitorToken", WebTokenGenerator.getInstance().toWebToken(visitor.getId()));
+        params.put("status", visitor.getVisitStatus()+"");
+        AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByNamespaceId(visitor.getNamespaceId());
+        App app = appProvider.findAppByKey(mapping.getAppKey());
+        params.put("appKey", app.getAppKey());
+        String s = SignatureHelper.computeSignature(params, app.getSecretKey());
+        params.put("signature", s);
+        int i = 0;
+        while(i<3) {
+            try {
+                String result = Utils.post(callbackurl, params);
+                LOGGER.info(callbackurl+" result:"+result);
+                RestResponse o = (RestResponse) StringHelper.fromJsonString(result, RestResponse.class);
+                if (o.getErrorCode() == 200) {
+                    visitor.setNotifyThirdSuccessFlag(VisitorsysNotifyThirdType.CALLBACK_SUCCESS.getCode());
+                    visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
+                    break;
+                }
+            }catch (Exception e){
+                LOGGER.error("visitorsys post error:{}",e);
+            }
+            i++;
+        }
+
+
+    }
+
+    private void sendMessageToAdmin(VisitorSysVisitor visitor,CreateOrUpdateVisitorCommand cmd) {
+        VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        if(VisitorsysStatus.WAIT_CONFIRM_VISIT != visitStatus){
+            return;
+        }
+
+        Long appId = cmd.getAppId();
+        if(appId == null) {
+            PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(visitor.getNamespaceId());
+            List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(visitor.getNamespaceId(), releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.COMMUNITY_MODULE_ID);
+            if (serviceModuleApps != null && serviceModuleApps.size() > 0) {
+                appId = serviceModuleApps.get(serviceModuleApps.size()-1).getOriginId();
+            }
+        }
+        String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
+        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
+
+        String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getId(),appId,visitor.getVisitStatus());
+        List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        if(list == null || list.size()==0)
+            return;
+        for (VisitorSysMessageReceiver receiver : list) {
+            try {
+                // 组装路由
+                OfficialActionData actionData = new OfficialActionData();
+                actionData.setUrl(url);
+
+                String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
+                RouterMetaObject metaObject = new RouterMetaObject();
+                metaObject.setUrl(uri);
+
+                Map<String, String> meta = new HashMap<String, String>();
+                meta.put(MessageMetaConstant.MESSAGE_SUBJECT, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_TITLE, "待确认访客"));
+                meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+                meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+                String detail = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITER_DETAIL, "你有一个访客等待确认");
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), receiver.getCreatorUid().toString()));
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto.setBody(detail);
+                messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+                if(null != meta && meta.size() > 0) {
+                    messageDto.getMeta().putAll(meta);
+                }
+//                if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                }
+//                else {
+//                    boolean hasPrivilege = userPrivilegeMgr.checkUserPrivilege(receiver.getCreatorUid(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, appId, null, cmd.getOwnerId());
+//                    if (hasPrivilege) {
+//                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+//                            receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+
+//                    }
+//                }
+            } catch (Exception e) {
+                LOGGER.error("visitorsys {} send message error", receiver, e);
+            }
+        }
+
+    }
+
+    //更新访客状态的时候，检查状态是否已经被提前更新
+    private void checkConcurrentModify(CreateOrUpdateVisitorCommand cmd, VisitorSysVisitor oldVisitor) {
+        if(cmd == null || cmd.getVisitStatus()==null || cmd.getBookingStatus() == null){
+            return ;
+        }
+
+        if((cmd.getBookingStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()
+                && cmd.getVisitStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()) ||
+                (cmd.getBookingStatus()== VisitorsysStatus.HAS_VISITED.getCode()
+                        && cmd.getVisitStatus()== VisitorsysStatus.HAS_VISITED.getCode())){
+            if(oldVisitor.getVisitStatus() == VisitorsysStatus.REJECTED_VISIT.getCode()
+                    || oldVisitor.getVisitStatus()  == VisitorsysStatus.HAS_VISITED.getCode()){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_HAS_UPDATE_VISITOR,
+                        "此访客记录已被处理");
+            }
+        }
     }
 
     /**
@@ -475,7 +631,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, VisitorsysOwnerType.COMMUNITY.getCode(),
                     communityId, visitorPhone);
             if(blackList!=null){
-                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INBLACKLIST_PHONE_ENTERPRISE,
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INBLACKLIST_PHONE_COMMUNITY,
                         "black list community, phone = " + visitorPhone);
             }
         }
@@ -492,6 +648,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
+        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
@@ -502,6 +659,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         createVisitorActions(relatedVisitor);
+        sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
 
@@ -554,6 +712,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
+        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
@@ -564,6 +723,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         createVisitorActions(relatedVisitor);
+        sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
 
@@ -724,7 +884,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public AddDeviceResponse addDevice(AddDeviceCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
         if(cmd.getPairingCode()==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -788,7 +948,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListDevicesResponse listDevices(BaseVisitorsysCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -1636,6 +1796,178 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return getUploadFileToken();
     }
 
+    @Override
+    public void checkBlackList(CheckBlackListCommand cmd) {
+        VisitorSysDevice sysDevice = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
+        checkBlackList(sysDevice.getNamespaceId(),sysDevice.getOwnerType(),sysDevice.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
+    }
+
+    @Override
+    public void checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
+        beforePostForWeb(cmd);
+        checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
+    }
+
+    public void checkMoblieManagePrivilege(BaseVisitorsysCommand cmd){
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
+        if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
+        }
+    }
+    @Override
+    public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
+        cmd.setSearchFlag(VisitorsysSearchFlagType.VISITOR_MANAGEMENT.getCode());
+        checkMoblieManagePrivilege(cmd);
+        return listBookedVisitorsWithOutACL(cmd);
+    }
+
+    @Override
+    public GetBookedVisitorByIdResponse getBookedVisitorByIdForManage(GetBookedVisitorByIdCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return getBookedVisitorById(cmd);
+    }
+
+    @Override
+    public ListVisitReasonsResponse listVisitReasonsForManage(BaseVisitorsysCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return listVisitReasons(cmd);
+    }
+
+    @Override
+    public GetBookedVisitorByIdResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return createOrUpdateVisitor(cmd);
+    }
+
+    @Override
+    public void confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        confirmVisitor(cmd);
+    }
+
+    @Override
+    public void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        rejectVisitor(cmd);
+    }
+
+    @Override
+    public void updateMessageReceiverForManage(UpdateMessageReceiverCommand cmd) {
+        VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        //这里考虑加锁，其实没有什么并发量也没必要
+        VisitorsysFlagType statusFlag = VisitorsysFlagType.fromCode(cmd.getStatusFlag());
+        if(statusFlag == VisitorsysFlagType.NO){
+            messageReceiverProvider.deleteMessageReceiverByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),UserContext.current().getUser().getId());
+        }else {
+            VisitorSysMessageReceiver receiver = messageReceiverProvider.findMessageReceiverByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId());
+            if (receiver == null) {
+                receiver=ConvertHelper.convert(cmd,VisitorSysMessageReceiver.class);
+                messageReceiverProvider.createVisitorSysMessageReceiver(receiver);
+            }
+        }
+    }
+
+    @Override
+    public GetMessageReceiverForManageResponse getMessageReceiverForManage(BaseVisitorsysCommand cmd) {
+        VisitorSysMessageReceiver receiver = messageReceiverProvider.findMessageReceiverByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId());
+        if (receiver == null) {
+            return new GetMessageReceiverForManageResponse(VisitorsysFlagType.NO.getCode());
+        }
+        return new GetMessageReceiverForManageResponse(VisitorsysFlagType.YES.getCode());
+    }
+
+    @Override
+    public OpenApiListOrganizationsResponse openApiListOrganizations(OpenApiListOrganizationsCommand cmd) {
+        SearchOrganizationCommand orgCmd = new SearchOrganizationCommand();
+        orgCmd.setKeyword(cmd.getKeyWords());
+        orgCmd.setCommunityId(cmd.getOwnerId());
+        orgCmd.setSimplifyFlag((byte)1);
+        orgCmd.setPageSize(configurationProvider.getIntValue("visitorsys.organizationlist.pagesize",20));
+        OrganizationQueryResult organizationQueryResult = organizationSearcher.fuzzyQueryOrganizationByName(orgCmd);
+        if(organizationQueryResult==null || organizationQueryResult.getDtos()==null){
+            return null;
+        }
+        OpenApiListOrganizationsResponse response = new OpenApiListOrganizationsResponse();
+        response.setNextPageAnchor(organizationQueryResult.getPageAnchor());
+
+        List<OrganizationAddress> orgAddress= organizationProvider.findOrganizationAddressByOrganizationIds(organizationQueryResult.getDtos().stream().map(r -> r.getId()).collect(Collectors.toList()));
+        List<Address> address = addressProvider.listAddressOnlyByIds(orgAddress.stream().map(r -> r.getAddressId()).collect(Collectors.toList()));
+        //addressid -> 地址详情
+        Map<Long,Address> mapAddress = address.stream().collect(Collectors.toMap(Address::getId,r->r));
+
+        //公司id->地址列表
+        Map<Long,List<OrganizationAddress>> orgAddressMap = new HashMap<>();
+        for (OrganizationAddress organizationAddress : orgAddress) {
+            List<OrganizationAddress> addresses = orgAddressMap.get(organizationAddress.getOrganizationId());
+            if(addresses == null){
+                addresses = new ArrayList<>();
+                orgAddressMap.put(organizationAddress.getOrganizationId(),addresses);
+            }
+            addresses.add(organizationAddress);
+
+        }
+        response.setVisitorEnterpriseList(organizationQueryResult.getDtos().stream().map(r->{
+            BaseVisitorEnterpriseDTO dto = new BaseVisitorEnterpriseDTO();
+            dto.setEnterpriseId(r.getId());
+            dto.setEnterpriseName(r.getName());
+            List<OrganizationAddress> addresses = orgAddressMap.get(r.getId());
+            if(addresses!=null && addresses.size()>0) {
+                //设置楼栋门牌
+                dto.setBuildings(addresses.stream().map(addr->{
+                    VisitorSysBuilding building = new VisitorSysBuilding();
+                    Address address1 = mapAddress.get(addr.getAddressId());
+                    if(address1!=null){
+                        building.setDoorplate(address1.getApartmentName());
+                    }
+                    building.setBuilding(addr.getBuildingName());
+                    return building;
+                }).collect(Collectors.toList()));
+            }
+            return dto;
+        }).collect(Collectors.toList()));
+        return response;
+    }
+
+    @Override
+    public OpenApiCreateVisitorResponse openApiCreateVisitor(OpenApiCreateVisitorCommand cmd) {
+        CreateOrUpdateVisitorCommand createCmd = ConvertHelper.convert(cmd,CreateOrUpdateVisitorCommand.class);
+        if(cmd.getVisitorToken()!=null) {
+            Long visitorId = null;
+            try {
+                visitorId = WebTokenGenerator.getInstance().fromWebToken(cmd.getVisitorToken(), Long.class);
+            } catch (Exception e) {
+                LOGGER.error("visitorToken transform error , token = {}", cmd.getVisitorToken());
+            }
+            createCmd.setId(visitorId);
+        }
+        //设置namespaceid
+        AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+        createCmd.setNamespaceId(appNamespaceMapping.getNamespaceId());
+
+        ListOfficeLocationsCommand officeLocationsCommand = new ListOfficeLocationsCommand();
+        officeLocationsCommand.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
+        officeLocationsCommand.setOwnerId(cmd.getEnterpriseId());
+        officeLocationsCommand.setNamespaceId(appNamespaceMapping.getNamespaceId());
+        ListOfficeLocationsResponse listOfficeLocationsResponse = this.listOfficeLocations(officeLocationsCommand);
+
+        //设置办公地点
+        if(listOfficeLocationsResponse!=null
+                && listOfficeLocationsResponse.getOfficeLocationList()!=null
+                && listOfficeLocationsResponse.getOfficeLocationList().size()>0){
+            createCmd.setOfficeLocationId(listOfficeLocationsResponse.getOfficeLocationList().get(0).getId());
+            createCmd.setOfficeLocationName(listOfficeLocationsResponse.getOfficeLocationList().get(0).getOfficeLocationName());
+        }
+        createCmd.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+        createCmd.setSource(VisitorsysSourceType.OUTER.getCode());
+
+        GetBookedVisitorByIdResponse orUpdateVisitor = this.createOrUpdateVisitor(createCmd);
+        OpenApiCreateVisitorResponse convert = ConvertHelper.convert(orUpdateVisitor, OpenApiCreateVisitorResponse.class);
+        String token = WebTokenGenerator.getInstance().toWebToken(orUpdateVisitor.getId());
+        convert.setVisitorToken(token);
+        convert.setBuildings(cmd.getBuildings());//第三方要求的楼栋门牌，我们这边貌似存了也没什么用，直接返回给第三方
+        return convert;
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
@@ -1982,7 +2314,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
             doorCmd.setHeadImgUri(visitor.getVisitorPicUri());
         }
-        DoorAuthDTO localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
+        DoorAuthDTO localVisitorAuth = null;
+        try {
+            localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
+        } catch (Exception e) {
+            LOGGER.error("error invoke dooraccess");
+        }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
             visitor.setDoorGuardQrcode(localVisitorAuth.getQrString());

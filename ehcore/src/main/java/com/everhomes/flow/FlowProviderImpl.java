@@ -16,6 +16,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -103,7 +104,14 @@ public class FlowProviderImpl implements FlowProvider {
         }
         query.addOrderBy(t.ID.desc());
 
+        query.addLimit(count);
+        query.addOrderBy(t.ID.desc());
+
         LOGGER.debug("query flow sql: {}", query.getSQL(true));
+
+        List<Flow> objs = query.fetch().map((r) -> {
+            return RecordHelper.convert(r, Flow.class);
+        });
 
         List<Flow> list = query.fetch().map((r) -> RecordHelper.convert(r, Flow.class));
 
@@ -299,8 +307,12 @@ public class FlowProviderImpl implements FlowProvider {
             if (moduleType != null) {
                 query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
             }
-            query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
-            query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
+            if (ownerId != null) {
+                query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
+            }
+            if (StringUtils.isNotBlank(ownerType)) {
+                query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
+            }
             query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
             query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0L));
             query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());

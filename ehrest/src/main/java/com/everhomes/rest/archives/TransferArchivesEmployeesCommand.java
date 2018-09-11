@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class TransferArchivesEmployeesCommand {
 
+    private Integer namespaceId;
+
     @ItemType(Long.class)
     private List<Long> detailIds;
 
@@ -40,6 +42,14 @@ public class TransferArchivesEmployeesCommand {
     private String transferReason;
 
     public TransferArchivesEmployeesCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public List<Long> getDetailIds() {

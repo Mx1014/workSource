@@ -37,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
@@ -200,6 +201,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	public void onFlowCaseEnd(FlowCaseState ctx) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+		if(null != order && null != order.getAmount())
+			task.setAmount(order.getAmount());
 		task.setStatus(FlowCaseStatus.FINISHED.getCode());
 		pmTaskProvider.updateTask(task);
 		//elasticsearch更新
@@ -253,7 +257,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					}
 				}
 				if(addrs.length() > 0){
-					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 2));
+					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 1));
 				}
 			}
 		}
@@ -606,36 +610,36 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //			处理人
 //			ctx.getOperator().getId();
 			if ("MOTIFYFEE".equals(btnNodeType)) {
-				FlowGraphEvent evt = ctx.getCurrentEvent();
-				if (FlowUserType.APPLIER.equals(evt.getUserType())){
-					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
-					FlowAutoStepDTO dto = new FlowAutoStepDTO();
-					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-					dto.setFlowCaseId(flowCase.getId());
-					dto.setFlowMainId(flowCase.getFlowMainId());
-					dto.setFlowNodeId(flowCase.getCurrentNodeId());
-					dto.setFlowVersion(flowCase.getFlowVersion());
-					dto.setStepCount(flowCase.getStepCount());
-					flowService.processAutoStep(dto);
-				}
+//				FlowGraphEvent evt = ctx.getCurrentEvent();
+//				if (FlowUserType.APPLIER.equals(evt.getUserType())){
+//					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+//					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+//					dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//					dto.setFlowCaseId(flowCase.getId());
+//					dto.setFlowMainId(flowCase.getFlowMainId());
+//					dto.setFlowNodeId(flowCase.getCurrentNodeId());
+//					dto.setFlowVersion(flowCase.getFlowVersion());
+//					dto.setStepCount(flowCase.getStepCount());
+//					flowService.processAutoStep(dto);
+//				}
 			} else if ("CONFIRMFEE".equals(btnNodeType)){
-// TODO: 2018/7/11 支付
-				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-				task.setAmount(order.getAmount());
-				pmTaskProvider.updateTask(task);
-				pmTaskSearch.feedDoc(task);
-
-				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
-				FlowAutoStepDTO dto = new FlowAutoStepDTO();
-				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-				dto.setFlowCaseId(flowCase.getId());
-				dto.setFlowMainId(flowCase.getFlowMainId());
-				dto.setFlowNodeId(flowCase.getCurrentNodeId());
-				dto.setFlowVersion(flowCase.getFlowVersion());
-				dto.setStepCount(flowCase.getStepCount());
-				flowService.processAutoStep(dto);
+// 费用确认客户端调用业务接口
+//				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+//				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+//				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+//				task.setAmount(order.getAmount());
+//				pmTaskProvider.updateTask(task);
+//				pmTaskSearch.feedDoc(task);
+//
+//				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+//				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+//				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//				dto.setFlowCaseId(flowCase.getId());
+//				dto.setFlowMainId(flowCase.getFlowMainId());
+//				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+//				dto.setFlowVersion(flowCase.getFlowVersion());
+//				dto.setStepCount(flowCase.getStepCount());
+//				flowService.processAutoStep(dto);
 			} else if ("NEEDFEE".equals(btnNodeType)){
 				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 				FlowAutoStepDTO dto = new FlowAutoStepDTO();
@@ -766,12 +770,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
 		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
 		cmd.setNamespaceId(namespaceId);
+		cmd.setOrganizationId(flow.getOrganizationId());
 		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
 			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
 		else
 			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
+		if(null == response.getRequests()){
+			LOGGER.error("Categories is null.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+					"Categories is null.");
+		}
 		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
 		list.add(dto);
 		return list;

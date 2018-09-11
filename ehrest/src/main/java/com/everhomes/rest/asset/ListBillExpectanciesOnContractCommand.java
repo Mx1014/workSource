@@ -16,8 +16,35 @@ public class ListBillExpectanciesOnContractCommand {
     private Integer pageOffset;
     private Integer pageSize;
     private Long contractId;
+    private Long categoryId;
+    private Integer namespaceId;
+    private Long moduleId;
 
-    public String getContractNum() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getContractNum() {
         return contractNum;
     }
 

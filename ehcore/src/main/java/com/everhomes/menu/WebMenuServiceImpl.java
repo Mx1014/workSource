@@ -161,7 +161,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	}
 
 	@Override
-	public ListUserAppCategoryResponse listUserAppCategory(ListUserAppCategoryCommand cmd){
+	public List<AppCategoryDTO> listUserAppCategory(ListUserAppCategoryCommand cmd){
 		//拆成两个独立的方法
 		//前面一个是获取这个用户在这个公司有权限的应用id，这是权限的锅
 		//后面一个是根据应用id获取菜单的，这个是菜单的锅
@@ -170,10 +170,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<AppCategoryDTO> dtos = listCategoryByAppIds(appOriginIds);
 
-		ListUserAppCategoryResponse response = new ListUserAppCategoryResponse();
-		response.setDtos(dtos);
-
-		return response;
+		return dtos;
 	}
 
 
@@ -403,8 +400,51 @@ public class WebMenuServiceImpl implements WebMenuService {
 			setMenuToAppCategoryDto(dto, webMenus);
 		}
 
+
+		//清除空目录
+		if(dtos != null && dtos.size() > 0){
+			dtos = dtos.stream().filter((dto) -> {
+				boolean removeFlag = removeEmpty(dto);
+				return !removeFlag;
+			}).collect(Collectors.toList());
+		}
+
 		return dtos;
 
+	}
+
+
+	private boolean removeEmpty(AppCategoryDTO dto){
+
+		if(dto == null){
+			return false;
+		}
+
+
+		//1、有下级目录，先遍历下级目录。
+		if(dto.getDtos() != null && dto.getDtos().size() > 0){
+			List<AppCategoryDTO> subDtos = dto.getDtos().stream().filter((subDto) -> {
+				boolean removeFlag = removeEmpty(subDto);
+				return !removeFlag;
+			}).collect(Collectors.toList());
+
+			dto.setDtos(subDtos);
+		}
+
+		//2、处理完下级目录之后，再看看是否剩余非空目录
+		if(dto.getDtos() != null && dto.getDtos().size() > 0){
+			return false;
+		}
+
+
+		//3、有没有菜单
+		if(dto.getMenuDtos() != null && dto.getMenuDtos().size() > 0){
+			return false;
+		}
+
+
+		//4、没有非空目录，也没有菜单，要删除。
+		return true;
 	}
 
 
@@ -453,7 +493,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	//TODO 临时为"智谷汇"添加“企业办公”下的“协同办公”和“人力资源”资源菜单
 	private void addOaDefaultMenu(List<WebMenuDTO> dtos, String webMenuType){
 
-		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1)) {
+		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1 && UserContext.getCurrentNamespaceId() != 999946 && UserContext.getCurrentNamespaceId() != 11)) {
 
 			return;
 

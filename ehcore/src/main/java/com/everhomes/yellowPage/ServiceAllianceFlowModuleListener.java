@@ -11,6 +11,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.flow.*;
@@ -23,6 +24,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
@@ -61,6 +63,10 @@ import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.file.FileUtils;
+import com.everhomes.util.pdf.PdfUtils;
+import com.everhomes.yellowPage.stat.ClickStatDetail;
+import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
 @Component
 public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
@@ -69,7 +75,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
 	private final String FORM_VAL_SOURCE_TYPE_NAME = EhFlowCases.class.getSimpleName();
 	private static List<String> DEFAULT_FIELDS = new ArrayList<>();
-	
+
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	public static final long MODULE_ID = 40500;
@@ -82,15 +88,16 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Autowired
 	private MessagingService messagingService;
+
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
-	
+
     @Autowired
-    protected ContentServerService contentServerService;
-    @Autowired
-    protected ServiceModuleProvider serviceModuleProvider;
-    @Autowired
-    protected GeneralFormService generalFormService;
+	protected ContentServerService contentServerService;
+	@Autowired
+	protected ServiceModuleProvider serviceModuleProvider;
+	@Autowired
+	protected GeneralFormService generalFormService;
     @Autowired
     protected GeneralFormProvider generalFormProvider;
     @Autowired
@@ -104,13 +111,16 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
     @Autowired
     protected GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
-	
+
     public ServiceAllianceFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
             DEFAULT_FIELDS.add(value.getCode());
         }
     }
-	
+
+	@Autowired
+	ClickStatDetailProvider detailProvider;
+
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -159,14 +169,14 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
 		}
-		
+
 		//如果没有选择服务直接返回
 		if (null == yellowPage) {
 			return;
 		}
-		
+
 		flowCase.setContent(contentBuffer.toString());
-		
+
 		Byte status = ServiceAllianceWorkFlowStatus.PROCESSING.getCode();
 		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
 			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
@@ -174,8 +184,37 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		//同步申请到es
 		syncRequest(values, request, flowCase,yellowPage,status);
 		
+		//添加到埋点统计中
+		createCommitStatDetail(flowCase, yellowPage);
+
 		//发送消息给相关人员
 		sendMessage(yellowPage,flowCase, formItemsInfo);
+	}
+
+	private void createCommitStatDetail(FlowCase flowCase, ServiceAlliances service) {
+		if (null == service) {
+			return;
+		}
+
+		ClickStatDetail detail = new ClickStatDetail();
+		detail.setNamespaceId(flowCase.getNamespaceId());
+		detail.setType(service.getParentId());
+		detail.setOwnerId(service.getOwnerId());
+		detail.setCategoryId(service.getCategoryId());
+		detail.setServiceId(service.getId());
+		detail.setClickType(StatClickOrSortType.CLICK_TYPE_COMMIT_TIMES.getCode());
+		detail.setClickTime(System.currentTimeMillis());
+
+		// 设置用户相关信息
+		detail.setUserId(flowCase.getApplyUserId());
+		TargetDTO dto = organizationProvider.findUserContactByUserId(flowCase.getNamespaceId(),
+				flowCase.getApplyUserId());
+		if (null != dto) {
+			detail.setUserName(dto.getTargetName());
+			detail.setUserPhone(dto.getUserIdentifier());
+		}
+
+		detailProvider.createClickStatDetail(detail);
 	}
 
 	private void syncRequest(List<PostApprovalFormItem> values,ServiceAllianceRequestInfo request,FlowCase flowCase,ServiceAlliances  sa, Byte status) {
@@ -432,7 +471,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		if (CollectionUtils.isEmpty(vals)) {
 			return null;
 		}
-		
+
 		List<PostApprovalFormItem> valItems = vals.stream().map(r -> {
 			return ConvertHelper.convert(r, PostApprovalFormItem.class);
 		}).collect(Collectors.toList());
@@ -664,7 +703,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
         }
         return null;
     }
-    
+
     protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
         if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
@@ -679,7 +718,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
         }
         return entities;
     }
-    
+
 
     private void processEntities(
             List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {

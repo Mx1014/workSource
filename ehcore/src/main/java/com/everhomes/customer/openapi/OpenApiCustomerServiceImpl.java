@@ -30,7 +30,7 @@ import com.everhomes.rest.community.BuildingStatus;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerType;
@@ -353,7 +353,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
 
     @Override
     public CommunityResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
-        ListCommunitiesByKeywordCommandResponse response =  communityService.listCommunitiesByCategory(cmd);
+        ListCommunitiesByKeywordResponse response =  communityService.listCommunitiesByCategory(cmd);
         CommunityResponse communityResponse = new CommunityResponse();
         communityResponse.setNextPageAnchor(response.getNextPageAnchor());
         List<CommunityDTO> communityDTOS = new ArrayList<>();

@@ -5,6 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
+import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
@@ -74,6 +75,7 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	@ItemType(Long.class)
 	private List<Long> dayTimes;
 	private String openTimes;
+	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
 	@Override
     public String toString() {
@@ -367,5 +369,13 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 
 	public void setOpenTimes(String openTimes) {
 		this.openTimes = openTimes;
+	}
+
+	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
+		return halfDayTimeIntervals;
+	}
+
+	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
+		this.halfDayTimeIntervals = halfDayTimeIntervals;
 	}
 }

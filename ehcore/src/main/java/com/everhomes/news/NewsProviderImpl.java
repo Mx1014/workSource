@@ -207,11 +207,11 @@ public class NewsProviderImpl implements NewsProvider {
 		if (!StringUtils.isEmpty(ownerType)) {
 			query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
 		}
-		
+
 		if (null != ownerId) {
 			query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
 		}
-		
+
 		query.addConditions(Tables.EH_NEWS_TAG.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
 		if (isSearch != null)
@@ -337,7 +337,29 @@ public class NewsProviderImpl implements NewsProvider {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public Long createNewPreview(News news) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPreview.class));
+		news.setId(id);
+		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if (news.getPublishTime() == null) {
+			news.setPublishTime(news.getCreateTime());
+		}
+		DSLContext context = getReadWriteContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		dao.insert(ConvertHelper.convert(news,EhNewPreview.class));
+		return id;
+	}
+
+	@Override
+	public News findNewPreview(Long id) {
+		DSLContext context = getReadOnlyContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		EhNewPreview result = dao.findById(id);
+		return ConvertHelper.convert(result,News.class);
+	}
+
 	@Override
 	public List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId) {
 		return listNewsTag(UserContext.getCurrentNamespaceId(), ownerType, ownerId, null, 0L, null, null, categoryId);
@@ -354,5 +376,5 @@ public class NewsProviderImpl implements NewsProvider {
 				)
 		.execute();
 	}
-	
+
 }

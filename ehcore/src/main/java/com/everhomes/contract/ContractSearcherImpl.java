@@ -1,8 +1,5 @@
 package com.everhomes.contract;
 
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -18,13 +15,17 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.pm.OrganizationOwnerType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -38,7 +39,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
-import com.everhomes.varField.ScopeField;
 import com.everhomes.varField.ScopeFieldItem;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -87,9 +87,6 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Autowired
     private FieldProvider fieldProvider;
-
-    @Autowired
-    private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
     private PortalService portalService;
@@ -151,7 +148,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
-            builder.field("paymentFlag", contract.getPaymentFlag());
+            if(contract.getPaymentFlag() == null){
+                builder.field("paymentFlag", 0);
+            }else{
+                builder.field("paymentFlag", contract.getPaymentFlag());
+            }
             builder.field("categoryId", contract.getCategoryId());
             
             if(contract.getRent() != null) {
@@ -314,7 +315,6 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getCategoryId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
-
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
@@ -370,7 +370,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
                 }
                 if(contract.getCategoryItemId() != null) {
-                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), contract.getCategoryItemId());
+                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),cmd.getOrgId(), contract.getCommunityId(), contract.getCategoryItemId());
                     if(item != null) {
                         dto.setCategoryItemName(item.getItemDisplayName());
                     }
