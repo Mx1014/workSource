@@ -1536,7 +1536,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setBillGroupId(billGroupId);
                     item.setBillId(nextBillId);
                     item.setChargingItemName(dto.getBillItemName());
-                    item.setChargingItemsId(dto.getBillItemId());
+                    item.setChargingItemsId(dto.getChargingItemsId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dateStr);
