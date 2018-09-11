@@ -59,11 +59,12 @@ public class KetuoYuekongjianParkingVendorHandler extends KetuoParkingVendorHand
     boolean payTempCardFee(ParkingRechargeOrder order){
 		JSONObject param = new JSONObject();
 		int appId = 1;
+        Integer amount = order.getOriginalPrice().multiply(new BigDecimal(100)).intValue();
 		param.put("appId", appId);
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
-		String json = post(param, PAY_TEMP_FEE);
+		String json = doJsonPostPay(order, PAY_TEMP_FEE);
 
         JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
@@ -183,20 +184,98 @@ public class KetuoYuekongjianParkingVendorHandler extends KetuoParkingVendorHand
         LOGGER.info("SendResult from third, url={}, result={}", urlPath, result);
         return result;
 	}
-	
+
+
+    private String doJsonPostPay(ParkingRechargeOrder order, String urlPath) {
+        JSONObject param = new JSONObject();
+        urlPath = configProvider.getValue("parking.yuekongjian.url", "")+urlPath;
+        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+        String iv = sdf2.format(new Date());
+        Integer amount = (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue();
+        Integer payType = VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5;
+        String payMethod = "0";
+        String freeMoney = "0";
+        String freeTime = "0";
+        String p = order.getOrderToken() + amount + payType + payMethod + freeMoney + freeTime + iv + appSecret;
+        String key = MD5Utils.getMD5(p);
+        param.put("appId", "1");
+        param.put("key", key);
+        param.put("orderNo", order.getOrderToken());
+        param.put("amount", amount);
+        param.put("payType", payType);
+        param.put("payMethod", payMethod);
+        param.put("freeMoney", freeMoney);
+        param.put("freeTime", freeTime);
+
+        String json = param.toJSONString();
+        String result = "";
+        BufferedReader reader = null;
+        try {
+            URL url = new URL(urlPath);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Charset", "UTF-8");
+            // 设置文件类型:
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            // 设置接收类型否则返回415错误
+            conn.setRequestProperty("accept", "*/*");// 此处为暴力方法设置接受所有类型，以此来防范返回415;
+            conn.setRequestProperty("accept", "application/json");
+            // 往服务器里面发送数据
+            if (json != null && !("").equals(json)) {
+                byte[] writebytes = json.getBytes();
+                // 设置文件长度
+                conn.setRequestProperty("Content-Length", String.valueOf(writebytes.length));
+                OutputStream outwritestream = (OutputStream) conn.getOutputStream();
+                outwritestream.write(json.getBytes());
+                outwritestream.flush();
+                outwritestream.close();
+
+            }
+            if (conn.getResponseCode() == 200) {
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                result = reader.readLine();
+            }
+        } catch (Exception e) {
+            LOGGER.error("The request error, param={}", json, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "The request error.");
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        LOGGER.info("SendResult from third, url={}, result={}", urlPath, result);
+        return result;
+    }
+
     public static void main (String[] args){
 
-        String urlPath = "http://220.160.111.118:8099/api/wec/GetParkingPaymentInfo";
+        String urlPath = "http://220.160.111.118:8099/api/wec/PayParkingFee2";
        // String urlPath = "http://mops-test.fujica.com.cn:8021/Api/CalculationCost/ApiThirdPartyTemporaryCardPay";
         JSONObject jo = new JSONObject();
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
-        String p = "1CCC002" + iv + "b20887292a374637b4a9d6e9f940b1e6";
+        String freeDetailString = "";
+        String p = "000120180911141352092CCC002" + "1" +"0000" +iv + "b20887292a374637b4a9d6e9f940b1e6";
         String key = MD5Utils.getMD5(p);
         jo.put("appId", "1");
         jo.put("key", key);
-        jo.put("parkId", "1");
-        jo.put("plateNo","CCC002");
+        jo.put("orderNo", "000120180911141352092CCC002");
+        jo.put("amount", "1");
+        jo.put("payType","0");
+        jo.put("payMethod", "0");
+        jo.put("freeMoney", "0");
+        jo.put("freeTime", "0");
+        //jo.put("freeDetail", freeDetailString);
 
         String json = jo.toJSONString();
         String result = "";
