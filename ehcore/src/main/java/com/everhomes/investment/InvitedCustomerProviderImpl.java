@@ -4,6 +4,7 @@ import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
@@ -13,24 +14,25 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhCustomerTrackers;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
 import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerRequirementAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackersDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerRequirementAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
+import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -321,9 +324,10 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap) {
+    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
+        List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize);
         Field<?>[] fieldArray = new Field[itemIds.size()];
         List<Field<?>> fields = new ArrayList<>();
         itemIds.forEach((itemId) -> {
@@ -337,7 +341,12 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(customer.COMMUNITY_ID.eq(communityId));
         query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
+        // related record searcher
+        if(startAreaSize!=null || endAreaSize!=null){
+            query.addConditions(customer.ID.in(customerIds));
+        }
         query.addFrom(customer);
+        callback.buildCondition(null, query);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("count investment enterprise, sql=" + query.getSQL());
             LOGGER.debug("count investment  enterprise , bindValues=" + query.getBindValues());
@@ -355,6 +364,15 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             return null;
         });
         return result;
+    }
+
+    private List<Long> getRelatedStatistics(BigDecimal startAreaSize, BigDecimal endAreaSize) {
+        if(startAreaSize!=null || endAreaSize!=null){
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+            com.everhomes.server.schema.tables.EhCustomerRequirements requirements = Tables.EH_CUSTOMER_REQUIREMENTS;
+
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.everhomes.investment;
 
 
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -19,7 +18,9 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerCurrentRentDTO;
 import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.CustomerRequirementAddressDTO;
 import com.everhomes.rest.investment.CustomerRequirementDTO;
 import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.rest.investment.InvitedCustomerDTO;
@@ -31,6 +32,7 @@ import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -260,7 +262,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
-                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), itemsMap.keySet(),itemsMap);
+                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(),cmd.getStartAreaSize(),cmd.getEndAreaSize(), itemsMap.keySet(), itemsMap, (locator, query) -> {
+                    if (cmd.getCorpIndustryItemId() != null) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CORP_INDUSTRY_ITEM_ID.eq(cmd.getCorpIndustryItemId()));
+                    }
+                    if (cmd.getSourceItemId() != null) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.SOURCE_ITEM_ID.eq(cmd.getSourceItemId()));
+                    }
+
+                    return query;
+                });
             }
             response.setStatistics(statistics);
         }
