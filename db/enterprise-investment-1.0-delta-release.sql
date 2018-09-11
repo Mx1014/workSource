@@ -1,6 +1,3 @@
--- 执行完所有sql之后，调用此接口
--- /invitedCustomer/syncTrackerData
-
 
 set @eecid=(select max(id)+1 from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);

@@ -4,7 +4,6 @@ package com.everhomes.investment;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -30,7 +29,6 @@ import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldService;
@@ -289,31 +287,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void syncTrackerData() {
-        //sync origin customer tracker data
-        ListingLocator locator = new ListingLocator();
-        int pageSize = 200;
-        List<EnterpriseCustomer> customers = invitedCustomerProvider.listCustomersByType(InvitedCustomerType.INVITED_CUSTOMER.getCode(), locator, pageSize);
-        if (customers != null && customers.size() > 0) {
-            customers.forEach((customer) -> {
-                if (customer.getTrackingUid() != null && customer.getTrackingUid() != 0L) {
-                    CustomerTracker tracker = new CustomerTracker();
-                    tracker.setCommunityId(customer.getCommunityId());
 
-                    tracker.setCreatorUid(1L);
-                    tracker.setCustomerId(customer.getId());
-                    tracker.setStatus(CommonStatus.ACTIVE.getCode());
-                    tracker.setNamespaceId(customer.getNamespaceId());
-                    tracker.setTrackerUid(customer.getCreatorUid());
-                    // sync logic code
-                    if (InvitedCustomerType.INVITED_CUSTOMER.equals(InvitedCustomerType.fromCode(customer.getCustomerSource()))) {
-                        tracker.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
-                    }else {
-                        tracker.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-                    }
-                    invitedCustomerProvider.createTracker(tracker);
-                }
-            });
-        }
     }
 }
 
