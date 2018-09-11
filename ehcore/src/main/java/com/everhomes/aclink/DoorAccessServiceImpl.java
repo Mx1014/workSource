@@ -35,6 +35,7 @@ import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -94,6 +95,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.hibernate.boot.model.naming.Identifier;
 import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -4229,21 +4231,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
         resp.setDtos(new ArrayList<AclinkLogDTO>());
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        /*
-        if(cmd.getStartTime() == null) {
-            cmd.setStartTime(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
-        }else{
-            cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
-        }
-        if(cmd.getEndTime() == null) {
-            cmd.setEndTime(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
-        }else{
-            cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
-        }
-        */
+
+//        if(cmd.getStartTime() == null) {
+//            cmd.setStartTime(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
+//        }else{
+//            cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
+//        }
+//        if(cmd.getEndTime() == null) {
+//            cmd.setEndTime(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
+//        }else{
+//            cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
+//        }
+
         List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -4278,15 +4279,86 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             
         });
         
-//        for(AclinkLog obj : objs) {
-//            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
-//            resp.getDtos().add(dto);
-//        }
+        for(AclinkLogDTO obj : objs) {
+            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
+            resp.getDtos().add(dto);
+        }
         resp.setDtos(objs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
-    
+    //add by liqingyan
+    @Override
+    public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        DoorStatisticResponse resp = new DoorStatisticResponse();
+        resp.setDtos(new DoorStatisticDTO());
+//        DoorStatisticDTO dto = new DoorStatisticDTO();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Condition condition = Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType());
+//        condition = condition.and(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
+
+//service 传条件
+//        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//        ListingLocator locator = new ListingLocator();
+//        List<DoorStatisticDTO> objs = aclinkLogProvider.queryDoorStatisticDTO(locator, count, new ListingQueryBuilderCallback() {
+//            @Override
+//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+//                if (cmd.getOwnerType() != null) {
+//                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
+//                }
+//                if (cmd.getOwnerId() != null) {
+//                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
+//                }
+//                return query;
+//            }
+//        });
+
+
+        DoorStatisticDTO objs =aclinkLogProvider.queryDoorStatistic(cmd);
+        resp.setDtos(objs);
+        return resp;
+    }
+
+    //add by liqingyan
+//    @Override
+//    public DoorStatisticResponse DoorStatistic(DoorStatisticCommand cmd) {
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        DoorStatisticResponse resp = new DoorStatisticResponse();
+//        resp.setDtos(new ArrayList<DoorStatisticDTO>());
+//        List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOs();
+//        for(DoorStatisticDTO obj : objs) {
+//            DoorStatisticDTO dto = ConvertHelper.convert(obj, DoorStatisticDTO.class);
+//            resp.getDtos().add(dto);
+//        }
+//        resp.setDtos(objs);
+//        return resp;
+//    }
+
+
+
+//参考
+    //    DoorAuthStatisticsDTO dto = new DoorAuthStatisticsDTO();
+//    Integer namespaceId = UserContext.getCurrentNamespaceId();
+//    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+//        if(door == null){
+//        throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "门禁不存在或已删除");
+//    }
+//        if(door.getOwnerType() == 0){
+//        //小区,认证状态需要与用户认证一致;公司未认证且不在园区中的用户,不作统计
+//        Community community = communityProvider.findCommunityById(door.getOwnerId());
+//        Long utn = doorAuthProvider.countCommunityDoorAuthUser(null, null, cmd.getDoorId(), community.getId(), community.getCommunityType(), namespaceId, cmd.getRightType());
+//        dto.setUtn(utn);
+//        dto.setUaucutn(uaucutn);
+//    }else{
+//        //企业或家庭,按以前方式统计
+//        Long utn = doorAuthProvider.countDoorAuthUser(null, null, cmd.getDoorId(), namespaceId, cmd.getRightType());
+//        dto.setUtn(utn);
+//    }
+//        return dto;
+
+
+
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
         return doorAuthProvider.getLinglingDoorAuthByUuid(uuid);

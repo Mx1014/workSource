@@ -97,7 +97,8 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
-
+//add by liqingyan
+//    DoorStatisticResponse DoorStatistic(DoorStatisticCommand cmd);
     void test();
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
@@ -123,6 +124,8 @@ public interface DoorAccessService {
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 //add by liqingyan
     void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
+//add by liqingyan
+    DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd);
 
     String checkAllDoorAuthList();
 

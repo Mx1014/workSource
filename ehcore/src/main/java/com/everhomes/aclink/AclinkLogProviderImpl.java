@@ -3,34 +3,27 @@ package com.everhomes.aclink;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import com.everhomes.rest.aclink.*;
+import com.everhomes.server.schema.tables.EhDoorAccess;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.aclink.AclinkLogDTO;
-import com.everhomes.rest.aclink.AclinkLogEventType;
-import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinkLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
 import com.everhomes.server.schema.tables.records.EhAclinkLogsRecord;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class AclinkLogProviderImpl implements AclinkLogProvider {
@@ -152,6 +145,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         return objs;
     }
 
+    @Override
     public List<AclinkLogDTO> queryAclinkLogDTOsByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
         SelectQuery<Record> query = context.selectQuery();
@@ -194,9 +188,59 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
 
         return objs;
     }
+//add by liqingyan 需要修改
+    @Override
+    public List<DoorStatisticDTO> queryDoorStatisticDTO (ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_LOGS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+        query.addOrderBy(Tables.EH_ACLINK_LOGS.CREATE_TIME.desc());
+        query.addJoin(Tables.EH_DOOR_AUTH,Tables.EH_ACLINK_LOGS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID));
+        query.addConditions(Tables.EH_ACLINK_LOGS.AUTH_ID.ne(0L));
+        query.addSelect(Tables.EH_DOOR_AUTH.AUTH_TYPE);
+        List<DoorStatisticDTO> objs = query.fetch().map((r) -> {
+            DoorStatisticDTO dto = ConvertHelper.convert(r, DoorStatisticDTO.class);
+            return dto;
+        });
+        return objs;
+    }
+    //add by liqingyan
+
+    public DoorStatisticDTO queryDoorStatistic(DoorStatisticCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        DoorStatisticDTO dto = new DoorStatisticDTO();
+        com.everhomes.server.schema.tables.EhAclinkLogs t = Tables.EH_ACLINK_LOGS.as("t");
+        EhDoorAccess t1 = Tables.EH_DOOR_ACCESS.as("t1");
+        com.everhomes.server.schema.tables.EhDoorAuth t2 = Tables.EH_DOOR_AUTH.as("t2");
+
+        Result<Record1<Integer>> rlt1 = context.select(t1.ID.count().as("door"))
+                .from(t1).fetch();
+        Result<Record1<Integer>> rlt2 = context.select(t.ID.count().as("open"))
+                .from(t)
+                .where(t.AUTH_ID.ne(0L))
+                .fetch();
+        Result<Record1<Integer>> rlt3 = context.select(t.AUTH_ID.count().as("temp"))
+                .from(t,t2)
+                .where(t.AUTH_ID.ne(0L))
+                .and(t.AUTH_ID.eq(t2.ID))
+                .and(t2.AUTH_TYPE.eq((byte)1)).fetch();
+        Result<Record1<Integer>> rlt4 = context.select(t.AUTH_ID.count().as("perm"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(t.AUTH_ID.ne(0L))
+                .and(t2.AUTH_TYPE.eq((byte)0)).fetch();
+        dto.setActiveDoor(new Long((Integer)rlt1.get(0).getValue("door")));
+        dto.setOpenTotal(new Long ((Integer)rlt2.get(0).getValue("open")));
+        dto.setTempAuthTotal(new Long ((Integer)rlt3.get(0).getValue("temp")));
+        dto.setPermAuthTotal(new Long ((Integer)rlt4.get(0).getValue("perm")));
+        return dto;
+    }
+
 
     private void prepareObj(AclinkLog obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
     }
+
 }

@@ -506,8 +506,24 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
-    
+    }
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/doorStatistic</b>
+     * <p>门禁综合统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("doorStatistic")
+    @RestReturn(value=DoorStatisticDTO.class)
+    public RestResponse doorStatistic(@Valid DoorStatisticCommand cmd) {
+        DoorStatisticResponse obj = doorAccessService.doorStatistic(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
     /**
      * <b>URL: /admin/aclink/createQRUserPermission</b>
      * <p>创建保安二维码授权</p>

@@ -6,6 +6,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.aclink.AclinkLogDTO;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
+import com.everhomes.rest.aclink.DoorStatisticCommand;
+import com.everhomes.rest.aclink.DoorStatisticDTO;
 
 public interface AclinkLogProvider {
 
@@ -24,5 +26,9 @@ public interface AclinkLogProvider {
 
     List<AclinkLogDTO> queryAclinkLogDTOsByTime(ListingLocator locator, int count,
                                              ListingQueryBuilderCallback queryBuilderCallback);
+    //add by liqingyan
+    List<DoorStatisticDTO> queryDoorStatisticDTO(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
+    //add by liqingyan
+    DoorStatisticDTO queryDoorStatistic(DoorStatisticCommand cmd);
 
 }
