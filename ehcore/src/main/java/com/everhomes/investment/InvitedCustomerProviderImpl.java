@@ -1,7 +1,9 @@
 package com.everhomes.investment;
 
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
@@ -9,15 +11,16 @@ import com.everhomes.rest.investment.InvitedCustomerStatus;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhCustomerTrackers;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackersDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -116,13 +119,24 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public Long createTracker(CustomerTracker contact) {
-        return null;
+    public Long createTracker(CustomerTracker tracker) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrackers.class));
+        tracker.setId(id);
+        tracker.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
+        dao.insert(tracker);
+        return id;
     }
 
     @Override
-    public Long updateTracker(CustomerTracker contact) {
-        return null;
+    public Long updateTracker(CustomerTracker tracker) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
+        tracker.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        tracker.setOperatorUid(UserContext.currentUserId());
+        dao.update(tracker);
+        return tracker.getId();
     }
 
     @Override
@@ -328,5 +342,10 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                 .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
                 .where(contact.CUSTOMER_ID.eq(id))
                 .execute();
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize) {
+        return null;
     }
 }

@@ -1,5 +1,7 @@
 package com.everhomes.investment;
 
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 
@@ -56,4 +58,6 @@ public interface InvitedCustomerProvider {
     void deleteInvitedCustomer(Long id);
 
     void deleteCustomerContacts(Long id);
+
+    List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize);
 }

@@ -157,6 +157,21 @@ public class InvitedCustomerController {
     }
 
 
+    /**
+     * <b>URL: /invitedCustomer/syncTrackerData</b>
+     * <p> 迁移原始跟进人信息 </p>
+     */
+    @RequestMapping("syncTrackerData")
+    @RestReturn(value=String.class)
+    public RestResponse syncTrackerData() {
+        invitedCustomerService.syncTrackerData();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 
 
 }

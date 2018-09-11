@@ -1,3 +1,7 @@
+-- 执行完所有sql之后，调用此接口
+-- /invitedCustomer/syncTrackerData
+
+
 set @eecid=(select max(id)+1 from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'entryStatusItemId', '入驻状态', 'Long', 10, '/1/10/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
