@@ -1788,7 +1788,7 @@ public class AssetProviderImpl implements AssetProvider {
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM
-                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID)
+                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.CAN_DELETE, r.CAN_MODIFY)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
@@ -1820,10 +1820,14 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setSourceType(f.getValue(r.SOURCE_TYPE));
                     vo.setSourceName(f.getValue(r.SOURCE_NAME));
                     vo.setConsumeUserId(f.getValue(r.CONSUME_USER_ID));
+                    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+                    vo.setCanDelete(f.getValue(r.CAN_DELETE));
+                    vo.setCanModify(f.getValue(r.CAN_MODIFY));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
-        		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE)
+        		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE
+        		, o.SOURCE_ID, o.SOURCE_TYPE, o.SOURCE_NAME, o.CONSUME_USER_ID, o.CAN_DELETE, o.CAN_MODIFY)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1854,6 +1858,14 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setAmountReceivableWithoutTax(f.getValue(o.AMOUNT_RECEIVABLE_WITHOUT_TAX));//增加应收（不含税）
                     itemDTO.setTaxAmount(f.getValue(o.TAX_AMOUNT));//税额
                     itemDTO.setTaxRate(f.getValue(o.TAX_RATE));//税率
+                    //新增账单来源信息
+                    itemDTO.setSourceId(f.getValue(o.SOURCE_ID));
+                    itemDTO.setSourceType(f.getValue(o.SOURCE_TYPE));
+                    itemDTO.setSourceName(f.getValue(o.SOURCE_NAME));
+                    itemDTO.setConsumeUserId(f.getValue(o.CONSUME_USER_ID));
+                    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+                    itemDTO.setCanDelete(f.getValue(o.CAN_DELETE));
+                    itemDTO.setCanModify(f.getValue(o.CAN_MODIFY));
                     list1.add(itemDTO);
                     return null;
                 });
@@ -1868,8 +1880,15 @@ public class AssetProviderImpl implements AssetProvider {
                 // 左邻convert为浅拷贝，第一层字段更改不会影响之前的
                 nitem.setBillItemName(n.getName());
                 nitem.setAmountReceivable(n.getAmount());
+                nitem.setAmountReceivableWithoutTax(n.getAmount());
+                nitem.setTaxAmount(BigDecimal.ZERO);
+                nitem.setTaxRate(BigDecimal.ZERO);
                 nitem.setItemFineType(AssetItemFineType.lateFine.getCode());//增加费项类型字段
                 nitem.setItemType(AssetSubtractionType.lateFine.getCode());//费项类型
+                //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+                //滞纳金是当成一个费项来展示的，这个会涉及滞纳金的后台计算，应该再区分滞纳金/费项，是滞纳金不允许编辑/删除。
+                nitem.setCanDelete((byte)0);
+                nitem.setCanModify((byte)0);
                 fineList.add(nitem);
             }
         }
