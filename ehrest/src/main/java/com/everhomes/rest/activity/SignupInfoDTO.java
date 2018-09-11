@@ -74,8 +74,17 @@ public class SignupInfoDTO {
     private Timestamp refundTime;
 	private Byte status;
 	private String signupStatusText;
+	private String activitySubject;
 
-    public String getRealName() {
+    public String getActivitySubject() {
+		return activitySubject;
+	}
+
+	public void setActivitySubject(String activitySubject) {
+		this.activitySubject = activitySubject;
+	}
+
+	public String getRealName() {
         return realName;
     }
 

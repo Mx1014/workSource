@@ -179,8 +179,6 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("exportCommunityUsers")
     public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
         communityService.exportCommunityUsers(cmd, response);
-
-
     }
 	
 	/**
@@ -211,7 +209,6 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    	
     }
 
     /**
