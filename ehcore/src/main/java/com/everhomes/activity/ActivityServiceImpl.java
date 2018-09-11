@@ -3015,7 +3015,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode(generateAccountCode());
         createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
-        createRefundOrderCommand.setAmount(roster.getPayAmount().longValue());
+        Double payAmount = roster.getPayAmount().doubleValue() * 100;
+        createRefundOrderCommand.setAmount(payAmount.longValue());
         createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
         createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
         createRefundOrderCommand.setCallbackUrl(getPayCallbackUrl());
