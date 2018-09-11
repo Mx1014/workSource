@@ -720,6 +720,7 @@ public class AssetProviderImpl implements AssetProvider {
         //物业缴费V6.0 账单、费项表增加是否删除状态字段,0：已删除；1：正常使用
         if(!org.springframework.util.StringUtils.isEmpty(deleteFlag)) {
         	query.addConditions(t.DELETE_FLAG.eq(deleteFlag));
+        	query.addConditions(t2.DELETE_FLAG.eq(deleteFlag));
         }
         
         query.addGroupBy(t.ID);
@@ -801,6 +802,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
+                .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode())) //物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .limit(firstOffset,pageSize+1)
                 .getSQL();
         context.fetch(sql,billId,pageSize + 1,firstOffset)
@@ -857,6 +859,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .leftOuterJoin(t2)
                     .on(t.ADDRESS_ID.eq(t2.ID))
                     .where(t3.BILL_ITEM_ID.eq(dto.getBillItemId()))
+                    .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode())) //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .fetch()
                     .forEach(r -> {
                         BillDTO fineDTO = (BillDTO)dto.clone();
@@ -884,6 +887,7 @@ public class AssetProviderImpl implements AssetProvider {
         dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME,Tables.EH_PAYMENT_BILLS.DATE_STR, Tables.EH_PAYMENT_BILLS.NAMESPACE_ID)
                 .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode())) //物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch().map(r -> {
             NoticeInfo info = new NoticeInfo();
             info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
@@ -931,6 +935,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         //已出账单，排除了未来账单
         query.addConditions(t.SWITCH.eq((byte)1));
+        query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
 
         if(billGroupId!=null){
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
@@ -1284,6 +1289,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(billStatus!=null){
             query.addConditions(t.STATUS.eq(billStatus));
         }
+        query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         try {
             query.fetch()
                     .map(r -> {
@@ -1785,6 +1791,7 @@ public class AssetProviderImpl implements AssetProvider {
                 , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID)
                 .from(r)
                 .where(r.ID.eq(billId))
+                .and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch()
                 .map(f -> {
                     vo.setBillId(f.getValue(r.ID));
@@ -1823,6 +1830,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .leftOuterJoin(t1)
                 .on(o.ADDRESS_ID.eq(t1.ID))
                 .where(o.BILL_ID.eq(billId))
+                .and(o.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .orderBy(k.DEFAULT_ORDER)
                 .fetch()
                 .map(f -> {
@@ -1937,6 +1945,7 @@ public class AssetProviderImpl implements AssetProvider {
         queryAddr.addSelect(o2.BUILDING_NAME,o2.APARTMENT_NAME);
         queryAddr.addFrom(o2);
         queryAddr.addConditions(o2.BILL_ID.eq(billId));
+        queryAddr.addConditions(o2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         queryAddr.fetch()
         	.map(f -> {
         		String newAddr = f.getValue(o2.BUILDING_NAME) + "/" + f.getValue(o2.APARTMENT_NAME);
@@ -1965,6 +1974,7 @@ public class AssetProviderImpl implements AssetProvider {
         		, r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT);
         query.addFrom(r);
         query.addConditions(r.ID.eq(billId));
+        query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         if(cmd.getDateStrBegin() != null) {
         	query.addConditions(r.DATE_STR_BEGIN.greaterOrEqual(cmd.getDateStrBegin()));
         }
@@ -2063,6 +2073,7 @@ public class AssetProviderImpl implements AssetProvider {
         Long fetch = context.select(Tables.EH_PAYMENT_BILLS.CATEGORY_ID)
                 .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetchOne(Tables.EH_PAYMENT_BILLS.CATEGORY_ID);
         if(fetch != null && fetch.longValue() == categoryId.longValue()){
             return true;
@@ -2097,6 +2108,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(r.OWNER_ID.eq(ownerId));
         query.addConditions(r.OWNER_TYPE.eq(ownerType));
         query.addConditions(r.SWITCH.eq((byte)1));
+        query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         query.addGroupBy(r.DATE_STR);
         query.addOrderBy(r.DATE_STR);
         query.fetch()
@@ -2123,12 +2135,14 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t1)
                 .where(t1.SWITCH.eq((byte) 1))
                 .and(t1.CATEGORY_ID.eq(categoryId))
+                .and(t1.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),t.NAME,t.ID);
 //        query.addFrom(t,o);
         query.addFrom(t);
         query.addJoin(o);
+        query.addConditions(o.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
 
 //        query.addJoin(o);
         if(settledBillIds!=null&& settledBillIds.size()>0){
@@ -2213,6 +2227,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addConditions(t.CATEGORY_ID.eq(categoryId));
         query.addConditions(t.SWITCH.eq((byte)1));
+        query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         Table<Record> r = query.asTable("r");
 
         context.select(DSL.sum(r.field(t.AMOUNT_RECEIVED)), DSL.sum(r.field(t.AMOUNT_RECEIVABLE)), DSL.sum(r.field(t.AMOUNT_OWED)), o.NAME)
@@ -2788,9 +2803,11 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void deleteBillItem(Long billItemId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
-                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
-                .execute();
+        //删除费项（置状态）
+        context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
+    		.where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+            .execute();
     }
 
     @Override
@@ -2892,6 +2909,7 @@ public class AssetProviderImpl implements AssetProvider {
         context.update(Tables.EH_PAYMENT_BILLS)
                 .set(Tables.EH_PAYMENT_BILLS.NOTICE_TIMES,Tables.EH_PAYMENT_BILLS.NOTICE_TIMES.add(1))
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .execute();
     }
 
@@ -2986,6 +3004,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(t.SWITCH,t.NEXT_SWITCH)
                     .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte)3))
+                    .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .execute();
             context.update(t1)
                     .set(t1.STATUS,(byte)1)
@@ -3364,6 +3383,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(ownerId!=null){
             query.addConditions(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId));
         }
+        query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         return query.fetch(Tables.EH_PAYMENT_BILLS.ID);
     }
 
@@ -3645,6 +3665,7 @@ public class AssetProviderImpl implements AssetProvider {
             	            .and(bill.CATEGORY_ID.eq(categoryId))
             	            .and(bill.OWNER_ID.eq(communityId))
             	            .and(bill.SWITCH.eq((byte) 0).or(bill.SWITCH.eq((byte) 3))) //未出账单 or 合同那边的草稿合同费用清单
+            	            .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
             	            .fetch()
             	            .forEach(r -> {
             	            	billIds.add(r.getValue(bill.ID));
@@ -3662,6 +3683,7 @@ public class AssetProviderImpl implements AssetProvider {
                                 .and(t.CATEGORY_ID.eq(categoryId))
                                 .and(t.OWNER_ID.eq(communityId))
                                 .and(billItems.BILL_ID.in(billIds))
+                                .and(billItems.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                                 .fetch()
                                 .forEach(r -> {
                                 	//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
@@ -4539,6 +4561,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(bills.BILL_GROUP_ID.eq(rule.getBillGroupId()))
                 .and(bills.SWITCH.notEqual((byte)3))
                 //todo 限定条件应该排除已经缴纳的账单，但已经缴纳的账单的需要增加一个账单组历史名称,且兼容历史数据，即数据迁移
+                .and(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch(bills.ID);
         if(fetch.size()>0){
             workFlag = true;
@@ -5054,6 +5077,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addConditions(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1));
         query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0));
+        query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         return query.fetchInto(PaymentBills.class);
     }
 
@@ -5071,6 +5095,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_BILLS.TARGET_ID.eq(organizationId));
         }
         query.addConditions(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 1));
+        query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         return query.fetchInto(PaymentBills.class);
     }
     public List<com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean withBro) {
@@ -5092,6 +5117,7 @@ public class AssetProviderImpl implements AssetProvider {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.CONTRACT_ID.in(contractIds))
                 .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetchInto(PaymentBills.class);
     }
 
@@ -5294,6 +5320,7 @@ public class AssetProviderImpl implements AssetProvider {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)1))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetchInto(PaymentBills.class);
     }
 
@@ -5316,6 +5343,7 @@ public class AssetProviderImpl implements AssetProvider {
         		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch()
                 .forEach(r -> {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));//应收
@@ -5399,6 +5427,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentBills> paymentBills = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
                 .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .limit(pageOffset.intValue(), pageSize+1)
                 .fetchInto(PaymentBills.class);
         if(paymentBills.size() > pageSize){
@@ -5416,6 +5445,7 @@ public class AssetProviderImpl implements AssetProvider {
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                 .set(Tables.EH_PAYMENT_BILLS.CHARGE_STATUS,(byte)1)
                 .where(Tables.EH_PAYMENT_BILLS.ID.eq(id))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .execute();
     }
 
@@ -5423,6 +5453,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<PaymentBillItems> getBillItemsByBillIds(List<Long> overdueBillIds) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(overdueBillIds))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetchInto(PaymentBillItems.class);
     }
 
@@ -5554,6 +5585,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
                 .where(Tables.EH_PAYMENT_BILLS.CUSTOMER_TEL.eq(token))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.USER.getCode()))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .execute();
     }
 
@@ -5564,6 +5596,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(Tables.EH_PAYMENT_BILLS.TARGET_ID, ownerUid)
                 .where(Tables.EH_PAYMENT_BILLS.TARGET_NAME.eq(orgName))
                 .and(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .execute();
     }
 
@@ -5596,6 +5629,7 @@ public class AssetProviderImpl implements AssetProvider {
         dslContext.select(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME, Tables.EH_PAYMENT_BILL_ITEMS.BUILDING_NAME)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(id))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch()
                 .forEach(r -> {
                     String apartment = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME);
@@ -5811,6 +5845,7 @@ public class AssetProviderImpl implements AssetProvider {
 					            .from(t)
 					            .where(t.CONTRACT_ID.eq(contractId))
 					            .and(t.SWITCH.eq((byte) 0))
+					            .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 					            .orderBy(t.DATE_STR.asc())
 					            .limit(1)
 					            .fetchOne();
@@ -5825,6 +5860,7 @@ public class AssetProviderImpl implements AssetProvider {
 		context.select()
 			   .from(t)
 			   .where(t.BILL_ID.eq(billId))
+			   .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 			   .fetch()
 			   .forEach(r->{
 				   PaymentBillItems billItem = ConvertHelper.convert(r, PaymentBillItems.class);
@@ -5850,6 +5886,7 @@ public class AssetProviderImpl implements AssetProvider {
 			   	.where(t.CONTRACT_ID.eq(contractId))
 	            .and(t.SWITCH.eq((byte) 0))
 	            .and(t.DATE_STR_BEGIN.le(endTimestr))
+	            .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 	            .orderBy(t.DATE_STR.asc())
 	            .fetch()
 	            .forEach(r->{
@@ -5889,6 +5926,7 @@ public class AssetProviderImpl implements AssetProvider {
 		List<PaymentBills> list = context.select()
 										.from(bills)
 										.where(bills.CONTRACT_ID.eq(contractId))
+										.and(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 										.orderBy(bills.DATE_STR_BEGIN.desc())
 										.limit(0,1)
 										.fetchInto(PaymentBills.class);
@@ -5913,6 +5951,7 @@ public class AssetProviderImpl implements AssetProvider {
 						        		.where(billItems.CONTRACT_ID.eq(contractId))
 						        		.and(billItems.DATE_STR_BEGIN.le(endTimeStr))
 						        		.and(billItems.CHARGING_ITEMS_ID.eq(chargingItemId))
+						        		.and(billItems.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 						        		.groupBy(billItems.DATE_STR_END)
 						        		.orderBy(billItems.DATE_STR_END.desc())
 						        		.limit(0, 1)
@@ -5952,6 +5991,7 @@ public class AssetProviderImpl implements AssetProvider {
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         Byte status = new Byte("1");
         query.addConditions(t.SWITCH.eq(status));
+        query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
         	query.addConditions(t.CATEGORY_ID.eq(categoryId));//增加多入口查询条件
         }
@@ -6112,6 +6152,7 @@ public class AssetProviderImpl implements AssetProvider {
         queryAddr.addSelect(o2.BUILDING_NAME,o2.APARTMENT_NAME);
         queryAddr.addFrom(o2);
         queryAddr.addConditions(o2.BILL_ID.eq(billId));
+        queryAddr.addConditions(o2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         queryAddr.fetch()
         	.map(f -> {
         		String newAddr = f.getValue(o2.BUILDING_NAME) + "/" + f.getValue(o2.APARTMENT_NAME);
@@ -6131,6 +6172,7 @@ public class AssetProviderImpl implements AssetProvider {
         		, r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT);
         query.addFrom(r);
         query.addConditions(r.ID.eq(billId));
+        query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         query.fetch()
                 .map(f -> {
                     vo.setBillId(f.getValue(r.ID));
@@ -6335,50 +6377,6 @@ public class AssetProviderImpl implements AssetProvider {
        return response;
 	}
 	
-	public void transferOrderPaymentType() {
-		DSLContext writeContext = getReadWriteContext();
-		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-		writeContext.update(t4)
-	        .set(t4.PAYMENT_TYPE, "8")//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
-	        .execute();
-		writeContext.update(t)
-			.set(t.PAYMENT_TYPE, 8)//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
-			.where(t.STATUS.eq((byte)1))//0: upfinished; 1: paid off（已缴）
-			.execute();
-		//根据支付订单ID列表查询订单信息，如果查的到支付方式，那么刷新支付方式
-        List<PaymentOrderBillDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID, t.ID);
-        query.addFrom(t);
-        query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
-        query.fetch().map(r -> {
-        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
-        	dto.setUserId(r.getValue(t.ID));//存eh_payment_bills表的id，方便更新eh_payment_bills表的支付方式
-        	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便更新EH_ASSET_PAYMENT_ORDER表的支付方式
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
-            list.add(dto);
-            return null;
-        });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        //支付订单信息一次最多查询100个
-        while(payOrderIds.size() >= 99) {
-        	List<Long> queryIds = payOrderIds.subList(0, 99); 
-        	queryAndTransfer(queryIds, list);
-        	payOrderIds.removeAll(queryIds);
-        }
-        queryAndTransfer(payOrderIds, list);
-    }
 	
 	private void queryAndTransfer(List<Long> queryIds, List<PaymentOrderBillDTO> list) {
 		DSLContext writeContext = getReadWriteContext();
@@ -6414,8 +6412,6 @@ public class AssetProviderImpl implements AssetProvider {
         }
 	}
 
-    
-
     public String getProjectNameByBillID(Long billId) {
 		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)
 	        .from(Tables.EH_COMMUNITIES,Tables.EH_PAYMENT_BILLS)
@@ -6434,6 +6430,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addSelect(r.ID,r.TARGET_ID,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM);
         query.addFrom(r);
         query.addConditions(r.ID.eq(billId));
+        query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
         query.fetch()
                 .map(f -> {
                     vo.setBillId(f.getValue(r.ID));
@@ -6562,6 +6559,7 @@ public class AssetProviderImpl implements AssetProvider {
 	            .from(Tables.EH_PAYMENT_BILL_ITEMS)
 	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
 	            .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+	            .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 	            .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
 		return chargingItemId;
 	}
@@ -6747,6 +6745,7 @@ public class AssetProviderImpl implements AssetProvider {
 					.from(billItems)
 					.where(billItems.CONTRACT_ID.eq(contractId))
 					.and(billItems.DATE_STR_BEGIN.gt(endTimeStr))
+					.and(billItems.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 					.orderBy(billItems.DATE_STR_BEGIN.asc())
 					.limit(0,1)
 					.fetchInto(PaymentBillItems.class);

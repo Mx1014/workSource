@@ -5023,10 +5023,6 @@ public class AssetServiceImpl implements AssetService {
 		return response;
 	}
 
-	public void transferOrderPaymentType() {
-		assetProvider.transferOrderPaymentType();
-	}
-	
 	//issue 31594,计算天企汇历史合同的租赁总额字段
 	@Override
 	public void calculateRentForContract(CalculateRentCommand cmd){
