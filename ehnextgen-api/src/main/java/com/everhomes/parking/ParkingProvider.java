@@ -165,7 +165,7 @@ public interface ParkingProvider {
 
     List<ParkingLot> findParkingLotByIdHash(String parkingLotToken);
 
-    ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo);
-
     ParkingLot userNoticeFindByParkingLotId(long owerId);
+
+	ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo);
 }

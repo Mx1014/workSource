@@ -35,9 +35,7 @@ public class InvoiceServiceImpl implements InvoiceService{
     public ListNotInvoicedOrdersResponse listNotInvoicedOrders(ListNotInvoicedOrdersCommand cmd) {
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor()==null?0:cmd.getPageAnchor();
-        ParkingRechargeOrder parkingRechargeOrder = parkingProvider.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
         List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrdersByUserId(cmd.getUserId(),cmd.getStartCreateTime(),cmd.getEndCreateTime(),pageSize,pageAnchor);
-        list.add(0, parkingRechargeOrder);
         Map<String,ParkingLot> lotsMap = new HashMap<String,ParkingLot>();
         ListNotInvoicedOrdersResponse response = new ListNotInvoicedOrdersResponse();
         if(list !=null && list.size()>0 ){
@@ -68,7 +66,7 @@ public class InvoiceServiceImpl implements InvoiceService{
             throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
                     "not find orderno");
         }
-        rechargeOrder.setInvoiceStatus((byte)2);
+        rechargeOrder.setInvoiceStatus(cmd.getStatus());
         rechargeOrder.setInvoiceCreateTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingRechargeOrder(rechargeOrder);
     }
@@ -90,5 +88,10 @@ public class InvoiceServiceImpl implements InvoiceService{
         List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
         List<ParkingLotDTO> parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class)).collect(Collectors.toList());
         return parkingLotList;
+    }
+    
+    @Override
+    public ParkingRechargeOrder parkingRechargeOrdersByOrderNo (long orderNo){
+		return parkingProvider.parkingRechargeOrdersByOrderNo(orderNo);
     }
 }

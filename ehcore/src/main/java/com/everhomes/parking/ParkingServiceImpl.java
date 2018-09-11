@@ -3600,8 +3600,11 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingLot getParkingUserNotice(long parkingLotId) {
+	public ParkingLotDTO getParkingUserNotice(long parkingLotId) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
-		return parkingLot;
+		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
+		newParkingLot.setContact(parkingLot.getContact());
+		newParkingLot.setSummary(parkingLot.getSummary());
+		return newParkingLot;
 	}
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking.invoice;
 
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.invoice.*;
 
@@ -18,4 +19,6 @@ public interface InvoiceService {
     GetPayeeIdByOrderNoResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd);
 
     List<ParkingLotDTO> listAllParkingLots(ListAllParkingLotsCommand cmd);
+
+	ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo);
 }

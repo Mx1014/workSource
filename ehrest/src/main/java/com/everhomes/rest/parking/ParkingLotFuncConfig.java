@@ -38,10 +38,6 @@ public class ParkingLotFuncConfig {
 
     private List<Byte> flowModeList;
 
-    private Byte enableNotice;
-
-    private Byte enableInvoice;
-
     public String getOwnerType() {
         return ownerType;
     }
@@ -105,14 +101,6 @@ public class ParkingLotFuncConfig {
     public void setFlowModeList(List<Byte> flowModeList) {
         this.flowModeList = flowModeList;
     }
-
-    public Byte getEnableNotice() { return enableNotice; }
-
-    public Byte getEnableInvoice() { return enableInvoice; }
-
-    public void setEnableNotice(Byte enableNotice) { this.enableNotice = enableNotice; }
-
-    public void setEnableInvoice(Byte enableInvoice) { this.enableInvoice = enableInvoice; }
 
     @Override
     public String toString() {

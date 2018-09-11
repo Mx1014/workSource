@@ -100,9 +100,9 @@ public class ParkingController extends ControllerBase {
      * <p>获取用户须知</p>
      */
     @RequestMapping("getUserNotice")
-    @RestReturn(value=ParkingLot.class)
+    @RestReturn(value=ParkingLotDTO.class)
     public RestResponse userNotice(UserNoticeCommand cmd) {
-        ParkingLot parkingLot = parkingService.getParkingUserNotice(cmd.getParkingLotId());
+    	ParkingLotDTO parkingLot = parkingService.getParkingUserNotice(cmd.getParkingLotId());
         RestResponse response = new RestResponse(parkingLot);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

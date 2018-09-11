@@ -81,7 +81,9 @@ public class ParkingLotDTO {
     private String vipParkingUrl;
     private Byte identityCardFlag;
     private Long flowId;
-
+    private String summary;
+    private Byte noticeFlag;
+    
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
     }
@@ -310,7 +312,23 @@ public class ParkingLotDTO {
         this.flowId = flowId;
     }
 
-    @Override
+    public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public Byte getNoticeFlag() {
+		return noticeFlag;
+	}
+
+	public void setNoticeFlag(Byte noticeFlag) {
+		this.noticeFlag = noticeFlag;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
