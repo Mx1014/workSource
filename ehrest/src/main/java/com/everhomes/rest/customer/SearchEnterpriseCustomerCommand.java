@@ -77,6 +77,8 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long orgId;
 
+    private String customerName;
+
     @ItemType(Long.class)
     private List<Long> trackingUids;
 
@@ -358,5 +360,13 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setContractSearchCustomerFlag(Byte contractSearchCustomerFlag) {
         ContractSearchCustomerFlag = contractSearchCustomerFlag;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 }

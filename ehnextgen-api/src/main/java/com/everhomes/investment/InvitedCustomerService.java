@@ -1,10 +1,7 @@
 package com.everhomes.investment;
 
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
-import com.everhomes.rest.investment.InvitedCustomerDTO;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
-import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
+import com.everhomes.rest.investment.*;
 
 public interface InvitedCustomerService {
 
@@ -18,6 +15,8 @@ public interface InvitedCustomerService {
     SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd);
 
     InvitedCustomerDTO viewInvestmentDetail(ViewInvestmentDetailCommand cmd);
+
+    CustomerRequirementDTO getCustomerRequirementDTOByCustomerId(Long customerId);
 
     void syncTrackerData();
 }

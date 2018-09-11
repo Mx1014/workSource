@@ -2,7 +2,6 @@ package com.everhomes.investment;
 
 
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressService;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -10,27 +9,22 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
-import com.everhomes.rest.investment.CustomerContactDTO;
-import com.everhomes.rest.investment.CustomerLevelType;
-import com.everhomes.rest.investment.CustomerRequirementDTO;
-import com.everhomes.rest.investment.CustomerTrackerDTO;
-import com.everhomes.rest.investment.InvitedCustomerDTO;
-import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
-import com.everhomes.rest.investment.InvitedCustomerType;
-import com.everhomes.rest.investment.SearchInvestmentResponse;
-import com.everhomes.rest.investment.ViewInvestmentDetailCommand;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -41,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +71,17 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Autowired
     private AddressProvider addressProvider;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.BUSINESS_INVITATION, null, null, null, communityId);
+    }
+
     @Override
     public InvitedCustomerDTO createInvitedCustomer(CreateInvitedCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());
+
         InvitedCustomerDTO result;
         if(cmd.getCustomerSource() == null){
             if(cmd.getLevelItemId()== CustomerLevelType.REGISTERED_CUSTOMER.getCode()){
@@ -132,6 +136,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             // reflush current basic info
             if (cmd.getCurrentRent() != null) {
                 CustomerCurrentRent currentRent = ConvertHelper.convert(cmd.getCurrentRent(), CustomerCurrentRent.class);
+                if(cmd.getCurrentRent().getContractIntentionDate() != null){
+                    currentRent.setContractIntentionDate(new Timestamp(cmd.getCurrentRent().getContractIntentionDate()));
+
+                }
                 currentRent.setCommunityId(cmd.getCommunityId());
                 currentRent.setNamespaceId(cmd.getNamespaceId());
                 currentRent.setStatus(CommonStatus.ACTIVE.getCode());
@@ -150,7 +158,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 });
             }
 
+            EnterpriseCustomer dto = ConvertHelper.convert(customer, EnterpriseCustomer.class);
 
+            dto.setStatus(CommonStatus.ACTIVE.getCode());
+            dto.setNamespaceId(cmd.getNamespaceId());
+            customerSearcher.feedDoc(dto);
             return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
         }
 
@@ -159,6 +171,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void updateInvestment(CreateInvitedCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         // reflush contacts
         invitedCustomerProvider.deleteInvitedCustomer(cmd.getId());
@@ -236,6 +250,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void deleteInvestment(CreateInvitedCustomerCommand cmd) {
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+
         customerSearcher.deleteById(cmd.getId());
 
         invitedCustomerProvider.deleteInvitedCustomer(cmd.getId());
@@ -279,6 +295,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     }
 
     public InvitedCustomerDTO viewInvestmentDetail(ViewInvestmentDetailCommand cmd){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_VIEW, cmd.getOrgId(), cmd.getCommunityId());
+
         GetEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, GetEnterpriseCustomerCommand.class);
         EnterpriseCustomerDTO customerDTO = customerService.getEnterpriseCustomer(cmd2);
         if(customerDTO != null) {
@@ -332,6 +350,26 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         return null;
     }
+
+    @Override
+    public CustomerRequirementDTO getCustomerRequirementDTOByCustomerId(Long customerId){
+        CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customerId);
+        if(requirement != null){
+            List<CustomerRequirementAddress> addresses = invitedCustomerProvider.findRequirementAddressByRequirementId(requirement.getId());
+            CustomerRequirementDTO requirementDTO = ConvertHelper.convert(requirement, CustomerRequirementDTO.class);
+            if(addresses != null && addresses.size() > 0){
+                List<CustomerRequirementAddressDTO> addressesDTO = new ArrayList<>();
+                addresses.forEach(a -> {
+                    addressesDTO.add(ConvertHelper.convert(a, CustomerRequirementAddressDTO.class));
+
+                });
+                requirementDTO.setAddresses(addressesDTO);
+            }
+            return requirementDTO;
+        }
+        return null;
+    }
+
 
     @Override
     public void syncTrackerData() {

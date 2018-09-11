@@ -5,8 +5,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentService;
-import com.everhomes.investment.CustomerRequirement;
-import com.everhomes.investment.InvitedCustomerProvider;
+import com.everhomes.investment.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
@@ -26,6 +25,9 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
+import com.everhomes.rest.investment.CustomerRequirementAddressDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -116,6 +118,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     @Autowired
     private InvitedCustomerProvider invitedCustomerProvider;
 
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
+
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISE_CUSTOMER;
@@ -176,14 +181,33 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             builder.field("customerSource" , customer.getCustomerSource());
             builder.field("EntryStatus", customer.getEntryStatus());
+            List<CustomerTracker> tracker;
+            if(customer.getCustomerSource() != null){
+                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), customer.getCustomerSource());
+
+            }else{
+                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            }
+            if(tracker != null && tracker.size() > 0){
+                List<String> trackerNames = new ArrayList<>();
+                List<Long> trackerIds = new ArrayList<>();
+
+                tracker.forEach(r -> {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(r.getTrackerUid());
+                    if (members != null && members.size()>0) {
+                        trackerNames.add(members.get(0).getContactName());
+                        trackerIds.add(r.getTrackerUid());
+                    }
+                });
+                builder.field("trackerName", StringUtils.join(trackerNames, "|"));
+                builder.field("trackerUid", StringUtils.join(trackerIds, "|"));
+
+            }
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customer.getId());
             if(requirement != null){
-                if(requirement.getMinArea() != null) {
-                    builder.field("RequirementMinArea", requirement.getMinArea());
-                }
-                if(requirement.getMaxArea() != null) {
-                    builder.field("RequirementMaxArea", requirement.getMaxArea());
-                }
+                builder.field("RequirementMinArea", requirement.getMinArea() == null ? "" : requirement.getMinArea());
+                builder.field("RequirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
+
             }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
@@ -253,24 +277,39 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+        if((cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) && (cmd.getCustomerName() == null || cmd.getCustomerName().isEmpty())) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackingName");
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName")
+                .field("trackingName", 4.0f);
             }else {
                 qb = QueryBuilders.matchAllQuery();
             }
         } else {
-            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
-                    .field("contactName",5.0f)
-                    .field("contactAddress",4.0f)
-                    .field("contactPhone",3.0f)
-                    .field("trackingName",4.0f);
+            if(StringUtils.isNotBlank(cmd.getKeyword())) {
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName")
+                        .field("contactName", 5.0f)
+                        .field("contactAddress", 4.0f)
+                        .field("contactPhone", 3.0f)
+                        .field("name", 5.0f)
+                        .field("trackingName", 3.0f);
+            }
+
+            if (cmd.getCustomerName() != null) {
+                if(qb != null) {
+                    qb = QueryBuilders.boolQuery().must(qb).must(QueryBuilders.queryString("*" + cmd.getCustomerName() + "*").field("name"));
+                }else{
+                    qb = QueryBuilders.queryString("*" + cmd.getCustomerName() + "*").field("name");
+                }
+            }
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactPhone")
             		.addHighlightedField("trackingName");
+
+
+
         }
 
         FilterBuilder fb = null;
@@ -404,6 +443,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
