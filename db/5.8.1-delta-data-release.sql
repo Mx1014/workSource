@@ -9,6 +9,9 @@
 -- REMARK: coreserver 配置中需加入kafka的配置信息.具体请见(http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011)
 --         网址中的 "修改服务器配置" 一项
 
+-- AUTHOR: 黄明波 20180906
+-- REMARK: 只在----深圳湾----调用/yellowPage/syncSARequestInfo 接口
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -35,14 +38,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10011', 'zh_CN', '缴费订单创建失败');
 
--- AUTHOR: liangqishi 20180811
--- REMARK: 增加连接统一订单服务器的配置
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('gorder.server.connect_url', 'https://core.zuolin.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('gorder.server.app_key', '69ee0cb3-5afb-4d83-ae12-ef493de48de2', '连接统一订单服务器的appkey', 0, NULL, 0);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES ('gorder.server.app_secret', 'T6PEjA9GBAVMBmlBYDs9RkoQMurrH5XQjFoP1v+oGomKeIdsqVhwpTVv8AHPLWo/I09IudgxR4/zjvM9YYwxzg==', '连接统一订单服务器的appsecret', 0, NULL, 0);
 
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
@@ -207,6 +202,15 @@ DELETE FROM `eh_configurations` WHERE `name`='pay.v2.callback.url.pmsy';
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('pay.v2.callback.url.asset', '/pmsy/payNotify', '物业缴费新支付回调接口', 999993, NULL, 0);
 
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://core.zuolin.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', '69ee0cb3-5afb-4d83-ae12-ef493de48de2', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', 'T6PEjA9GBAVMBmlBYDs9RkoQMurrH5XQjFoP1v+oGomKeIdsqVhwpTVv8AHPLWo/I09IudgxR4/zjvM9YYwxzg==', '连接统一订单服务器的appsecret', 0, NULL, 0);
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
@@ -252,6 +256,16 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zijing
 -- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
+
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://zijing.lihekefu.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', 'fc11e221-29d6-4f07-b069-9dd79e077b6a', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', 'Z9VdCw9PEvui6tPTihExybCrJJHRSfNAPKuutK978NgxCpmCu+ztk0alVqTMN5JcBZe0thya7zK/5a/qe2fANA==', '连接统一订单服务器的appsecret', 0, NULL, 0);
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
@@ -323,8 +337,15 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
 
 
--- AUTHOR: 黄明波 20180906
--- REMARK: 调用/yellowPage/syncSARequestInfo 接口
+
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://park.szbay.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', '2ecedecc-3592-4edd-bfff-205b71fde95c', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', 'T1nIY3vNMK83dkJNcD/DIk9xx2rZup9KDjGwITiUnVFMVGVVwnmk5XHBHSe7BOm5Ex4TKflryC5IEURNQWHDIg==', '连接统一订单服务器的appsecret', 0, NULL, 0);
 
 
 -- AUTHOR: 梁燕龙
