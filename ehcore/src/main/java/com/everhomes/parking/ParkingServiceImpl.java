@@ -3514,7 +3514,6 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		response.setDockingFuncLists(dockingFuncLists);
 		
-		ParkingFuncDTO dto = new ParkingFuncDTO();
 
 //		ParkingFuncDTO dto = new ParkingFuncDTO();
 //		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
@@ -3596,11 +3595,10 @@ public class ParkingServiceImpl implements ParkingService {
 	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(cmd.getParkingLotId());
 		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
-		ParkingLotConfig config = ConvertHelper.convert(parkingLot.getConfigJson(), ParkingLotConfig.class);
+		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
 		config.setContact(cmd.getContact());
 		newParkingLot.setRechargeJson(JSONObject.toJSONString(config));
 		newParkingLot.setId(parkingLot.getId());
-		newParkingLot.setContact(parkingLot.getContact());
 		newParkingLot.setCreateTime(parkingLot.getCreateTime());
 		newParkingLot.setCreatorUid(parkingLot.getCreatorUid());
 		newParkingLot.setNamespaceId(parkingLot.getNamespaceId());
@@ -3614,7 +3612,7 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingLotDTO getParkingUserNotice(long parkingLotId) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
 		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
-		ParkingRechargeConfig config = ConvertHelper.convert(parkingLot.getRechargeJson(), ParkingRechargeConfig.class);
+		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
 		newParkingLot.setContact(config.getContact());
 		newParkingLot.setSummary(parkingLot.getSummary());
 		return newParkingLot;
