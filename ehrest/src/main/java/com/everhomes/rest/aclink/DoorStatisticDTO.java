@@ -20,6 +20,16 @@ public class DoorStatisticDTO {
 
     private Long permAuthTotal;
 
+    private Long bluetoothTotal;
+
+    private Long qrTotal;
+
+    private Long remoteTotal;
+
+    private Long faceTotal;
+
+    private Long clickTotal;
+
     public Long getActiveDoor() {
         return activeDoor;
     }
@@ -50,6 +60,46 @@ public class DoorStatisticDTO {
 
     public void setPermAuthTotal(Long permAuthTotal) {
         this.permAuthTotal = permAuthTotal;
+    }
+
+    public Long getBluetoothTotal() {
+        return bluetoothTotal;
+    }
+
+    public void setBluetoothTotal(Long bluetoothTotal) {
+        this.bluetoothTotal = bluetoothTotal;
+    }
+
+    public Long getQrTotal() {
+        return qrTotal;
+    }
+
+    public void setQrTotal(Long qrTotal) {
+        this.qrTotal = qrTotal;
+    }
+
+    public Long getRemoteTotal() {
+        return remoteTotal;
+    }
+
+    public void setRemoteTotal(Long remoteTotal) {
+        this.remoteTotal = remoteTotal;
+    }
+
+    public Long getFaceTotal() {
+        return faceTotal;
+    }
+
+    public void setFaceTotal(Long faceTotal) {
+        this.faceTotal = faceTotal;
+    }
+
+    public Long getClickTotal() {
+        return clickTotal;
+    }
+
+    public void setClickTotal(Long clickTotal) {
+        this.clickTotal = clickTotal;
     }
 
     @Override

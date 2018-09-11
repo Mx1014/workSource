@@ -230,10 +230,30 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(t.AUTH_ID.ne(0L))
                 .and(t2.AUTH_TYPE.eq((byte)0)).fetch();
+        Result<Record1<Integer>> rlt5 = context.select(t.AUTH_ID.count().as("bluetooth"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(t.AUTH_ID.ne(0L))
+                .and(t.EVENT_TYPE.eq(0L)).fetch();
+        Result<Record1<Integer>> rlt6 = context.select(t.AUTH_ID.count().as("qr"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(t.AUTH_ID.ne(0L))
+                .and(t.EVENT_TYPE.eq(1L)).fetch();
+        Result<Record1<Integer>> rlt7 = context.select(t.AUTH_ID.count().as("remote"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(t.AUTH_ID.ne(0L))
+                .and(t.EVENT_TYPE.eq(2L)).fetch();
+        Result<Record1<Integer>> rlt8 = context.select(t.AUTH_ID.count().as("face"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(t.AUTH_ID.ne(0L))
+                .and(t.EVENT_TYPE.eq(3L)).fetch();
         dto.setActiveDoor(new Long((Integer)rlt1.get(0).getValue("door")));
         dto.setOpenTotal(new Long ((Integer)rlt2.get(0).getValue("open")));
         dto.setTempAuthTotal(new Long ((Integer)rlt3.get(0).getValue("temp")));
         dto.setPermAuthTotal(new Long ((Integer)rlt4.get(0).getValue("perm")));
+        dto.setBluetoothTotal(new Long ((Integer)rlt5.get(0).getValue("bluetooth")));
+        dto.setQrTotal(new Long ((Integer)rlt6.get(0).getValue("qr")));
+        dto.setRemoteTotal(new Long ((Integer)rlt7.get(0).getValue("remote")));
+        dto.setFaceTotal(new Long ((Integer)rlt8.get(0).getValue("face")));
         return dto;
     }
 
