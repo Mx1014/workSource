@@ -2740,22 +2740,6 @@ public class FlowServiceImpl implements FlowService {
         return flowServiceMappingProvider.findConfigMapping(namespaceId, projectType, projectId, moduleType, moduleId, ownerType, ownerId);
     }
 
-    /**
-     * 使用关联的方式关联工作流时，通过这个方法获取对应的工作流
-     */
-    @Override
-    public Flow getAssociatedFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-        FlowServiceMapping mapping = flowServiceMappingProvider.findConfigMapping(namespaceId, projectType, projectId, moduleType, moduleId, ownerType, ownerId);
-        if (mapping != null) {
-            return flowProvider.getSnapshotFlowById(mapping.getFlowMainId());
-        }
-        return null;
-    }
-
-    @Override
-    public FlowServiceMapping getFlowServiceMapping(Integer namespaceId, String projectType, Long projectId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-        return flowServiceMappingProvider.findConfigMapping(namespaceId, projectType, projectId, moduleType, moduleId, ownerType, ownerId);
-    }
 
     @Override
     public FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd) {
@@ -3917,16 +3901,6 @@ public class FlowServiceImpl implements FlowService {
         return localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
     }
 
-    @Override
-    public String templateRender(int code, Map<String, Object> map) {
-        String scope = FlowTemplateCode.SCOPE;
-        User user = UserContext.current().getUser();
-        String locale = Locale.SIMPLIFIED_CHINESE.toString();
-        if (user != null) {
-            locale = user.getLocale();
-        }
-        return localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-    }
 
     @Override
     public String templateRender(int code, Map<String, Object> map) {
@@ -5745,7 +5719,7 @@ public class FlowServiceImpl implements FlowService {
             boolean isOk = true;
             try {
                 dbProvider.execute((s) -> {
-                    doSnapshot(flowGraph);
+                    doSnapshot(flowGraph,false);
                     return true;
                 });
             } catch (Exception ex) {
@@ -5861,6 +5835,82 @@ public class FlowServiceImpl implements FlowService {
             mapping = new FlowServiceMapping();
         }
         return toFlowServiceMappingDTO(mapping);
+    }
+
+
+    @Override
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, FlowKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType(FlowModuleType.NO_MODULE.getCode());
+            }
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+            config.setStatus(FlowCommonStatus.VALID.getCode());
+            flowKvConfigProvider.createFlowKvConfig(config);
+        }
+    }
+
+    @Override
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        List<Flow> list = flowProvider.listConfigFlowByCond(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId());
+
+        for (Flow flow : list) {
+            flow.setStatus(FlowStatusType.INVALID.getCode());
+            flowProvider.updateFlow(flow);
+        }
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFlowMirror(DoFlowMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long flowId : cmd.getFlowIds()) {
+            FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
+            Flow flow = flowGraph.getFlow();
+            flow.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);// 设置成 0
+
+            if (cmd.getModuleType() != null) {
+                flow.setModuleType(cmd.getModuleType());
+            }
+            flow.setModuleId(cmd.getModuleId());
+            flow.setProjectType(cmd.getProjectType());
+            flow.setProjectId(cmd.getProjectId());
+            flow.setOwnerType(cmd.getOwnerType());
+            flow.setOwnerId(cmd.getOwnerId());
+
+            doSnapshot(flowGraph, /*isMirror*/true);
+        }
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {

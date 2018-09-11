@@ -425,7 +425,7 @@ public class NewsController extends ControllerBase {
 		return response;
 	}
 
-}
+
 
 	/**
 	 * <b>URL: /news/enableSelfDefinedConfig</b>
