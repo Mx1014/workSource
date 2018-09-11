@@ -42,6 +42,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
@@ -54,12 +56,14 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
+import com.everhomes.rest.asset.AssetPaymentBillSourceId;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -232,6 +236,9 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
 	private PortalService portalService;
+    
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -1317,9 +1324,6 @@ public class AssetProviderImpl implements AssetProvider {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            //根据billGroup获得时间，如需重复使用，则请抽象出来
-            SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
             //获取所需要的cmd的数据
             BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
             Byte isSettled = cmd.getIsSettled();
@@ -1350,98 +1354,6 @@ public class AssetProviderImpl implements AssetProvider {
                 apartmentName= itemDTO.getApartmentName();
                 buildingName = itemDTO.getBuildingName();
             }
-            //需要billGroup查看生成账单周期
-            PaymentBillGroup group = getBillGroupById(billGroupId);
-            List<String> dates = new ArrayList<>();
-            BillingCycle balanceDateType = BillingCycle.fromCode(group.getBalanceDateType());//生成账单周期：自然月、自然季等
-            byte dueDayType = group.getDueDayType();//最晚还款日的单位类型，1:日; 2:月
-            Integer dueDay = group.getDueDay();//最晚还款日
-            BillsDayType billsDayType = BillsDayType.fromCode(group.getBillsDayType());//出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
-            Integer billsDay = group.getBillsDay();//出账单日
-            Calendar start = Calendar.getInstance();
-            //账期取的是账单开始时间的yyyy-MM
-            String dateStr = null;
-            try{
-                // 如果传递了计费开始时间
-                if(dateStrBegin != null){
-                    start.setTime(yyyyMMdd.parse(dateStrBegin));
-                    dateStr = yyyyMM.format(yyyyMM.parse(dateStrBegin));
-                }else{
-                	dateStr = yyyyMM.format(start.getTime());
-                    start.setTime(yyyyMM.parse(dateStr));
-                    //如果没有设置账单的开始时间，那么默认是当前月的第一天
-                    start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
-                }
-                dates.add(yyyyMMdd.format(start.getTime()));
-                int cycle = 0;
-                switch(balanceDateType){
-                    case NATURAL_MONTH:
-                        cycle = 1;
-                        break;
-                    case NATURAL_QUARTER:
-                        cycle = 3;
-                        break;
-                    case NATURAL_YEAR:
-                        cycle = 12;
-                        break;
-                    default:
-                    	cycle = 0;
-                    	break;
-                }
-                start.add(Calendar.MONTH,cycle);
-                if(cycle == 0){
-                    //自然周期
-                    start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
-                }
-                start.add(Calendar.DAY_OF_MONTH,-1);
-                // 如果计费结束时间不是null，那么就应该设置为给定的
-                if(dateStrEnd != null){
-                    dates.add(dateStrEnd);
-                }else{
-                    dates.add(yyyyMMdd.format(start.getTime()));
-                }
-                //计算之后设置出账单日
-                //出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
-                if(billsDayType == null){
-                    billsDayType = BillsDayType.FIRST_MONTH_NEXT_PERIOD;
-                }
-                Date dateStart = yyyyMMdd.parse(dates.get(0));
-                Date dateEnd = yyyyMMdd.parse(dates.get(1));
-                switch (billsDayType){
-	                case FIRST_MONTH_NEXT_PERIOD:
-	                	start.setTime(dateEnd);
-	                	start.add(Calendar.DAY_OF_MONTH, billsDay);
-	                    break;
-	                case BEFORE_THIS_PERIOD:
-	                	start.setTime(dateStart);
-	                	start.add(Calendar.DAY_OF_MONTH, -billsDay);
-	                    break;
-	                case AFTER_THIS_PERIOD:
-	                	start.setTime(dateStart);
-	                	start.add(Calendar.DAY_OF_MONTH, billsDay - 1);
-	                    break;
-	                case END_THIS_PERIOD:
-	                	start.setTime(dateEnd);
-	                    break;
-                }
-                dates.add(yyyyMMdd.format(start.getTime()));
-                //计算之后设置最晚还款日
-                //日
-                if(dueDayType == (byte)1){
-                    start.add(Calendar.DAY_OF_MONTH,dueDay);
-                }
-                //月
-                else if(dueDayType == (byte)2){
-                    start.add(Calendar.MONTH,dueDay);
-                }
-                dates.add(yyyyMMdd.format(start.getTime()));
-            }catch (Exception e){
-                dates.add(null);
-                dates.add(null);
-                dates.add(null);
-                dates.add(null);
-                LOGGER.error(e.toString());
-            }
             //需要组装的信息
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
@@ -1452,6 +1364,11 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//增加待收（不含税）
             BigDecimal taxAmount = BigDecimal.ZERO;//增加税额
 
+            //根据billGroup获得时间，如需重复使用，则请抽象出来
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            //根据账单组设置生成账单的账期、账单开始时间、账单结束时间、出账单日、最晚还款日
+            AssetBillDateDTO assetBillDateDTO = generateBillDate(billGroupId, dateStrBegin, dateStrEnd);
+            
             long nextBillId;
             if(billId != null) {
             	nextBillId = billId;
@@ -1539,10 +1456,10 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setChargingItemsId(dto.getChargingItemsId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dateStr);
+                    item.setDateStr(assetBillDateDTO.getDateStr());
                     //时间假定
-                    item.setDateStrBegin(dates.get(0));
-                    item.setDateStrEnd(dates.get(1));
+                    item.setDateStrBegin(assetBillDateDTO.getDateStrBegin());
+                    item.setDateStrEnd(assetBillDateDTO.getDateStrEnd());
                     item.setId(currentBillItemSeq);
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
@@ -1694,11 +1611,11 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setAmountExemption(amountExemption);
             newBill.setBillGroupId(billGroupId);
             //时间
-            newBill.setDateStr(dateStr);
-            newBill.setDateStrBegin(dates.get(0));
-            newBill.setDateStrEnd(dates.get(1));
-            newBill.setDateStrDue(dates.get(2));//出账单日
-            newBill.setDueDayDeadline(dates.get(3));//最晚还款日
+            newBill.setDateStr(assetBillDateDTO.getDateStr());
+            newBill.setDateStrBegin(assetBillDateDTO.getDateStrBegin());
+            newBill.setDateStrEnd(assetBillDateDTO.getDateStrEnd());
+            newBill.setDateStrDue(assetBillDateDTO.getDateStrDue());//出账单日
+            newBill.setDueDayDeadline(assetBillDateDTO.getDueDayDeadline());//最晚还款日
             //新增时只填了一个楼栋门牌，所以也可以放到bill里去 by wentian 2018/4/24
             newBill.setBuildingName(buildingName);
             newBill.setApartmentName(apartmentName);
@@ -2551,81 +2468,109 @@ public class AssetProviderImpl implements AssetProvider {
         
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-            EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
             EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
             com.everhomes.server.schema.tables.EhPaymentSubtractionItems t3 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t3");
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
             List<SubItemDTO> subItemDTOList = billGroupDTO.getSubItemDTOList();//增加减免费项
-            //需要组装的信息
-            BigDecimal amountExemption = new BigDecimal("0");
-            BigDecimal amountSupplement = new BigDecimal("0");
-            BigDecimal amountReceivable = new BigDecimal("0");
-            BigDecimal amountChange = new BigDecimal("0");
-            BigDecimal zero = new BigDecimal("0");
-            //更新收费项（更新费项之前先删除原来的）
-//            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
-//	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
-//	            .execute();
-//            if(list1!=null){
-//                for(int i = 0; i < list1.size() ; i++) {
-//                    BillItemDTO dto = list1.get(i);
-//                    //只对常规费项做新增操作，对滞纳金费项不做处理
-//                    if(dto.getItemFineType().equals(AssetItemFineType.item.getCode())) {
-//                    	List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-//                    	long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
-//                        if(currentBillItemSeq == 0){
-//                            this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
-//                        }
-//                        PaymentBillItems item = new PaymentBillItems();
-//                        item.setBillGroupRuleId(dto.getBillGroupRuleId());
-//                        item.setAddressId(dto.getAddressId());
-//                        item.setBuildingName(dto.getBuildingName());
-//                        item.setApartmentName(dto.getApartmentName());
-//                        BigDecimal var1 = dto.getAmountReceivable();
-//                        //减免项不覆盖收费项目的收付，暂时
-//                        var1 = DecimalUtils.negativeValueFilte(var1);
-//                        item.setAmountOwed(var1);
-//                        item.setAmountReceivable(var1);
-//                        item.setAmountReceived(new BigDecimal("0"));
-//                        item.setBillGroupId(billGroupId);
-//                        item.setBillId(billId);
-//                        item.setChargingItemName(dto.getBillItemName());
-//                        item.setChargingItemsId(dto.getBillItemId());
-//                        item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//                        item.setCreatorUid(UserContext.currentUserId());
-//                        item.setDateStr(dateStr);
-//                        //时间假定
-//                        item.setDateStrBegin(dates.get(0));
-//                        item.setDateStrEnd(dates.get(1));
-//                        item.setId(currentBillItemSeq);
-//                        item.setNamespaceId(UserContext.getCurrentNamespaceId());
-//                        item.setOwnerType(ownerType);
-//                        item.setOwnerId(ownerId);
-//                        item.setContractId(contractId);
-//                        item.setContractNum(contractNum);
-//                        //item 也添加categoryId， 这样费用清单简单些
-//                        item.setCategoryId(categoryId);
-//                        if(targetType!=null){
-//                            item.setTargetType(targetType);
-//                        }
-//                        if(targetId != null) {
-//                            item.setTargetId(targetId);
-//                        }
-//                        item.setTargetName(targetName);
-//                        item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//                        item.setEnergyConsume(dto.getEnergyConsume());//增加用量
-//                        billItemsList.add(item);
-//                    	EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-//                    	billItemsDao.insert(billItemsList);
-//                    }
-//                }
-//            }
+            //1、更新收费项：更新费项之前先删除原来的（置为已删除状态）
+            //2、只对常规费项做编辑操作，对滞纳金费项不做处理（前端已做过滤）
+            context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+            	.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())//物业缴费V6.0 账单、费项表增加是否删除状态字段
+	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+	            .execute();
+            //根据账单组设置生成账单的账期、账单开始时间、账单结束时间、出账单日、最晚还款日
+            AssetBillDateDTO assetBillDateDTO = generateBillDate(billGroupId, cmd.getDateStrBegin(), cmd.getDateStrEnd());
+            if(list1!=null){
+                for(int i = 0; i < list1.size() ; i++) {
+                    BillItemDTO dto = list1.get(i);
+                    Long billItemId = dto.getBillItemId();
+                    //如果费项ID是空，那么是新增
+                    if(billItemId == null) {
+                    	long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                        if(currentBillItemSeq == 0){
+                            this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                        }
+                        PaymentBillItems item = new PaymentBillItems();
+                        item.setBillGroupRuleId(dto.getBillGroupRuleId());
+                        item.setAddressId(dto.getAddressId());
+                        item.setBuildingName(dto.getBuildingName());
+                        item.setApartmentName(dto.getApartmentName());
+                        BigDecimal var1 = dto.getAmountReceivable();
+                        //减免项不覆盖收费项目的收付，暂时
+                        var1 = DecimalUtils.negativeValueFilte(var1);
+                        item.setAmountOwed(var1);
+                        item.setAmountReceivable(var1);
+                        item.setAmountReceived(new BigDecimal("0"));
+                        item.setBillGroupId(billGroupId);
+                        item.setBillId(billId);
+                        item.setChargingItemName(dto.getBillItemName());
+                        item.setChargingItemsId(dto.getChargingItemsId());
+                        item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        item.setCreatorUid(UserContext.currentUserId());
+                        item.setDateStr(assetBillDateDTO.getDateStr());
+                        //时间假定
+                        item.setDateStrBegin(assetBillDateDTO.getDateStrBegin());
+                        item.setDateStrEnd(assetBillDateDTO.getDateStrEnd());
+                        item.setId(currentBillItemSeq);
+                        item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                        item.setOwnerType(ownerType);
+                        item.setOwnerId(ownerId);
+                        item.setContractId(cmd.getContractId());
+                        item.setContractNum(cmd.getContractNum());
+                        //item 也添加categoryId， 这样费用清单简单些
+                        item.setCategoryId(categoryId);
+                        if(targetType!=null){
+                            item.setTargetType(targetType);
+                        }
+                        if(targetId != null) {
+                            item.setTargetId(targetId);
+                        }
+                        item.setTargetName(targetName);
+                        item.setEnergyConsume(dto.getEnergyConsume());//增加用量
+                        BigDecimal var2 = dto.getAmountReceivableWithoutTax();
+                        var2 = DecimalUtils.negativeValueFilte(var2);
+                        item.setAmountOwedWithoutTax(var2);//增加待收（不含税）
+                        item.setAmountReceivableWithoutTax(var2);//增加应收（不含税）
+                        item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
+                        item.setTaxAmount(dto.getTaxAmount());//增加税额
+                        item.setTaxRate(dto.getTaxRate());//费项增加税率信息
+                        //物业缴费V6.6（对接统一账单） 账单要增加来源
+                        item.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+                        item.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：手动新增的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+                    	item.setCanDelete((byte)1);
+                    	item.setCanModify((byte)1);
+                        //物业缴费V6.0 账单、费项表增加是否删除状态字段
+                        item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                        
+                    	EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+                    	billItemsDao.insert(item);
+                    }else {
+                    	//如果费项ID不为空，那么是更新操作
+                    	context.update(Tables.EH_PAYMENT_BILL_ITEMS)
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.VALID.getCode())//物业缴费V6.0 账单、费项表增加是否删除状态字段
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID, dto.getChargingItemsId())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEM_NAME, dto.getBillItemName())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE, dto.getAmountReceivable())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX, dto.getAmountReceivableWithoutTax())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT, dto.getTaxAmount())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.BUILDING_NAME, dto.getBuildingName())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME, dto.getApartmentName())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.ADDRESS_ID, dto.getAddressId())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.OPERATOR_UID, UserContext.currentUserId())
+	        	            .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+	        	            .execute();
+                    }
+                }
+            }
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
             //减免项列表list2
-            List<Long> includeExemptionIds = new ArrayList();
+            List<Long> includeExemptionIds = new ArrayList<Long>();
             includeExemptionIds.add(-1l);
             if(list2!=null){
                 //bill exemption
@@ -7089,5 +7034,103 @@ public class AssetProviderImpl implements AssetProvider {
 	        .fetchInto(AppAssetCategory.class);
 		return list;
 	}
+	
+    /**
+     * 根据账单组设置生成账单的账期、账单开始时间、账单结束时间、出账单日、最晚还款日
+     * @param billGroupId
+     * @return
+     */
+    public AssetBillDateDTO generateBillDate(Long billGroupId, String dateStrBegin, String dateStrEnd){
+    	AssetBillDateDTO dto = new AssetBillDateDTO();
+    	//根据billGroup获得时间，如需重复使用，则请抽象出来
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+    	//需要billGroup查看生成账单周期
+        PaymentBillGroup group = getBillGroupById(billGroupId);
+        BillingCycle balanceDateType = BillingCycle.fromCode(group.getBalanceDateType());//生成账单周期：自然月、自然季等
+        byte dueDayType = group.getDueDayType();//最晚还款日的单位类型，1:日; 2:月
+        Integer dueDay = group.getDueDay();//最晚还款日
+        BillsDayType billsDayType = BillsDayType.fromCode(group.getBillsDayType());//出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
+        Integer billsDay = group.getBillsDay();//出账单日
+        Calendar start = Calendar.getInstance();
+        try{
+            // 如果传递了计费开始时间
+            if(dateStrBegin != null){
+                start.setTime(yyyyMMdd.parse(dateStrBegin));
+                dto.setDateStr(yyyyMM.format(yyyyMM.parse(dateStrBegin)));//账期取的是账单开始时间的yyyy-MM
+            }else{
+            	dto.setDateStr(yyyyMM.format(start.getTime()));//账期取的是账单开始时间的yyyy-MM
+                start.setTime(yyyyMM.parse(dto.getDateStr()));
+                //如果没有设置账单的开始时间，那么默认是当前月的第一天
+                start.set(Calendar.DAY_OF_MONTH,start.getActualMinimum(Calendar.DAY_OF_MONTH));
+            }
+            dto.setDateStrBegin(yyyyMMdd.format(start.getTime()));
+            int cycle = 0;
+            switch(balanceDateType){
+                case NATURAL_MONTH:
+                    cycle = 1;
+                    break;
+                case NATURAL_QUARTER:
+                    cycle = 3;
+                    break;
+                case NATURAL_YEAR:
+                    cycle = 12;
+                    break;
+                default:
+                	cycle = 0;
+                	break;
+            }
+            start.add(Calendar.MONTH,cycle);
+            if(cycle == 0){
+                //自然周期
+                start.set(Calendar.DAY_OF_MONTH,start.getActualMaximum(Calendar.DAY_OF_MONTH));
+            }
+            start.add(Calendar.DAY_OF_MONTH,-1);
+            // 如果计费结束时间不是null，那么就应该设置为给定的
+            if(dateStrEnd != null){
+                dto.setDateStrEnd(dateStrEnd);
+            }else{
+                dto.setDateStrEnd(yyyyMMdd.format(start.getTime()));
+            }
+            //计算之后设置出账单日
+            //出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日
+            if(billsDayType == null){
+                billsDayType = BillsDayType.FIRST_MONTH_NEXT_PERIOD;
+            }
+            Date dateStart = yyyyMMdd.parse(dto.getDateStrBegin());
+            Date dateEnd = yyyyMMdd.parse(dto.getDateStrEnd());
+            switch (billsDayType){
+                case FIRST_MONTH_NEXT_PERIOD:
+                	start.setTime(dateEnd);
+                	start.add(Calendar.DAY_OF_MONTH, billsDay);
+                    break;
+                case BEFORE_THIS_PERIOD:
+                	start.setTime(dateStart);
+                	start.add(Calendar.DAY_OF_MONTH, -billsDay);
+                    break;
+                case AFTER_THIS_PERIOD:
+                	start.setTime(dateStart);
+                	start.add(Calendar.DAY_OF_MONTH, billsDay - 1);
+                    break;
+                case END_THIS_PERIOD:
+                	start.setTime(dateEnd);
+                    break;
+            }
+            dto.setDateStrDue(yyyyMMdd.format(start.getTime()));
+            //计算之后设置最晚还款日
+            //日
+            if(dueDayType == (byte)1){
+                start.add(Calendar.DAY_OF_MONTH,dueDay);
+            }
+            //月
+            else if(dueDayType == (byte)2){
+                start.add(Calendar.MONTH,dueDay);
+            }
+            dto.setDueDayDeadline(yyyyMMdd.format(start.getTime()));
+        }catch (Exception e){
+            LOGGER.error(e.toString());
+        }
+        return dto;
+    }
 	
 }
