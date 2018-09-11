@@ -795,32 +795,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 			dto.setButtonTitle(sa.getButtonTitle());
 		}
 
-
-		// 服务联盟跳转到审批，审批模块可控制在app端是否显示
-		if (dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl() != null
-				&& dto.getModuleUrl().contains("zl://approval/create")) {
-			boolean matches = Pattern.matches("^(.*)formId=.*$", dto.getModuleUrl());
-			if (!matches){
-				int start = dto.getModuleUrl().indexOf('?');
-				String s[] = dto.getModuleUrl().substring(start).split("&");
-				s = s[0].split("=");
-				if (s.length > 1) {
-					try {
-						Long approveId = Long.valueOf(s[1]);
-						GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
-						if (CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()) {
-//							dto.setButtonTitle(null);
-//							dto.setJumpType(JumpType.NONE.getCode());
-//							dto.setModuleUrl(null);
-							dto.setIsApprovalActive(TrueOrFalseFlag.FALSE.getCode());
-						}
-
-					} catch (Exception e) {
-					}
-				}
-			}
+		// 客户端/前端显示前需要检查表单，工作流状态是否有效
+		if (JumpType.FORM.getCode().equals(dto.getJumpType())) {
+			if (!checkFormModuleUrlValid(dto)) {
+//				dto.setButtonTitle(null);
+//				dto.setJumpType(JumpType.NONE.getCode());
+//				dto.setModuleUrl(null);
+                dto.setIsApprovalActive(TrueOrFalseFlag.FALSE.getCode());
+            }
 		}
-
 
 		this.processDetailUrl(dto);
 		// response.setDisplayName(serviceAlliance.getNickName());
@@ -976,9 +959,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 			if ((ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null)
 					&& JumpType.FORM.getCode().equals(dto.getJumpType())) {
 				if (!checkFormModuleUrlValid(dto)) {
-					dto.setButtonTitle(null);
-					dto.setJumpType(JumpType.NONE.getCode());
-					dto.setModuleUrl(null);
+//					dto.setButtonTitle(null);
+//					dto.setJumpType(JumpType.NONE.getCode());
+//					dto.setModuleUrl(null);
                     dto.setIsApprovalActive(TrueOrFalseFlag.FALSE.getCode());
                 }
 			}

@@ -69,8 +69,6 @@ public interface YellowPageProvider {
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
-
 	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, CategoryAdminStatus status, List<Byte> displayDestination, boolean queryAllChilds);
 
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
