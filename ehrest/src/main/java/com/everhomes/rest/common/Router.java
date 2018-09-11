@@ -261,7 +261,7 @@ public enum Router {
     RENTAL_ORDER_DETAIL(ActionType.RENTAL,
             "zl://resource-reservation/detail", RentalOrderActionData.class),
     /**
-     * video-conference
+     * work_report_notice
      */
     WORK_REPORT_DETAILS(
             "zl://work-report/details", WorkReportDetailsActionData.class),

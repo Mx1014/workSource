@@ -180,9 +180,9 @@ public class WorkReportTimeServiceImpl implements WorkReportTimeService{
                 temp = firstOfWeek(current.toLocalDate().plusWeeks(1));
             else {
                 if (currentTime <= endTime)
-                    temp = current.toLocalDate();
+                    temp = firstOfWeek(current.toLocalDate());
                 else
-                    temp = current.toLocalDate().plusWeeks(1);
+                    temp = firstOfWeek(current.toLocalDate().plusWeeks(1));
             }
         } else if (setting.getStartType() == 1 && setting.getEndType() == 1) {
             if (currentDay < endDay)
@@ -191,9 +191,9 @@ public class WorkReportTimeServiceImpl implements WorkReportTimeService{
                 temp = firstOfWeek(current.toLocalDate());
             else {
                 if (currentTime <= endTime)
-                    temp = current.toLocalDate().minusWeeks(1);
+                    temp = firstOfWeek(current.toLocalDate().minusWeeks(1));
                 else
-                    temp = current.toLocalDate();
+                    temp = firstOfWeek(current.toLocalDate());
             }
         } else {
             //  取周几进行比较 dayOfWeek
