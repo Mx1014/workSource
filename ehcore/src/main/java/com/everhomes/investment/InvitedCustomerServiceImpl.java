@@ -262,7 +262,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
-                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(),cmd.getStartAreaSize(),cmd.getEndAreaSize(), itemsMap.keySet(), itemsMap, (locator, query) -> {
+                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getStartAreaSize(), cmd.getEndAreaSize(), itemsMap.keySet(), itemsMap, (locator, query) -> {
                     if (cmd.getCorpIndustryItemId() != null) {
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CORP_INDUSTRY_ITEM_ID.eq(cmd.getCorpIndustryItemId()));
                     }

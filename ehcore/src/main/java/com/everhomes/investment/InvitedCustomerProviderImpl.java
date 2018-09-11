@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerRequirementAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerRequirementsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -32,7 +33,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
@@ -342,7 +342,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.addConditions(customer.COMMUNITY_ID.eq(communityId));
         query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
         // related record searcher
-        if(startAreaSize!=null || endAreaSize!=null){
+        if (startAreaSize != null || endAreaSize != null) {
             query.addConditions(customer.ID.in(customerIds));
         }
         query.addFrom(customer);
@@ -355,7 +355,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.fetch().map((r) -> {
             for (Long itemId : itemIds) {
                 InvitedCustomerStatisticsDTO dto = new InvitedCustomerStatisticsDTO();
-//                dto.setKey(itemId.toString());
                 dto.setKey(itemsMap.get(itemId).getItemDisplayName());
                 dto.setValue(r.getValue(itemId.toString(), Long.class).toString());
                 dto.setItemId(itemId);
@@ -370,6 +369,12 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(startAreaSize!=null || endAreaSize!=null){
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
             com.everhomes.server.schema.tables.EhCustomerRequirements requirements = Tables.EH_CUSTOMER_REQUIREMENTS;
+            SelectQuery<EhCustomerRequirementsRecord> query = context.selectQuery(requirements);
+            if(startAreaSize!=null)
+            query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+            if(endAreaSize!=null)
+            query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+            return query.fetchInto(Long.class);
 
         }
         return new ArrayList<>();
