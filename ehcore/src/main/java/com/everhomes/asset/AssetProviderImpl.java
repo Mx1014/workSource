@@ -1074,7 +1074,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentExemptionItems exemption = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("exemption");//减免/增收项
 
         dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END
-        		,t.ENERGY_CONSUME,t.CHARGING_ITEMS_ID)
+        		,t.ENERGY_CONSUME,t.CHARGING_ITEMS_ID,t.NAMESPACE_ID,t.OWNER_ID,t.OWNER_TYPE,t.CATEGORY_ID)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
@@ -1083,6 +1083,14 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    //APP端也需更新:备注名称改为显示名称
+                    Integer namespaceId = r.getValue(t.NAMESPACE_ID);
+                    Long ownerId = r.getValue(t.OWNER_ID);
+                    String ownerType = r.getValue(t.OWNER_TYPE);
+                    Long chargingItemId = r.getValue(t.CHARGING_ITEMS_ID);
+                    Long categoryId = r.getValue(t.CATEGORY_ID);
+                    String projectChargingItemName = getProjectChargingItemName(namespaceId, ownerId, ownerType, chargingItemId, categoryId);
+                    dto.setProjectChargingItemName(projectChargingItemName);
                     String buildingName = r.getValue(t.BUILDING_NAME)==null?"":r.getValue(t.BUILDING_NAME);
                     String apartmentName = r.getValue(t.APARTMENT_NAME)==null?"":r.getValue(t.APARTMENT_NAME);
                     String address = buildingName + apartmentName;
@@ -2170,6 +2178,21 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(aLong))
                 .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME);
         if(names.size() > 1){
+            return names.get(0);
+        }
+        return null;
+    }
+    
+    private String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
+        List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
+                .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME);
+        if(names.size() >= 1){
             return names.get(0);
         }
         return null;
