@@ -1,10 +1,13 @@
 package com.everhomes.investment;
 
 
+import com.everhomes.address.AddressProvider;
+import com.everhomes.address.AddressService;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
@@ -54,11 +57,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     private FieldService fieldService;
     @Autowired
     private OrganizationService organizationService;
+
     @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
     private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private AddressProvider addressProvider;
 
     @Override
     public InvitedCustomerDTO createInvitedCustomer(CreateInvitedCustomerCommand cmd) {
@@ -99,7 +106,19 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 requirement.setNamespaceId(cmd.getNamespaceId());
                 requirement.setCustomerId(cmd.getId());
                 requirement.setStatus(CommonStatus.ACTIVE.getCode());
-                invitedCustomerProvider.createRequirement(requirement);
+                Long requirementId = invitedCustomerProvider.createRequirement(requirement);
+                if(cmd.getRequirement().getAddresses() != null && cmd.getRequirement().getAddresses().size() > 0){
+                    cmd.getRequirement().getAddresses().forEach((c) -> {
+                        CustomerRequirementAddress address = ConvertHelper.convert(c, CustomerRequirementAddress.class);
+                        address.setCustomerId(cmd.getId());
+                        address.setCommunityId(cmd.getCommunityId());
+                        address.setNamespaceId(cmd.getNamespaceId());
+                        address.setStatus(CommonStatus.ACTIVE.getCode());
+                        address.setRequirementId(requirementId);
+                        invitedCustomerProvider.createRequirementAddress(address);
+                    });
+                }
+
             }
             // reflush current basic info
             if (cmd.getCurrentRent() != null) {
@@ -111,13 +130,17 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 invitedCustomerProvider.createCurrentRent(currentRent);
             }
             if(cmd.getTrackers() != null){
-                CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
-                tracker.setCommunityId(cmd.getCommunityId());
-                tracker.setNamespaceId(cmd.getNamespaceId());
-                tracker.setStatus(CommonStatus.ACTIVE.getCode());
-                tracker.setCustomerId(cmd.getId());
-                invitedCustomerProvider.createTracker(tracker);
+                cmd.getTrackers().forEach((c) -> {
+                    CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
+                    tracker.setCommunityId(cmd.getCommunityId());
+                    tracker.setNamespaceId(cmd.getNamespaceId());
+                    tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                    tracker.setCustomerId(cmd.getId());
+                    tracker.setCustomerSource(cmd.getCustomerSource());
+                    invitedCustomerProvider.createTracker(tracker);
+                });
             }
+
 
             return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
         }
@@ -260,10 +283,33 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(invitedCustomerDTO.getId());
             if(trackers != null && trackers.size() != 0){
                 List<CustomerTrackerDTO> dtos = trackers.stream().map(r -> ConvertHelper.convert(r, CustomerTrackerDTO.class)).collect(Collectors.toList());
+                dtos.forEach((r) -> {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(r.getTrackerUid());
+                    if (members != null && members.size()>0) {
+                        r.setTrackerPhone(members.get(0).getContactToken());
+                        r.setTrackerName(members.get(0).getContactName());
+                    }
+                });
+
                 invitedCustomerDTO.setTrackers(dtos);
+
             }
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(invitedCustomerDTO.getId());
-            invitedCustomerDTO.setRequirement(ConvertHelper.convert(requirement, CustomerRequirementDTO.class));
+            if(requirement != null){
+                CustomerRequirementDTO requirementDTO = ConvertHelper.convert(requirement, CustomerRequirementDTO.class);
+                List<CustomerRequirementAddress> addresses = invitedCustomerProvider.findRequirementAddressByRequirementId(requirement.getId());
+                if(addresses != null){
+                    List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
+                    dtos.forEach(r ->{
+                        r.setAddressName(addressProvider.findAddressById(r.getAddressId()).getBuildingName() + "/" + addressProvider.findAddressById(r.getAddressId()).getApartmentName());
+                    });
+                    requirementDTO.setAddresses(dtos);
+                }
+
+
+                invitedCustomerDTO.setRequirement(requirementDTO);
+
+            }
 
             CustomerCurrentRent currentRent = invitedCustomerProvider.findNewestCurrentRentByCustomerId(invitedCustomerDTO.getId());
             invitedCustomerDTO.setCurrentRent(ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class));

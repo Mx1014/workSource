@@ -22,17 +22,13 @@ import java.sql.Timestamp;
  */
 public class CustomerTrackerDTO {
     private Long id;
-    private Integer namespaceId;
-    private Long communityId;
     private Long customerId;
     private Long trackerUid;
     private Byte trackerType;
+    private String trackerName;
+    private String trackerPhone;
     private Byte customerSource;
     private Byte status;
-    private Timestamp createTime;
-    private Long creatorUid;
-    private Timestamp operatorTime;
-    private Long operatorUid;
 
     public Long getId() {
         return id;
@@ -42,21 +38,6 @@ public class CustomerTrackerDTO {
         this.id = id;
     }
 
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
 
     public Long getCustomerId() {
         return customerId;
@@ -98,37 +79,24 @@ public class CustomerTrackerDTO {
         this.status = status;
     }
 
-    public Timestamp getCreateTime() {
-        return createTime;
+    public String getTrackerName(){
+        return trackerName;
     }
 
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
+    public void setTrackerName(String trackerName){
+        this.trackerName = trackerName;
     }
 
-    public Long getCreatorUid() {
-        return creatorUid;
+
+    public String getTrackerPhone(){
+        return trackerPhone;
     }
 
-    public void setCreatorUid(Long creatorUid) {
-        this.creatorUid = creatorUid;
+    public void setTrackerPhone(String trackerPhone){
+        this.trackerPhone = trackerPhone;
     }
 
-    public Timestamp getOperatorTime() {
-        return operatorTime;
-    }
 
-    public void setOperatorTime(Timestamp operatorTime) {
-        this.operatorTime = operatorTime;
-    }
-
-    public Long getOperatorUid() {
-        return operatorUid;
-    }
-
-    public void setOperatorUid(Long operatorUid) {
-        this.operatorUid = operatorUid;
-    }
 
     @Override
     public String toString() {

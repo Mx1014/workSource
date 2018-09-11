@@ -692,7 +692,7 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
-            }else {p
+            }else {
                 User user = userProvider.findUserById(customer.getTrackingUid());
                 if(user!=null)
                     customer.setTrackingName(user.getNickName());

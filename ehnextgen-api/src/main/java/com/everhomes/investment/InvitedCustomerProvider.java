@@ -56,4 +56,14 @@ public interface InvitedCustomerProvider {
     void deleteInvitedCustomer(Long id);
 
     void deleteCustomerContacts(Long id);
+
+    Long createRequirementAddress(CustomerRequirementAddress address);
+
+    Long updateCurrentRent(CustomerRequirementAddress address);
+
+    CustomerRequirementAddress findRequirementAddressById(Long id);
+
+    List<CustomerRequirementAddress> findRequirementAddressByRequirementId(Long requirementId);
+
+
 }

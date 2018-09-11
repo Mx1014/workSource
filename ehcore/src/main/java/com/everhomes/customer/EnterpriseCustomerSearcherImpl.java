@@ -178,8 +178,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("EntryStatus", customer.getEntryStatus());
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customer.getId());
             if(requirement != null){
-                builder.field("aptitudeFlagItemId" , requirement.getMinArea());
-                builder.field("aptitudeFlagItemId" , requirement.getMaxArea());
+                if(requirement.getMinArea() != null) {
+                    builder.field("RequirementMinArea", requirement.getMinArea());
+                }
+                if(requirement.getMaxArea() != null) {
+                    builder.field("RequirementMaxArea", requirement.getMaxArea());
+                }
             }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {

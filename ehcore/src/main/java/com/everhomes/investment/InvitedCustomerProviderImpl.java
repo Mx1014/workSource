@@ -10,13 +10,11 @@ import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -116,28 +114,69 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public Long createTracker(CustomerTracker contact) {
-        return null;
+    public Long createTracker(CustomerTracker tracker) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhCustomerTrackers.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerTrackers.class));
+        tracker.setId(id);
+
+        User user = UserContext.current().getUser();
+        tracker.setOperatorUid(user.getId());
+        tracker.setCreatorUid(user.getId());
+
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        tracker.setOperatorTime(new Timestamp(l2));
+        tracker.setCreateTime(new Timestamp(l2));
+
+        EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
+        dao.insert(tracker);
+        return id;
     }
 
     @Override
-    public Long updateTracker(CustomerTracker contact) {
-        return null;
+    public Long updateTracker(CustomerTracker tracker) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerTrackers.class));
+
+        User user = UserContext.current().getUser();
+        tracker.setOperatorUid(user.getId());
+
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        tracker.setOperatorTime(new Timestamp(l2));
+
+        EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
+        dao.update(tracker);
+        return tracker.getId();
     }
 
     @Override
     public CustomerTracker findTrackerById(Long id) {
-        return null;
-    }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerTrackers.class));
+
+        EhCustomerTrackersDao dao = new EhCustomerTrackersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTracker.class);    }
 
     @Override
     public List<CustomerTracker> findTrackerByCustomerId(Long customerId) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerTrackers.class));
+
+        SelectQuery<EhCustomerTrackersRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKERS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
+        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
     }
 
     @Override
     public List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerTrackers.class));
+
+        SelectQuery<EhCustomerTrackersRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKERS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.TRACKER_TYPE.eq(type));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
+        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
     }
 
     @Override
@@ -329,4 +368,60 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                 .where(contact.CUSTOMER_ID.eq(id))
                 .execute();
     }
+
+    @Override
+    public Long createRequirementAddress(CustomerRequirementAddress address) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhCustomerRequirementAddresses.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerRequirementAddresses.class));
+        address.setId(id);
+
+        User user = UserContext.current().getUser();
+        address.setOperatorUid(user.getId());
+        address.setCreatorUid(user.getId());
+
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        address.setCreateTime(new Timestamp(l2));
+        address.setOperatorTime(new Timestamp(l2));
+
+        EhCustomerRequirementAddressesDao dao = new EhCustomerRequirementAddressesDao(context.configuration());
+        dao.insert(address);
+        return id;
+    }
+
+    @Override
+    public Long updateCurrentRent(CustomerRequirementAddress address) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerRequirementAddresses.class));
+
+        User user = UserContext.current().getUser();
+        address.setOperatorUid(user.getId());
+
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        address.setOperatorTime(new Timestamp(l2));
+
+        EhCustomerRequirementAddressesDao dao = new EhCustomerRequirementAddressesDao(context.configuration());
+        dao.update(address);
+        return address.getId();
+    }
+
+    @Override
+    public CustomerRequirementAddress findRequirementAddressById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerRequirementAddresses.class));
+
+
+        EhCustomerRequirementAddressesDao dao = new EhCustomerRequirementAddressesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerRequirementAddress.class);    }
+
+    @Override
+    public List<CustomerRequirementAddress> findRequirementAddressByRequirementId(Long requirementId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerTrackers.class));
+
+        SelectQuery<EhCustomerRequirementAddressesRecord> query = context.selectQuery(Tables.EH_CUSTOMER_REQUIREMENT_ADDRESSES);
+        query.addConditions(Tables.EH_CUSTOMER_REQUIREMENT_ADDRESSES.REQUIREMENT_ID.eq(requirementId));
+        query.addConditions(Tables.EH_CUSTOMER_REQUIREMENT_ADDRESSES.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
+        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerRequirementAddress.class));    }
+
 }
