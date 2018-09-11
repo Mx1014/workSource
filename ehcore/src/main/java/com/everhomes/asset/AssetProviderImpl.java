@@ -3037,7 +3037,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
-        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME)
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT,billGroup.NAME,t.DELETE_FLAG)
                 .from(t,t1,billGroup)
                 .where(t.BILL_ID.in(fetch))
                 .and(t.BILL_GROUP_ID.eq(billGroup.ID))
@@ -3059,9 +3059,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
                     dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     dto.setBillGroupName(r.getValue(billGroup.NAME));//物业缴费V6.3合同概览需要增加账单组名称字段
-                    
-                    
-                    
+                    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+                    dto.setDeleteFlag(r.getValue(t.DELETE_FLAG));
                     set.add(dto);
                     return null;
                 });
@@ -5142,17 +5141,20 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(bill.CONTRACT_NUM.eq(contractNum))
                     .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                     .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .fetch(bill.ID);
         }else {
         	fetch = context.select(bill.ID)
                     .from(bill)
                     .where(bill.CONTRACT_NUM.eq(contractNum))
+                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .fetch(bill.ID);
         }
         context.select(t.ID,t.AMOUNT_RECEIVABLE)
 	        .from(t,t1)
 	        .where(t.BILL_ID.in(fetch))
 	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+	        .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
 	        .orderBy(t1.NAME,t.DATE_STR)
 	        .fetch()
 	        .map(r -> {
@@ -5170,17 +5172,20 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(bill.CONTRACT_ID.eq(contractId))
                     .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                     .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .fetch(bill.ID);
         }else {
         	fetch1 = context.select(bill.ID)
                     .from(bill)
                     .where(bill.CONTRACT_ID.eq(contractId))
+                    .and(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                     .fetch(bill.ID);
         }
         context.select(t.ID,t.AMOUNT_RECEIVABLE)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .orderBy(t1.NAME,t.DATE_STR)
                 .fetch()
                 .map(r -> {
