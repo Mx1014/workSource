@@ -1037,6 +1037,7 @@ public class AssetProviderImpl implements AssetProvider {
         		,t.ENERGY_CONSUME,t.CHARGING_ITEMS_ID)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
+                .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch()
                 .map(r -> {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
@@ -1085,6 +1086,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(fine,t)
                 .where(fine.BILL_ITEM_ID.eq(t.ID))
                 .and(fine.BILL_ID.eq(billId))
+                .and(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetch()
                 .map(r -> {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
@@ -5239,6 +5241,7 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(bill.TARGET_ID.eq(targetId));
         }
         query.addConditions(bill.SWITCH.eq((byte)1));
+        query.addConditions(bill.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         query.addOrderBy(bill.DATE_STR.desc());
 
         query.fetch()
@@ -5282,6 +5285,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .fetchInto(PaymentBills.class);
     }
 

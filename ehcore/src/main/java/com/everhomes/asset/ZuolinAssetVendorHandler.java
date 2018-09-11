@@ -62,6 +62,7 @@ import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
 import com.everhomes.rest.asset.AssetServiceErrorCode;
 import com.everhomes.rest.asset.AssetTargetType;
@@ -989,6 +990,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
             query.addConditions(t.AMOUNT_OWED.greaterThan(BigDecimal.ZERO));//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的       
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }
@@ -1205,6 +1208,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
             query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addGroupBy(t.ID);
             query.addOrderBy(t.DATE_STR.desc());
             List<ListAllBillsForClientDTO> list = new ArrayList<>();
