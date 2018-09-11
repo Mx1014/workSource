@@ -60,9 +60,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('pay.v2.callback.url.express', '/express/notifyExpressOrderPaymentV2', '快递缴费新支付回调接口', 0, NULL, 0);
 	
 	
--- AUTHOR: 黄良铭
--- REMARK: 积分所需配置表 及菜单
-SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
+
 
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
@@ -210,6 +208,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.server.app_secret', 'T6PEjA9GBAVMBmlBYDs9RkoQMurrH5XQjFoP1v+oGomKeIdsqVhwpTVv8AHPLWo/I09IudgxR4/zjvM9YYwxzg==', '连接统一订单服务器的appsecret', 0, NULL, 0);
 
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
  VALUES(@b_id:= @b_id +1,'server.point.url','https://core.zuolin.com','the point url','0',NULL,NULL);
  
@@ -268,6 +269,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.server.app_secret', 'Z9VdCw9PEvui6tPTihExybCrJJHRSfNAPKuutK978NgxCpmCu+ztk0alVqTMN5JcBZe0thya7zK/5a/qe2fANA==', '连接统一订单服务器的appsecret', 0, NULL, 0);
 
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
  VALUES(@b_id:= @b_id +1,'server.point.url','https://zijing.lihekefu.com','the point url','0',NULL,NULL);
  
@@ -352,6 +356,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.server.app_secret', 'T1nIY3vNMK83dkJNcD/DIk9xx2rZup9KDjGwITiUnVFMVGVVwnmk5XHBHSe7BOm5Ex4TKflryC5IEURNQWHDIg==', '连接统一订单服务器的appsecret', 0, NULL, 0);
 
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
  VALUES(@b_id:= @b_id +1,'server.point.url','https://park.szbay.com','the point url','0',NULL,NULL);
 
