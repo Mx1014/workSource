@@ -30,7 +30,7 @@ public class ParkingLot extends EhParkingLots {
     //显示当前在场车/当前剩余车位
     private Byte currentInfoType;
     //停车场客服联系方式
-//    private String contact;
+    private String contact;
 
     private Byte monthlyDiscountFlag;
     private String monthlyDiscount;
@@ -210,13 +210,13 @@ public class ParkingLot extends EhParkingLots {
         this.monthRechargeFlag = monthRechargeFlag;
     }
 
-//    public String getContact() {
-//        return contact;
-//    }
-//
-//    public void setContact(String contact) {
-//        this.contact = contact;
-//    }
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
     
 	public Byte getNoticeFlag() {
 		return noticeFlag;
