@@ -1231,7 +1231,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite,  true);
 
 			//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, null, true);
 			//退款提示
 			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 					rentalSite.getResourceType(), rentalSite.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rentalSite.getId());
