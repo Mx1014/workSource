@@ -1935,6 +1935,8 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
                 scopeField.setCategoryId(cmd.getCategoryId());
+                scopeField.setOwnerId(cmd.getOwnerId());
+                scopeField.setOwnerType(cmd.getOwnerType());
 
                 if (scopeField.getId() == null) {
                     scopeField.setGroupPath(scopeField.getGroupPath());
