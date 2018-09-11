@@ -3471,12 +3471,24 @@ public class ParkingServiceImpl implements ParkingService {
 		if(lot.getFuncList()!=null && lot.getFuncList().contains("[")){
 			JSONArray array = JSONObject.parseArray(lot.getFuncList());
 			for (Object o : array) {
-//				//暂时如此
-//				if(ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())){
-//					continue;
-//				}
-				
+				//暂时如此
 				ParkingFuncDTO dto = new ParkingFuncDTO();
+				if (ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())) {
+					dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
+					dto.setEnableFlag(lot.getVipParkingFlag());
+					funcLists.add(dto);
+					continue;
+				} else if (ParkingBusinessType.USER_NOTICE.getCode().equals(o.toString())){
+					dto.setCode(ParkingBusinessType.USER_NOTICE.getCode());
+					dto.setEnableFlag(lot.getNoticeFlag());
+					funcLists.add(dto);
+					continue;
+				} else if (ParkingBusinessType.INVOICE_APPLY.getCode().equals(o.toString())){
+					dto.setCode(ParkingBusinessType.INVOICE_APPLY.getCode());
+					dto.setEnableFlag(lot.getInvoiceFlag());
+					funcLists.add(dto);
+					continue;
+				}
 				dto.setCode(o.toString());
 				dto.setEnableFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 				try {
@@ -3497,16 +3509,12 @@ public class ParkingServiceImpl implements ParkingService {
 						break;
 					}
 				}
-				if (ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString()) 
-						|| ParkingBusinessType.USER_NOTICE.getCode().equals(o.toString()) 
-						|| ParkingBusinessType.INVOICE_APPLY.getCode().equals(o.toString())) {
-					funcLists.add(dto);
-				} else {
-					dockingFuncLists.add(dto);
-				}
+				dockingFuncLists.add(dto);
 			}
 		}
 		response.setDockingFuncLists(dockingFuncLists);
+		
+		ParkingFuncDTO dto = new ParkingFuncDTO();
 
 //		ParkingFuncDTO dto = new ParkingFuncDTO();
 //		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
@@ -3588,6 +3596,9 @@ public class ParkingServiceImpl implements ParkingService {
 	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(cmd.getParkingLotId());
 		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
+		ParkingLotConfig config = ConvertHelper.convert(parkingLot.getConfigJson(), ParkingLotConfig.class);
+		config.setContact(cmd.getContact());
+		newParkingLot.setRechargeJson(JSONObject.toJSONString(config));
 		newParkingLot.setId(parkingLot.getId());
 		newParkingLot.setContact(parkingLot.getContact());
 		newParkingLot.setCreateTime(parkingLot.getCreateTime());
@@ -3603,7 +3614,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingLotDTO getParkingUserNotice(long parkingLotId) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
 		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
-		newParkingLot.setContact(parkingLot.getContact());
+		ParkingRechargeConfig config = ConvertHelper.convert(parkingLot.getRechargeJson(), ParkingRechargeConfig.class);
+		newParkingLot.setContact(config.getContact());
 		newParkingLot.setSummary(parkingLot.getSummary());
 		return newParkingLot;
 	}

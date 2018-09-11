@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateUserNoticeCommand {
     private Long parkingLotId;
-    private String contect;
+    private String contact;
     private String summary;
 
 
@@ -24,12 +24,12 @@ public class UpdateUserNoticeCommand {
 		this.summary = summary;
 	}
 
-	public String getContect() {
-		return contect;
+	public String getContact() {
+		return contact;
 	}
 
-	public void setContect(String contect) {
-		this.contect = contect;
+	public void setContact(String contact) {
+		this.contact = contact;
 	}
 
 	public Long getParkingLotId() {
