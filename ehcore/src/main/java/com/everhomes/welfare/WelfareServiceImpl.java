@@ -19,6 +19,9 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.paySDK.PaySDKController;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.socialSecurity.NormalFlag;
@@ -30,6 +33,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,8 @@ public class WelfareServiceImpl implements WelfareService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WelfareServiceImpl.class);
     @Autowired
     private ArchivesService archivesService;
+    @Autowired
+    private PayService payService;
     @Autowired
     private WelfareProvider welfareProvider;
     @Autowired
@@ -240,10 +246,16 @@ public class WelfareServiceImpl implements WelfareService {
             if (NormalFlag.YES == NormalFlag.fromCode(response.getCheckStatus())) {
                 return response;
             }
-            //todo 转账
-
+          
             //发消息
-            cmd.getWelfare().getReceivers().stream().map(r -> {
+            cmd.getWelfare().getReceivers().forEach(r -> {
+
+                
+                //查企业账户有没有足够的钱
+                //拿用户的账户(没有就创建)
+                //转账
+                PayUserDTO accountDTO = payService.createPersonalPayUserIfAbsent("EhUser" + r.getReceiverUid(), "NS" + UserContext.getCurrentNamespaceId().toString());
+                //todo 转账
                 sendPayslipMessage(welfare.getOperatorName(), welfare.getSubject(), welfare.getId(), r.getReceiverUid());
                 return r;
             });
