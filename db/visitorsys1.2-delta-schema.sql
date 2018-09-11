@@ -3,7 +3,7 @@ CREATE TABLE `eh_visitor_sys_door_access` (
   `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT 'namespace id',
   `owner_type` varchar(64) NOT NULL COMMENT 'community or organization',
   `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `door_access_id` bigint(20) DEFAULT NOT NULL COMMENT '门禁组Id',
+  `door_access_id` bigint(20) NOT NULL COMMENT '门禁组Id',
   `door_access_name` varchar(256) DEFAULT NULL COMMENT '门禁组名称',
   `auth_rule_type` tinyint(4) DEFAULT NULL COMMENT '授权规则种类，0 时长，1 次数',
   `max_duration` int DEFAULT 0 COMMENT '访客授权最长有效期',
