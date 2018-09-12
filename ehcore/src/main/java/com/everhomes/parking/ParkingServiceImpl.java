@@ -3612,8 +3612,11 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingLotDTO getParkingUserNotice(long parkingLotId) {
 		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
 		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
-		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		newParkingLot.setContact(config.getContact());
+		ParkingRechargeConfig rechargeConfig = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
+		ParkingLotConfig config = JSONObject.parseObject(parkingLot.getConfigJson(),new TypeReference<ParkingLotConfig>() {});
+		newParkingLot.setNoticeFlag(config.getNoticeFlag());
+		newParkingLot.setInvoiceFlag(config.getInvoiceFlag());
+		newParkingLot.setContact(rechargeConfig.getContact());
 		newParkingLot.setSummary(parkingLot.getSummary());
 		return newParkingLot;
 	}
