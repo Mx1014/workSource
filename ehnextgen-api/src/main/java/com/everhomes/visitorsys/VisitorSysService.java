@@ -1,13 +1,12 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.GetFormCommand;
 import com.everhomes.rest.visitorsys.ui.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -146,5 +145,11 @@ public interface VisitorSysService {
 
     IdentifierCardDTO getIDCardInfo();
 
-    //List<> listDoorAccess(ListDoorAccessCommand);
+    List<VisitorSysDoorAccessDTO> listDoorAccess(BaseVisitorsysCommand cmd);
+
+    void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd);
+
+    void deleteDoorAccess(DeleteDoorAccessCommand cmd);
+
+    void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd);
 }

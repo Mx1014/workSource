@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
+import java.util.List;
 
 @RestDoc(value = "visitorsys Controller", site = "core")
 @RestController
@@ -402,6 +403,69 @@ public class VisitorSysController extends ControllerBase {
 		ListDoorGuardsResponse baseResponse = visitorSysService.listDoorGuards(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/listDoorAccess</b>
+	 * <p>
+	 * 22.门禁授权规则列表-后台管理
+	 * </p>
+	 */
+	@RequestMapping("listDoorAccess")
+	@RestReturn(value = VisitorSysDoorAccessDTO.class,collection = true)
+	public RestResponse listDoorAccess(BaseVisitorsysCommand cmd) {
+		RestResponse response = new RestResponse(visitorSysService.listDoorAccess(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/createDoorAccess</b>
+	 * <p>
+	 * 22.创建门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("createDoorAccess")
+	@RestReturn(String.class)
+	public RestResponse createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
+		visitorSysService.createDoorAccess(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/deleteDoorAccess</b>
+	 * <p>
+	 * 22.删除门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("deleteDoorAccess")
+	@RestReturn(String.class)
+	public RestResponse deleteDoorAccess(DeleteDoorAccessCommand cmd) {
+		visitorSysService.deleteDoorAccess(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/setDefaultAccess</b>
+	 * <p>
+	 * 22.设置默认门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("setDefaultAccess")
+	@RestReturn(String.class)
+	public RestResponse setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+		visitorSysService.setDefaultAccess(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
