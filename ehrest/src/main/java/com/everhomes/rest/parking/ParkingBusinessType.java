@@ -24,8 +24,8 @@ public enum ParkingBusinessType {
     CAR_NUM("carNum","在场车数量","getCurrentInfoType","setCurrentInfoType"),
     FREE_PLACE("freePlace","空余车位数量","getCurrentInfoType","setCurrentInfoType"),
     MONTH_CARD_APPLY("monthCardApply","在线月卡申请","getFlowMode","setFlowMode"),
-	USER_NOTICE("userNotice","用户须知","getUserNotice","setUserNotice"),
-	INVOICE_APPLY("invoiceApply","发票申请","getInvoiceApply","setInvoiceApply");
+	USER_NOTICE("userNotice","用户须知","getUserNoticeFlag","setUserNoticeFlag"),
+	INVOICE_APPLY("invoiceApply","发票申请","getInvoiceApplyFlag","setInvoiceApplyFlag");
 	
     private String code;
     private String desc;
