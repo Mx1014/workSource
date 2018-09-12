@@ -334,11 +334,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void deleteReportValReceiverMsg(Long reportId, java.sql.Date reportTime){
+    public void deleteReportValReceiverMsgByValId(Long reportValId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportValReceiverMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_ID.eq(reportId));
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_TIME.eq(reportTime));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_VAL_ID.eq(reportValId));
         query.execute();
     }
 

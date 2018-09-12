@@ -51,7 +51,7 @@ public interface WorkReportValProvider {
 
     Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
 
-    void deleteReportValReceiverMsg(Long reportId, java.sql.Date reportTime);
+    void deleteReportValReceiverMsgByValId(Long reportValId);
 
     void deleteReportValReceiverMsg(Timestamp time);
 

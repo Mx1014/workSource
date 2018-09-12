@@ -561,6 +561,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         msg.setOrganizationId(reportVal.getOrganizationId());
         msg.setReportId(report.getId());
         msg.setReportName(report.getReportName());
+        msg.setReportValId(reportVal.getId());
         msg.setReportType(report.getReportType());
         msg.setReportTime(reportVal.getReportTime());
         msg.setReminderTime(reminderTime);
@@ -579,6 +580,8 @@ public class WorkReportServiceImpl implements WorkReportService {
                 workReportValProvider.updateWorkReportVal(reportVal);
                 //  2.delete the report receivers.
                 workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
+                //  3.delete the report receiver msg.
+                workReportValProvider.deleteReportValReceiverMsgByValId(reportVal.getId());
                 return null;
             });
         }
@@ -617,7 +620,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             generalFormService.updateGeneralFormVal(formCommand);
             //  3.update receivers.
             workReportValProvider.deleteReportValReceiverByValId(reportVal.getId());
-            workReportValProvider.deleteReportValReceiverMsg(reportVal.getReportId(), reportVal.getReportTime());
+            workReportValProvider.deleteReportValReceiverMsgByValId(reportVal.getId());
             for (Long receiverId : cmd.getReceiverIds()) {
                 //  create the receiver.
                 createWorkReportValReceiverMap(reportVal, receiverId);
