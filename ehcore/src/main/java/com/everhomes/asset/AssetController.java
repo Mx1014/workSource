@@ -1393,7 +1393,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * it can only have one mate from the same module to prevent a bigamy
      * @param cmd
      * @return OK
-     */
+     *//*
     @RequestMapping("createAnAppMapping")
     @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
     public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
@@ -1403,11 +1403,11 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorDescription("OK");
         return response;
     }
-    /**
+    *//**
      * forcely update a mapping relation to be allocated again
      * @param cmd
      * @return OK
-     */
+     *//*
     @RequestMapping("updateAnAppMapping")
     @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
     public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
@@ -1416,7 +1416,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
     
     /**
      * <b>URL: /asset/isUserExistInAddress</b>
@@ -1637,6 +1637,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
+    }
+    
+    /**
+     * <p>物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移</p>
+     * <b>URL: /asset/tranferAssetMappings</b>
+     */
+    @RequestMapping("tranferAssetMappings")
+    @RestReturn(value = String.class)
+    public RestResponse tranferAssetMappings(HttpServletResponse response) {
+        assetService.tranferAssetMappings();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
     }
     
 }
