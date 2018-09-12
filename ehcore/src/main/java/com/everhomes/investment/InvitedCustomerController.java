@@ -80,7 +80,7 @@ public class InvitedCustomerController {
      */
     @RequestMapping("deleteInvestment")
     @RestReturn(value=Long.class)
-    public RestResponse deleteInvestment(CreateInvitedCustomerCommand cmd) {
+    public RestResponse deleteInvestment(DeleteInvitedCustomerCommand cmd) {
         RestResponse response = new RestResponse();
         // cmd.getId() cmd.getNameSpaceId()
         invitedCustomerService.deleteInvestment(cmd);

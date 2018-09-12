@@ -70,4 +70,6 @@ public interface InvitedCustomerProvider {
     List<CustomerRequirementAddress> findRequirementAddressByRequirementId(Long requirementId);
 
     List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize);
+
+    void deleteCustomerTrackersByCustomerId(Long customerId, byte code);
 }

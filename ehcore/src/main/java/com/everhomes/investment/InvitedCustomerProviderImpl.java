@@ -462,4 +462,15 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     public List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize) {
         return null;
     }
+
+    @Override
+    public void deleteCustomerTrackersByCustomerId(Long customerId, byte code) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerTrackers tracker = Tables.EH_CUSTOMER_TRACKERS;
+        context.update(tracker)
+                .set(tracker.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(tracker.CUSTOMER_ID.eq(customerId))
+                .and(tracker.CUSTOMER_SOURCE.eq(code))
+                .execute();
+    }
 }

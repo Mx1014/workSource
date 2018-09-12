@@ -10,7 +10,7 @@ public interface InvitedCustomerService {
 
     void updateInvestment(CreateInvitedCustomerCommand cmd);
 
-    void deleteInvestment(CreateInvitedCustomerCommand cmd);
+    void deleteInvestment(DeleteInvitedCustomerCommand cmd);
 
     SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd);
 
