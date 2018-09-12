@@ -6,15 +6,15 @@ import java.util.List;
 
 public class ChangeInvestmentToCustomerCommand {
 
-    private List<Long> customerId;
+    private List<Long> customerIds;
 
 
-    public List<Long> getCustomerId() {
-        return customerId;
+    public List<Long> getCustomerIds() {
+        return customerIds;
     }
 
-    public void setCustomerId(List<Long> customerId) {
-        this.customerId = customerId;
+    public void setCustomerIds(List<Long> customerIds) {
+        this.customerIds = customerIds;
     }
 
     @Override

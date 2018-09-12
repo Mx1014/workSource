@@ -450,6 +450,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     }
 
 
+    public void changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd){
+        
+    }
+
 
     @Override
     public void giveUpInvitedCustomer(ViewInvestmentDetailCommand cmd) {
