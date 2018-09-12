@@ -178,7 +178,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceType" , customer.getSourceType());
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             builder.field("customerSource" , customer.getCustomerSource());
-            builder.field("entryStatus", customer.getEntryStatus());
+            builder.field("entryStatusItemId", customer.getEntryStatusItemId());
             List<CustomerTracker> tracker;
             if(customer.getCustomerSource() != null){
                 tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), customer.getCustomerSource());
