@@ -2629,4 +2629,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         idCard = resp.getCardInfo();
         return idCard;
     }
+
+
 }
