@@ -4,10 +4,22 @@
 -- AUTHOR: liangqishi  20180702
 -- REMARK: 某某模块涉及到数据迁移，升级后需要调用/xxxx/xxxx接口更新ES
 -- REMARK: content图片程序升级，从本版中的content二进制更新到正式环境中
+
+-- AUTHOR: 杨崇鑫 2018年9月5日
+-- REMARK: 1、备份表eh_asset_module_app_mappings
+--         2、调用接口/asset/tranferAssetMappings
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: 杨崇鑫 2018年9月5日
+-- REMARK: 物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移
+update eh_asset_module_app_mappings set config=concat('{"contractOriginId":', contract_originId , ',' , '"contractChangeFlag":' , '"', contract_changeFlag , '"' , '}') 
+	where contract_originId is not null;
+update eh_asset_module_app_mappings set source_type='contract' where source_type is null;
+	
 -- AUTHOR: 张智伟 20180822
 -- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
 UPDATE eh_punch_rules SET punch_remind_flag=1,remind_minutes_on_duty=10 WHERE rule_type=1;

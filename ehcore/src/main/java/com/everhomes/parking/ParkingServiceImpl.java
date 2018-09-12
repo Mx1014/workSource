@@ -3693,12 +3693,16 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+		//微信通知开关
+		if (!configProvider.getBooleanValue(UserContext.getCurrentNamespaceId(),"parking.wechatNotify",false))
+			return;
 		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
 			return;
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + order.getId()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + order.getBizOrderNo()).enter(()-> {
 			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
 			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+			order.setPaidType(VendorType.WEI_XIN.getCode());
 			if (handler.notifyParkingRechargeOrderPayment(order)) {
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
