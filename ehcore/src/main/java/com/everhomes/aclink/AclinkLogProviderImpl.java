@@ -6,13 +6,17 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.aclink.*;
 import com.everhomes.server.schema.tables.EhDoorAccess;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
+import org.apache.poi.ddf.NullEscherSerializationListener;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -207,7 +211,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         return objs;
     }
     //add by liqingyan
-
+    @Override
     public DoorStatisticDTO queryDoorStatistic(DoorStatisticCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         DoorStatisticDTO dto = new DoorStatisticDTO();
@@ -256,7 +260,30 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         dto.setFaceTotal(new Long ((Integer)rlt8.get(0).getValue("face")));
         return dto;
     }
-
+    //add by liqingyan
+    @Override
+    public List<DoorStatisticByTimeDTO> queryDoorStatisticByTime (DoorStatisticByTimeCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAclinkLogs t = Tables.EH_ACLINK_LOGS.as("t");
+        com.everhomes.server.schema.tables.EhDoorAuth t2 = Tables.EH_DOOR_AUTH.as("t2");
+        Condition condition = t.AUTH_ID.ne(0L);
+        if(cmd.getStartTime() != null){
+            condition = condition.and(t.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+        }
+        List<DoorStatisticByTimeDTO> dtos = new ArrayList<DoorStatisticByTimeDTO>();
+        SelectHavingStep<Record2<Integer, Date>> groupBy = context.select(t.ID.count().as("num"),
+                DSL.date(t.CREATE_TIME).as("d"))
+                .from(t)
+                .where(condition).groupBy(DSL.date(t.CREATE_TIME).as("d"));
+        groupBy.fetch().map((r) -> {
+            DoorStatisticByTimeDTO dto = new DoorStatisticByTimeDTO();
+            dto.setCreateTime(r.getValue("d").toString());
+            dto.setOpenNumber(Long.parseLong(r.getValue("num").toString()));
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
+    }
 
     private void prepareObj(AclinkLog obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();

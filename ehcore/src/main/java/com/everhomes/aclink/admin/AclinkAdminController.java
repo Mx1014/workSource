@@ -514,7 +514,7 @@ public class AclinkAdminController extends ControllerBase {
      * @return 门禁列表
      */
     @RequestMapping("doorStatistic")
-    @RestReturn(value=DoorStatisticDTO.class)
+    @RestReturn(value=DoorStatisticResponse.class)
     public RestResponse doorStatistic(@Valid DoorStatisticCommand cmd) {
         DoorStatisticResponse obj = doorAccessService.doorStatistic(cmd);
         RestResponse response = new RestResponse(obj);
@@ -522,7 +522,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/doorStatisticByTime</b>
+     * <p>门禁综合统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("doorStatisticByTime")
+    @RestReturn(value=DoorStatisticByTimeResponse.class)
+    public RestResponse doorStatisticByTime(@Valid DoorStatisticByTimeCommand cmd) {
+        DoorStatisticByTimeResponse obj = doorAccessService.doorStatisticByTime(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/aclink/createQRUserPermission</b>

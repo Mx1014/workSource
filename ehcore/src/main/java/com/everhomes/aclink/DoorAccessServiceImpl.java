@@ -4290,32 +4290,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add by liqingyan
     @Override
     public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
-//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         DoorStatisticResponse resp = new DoorStatisticResponse();
         resp.setDtos(new DoorStatisticDTO());
-//        DoorStatisticDTO dto = new DoorStatisticDTO();
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        Condition condition = Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType());
-//        condition = condition.and(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
-
-//service 传条件
-//        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-//        ListingLocator locator = new ListingLocator();
-//        List<DoorStatisticDTO> objs = aclinkLogProvider.queryDoorStatisticDTO(locator, count, new ListingQueryBuilderCallback() {
-//            @Override
-//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-//                if (cmd.getOwnerType() != null) {
-//                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
-//                }
-//                if (cmd.getOwnerId() != null) {
-//                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
-//                }
-//                return query;
-//            }
-//        });
-
-
         DoorStatisticDTO objs =aclinkLogProvider.queryDoorStatistic(cmd);
+        resp.setDtos(objs);
+        return resp;
+    }
+
+    //add by liqingyan
+    @Override
+    public DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd){
+        DoorStatisticByTimeResponse resp = new DoorStatisticByTimeResponse();
+        resp.setDtos(new ArrayList<DoorStatisticByTimeDTO>());
+        List<DoorStatisticByTimeDTO> objs = aclinkLogProvider.queryDoorStatisticByTime(cmd);
         resp.setDtos(objs);
         return resp;
     }

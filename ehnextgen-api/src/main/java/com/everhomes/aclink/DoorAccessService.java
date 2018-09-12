@@ -127,6 +127,8 @@ public interface DoorAccessService {
 //add by liqingyan
     DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd);
 
+    DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd);
+
     String checkAllDoorAuthList();
 
 	public void remoteOpenDoor(String hardwareId);
