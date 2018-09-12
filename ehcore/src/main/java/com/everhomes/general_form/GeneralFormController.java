@@ -5,7 +5,24 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.general_approval.SearchFormValDTO;
+import com.everhomes.rest.general_approval.SearchFormValsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +46,7 @@ public class GeneralFormController extends ControllerBase {
 	 * <p> 根据业务获取表单 </p>
 	 */
 	@RequestMapping("getTemplateBySourceId")
-	@RestReturn(value=GeneralFormDTO.class)
+	@RestReturn(value = GeneralFormDTO.class)
 	public RestResponse getTemplateBySourceId(@Valid GetTemplateBySourceIdCommand cmd) {
 
 		GeneralFormDTO dto = generalFormService.getTemplateBySourceId(cmd);
@@ -40,7 +57,7 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
-    /**postGeneralFormVal
+    /**
 	 * <b>URL: /general_form/postGeneralForm</b>
 	 * <p> 提交表单值 </p>
 	 */

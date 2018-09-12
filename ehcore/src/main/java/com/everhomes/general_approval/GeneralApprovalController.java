@@ -1,18 +1,25 @@
 package com.everhomes.general_approval;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.general_approval.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.GetUserRealNameCommand;
+import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 
 @RestDoc(value="General approval controller", site="core")
@@ -97,6 +104,34 @@ public class GeneralApprovalController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_approval/getGeneralFormsAndValuesByFlowNode</b>
+	 * <p> 根据工作流节点获取表单列表和值 </p>
+	 */
+	@RequestMapping("getGeneralFormsAndValuesByFlowNode")
+	@RestReturn(value = ListGeneralFormResponse.class)
+	public RestResponse getGeneralFormsAndValuesByFlowNode(@Valid GetGeneralFormsAndValuesByFlowNodeCommand cmd) {
+		ListGeneralFormResponse listGeneralFormResponse = generalApprovalService.getGeneralFormsAndValuesByFlowNode(cmd);
+		RestResponse response = new RestResponse(listGeneralFormResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_approval/createOrUpdateGeneralFormValuesWithFlow</b>
+	 * <p> 编辑工作流表单值 </p>
+	 */
+	@RequestMapping("createOrUpdateGeneralFormValuesWithFlow")
+	@RestReturn(value = String.class)
+	public RestResponse createOrUpdateGeneralFormValuesWithFlow(CreateOrUpdateGeneralFormValuesWithFlowCommand cmd) {
+		generalApprovalService.createOrUpdateGeneralFormValuesWithFlow(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
 	}
 }
