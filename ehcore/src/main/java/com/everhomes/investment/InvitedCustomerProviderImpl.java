@@ -328,13 +328,14 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize);
-        Field<?>[] fieldArray = new Field[itemIds.size()];
+        Field<?>[] fieldArray = new Field[itemIds.size()+1];
         List<Field<?>> fields = new ArrayList<>();
         itemIds.forEach((itemId) -> {
             // dynamic build stastics decode
             Field<Long> staTmp = DSL.decode().when(customer.LEVEL_ITEM_ID.eq(itemId), itemId);
             fields.add(DSL.count(staTmp).as(itemId.toString()));
         });
+        fields.add(DSL.count().as("totalCount"));
         fields.toArray(fieldArray);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fieldArray);
@@ -358,6 +359,10 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                 dto.setItemId(itemId);
                 result.add(dto);
             }
+            InvitedCustomerStatisticsDTO dto = new InvitedCustomerStatisticsDTO();
+            dto.setKey("totalCount");
+            dto.setValue(r.getValue("totalCount", Long.class).toString());
+            result.add(dto);
             return null;
         });
         return result;
