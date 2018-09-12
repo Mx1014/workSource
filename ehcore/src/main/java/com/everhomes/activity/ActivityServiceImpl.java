@@ -2811,7 +2811,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
                  ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
-                 if (roster != null && roster.getPayFlag() != null && ActivityRosterPayFlag.REFUND.getCode() == roster.getPayFlag()) {
+                 if (roster != null && roster.getPayFlag() != null && roster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
                      dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
                  }
 	             dto.setActivityId(activity.getId());
