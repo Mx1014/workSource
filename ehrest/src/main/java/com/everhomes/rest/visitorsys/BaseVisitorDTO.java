@@ -57,6 +57,10 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
     private String officeLocationName;
     private Timestamp createTime;
 
+    private Byte authRuleType;
+    private Integer doorAccessInvalidTimes;
+    private Integer doorAccessInvalidDuration;
+
     public Long getId() {
         return id;
     }
