@@ -614,6 +614,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
+                order.setAccountName(record.getAccountName()); //记录收款方账号
                 switch (cmd.getPaymentType()){
                     case 1:
                     case 7:
