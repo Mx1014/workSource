@@ -221,6 +221,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         customer.setName(cmd.getName());
         customer.setSourceId(cmd.getSourceId());
         customer.setCorpIndustryItemId(cmd.getCorpIndustryItemId());
+        customer.setSourceItemId(cmd.getSourceItemId());
         customer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
         customer.setTransactionRatio(cmd.getTransactionRatio());
         customerProvider.updateEnterpriseCustomer(customer);
@@ -370,7 +371,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             if(addresses != null && addresses.size() > 0){
                 List<CustomerRequirementAddressDTO> addressesDTO = new ArrayList<>();
                 addresses.forEach(a -> {
-                    addressesDTO.add(ConvertHelper.convert(a, CustomerRequirementAddressDTO.class));
+                    CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
+                    addressDTO.setAddressName(addressProvider.findAddressById(addressDTO.getAddressId()).getBuildingName() + "/" + addressProvider.findAddressById(addressDTO.getAddressId()).getApartmentName());
+                    addressesDTO.add(addressDTO);
 
                 });
                 requirementDTO.setAddresses(addressesDTO);
@@ -379,6 +382,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         }
         return null;
     }
+
 
 
     @Override

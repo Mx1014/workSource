@@ -2,6 +2,10 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerCurrentRentDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 
 import java.math.BigDecimal;
@@ -260,6 +264,55 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private Byte customerSource;
     private Long entryStatusItemId;
     private String entryStatusItemName;
+
+    @ItemType(CreateCustomerTrackingCommand.class)
+    private List<CreateCustomerTrackingCommand> trackingInfos;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
+
+    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
+        return trackingInfos;
+    }
+
+    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
+        this.trackingInfos = trackingInfos;
+    }
+
+    public List<CustomerContactDTO> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<CustomerContactDTO> contacts) {
+        this.contacts = contacts;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
+    }
+
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
+    }
+
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
+    }
+
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
+    }
+
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
+    }
 
     public String getTransactionRatio() {
         return transactionRatio;

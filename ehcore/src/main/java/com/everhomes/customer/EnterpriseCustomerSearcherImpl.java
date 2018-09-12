@@ -25,9 +25,7 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
-import com.everhomes.rest.investment.CustomerRequirementAddressDTO;
-import com.everhomes.rest.investment.CustomerRequirementDTO;
-import com.everhomes.rest.investment.InvitedCustomerType;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -836,6 +834,36 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
+
+
+
+        CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
+        dto.setRequirement(requirementDTO);
+
+
+
+        List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
+        List<CustomerContactDTO> contactDTOS = new ArrayList<>();
+        customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+        dto.setContacts(contactDTOS);
+
+
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerIdAndType(dto.getId(), customer.getCustomerSource());
+        List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+        trackers.forEach(r-> {
+            CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+            List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+            if (oMembers != null && oMembers.size()>0) {
+                trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+            }
+            trackerDTOS.add(trackerDTO);
+        });
+        dto.setTrackers(trackerDTOS);
+
+
+
+
         LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
         return dto;
     }
