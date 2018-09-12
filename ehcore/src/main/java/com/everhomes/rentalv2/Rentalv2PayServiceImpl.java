@@ -311,7 +311,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                     "暂未绑定收款账户");
-        }
+        }else
+            cmd.setAccountName(payUserDTOs.get(0).getUserAliasName());
 
         //4、组装报文，发起下单请求
         PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd);
