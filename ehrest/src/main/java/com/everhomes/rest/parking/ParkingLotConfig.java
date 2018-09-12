@@ -20,7 +20,7 @@ public class ParkingLotConfig {
     //停车场客服联系方式
     private String contact;
 
-    private Byte invoiceApplyFlag = 0;
+    private Byte invoiceFlag = 0;
 
     private Byte businessLicenseFlag = 0;
     private Byte vipParkingFlag = 0;
@@ -28,7 +28,7 @@ public class ParkingLotConfig {
     private Byte identityCardFlag = 0;
     private Byte monthCardFlag = 0;
     private Integer flowMode;
-    private Byte userNoticeFlag = 0;
+    private Byte noticeFlag = 0;
 
     public Integer getFlowMode() {
         return flowMode;
@@ -127,20 +127,20 @@ public class ParkingLotConfig {
     }
 
 
-	public Byte getInvoiceApplyFlag() {
-		return invoiceApplyFlag;
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
 	}
 
-	public void setInvoiceApplyFlag(Byte invoiceApplyFlag) {
-		this.invoiceApplyFlag = invoiceApplyFlag;
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
 
-	public Byte getUserNoticeFlag() {
-		return userNoticeFlag;
+	public Byte getNoticeFlag() {
+		return noticeFlag;
 	}
 
-	public void setUserNoticeFlag(Byte userNoticeFlag) {
-		this.userNoticeFlag = userNoticeFlag;
+	public void setNoticeFlag(Byte noticeFlag) {
+		this.noticeFlag = noticeFlag;
 	}
 
 	@Override

@@ -3623,8 +3623,8 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		UserNoticeInvoiceDTO userNoticeInvoice = ConvertHelper.convert(parkingLot,UserNoticeInvoiceDTO.class);
 		ParkingLotConfig config = JSONObject.parseObject(parkingLot.getConfigJson(),new TypeReference<ParkingLotConfig>() {});
-		userNoticeInvoice.setNoticeFlag(config.getUserNoticeFlag());
-		userNoticeInvoice.setInvoiceFlag(config.getInvoiceApplyFlag());
+		userNoticeInvoice.setNoticeFlag(config.getNoticeFlag());
+		userNoticeInvoice.setInvoiceFlag(config.getInvoiceFlag());
 		return userNoticeInvoice;
 	}
 	
