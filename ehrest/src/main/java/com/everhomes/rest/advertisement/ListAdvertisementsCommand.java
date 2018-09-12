@@ -4,6 +4,22 @@ import java.math.BigDecimal;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * 	<li>namespaceId: 域空间id</li>
+ *  <li>communityId: 园区id</li>
+ * 	<li>businessStatus: 招商状态</li>
+ *  <li>advertisementType: 广告类型（1-招租广告，2-招商广告）</li>
+ * 	<li>availableAreaMin: 最小招商面积</li>
+ * 	<li>availableAreaMax: 最大招商面积</li>
+ * 	<li>assetPriceMin: 最小租金</li>
+ * 	<li>assetPriceMax: 最大租金</li>
+ * 	<li>apartmentFloorMin: 最小楼层</li>
+ * 	<li>apartmentFloorMax: 最大楼层</li>
+ *  <li>orientation: 朝向</li>
+ *  <li>keywords: 关键字</li>
+ * </ul>
+ */
 public class ListAdvertisementsCommand {
 	
 	private Integer namespaceId;

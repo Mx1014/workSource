@@ -13,6 +13,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.advertisement.ChangeAdvertisementOrderCommand;
 import com.everhomes.rest.advertisement.CreateAdvertisementCommand;
 import com.everhomes.rest.advertisement.DeleteAdvertisementCommand;
 import com.everhomes.rest.advertisement.ListAdvertisementsCommand;
@@ -83,6 +84,20 @@ public class AdvertisementController extends ControllerBase{
 	public RestResponse listAdvertisements(ListAdvertisementsCommand cmd){
 		ListAdvertisementsResponse result = advertisementService.listAdvertisements(cmd);
 		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /advertisement/changeAdvertisementOrder</b>
+	 * <p>查找招商广告</p>
+	 */
+	@RequestMapping("changeAdvertisementOrder")
+	@RestReturn(value=String.class)
+	public RestResponse changeAdvertisementOrder(ChangeAdvertisementOrderCommand cmd){
+		advertisementService.changeAdvertisementOrder(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

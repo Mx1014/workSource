@@ -63,4 +63,6 @@ CREATE TABLE `eh_investment_advertisement_asset` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招商广告关联资产表';
 
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `integral_tag1` bigint(20) NULL DEFAULT 0 COMMENT '业务字段（用于表示招商租赁的预约申请记录状态）';
+
 -- --------------------- SECTION END ---------------------------------------------------------

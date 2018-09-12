@@ -1,5 +1,6 @@
 package com.everhomes.advertisement;
 
+import com.everhomes.rest.advertisement.ChangeAdvertisementOrderCommand;
 import com.everhomes.rest.advertisement.CreateAdvertisementCommand;
 import com.everhomes.rest.advertisement.DeleteAdvertisementCommand;
 import com.everhomes.rest.advertisement.ListAdvertisementsCommand;
@@ -15,5 +16,7 @@ public interface AdvertisementService {
 	void updateAdvertisement(UpdateAdvertisementCommand cmd);
 
 	ListAdvertisementsResponse listAdvertisements(ListAdvertisementsCommand cmd);
+
+	void changeAdvertisementOrder(ChangeAdvertisementOrderCommand cmd);
 
 }

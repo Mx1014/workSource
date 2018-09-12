@@ -7,6 +7,34 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * 	<li>title: 招商广告标题</li>
+ * 	<li>advertisementType: 广告类型（1-招租广告，2-招商广告）</li>
+ * 	<li>businessStatus: 招商状态</li>
+ * 	<li>availableAreaMin: 最小招商面积</li>
+ * 	<li>availableAreaMax: 最大招商面积</li>
+ * 	<li>assetPriceMin: 最小租金</li>
+ * 	<li>assetPriceMax: 最大租金</li>
+ * 	<li>priceUnit: 租金单位</li>
+ * 	<li>apartmentFloorMin: 最小楼层</li>
+ * 	<li>apartmentFloorMax: 最大楼层</li>
+ *  <li>orientation: 朝向</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
+ *  <li>contacts: 联系人</li>
+ *  <li>contactPhone: 联系电话</li>
+ *  <li>description: 招商广告描述</li>
+ *  <li>postUri: 招商广告封面图</li>
+ *  <li>defaultOrder: 排序字段</li>
+ *  <li>assetRelated: 招商广告是否关联楼宇房源</li>
+ *  <li>relatedAssets: 招商广告关联的楼宇房源，参考{@link com.everhomes.rest.advertisement.RelatedAssetDTO}</li>
+ *  <li>attachments: 招商广告轮播图，，参考{@link com.everhomes.rest.advertisement.AdvertisementAttachmentDTO}</li>
+ *  <li>customFormFlag: 是否启用了自定义表单</li>
+ *  <li>generalFormId: 自定义表单id</li>
+ *  <li>formValues: 自定义表单传值，参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * </ul>
+ */
 public class UpdateAdvertisementCommand {
 	private String title;
 	private Byte advertisementType;
@@ -31,7 +59,7 @@ public class UpdateAdvertisementCommand {
 	private Byte assetRelated;
 	@ItemType(RelatedAssetDTO.class)
 	private List<RelatedAssetDTO> relatedAssets;
-	
+	@ItemType(AdvertisementAttachmentDTO.class)
 	private List<AdvertisementAttachmentDTO> attachments;
 	
 	private Byte customFormFlag;

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.advertisement.ChangeAdvertisementOrderCommand;
 import com.everhomes.rest.advertisement.CreateAdvertisementCommand;
 import com.everhomes.rest.advertisement.DeleteAdvertisementCommand;
 import com.everhomes.rest.advertisement.ListAdvertisementsCommand;
@@ -38,7 +39,11 @@ public class AdvertisementServiceImpl implements AdvertisementService{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	
+
+	@Override
+	public void changeAdvertisementOrder(ChangeAdvertisementOrderCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }
