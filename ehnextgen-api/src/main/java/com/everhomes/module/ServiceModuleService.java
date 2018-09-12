@@ -82,4 +82,6 @@ public interface ServiceModuleService {
     void deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd);
 
 	ServiceModuleEntryDTO createServiceModuleEntry(CreateServiceModuleEntryCommand cmd);
+
+	ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd);
 }

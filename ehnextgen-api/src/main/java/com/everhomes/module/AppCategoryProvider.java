@@ -6,6 +6,8 @@ import java.util.List;
 public interface AppCategoryProvider {
     List<AppCategory> listAppCategories(Byte locationType, Long parentId);
 
+    List<AppCategory> listLeafAppCategories(Byte locationType);
+
     Long findMaxDefaultOrder(Byte locationType, Long parentId);
 
     void delete(Long id);

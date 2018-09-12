@@ -423,12 +423,26 @@ public class ModuleController extends ControllerBase {
 
     /**
      * <b>URL: /module/listAppCategory</b>
-     * <p>查询应用入口目录</p>
+     * <p>查询应用入口树形目录</p>
      */
     @RequestMapping("listAppCategory")
     @RestReturn(value = ListAppCategoryResponse.class)
     public RestResponse listAppCategory(ListAppCategoryCommand cmd) {
         ListAppCategoryResponse res = serviceModuleService.listAppCategory(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listLeafAppCategory</b>
+     * <p>查询应用入口平铺结构</p>
+     */
+    @RequestMapping("listLeafAppCategory")
+    @RestReturn(value = ListLeafAppCategoryResponse.class)
+    public RestResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
+        ListLeafAppCategoryResponse res = serviceModuleService.listLeafAppCategory(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

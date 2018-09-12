@@ -1843,4 +1843,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return dto;
 
     }
+
+    @Override
+    public ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
+
+        if(cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        ListLeafAppCategoryResponse response = new ListLeafAppCategoryResponse();
+        List<AppCategory> appCategories = appCategoryProvider.listLeafAppCategories(cmd.getLocationType());
+        if(appCategories != null && appCategories.size() >= 0){
+            List<AppCategoryDTO> dtos = new ArrayList<>();
+            for(AppCategory appCategory: appCategories){
+                AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+                dtos.add(dto);
+            }
+
+            response.setDtos(dtos);
+        }
+
+        return response;
+    }
 }
