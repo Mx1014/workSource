@@ -4272,8 +4272,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
                     query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
                 }
-                //query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
-                //query.addConditions(Tables.EH_ACLINK_LOGS.LOG_TIME.between(cmd.getStartTime(), cmd.getEndTime()));
+                query.addConditions(Tables.EH_ACLINK_LOGS.LOG_TIME.between(cmd.getStartTime(), cmd.getEndTime()));
                 return query;
             }
             
@@ -4308,43 +4307,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     //add by liqingyan
-//    @Override
-//    public DoorStatisticResponse DoorStatistic(DoorStatisticCommand cmd) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        DoorStatisticResponse resp = new DoorStatisticResponse();
-//        resp.setDtos(new ArrayList<DoorStatisticDTO>());
-//        List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOs();
-//        for(DoorStatisticDTO obj : objs) {
-//            DoorStatisticDTO dto = ConvertHelper.convert(obj, DoorStatisticDTO.class);
-//            resp.getDtos().add(dto);
-//        }
-//        resp.setDtos(objs);
-//        return resp;
-//    }
-
-
-
-//参考
-    //    DoorAuthStatisticsDTO dto = new DoorAuthStatisticsDTO();
-//    Integer namespaceId = UserContext.getCurrentNamespaceId();
-//    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-//        if(door == null){
-//        throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "门禁不存在或已删除");
-//    }
-//        if(door.getOwnerType() == 0){
-//        //小区,认证状态需要与用户认证一致;公司未认证且不在园区中的用户,不作统计
-//        Community community = communityProvider.findCommunityById(door.getOwnerId());
-//        Long utn = doorAuthProvider.countCommunityDoorAuthUser(null, null, cmd.getDoorId(), community.getId(), community.getCommunityType(), namespaceId, cmd.getRightType());
-//        dto.setUtn(utn);
-//        dto.setUaucutn(uaucutn);
-//    }else{
-//        //企业或家庭,按以前方式统计
-//        Long utn = doorAuthProvider.countDoorAuthUser(null, null, cmd.getDoorId(), namespaceId, cmd.getRightType());
-//        dto.setUtn(utn);
-//    }
-//        return dto;
-
-
+    @Override
+    public TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd){
+        TempStatisticByTimeResponse resp = new TempStatisticByTimeResponse();
+        resp.setDtos(new ArrayList<TempStatisticByTimeDTO>());
+        List<TempStatisticByTimeDTO> objs = aclinkLogProvider.queryTempStatisticByTime(cmd);
+        resp.setDtos(objs);
+        return resp;
+    }
 
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {

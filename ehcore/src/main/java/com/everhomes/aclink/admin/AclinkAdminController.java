@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.xml.transform.Result;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -525,13 +526,28 @@ public class AclinkAdminController extends ControllerBase {
 //add by liqingyan
     /**
      * <b>URL: /admin/aclink/doorStatisticByTime</b>
-     * <p>门禁综合统计</p>
+     * <p>门禁时间统计</p>
      * @return 门禁列表
      */
     @RequestMapping("doorStatisticByTime")
     @RestReturn(value=DoorStatisticByTimeResponse.class)
     public RestResponse doorStatisticByTime(@Valid DoorStatisticByTimeCommand cmd) {
         DoorStatisticByTimeResponse obj = doorAccessService.doorStatisticByTime(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/tempStatisticByTime</b>
+     * <p>临时授权时间统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("tempStatisticByTime")
+    @RestReturn(value=TempStatisticByTimeResponse.class)
+    public RestResponse TempStatisticByTime(@Valid TempStatisticByTimeCommand cmd) {
+        TempStatisticByTimeResponse obj = doorAccessService.tempStatisticByTime(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

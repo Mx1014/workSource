@@ -192,24 +192,6 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
 
         return objs;
     }
-//add by liqingyan 需要修改
-    @Override
-    public List<DoorStatisticDTO> queryDoorStatisticDTO (ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkLogs.class));
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(Tables.EH_ACLINK_LOGS);
-        if(queryBuilderCallback != null)
-            queryBuilderCallback.buildCondition(locator, query);
-        query.addOrderBy(Tables.EH_ACLINK_LOGS.CREATE_TIME.desc());
-        query.addJoin(Tables.EH_DOOR_AUTH,Tables.EH_ACLINK_LOGS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID));
-        query.addConditions(Tables.EH_ACLINK_LOGS.AUTH_ID.ne(0L));
-        query.addSelect(Tables.EH_DOOR_AUTH.AUTH_TYPE);
-        List<DoorStatisticDTO> objs = query.fetch().map((r) -> {
-            DoorStatisticDTO dto = ConvertHelper.convert(r, DoorStatisticDTO.class);
-            return dto;
-        });
-        return objs;
-    }
     //add by liqingyan
     @Override
     public DoorStatisticDTO queryDoorStatistic(DoorStatisticCommand cmd){
@@ -218,37 +200,44 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         com.everhomes.server.schema.tables.EhAclinkLogs t = Tables.EH_ACLINK_LOGS.as("t");
         EhDoorAccess t1 = Tables.EH_DOOR_ACCESS.as("t1");
         com.everhomes.server.schema.tables.EhDoorAuth t2 = Tables.EH_DOOR_AUTH.as("t2");
+        Condition condition = t.AUTH_ID.ne(0L);
+        if(cmd.getOwnerType() != null){
+            condition = condition.and(t.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(cmd.getOwnerId() != null){
+            condition= condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
+        }
 
         Result<Record1<Integer>> rlt1 = context.select(t1.ID.count().as("door"))
                 .from(t1).fetch();
         Result<Record1<Integer>> rlt2 = context.select(t.ID.count().as("open"))
                 .from(t)
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .fetch();
         Result<Record1<Integer>> rlt3 = context.select(t.AUTH_ID.count().as("temp"))
                 .from(t,t2)
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t.AUTH_ID.eq(t2.ID))
                 .and(t2.AUTH_TYPE.eq((byte)1)).fetch();
         Result<Record1<Integer>> rlt4 = context.select(t.AUTH_ID.count().as("perm"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t2.AUTH_TYPE.eq((byte)0)).fetch();
         Result<Record1<Integer>> rlt5 = context.select(t.AUTH_ID.count().as("bluetooth"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t.EVENT_TYPE.eq(0L)).fetch();
         Result<Record1<Integer>> rlt6 = context.select(t.AUTH_ID.count().as("qr"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t.EVENT_TYPE.eq(1L)).fetch();
         Result<Record1<Integer>> rlt7 = context.select(t.AUTH_ID.count().as("remote"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t.EVENT_TYPE.eq(2L)).fetch();
         Result<Record1<Integer>> rlt8 = context.select(t.AUTH_ID.count().as("face"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
-                .where(t.AUTH_ID.ne(0L))
+                .where(condition)
                 .and(t.EVENT_TYPE.eq(3L)).fetch();
         dto.setActiveDoor(new Long((Integer)rlt1.get(0).getValue("door")));
         dto.setOpenTotal(new Long ((Integer)rlt2.get(0).getValue("open")));
@@ -267,6 +256,12 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         com.everhomes.server.schema.tables.EhAclinkLogs t = Tables.EH_ACLINK_LOGS.as("t");
         com.everhomes.server.schema.tables.EhDoorAuth t2 = Tables.EH_DOOR_AUTH.as("t2");
         Condition condition = t.AUTH_ID.ne(0L);
+        if(cmd.getOwnerType() != null){
+            condition = condition.and(t.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(cmd.getOwnerId() != null){
+            condition= condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
+        }
         if(cmd.getStartTime() != null){
             condition = condition.and(t.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
         }
@@ -274,11 +269,46 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         SelectHavingStep<Record2<Integer, Date>> groupBy = context.select(t.ID.count().as("num"),
                 DSL.date(t.CREATE_TIME).as("d"))
                 .from(t)
-                .where(condition).groupBy(DSL.date(t.CREATE_TIME).as("d"));
+                .where(condition)
+                .groupBy(DSL.date(t.CREATE_TIME).as("d"));
         groupBy.fetch().map((r) -> {
             DoorStatisticByTimeDTO dto = new DoorStatisticByTimeDTO();
             dto.setCreateTime(r.getValue("d").toString());
             dto.setOpenNumber(Long.parseLong(r.getValue("num").toString()));
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
+    }
+
+    @Override
+    public List<TempStatisticByTimeDTO> queryTempStatisticByTime (TempStatisticByTimeCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAclinkLogs t = Tables.EH_ACLINK_LOGS.as("t");
+        com.everhomes.server.schema.tables.EhDoorAuth t2 = Tables.EH_DOOR_AUTH.as("t2");
+        Condition condition  = t.AUTH_ID.ne(0L);
+        if(cmd.getOwnerType() != null){
+            condition = condition.and(t.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(cmd.getOwnerId() != null){
+            condition= condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
+        }
+        if(cmd.getStartTime() != null){
+            condition = condition.and(t.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+        }
+        List<TempStatisticByTimeDTO> dtos = new ArrayList<TempStatisticByTimeDTO>();
+        SelectHavingStep<Record2<Integer, Date>> groupBy = context.select(t.ID.count().as("num"),
+                DSL.date(t.CREATE_TIME).as("d"))
+                .from(t)
+                .leftOuterJoin(t2).
+                        on(t2.ID.eq(t.AUTH_ID))
+                .where(condition)
+                .and(t2.AUTH_TYPE.eq((byte)0))
+                .groupBy(DSL.date(t.CREATE_TIME).as("d"));
+        groupBy.fetch().map((r) ->{
+            TempStatisticByTimeDTO dto = new TempStatisticByTimeDTO();
+            dto.setCreateTime(r.getValue("d").toString());
+            dto.setTempNumber(Long.parseLong(r.getValue("num").toString()));
             dtos.add(dto);
             return null;
         });

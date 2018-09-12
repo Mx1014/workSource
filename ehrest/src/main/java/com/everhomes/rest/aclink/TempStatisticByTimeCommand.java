@@ -3,7 +3,7 @@ package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
 
-public class TempStatisticByTime {
+public class TempStatisticByTimeCommand {
     private Long ownerId;
 
     private Byte ownerType;
