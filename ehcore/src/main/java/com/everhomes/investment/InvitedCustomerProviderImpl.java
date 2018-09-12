@@ -324,7 +324,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Integer namespaceId, Long communityId, BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
+    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize);
@@ -339,8 +339,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(fieldArray);
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-        query.addConditions(customer.COMMUNITY_ID.eq(communityId));
-        query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
         // related record searcher
         if (startAreaSize != null || endAreaSize != null) {
             query.addConditions(customer.ID.in(customerIds));
@@ -370,6 +368,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
             com.everhomes.server.schema.tables.EhCustomerRequirements requirements = Tables.EH_CUSTOMER_REQUIREMENTS;
             SelectQuery<EhCustomerRequirementsRecord> query = context.selectQuery(requirements);
+            query.addConditions(requirements.STATUS.eq(CommonStatus.ACTIVE.getCode()));
             if(startAreaSize!=null)
             query.addConditions(requirements.MIN_AREA.le(startAreaSize));
             if(endAreaSize!=null)
