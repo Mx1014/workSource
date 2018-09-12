@@ -11036,12 +11036,18 @@ public class PunchServiceImpl implements PunchService {
         if (!org.springframework.util.StringUtils.hasText(cmd.getStatisticsMonth())) {
             cmd.setStatisticsMonth(monthSF.get().format(new Date()));
         }
+        PunchMonthReport report = punchMonthReportProvider.findPunchMonthReportByOwnerMonth(cmd.getOrganizationId(), cmd.getStatisticsMonth());
+        if (report == null) {
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_MONTH_STATISTICS_WAITTING_GENERATE, "no data");
+        }
         List<Long> deptIds = listChildDepartmentsIncludeSelf(department);
         MonthlyStatisticsByDepartmentRecordMapper record = punchProvider.monthlyStatisticsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
 
         PunchMonthlyStatisticsByDepartmentResponse response = new PunchMonthlyStatisticsByDepartmentResponse();
         response.setStatisticsMonth(cmd.getStatisticsMonth());
         response.setDepartmentId(cmd.getDepartmentId());
+        response.setLastUpdateTime(report.getUpdateTime() != null ? report.getUpdateTime().getTime() : report.getCreateTime().getTime());
         if (record == null) {
             return response;
         }
