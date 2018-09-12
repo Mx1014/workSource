@@ -39,6 +39,7 @@ import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.AllOrMoreType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
@@ -1269,6 +1270,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	public void updateBaseUserApps(UpdateUserAppsCommand cmd) {
 
 		Long userId = UserContext.currentUserId();
+
+		if(userId == null || userId == 0){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
+		}
 
 		if(cmd.getCommunityId() == null || cmd.getAppIds() == null || cmd.getAppIds().size() == 0){
             LOGGER.error("invalid parameter, cmd = {}.", cmd);

@@ -3336,13 +3336,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Override
 	public void updateUserApps(UpdateUserAppsCommand cmd) {
 
+		Long userId = UserContext.currentUserId();
+
+		if(userId == null || userId == 0){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
+		}
+
 		if(cmd.getGroupId() == null || cmd.getItemIds() == null || cmd.getItemIds().size() == 0){
 			LOGGER.error("Invalid paramter, cmd = ", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter, cmd = " + cmd);
 		}
 
-		Long userId = UserContext.currentUserId();
 		String ownerType = getOwnerType(cmd.getContext());
 		Long ownerId = getOwnerId(cmd.getContext());
 
