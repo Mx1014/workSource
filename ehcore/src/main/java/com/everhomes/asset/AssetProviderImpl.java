@@ -6529,17 +6529,14 @@ public class AssetProviderImpl implements AssetProvider {
 	public GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId) {
 		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-		EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(t2.STATUS);
-        query.addFrom(t2);
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-		query.addConditions(t3.PAYMENT_ORDER_ID.eq(orderId));
+		query.addSelect(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_STATUS);
+        query.addFrom(Tables.EH_PAYMENT_BILL_ORDERS);
+		query.addConditions(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_ORDER_ID.eq(orderId));
 		query.fetch().map(r -> {
-			Integer status = r.getValue(t2.STATUS);
+			Integer status = r.getValue(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_STATUS);
 			if(status != null && status.equals(1)) {
-				response.setPayState(1);//EhAssetPaymentOrderBills中的status1代表支付成功
+				response.setPayState(1);//支付状态，0-待支付、1-支付成功、2-支付中、5-支付失败
 			}else{
 				response.setPayState(0);
 			}
@@ -6895,4 +6892,6 @@ public class AssetProviderImpl implements AssetProvider {
 	        .fetchInto(AppAssetCategory.class);
 		return list;
 	}
+
+
 }
