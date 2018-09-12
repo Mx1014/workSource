@@ -40,13 +40,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
-import com.everhomes.pay.order.OrderDTO;
-import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
-import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -65,7 +61,6 @@ import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
 import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.asset.BillGroupDTO;
-import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.BillingCycle;
@@ -146,7 +141,6 @@ import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
 import com.everhomes.server.schema.tables.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
-import com.everhomes.server.schema.tables.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
@@ -190,7 +184,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DecimalUtils;
 import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -1131,7 +1124,6 @@ public class AssetProviderImpl implements AssetProvider {
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         List<Long> userIds = new ArrayList<Long>();
-        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         SelectQuery<Record> query = context.selectQuery();
@@ -6201,85 +6193,6 @@ public class AssetProviderImpl implements AssetProvider {
        return response;
 	}
 	
-	public void transferOrderPaymentType() {
-		DSLContext writeContext = getReadWriteContext();
-		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-		writeContext.update(t4)
-	        .set(t4.PAYMENT_TYPE, "8")//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
-	        .execute();
-		writeContext.update(t)
-			.set(t.PAYMENT_TYPE, 8)//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
-			.where(t.STATUS.eq((byte)1))//0: upfinished; 1: paid off（已缴）
-			.execute();
-		//根据支付订单ID列表查询订单信息，如果查的到支付方式，那么刷新支付方式
-        List<PaymentOrderBillDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID, t.ID);
-        query.addFrom(t);
-        query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
-        query.fetch().map(r -> {
-        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
-        	dto.setUserId(r.getValue(t.ID));//存eh_payment_bills表的id，方便更新eh_payment_bills表的支付方式
-        	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便更新EH_ASSET_PAYMENT_ORDER表的支付方式
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
-            list.add(dto);
-            return null;
-        });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        //支付订单信息一次最多查询100个
-        while(payOrderIds.size() >= 99) {
-        	List<Long> queryIds = payOrderIds.subList(0, 99); 
-        	queryAndTransfer(queryIds, list);
-        	payOrderIds.removeAll(queryIds);
-        }
-        queryAndTransfer(payOrderIds, list);
-    }
-	
-	private void queryAndTransfer(List<Long> queryIds, List<PaymentOrderBillDTO> list) {
-		DSLContext writeContext = getReadWriteContext();
-		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-		if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transferOrderPaymentType(request), cmd={}", queryIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(queryIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transferOrderPaymentType(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			if(orderDTO.getPaymentType() != null) {
-            				writeContext.update(t4)
-	                            .set(t4.PAYMENT_TYPE, orderDTO.getPaymentType().toString())
-	                            .where(t4.ID.eq(dto.getBillId()))
-	                            .execute();
-            				writeContext.update(t)
-	                            .set(t.PAYMENT_TYPE, orderDTO.getPaymentType())
-	                            .where(t.ID.eq(dto.getBillId()))
-	                            .execute();
-            			}
-            		}
-            	}
-            }
-        }
-	}
-          
     public String getProjectNameByBillID(Long billId) {
 		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)
 	        .from(Tables.EH_COMMUNITIES,Tables.EH_PAYMENT_BILLS)

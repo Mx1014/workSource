@@ -433,8 +433,6 @@ public interface AssetProvider {
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
-	void transferOrderPaymentType();    
-
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);

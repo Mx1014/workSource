@@ -203,8 +203,6 @@ public interface AssetService {
     
 	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
 	
-	void transferOrderPaymentType();
-
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
