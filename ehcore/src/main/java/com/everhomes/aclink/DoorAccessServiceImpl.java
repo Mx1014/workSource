@@ -5476,4 +5476,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 		doorAuthProvider.updateDoorAuth(auths);
 	}
+
+	@Override
+	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd) {
+		User operator = UserContext.current().getUser();
+		//TODO 验证id列表
+		Timestamp nowTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+		List<DoorAuth> auths = new ArrayList<DoorAuth>();
+		if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
+			for(Long userId : cmd.getUserIds()){
+				DoorAuthDTO auth = new DoorAuthDTO();
+				auth.setUserId(userId);
+				auth.setApproveUserId(operator.getId());
+				auth.setApproveUserName(operator.getNickName());
+				auth.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+				auth.setAuthType(DoorAuthType.FOREVER.getCode());
+				auth.setCreateTime(nowTime);
+//				auth.set
+			}
+		}
+	}
 }

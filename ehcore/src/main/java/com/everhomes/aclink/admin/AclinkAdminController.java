@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 @RestDoc(value="Aclink Admin controller", site="core")
@@ -204,7 +206,7 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
 //        cmd.setIsOpenAuth((byte)0);
-    	//TODO 
+    	doorAccessService.createFormalAuthBatch(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -392,6 +394,27 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("getTempAuthSettings")
     @RestReturn(value=GetTempAuthSettingsResponse.class)
     public RestResponse getTempAuthSettings(@Valid GetTempAuthSettingsCommand cmd) {
+//    	Map<String, String> resMap = new HashMap<>();
+//    	resMap.put("TESTKEY", "testvalue");
+    	GetTempAuthSettingsResponse rsp = new GetTempAuthSettingsResponse();
+//    	rsp.setConfigs(resMap);
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/setTempAuthSettings</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("getTempAuthSettings")
+    @RestReturn(value=String.class)
+    public RestResponse setTempAuthSettings(@Valid SetTempAuthSettingsCommand cmd) {
+//    	Map<String, String> resMap = new HashMap<>();
+//    	resMap.put("TESTKEY", "testvalue");
+//    	rsp.setConfigs(resMap);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

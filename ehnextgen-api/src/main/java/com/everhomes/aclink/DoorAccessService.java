@@ -191,4 +191,6 @@ public interface DoorAccessService {
 	public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
 
 	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
+
+	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
 }
