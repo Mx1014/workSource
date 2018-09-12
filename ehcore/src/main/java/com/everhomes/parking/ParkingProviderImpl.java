@@ -1388,15 +1388,6 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public ParkingLot userNoticeFindByParkingLotId(long parkingLotId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
-		SelectConditionStep<Record> sql = context.select().from(Tables.EH_PARKING_LOTS)
-				.where(Tables.EH_PARKING_LOTS.ID.eq(parkingLotId));
-		Record record = sql.fetchOne();
-		return ConvertHelper.convert(record, ParkingLot.class);
-	}
-
-	@Override
 	public ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
 		SelectConditionStep<Record> sql = context.select().from(Tables.EH_PARKING_RECHARGE_ORDERS)

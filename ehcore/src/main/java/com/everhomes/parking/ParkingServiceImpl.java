@@ -3593,7 +3593,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	@Override
 	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
-		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
 		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
 		config.setContact(cmd.getContact());
@@ -3609,23 +3609,23 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingLotDTO getParkingUserNotice(long parkingLotId) {
-		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
-		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
+	public UserNoticeDTO getParkingUserNotice(UserNoticeCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		UserNoticeDTO userNotice = ConvertHelper.convert(parkingLot,UserNoticeDTO.class);
 		ParkingRechargeConfig rechargeConfig = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		newParkingLot.setContact(rechargeConfig.getContact());
-		newParkingLot.setSummary(parkingLot.getSummary());
-		return newParkingLot;
+		userNotice.setContact(rechargeConfig.getContact());
+		userNotice.setSummary(parkingLot.getSummary());
+		return userNotice;
 	}
 	
 	@Override
-	public ParkingLotDTO getParkingUserNoticeInvoice(long parkingLotId) {
-		ParkingLot parkingLot = parkingProvider.userNoticeFindByParkingLotId(parkingLotId);
-		ParkingLotDTO newParkingLot = ConvertHelper.convert(parkingLot,ParkingLotDTO.class);
+	public UserNoticeInvoiceDTO getParkingUserNoticeInvoice(UserNoticeInvoiceCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		UserNoticeInvoiceDTO userNoticeInvoice = ConvertHelper.convert(parkingLot,UserNoticeInvoiceDTO.class);
 		ParkingLotConfig config = JSONObject.parseObject(parkingLot.getConfigJson(),new TypeReference<ParkingLotConfig>() {});
-		newParkingLot.setNoticeFlag(config.getNoticeFlag());
-		newParkingLot.setInvoiceFlag(config.getInvoiceFlag());
-		return newParkingLot;
+		userNoticeInvoice.setNoticeFlag(config.getNoticeFlag());
+		userNoticeInvoice.setInvoiceFlag(config.getInvoiceFlag());
+		return userNoticeInvoice;
 	}
 	
 }

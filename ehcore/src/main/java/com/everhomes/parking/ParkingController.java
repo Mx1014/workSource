@@ -100,10 +100,10 @@ public class ParkingController extends ControllerBase {
      * <p>获取用户须知</p>
      */
     @RequestMapping("getUserNotice")
-    @RestReturn(value=ParkingLotDTO.class)
+    @RestReturn(value=UserNoticeDTO.class)
     public RestResponse getUserNotice(UserNoticeCommand cmd) {
-    	ParkingLotDTO parkingLot = parkingService.getParkingUserNotice(cmd.getParkingLotId());
-        RestResponse response = new RestResponse(parkingLot);
+    	UserNoticeDTO userNotice = parkingService.getParkingUserNotice(cmd);
+        RestResponse response = new RestResponse(userNotice);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -126,13 +126,13 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/getUserNoticeInvoice</b>
-     * <p>获取用户须知</p>
+     * <p>获取用户是否开启了用户须知于发票申请</p>
      */
     @RequestMapping("getUserNoticeInvoice")
-    @RestReturn(value=ParkingLotDTO.class)
+    @RestReturn(value=UserNoticeInvoiceDTO.class)
     public RestResponse getUserNoticeInvoice(UserNoticeInvoiceCommand cmd) {
-    	ParkingLotDTO parkingLot = parkingService.getParkingUserNoticeInvoice(cmd.getParkingLotId());
-        RestResponse response = new RestResponse(parkingLot);
+    	UserNoticeInvoiceDTO userNoticeInvoice = parkingService.getParkingUserNoticeInvoice(cmd);
+        RestResponse response = new RestResponse(userNoticeInvoice);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
