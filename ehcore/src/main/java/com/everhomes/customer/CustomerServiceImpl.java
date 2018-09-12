@@ -964,6 +964,10 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if(customer.getExpectedSignDate() != null){
+            dto.setExpectedSignDate(customer.getExpectedSignDate().getTime());
+        }
+
         if (null != dto.getAptitudeFlagItemId()) {
             findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();
             cmd.setNamespaceId(customer.getNamespaceId());

@@ -18,5 +18,7 @@ public interface InvitedCustomerService {
 
     CustomerRequirementDTO getCustomerRequirementDTOByCustomerId(Long customerId);
 
+    void giveUpInvitedCustomer(ViewInvestmentDetailCommand cmd) ;
+
     void syncTrackerData();
 }

@@ -156,4 +156,18 @@ public class InvitedCustomerController {
         return response;
     }
 
+    /**
+     * <b>URL: /invitedCustomer/giveUpInvitedCustomer</b>
+     * <p> 放弃招商客户 </p>
+     */
+    @RequestMapping("giveUpInvitedCustomer")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse giveUpInvitedCustomer(@Valid ViewInvestmentDetailCommand cmd) {
+        invitedCustomerService.giveUpInvitedCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

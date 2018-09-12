@@ -245,7 +245,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         customer.setSourceId(cmd.getSourceId());
         customer.setCorpIndustryItemId(cmd.getCorpIndustryItemId());
         customer.setSourceItemId(cmd.getSourceItemId());
-        customer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
+        if(cmd.getExpectedSignDate() != null){
+            customer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
+        }
         customer.setTransactionRatio(cmd.getTransactionRatio());
         customerProvider.updateEnterpriseCustomer(customer);
         //sync tenant info into organization
@@ -344,6 +346,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         if(customerDTO != null) {
             InvitedCustomerDTO invitedCustomerDTO = ConvertHelper.convert(customerDTO, InvitedCustomerDTO.class);
 
+            invitedCustomerDTO.setExpectedSignDate(customerDTO.getExpectedSignDate());
+
             List<CustomerContact> contacts = invitedCustomerProvider.findContactByCustomerId(invitedCustomerDTO.getId());
             if(contacts != null && contacts.size() != 0){
                 List<CustomerContactDTO> dtos = contacts.stream().map(r -> ConvertHelper.convert(r, CustomerContactDTO.class)).collect(Collectors.toList());
@@ -363,6 +367,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 invitedCustomerDTO.setTrackers(dtos);
 
             }
+
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(invitedCustomerDTO.getId());
             if(requirement != null){
                 CustomerRequirementDTO requirementDTO = ConvertHelper.convert(requirement, CustomerRequirementDTO.class);
@@ -381,7 +386,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             }
 
             CustomerCurrentRent currentRent = invitedCustomerProvider.findNewestCurrentRentByCustomerId(invitedCustomerDTO.getId());
-            invitedCustomerDTO.setCurrentRent(ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class));
+            CustomerCurrentRentDTO currentRentDTO = ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class);
+            if(currentRent.getContractIntentionDate() != null)
+                currentRentDTO.setContractIntentionDate(currentRent.getContractIntentionDate().getTime());
+            invitedCustomerDTO.setCurrentRent(currentRentDTO);
+
 
 
 
@@ -414,6 +423,43 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         return null;
     }
 
+
+
+    @Override
+    public void giveUpInvitedCustomer(ViewInvestmentDetailCommand cmd) {
+        InvitedCustomerDTO invitedCustomerDTO = viewInvestmentDetail(cmd);
+
+
+        if(invitedCustomerDTO != null) {
+            List<CustomerTrackerDTO> trackers = invitedCustomerDTO.getTrackers();
+
+            if(trackers != null && trackers.size() > 0){
+                trackers.forEach(r -> {
+                    if(r.getTrackerUid().equals(UserContext.current().getUser().getId())) {
+                        trackers.remove(r);
+                    }
+                });
+            }
+
+            invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            if(trackers != null && trackers.size() > 0){
+                trackers.forEach((c) -> {
+                    CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
+                    tracker.setCommunityId(invitedCustomerDTO.getCommunityId());
+                    tracker.setNamespaceId(invitedCustomerDTO.getNamespaceId());
+                    tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                    tracker.setCustomerId(invitedCustomerDTO.getId());
+                    tracker.setCustomerSource(invitedCustomerDTO.getCustomerSource());
+                    invitedCustomerProvider.createTracker(tracker);
+                });
+            }
+            invitedCustomerDTO.setTrackers(trackers);
+            EnterpriseCustomer customer = ConvertHelper.convert(invitedCustomerDTO, EnterpriseCustomer.class);
+            customerSearcher.feedDoc(customer);
+
+        }
+
+    }
 
 
     @Override
