@@ -17,6 +17,8 @@ import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.TestLateFineCommand;
 import com.everhomes.rest.portal.AssetModuleAppMappingDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -100,6 +102,49 @@ public class TestAssetController extends ControllerBase {
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
 	    return response;
+	}
+	
+	/**
+	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+	 * <b>URL: /asset/testLateFine</b>
+	 * @throws ParseException
+	 */
+	@RequestMapping("testLateFine")
+	@RestReturn(value = String.class)
+	public RestResponse testLateFine(TestLateFineCommand cmd) {
+		assetService.testLateFine(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>仅用于手动测试能耗数据</p>
+	 * <b>URL: /asset/testEnergy</b>
+	 */
+	@RequestMapping("testEnergy")
+	@RestReturn(value = String.class)
+	public RestResponse testEnergy(PaymentExpectanciesCommand cmd) {
+		assetService.paymentExpectanciesCalculate(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+
+	/**
+	 * <p>仅用于测试手动测试欠费天数</p>
+	 * <b>URL: /asset/testUpdateBillDueDayCountOnTime</b>
+	 */
+	@RequestMapping("testUpdateBillDueDayCountOnTime")
+	@RestReturn(value = String.class)
+	public RestResponse testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+		assetService.testUpdateBillDueDayCountOnTime(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
 	}
 
 }
