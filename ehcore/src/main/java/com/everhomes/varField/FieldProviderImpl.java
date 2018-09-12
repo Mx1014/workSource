@@ -275,7 +275,7 @@ public class FieldProviderImpl implements FieldProvider {
         SelectQuery<EhVarFieldGroupScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
         if (ownerId != null) {
-            query.addConditions(Tables.EH_VAR_FIELD_SCOPES.OWNER_ID.eq(ownerId));
+            query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.OWNER_ID.eq(ownerId));
 
         }
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName));

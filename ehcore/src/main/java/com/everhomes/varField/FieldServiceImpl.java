@@ -2279,7 +2279,7 @@ public class FieldServiceImpl implements FieldService {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(),null,cmd.getCommunityId(), cmd.getModuleName(), cmd.getCategoryId());
             //查询旧数据 多入口
             if (groups != null && groups.size() < 1) {
-            	groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getOrgId(),cmd.getCommunityId(), cmd.getModuleName(), null);
+            	groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getOwnerId(),cmd.getCommunityId(), cmd.getModuleName(), null);
 			}
             if(groups != null && groups.size() > 0) {
                 namespaceFlag = false;
@@ -2288,10 +2288,10 @@ public class FieldServiceImpl implements FieldService {
         }
 
         if(namespaceFlag) {
-            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(),cmd.getOrgId(), null, cmd.getModuleName(), cmd.getCategoryId());
+            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(),cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getCategoryId());
             //查询旧数据 多入口
             if (groups != null && groups.size() < 1) {
-            	groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(),cmd.getOrgId(), null, cmd.getModuleName(), null);
+            	groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(),cmd.getOwnerId(), null, cmd.getModuleName(), null);
 			}
             if(groups!=null && groups.size()>0){
                 globalFlag = false;
