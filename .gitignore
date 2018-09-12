@@ -56,6 +56,7 @@ ehcore/src/main/config/ehcore_custom_1.yml
 
 ehborder/pom.xml
 ehcore/pom.xml
+ehcore-sdk/pom.xml
 ehcore-persist/pom.xml
 ehnextgen-api/pom.xml
 ehnextgen-forum/pom.xml

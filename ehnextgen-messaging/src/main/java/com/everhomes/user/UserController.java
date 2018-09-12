@@ -25,9 +25,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.BlockingEventCommand;
 import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -38,10 +35,11 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.sdk.LogonInfoCommand;
+import com.everhomes.rest.user.sdk.UserLogonInfo;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -56,18 +54,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -1716,4 +1709,14 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+	/**
+	 * <b>URL: /rpcapi/user/logonInfo</b>
+	 * <p>获取登录信息</p>
+	 */
+	@RequestMapping("logonInfo")
+	@RestReturn(UserLogonInfo.class)
+	public RestResponse resendVerificationCode(@Valid LogonInfoCommand cmd) {
+		// xxx
+		return new RestResponse("OK");
+	}
 }
