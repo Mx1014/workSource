@@ -45,7 +45,7 @@ public class AclinkOpenController extends ControllerBase {
     /**
      * 
      * <b>URL: /openapi/aclink/invalidVistorAuths</b>
-     * <p>查logs</p>
+     * <p>批量取消授权</p>
      * @return
      */
     @RequestMapping("invalidVistorAuths")
@@ -61,7 +61,7 @@ public class AclinkOpenController extends ControllerBase {
     /**
      * 
      * <b>URL: /openapi/aclink/queryLogs</b>
-     * <p>批量授权访客 </p>
+     * <p>查询开门记录 </p>
      * @return
      */
     @RequestMapping("queryLogs")
