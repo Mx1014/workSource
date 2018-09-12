@@ -1386,7 +1386,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 }
 
                 if(dto.getAppCategoryId() != null){
-                    AppCategory appCategory = appCategoryProvider.findById(dto.getId());
+                    AppCategory appCategory = appCategoryProvider.findById(dto.getAppCategoryId());
                     if(appCategory != null){
                         dto.setAppCategoryName(appCategory.getName());
                     }
