@@ -12,12 +12,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldItemCommand;
@@ -174,6 +169,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     public void updateInvestment(CreateInvitedCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 
+        if(cmd.getCustomerSource() == null){
+            if(cmd.getLevelItemId()== CustomerLevelType.REGISTERED_CUSTOMER.getCode()){
+                cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            }else{
+                cmd.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            }
+        }
+
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         // reflush contacts
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
@@ -184,6 +187,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 contact.setCommunityId(cmd.getCommunityId());
                 contact.setNamespaceId(cmd.getNamespaceId());
                 contact.setStatus(CommonStatus.ACTIVE.getCode());
+                contact.setCustomerSource(cmd.getCustomerSource());
                 invitedCustomerProvider.createContact(contact);
             });
         }
@@ -194,11 +198,26 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             requirement.setNamespaceId(cmd.getNamespaceId());
             requirement.setCustomerId(cmd.getId());
             requirement.setStatus(CommonStatus.ACTIVE.getCode());
-            invitedCustomerProvider.createRequirement(requirement);
+            Long requirementId = invitedCustomerProvider.createRequirement(requirement);
+            if(cmd.getRequirement().getAddresses() != null && cmd.getRequirement().getAddresses().size() > 0){
+                cmd.getRequirement().getAddresses().forEach((c) -> {
+                    CustomerRequirementAddress address = ConvertHelper.convert(c, CustomerRequirementAddress.class);
+                    address.setCustomerId(cmd.getId());
+                    address.setCommunityId(cmd.getCommunityId());
+                    address.setNamespaceId(cmd.getNamespaceId());
+                    address.setStatus(CommonStatus.ACTIVE.getCode());
+                    address.setRequirementId(requirementId);
+                    invitedCustomerProvider.createRequirementAddress(address);
+                });
+            }
         }
         // reflush current basic info
         if(cmd.getCurrentRent()!=null){
             CustomerCurrentRent currentRent = ConvertHelper.convert(cmd.getCurrentRent(), CustomerCurrentRent.class);
+            if(cmd.getCurrentRent().getContractIntentionDate() != null){
+                currentRent.setContractIntentionDate(new Timestamp(cmd.getCurrentRent().getContractIntentionDate()));
+
+            }
             currentRent.setCommunityId(cmd.getCommunityId());
             currentRent.setNamespaceId(cmd.getNamespaceId());
             currentRent.setStatus(CommonStatus.ACTIVE.getCode());
@@ -206,18 +225,22 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             invitedCustomerProvider.createCurrentRent(currentRent);
         }
         // update tracking user infos
+        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
         if(cmd.getTrackers() != null){
-            customerService.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
-            CustomerTracker tracker = ConvertHelper.convert(cmd.getTrackers(), CustomerTracker.class);
-            tracker.setCommunityId(cmd.getCommunityId());
-            tracker.setNamespaceId(cmd.getNamespaceId());
-            tracker.setStatus(CommonStatus.ACTIVE.getCode());
-            tracker.setCustomerId(cmd.getId());
-            invitedCustomerProvider.createTracker(tracker);
+            cmd.getTrackers().forEach((c) -> {
+                CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
+                tracker.setCommunityId(cmd.getCommunityId());
+                tracker.setNamespaceId(cmd.getNamespaceId());
+                tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                tracker.setCustomerId(cmd.getId());
+                tracker.setCustomerSource(cmd.getCustomerSource());
+                invitedCustomerProvider.createTracker(tracker);
+            });
         }
         // todo: update main record data
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setLevelItemId(cmd.getLevelItemId());
+        customer.setCustomerSource(cmd.getCustomerSource());
         customer.setName(cmd.getName());
         customer.setSourceId(cmd.getSourceId());
         customer.setCorpIndustryItemId(cmd.getCorpIndustryItemId());
@@ -251,12 +274,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     }
 
     @Override
-    public void deleteInvestment(CreateInvitedCustomerCommand cmd) {
+    public void deleteInvestment(DeleteInvitedCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 
         customerSearcher.deleteById(cmd.getId());
+        DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
+        customerService.deleteEnterpriseCustomer(cmd2, true);
+        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+        invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 
-        invitedCustomerProvider.deleteInvitedCustomer(cmd.getId());
     }
 
     @Override

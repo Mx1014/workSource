@@ -178,7 +178,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceType" , customer.getSourceType());
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
             builder.field("customerSource" , customer.getCustomerSource());
-            builder.field("EntryStatus", customer.getEntryStatus());
+            builder.field("entryStatus", customer.getEntryStatus());
             List<CustomerTracker> tracker;
             if(customer.getCustomerSource() != null){
                 tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), customer.getCustomerSource());
@@ -203,8 +203,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
             CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customer.getId());
             if(requirement != null){
-                builder.field("RequirementMinArea", requirement.getMinArea() == null ? "" : requirement.getMinArea());
-                builder.field("RequirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
+                builder.field("requirementMinArea", requirement.getMinArea() == null ? "" : requirement.getMinArea());
+                builder.field("requirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
 
             }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());

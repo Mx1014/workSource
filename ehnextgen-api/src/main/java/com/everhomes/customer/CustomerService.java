@@ -402,5 +402,4 @@ public interface CustomerService {
 
     EnterpriseCustomerDTO createEnterpriseCustomerOutAuth(CreateEnterpriseCustomerCommand cmd);
 
-    void deleteCustomerTrackersByCustomerId(Long id, byte code);
 }
