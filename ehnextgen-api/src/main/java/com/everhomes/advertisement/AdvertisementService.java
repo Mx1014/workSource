@@ -2,11 +2,18 @@ package com.everhomes.advertisement;
 
 import com.everhomes.rest.advertisement.CreateAdvertisementCommand;
 import com.everhomes.rest.advertisement.DeleteAdvertisementCommand;
+import com.everhomes.rest.advertisement.ListAdvertisementsCommand;
+import com.everhomes.rest.advertisement.ListAdvertisementsResponse;
+import com.everhomes.rest.advertisement.UpdateAdvertisementCommand;
 
 public interface AdvertisementService {
 
 	void deleteAdvertisement(DeleteAdvertisementCommand cmd);
 
 	void createAdvertisement(CreateAdvertisementCommand cmd);
+
+	void updateAdvertisement(UpdateAdvertisementCommand cmd);
+
+	ListAdvertisementsResponse listAdvertisements(ListAdvertisementsCommand cmd);
 
 }

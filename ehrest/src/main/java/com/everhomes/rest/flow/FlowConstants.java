@@ -41,4 +41,6 @@ public interface FlowConstants {
     Long RENTALV2_MODULE = 40400L;
     //装修管理模块id
     Long DECORATION_MODULE = 43000L;
+    //招商租赁模块id
+    Long BUSINESS_INVATION_MODULE = 150000L;
 }

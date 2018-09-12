@@ -7,7 +7,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
-public class CreateAdvertisementCommand {
+public class UpdateAdvertisementCommand {
 	private String title;
 	private Byte advertisementType;
 	private Byte businessStatus;
@@ -194,5 +194,4 @@ public class CreateAdvertisementCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 }
