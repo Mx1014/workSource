@@ -210,13 +210,8 @@ public interface AssetProvider {
 
     String findIdentifierByUid(Long aLong);
 
-
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
-
     Long findAssetOrderByBillIds(List<String> billIds);
     
-    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
-
     void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
