@@ -43,13 +43,13 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
         Long requestFormId;
-        if (null == request) {
+        if (null == request || request.getSourceId() == null) {
             //查询初始默认数据
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
             requestFormId = form.getFormOriginId();

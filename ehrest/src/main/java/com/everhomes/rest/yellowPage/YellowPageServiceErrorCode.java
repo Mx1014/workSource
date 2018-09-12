@@ -27,6 +27,11 @@ public interface YellowPageServiceErrorCode {
     
     //埋点统计
     static final int ERROR_ALLIANCE_GET_STAT_TOOL_TYPE_IS_NULL = 11200;  //获取统计信息时type为null
-    
-    
+
+
+    //标准版
+    static final int ERROR_ALLIANCE_TYPE_NOT_VALID = 11200;  //服务联盟类型有误
+    static final int ERROR_OWNER_TYPE_NOT_COMMUNITY = 11201;  //项目请求参数有误
+    static final int ERROR_ALLIANCE_MAIN_CONFIG_NOT_EXIST = 11202;  //通用配置(基础)不存在
+    static final int ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST = 11203;  //基础样式不存在
 }

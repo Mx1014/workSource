@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li> name: 类型名称</li>
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
- *  <li> parentId: 父id</li>
+ *  <li> parentId: 父id,当前传的实际是服务联盟类型:type</li>
  *  <li> logoUrl: 类型logo的url地址</li>
  *  <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
  *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>

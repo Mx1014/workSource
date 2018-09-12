@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.server.schema.tables.daos.EhOfficeCubicleConfigsDao;
+import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -375,5 +379,40 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 				.and(Tables.EH_OFFICE_CUBICLE_SPACES.PROVINCE_NAME.equal(provinceName))
 				.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_NAME.equal(cityName))
 				.execute();
+	}
+
+	@Override
+	public void createConfig(OfficeCubicleConfig bean) {
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleConfigs.class));
+		bean.setId(id);
+		bean.setCreatorUid(UserContext.currentUserId());
+		bean.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleConfigsDao dao = new EhOfficeCubicleConfigsDao(context.configuration());
+		dao.insert(bean);
+	}
+
+	@Override
+	public void updateConfig(OfficeCubicleConfig bean) {
+		bean.setUpdaterUid(UserContext.currentUserId());
+		bean.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOfficeCubicleConfigsDao dao = new EhOfficeCubicleConfigsDao(context.configuration());
+		dao.update(bean);
+	}
+
+	@Override
+	public OfficeCubicleConfig findConfigByOwnerId(String ownerType, Long ownerId) {
+		assert(null != ownerId && StringUtils.isNotEmpty(ownerType));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OfficeCubicleConfig> result = context.select().from(Tables.EH_OFFICE_CUBICLE_CONFIGS)
+				.where(Tables.EH_OFFICE_CUBICLE_CONFIGS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.OWNER_TYPE.eq(ownerType)
+				.and(Tables.EH_OFFICE_CUBICLE_CONFIGS.STATUS.eq((byte)2)))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleConfig.class));
+		if(null != result && result.size() > 0){
+			return result.get(0);
+		}
+		return null;
 	}
 }

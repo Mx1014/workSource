@@ -738,8 +738,8 @@ public interface OrganizationService {
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
 
-	List<ProjectDTO> getOrganizationProjectIdsByAppId(Long organizationId, Long moduleId, Long originAppId);
+	List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId);
 
-	List<ProjectDTO> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
+	List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
 			AppInstanceConfigConfigMatchCallBack matchCallback);
 }

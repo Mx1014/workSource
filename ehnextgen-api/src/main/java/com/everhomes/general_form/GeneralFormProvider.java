@@ -91,7 +91,10 @@ public interface GeneralFormProvider {
     List<GeneralFormFilterUserMap> listGeneralFormFilter(Integer namespaceId, Long moduleId, Long ownerId, String userUuid, Long FormOriginId, Long FormVersion);
 
     void updateGeneralFormApprovalStatusById(Long id, Byte status);
-    
+
     void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion);
 
+
+    List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+                                      String projectType, Long projectId, String ownerType, Long ownerId);
 }

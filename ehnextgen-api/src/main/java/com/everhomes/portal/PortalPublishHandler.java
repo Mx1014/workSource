@@ -23,7 +23,7 @@ public interface PortalPublishHandler {
      * @param instanceConfig
      * @return
      */
-    String processInstanceConfig(String instanceConfig);
+    String processInstanceConfig(Integer namespaceId,String instanceConfig);
 
 
     /**

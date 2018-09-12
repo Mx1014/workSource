@@ -674,8 +674,7 @@ public class CommunityController extends ControllerBase {
         return response;
 
     }
-
-
+    
     /**
      * <b>URL: /community/listCommunitiesByOrgIdAndAppId</b>
      * <p>查询当前公司在这个应用中能管理的项目</p>
@@ -692,7 +691,6 @@ public class CommunityController extends ControllerBase {
         return response;
 
     }
-
 
 
 }
