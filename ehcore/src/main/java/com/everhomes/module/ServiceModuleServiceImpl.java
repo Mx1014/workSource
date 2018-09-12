@@ -1478,13 +1478,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
 
         //同样的位置不能有两个入口
-        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleEntry.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleEntry.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
 
-        if(serviceModuleEntries != null && serviceModuleEntries.size() > 0){
-            LOGGER.error("entry already exists");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+        if(entries != null && entries.size() > 0){
+            for (ServiceModuleEntry entry: entries){
+                if(!entry.getId().equals(cmd.getId())){
+                    LOGGER.error("entry already exists");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+                }
+            }
         }
-
 
         serviceModuleEntry.setEntryName(cmd.getEntryName());
         serviceModuleEntry.setIconUri(cmd.getIconUri());
