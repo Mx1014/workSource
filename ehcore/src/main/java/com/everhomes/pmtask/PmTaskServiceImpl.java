@@ -2479,9 +2479,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 //				ifAdmain = 0;
 //		}
 
+		colName = "pmtask.hide.represent.app";
+		colName += cmd.getAppId().toString();
+		response.setIfAppHide(configProvider.getIntValue(namespaceId, colName , 0));
+
+		colName = "pmtask.hide.represent.bg";
+		colName += cmd.getAppId().toString();
+		response.setIfBgHide(configProvider.getIntValue(namespaceId, colName , 0));
+
+
 		//去除场景，按照普通用户显示
 		Integer ifAdmain = 0;
 		response.setIfHide(response.getIfHide()|ifAdmain);
+		response.setIfAppHide(response.getIfAppHide()|ifAdmain);
+		response.setIfBgHide(response.getIfBgHide()|ifAdmain);
 		return response;
 	}
 

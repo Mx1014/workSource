@@ -99,6 +99,11 @@ public class FlowProviderImpl implements FlowProvider {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
 
+        if (count > 0) {
+            query.addLimit(count + 1);
+        }
+        query.addOrderBy(t.ID.desc());
+
         query.addLimit(count);
         query.addOrderBy(t.ID.desc());
 
@@ -108,13 +113,15 @@ public class FlowProviderImpl implements FlowProvider {
             return RecordHelper.convert(r, Flow.class);
         });
 
-        if (objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        List<Flow> list = query.fetch().map((r) -> RecordHelper.convert(r, Flow.class));
+
+        if (list.size() > count && count > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
         } else {
             locator.setAnchor(null);
         }
-
-        return objs;
+        return list;
     }
 
     private void prepareObj(Flow obj) {
@@ -317,6 +324,25 @@ public class FlowProviderImpl implements FlowProvider {
             return flows.get(0);
         }
         return null;
+    }
+
+    @Override
+    public List<Flow> listConfigFlowByCond(Integer namespaceId, String moduleType, Long moduleId, String projectType, Long projectId, String ownerType, Long ownerId) {
+        return this.queryFlows(new ListingLocator(), -1, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlows t = Tables.EH_FLOWS;
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            if (moduleType != null) {
+                query.addConditions(t.MODULE_TYPE.eq(moduleType));
+            }
+            query.addConditions(t.MODULE_ID.eq(moduleId));
+            query.addConditions(t.PROJECT_TYPE.eq(projectType));
+            query.addConditions(t.PROJECT_ID.eq(projectId));
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+            query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
+            query.addConditions(t.FLOW_MAIN_ID.eq(0L));
+            return query;
+        });
     }
 
     @Override

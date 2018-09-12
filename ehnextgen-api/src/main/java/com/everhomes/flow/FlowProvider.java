@@ -32,4 +32,7 @@ public interface FlowProvider {
 
 	Flow getEnabledConfigFlow(Integer namespaceId, String projectType, Long projectId, Long moduleId,
 			String moduleType, Long ownerId, String ownerType);
+
+    List<Flow> listConfigFlowByCond(Integer namespaceId, String moduleType, Long moduleId,
+									String projectType, Long projectId, String ownerType, Long ownerId);
 }

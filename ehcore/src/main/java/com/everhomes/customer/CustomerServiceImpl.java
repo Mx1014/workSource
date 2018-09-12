@@ -2835,13 +2835,13 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
-                
+
                 if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
                 	dto.setAddressExists((byte)1);
 				}else {
 					dto.setAddressExists((byte)0);
 				}
-                
+
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -4735,7 +4735,7 @@ public class CustomerServiceImpl implements CustomerService {
         //add service alliance categories
         ListServiceAllianceCategoriesCommand command = new ListServiceAllianceCategoriesCommand();
         command.setNamespaceId(UserContext.getCurrentNamespaceId());
-        
+
         List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(command);
         if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
             serviceAllianceCategories.forEach((r) -> {

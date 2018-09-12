@@ -93,6 +93,12 @@ public interface NewsService {
 
 	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
 
+	void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
+
+	void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
+
+	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
+
 	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
 
 }

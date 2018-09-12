@@ -8,15 +8,21 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 参数
  * <li>namespaceId: 域空间id</li>
+ * <li>ownerType: community / organaization 见{@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
+ * <li>ownerId: 项目id/公司id</li>
  * <li>type: 服务联盟类型</li>
  * <li>tagGroup: 筛选父节点{@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO}</li>
  * </ul>
  */
 public class UpdateAllianceTagCommand {
 	
-	Integer namespaceId;
+	private Integer namespaceId;
 	
-	Long type;
+	private String ownerType;
+	
+	private Long ownerId;
+	
+	private Long type;
 	
 	private AllianceTagGroupDTO tagGroup;
     
@@ -47,6 +53,22 @@ public class UpdateAllianceTagCommand {
 
 	public void setTagGroup(AllianceTagGroupDTO tagGroup) {
 		this.tagGroup = tagGroup;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 }

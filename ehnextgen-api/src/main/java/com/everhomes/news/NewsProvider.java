@@ -45,7 +45,7 @@ public interface NewsProvider {
 
 	void updateNewsTag(NewsTag newsTag);
 
-	List<NewsTag> listNewsTag(Integer namespaceId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize, Long categoryId);
+	List<NewsTag> listNewsTag(Integer namespaceId,String ownerType,Long ownerId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize, Long categoryId);
 
 	void increaseViewCount(Long newsId, Long nViewCount);
 
@@ -57,4 +57,8 @@ public interface NewsProvider {
 
 	News findNewPreview(Long id);
 
+
+	List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId);
+
+	void deleteProjectNewsTags(Long projectId, Long categoryId);
 }

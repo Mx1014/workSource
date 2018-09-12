@@ -160,6 +160,8 @@ public interface CommunityService {
 		//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
 
+	ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
+
 	CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd);
 
 	ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd);
@@ -190,6 +192,4 @@ public interface CommunityService {
 
 	void caculateAllBuildingArea();
 
-
-    ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
 }
