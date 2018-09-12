@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -293,9 +295,33 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     return query;
                 });
             }
+            // add transfer Rate  infos
+            addExtendInfo(statistics);
             response.setStatistics(statistics);
         }
         return response;
+    }
+
+    private void addExtendInfo(List<InvitedCustomerStatisticsDTO> statistics) {
+        InvitedCustomerStatisticsDTO dto = new InvitedCustomerStatisticsDTO();
+        dto.setKey("rate");
+        dto.setValue("0");
+        if (statistics != null && statistics.size() > 0) {
+            Long dealCustomerCount = 0L;
+            Long totalCustomerCount = 0L;
+            for (InvitedCustomerStatisticsDTO tmp : statistics) {
+                if (tmp.getItemId()!=null &&  6 == tmp.getItemId()) {
+                    dealCustomerCount = Long.parseLong(tmp.getValue());
+                }
+                if ("totalCount".equals(tmp.getKey())) {
+                    totalCustomerCount = Long.parseLong(tmp.getValue());
+                }
+            }
+            if (totalCustomerCount != 0L) {
+                dto.setValue(new BigDecimal(dealCustomerCount).divide(new BigDecimal(totalCustomerCount), 2, RoundingMode.HALF_UP).toString());
+            }
+            statistics.add(dto);
+        }
     }
 
     private Map<Long, FieldItemDTO> transferCurrentCommunityItemsMap(List<FieldItemDTO> items) {
