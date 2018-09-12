@@ -55,7 +55,7 @@ public interface InvitedCustomerProvider {
 
     CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId);
 
-    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(BigDecimal startAreaSize, BigDecimal endAreaSize, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback);
+    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin,BigDecimal startAreaSize, BigDecimal endAreaSize, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback);
 
     void deleteInvitedCustomer(Long id);
 

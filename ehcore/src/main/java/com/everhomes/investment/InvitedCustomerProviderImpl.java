@@ -324,10 +324,11 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
+    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin,BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
-        List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize);
+        List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize,isAdmin);
+        List<Long> trackerIds = getPrivilegeControlData(isAdmin);
         Field<?>[] fieldArray = new Field[itemIds.size()+1];
         List<Field<?>> fields = new ArrayList<>();
         itemIds.forEach((itemId) -> {
@@ -343,6 +344,9 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         // related record searcher
         if (startAreaSize != null || endAreaSize != null) {
             query.addConditions(customer.ID.in(customerIds));
+        }
+        if (!isAdmin) {
+            query.addConditions(customer.ID.in(trackerIds));
         }
         query.addFrom(customer);
         callback.buildCondition(null, query);
@@ -368,20 +372,36 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         return result;
     }
 
-    private List<Long> getRelatedStatistics(BigDecimal startAreaSize, BigDecimal endAreaSize) {
-        if(startAreaSize!=null || endAreaSize!=null){
+    private List<Long> getPrivilegeControlData(Boolean isAdmin) {
+        List<Long> trackers = new ArrayList<>();
+        if (!isAdmin) {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+            com.everhomes.server.schema.tables.EhCustomerTrackers tracker = Tables.EH_CUSTOMER_TRACKERS;
+            SelectQuery<EhCustomerTrackersRecord> query = context.selectQuery(tracker);
+            query.addSelect(tracker.CUSTOMER_ID);
+            query.addConditions(tracker.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+            query.addConditions(tracker.TRACKER_UID.eq(UserContext.currentUserId()));
+            trackers = query.fetchInto(Long.class);
+        }
+        return trackers;
+    }
+
+    private List<Long> getRelatedStatistics(BigDecimal startAreaSize, BigDecimal endAreaSize, Boolean isAdmin) {
+        List<Long> requires = new ArrayList<>();
+        if (startAreaSize != null || endAreaSize != null) {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
             com.everhomes.server.schema.tables.EhCustomerRequirements requirements = Tables.EH_CUSTOMER_REQUIREMENTS;
             SelectQuery<EhCustomerRequirementsRecord> query = context.selectQuery(requirements);
+            query.addSelect(requirements.CUSTOMER_ID);
             query.addConditions(requirements.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-            if(startAreaSize!=null)
-            query.addConditions(requirements.MIN_AREA.le(startAreaSize));
-            if(endAreaSize!=null)
-            query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
-            return query.fetchInto(Long.class);
+            if (startAreaSize != null)
+                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+            if (endAreaSize != null)
+                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+            requires = query.fetchInto(Long.class);
 
         }
-        return new ArrayList<>();
+        return requires;
     }
 
     @Override
