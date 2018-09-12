@@ -412,10 +412,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             }
 
             CustomerCurrentRent currentRent = invitedCustomerProvider.findNewestCurrentRentByCustomerId(invitedCustomerDTO.getId());
-            CustomerCurrentRentDTO currentRentDTO = ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class);
-            if(currentRent.getContractIntentionDate() != null)
-                currentRentDTO.setContractIntentionDate(currentRent.getContractIntentionDate().getTime());
-            invitedCustomerDTO.setCurrentRent(currentRentDTO);
+            if(currentRent != null){
+                CustomerCurrentRentDTO currentRentDTO = ConvertHelper.convert(currentRent, CustomerCurrentRentDTO.class);
+                if(currentRent.getContractIntentionDate() != null)
+                    currentRentDTO.setContractIntentionDate(currentRent.getContractIntentionDate().getTime());
+                invitedCustomerDTO.setCurrentRent(currentRentDTO);
+            }
+
 
 
 
@@ -451,7 +454,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
 
     public void changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd){
-        
+
     }
 
 

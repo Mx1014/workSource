@@ -193,6 +193,6 @@ ALTER TABLE `eh_enterprise_customers` ADD COLUMN `expected_sign_date` DATETIME;
 ALTER TABLE `eh_customer_events` ADD COLUMN investment_type TINYINT COMMENT '操作客户类型，0-客户管理，1-租客管理';
 
 -- REMARK: 客户表增加是否入驻状态
-ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entry_status` BIGINT COMMENT '该用户是否入驻，1-未入驻，2-入驻';
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entry_status_item_id` BIGINT COMMENT '该用户是否入驻，1-未入驻，2-入驻';
 
 -- end

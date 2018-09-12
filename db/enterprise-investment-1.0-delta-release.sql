@@ -26,15 +26,19 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',2,'investment_promoti
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',5,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',6,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',24,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12121,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12122,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12123,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12124,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12125,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12111,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12112,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12113,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12114,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12115,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_promotion','enterprise_customer');
-INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12125,'enterprise_customer','enterprise_customer');
 
-DELETE FROM eh_var_field_ranges WHERE field_id = 12110 AND module_name='enterprise_customer' AND module_type='enterprise_customer';
+
+SET @id = (select max(id) from eh_var_field_ranges);
+INSERT INTO `ehcore`.`eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
+INSERT INTO `ehcore`.`eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 10, 'investment_promotion', 'enterprise_customer');
+
+DELETE FROM eh_var_field_ranges WHERE field_id = 12109 AND module_name='enterprise_customer' AND module_type='enterprise_customer';
 DELETE FROM eh_var_field_ranges WHERE field_id = 5 AND module_name='enterprise_customer' AND module_type='enterprise_customer';
 
 
