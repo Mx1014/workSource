@@ -242,6 +242,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_PAYMENT_CARDS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PAYMENT_CARDS.STATUS.eq(PaymentCardStatus.ACTIVE.getCode()));
 
         return query.fetchCount();
     }
