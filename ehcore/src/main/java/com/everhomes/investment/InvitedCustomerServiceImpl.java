@@ -176,7 +176,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         // reflush contacts
-        invitedCustomerProvider.deleteInvitedCustomer(cmd.getId());
+        invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
         if (cmd.getContacts() != null && cmd.getContacts().size() > 0) {
             cmd.getContacts().forEach((c) -> {
                 CustomerContact contact = ConvertHelper.convert(c, CustomerContact.class);
