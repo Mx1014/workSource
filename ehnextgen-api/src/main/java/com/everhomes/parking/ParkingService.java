@@ -178,4 +178,6 @@ public interface ParkingService {
     void updateParkingUserNotice(UpdateUserNoticeCommand cmd);
 
     ParkingLotDTO getParkingUserNotice(long owerId);
+
+	ParkingLotDTO getParkingUserNoticeInvoice(long parkingLotId);
 }
