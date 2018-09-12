@@ -399,6 +399,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         record.setOrderCommitToken(response.getOrderCommitToken());
         record.setOrderCommitUrl(response.getOrderCommitUrl());
         record.setPayInfo(response.getPayInfo());
+        record.setAccountName(cmd.getAccountName());
+
 
         this.rentalv2AccountProvider.createOrderRecord(record);
     }
