@@ -104,6 +104,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     public UserInfo updateUserCompany(UpdateUserCompanyCommand cmd) {
         User user = UserContext.current().getUser();
         user.setCompany(cmd.getCompanyName());
+        user.setCompanyId(cmd.getCompanyId());
         userProvider.updateUser(user);
         return userService.getUserInfo(user.getId());
     }
