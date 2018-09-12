@@ -366,7 +366,23 @@ public class ModuleController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /module/createServiceModuleEntry</b>
+     * <p>新增模块入口</p>
+     */
+    @RequestMapping("createServiceModuleEntry")
+    @RestReturn(value = ServiceModuleEntryDTO.class)
+    public RestResponse createServiceModuleEntry(CreateServiceModuleEntryCommand cmd) {
 
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        ServiceModuleEntryDTO dto = serviceModuleService.createServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /module/updateServiceModuleEntry</b>
@@ -386,6 +402,24 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /module/deleteServiceModuleEntry</b>
+     * <p>删除模块入口</p>
+     */
+    @RequestMapping("deleteServiceModuleEntry")
+    @RestReturn(value = String.class)
+    public RestResponse deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.deleteServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /module/listAppCategory</b>

@@ -3,11 +3,9 @@ package com.everhomes.rest.acl;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
-
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>moduleId: moduleId</li>
  *     <li>entryName: entryName</li>
  *     <li>iconUri: iconUri</li>
  *     <li>terminalType: 终端类型 {@link com.everhomes.rest.module.TerminalType}</li>
@@ -16,9 +14,9 @@ import java.util.List;
  *     <li>appCategoryId: appCategoryId</li>
  * </ul>
  */
-public class UpdateServiceModuleEntryCommand {
+public class CreateServiceModuleEntryCommand {
 
-    private Long id;
+    private Long moduleId;
     private String entryName;
     private String iconUri;
     private Byte terminalType;
@@ -26,12 +24,12 @@ public class UpdateServiceModuleEntryCommand {
     private Byte sceneType;
     private Long appCategoryId;
 
-    public Long getId() {
-        return id;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     public String getEntryName() {
