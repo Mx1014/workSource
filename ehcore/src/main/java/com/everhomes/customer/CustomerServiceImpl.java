@@ -4232,7 +4232,7 @@ public class CustomerServiceImpl implements CustomerService {
                     communityControlIds = r.getCommunityControlApps().getCommunityControlIds();
                 }
 //                if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || (communityControlIds != null && communityControlIds.contains(communityId))) {
-                if (communityControlIds == null || (communityControlIds != null && communityControlIds.contains(communityId))) {
+                if (communityControlIds == null || communityControlIds.contains(communityId)) {
                     OrganizationMemberDTO dto = new OrganizationMemberDTO();
                     dto.setTargetId(r.getTargetId());
                     dto.setTargetType(r.getTargetType());
