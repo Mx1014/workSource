@@ -233,6 +233,7 @@ import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -483,7 +484,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 
     @Value("${server.contextPath:}")
     private String contextPath;
-	
+
 	@Autowired
     private NamespaceProvider namespaceProvider;
 
@@ -498,7 +499,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
     }
-    @Override  
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
             setup();
@@ -1212,6 +1213,10 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
             payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
+            if(payUserDTO==null){
+                throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+                        "创建个人付款账户失败");
+            }
             String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
             payUserDTO = payUserDTOs.get(0);

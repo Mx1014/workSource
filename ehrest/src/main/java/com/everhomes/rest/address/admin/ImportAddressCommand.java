@@ -10,8 +10,17 @@ import com.everhomes.util.StringHelper;
  */
 public class ImportAddressCommand {
 	private Long communityId;
+	private Long buildingId;
 
-	private String name;
+    private String name;
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
 
 	public Long getCommunityId() {
 		return communityId;

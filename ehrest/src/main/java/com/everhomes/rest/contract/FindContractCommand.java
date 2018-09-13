@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,20 +15,23 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/8/2.
  */
 public class FindContractCommand {
-
+	@NotNull
     private Long id;
 
     private String contractNumber;
-
+    @NotNull
     private Integer namespaceId;
-
+    @NotNull
     private Long communityId;
 
     private Long partyAId;
 
     private Long organizationId;
-    
+    @NotNull
     private Long categoryId;
+
+    private Long orgId;
+
     
     public Long getCategoryId() {
 		return categoryId;
@@ -94,7 +99,16 @@ public class FindContractCommand {
     public void setPartyAId(Long partyAId) {
         this.partyAId = partyAId;
     }
-    
+
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

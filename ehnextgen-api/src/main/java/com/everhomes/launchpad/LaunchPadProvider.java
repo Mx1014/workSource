@@ -7,6 +7,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.util.Tuple;
 import org.jooq.Condition;
 
 import java.util.List;
@@ -32,7 +33,10 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);
     List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, Map<Byte, Long> defalutScopeMap, String keyword, int offset, int pageSize);
 	List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize, long offset, String keyword);
-    List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId, Integer namesapceId);
+
+    void deleteLaunchPadLayout(Integer namespaceId, String name, Byte publishType);
+
+    List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId, Byte scopeCode, long scopeId, Integer namesapceId);
     void deleteLaunchPadItemByTargetTypeAndTargetId(String targetType, long targetId);
     void deleteLaunchPadItemByScopeAndTargetId(Byte scopeCode,Long scopeId,String targetType, long targetId);
 	List<LaunchPadItem> findLaunchPadItem(Integer nameSpaceId,String itemGroup, String itemName,Byte scopeCode, long scopeId);
@@ -43,6 +47,9 @@ public interface LaunchPadProvider {
 	void updateUserLaunchPadItemById(UserLaunchPadItem userItem);
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup, ListingQueryBuilderCallback callback);
+
+    List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes);
+
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
 
     List<LaunchPadItem> listLaunchPadItemsByNamespaceId(Integer namespaceId);
@@ -64,4 +71,12 @@ public interface LaunchPadProvider {
     void deletePreviewVersionLayouts(Integer namespaceId);
 
     void deletePreviewVersionCategories(Integer namespaceId);
+
+    List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag);
+
+    void deleteUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId);
+
+    List<UserLaunchPadItem> listUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId);
+
+    List<LaunchPadItem> listLaunchPadItemsByIds(List<Long> itemIds);
 }

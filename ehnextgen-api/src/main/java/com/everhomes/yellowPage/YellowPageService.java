@@ -1,14 +1,29 @@
 package com.everhomes.yellowPage;
 
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
+import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
+import com.everhomes.rest.yellowPage.stat.InterestStatDTO;
+import com.everhomes.rest.yellowPage.stat.ListClickStatCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailCommand;
+import com.everhomes.rest.yellowPage.stat.ListClickStatDetailResponse;
+import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
+import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
+import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 public interface YellowPageService {
+
+	public static final String SERVICE_ALLIANCE_HANDLER_NAME = "service_alliance";
+
+	public final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
 
 	YellowPageDTO getYellowPageDetail(GetYellowPageDetailCommand cmd);
 
@@ -44,7 +59,8 @@ public interface YellowPageService {
      * @param cmd
      * @return
      */
-    List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd);
+	List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd);
+
 
     /**
      * 获取服务联盟机构的展示类型
@@ -102,6 +118,12 @@ public interface YellowPageService {
 
 	String transferTime(Long parentId);
 
+	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
 
+	void updateAllianceTag(Integer namespaceId, String ownerType, Long ownerId, Long type, AllianceTagDTO parentTagDto,
+			List<AllianceTagDTO> childTagDtos);
+
+	List<AllianceTagGroupDTO> getAllianceTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
+			String ownerType, Long ownerId, Long type);
 
 }

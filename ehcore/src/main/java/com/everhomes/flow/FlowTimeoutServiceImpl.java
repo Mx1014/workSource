@@ -18,38 +18,38 @@ import java.util.Map;
 
 @Component
 public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationListener<ContextRefreshedEvent> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FlowTimeoutServiceImpl.class);
-	
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowTimeoutServiceImpl.class);
+
     @Autowired
     private
     WorkerPoolFactory workerPoolFactory;
-    
+
     @Autowired
     JesqueClientFactory jesqueClientFactory;
-    
-	@Autowired
+
+    @Autowired
     private
     FlowTimeoutProvider flowTimeoutProvider;
-	
-	@Autowired
+
+    @Autowired
     private
     FlowService flowService;
 
     @Autowired
     private ScheduleProvider scheduleProvider;
-    
+
     private String queueDelay = "flowdelays";
     private String queueNoDelay = "flownodelays";
-    
+
     private void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueDelay);
         workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
-    
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent arg0) {
-		setup();
-	}
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        setup();
+    }
     
     /*@Override
     public void pushTimeoutByJesque(FlowTimeout ft) {
@@ -72,10 +72,10 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
 
     @Override
     public void pushTimeout(FlowTimeout ft) {
-    	//FlowTimeoutAction
-    	flowTimeoutProvider.createFlowTimeout(ft);
+        //FlowTimeoutAction
+        flowTimeoutProvider.createFlowTimeout(ft);
 
-    	if (ft.getId() > 0) {
+        if (ft.getId() > 0) {
             Map<String, Object> map = new HashMap<>();
             map.put("flowTimeoutId", ft.getId());
             // map.put("ctx", ctx);
@@ -104,26 +104,29 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
                         map
                 );
             }
-    	} else {
-    		LOGGER.error("create flowTimeout error! ft=" + ft.toString());
-    	}
+        } else {
+            LOGGER.error("create flowTimeout error! ft=" + ft.toString());
+        }
     }
 
     @Override
     public void processTimeout(FlowTimeout ft) {
-    	FlowTimeoutType timeoutType = FlowTimeoutType.fromCode(ft.getTimeoutType());
-    	switch(timeoutType) {
-    	case STEP_TIMEOUT:
-    		flowService.processStepTimeout(ft);
-    		break;
-    	case MESSAGE_TIMEOUT:
-    		flowService.processMessageTimeout(ft);
-    		break;
-    	case SMS_TIMEOUT:
-    		flowService.processSMSTimeout(ft);
-    		break;
-    	default:
-    		break;
-    	}
+        FlowTimeoutType timeoutType = FlowTimeoutType.fromCode(ft.getTimeoutType());
+        switch (timeoutType) {
+            case STEP_TIMEOUT:
+                flowService.processStepTimeout(ft);
+                break;
+            case MESSAGE_TIMEOUT:
+                flowService.processMessageTimeout(ft);
+                break;
+            case SMS_TIMEOUT:
+                flowService.processSMSTimeout(ft);
+                break;
+            case SUBFLOW_TIMEOUT:
+                flowService.processSubFlowEnd(ft);
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -74,7 +74,7 @@ public interface Rentalv2Service {
 			FindAutoAssignRentalSiteDayStatusCommand cmd);
 	void updateRentalSiteCellRule(UpdateRentalSiteCellRuleAdminCommand cmd);
 	void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs, RentalResource rs,
-							RentalDefaultRule rule);
+							RentalDefaultRule rule,Byte rentalType);
 
 	void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd);
 

@@ -17,6 +17,8 @@ public interface ExpressCompanyProvider {
 
 	List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner);
 
+	List<ExpressCompany> listNotDeleteExpressCompanyByOwner(ExpressOwner owner);
+
 	ExpressCompany findExpressCompanyByAppKey(String appKey);
 
 }

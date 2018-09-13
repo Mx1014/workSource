@@ -4,7 +4,6 @@ package com.everhomes.serviceModuleApp;
 import com.everhomes.acl.ServiceModuleAppAuthorizationService;
 import com.everhomes.acl.ServiceModuleAppProfile;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
-import com.everhomes.app.App;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -40,9 +39,9 @@ import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.AllOrMoreType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.user.UserContext;
@@ -608,7 +607,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		allDto.setModuleId(-10000L);
 		allDto.setClientHandlerType((byte)0);
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, AllOrMoreType.fromCode(allOrMoreType).getCode());
+		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode());
 		allDto.setRouterPath(routerInfo.getPath());
 		allDto.setRouterQuery(routerInfo.getQuery());
 
@@ -1268,9 +1267,14 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public void updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
+	public void updateBaseUserApps(UpdateUserAppsCommand cmd) {
 
 		Long userId = UserContext.currentUserId();
+
+		if(userId == null || userId == 0){
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
+		}
 
 		if(cmd.getCommunityId() == null || cmd.getAppIds() == null || cmd.getAppIds().size() == 0){
             LOGGER.error("invalid parameter, cmd = {}.", cmd);

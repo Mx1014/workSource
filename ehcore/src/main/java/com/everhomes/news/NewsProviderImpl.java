@@ -11,6 +11,8 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhNewsTagRecord;
 import com.everhomes.user.UserContext;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,11 +201,17 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<NewsTag> listNewsTag(Integer namespaceId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
+	public List<NewsTag> listNewsTag(Integer namespaceId, String ownerType, Long ownerId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTag.class));
 		SelectQuery<EhNewsTagRecord> query = context.selectQuery(Tables.EH_NEWS_TAG);
-//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
-//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		if (!StringUtils.isEmpty(ownerType)) {
+			query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
+		}
+
+		if (null != ownerId) {
+			query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		}
+
 		query.addConditions(Tables.EH_NEWS_TAG.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
 		if (isSearch != null)
@@ -329,4 +337,44 @@ public class NewsProviderImpl implements NewsProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public Long createNewPreview(News news) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewPreview.class));
+		news.setId(id);
+		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if (news.getPublishTime() == null) {
+			news.setPublishTime(news.getCreateTime());
+		}
+		DSLContext context = getReadWriteContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		dao.insert(ConvertHelper.convert(news,EhNewPreview.class));
+		return id;
+	}
+
+	@Override
+	public News findNewPreview(Long id) {
+		DSLContext context = getReadOnlyContext();
+		EhNewPreviewDao dao = new EhNewPreviewDao(context.configuration());
+		EhNewPreview result = dao.findById(id);
+		return ConvertHelper.convert(result,News.class);
+	}
+
+	@Override
+	public List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId) {
+		return listNewsTag(UserContext.getCurrentNamespaceId(), ownerType, ownerId, null, 0L, null, null, categoryId);
+	}
+
+	@Override
+	public void deleteProjectNewsTags(Long projectId, Long categoryId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_NEWS_TAG)
+		.where(
+				Tables.EH_NEWS_TAG.OWNER_TYPE.eq(NewsOwnerType.COMMUNITY.getCode())
+				.and(Tables.EH_NEWS_TAG.OWNER_ID.eq(projectId))
+				.and(Tables.EH_NEWS_TAG.CATEGORY_ID.eq(categoryId))
+				)
+		.execute();
+	}
+
 }

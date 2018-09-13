@@ -14,6 +14,10 @@ import com.everhomes.util.StringHelper;
 public class EquipmentInspectionReviewDateDTO {
     private Long id;
 
+    private Long targetId;
+
+    private String targetType;
+
     private Integer namespaceId;
 
     private Long communityId;
@@ -60,6 +64,23 @@ public class EquipmentInspectionReviewDateDTO {
 
     public void setReviewExpiredDays(Integer reviewExpiredDays) {
         this.reviewExpiredDays = reviewExpiredDays;
+    }
+
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     @Override

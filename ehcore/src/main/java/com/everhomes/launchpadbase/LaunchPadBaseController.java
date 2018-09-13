@@ -1,6 +1,5 @@
 package com.everhomes.launchpadbase;
 
-import com.everhomes.banner.BannerService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -9,7 +8,7 @@ import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.*;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.rest.launchpadbase.UpdateUserAppsCommand;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,13 +74,13 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpadbase/updateUserLaunchPadApps</b>
-     * <p>编辑用户首页数据</p>
+     * <b>URL: /launchpadbase/updateUserApps</b>
+     * <p>标准版编辑用户首页数据</p>
      */
-    @RequestMapping("updateUserLaunchPadApps")
+    @RequestMapping("updateUserApps")
     @RestReturn(value=String.class)
-    public RestResponse updateUserLaunchPadApps(UpdateUserLaunchPadAppsCommand cmd) {
-        serviceModuleAppService.updateUserLaunchPadApps(cmd);
+    public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
+        serviceModuleAppService.updateBaseUserApps(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

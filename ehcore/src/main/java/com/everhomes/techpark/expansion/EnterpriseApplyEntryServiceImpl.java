@@ -43,14 +43,17 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.techpark.expansion.OpenCustomRequestFormCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
@@ -1692,7 +1695,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
 
 		if (null == request) {
 			if (null != cmd.getSourceId()) {
@@ -1705,8 +1708,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				request.setSourceId(cmd.getSourceId());
 				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
 			}else {
-				//当没有sourced的时候表示没有设置表单，即删除关联关系
-				enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+				//当没有sourced的时候表示没有设置表单，将表单id置空 与复用统一表单区分开
+				request.setSourceId(null);
+				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
+			//	enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 			}
 		}
 
@@ -1724,7 +1729,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+
+		//查询公司模板
+		if (request == null)
+			request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
@@ -1833,5 +1843,121 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		this.generalFormProvider = generalFormProvider;
 		this.enterpriseApplyBuildingProvider = enterpriseApplyBuildingProvider;
 		this.localeStringService = localeStringService;
+	}
+
+	@Override
+	public LeaseFormRequest getFormRequestByCommunityId(Integer namespaceId, Long communityId, String sourceType, Long categoryId) {
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(namespaceId,
+				communityId, EntityType.COMMUNITY.getCode(), sourceType, categoryId);
+		if (request == null){
+			//尝试从园区管理公司获取表单
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(40100l);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(categoryId));
+			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			Long appId = null;
+			if (apps != null){
+				appId = apps.getServiceModuleApps().get(0).getOriginId();
+			}else{ //尝试获取 默认应用
+				listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+				listServiceModuleAppsCommand.setModuleId(40100l);
+				apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+				if (apps != null)
+					appId = apps.getServiceModuleApps().get(0).getOriginId();
+			}
+
+			if (appId == null)
+				return null;
+			GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+			cmd.setProjectId(communityId);
+			cmd.setAppId(appId);
+			OrganizationDTO org = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+			if (org != null){
+				request = enterpriseApplyEntryProvider.findLeaseRequestForm(namespaceId,
+						org.getId(), EntityType.ORGANIZATIONS.getCode(), sourceType, categoryId);
+			}
+
+		}
+		return request;
+	}
+
+	@Override
+	public void openCustomRequestForm(OpenCustomRequestFormCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
+		OpenCustomRequestFormCommand cmd2 = ConvertHelper.convert(cmd,OpenCustomRequestFormCommand.class);
+		UpdateLeasePromotionRequestFormCommand closeCmd = ConvertHelper.convert(cmd,UpdateLeasePromotionRequestFormCommand.class);
+		//先删除所有表单
+		closeCustomRequestForm(closeCmd);
+		
+		cmd2.setSourceType(EntityType.LEASE_PROJECT.getCode());
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		Long formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_BUILDING.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_PROMOTION.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+
+	}
+
+	private void copyCustomRequestForm(OpenCustomRequestFormCommand cmd,Long formId){
+
+		if (formId == null){ //sourceId值为空
+			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		}else {
+			GeneralForm generalForm = generalFormService.mirrorGeneralForm(formId, null, null,null,null,cmd.getOwnerType(), cmd.getOwnerId());
+			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+			request.setSourceId(generalForm.getId());
+			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		}
+	}
+
+	@Override
+	public void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
+		cmd.setSourceType(EntityType.LEASE_PROJECT.getCode());
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+
+		cmd.setSourceType(EntityType.LEASE_BUILDING.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+
+		cmd.setSourceType(EntityType.LEASE_PROMOTION.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 	}
 }

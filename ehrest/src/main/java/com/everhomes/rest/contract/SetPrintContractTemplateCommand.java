@@ -29,7 +29,7 @@ public class SetPrintContractTemplateCommand {
 	private String contractNumber;
 	@NotNull
 	private Long orgId;
-	@NotNull
+	
 	private Long templateId;
 	public Long getId() {
 		return id;

@@ -95,19 +95,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData) {
         ServiceAllianceActionData serviceAllianceActionData = (ServiceAllianceActionData)StringHelper.fromJsonString(actionData, ServiceAllianceActionData.class);
-        ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(serviceAllianceActionData.getParentId(), namespaceId);
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = new ServiceAllianceInstanceConfig();
         serviceAllianceInstanceConfig.setType(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setEntryId(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setDisplayType(serviceAllianceActionData.getDisplayType());
         serviceAllianceInstanceConfig.setEnableComment(serviceAllianceActionData.getEnableComment());
         serviceAllianceInstanceConfig.setEnableProvider(serviceAllianceActionData.getEnableProvider());
-        
-        if(null == rule){
-            serviceAllianceInstanceConfig.setDetailFlag(DetailFlag.NO.getCode());
-        }else{
-            serviceAllianceInstanceConfig.setDetailFlag(DetailFlag.YES.getCode());
-        }
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
 
@@ -149,6 +142,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		url.append("?displayType=" + config.getDisplayType());
 		url.append("&parentId=" + config.getType());
 		url.append("&enableComment=" + config.getEnableComment());
+		url.append("&ns=" + namespaceId);
 		url.append("#sign_suffix");
 
 		return url.toString();
@@ -189,13 +183,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             serviceAlliances.setSupportType((byte)0);
             serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
             yellowPageProvider.createServiceAlliances(serviceAlliances);
-
-            if(DetailFlag.fromCode(detailFlag) == DetailFlag.YES){
-                ServiceAllianceSkipRule serviceAllianceSkipRule = new ServiceAllianceSkipRule();
-                serviceAllianceSkipRule.setNamespaceId(namespaceId);
-                serviceAllianceSkipRule.setServiceAllianceCategoryId(serviceAllianceCategories.getId());
-                yellowPageProvider.createServiceAllianceSkipRule(serviceAllianceSkipRule);
-            }
             
             boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
             if(iscreateMenuScope){
@@ -338,7 +325,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name){
 		
 		Long type = config.getType();
-		Byte detailFlag = config.getDetailFlag();
 		Byte enableComment = config.getEnableComment(); //是否允许评论
 		Byte enableProvider = config.getEnableProvider(); //是否打开供应商开关
 		
@@ -369,19 +355,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             }else{
                 LOGGER.error("serviceAlliances is null. pmId = {}, type = {}", organization.getId(), type);
             }
-
-            ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(type);
-            if(DetailFlag.fromCode(detailFlag) == DetailFlag.YES){
-                if(null == rule){
-                    ServiceAllianceSkipRule serviceAllianceSkipRule = new ServiceAllianceSkipRule();
-                    serviceAllianceSkipRule.setNamespaceId(namespaceId);
-                    serviceAllianceSkipRule.setServiceAllianceCategoryId(serviceAllianceCategories.getId());
-                }
-            }else{
-                if(null != rule){
-                    yellowPageProvider.deleteServiceAllianceSkipRule(rule.getId());
-                }
-            }
         }else{
             LOGGER.error("namespace not community or service alliance category is null. namespaceId = {}, type = {}", namespaceId, type);
         }
@@ -393,7 +366,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
         return instanceConfig;
     }
     

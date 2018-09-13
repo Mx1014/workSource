@@ -1,0 +1,73 @@
+package com.everhomes.rest.address;
+
+import java.sql.Timestamp;
+
+import com.everhomes.util.StringHelper;
+/**
+*<ul>
+* <li>namespaceId:域空间id</li>
+* <li>addressId:房源编号</li>
+* <li>operatorUid: 操作人id</li>
+* <li>operatorName: 操作人名称</li>
+* <li>opearteTime:操作时间</li>
+* <li>opearteType:操作类型（1：增加，2：删除，3：拆分，4：合并）</li>
+* <li>content:日志内容</li>
+*</ul>
+*/
+public class ApartmentEventDTO {
+	
+	private Integer namespaceId;
+	private Long addressId;
+	private Long operatorUid;
+	private String operatorName;
+	private Timestamp opearteTime;
+	private Byte opearteType;
+	private String content;
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+	public Long getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+	public Long getOperatorUid() {
+		return operatorUid;
+	}
+	public void setOperatorUid(Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+	public String getOperatorName() {
+		return operatorName;
+	}
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+	public Timestamp getOpearteTime() {
+		return opearteTime;
+	}
+	public void setOpearteTime(Timestamp opearteTime) {
+		this.opearteTime = opearteTime;
+	}
+	public Byte getOpearteType() {
+		return opearteType;
+	}
+	public void setOpearteType(Byte opearteType) {
+		this.opearteType = opearteType;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}

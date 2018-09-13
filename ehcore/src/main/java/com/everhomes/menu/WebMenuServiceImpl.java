@@ -493,7 +493,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 	//TODO 临时为"智谷汇"添加“企业办公”下的“协同办公”和“人力资源”资源菜单
 	private void addOaDefaultMenu(List<WebMenuDTO> dtos, String webMenuType){
 
-		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1)) {
+		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1 && UserContext.getCurrentNamespaceId() != 999946 && UserContext.getCurrentNamespaceId() != 11)) {
 
 			return;
 

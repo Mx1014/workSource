@@ -38,6 +38,9 @@ public class VisitorsysConstant {
     public static final String VISITORSYS_INVITER_ROUNTE = "visitorsys.inviter.route";//邀请者查看邀请详情路由 %s/detail/i.html?visitorToken=%s
     public static final String VISITORSYS_INVITER_DETAIL = "visitorsys.inviter.detail";//邀请者查看邀请详情
     public static final String VISITORSYS_INVITER_TITLE = "visitorsys.inviter.title";//邀请者查看邀请详情title
+    public static final String VISITORSYS_ADMIN_ROUNTE = "visitorsys.admin.route";//应用管理员及以上查看详情路由 %s/detail/i.html?visitorToken=%s
+    public static final String VISITORSYS_ADMIN_DETAIL = "visitorsys.admin.detail";//应用管理员及以上查看邀请详情
+    public static final String VISITORSYS_ADMIN_TITLE = "visitorsys.admin.title";//应用管理员及以上查看邀请详情title
     //短信字段
     public static final String SMS_MODLUENAME_CN= "【左邻访客】";//短信发送模块名称
     public final static String SMS_MODLUENAME = "modlueName";
@@ -71,4 +74,8 @@ public class VisitorsysConstant {
     public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id
     public static final long ENTERPRISE_MODULE_ID = 52100 ;//企业访客模块Id
 
+    public static final long COMMUNITY_MANAGER_MODULE_ID = 42100 ;//园区访客管理模块Id
+    public static final long ENTERPRISE_MANAGER_MODULE_ID = 52200 ;//企业访客管理模块Id
+
+    public static final int ERROR_HAS_UPDATE_VISITOR = 71701;//此访客记录已被处理
 }

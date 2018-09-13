@@ -41,7 +41,7 @@ public interface GeneralFormService {
     /**
      * 根据owner和字段名称获取字段的值
      */
-    GeneralFormFieldDTO getGeneralFormValueByOwner(String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
+    GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName);
 
 	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
 
@@ -50,4 +50,46 @@ public interface GeneralFormService {
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
+
+    void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+    GeneralForm mirrorGeneralForm(Long formId, String mirrorModuleType, Long mirrorModuleId,
+                                  String mirrorProjectType, Long mirrorProjectId, String mirrorOwnerType, Long mirrorOwnerId);
+
+    void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+	Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
+
+	void doFormMirror(DoFormMirrorCommand cmd);
+
+	SearchFormValDTO searchGeneralFormVals(SearchFormValsCommand cmd);
+
+	/**
+	 * 根据所进入的模块选择对应的模板列表
+	 * @param cmd
+	 * @return
+	 */
+	List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd);
+
+	Long deleteGeneralFormVal(PostGeneralFormValCommand cmd);
+	Long deleteGeneralFormValWithPrivi(PostGeneralFormValCommand cmd);
+
+	Long deleteGeneralForm(PostGeneralFormValCommand cmd);
+
+	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
+
+
+	Long saveGeneralFormVal(PostGeneralFormValCommand cmd);
+	/**
+	 * 保存但不提交工作流
+	 * @param cmd
+	 */
+	Long saveGeneralForm(PostGeneralFormValCommand cmd);
+
+	List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd);
+
+	List<String> saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
+
+	List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd);
+
 }

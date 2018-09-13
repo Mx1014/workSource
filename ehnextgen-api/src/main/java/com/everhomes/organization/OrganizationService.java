@@ -174,6 +174,16 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 public interface OrganizationService {
 
@@ -302,8 +312,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
-	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
@@ -603,7 +612,8 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
 	/**创建机构账号，包括注册、把用户添加到公司**/
-	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
+	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName,
+			String contactToken,boolean notSendMsgFlag);
 
 	/**组织架构批量调整**/
 	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
@@ -721,15 +731,15 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	void updateWholeAddressName(WholeAddressComamnd cmd);
-	
+
 	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
 
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
-	
-	List<ProjectDTO> getOrganizationProjectIdsByAppId(Long organizationId, Long moduleId, Long originAppId);
-	
-	List<ProjectDTO> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
+
+	List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId);
+
+	List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
 			AppInstanceConfigConfigMatchCallBack matchCallback);
 }

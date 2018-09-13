@@ -78,4 +78,10 @@ public interface ServiceModuleService {
 
 	List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId);
 	void reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd);
+
+    void deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd);
+
+	ServiceModuleEntryDTO createServiceModuleEntry(CreateServiceModuleEntryCommand cmd);
+
+	ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd);
 }

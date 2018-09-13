@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,6 @@ import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.IdNameDTO;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.news.open.CreateOpenNewsCommand;
@@ -149,7 +149,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 		List<CommunityDTO> communities = null;
 
 		cmd.setNamespaceId(getNamespaceId());
-		ListCommunitiesByKeywordCommandResponse resp = communityService.listCommunitiesByKeyword(cmd);
+		ListCommunitiesByKeywordResponse resp = communityService.listCommunitiesByKeyword(cmd);
 		if (null == resp || CollectionUtils.isEmpty(communities = resp.getRequests())) {
 			return null;
 		}
@@ -166,7 +166,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	public List<TagDTO> listNewsTags(ListNewsTagsCommand cmd) {
 		Integer namespaceId = getNamespaceId();
 		Long categoryId = getCategoryId(namespaceId, cmd.getCategoryId());
-		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, categoryId);
+		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null,null, null, categoryId);
 		if (CollectionUtils.isEmpty(allTags)) {
 			return null;
 		}

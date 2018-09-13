@@ -1,11 +1,15 @@
 package com.everhomes.rest.flow;
 
 public interface FlowConstants {
+
     String FLOW_STEP_NAME_PREFIX = "flow.stepname.";
+
+    String KV_CONFIG_PROJECT_CUSTOMIZE = "project-customize";
+
     String EVALURTE_TITLE = "evaluate";
     Integer FLOW_CONFIG_VER = 0;
     Integer FLOW_CONFIG_START = 1;
-    Integer FLOW_MAX_NAME_CNT = 3;
+    Integer FLOW_MAX_NAME_CNT = 10;
     
     // 物业报修模块id
     Long PM_TASK_MODULE = 20100L;
@@ -39,4 +43,6 @@ public interface FlowConstants {
     Long PURCHASE_MODULE= 26000L;
     //资源预订模块id
     Long RENTALV2_MODULE = 40400L;
+    //装修管理模块id
+    Long DECORATION_MODULE = 43000L;
 }

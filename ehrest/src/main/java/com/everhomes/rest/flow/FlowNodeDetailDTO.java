@@ -25,15 +25,24 @@ import java.util.List;
  *     <li>allowTimeoutAction: allowTimeoutAction</li>
  *     <li>reminder: reminder {@link com.everhomes.rest.flow.FlowNodeReminderDTO}</li>
  *     <li>tracker: tracker {@link com.everhomes.rest.flow.FlowNodeTrackerDTO}</li>
+ *     <li>enterScript: 脚本 {@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>flowLaneId: flowLaneId</li>
  *     <li>nodeType: nodeType</li>
  *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
  *     <li>needAllProcessorComplete: needAllProcessorComplete</li>
+ *     <li>subFlowGotoNodeId: subFlowGotoNodeId</li>
+ *     <li>subFlowStepType: subFlowStepType</li>
+ *     <li>subFlowProjectType: subFlowProjectType</li>
+ *     <li>subFlowProjectId: subFlowProjectId</li>
+ *     <li>subFlowModuleType: subFlowModuleType</li>
+ *     <li>subFlowModuleId: subFlowModuleId</li>
+ *     <li>subFlowOwnerType: subFlowOwnerType</li>
+ *     <li>subFlowOwnerId: subFlowOwnerId</li>
+ *     <li>formStatus: 表单状态</li>
  *     <li>branch: branch {@link com.everhomes.rest.flow.FlowBranchDTO}</li>
  *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
  *     <li>processButtons: processButtons {@link com.everhomes.rest.flow.FlowButtonDetailDTO}</li>
  *     <li>conditions: conditions {@link com.everhomes.rest.flow.FlowConditionDTO}</li>
- *     <li>enterScript: 脚本 {@link com.everhomes.rest.flow.FlowActionDTO}</li>
  * </ul>
  */
 public class FlowNodeDetailDTO {
@@ -61,6 +70,16 @@ public class FlowNodeDetailDTO {
     private String nodeType;
     private String gotoProcessButtonName;
     private Byte needAllProcessorComplete;
+    private Byte formStatus;
+
+    private Long subFlowGotoNodeId;
+    private String subFlowStepType;
+    private String subFlowProjectType;
+    private Long subFlowProjectId;
+    private String subFlowModuleType;
+    private Long subFlowModuleId;
+    private String subFlowOwnerType;
+    private Long subFlowOwnerId;
 
     private FlowBranchDTO branch;
 
@@ -271,6 +290,78 @@ public class FlowNodeDetailDTO {
 
     public void setEnterScript(FlowActionDTO enterScript) {
         this.enterScript = enterScript;
+    }
+
+    public Byte getFormStatus() {
+        return formStatus;
+    }
+
+    public void setFormStatus(Byte formStatus) {
+        this.formStatus = formStatus;
+    }
+
+    public Long getSubFlowGotoNodeId() {
+        return subFlowGotoNodeId;
+    }
+
+    public void setSubFlowGotoNodeId(Long subFlowGotoNodeId) {
+        this.subFlowGotoNodeId = subFlowGotoNodeId;
+    }
+
+    public String getSubFlowStepType() {
+        return subFlowStepType;
+    }
+
+    public void setSubFlowStepType(String subFlowStepType) {
+        this.subFlowStepType = subFlowStepType;
+    }
+
+    public String getSubFlowProjectType() {
+        return subFlowProjectType;
+    }
+
+    public void setSubFlowProjectType(String subFlowProjectType) {
+        this.subFlowProjectType = subFlowProjectType;
+    }
+
+    public Long getSubFlowProjectId() {
+        return subFlowProjectId;
+    }
+
+    public void setSubFlowProjectId(Long subFlowProjectId) {
+        this.subFlowProjectId = subFlowProjectId;
+    }
+
+    public String getSubFlowModuleType() {
+        return subFlowModuleType;
+    }
+
+    public void setSubFlowModuleType(String subFlowModuleType) {
+        this.subFlowModuleType = subFlowModuleType;
+    }
+
+    public Long getSubFlowModuleId() {
+        return subFlowModuleId;
+    }
+
+    public void setSubFlowModuleId(Long subFlowModuleId) {
+        this.subFlowModuleId = subFlowModuleId;
+    }
+
+    public String getSubFlowOwnerType() {
+        return subFlowOwnerType;
+    }
+
+    public void setSubFlowOwnerType(String subFlowOwnerType) {
+        this.subFlowOwnerType = subFlowOwnerType;
+    }
+
+    public Long getSubFlowOwnerId() {
+        return subFlowOwnerId;
+    }
+
+    public void setSubFlowOwnerId(Long subFlowOwnerId) {
+        this.subFlowOwnerId = subFlowOwnerId;
     }
 
     @Override

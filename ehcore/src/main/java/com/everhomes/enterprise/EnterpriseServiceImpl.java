@@ -220,15 +220,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd){
         List<OrganizationSiteApartmentDTO> organizationSiteApartmentDTOList = Lists.newArrayList();
-        //创建ListEnterprisesResponse类的对象
         ListEnterprisesResponse response = new ListEnterprisesResponse();
-        //创建List<EnterprisePropertyDTO>集合对象
         List<EnterprisePropertyDTO> newEnterprisePropertyDTOS = Lists.newArrayList();
 
         //首先需要进行非空校验
         if(cmd.getCommunityId() != null){
             //说明项目编号不为空，那么我们就根据该communityId进行查询eh_organization_workPlaces表中对应的所有的公司的id
-            //创建ListingLocator类的对象
             ListingLocator locator = new ListingLocator();
             //设置pageAnchor
             locator.setAnchor(cmd.getPageAnchor());
@@ -256,72 +253,28 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 
                 //说明查询出来的集合List<EnterprisePropertyDTO>不为空，那么我们就进行遍历
-                //遍历集合List<EnterprisePropertyDTO>得到每一个EnterprisePropertyDTO对象
                 for(EnterprisePropertyDTO enterprisePropertyDTO : enterprisePropertyDTOS){
                     //得到每一个对象EnterprisePropertyDTO
                     //然后我们将对应的楼栋和门牌设置进去
                     //根据community_id来查询eh_communityAndBuilding_relationes表中的addressId信息
-                    //声明一个List<Long>类型的集合,用于承载address_id的集合
                     List<Long> addressIdList = Lists.newArrayList();
-                    //// TODO: 2018/5/10 接下来需要查询eh_communityAndBuilding_relationes表中的信息
                     addressIdList = organizationProvider.getCommunityAndBuildingRelationesAddressIdsByCommunityId(cmd.getCommunityId());
 
-                    //进行非空校验
                     if(CollectionUtils.isNotEmpty(addressIdList) && cmd.getNamespaceId() != null){
                         //说明查询出来的addressIdList集合不为空，那么我们就根据这些addressIdList来查询eh_addresses表中信息，从而得到对应的楼栋和门牌
-                        //// TODO: 2018/5/10
                         List<Address> addressList = addressProvider.findAddressByIds(addressIdList,cmd.getNamespaceId());
-                        //进行非空校验
                         if(CollectionUtils.isNotEmpty(addressList)){
-                            //采用forEach循环遍历集合List<Address>
                             for(Address address : addressList){
-                                //创建OrganizationSiteApartmentDTO类的对象
                                 OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
-                                //将信息封装在对象中
                                 organizationSiteApartmentDTO.setBuildingName(address.getBuildingName());
                                 organizationSiteApartmentDTO.setApartmentName(address.getApartmentName());
-                                //添加到List<OrganizationSiteApartmentDTO>集合中
                                 organizationSiteApartmentDTOList.add(organizationSiteApartmentDTO);
                             }
-                            //将organizationSiteApartmentDTOList集合封装在enterprisePropertyDTO对象中
                             enterprisePropertyDTO.setSiteDtos(organizationSiteApartmentDTOList);
                         }
                     }
                 }
             }
-/*
-            //// TODO: 2018/5/10
-            //接下来我们还需要根据communityId来查询eh_communityAndBuilding_relationes表中的address_id信息，注意有可能是一个集合
-            //声明一个List<Long>类型的集合,用于承载address_id的集合
-            List<Long> addressIdList = Lists.newArrayList();
-            //// TODO: 2018/5/10 接下来需要查询eh_communityAndBuilding_relationes表中的信息
-            addressIdList = organizationProvider.getCommunityAndBuildingRelationesAddressIdsByCommunityId(cmd.getCommunityId());
-            //进行非空校验
-            if(CollectionUtils.isNotEmpty(addressIdList) && cmd.getNamespaceId() != null){
-                //说明查询出来的addressIdList集合不为空，那么我们就根据这些addressIdList来查询eh_addresses表中信息，从而得到对应的楼栋和门牌
-                //// TODO: 2018/5/10
-                List<Address> addressList = addressProvider.findAddressByIds(addressIdList,cmd.getNamespaceId());
-                //进行非空校验
-                if(CollectionUtils.isNotEmpty(addressList)){
-                    //说明查询出来的address信息不为空，那么我们对其进行遍历，拿出楼栋和门牌信息，并且创建一个集合来封装他们
-
-                    //采用forEach循环遍历集合List<Address>
-                    for(Address address : addressList){
-                        //创建OrganizationSiteApartmentDTO类的对象
-                        OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
-                        //将信息封装在对象中
-                        organizationSiteApartmentDTO.setBuildingName(address.getBuildingName());
-                        organizationSiteApartmentDTO.setApartmentName(address.getApartmentName());
-                        //添加到List<OrganizationSiteApartmentDTO>集合中
-                        organizationSiteApartmentDTOList.add(organizationSiteApartmentDTO);
-                    }
-                }
-            }
-            //遍历集合List<EnterprisePropertyDTO>
-            for(EnterprisePropertyDTO enterprisePropertyDTO : enterprisePropertyDTOS){
-                //将List<OrganizationSiteApartmentDTO>集合信息封装进去
-                enterprisePropertyDTO.setSiteDtos(organizationSiteApartmentDTOList);
-            }*/
         }
         response.setEnterprises(newEnterprisePropertyDTOS);
         return response;

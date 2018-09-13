@@ -109,7 +109,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public void createRentalSiteRule(RentalCell rsr) {
-
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
+		rsr.setCellId(rsr.getId());
+		rsr.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsRecord record = ConvertHelper.convert(rsr,
 				EhRentalv2CellsRecord.class);
@@ -243,16 +246,19 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 		
 	@Override
-	public Double countRentalSiteBillBySiteRuleId(Long cellId) {
+	public Double countRentalSiteBillBySiteRuleId(Long cellId,RentalResource rentalResource,Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record1<BigDecimal> result = context.select(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT))
-			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
-			.join(Tables.EH_RENTALV2_ORDERS)
-			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
-			.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
-					or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
-			.fetchOne();
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+				.join(Tables.EH_RENTALV2_ORDERS)
+				.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+				.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
+						or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_TYPE.eq(rentalType))
+				.fetchOne();
 
 		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)) == null ? 0D: result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
 	}
@@ -268,33 +274,36 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
 			.join(Tables.EH_RENTALV2_ORDERS)
 			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
-			.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
-				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
 			.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+                .and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+                .and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()));
 		if (!StringUtils.isBlank(rentalCell.getResourceNumber())){
 			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_NUMBER.eq(rentalCell.getResourceNumber()));
 		}
 		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
 			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
-			if (rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) {
-				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
-				if (amorpm != null) {
-					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
+			if ((rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) &&
+					amorpm != null) {
+					step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
-									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
-											.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm))))
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())))
+							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm)
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
 									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate()))))
 					        .or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							        .and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
-				}
+
 			}else {
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -305,7 +314,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
 			if (rentalTypes.contains(RentalType.HOUR.getCode())) {
 				Timestamp[] beginEndTime = calculateHalfDayBeginEndTime(rentalResource, rentalCell);
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME.ge(beginEndTime[0]).and(Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME.le(beginEndTime[1])))
@@ -314,7 +324,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}else {
-				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+				step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+						.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -323,7 +334,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 			}
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.DAY) {
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.in(Arrays.asList(RentalType.HOUR.getCode(), RentalType.HALFDAY.getCode(), RentalType.THREETIMEADAY.getCode()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -331,13 +343,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.MONTH) { //对于自然周跨月的处理 区间判断可以处理首尾跨界问题的其中一个 另一个用首日所属解决
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.ge(initToMonthFirstDay(rentalCell.getResourceRentalDate()))
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.le(initToMonthLastDay(rentalCell.getResourceRentalDate()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.WEEK.getCode())
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(rentalCell.getResourceRentalDate())))));
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.WEEK){
-			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+			step.and((Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(rentalCell.getRentalType())
+					.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.ge(initToWeekFirstDay(rentalCell.getResourceRentalDate()))
 							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.le(initToWeekLastDay(rentalCell.getResourceRentalDate()))))
 					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
@@ -362,7 +376,34 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)) == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
 	}
 
-	@Override
+    @Override
+    public List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource, Long beginTime, Long endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<RentalResourceOrder> list = context.select(Tables.EH_RENTALV2_RESOURCE_ORDERS.fields())
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+				.join(Tables.EH_RENTALV2_ORDERS)
+				.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
+				.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+				.fetch().map(r -> {
+					RentalResourceOrder order = new RentalResourceOrder();
+					order.setRentalType(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE));
+					order.setBeginTime(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME));
+					order.setEndTime(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME));
+					order.setRentalCount(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT));
+					order.setResourceNumber(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_NUMBER));
+					return order;
+				});
+		return list;
+    }
+
+    @Override
 	public boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
 		List<Byte> rentalTypes = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList());
 		rentalTypes.remove(rentalCell.getRentalType());
@@ -380,32 +421,51 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			RentalType rentalType = RentalType.fromCode(rentalTypeByte);
 			if (rentalType == RentalType.HOUR) {
 				Timestamp[] beginEndTime = calculateBeginEndTime(rentalResource, rentalCell);
-				record = getHourCloseRecord(context, rentalResource.getId(), beginEndTime[0], beginEndTime[1], rentalCell.getResourceNumber());
+				record = getHourCloseRecord(context, rentalResource.getResourceType(),rentalResource.getId(), beginEndTime[0], beginEndTime[1], rentalCell.getResourceNumber());
 			}else if (rentalType == RentalType.DAY) {
 				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-				record = getDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalCell.getResourceNumber());
+				record = getDayCloseRecord(context,rentalResource.getResourceType(), rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalCell.getResourceNumber());
 			}else if (rentalType == RentalType.MONTH) { //需要处理月和周互相跨界的问题
-				record = getMonthCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalCell.getResourceNumber());
+				record = getMonthCloseRecord(context, rentalResource.getResourceType(),rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalCell.getResourceNumber());
 				if (record == null && rentalCell.getRentalType() == RentalType.WEEK.getCode()){
 					Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-					record = getMonthCloseRecord(context, rentalResource.getId(), beginEndDate[1], rentalCell.getResourceNumber());
+					record = getMonthCloseRecord(context,rentalResource.getResourceType(), rentalResource.getId(), beginEndDate[1], rentalCell.getResourceNumber());
 				}
 			}else if (rentalType == RentalType.WEEK) {
-				record = getWeekCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalCell.getResourceNumber());
+				record = getWeekCloseRecord(context,rentalResource.getResourceType(), rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalCell.getResourceNumber());
 				if (record == null && rentalCell.getRentalType() == RentalType.MONTH.getCode()){
 					Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-					record = getWeekCloseRecord(context, rentalResource.getId(), beginEndDate[1], rentalCell.getResourceNumber());
+					record = getWeekCloseRecord(context, rentalResource.getResourceType(),rentalResource.getId(), beginEndDate[1], rentalCell.getResourceNumber());
 				}
 			} else if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
 				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm, RentalType.fromCode(rentalCell.getRentalType())==RentalType.HOUR, rentalCell.getResourceNumber());
+				record = getHalfDayCloseRecord(context,rentalResource.getResourceType(), rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm, RentalType.fromCode(rentalCell.getRentalType())==RentalType.HOUR, rentalCell.getResourceNumber());
 			}
 			if (record != null) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public List<RentalCell> findCellClosedByTimeInterval(String resourceType, Long rentalSiteId,Long startTime,Long endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<RentalCell> map = context.select().from(Tables.EH_RENTALV2_CELLS)
+                .where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+                .and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
+                .and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+                .and((Tables.EH_RENTALV2_CELLS.BEGIN_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.gt(new Timestamp(startTime))))
+                        .or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)))))
+                .fetch().map(r -> {
+                    RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+                    Long tmp = convert.getId();
+                    convert.setId(convert.getCellId());
+                    convert.setCellId(tmp);
+                    return convert;
+                });
+        return map;
 	}
 
 	private Date[] calculateBeginEndDate(RentalResource rentalResource, RentalCell rentalCell) {
@@ -436,9 +496,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return new Timestamp[]{new Timestamp(rentalCell.getResourceRentalDate().getTime()), new Timestamp(rentalCell.getResourceRentalDate().getTime())};
 	}
 
-	private Record getHourCloseRecord(DSLContext context, Long resourceId, Timestamp begin, Timestamp end, String resourceNumber) {
+	private Record getHourCloseRecord(DSLContext context,String resourceType, Long resourceId, Timestamp begin, Timestamp end, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.HOUR.getCode()))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.ge(begin))
@@ -447,12 +508,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm, boolean isHour, String resourceNumber) {
+	private Record getHalfDayCloseRecord(DSLContext context,String resourceType, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm, boolean isHour, String resourceNumber) {
 		if (isHour && amorpm == null) {
 			return null;
 		}
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
@@ -462,9 +524,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getMonthCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate, String resourceNumber) {
+	private Record getMonthCloseRecord(DSLContext context,String resourceType, Long resourceId, Date resourceRentalDate, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.MONTH.getCode()))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(resourceRentalDate)))
@@ -472,9 +535,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getWeekCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate, String resourceNumber){
+	private Record getWeekCloseRecord(DSLContext context,String resourceType, Long resourceId, Date resourceRentalDate, String resourceNumber){
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.WEEK.getCode()))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToWeekFirstDay(resourceRentalDate)))
@@ -482,9 +546,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, String resourceNumber) {
+	private Record getDayCloseRecord(DSLContext context,String resourceType, Long resourceId, Date begin, Date end, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.DAY.getCode()))
 				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
@@ -929,10 +994,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				SiteBillStatus.IN_USING.getCode());
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
 		if (null != startTime && null != endTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.le(new Timestamp(startTime)).
-					or(Tables.EH_RENTALV2_ORDERS.START_TIME.lt(new Timestamp(endTime))));
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.gt(new Timestamp(startTime)).
-					or(Tables.EH_RENTALV2_ORDERS.END_TIME.ge(new Timestamp(endTime))));
+			condition = condition.and((Tables.EH_RENTALV2_ORDERS.START_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_ORDERS.END_TIME.gt(new Timestamp(startTime))))
+					.or(Tables.EH_RENTALV2_ORDERS.START_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_ORDERS.START_TIME.lt(new Timestamp(endTime)))));
 
 		}
 		step.where(condition);
@@ -947,7 +1010,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
-												Long startTime, Long endTime, String tag1, String tag2,String keyword, Long pageAnchor ,
+												Long startTime, Long endTime, String tag1, String tag2,String vendorType,String keyword, Long pageAnchor ,
 												Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
@@ -972,6 +1035,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.equal(billStatus));
+		if (null != vendorType)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.VENDOR_TYPE.equal(vendorType));
 		if (null != keyword)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.CUSTOM_OBJECT.like("%"+keyword+"%").
 					or(Tables.EH_RENTALV2_ORDERS.USER_NAME.eq(keyword)).or(Tables.EH_RENTALV2_ORDERS.USER_PHONE.eq(keyword)));
@@ -1254,16 +1319,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2Orders.class,
 				bill.getId());
 	}
-//	@Override
-//	public void updateRentalOrderPayorderMap(RentalOrderPayorderMap ordeMap) {
-//		assert (ordeMap.getId() == null);
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-//		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
-//
-//		dao.update(ordeMap);
-//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
-//				ordeMap.getId());
-//	}
+
 
 	@Override
 	public Long createRentalBillAttachment(RentalOrderAttachment rba) {
@@ -1321,7 +1377,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourceOrder.class);
-				});;
+				});
 
 
 		return result;
@@ -1478,16 +1534,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	public List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType,Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTALV2_RESOURCE_PICS);
-		Condition condition = Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID
+				Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
 				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
 		step.where(condition);
 		List<RentalResourcePic> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCE_PICS.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourcePic.class);
 				});
@@ -1495,6 +1552,29 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 
+	}
+
+	@Override
+	public List<RentalResourceFile> findRentalSiteFilesByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
+				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
+				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("file"));
+		step.where(condition);
+		List<RentalResourceFile> result = step
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceFile.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
 	}
 
 	@Override
@@ -1819,30 +1899,64 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public void createRentalSitePic(RentalResourcePic detailPic) {
 		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2ResourcePics.class));
+				.getSequenceDomainFromTablePojo(EhRentalv2SiteResources.class));
 		detailPic.setId(id);
+		detailPic.setType("pic");
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhRentalv2ResourcePicsRecord record = ConvertHelper.convert(detailPic,
-				EhRentalv2ResourcePicsRecord.class);
-		InsertQuery<EhRentalv2ResourcePicsRecord> query = context
-				.insertQuery(Tables.EH_RENTALV2_RESOURCE_PICS);
+		EhRentalv2SiteResourcesRecord record = ConvertHelper.convert(detailPic,
+				EhRentalv2SiteResourcesRecord.class);
+		InsertQuery<EhRentalv2SiteResourcesRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_SITE_RESOURCES);
 		query.setRecord(record);
 		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2ResourcePics.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2SiteResources.class, null);
 		
+	}
+
+	@Override
+	public void createRentalSiteFile(RentalResourceFile file) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2SiteResources.class));
+		file.setId(id);
+		file.setType("file");
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2SiteResourcesRecord record = ConvertHelper.convert(file,
+				EhRentalv2SiteResourcesRecord.class);
+		InsertQuery<EhRentalv2SiteResourcesRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_SITE_RESOURCES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2SiteResources.class, null);
 	}
 
 	@Override
 	public void deleteRentalSitePicsBySiteId(String resourceType, Long siteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhRentalv2ResourcePicsRecord> step = context
-				.delete(Tables.EH_RENTALV2_RESOURCE_PICS);
-		Condition condition = Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID
+		DeleteWhereStep<EhRentalv2SiteResourcesRecord> step = context
+				.delete(Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
 				.equal(siteId);
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
 				.equal(EhRentalv2Resources.class.getSimpleName()));
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void deleteRentalSiteFilesBySiteId(String resourceType, Long siteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2SiteResourcesRecord> step = context
+				.delete(Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
+				.equal(siteId);
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
+				.equal(EhRentalv2Resources.class.getSimpleName()));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
+				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("file"));
 		step.where(condition);
 		step.execute();
 	}
@@ -1909,7 +2023,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public void updateRentalSiteRule(RentalCell rsr) {
 		assert (rsr.getId() == null);
-
+		Long tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
 		dao.update(rsr);
@@ -2117,34 +2233,58 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalCell getRentalCellById(Long cellId) {
+	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType,String resourceType) {
 		 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
-		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
-		EhRentalv2Cells order = dao.findById(cellId);
-		return ConvertHelper.convert(order, RentalCell.class);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.eq(cellId).and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+		.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType)).and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType)));
+		EhRentalv2CellsRecord record = query.fetchOne();
+		if (record == null)
+			return null;
+		RentalCell cell = ConvertHelper.convert(record, RentalCell.class);
+		Long tmp = cell.getId();
+		cell.setId(cell.getCellId());
+		cell.setCellId(tmp);
+		return cell;
 	}
 
 	@Override
-	public List<RentalCell> getRentalCellsByIds(List<Long> cellIds) {
+	public List<RentalCell> getRentalCellsByIds(String resourceType,List<Long> cellIds, Long rentalSiteId,Byte rentalType) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 //		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
 //		EhRentalv2Cells order = dao.findById(cellId);
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.in(cellIds));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.in(cellIds).and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
+		.and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId).and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))));
 
-		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
+
+		return query.fetch().map(r -> { //cell 的id不再作为绝对值 改为根据资源id区分的相对值
+			RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+			Long tmp = convert.getId();
+			convert.setId(convert.getCellId());
+			convert.setCellId(tmp);
+			return convert;
+		});
 	}
 
 	@Override
-	public List<RentalCell> getRentalCellsByRange(Long minId, Long maxId) {
+	public List<RentalCell> getRentalCellsByRange(String resourceType,Long minId,Long maxId, Long rentalSiteId,Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.ge(minId));
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.le(maxId));
-		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.ge(minId));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.le(maxId));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType)
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId).and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))));
+		return query.fetch().map(r -> {
+			RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+			Long tmp = convert.getId();
+			convert.setId(convert.getCellId());
+			convert.setCellId(tmp);
+			return convert;
+		});
 	}
 
 	@Override
@@ -2233,13 +2373,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
 		step.where(condition);
+		Record record = step.fetchAny();
+		if (record == null)
+			return null;
 
-		RentalResourceType result = step.fetchAny()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalResourceType.class);
-				});
-
-		return result;
+		return ConvertHelper.convert(record, RentalResourceType.class);
 
 	}
 
@@ -2355,7 +2493,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public MaxMinPrice findMaxMinPrice(Long resourceId, Byte rentalType) {
+	public MaxMinPrice findMaxMinPrice(String resourceType,Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE),
@@ -2364,6 +2502,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.from(Tables.EH_RENTALV2_CELLS)
 			.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 			.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 			.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
 			.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
 			.fetchOne();
@@ -2538,5 +2677,48 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if (record == null)
 			return  null;
 		return record.getValue("close_date",String.class);
+	}
+
+	@Override
+	public void createRefundTip(RentalRefundTip tip) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2RefundTips.class));
+		tip.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2RefundTipsRecord record = ConvertHelper.convert(tip,
+				EhRentalv2RefundTipsRecord.class);
+		InsertQuery<EhRentalv2RefundTipsRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_REFUND_TIPS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2RefundTips.class,
+				null);
+	}
+
+	@Override
+	public void deleteRefundTip(String resourceType, String sourceType, Long sourceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		context.delete(Tables.EH_RENTALV2_REFUND_TIPS)
+				.where(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_TYPE.eq(sourceType))
+				.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_ID.eq(sourceId))
+				.and(Tables.EH_RENTALV2_REFUND_TIPS.RESOURCE_TYPE.eq(resourceType))
+				.execute();
+	}
+
+	@Override
+	public List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId, Byte refundStrategy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_REFUND_TIPS);
+		Condition condition = Tables.EH_RENTALV2_REFUND_TIPS.RESOURCE_TYPE.eq(resourceType);
+		if (!StringUtils.isBlank(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.SOURCE_ID.eq(sourceId));
+		if (refundStrategy != null)
+			condition = condition.and(Tables.EH_RENTALV2_REFUND_TIPS.REFUND_STRATEGY.eq(refundStrategy));
+		step.where(condition);
+
+		return step.fetch().map(r-> ConvertHelper.convert(r,RentalRefundTip.class));
 	}
 }

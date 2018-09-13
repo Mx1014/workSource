@@ -30,6 +30,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
@@ -114,7 +115,7 @@ public class NewsServiceImpl implements NewsService {
 	private static final Long NEWS_MODULE_ID = 10800L;
 
 	private static final Integer NEWS_CONTENT_ABSTRACT_DEFAULT_LEN = 100;
-	
+
 	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
 	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
 
@@ -177,7 +178,7 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	PortalService portalService;
-	
+
 	@Autowired
 	OrganizationService organizationService;
 
@@ -201,10 +202,10 @@ public class NewsServiceImpl implements NewsService {
 
 		// 检查用户的项目权限是否合法
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
-		
+
 		// 创建新闻
 		News news = createNewsByAdmin(namespaceId, cmd);
-		
+
 		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
 		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		return response;
@@ -213,7 +214,7 @@ public class NewsServiceImpl implements NewsService {
 	private News createNewsByAdmin(Integer namespaceId, CreateNewsCommand cmd) {
 		return createNews(namespaceId, cmd, TYPE_CREATE_BY_ADMIN);
 	}
-	
+
 	@Override
 	public News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd) {
 		return createNews(namespaceId, cmd, TYPE_CREATE_BY_THIRD_PARTY);
@@ -241,11 +242,11 @@ public class NewsServiceImpl implements NewsService {
 			newsTagIds = cmd.getNewsTagIds();
 			communityIds = cmd.getProjectIds();
 		}
-		
+
 		//标准版时默认communityId为ownerId
 		if (StringUtils.isEmpty(communityIds)) {
 			communityIds = Arrays.asList(news.getOwnerId());
-		} 
+		}
 
 		createNews(news, communityIds, newsTagIds, createType);
 		return news;
@@ -332,16 +333,16 @@ public class NewsServiceImpl implements NewsService {
 		// 更新操作
 		updateNewsByAdmin(news, cmd);
 	}
-	
+
 	private void updateNewsByAdmin(News originNews, UpdateNewsCommand cmd) {
 		updateNews(originNews, cmd, TYPE_CREATE_BY_ADMIN);
 	}
-	
+
 	@Override
 	public void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd) {
 		updateNews(originNews, cmd, TYPE_CREATE_BY_THIRD_PARTY);
 	}
-	
+
 	public void updateNews(News originNews, Object cmdObject, byte createType) {
 
 		// 准备创建的News
@@ -387,22 +388,21 @@ public class NewsServiceImpl implements NewsService {
 		originNews.setAuthor(cmd.getAuthor());
 		originNews.setCoverUri(cmd.getCoverUri());
 		originNews.setContentAbstract(cmd.getContentAbstract());
-		// news.setCategoryId(cmd.getCategoryId());
 		originNews.setContent(cmd.getContent());
 		originNews.setSourceDesc(cmd.getSourceDesc());
 		originNews.setSourceUrl(cmd.getSourceUrl());
 		originNews.setPhone(cmd.getPhone());
-//		originNews.setVisibleType(cmd.getVisibleType());
+		originNews.setVisibleType(cmd.getVisibleType());
 		originNews.setStatus(generateNewsStatus(cmd.getStatus()));
 
 		// 调整摘要
 		adjustNewsContentAbstract(originNews);
-		
+
 		return;
 	}
 
 	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
-		
+
 		dbProvider.execute((TransactionStatus status) -> {
 			newsProvider.updateNews(news);
 			updateCommunityIds(news.getId(), communityIds);
@@ -415,7 +415,7 @@ public class NewsServiceImpl implements NewsService {
 
 	private void updateNewsTagVals(Long newsId, List<Long> newsTagIds) {
 		processNewsTagVals(newsId, newsTagIds, true);
-		
+
 	}
 
 	private void updateCommunityIds(Long newsId, List<Long> communityIds) {
@@ -429,7 +429,7 @@ public class NewsServiceImpl implements NewsService {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
 	}
-	
+
 	private News buildCreateNewsAdmin(Integer namespaceId, CreateNewsCommand cmd) {
 		return buildCreateNews(namespaceId, cmd, TYPE_CREATE_BY_ADMIN);
 	}
@@ -447,7 +447,7 @@ public class NewsServiceImpl implements NewsService {
 			publishTime = cmd.getPublishTime();
 			news.setCoverUri(cmd.getCoverUrl());
 		}
-		
+
 		news.setNamespaceId(namespaceId);
 		news.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
@@ -673,7 +673,7 @@ public class NewsServiceImpl implements NewsService {
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(0L);
 		}
-		
+
 		// 获取能够搜索项目所属范围，即用户只能搜索授权的项目。
 		List<Long> authProjectIds = getAuthSearchProjectIds(namespaceId, cmd, isScene);
 		if(CollectionUtils.isEmpty(authProjectIds)) {
@@ -691,12 +691,12 @@ public class NewsServiceImpl implements NewsService {
 				cmd.getKeyword(), cmd.getTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), isScene, cmd.getStatus());
 		return ConvertHelper.convert(response, ListNewsResponse.class);
 	}
-	
+
 	private List<Long> getAuthSearchProjectIds(Integer namespaceId, ListNewsCommand cmd, boolean isScene) {
 		if (isScene) {
 			return getAuthSearchProjectIdsByScene(namespaceId, cmd.getCategoryId(), cmd.getOwnerId());
 		}
-		
+
 		return getAuthSearchProjectIdsByAdmin(cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
 	}
 
@@ -706,9 +706,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		// 未携带id时，需要查询当前用户所属项目
-		List<ProjectDTO> projectDtos = organizationService.getOrganizationProjectIdsByAppId(currentPMId, NEWS_MODULE_ID,
-				appId);
-		return projectDtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
+		return organizationService.getOrganizationProjectIdsByAppId(currentPMId, appId);
 	}
 
 	private List<Long> getAuthSearchProjectIdsByScene(Integer namespaceId, Long categoryId, Long communityId) {
@@ -717,7 +715,7 @@ public class NewsServiceImpl implements NewsService {
 			return null;
 		}
 
-		List<ProjectDTO> dtos = organizationService.getProjectIdsByCommunityAndModuleApps(namespaceId, communityId, NEWS_MODULE_ID,
+		return organizationService.getProjectIdsByCommunityAndModuleApps(namespaceId, communityId, NEWS_MODULE_ID,
 				r -> {
 
 					NewsInstanceConfig config = (NewsInstanceConfig) StringHelper.fromJsonString(r,
@@ -728,7 +726,6 @@ public class NewsServiceImpl implements NewsService {
 
 					return categoryId.equals(config.getCategoryId());
 				});
-		return null == dtos ? null : dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
 	}
 
 	@Override
@@ -739,7 +736,7 @@ public class NewsServiceImpl implements NewsService {
 		List<BriefNewsDTO> newsList = null;
 		Long nextPageAnchor = null;
 		List<Long> authProjectIds = null == cmd.getOwnerId() ? null : Arrays.asList(cmd.getOwnerId());
-		
+
 		if (StringUtils.isEmpty(cmd.getKeyword()) && CollectionUtils.isEmpty(cmd.getNewsTagIds())) {
 			ListNewsResponse resp = listNews(userId, namespaceId, null, authProjectIds, cmd.getCategoryId(), cmd.getPageAnchor(),
 					cmd.getPageSize(), false, cmd.getStatus());
@@ -758,13 +755,13 @@ public class NewsServiceImpl implements NewsService {
 		resp.setNewsList(convertToOpenNewsList(newsList));
 		return resp;
 	}
-	
+
 
 	private List<OpenBriefNewsDTO> convertToOpenNewsList(List<BriefNewsDTO> newsList) {
 		if (CollectionUtils.isEmpty(newsList)) {
 			return null;
 		}
-		
+
 		return newsList.stream().map(r->{
 			OpenBriefNewsDTO openNewsDto = ConvertHelper.convert(r, OpenBriefNewsDTO.class);
 			openNewsDto.setPublishTime(r.getPublishTime().getTime());
@@ -909,12 +906,12 @@ public class NewsServiceImpl implements NewsService {
 		if (null != communityId && isScene) {
 			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
 		}
-		
+
 		if (CollectionUtils.isEmpty(authProjectIds)) {
 			String authIdList = Joiner.on(",").join(authProjectIds);
 			must.add(JSONObject.parse("{\"terms\":{\"ownerId\":[" + authIdList + "]}}"));
 		}
-		
+
 		// 设置过滤条件
 		if (null != categoryId) {
 			must.add(JSONObject.parse("{ \"term\": { \"categoryId\": " + categoryId + "}} "));
@@ -933,7 +930,7 @@ public class NewsServiceImpl implements NewsService {
 
 	private SearchNewsResponse searchNews(Long communityId, List<Long> authProjectIds, Long userId, Integer namespaceId, Long categoryId,
 			String keyword, List<Long> tagIds, Long pageAnchor, Integer pageSize, boolean isScene, Byte status) {
-		
+
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
 		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 
@@ -955,7 +952,7 @@ public class NewsServiceImpl implements NewsService {
 
 		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(categoryId, namespaceId);
 		// 转换结果到返回值
-		
+
 		List<BriefNewsDTO> list = result.stream().map(r -> {
 			JSONObject o = (JSONObject) r;
 			BriefNewsDTO newsDTO = new BriefNewsDTO();
@@ -1046,7 +1043,7 @@ public class NewsServiceImpl implements NewsService {
 		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
 		response.setCommunityIds(communityIds.stream().map(r -> r.toString()).collect(Collectors.toList()));
 		response.setPublishTime(news.getPublishTime().getTime());
-		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(), null, 0l, null, null,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getNamespaceId(),null,null, null, 0l, null, null,
 				news.getCategoryId());
 		List<NewsTagDTO> newsTags = parentTags.stream().map(r -> ConvertHelper.convert(r, NewsTagDTO.class))
 				.collect(Collectors.toList());
@@ -1089,7 +1086,7 @@ public class NewsServiceImpl implements NewsService {
 		// r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.forEach(r -> {
-			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId(), null, r.getId(), null, null,
+			List<NewsTag> tags = newsProvider.listNewsTag(news.getNamespaceId() ,null,null, null, r.getId(), null, null,
 					r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t -> ConvertHelper.convert(t, NewsTagDTO.class)).map(t -> {
 				// if (map.get(r.getId())!=null)
@@ -1242,11 +1239,11 @@ public class NewsServiceImpl implements NewsService {
 
 		// 权限核实
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), newsChk.getOwnerId(), cmd.getAppId());
-		
+
 		//删除
 		deleteNews(userId, newsChk);
 	}
-	
+
 	@Override
 	public void deleteNews(Long userId, News news) {
 
@@ -1592,12 +1589,12 @@ public class NewsServiceImpl implements NewsService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		if (cmd.getPageSize() == null)
 			pageSize = 9999999;
-		List<NewsTag> parentTags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getIsSearch(), 0l,
+		List<NewsTag> parentTags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getIsSearch(), 0l,
 				cmd.getPageAnchor(), pageSize + 1, cmd.getCategoryId());
 		List<NewsTagDTO> result = parentTags.stream().map(r -> ConvertHelper.convert(r, NewsTagDTO.class))
 				.collect(Collectors.toList());
 		result.stream().forEach(r -> {
-			List<NewsTag> tags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), null, r.getId(), null,
+			List<NewsTag> tags = newsProvider.listNewsTag(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), null, r.getId(), null,
 					null, r.getCategoryId());
 			List<NewsTagDTO> list = tags.stream().map(t -> ConvertHelper.convert(t, NewsTagDTO.class))
 					.collect(Collectors.toList());
@@ -1929,7 +1926,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		AppContext appContext = UserContext.current().getAppContext();
-		
+
 		String jsonString = getSearchJson(appContext.getCommunityId(), null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
 				NewsStatus.ACTIVE.getCode(), true);
 		// 需要查询的字段
@@ -2167,8 +2164,7 @@ public class NewsServiceImpl implements NewsService {
 		//获取item_group
 		PortalItemGroup group = portalItemGroupProvider.findPortalItemGroupById(groupId);
 		if (null == group) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_ITEM_GROUP_NOT_FOUND, "portal item group not found");
+			return;
 		}
 		
 		//获取模块
@@ -2176,8 +2172,7 @@ public class NewsServiceImpl implements NewsService {
 		Long moduleAppId = json.getLong("moduleAppId");
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 		
 		// 拼装renderUrl
@@ -2208,16 +2203,14 @@ public class NewsServiceImpl implements NewsService {
 		// 获取最新的版本
 		PortalVersion maxBigVersion = portalVersionProvider.findMaxBigVersion(namespaceId);
 		if (null == maxBigVersion) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_PORTAL_VERSION_NOT_FOUND, "protal version not exist");
+			return;
 		}
 
 		// 获取相应应用
 		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleApp(namespaceId, maxBigVersion.getId(),
 				NEWS_MODULE_ID, "" + categoryId);
 		if (null == moduleApp) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_MODULE_NOT_FOUND, "new module not exist");
+			return;
 		}
 
 		// 拼装renderUrl
@@ -2236,13 +2229,12 @@ public class NewsServiceImpl implements NewsService {
 	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
 
-		String encodeTitile;
+		String encodeTitile = null;
 		try {
 			// 标题为中文时需要转码
 			encodeTitile = URLEncoder.encode(title, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+			LOGGER.error("news title name not can't be encoded :"+ title);
 		}
 
 		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
@@ -2350,11 +2342,11 @@ public class NewsServiceImpl implements NewsService {
 	/**
 	 * 获取当前域名和版本下的所有标签
 	 *
-	 * @param parentTagId
+	 * @param namespaceId
 	 * @return
 	 */
 	private List<NewsTag> getAllNewsTags(Integer namespaceId, Long categoryId) {
-		return newsProvider.listNewsTag(namespaceId, null, null, null, null, categoryId);
+		return newsProvider.listNewsTag(namespaceId,null, null, null, null, null, null, categoryId);
 	}
 
 	/**
@@ -2431,15 +2423,184 @@ public class NewsServiceImpl implements NewsService {
 	public String getNewsQR(UpdateNewsCommand cmd) {
         String url = this.configProvider.getValue("home.url","localhost") + "/html/news_text_preview.html?newsToken=";
 		String token;
-		if(null == cmd.getId()){
-			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
-			token = result.getNewsToken();
-		} else {
-			this.updateNews(cmd);
-			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
-		}
+//		if(null == cmd.getId()){
+//			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
+//			token = result.getNewsToken();
+//		} else {
+//			this.updateNews(cmd);
+//			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+//		}
+		News news = processNewsCommand(UserContext.currentUserId(),UserContext.getCurrentNamespaceId(),ConvertHelper.convert(cmd,CreateNewsCommand.class));
+		Long id = this.newsProvider.createNewPreview(news);
+		token = WebTokenGenerator.getInstance().toWebToken(id);
 		url += token;
 
 		return url;
 	}
+
+
+
+	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
+		News news = ConvertHelper.convert(cmd, News.class);
+		news.setNamespaceId(namespaceId);
+		news.setOwnerType(cmd.getOwnerType());
+		news.setContentType(NewsContentType.RICH_TEXT.getCode());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		news.setCreatorUid(userId);
+		news.setDeleterUid(0L);
+		news.setPhone(cmd.getPhone());
+
+		//调整摘要
+		adjustNewsContentAbstract(news);
+
+		if (cmd.getPublishTime() != null) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
+
+		return news;
+	}
+
+	@Override
+	public GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd) {
+		Long userId = UserContext.currentUserId();
+		Long newsId = WebTokenGenerator.getInstance().fromWebToken(cmd.getNewsToken(),Long.class);
+		News news = this.newsProvider.findNewPreview(newsId);
+		String content = news.getContent();
+		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
+		response.setContent(content);
+		return response;
+	}
+
+	@Override
+	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		updateSelfDefinedConfig(cmd, true);
+	}
+
+	@Override
+	public void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		updateSelfDefinedConfig(cmd, false);
+	}
+
+	private void updateSelfDefinedConfig(GetSelfDefinedStateCommand cmd, boolean enable) {
+
+		if (!isIdValid(cmd.getCategoryId())) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_CATEGORY_ID_NOT_VALID, "Invalid category id");
+		}
+
+		Byte state = getSelfDefinedState(cmd.getProjectId(), cmd.getCategoryId());
+		if (enable) {
+			// 如果需要开启，而且当前是关闭状态，才进行创建
+			if (TrueOrFalseFlag.FALSE.getCode().equals(state)) {
+				createSelfDefinedConfig(cmd.getCategoryId(), cmd.getProjectId(), cmd.getCurrentPMId());
+			}
+			return;
+		}
+
+		if (TrueOrFalseFlag.TRUE.getCode().equals(state)) {
+			// 关闭时删除所有该项目下的所有自定义配置
+			deleteSelfDefinedConfig(cmd.getCategoryId(), cmd.getProjectId());
+		}
+
+	}
+
+	private void deleteSelfDefinedConfig(Long categoryId, Long projectId) {
+		// 删除tag
+		newsProvider.deleteProjectNewsTags(projectId, categoryId);
+
+		// 删除tagVal
+	}
+
+	private void createSelfDefinedConfig(Long categoryId, Long projectId, Long organizationId) {
+
+		// 获取所有标签
+		List<NewsTag> allTags = newsProvider.listNewsTag(
+				UserContext.getCurrentNamespaceId(), NewsOwnerType.ORGANIZATION.getCode(), organizationId,
+				null, null, null, null, categoryId);
+		if (CollectionUtils.isEmpty(allTags)) {
+			return;
+		}
+
+		//获取父子标签
+		List<NewsTag> pTags = new ArrayList<>();
+		List<NewsTag> cTags = new ArrayList<>();
+		for (NewsTag tag : allTags) {
+			if (0 == tag.getParentId()) {
+				pTags.add(tag);
+				continue;
+			}
+			cTags.add(tag);
+		}
+
+		if (0 == pTags.size()) {
+			return;
+		}
+
+		dbProvider.execute(r -> {
+			//创建父亲标签
+			Map<Long,Long> parentIdDiffMap = new HashMap<>();
+			for (NewsTag tag : pTags) {
+				tag.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
+				tag.setOwnerId(projectId);
+				parentIdDiffMap.put(tag.getId(), newsProvider.createNewsTag(tag));
+			}
+
+			//创建子标签
+			for (NewsTag tag : cTags) {
+				Long newParentId = parentIdDiffMap.get(tag.getParentId());
+				if (null == newParentId) {
+					continue;
+				}
+
+				tag.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
+				tag.setOwnerId(projectId);
+				tag.setParentId(newParentId);
+				newsProvider.createNewsTag(tag);
+			}
+
+			return null;
+		});
+
+	}
+
+	private boolean isIdValid(Long id) {
+		if (null == id || id < 0) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private Byte getSelfDefinedState(Long projectId, Long categoryId) {
+		List<NewsTag> tags = getProjectParentTags(projectId, categoryId);
+		return CollectionUtils.isEmpty(tags) ? TrueOrFalseFlag.FALSE.getCode() : TrueOrFalseFlag.TRUE.getCode();
+	}
+
+	@Override
+	public GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd) {
+		GetSelfDefinedStateResponse resp = new GetSelfDefinedStateResponse();
+		resp.setIsOpen(getSelfDefinedState(cmd.getProjectId(), cmd.getCategoryId()));
+		return resp;
+	}
+
+	private List<NewsTag> getProjectParentTags(Long projectId, Long categoryId) {
+		return newsProvider.listParentTags(NewsOwnerType.COMMUNITY.getCode(), projectId, categoryId);
+	}
+
+	private List<NewsTag> getParentTags(String ownerType, Long ownerId, Long organizationId, Long categoryId) {
+
+		List<NewsTag> tags = newsProvider.listParentTags(ownerType, ownerId, categoryId);
+		if (!CollectionUtils.isEmpty(tags)) {
+			return tags;
+		}
+
+		if (NewsOwnerType.COMMUNITY.getCode().equals(ownerType)) {
+			return newsProvider.listParentTags(NewsOwnerType.ORGANIZATION.getCode(), organizationId, categoryId);
+		}
+
+		return null;
+	}
+
 }

@@ -1298,6 +1298,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+        List<ServiceModuleIncludeFunction> includeFunctions = serviceModuleProvider.listIncludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
+        if (includeFunctions != null && includeFunctions.size() > 0) {
+            includeFunctions.forEach(includeFunction -> {
+                functionIds.remove(includeFunction.getFunctionId());
+            });
+        }
 
         return functionIds;
     }
@@ -1380,7 +1386,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 }
 
                 if(dto.getAppCategoryId() != null){
-                    AppCategory appCategory = appCategoryProvider.findById(dto.getId());
+                    AppCategory appCategory = appCategoryProvider.findById(dto.getAppCategoryId());
                     if(appCategory != null){
                         dto.setAppCategoryName(appCategory.getName());
                     }
@@ -1457,8 +1463,38 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
         }
 
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getAppCategoryId());
+        if(appCategory == null || !appCategory.getLocationType().equals(cmd.getLocationType())){
+            LOGGER.error("AppCategory not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory not find cmd = " + cmd.toString());
+        }
+
+
+        //可以编辑位置信息，这些字段必传
+        if(TerminalType.fromCode(cmd.getTerminalType()) == null || ServiceModuleLocationType.fromCode(cmd.getLocationType()) == null
+                || ServiceModuleSceneType.fromCode(cmd.getSceneType()) == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        //同样的位置不能有两个入口
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleEntry.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
+
+        if(entries != null && entries.size() > 0){
+            for (ServiceModuleEntry entry: entries){
+                if(!entry.getId().equals(cmd.getId())){
+                    LOGGER.error("entry already exists");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+                }
+            }
+        }
+
         serviceModuleEntry.setEntryName(cmd.getEntryName());
         serviceModuleEntry.setIconUri(cmd.getIconUri());
+        serviceModuleEntry.setTerminalType(cmd.getTerminalType());
+        serviceModuleEntry.setLocationType(cmd.getLocationType());
+        serviceModuleEntry.setSceneType(cmd.getSceneType());
+        serviceModuleEntry.setAppCategoryId(cmd.getAppCategoryId());
 
         serviceModuleEntryProvider.udpate(serviceModuleEntry);
 
@@ -1754,5 +1790,80 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
 		return resp.getServiceModuleApps();
 	}
-    
+
+    @Override
+    public void deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd) {
+
+        ServiceModuleEntry serviceModuleEntry = serviceModuleEntryProvider.findById(cmd.getId());
+        if(serviceModuleEntry == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        serviceModuleEntryProvider.delete(serviceModuleEntry.getId());
+    }
+
+    @Override
+    public ServiceModuleEntryDTO createServiceModuleEntry(CreateServiceModuleEntryCommand cmd) {
+
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+
+        if(module == null || TerminalType.fromCode(cmd.getTerminalType()) == null || ServiceModuleLocationType.fromCode(cmd.getLocationType()) == null
+                || ServiceModuleSceneType.fromCode(cmd.getSceneType()) == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
+
+        if(serviceModuleEntries != null && serviceModuleEntries.size() > 0){
+            LOGGER.error("entry already exists");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+        }
+
+        ServiceModuleEntry serviceModuleEntry = ConvertHelper.convert(cmd, ServiceModuleEntry.class);
+
+        serviceModuleEntry.setDefaultOrder(1000);
+
+        serviceModuleEntryProvider.create(serviceModuleEntry);
+
+        ServiceModuleEntryDTO dto = ConvertHelper.convert(serviceModuleEntry, ServiceModuleEntryDTO.class);
+        if(dto.getIconUri() != null){
+            String url = contentServerService.parserUri(serviceModuleEntry.getIconUri(), serviceModuleEntry.getClass().getSimpleName(), serviceModuleEntry.getId());
+            dto.setIconUrl(url);
+        }
+
+        if(dto.getAppCategoryId() != null){
+            AppCategory appCategory = appCategoryProvider.findById(dto.getId());
+            if(appCategory != null){
+                dto.setAppCategoryName(appCategory.getName());
+            }
+        }
+
+        return dto;
+
+    }
+
+    @Override
+    public ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
+
+        if(cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        ListLeafAppCategoryResponse response = new ListLeafAppCategoryResponse();
+        List<AppCategory> appCategories = appCategoryProvider.listLeafAppCategories(cmd.getLocationType());
+        if(appCategories != null && appCategories.size() >= 0){
+            List<AppCategoryDTO> dtos = new ArrayList<>();
+            for(AppCategory appCategory: appCategories){
+                AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+                dtos.add(dto);
+            }
+
+            response.setDtos(dtos);
+        }
+
+        return response;
+    }
 }

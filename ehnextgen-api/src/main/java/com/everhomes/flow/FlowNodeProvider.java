@@ -25,4 +25,6 @@ public interface FlowNodeProvider {
     void deleteFlowNode(List<Long> nodeIdList);
 
     void deleteFlowNode(Long flowMainId, Integer flowVersion, List<Long> retainNodeIdList);
+
+	List<FlowNode> listFlowNodeBySubFlow(String projectType, Long projectId, String moduleType, Long moduleId, String ownerType, Long ownerId);
 }

@@ -32,11 +32,14 @@ public interface CommunityServiceErrorCode {
 
 	static final int ERROR_COMMUNITY_TYPE = 10107;//园区分类不能为空
 	static final int ERROR_COMMUNITY_TYPE_CONTENT = 10108;//园区分类内容填写错误
-	
+
+	static final int ERROR_BUILDING_NAME_EXIST = 10201;//楼宇名称已存在
+
+
 	//TODO 冲突了，先直接合并
 	static final int ERROR_BUILDING_NAME_OVER_FLOW = 10013;//楼栋名称不能超过20个汉字
     static final int ERROR_BUILDING_NAME_REPEATED = 10014;//楼栋名称不能重复
-	
+
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;
     int ERROR_CONTACTOR_EMPTY = 20003;
@@ -45,4 +48,5 @@ public interface CommunityServiceErrorCode {
     int ERROR_AREASIZE_FORMAT = 20006;
 
     int ERROR_ORGANIZATION_COMMUNITY_NOT_EXIST = 30001; //管理管关系不存在
+    int ERROR_FLOORNUMBER_FORMAT = 20007;//楼层数填写格式错误
 }

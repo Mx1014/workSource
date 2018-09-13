@@ -17,6 +17,7 @@ import java.util.Map;
  */
 @Component("flow-variable-user-remind-prefix-processors")
 public class FlowVarsUserRemindPrefixProcessors implements FlowVariableUserResolver {
+
     @Autowired
     FlowEventLogProvider flowEventLogProvider;
 

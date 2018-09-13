@@ -200,7 +200,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         if(pageSize == null || pageSize < 1) pageSize = 20;
         int overloadPageSize = pageSize + 1;
         List<SearchPurchasesDTO> dtos = purchaseProvider.findPurchaseOrders(pageAnchor,overloadPageSize,cmd.getSubmissionStatus()
-                ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
+                ,cmd.getWarehouseStatus(),cmd.getApplicant(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(), cmd.getCommunityId());
         if(dtos.size() > pageSize) {
             response.setNextPageAnchor(pageAnchor + pageSize);
             dtos.remove(dtos.size() - 1);
@@ -252,6 +252,8 @@ public class PurchaseServiceImpl implements PurchaseService {
                 stock.setAmount(item.getPurchaseQuantity());
                 stock.setCommunityId(order.getCommunityId());
                 stock.setCreateTime(DateUtils.currentTimestamp());
+                //#36190 采购成功后入库，更新时间显示问题 by --djm
+                stock.setUpdateTime(DateUtils.currentTimestamp());
                 stock.setCreatorUid(order.getCreateUid());
                 stock.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
                         EhWarehouseStocks.class

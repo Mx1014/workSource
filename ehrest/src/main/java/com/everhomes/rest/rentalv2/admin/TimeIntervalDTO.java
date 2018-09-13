@@ -15,6 +15,8 @@ public class TimeIntervalDTO {
 	private Double timeStep;
 	private Double beginTime;
 	private Double endTime;
+	private Byte amorpm;
+	private String name;
 
 	public Double getBeginTime() {
 		return beginTime;
@@ -43,5 +45,21 @@ public class TimeIntervalDTO {
 
 	public void setTimeStep(Double timeStep) {
 		this.timeStep = timeStep;
+	}
+
+	public Byte getAmorpm() {
+		return amorpm;
+	}
+
+	public void setAmorpm(Byte amorpm) {
+		this.amorpm = amorpm;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

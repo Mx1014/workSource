@@ -7,8 +7,8 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>scopeCode: item可见范围类型，此参数用于校验item，参考{@link com.everhomes.rest.common.ScopeType}</li>
- *     <li>scopeId: 看见范围具体Id，此参数用于校验item，0为全部</li>
+ *     <li>groupId: 组件Id</li>
+ *     <li>context: 上下文信息，其中communityId必须传。参考{@link AppContext}</li>
  *     <li>itemIds: 按照顺序排列顺序传来itemId</li>
  * </ul>
  */
@@ -16,7 +16,7 @@ public class UpdateUserAppsCommand {
 
     private Long groupId;
 
-    private AppContext appContext;
+    private AppContext context;
 
     private List<Long> itemIds;
 
@@ -28,12 +28,12 @@ public class UpdateUserAppsCommand {
         this.groupId = groupId;
     }
 
-    public AppContext getAppContext() {
-        return appContext;
+    public AppContext getContext() {
+        return context;
     }
 
-    public void setAppContext(AppContext appContext) {
-        this.appContext = appContext;
+    public void setContext(AppContext context) {
+        this.context = context;
     }
 
     public List<Long> getItemIds() {

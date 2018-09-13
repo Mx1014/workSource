@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>deviceId: 设备id</li>
  *     <li>deviceBrand: 设备品牌</li>
  *     <li>deviceModel: 设备型号</li>
+ *     <li>osType: osType</li>
  *     <li>osVersion: 系统版本</li>
  *     <li>access: 网络类型：WIFI, GSM, 只区分WIFI和移动网络</li>
  *     <li>country: CN, US, 大写，采用国家代码ISO_3166 <a href="https://wenku.baidu.com/view/f61a5dd6b9f3f90f76c61b18.html">百度文库</a>/<a href="https://en.wikipedia.org/wiki/ISO_3166">维基百科</a></li>
@@ -29,6 +30,7 @@ public class StatPostDeviceCommand {
     private String deviceId;
     private String deviceBrand;
     private String deviceModel;
+    private String osType;
     private String osVersion;
     private String access;
     private String country;
@@ -149,6 +151,14 @@ public class StatPostDeviceCommand {
 
     public void setCarrier(String carrier) {
         this.carrier = carrier;
+    }
+
+    public String getOsType() {
+        return osType;
+    }
+
+    public void setOsType(String osType) {
+        this.osType = osType;
     }
 
     @Override

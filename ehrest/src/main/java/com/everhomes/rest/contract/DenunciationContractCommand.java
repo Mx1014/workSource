@@ -10,29 +10,31 @@ import com.everhomes.util.StringHelper;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
  *     <li>categoryId: 合同类型categoryId，用于多入口</li>
+ *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
 public class DenunciationContractCommand {
 
     private Long id;
-
     private Long partyAId;
-
     private Long denunciationUid;
     private Long denunciationTime;
-
     private String denunciationReason;
-
     private Long orgId;
-
     private Long communityId;
-
     private Integer namespaceId;
-
     private Byte paymentFlag = 0;
-
 	private Long categoryId;
+	private Byte costGenerationMethod;
+	
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;

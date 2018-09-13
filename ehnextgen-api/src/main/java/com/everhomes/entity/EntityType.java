@@ -21,7 +21,6 @@ import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
@@ -51,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhTalentRequests;
 import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 
 /**
  * <p>实体类型:</p>
@@ -134,7 +134,7 @@ public enum EntityType {
     RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName()),
     DOMAIN(EhDomains.class.getSimpleName()),
     PAYMENT_APPLICATION(EhPaymentApplications.class.getSimpleName()),
-    GENERAL_APPROVAL_VAL(EhGeneralApprovalVals.class.getSimpleName()),
+    GENERAL_FORM_VAL(EhGeneralFormVals.class.getSimpleName()),
     ACTIVITY_ROSTER(EhActivityRoster.class.getSimpleName());
 
 

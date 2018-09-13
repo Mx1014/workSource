@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAppCategoriesDao;
@@ -48,6 +49,22 @@ public class AppCategoryProviderImpl implements AppCategoryProvider {
         }
 
         query.addOrderBy(Tables.EH_APP_CATEGORIES.DEFAULT_ORDER.asc());
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, AppCategory.class));
+            return null;
+        });
+        return results;
+    }
+
+
+    @Override
+    public List<AppCategory> listLeafAppCategories(Byte locationType){
+        List<AppCategory> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAppCategoriesRecord> query = context.selectQuery(Tables.EH_APP_CATEGORIES);
+        query.addConditions(Tables.EH_APP_CATEGORIES.LOCATION_TYPE.eq(locationType));
+        query.addConditions(Tables.EH_APP_CATEGORIES.LEAF_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+        query.addOrderBy(Tables.EH_APP_CATEGORIES.ID.asc());
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, AppCategory.class));
             return null;

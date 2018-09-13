@@ -38,8 +38,11 @@ import com.everhomes.discover.ItemType;
  *  <li>attachments:楼栋附件信息</li>
  *  <li>buildingNumber:楼栋编号</li>
  *  <li>trafficDescription:交通说明</li>
+ *  <li>rentArea:在租面积</li>
+ *  <li>freeArea:可招租面积</li>
+ *  <li>chargeArea:收费面积</li>
+ *  <li>floorNumber:楼层数量</li>
  * </ul>
- *
  */
 public class BuildingDTO {
 
@@ -115,6 +118,43 @@ public class BuildingDTO {
 	private List<BuildingAttachmentDTO> attachments;
 
 	private String lastTime;
+	
+	private Double rentArea;
+	private Double freeArea;
+	private Double chargeArea;
+	private Integer floorNumber;
+	
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
+	public Integer getFloorNumber() {
+		return floorNumber;
+	}
+
+	public void setFloorNumber(Integer floorNumber) {
+		this.floorNumber = floorNumber;
+	}
 
 	public String getLastTime() {
 		return lastTime;

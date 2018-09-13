@@ -2,6 +2,7 @@ package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Calendar;
  */
 @Component(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "ABNORMAL_PUNCH")
 public class EnterpriseApprovalAbnormalPunchHandler extends EnterpriseApprovalPunchDefaultHandler {
+
     //  use the father's function
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
@@ -31,7 +33,8 @@ public class EnterpriseApprovalAbnormalPunchHandler extends EnterpriseApprovalPu
         punCalendar.setTime(request.getPunchDate());
         punchProvider.updatePunchExceptionRequest(request);
         try {
-            punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), punCalendar);
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(request.getUserId(), request.getEnterpriseId());
+            punchService.refreshPunchDayLog(memberDetail, punCalendar);
         } catch (ParseException e) {
             LOGGER.error("refresh punchDayLog ParseException : userid [" + request.getUserId() + "],enterpriseid ["
                     + request.getEnterpriseId() + "] day[" + request.getPunchDate() + "]");

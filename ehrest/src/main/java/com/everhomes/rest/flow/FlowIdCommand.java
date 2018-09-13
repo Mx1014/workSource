@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class FlowIdCommand {
-	Long flowId;
+
+	private Long flowId;
 
 	public Long getFlowId() {
 		return flowId;
