@@ -36,6 +36,9 @@ import java.util.List;
  * <li>sendSmsFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
  * <li>visitorSignCharacter: (选填)访客签名字符串</li>
+ * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
+ * <li>doorAccessInvalidTimes: 门禁使用次数</li>
+ * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{

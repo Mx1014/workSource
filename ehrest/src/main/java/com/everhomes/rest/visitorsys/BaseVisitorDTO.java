@@ -29,6 +29,9 @@ import java.sql.Timestamp;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
+ * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
+ * <li>doorAccessInvalidTimes: 门禁使用次数</li>
+ * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
  * </ul>
  */
 public class BaseVisitorDTO extends BaseVisitorsysCommand{
@@ -203,6 +206,30 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Byte getAuthRuleType() {
+        return authRuleType;
+    }
+
+    public void setAuthRuleType(Byte authRuleType) {
+        this.authRuleType = authRuleType;
+    }
+
+    public Integer getDoorAccessInvalidTimes() {
+        return doorAccessInvalidTimes;
+    }
+
+    public void setDoorAccessInvalidTimes(Integer doorAccessInvalidTimes) {
+        this.doorAccessInvalidTimes = doorAccessInvalidTimes;
+    }
+
+    public Integer getDoorAccessInvalidDuration() {
+        return doorAccessInvalidDuration;
+    }
+
+    public void setDoorAccessInvalidDuration(Integer doorAccessInvalidDuration) {
+        this.doorAccessInvalidDuration = doorAccessInvalidDuration;
     }
 
     @Override
