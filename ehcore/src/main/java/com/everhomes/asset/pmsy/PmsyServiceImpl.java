@@ -193,104 +193,12 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	@Override
 	public PmsyBillsResponse listPmBills(ListPmsyBillsCommand cmd) {
-		if(cmd.getCustomerId() == null){
-			LOGGER.error("the id of customer is not null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"the id of customer is not null.");
-		}
-		if(cmd.getProjectId() == null){
-			LOGGER.error("the id of project is not null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"the id of project is not null.");
-		}
-		if(cmd.getBillType() == null){
-			LOGGER.error("the billType is not null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"the billType is not null.");
-		}
 		PmsyBillsResponse response = new PmsyBillsResponse();
-		String startDate = "";
-		String endDate = "";
-		if(cmd.getStartDate() != null)
-			startDate = TimeToString(cmd.getStartDate());
-		if(cmd.getEndDate() != null)
-			endDate = TimeToString(cmd.getEndDate());
-		String json = null;
-		json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), startDate,
-				endDate, cmd.getProjectId(), cmd.getBillType().getCode(), "", "");
-		Gson gson = new Gson();
-		Map map = gson.fromJson(json, Map.class);
-		
-		List list = (List) map.get("UserRev_GetFeeList");
-		Map map2 = (Map) list.get(0);
-		List list2 = (List) map2.get("Syswin");
-		HashSet<Long> calculateMonthSet = new HashSet<Long>();
-		BigDecimal totalAmount = new BigDecimal(0);
-		
 		List<PmsyBillsDTO> requests = response.getRequests();
-		
-		outer:
-		for(Object o:list2){
-			Map map3 = (Map) o;
-			if(!cmd.getResourceId().equals((String)map3.get("ResID")))
-				continue;
-			PmsyBillItemDTO dto = new PmsyBillItemDTO();
-			dto.setCustomerId(cmd.getCustomerId());
-			dto.setBillId((String)map3.get("ID"));
-			Long billDateStr = StringToTime((String)map3.get("RepYears"));
-			dto.setBillDateStr(billDateStr);
-			dto.setItemName((String)map3.get("IpItemName"));
-			BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
-			BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
-			BigDecimal receivableAmount = priRev.add(lFRev);
-			dto.setReceivableAmount(receivableAmount);
-			BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
-			BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
-			BigDecimal debtAmount = priFailures.add(lFFailures);
-			dto.setDebtAmount(debtAmount);
-			calculateMonthSet.add(billDateStr);
-			totalAmount = totalAmount.add(debtAmount);
-			
-			for(PmsyBillsDTO mb:requests){
-				if(mb.getBillDateStr().longValue() == billDateStr.longValue()){
-					mb.getRequests().add(dto);
-					BigDecimal monthlyReceivableAmount = mb.getMonthlyDebtAmount();
-					BigDecimal monthlyDebtAmount = mb.getMonthlyDebtAmount();
-					monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
-					monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
-					mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
-					mb.setMonthlyDebtAmount(monthlyDebtAmount);
-					continue outer;
-				}
-			}
-			PmsyBillsDTO newMonthlyBill = new PmsyBillsDTO();
-			newMonthlyBill.setBillDateStr(billDateStr);
-			newMonthlyBill.setMonthlyDebtAmount(debtAmount);
-			newMonthlyBill.setMonthlyReceivableAmount(receivableAmount);
-			List<PmsyBillItemDTO> newRequests = new ArrayList<PmsyBillItemDTO>();
-			newRequests.add(dto);
-			newMonthlyBill.setRequests(newRequests);
-			requests.add(newMonthlyBill);
-		}
-		/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
-		if(pmsyCommunity == null){
-			LOGGER.error("pmsyCommunity relation is not exist.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"pmsyCommunity relation is not exist.");
-		}*/
-		//response.setContact(pmsyCommunity.getContact());
-		response.setCustomerId(cmd.getCustomerId());
-		response.setMonthCount(calculateMonthSet.size());
-		response.setPayerId(cmd.getPayerId());
-		response.setResourceId(cmd.getResourceId());
-		//response.setBillTip(pmsyCommunity.getBillTip());
-		response.setTotalAmount(totalAmount);
-		response.setProjectId(cmd.getProjectId());
-		//按时间排序
-		Collections.sort(requests);
-		
 		//判断是否处于左邻测试环境，如果是，则伪造测试数据
 		if(isZuolinTest()) {
+			//处于左邻测试环境，则伪造测试数据
+			BigDecimal totalAmount = BigDecimal.ZERO;
 			for(int i = 0;i < 1;i++) {
 				PmsyBillItemDTO dto = new PmsyBillItemDTO();
 				dto.setCustomerId(cmd.getCustomerId());
@@ -308,8 +216,100 @@ public class PmsyServiceImpl implements PmsyService{
 				requests.add(newMonthlyBill);
 			}
 			response.setTotalAmount(new BigDecimal("0.01"));
+		}else {
+			//处于正式环境，走正式的对接流程
+			if(cmd.getCustomerId() == null){
+				LOGGER.error("the id of customer is not null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"the id of customer is not null.");
+			}
+			if(cmd.getProjectId() == null){
+				LOGGER.error("the id of project is not null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"the id of project is not null.");
+			}
+			if(cmd.getBillType() == null){
+				LOGGER.error("the billType is not null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"the billType is not null.");
+			}
+			String startDate = "";
+			String endDate = "";
+			if(cmd.getStartDate() != null)
+				startDate = TimeToString(cmd.getStartDate());
+			if(cmd.getEndDate() != null)
+				endDate = TimeToString(cmd.getEndDate());
+			String json = null;
+			json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), startDate,
+					endDate, cmd.getProjectId(), cmd.getBillType().getCode(), "", "");
+			Gson gson = new Gson();
+			Map map = gson.fromJson(json, Map.class);
+			
+			List list = (List) map.get("UserRev_GetFeeList");
+			Map map2 = (Map) list.get(0);
+			List list2 = (List) map2.get("Syswin");
+			HashSet<Long> calculateMonthSet = new HashSet<Long>();
+			BigDecimal totalAmount = new BigDecimal(0);
+			outer:
+			for(Object o:list2){
+				Map map3 = (Map) o;
+				if(!cmd.getResourceId().equals((String)map3.get("ResID")))
+					continue;
+				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setCustomerId(cmd.getCustomerId());
+				dto.setBillId((String)map3.get("ID"));
+				Long billDateStr = StringToTime((String)map3.get("RepYears"));
+				dto.setBillDateStr(billDateStr);
+				dto.setItemName((String)map3.get("IpItemName"));
+				BigDecimal priRev = new BigDecimal((String)map3.get("PriRev"));
+				BigDecimal lFRev = new BigDecimal((String)map3.get("LFRev"));
+				BigDecimal receivableAmount = priRev.add(lFRev);
+				dto.setReceivableAmount(receivableAmount);
+				BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
+				BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
+				BigDecimal debtAmount = priFailures.add(lFFailures);
+				dto.setDebtAmount(debtAmount);
+				calculateMonthSet.add(billDateStr);
+				totalAmount = totalAmount.add(debtAmount);
+				
+				for(PmsyBillsDTO mb:requests){
+					if(mb.getBillDateStr().longValue() == billDateStr.longValue()){
+						mb.getRequests().add(dto);
+						BigDecimal monthlyReceivableAmount = mb.getMonthlyDebtAmount();
+						BigDecimal monthlyDebtAmount = mb.getMonthlyDebtAmount();
+						monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+						monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+						mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+						mb.setMonthlyDebtAmount(monthlyDebtAmount);
+						continue outer;
+					}
+				}
+				PmsyBillsDTO newMonthlyBill = new PmsyBillsDTO();
+				newMonthlyBill.setBillDateStr(billDateStr);
+				newMonthlyBill.setMonthlyDebtAmount(debtAmount);
+				newMonthlyBill.setMonthlyReceivableAmount(receivableAmount);
+				List<PmsyBillItemDTO> newRequests = new ArrayList<PmsyBillItemDTO>();
+				newRequests.add(dto);
+				newMonthlyBill.setRequests(newRequests);
+				requests.add(newMonthlyBill);
+			}
+			/*PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+			if(pmsyCommunity == null){
+				LOGGER.error("pmsyCommunity relation is not exist.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"pmsyCommunity relation is not exist.");
+			}*/
+			//response.setContact(pmsyCommunity.getContact());
+			response.setCustomerId(cmd.getCustomerId());
+			response.setMonthCount(calculateMonthSet.size());
+			response.setPayerId(cmd.getPayerId());
+			response.setResourceId(cmd.getResourceId());
+			//response.setBillTip(pmsyCommunity.getBillTip());
+			response.setTotalAmount(totalAmount);
+			response.setProjectId(cmd.getProjectId());
+			//按时间排序
+			Collections.sort(requests);
 		}
-		
 		return response;
 	}
 	
