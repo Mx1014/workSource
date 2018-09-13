@@ -21,6 +21,7 @@ import com.everhomes.aclink.lingling.*;
 import com.everhomes.aclink.uclbrt.UclbrtHttpClient;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.blacklist.BlacklistService;
@@ -118,6 +119,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Security;
+import java.sql.Timestamp;
 import java.text.Format;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1206,6 +1208,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     }
                     
                     doorAuthProvider.updateDoorAuth(doorAuth);
+                    
+                    //通知内网服务器同步授权信息(目前是访客,用户与访客的同步待合并)
+                    FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(doorAuth.getId());
+                    if(photo != null){
+                    	photo.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    	faceRecognitionPhotoProvider.updateFacialRecognitionPhoto(photo);
+                    	NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+                        cmd1.setDoorId(doorAuth.getDoorId());
+                        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+                    }
                     
                     if(aesUserKey1 != null) {
                         aesUserKey1.setStatus(AesUserKeyStatus.INVALID.getCode());
@@ -3130,6 +3142,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setNickname(cmd.getUserName());
         auth.setLinglingUuid(uuid);
         auth.setCurrStorey(cmd.getDoorNumber());
+        auth.setRightOpen((byte) 1);
         
         //按次开门只适用于左邻门禁 by liuyilin 20180509
 		if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
@@ -3555,10 +3568,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+        if(auth.getValidFromMs() > System.currentTimeMillis() || auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
             resp.setIsValid((byte)0);    
         } else {
             resp.setIsValid((byte)1);
+            //授权有效才传二维码 by liuyilin 20180813
+            resp.setQr(auth.getQrKey());
         }
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
@@ -3606,7 +3621,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             
             //ZUOLIN_V2按次开门的二维码不转成9号指令,按次二维码防截图后面再做 by liuyilin 20180717
-            if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN && (auth.getAuthRuleType() == null || auth.getAuthRuleType() == DoorAuthRuleType.DURATION.getCode())) {
+            if(resp.getIsValid() == (byte)1 &&  driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN && (auth.getAuthRuleType() == null || auth.getAuthRuleType() == DoorAuthRuleType.DURATION.getCode())) {
                 byte[] origin = Base64.decodeBase64(auth.getQrKey());
                 byte[] qrLenArr = new byte[2];
                 qrLenArr[0] = origin[2];
@@ -3615,17 +3630,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 qrLen -= 2;
                 byte[] qrArr = new byte[qrLen];
                 System.arraycopy(origin, 6, qrArr, 0, qrLen);
-                
-//                qrArr = Base64.decodeBase64("+mfPObQMjcXYWp+UpXhknA==");
-                
                 Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 10*60l);
                 resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
-                
-                return resp;
             }
         }
-        resp.setQr(auth.getQrKey());
-      
+        
         return resp;
     }
     
@@ -5228,6 +5237,99 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
+	public ListZLDoorAccessResponse listDoorAccessMacByApp() {
+		List<String> listMac = new ArrayList<String>();
+		ListZLDoorAccessResponse rsp = new ListZLDoorAccessResponse();
+		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		App app = UserContext.current().getCallerApp();
+		if(app == null || app.getName() == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth error");
+		}
+		Long ownerId = Long.valueOf(app.getName());
+		ListDoorAccessGroupCommand cmd = new ListDoorAccessGroupCommand();
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(DoorAccessOwnerType.ENTERPRISE.getCode());
+		List<DoorAccessDTO> das = listDoorAccessGroup(cmd).getDoors();
+		if(das != null && das.size() != 0){
+			for(DoorAccessDTO da : das){
+				listMac.add(da.getHardwareId());
+			}
+			rsp.setListMac(listMac);
+		}
+		return rsp;
+	}
+
+	@Override
+	public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd) {
+		DoorAccess da = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getMacAddress());
+		if(da == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+		}
+		List<AclinkAppUserKeyDTO> userKeys = new ArrayList<AclinkAppUserKeyDTO>();
+		for(Long userId: cmd.getUserIds()){
+			AclinkAppUserKeyDTO userKey =new AclinkAppUserKeyDTO();
+			userKey.setKeySecret(AclinkUtils.packAesUserKey(da.getAesIv(), userId, 0, System.currentTimeMillis() + KEY_TICK_7_DAY));
+			userKey.setMac(cmd.getMacAddress());
+			userKey.setUserId(userId);
+			userKeys.add(userKey);
+		}
+		GetZLAesUserKeyResponse rsp = new GetZLAesUserKeyResponse();
+		rsp.setUserKeys(userKeys);
+		
+		return rsp;
+	}
+
+	@Override
+	public void createVisitorBatch(CreateVisitorBatchCommand cmd) {
+		if(cmd.getDoorIds() != null && cmd.getDoorIds().size() > 0 && cmd.getAuthList() != null && cmd.getAuthList().size() > 0){
+			for(Long doorId : cmd.getDoorIds()){
+				if(doorId == null) continue;
+				for(CreateLocalVistorCommand itemCmd : cmd.getAuthList()){
+					if(itemCmd == null || itemCmd.getNamespaceId() == null) continue;
+					itemCmd.setDoorId(doorId);
+					itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+					itemCmd.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+			        if(itemCmd.getValidEndMs() == null) {
+			        	if(cmd.getValidEndMs() == null){
+			        		itemCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+			        	}else{
+			        		itemCmd.setValidEndMs(cmd.getValidEndMs());
+			        	}
+			        }
+			        if(itemCmd.getValidFromMs() == null) {
+			        	if(cmd.getValidFromMs() == null){
+			        		itemCmd.setValidFromMs(System.currentTimeMillis());	
+			        	}else{
+			        		itemCmd.setValidFromMs(cmd.getValidFromMs());
+			        	}
+			        }
+					createLocalVisitorAuth(itemCmd);
+				}
+			}
+		}
+	}
+
+	@Override
+	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd) {
+		CreateZLVisitorQRKeyResponse rsp = new CreateZLVisitorQRKeyResponse();
+		DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getMacAddress());
+		if(doorAccess == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+		}
+		
+		
+		//TODO 上海华润对接调试用,待appSecret与公司关联实现后补完 by liuyilin 20180802
+		Integer namespaceId = 2;
+		User user = UserContext.current().getUser();
+		CreateDoorVisitorCommand cmd2 = ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class);
+		cmd2.setNamespaceId(namespaceId);
+		cmd2.setDoorId(doorAccess.getId());
+        DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd2);
+        rsp.setMacAddress(cmd.getMacAddress());
+        rsp.setQrCode(auth.getQrKey());
+		return rsp;
+	}
+
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd) {
 		if(cmd.getOwnerType() == DoorAccessOwnerType.ENTERPRISE.getCode()){
 			deleteAuthWhenLeaveFromOrg(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getUserId());

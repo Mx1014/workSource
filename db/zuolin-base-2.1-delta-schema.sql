@@ -186,3 +186,8 @@ CREATE TABLE `eh_office_cubicle_configs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- END 工位预订
+
+
+
+-- 菜单增加“管理端”、“用户端”分类
+ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 1 COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType';
