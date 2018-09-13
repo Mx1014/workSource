@@ -926,9 +926,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(orgDTO == null) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user haven't companies");   
                 }
-        	
-            //5.7.0才有findOrganizationMemberByUIdAndOrgId 先用这个 by liuyilin20180801
-        	OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(custom.getId(), orgDTO.getId());
+        	 
+        	OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(custom.getId(), orgDTO.getId());
 			if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
 				custom.setNickName(om.getContactName());
 			}
@@ -1085,9 +1084,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         tmpUser.setNickName("admin");
         if (operator != null && operator.getId() != 0) {
             tmpUser.setNickName(getRealName(operator));
-            if(cmd.getOperatorOrgId() != null) {
-            	//5.7.0才有findOrganizationMemberByUIdAndOrgId 先用这个 by liuyilin 20180801
-                OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(operator.getId(), cmd.getOperatorOrgId());
+            if(cmd.getOperatorOrgId() != null) { 
+                OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(operator.getId(), cmd.getOperatorOrgId());
                 if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                     tmpUser.setNickName(om.getContactName());
                 }
