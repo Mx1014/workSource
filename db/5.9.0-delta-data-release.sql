@@ -120,7 +120,7 @@ INSERT INTO `ehcore`.`eh_parking_business_payee_accounts`(`namespace_id`, `owner
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: inno
--- DESCRIPTION: 此SECTION只在上海新天地-999929执行的脚本
+-- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
 -- AUTHOR: lifei  20180913
 -- REMARK: （此行放说明，可以多行，多行时每行前面都有REMARK）某模块增加初始化数据。。。。。。。
 -- REMARK:。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
