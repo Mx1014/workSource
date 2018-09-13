@@ -21,6 +21,7 @@ import com.everhomes.aclink.lingling.*;
 import com.everhomes.aclink.uclbrt.UclbrtHttpClient;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.blacklist.BlacklistService;
@@ -5327,6 +5328,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         rsp.setMacAddress(cmd.getMacAddress());
         rsp.setQrCode(auth.getQrKey());
 		return rsp;
+	}
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd) {
 		if(cmd.getOwnerType() == DoorAccessOwnerType.ENTERPRISE.getCode()){
