@@ -117,3 +117,12 @@ INSERT INTO `ehcore`.`eh_parking_lots`(`id`, `owner_type`, `owner_id`, `name`, `
 
 INSERT INTO `ehcore`.`eh_parking_business_payee_accounts`(`namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (999930, 'community', 240111044332063564, 10040, '财富广场地下停车场', 'tempfee', 4303, 'EhOrganizations', 2, 486680, CURRENT_TIMESTAMP, 486680, CURRENT_TIMESTAMP);
 -- -- --------------------- SECTION END ---------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: inno
+-- DESCRIPTION: 此SECTION只在上海新天地-999929执行的脚本
+-- AUTHOR: lifei  20180913
+-- REMARK: （此行放说明，可以多行，多行时每行前面都有REMARK）某模块增加初始化数据。。。。。。。
+-- REMARK:。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
+INSERT INTO xxxx() VALUES();
+-- --------------------- SECTION END ---------------------------------------------------------
