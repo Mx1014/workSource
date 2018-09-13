@@ -17,6 +17,11 @@ public interface ButtScriptConfigProvider {
 
     ButtScriptConfig findButtScriptConfig(Integer namespaceId , String infoType);
 
+    void updateButtScriptConfig(ButtScriptConfig bo);
+
+    ButtScriptConfig crteateButtScriptConfig(ButtScriptConfig bo);
+
+    ButtScriptConfig getButtScriptConfigById(Long id);
 
     List<ButtScriptConfig> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback);
 }

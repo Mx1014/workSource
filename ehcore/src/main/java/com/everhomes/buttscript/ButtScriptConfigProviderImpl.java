@@ -2,15 +2,22 @@ package com.everhomes.buttscript;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhButtScriptConfigDao;
 import com.everhomes.server.schema.tables.daos.EhButtScriptPublishInfoDao;
+import com.everhomes.server.schema.tables.pojos.EhButtInfoTypeEventMapping;
+import com.everhomes.server.schema.tables.pojos.EhButtScriptConfig;
+import com.everhomes.server.schema.tables.pojos.EhButtScriptPublishInfo;
 import com.everhomes.server.schema.tables.records.EhButtScriptConfigRecord;
 import com.everhomes.server.schema.tables.records.EhButtScriptPublishInfoRecord;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -75,6 +82,26 @@ public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
             return list.get(0);
         }
         return null ;
+    }
+
+    @Override
+    public void updateButtScriptConfig(ButtScriptConfig bo) {
+        rwDao().update(bo);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhButtScriptConfig.class, bo.getId());
+    }
+
+    @Override
+    public ButtScriptConfig crteateButtScriptConfig(ButtScriptConfig bo) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhButtScriptConfig.class));
+        bo.setId(id);
+        rwDao().insert(bo);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhButtScriptConfig.class, id);
+        return bo ;
+    }
+
+    @Override
+    public ButtScriptConfig getButtScriptConfigById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), ButtScriptConfig.class);
     }
 
     @Override

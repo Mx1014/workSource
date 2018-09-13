@@ -15,6 +15,21 @@ public interface ButtInfoTypeEventMappingProvider {
      */
     List<ButtInfoTypeEventMapping> findButtInfoTypeEventMapping(String eventName ,Integer namespaceId );
 
+    /**
+     *
+     * @param infoType
+     * @param namespaceId
+     * @return
+     */
+    List<ButtInfoTypeEventMapping> findByInfoType(String infoType ,Integer namespaceId );
+
+    ButtInfoTypeEventMapping getButtInfoTypeEventMappingById(Long id);
+
+    ButtInfoTypeEventMapping crteateButtInfoTypeEventMapping(ButtInfoTypeEventMapping bo);
+
+    void updateButtInfoTypeEventMapping(ButtInfoTypeEventMapping bo);
+
+    void deleteButtInfoTypeEventMapping(ButtInfoTypeEventMapping bo);
 
     List<ButtInfoTypeEventMapping> query(ListingLocator locator, int count, ListingQueryBuilderCallback callback);
 }
