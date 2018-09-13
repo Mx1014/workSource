@@ -1781,9 +1781,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 			dto.setAccountId(r.getId());
 			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-			dto.setAccountName(r.getUserName());
+			dto.setAccountName(r.getRemark());
 			dto.setAccountAliasName(r.getUserAliasName());
-			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
+	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+	        } else {
+	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+	        }
+			
 			return dto;
 		}).collect(Collectors.toList());
 		
