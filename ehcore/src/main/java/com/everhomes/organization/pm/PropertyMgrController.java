@@ -2364,7 +2364,7 @@ public class PropertyMgrController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pm/listPropApartments</b>
+	 * <b>URL: /pm/updateAuthorizePrice</b>
 	 * <p>更新房源授权价详情</p>
 	 */
 	@RequestMapping("updateAuthorizePrice")

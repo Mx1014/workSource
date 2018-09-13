@@ -37,6 +37,7 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseCustomerInvolved: 该房源是否关联企业客户（0：否,1：是）</li>
  * <li>apartmentRent: 房源的租金</li>
  * <li>apartmentRentType: 房源的租金类型</li>
+ * <li>apartAuthorizePrice: 房源授权价</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -69,6 +70,15 @@ public class GetApartmentDetailResponse {
 	private Integer buildingFloorNumber;
 	private BigDecimal apartmentRent;
 	private Byte apartmentRentType;
+	private String apartAuthorizePrice;
+    
+	public String getApartAuthorizePrice() {
+		return apartAuthorizePrice;
+	}
+
+	public void setApartAuthorizePrice(String apartAuthorizePrice) {
+		this.apartAuthorizePrice = apartAuthorizePrice;
+	}
 	
 	public BigDecimal getApartmentRent() {
 		return apartmentRent;

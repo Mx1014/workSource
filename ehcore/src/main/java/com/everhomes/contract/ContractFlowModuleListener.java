@@ -474,12 +474,22 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 		dto.setDisplayName("合同价格总额");
 		dto.setValue("contractPrice");
 		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		List operatorsList = new ArrayList<>();
+		operatorsList.add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL.getCode());
+		dto.setOperators(operatorsList);
 		list.add(dto);
 		
 		dto = new FlowConditionVariableDTO();
 		dto.setDisplayName("楼宇授权价");
 		dto.setValue("apartAuthorizePrice");
 		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		/*operatorsList = new ArrayList<>();
+		operatorsList.add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL.getCode());
+		dto.setOperators(operatorsList);*/
 		list.add(dto);
 
 		return list;

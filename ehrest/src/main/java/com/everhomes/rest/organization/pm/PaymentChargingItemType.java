@@ -63,4 +63,15 @@ public enum PaymentChargingItemType {
 		}
     	return PaymentChargingItemType.ERRORSTATUS;
     }
+
+	public static PaymentChargingItemType fromCode(Long code) {
+		 if (code != null) {
+	    	   for (PaymentChargingItemType status : PaymentChargingItemType.values()) {
+				if (status.code == code.byteValue()) {
+					return status;
+				}
+			}
+	       }
+	       return null;
+	}
 }

@@ -2827,6 +2827,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         response.setBuildingFloorNumber(building.getFloorNumber());
         
+        //房源的授权价
+        AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
+        if (addressProperties != null) {
+        	String chargingItemName = PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc();
+    		String apartmentAuthorizeType = AuthorizePriceType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc(); //周期
+    		response.setApartAuthorizePrice(apartmentAuthorizeType+chargingItemName+addressProperties.getAuthorizePrice());
+		}
+		
         return response;
     }
     
