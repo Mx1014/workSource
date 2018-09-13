@@ -1,5 +1,7 @@
 -- AUTHOR: 丁建民
 -- REMARK: #31812   保存用户当前所在场景
 
-
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20017', 'zh_CN', '周期输入格式不正确');
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20018', 'zh_CN', '授权价格式不正确');
 -- END

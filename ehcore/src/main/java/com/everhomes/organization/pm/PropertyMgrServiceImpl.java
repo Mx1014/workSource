@@ -36,6 +36,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.tools.ant.filters.TokenFilter.Trim;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -54,8 +55,10 @@ import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressArrangement;
+import com.everhomes.address.AddressProperties;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.address.AuthorizePriceExportHandler;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
@@ -85,9 +88,13 @@ import com.everhomes.family.FamilyBillingAccount;
 import com.everhomes.family.FamilyBillingTransactions;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.gogs.GogsConflictException;
+import com.everhomes.gogs.GogsFileNotExistException;
+import com.everhomes.gogs.GogsRepo;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
@@ -98,6 +105,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
@@ -105,6 +113,7 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.BillingAccountHelper;
 import com.everhomes.organization.BillingAccountType;
@@ -144,27 +153,41 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.ArrangementOperationFlag;
+import com.everhomes.rest.address.AuthorizePriceCommand;
+import com.everhomes.rest.address.AuthorizePriceDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
+import com.everhomes.rest.address.ExportApartmentsAuthorizePriceDTO;
+import com.everhomes.rest.address.ExportApartmentsInBuildingDTO;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ImportApartmentDataDTO;
+import com.everhomes.rest.address.ImportAuthorizePriceDataDTO;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateDTO;
+import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
+import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -174,6 +197,8 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.RejectMemberCommand;
 import com.everhomes.rest.family.RevokeMemberCommand;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -217,6 +242,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationOrderStatus;
 import com.everhomes.rest.organization.OrganizationOrderType;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
 import com.everhomes.rest.organization.OrganizationTaskType;
@@ -225,161 +251,7 @@ import com.everhomes.rest.organization.PaidType;
 import com.everhomes.rest.organization.TxType;
 import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.AddOrganizationOwnerCarUserCommand;
-import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.organization.pm.CancelReservationCommand;
-import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
-import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
-import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.CreateReservationCommand;
-import com.everhomes.rest.organization.pm.DefaultChargingItemDTO;
-import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyDTO;
-import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
-import com.everhomes.rest.organization.pm.DeleteDefaultChargingItemCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAttachmentCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerBehaviorCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
-import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeleteRelationOfOrganizationOwnerAndCarCommand;
-import com.everhomes.rest.organization.pm.DeleteReservationCommand;
-import com.everhomes.rest.organization.pm.ExportOrganizationOwnerCarsCommand;
-import com.everhomes.rest.organization.pm.ExportOrganizationsOwnersCommand;
-import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.GetOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.GetOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
-import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
-import com.everhomes.rest.organization.pm.GetRequestInfoResponse;
-import com.everhomes.rest.organization.pm.ImportOrganizationOwnerCarsCommand;
-import com.everhomes.rest.organization.pm.ImportOrganizationOwnerDTO;
-import com.everhomes.rest.organization.pm.ImportOrganizationsOwnersCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
-import com.everhomes.rest.organization.pm.ListApartmentOrganizationOwnerBehaviorsCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListDefaultChargingItemsCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerAddressesCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerAttachmentsCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerBehaviorsCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarByOrgOwnerCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarsByAddressCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticByAgeDTO;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerTypesCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersByCarCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListParkingCardCategoriesCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropBillCommand;
-import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
-import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommand;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropPostCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.ListReservationsCommand;
-import com.everhomes.rest.organization.pm.ListReservationsDTO;
-import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
-import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAttachmentDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarAttachmentDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerLocaleStringScope;
-import com.everhomes.rest.organization.pm.OrganizationOwnerOwnerCarPrimaryFlag;
-import com.everhomes.rest.organization.pm.OrganizationOwnerStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerTypeDTO;
-import com.everhomes.rest.organization.pm.OweFamilyDTO;
-import com.everhomes.rest.organization.pm.OwedType;
-import com.everhomes.rest.organization.pm.ParkingCardCategoryDTO;
-import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.PmBillEntityType;
-import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
-import com.everhomes.rest.organization.pm.PmBillOperLogType;
-import com.everhomes.rest.organization.pm.PmBillsDTO;
-import com.everhomes.rest.organization.pm.PmMemberStatus;
-import com.everhomes.rest.organization.pm.PropAddressMappingDTO;
-import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
-import com.everhomes.rest.organization.pm.PropBillDTO;
-import com.everhomes.rest.organization.pm.PropBillItemDTO;
-import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
-import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
-import com.everhomes.rest.organization.pm.PropFamilyDTO;
-import com.everhomes.rest.organization.pm.PropInvitedUserDTO;
-import com.everhomes.rest.organization.pm.PropOwnerDTO;
-import com.everhomes.rest.organization.pm.PropertyMemberDTO;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
-import com.everhomes.rest.organization.pm.QueryPropTopicByCategoryCommand;
-import com.everhomes.rest.organization.pm.ReservationStatus;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnersByconditionCommand;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
-import com.everhomes.rest.organization.pm.SendNoticeCommand;
-import com.everhomes.rest.organization.pm.SendNoticeMode;
-import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
-import com.everhomes.rest.organization.pm.SetOrganizationOwnerAsCarPrimaryCommand;
-import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdateDefaultChargingItemCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressAuthTypeCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
-import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
-import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
@@ -490,10 +362,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+//import org.apache.commons.lang.StringUtils;
 
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
@@ -642,6 +517,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
+   	
+   	@Autowired
+	protected LocaleStringService localeStringService;
+   	
+   	@Autowired
+	protected TaskService taskService;
+
 
     private String queueName = "property-mgr-push";
 
@@ -2606,8 +2488,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             //房源所在楼层
             address.setApartmentFloor(cmd.getApartmentFloor());
             address.setIsFutureApartment((byte)0);
-            address.setApartmentRent(cmd.getApartmentRent());
-            address.setApartmentRentType(cmd.getApartmentRentType());
             
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
@@ -2665,8 +2545,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            address.setApartmentRent(cmd.getApartmentRent());
-            address.setApartmentRentType(cmd.getApartmentRentType());
         
             addressProvider.updateAddress(address);
         } else {
@@ -2858,13 +2736,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setApartmentFloor(cmd.getApartmentFloor());
         }
         
-        if (cmd.getApartmentRent() != null) {
-            address.setApartmentRent(cmd.getApartmentRent());
-        }
-        if (cmd.getApartmentRentType() != null) {
-            address.setApartmentRentType(cmd.getApartmentRentType());
-        }
-        
         addressProvider.updateAddress(address);
 
         communityProvider.updateBuilding(building);
@@ -2890,15 +2761,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         } else {
             response.setStatus(address.getLivingStatus());
         }
-        //房源的租金
-        if (address.getApartmentRent() != null) {
-            response.setApartmentRent(address.getApartmentRent());
-        }
-        //房源的租金类型
-        if (address.getApartmentRentType() != null) {
-            response.setApartmentRentType(address.getApartmentRentType());
-        }
-
         if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
             OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
             if (organizationAddress != null) {
@@ -8166,5 +8028,389 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         	result.add(dto);
         }
 		return result;
+	}
+
+	//一房一价
+	@Override
+	public void setAuthorizePrice(AuthorizePriceCommand cmd) {
+		AddressProperties addressProperties = ConvertHelper.convert(cmd, AddressProperties.class);
+		propertyMgrProvider.createAuthorizePrice(addressProperties);
+	}
+
+	@Override
+	public ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
+		ListAuthorizePricesResponse response = new ListAuthorizePricesResponse();
+
+		if (list.size() > 0) {
+			List<AuthorizePriceDTO> resultList = list.stream().map((c) -> {
+				AuthorizePriceDTO dto = ConvertHelper.convert(c, AuthorizePriceDTO.class);
+				if (dto.getCreatorUid() != null) {
+					User user = userProvider.findUserById(dto.getCreatorUid());
+					if (user != null) {
+						dto.setCreatorName(user.getNickName());
+					}
+				}
+				// 房源名称
+				if (dto.getBuildingId() != null && dto.getAddressId() != null) {
+					Address address = addressProvider.findAddressById(dto.getAddressId());
+					dto.setAddressName(address.getAddress());
+				}
+				if (dto.getChargingItemsId() != null) {
+					String chargingItemName = assetProvider.findChargingItemNameById(dto.getChargingItemsId());
+					dto.setChargingItemsName(chargingItemName);
+				}
+
+				return dto;
+			}).collect(Collectors.toList());
+			response.setAuthorizePricesList(resultList);
+			if (list.size() != pageSize) {
+				response.setNextPageAnchor(null);
+			} else {
+				response.setNextPageAnchor(list.get(list.size() - 1).getId());
+			}
+		}
+		return response;
+	}
+
+	@Override
+	public AuthorizePriceDTO authorizePriceDetail(AuthorizePriceCommand cmd) {
+		if (cmd.getId() == null || cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+
+		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
+		return ConvertHelper.convert(addressProperties, AuthorizePriceDTO.class);
+	}
+
+	@Override
+	public void updateAuthorizePrice(AuthorizePriceCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+
+		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
+		if (cmd.getAddressId() != null) {
+			addressProperties.setAddressId(cmd.getAddressId());
+		}
+		if (cmd.getApartmentAuthorizeType() != null) {
+			addressProperties.setApartmentAuthorizeType(cmd.getApartmentAuthorizeType());
+		}
+		if (cmd.getAuthorizePrice() != null) {
+			addressProperties.setAuthorizePrice(cmd.getAuthorizePrice());
+		}
+		if (cmd.getChargingItemsId() != null) {
+			addressProperties.setChargingItemsId(cmd.getChargingItemsId());
+		}
+		propertyMgrProvider.updateAuthorizePrice(addressProperties);
+	}
+
+	@Override
+	public void deleteAuthorizePrice(AuthorizePriceCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+
+		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
+		propertyMgrProvider.deleteAuthorizePrice(addressProperties);
+	}
+
+	@Override
+	public void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("namespaceId", cmd.getNamespaceId());
+		params.put("communityId", cmd.getCommunityId());
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("CommandCMD", cmd);
+
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not exist.");
+		}
+		String fileName = String.format("一房一价信息_%s", community.getName(),
+				com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AuthorizePriceExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+
+	@Override
+	public OutputStream exportOutputStreamAuthorizePriceList(ListPropApartmentsByKeywordCommand cmd, Long taskId) {
+
+		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
+		taskService.updateTaskProcess(taskId, 40);
+		String fileName = null;
+		if (cmd.getCommunityId() != null) {
+			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+			fileName = String.format("一房一价信息_%s_%s", community.getName(), cmd.getBuildingName());
+		} else {
+			fileName = String.format("一房一价信息_%s", cmd.getBuildingName());
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+		if (aptList != null && aptList.size() > 0) {
+			ExcelUtils excelUtils = new ExcelUtils(null, fileName, "一房一价信息");
+			taskService.updateTaskProcess(taskId, 60);
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			List<ExportApartmentsAuthorizePriceDTO> data = aptList.stream().map(r -> {
+				ExportApartmentsAuthorizePriceDTO dto = ConvertHelper.convert(r, ExportApartmentsAuthorizePriceDTO.class);
+				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
+				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
+				AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, cmd.getBuildingId(), r.getAddressId());
+				if (addressProperties != null) {
+					dto.setChargingItemsName(PaymentChargingItemType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc());
+					dto.setApartmentAuthorizeType(AuthorizePriceType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc());
+					dto.setAuthorizePrice(addressProperties.getAuthorizePrice());
+				}
+				
+				return dto;
+			}).collect(Collectors.toList());
+
+			List<ExportApartmentsAuthorizePriceDTO> filterData = filterExportApartmentsInBuildingDTO(data, cmd);
+			taskService.updateTaskProcess(taskId, 80);
+			//动态获取费项名称
+			
+
+			excelUtils.setNeedTitleRemark(true).setTitleRemark(
+							"填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" 
+							+ "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n"
+							+ "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" 
+							+ "3、请不要随意复制单元格，这样会破坏字段规则校验。\n"
+							+ "4、带有星号（*）的红色字段为必填项。\n" 
+							+ "5、楼栋名称相同的情况下，门牌不允许重复，重复只算一条。\n" 
+							+ "6、状态可填项：待租、待售、出租、已售、自用、其他。\n" 
+							+ "7、费项名称可选项为：租金、服务费。\n" 
+							+ "8、周期可选项为：按月、按季、按年、按天。\n" 
+							+ "9、面积只允许填写数字，非数字将导致对应行导入失败\n" 
+							+ "10、导入系统已存在的门牌，将按照导入的门牌更新系统的门牌信息。\n" 
+							+ "\n",
+					(short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
+
+			String[] propertyNames = { "apartmentName", "livingStatus", "chargeArea", "chargingItemsName",
+					"authorizePrice", "apartmentAuthorizeType", "namespaceAddressType", "namespaceAddressToken" };
+			
+			String[] titleNames = { "*房源", "*状态", "收费面积", "费项名称", "授权价", "周期", "第三方来源", "第三方标识" };
+			int[] titleSizes = { 20, 20, 20, 20, 20, 20, 20, 20 };
+
+			return excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, filterData);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA, "no data");
+		}
+	}
+	
+	private List<ExportApartmentsAuthorizePriceDTO> filterExportApartmentsInBuildingDTO(List<ExportApartmentsAuthorizePriceDTO> data, ListPropApartmentsByKeywordCommand cmd) {
+		List<ExportApartmentsAuthorizePriceDTO> filterData = new ArrayList<>();
+		for (ExportApartmentsAuthorizePriceDTO dto : data) {
+			filterData.add(dto);
+			// 按状态筛选
+			if (cmd.getLivingStatus() != null
+					&& AddressMappingStatus.fromDesc(dto.getLivingStatus()).getCode() != cmd.getLivingStatus()) {
+				filterData.remove(dto);
+				continue;
+			}
+			// 按收费面积筛选
+			if (cmd.getChargeAreaFrom() != null) {
+				if (dto.getChargeArea() == null
+						|| dto.getChargeArea().doubleValue() < cmd.getChargeAreaFrom().doubleValue()) {
+					filterData.remove(dto);
+					continue;
+				}
+			}
+			if (cmd.getChargeAreaTo() != null) {
+				if (dto.getChargeArea() == null
+						|| dto.getChargeArea().doubleValue() > cmd.getChargeAreaTo().doubleValue()) {
+					filterData.remove(dto);
+					continue;
+				}
+			}
+		}
+		return filterData;
+	}
+
+	@Override
+	public Object importAddressAuthorizePriceData(ImportAddressCommand cmd, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			// 解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+			if (null == resultList || resultList.isEmpty()) {
+				LOGGER.error("File content is empty.userId=" + userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE,
+						OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY, "File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(cmd.getCommunityId());
+			task.setType(ImportFileTaskType.APARTMENT.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+				ImportFileResponse response = new ImportFileResponse();
+				List<ImportAuthorizePriceDataDTO> datas = handleImportApartmentData(resultList);
+				if (datas.size() > 0) {
+					// 设置导出报错的结果excel的标题
+					response.setTitle(datas.get(0));
+					datas.remove(0);
+				}
+				List<ImportFileResultLog<ImportAuthorizePriceDataDTO>> results = importApartment(datas, userId, cmd);
+				response.setTotalCount((long) datas.size());
+				response.setFailCount((long) results.size());
+				response.setLogs(results);
+				return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+
+	private List<ImportFileResultLog<ImportAuthorizePriceDataDTO>> importApartment(List<ImportAuthorizePriceDataDTO> datas, Long userId, ImportAddressCommand cmd) {
+		if (null == cmd.getCommunityId() || cmd.getBuildingId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+
+		List<ImportFileResultLog<ImportAuthorizePriceDataDTO>> errorLogs = new ArrayList<>();
+		// 参数校验
+		for (ImportAuthorizePriceDataDTO data : datas) {
+			ImportFileResultLog<ImportAuthorizePriceDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
+
+			if (StringUtils.isEmpty(data.getApartmentName())) {
+				log.setData(data);
+				log.setErrorLog("apartment name is null");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+			if (StringUtils.isEmpty(data.getStatus())) {
+				log.setData(data);
+				log.setErrorLog("apartmentStatus is null");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_STATUS_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+
+			if (!StringUtils.isEmpty(data.getStatus())) {
+				Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
+				if (livingStatus == -1) {
+					log.setData(data);
+					log.setErrorLog("apartmentStatus is error");
+					log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_STATUS_TYPE);
+					errorLogs.add(log);
+					continue;
+				}
+			}
+			if (!StringUtils.isEmpty(data.getApartmentAuthorizeType())) {
+				Byte apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
+				if (apartmentAuthorizeType == -1) {
+					log.setData(data);
+					log.setErrorLog("authorizeType is error");
+					log.setCode(AddressServiceErrorCode.ERROR_AUTHORIZE_PRICE_TYPE);
+					errorLogs.add(log);
+					continue;
+				}
+			}
+
+			BigDecimal chargeArea = BigDecimal.ZERO;
+			if (!StringUtils.isEmpty(data.getChargeArea())) {
+				try {
+					chargeArea = new BigDecimal(data.getChargeArea());
+					if (chargeArea.compareTo(BigDecimal.ZERO) == -1) {
+						log.setData(data);
+						log.setErrorLog("charge area should be greater than zero");
+						log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_LESS_THAN_ZERO);
+						errorLogs.add(log);
+						continue;
+					}
+				} catch (Exception e) {
+					log.setData(data);
+					log.setErrorLog("charge area is not number");
+					log.setCode(AddressServiceErrorCode.ERROR_CHARGE_AREA_NOT_NUMBER);
+					errorLogs.add(log);
+					continue;
+				}
+			}
+			// 正则校验数字
+			if (!StringUtils.isEmpty(data.getAuthorizePrice())) {
+				String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+				if (!Pattern.compile(reg).matcher(data.getAuthorizePrice()).find()) {
+					log.setData(data);
+					log.setErrorLog("AuthorizePrice format is error");
+					log.setCode(AddressServiceErrorCode.ERROR_AUTHORIZE_PRICE_FORMAT);
+					errorLogs.add(log);
+					continue;
+				}
+			}
+			// 导入房源授权价
+			importApartmentAuthorizePrice(community, building, data);
+		}
+		return errorLogs;
+	}
+
+	private void importApartmentAuthorizePrice(Community community, Building building, ImportAuthorizePriceDataDTO data) {
+		Long organizationId = findOrganizationByCommunity(community);
+		Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), building.getName(), data.getApartmentName());
+
+		// 查询该房源是否已经设置过授权价，并且费项保持一致，一个房源只支持一种费项绑定
+		Byte chargingItemId = PaymentChargingItemType.fromDesc(data.getChargingItemsName()).getCode();
+		Byte apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
+		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
+
+		if (addressProperties == null) {
+			addressProperties = new AddressProperties();
+			addressProperties.setNamespaceId(community.getNamespaceId());
+			addressProperties.setCommunityId(community.getId());
+			addressProperties.setBuildingId(building.getId());
+			addressProperties.setAddressId(address.getId());
+			addressProperties.setChargingItemsId((long) chargingItemId);
+			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
+			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+
+			propertyMgrProvider.createAuthorizePrice(addressProperties);
+		} else {
+			if (addressProperties.getChargingItemsId() != (long) chargingItemId) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid id parameter in the command");
+			}
+			addressProperties.setChargingItemsId((long) chargingItemId);
+			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
+			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+			propertyMgrProvider.updateAuthorizePrice(addressProperties);
+		}
+	}
+
+	private List<ImportAuthorizePriceDataDTO> handleImportApartmentData(List resultList) {
+		List<ImportAuthorizePriceDataDTO> list = new ArrayList<>();
+		for (int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (!StringUtils.isEmpty(r.getA()) || !StringUtils.isEmpty(r.getB()) || !StringUtils.isEmpty(r.getC())) {
+				ImportAuthorizePriceDataDTO data = new ImportAuthorizePriceDataDTO();
+				data.setApartmentName(trim(r.getA()));
+				data.setStatus(trim(r.getB()));
+				data.setChargeArea(trim(r.getC()));
+				data.setChargingItemsName(trim(r.getD()));
+				data.setAuthorizePrice(trim(r.getE()));
+				data.setApartmentAuthorizeType(trim(r.getF()));
+				data.setNamespaceAddressType(trim(r.getG()));
+				data.setNamespaceAddressToken(trim(r.getH()));
+				list.add(data);
+			}
+		}
+		return list;
+	}
+	
+	private String trim(String string) {
+		if (string != null) {
+			return string.trim();
+		}
+		return "";
 	}
 }

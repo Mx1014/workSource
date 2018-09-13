@@ -9,6 +9,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ApartmentEventDTO;
+import com.everhomes.rest.address.AuthorizePriceCommand;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
@@ -17,10 +18,12 @@ import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -2340,5 +2343,100 @@ public class PropertyMgrController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+	
+	/**
+	 * <b>URL: /pm/setAuthorizePrice</b>
+	 * <p> 一房一价，设置楼宇的授权价 </p>
+	 */
+	@RequestMapping("setAuthorizePrice")
+	public RestResponse setAuthorizePrice(AuthorizePriceCommand cmd){
+	    propertyMgrService.setAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listAuthorizePrices</b>
+	 * <p>房源授权价列表</p>
+	 */
+	@RequestMapping("listAuthorizePrices")
+	@RestReturn(value=ListAuthorizePricesResponse.class)
+	public RestResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
+		ListAuthorizePricesResponse results =  propertyMgrService.listAuthorizePrices(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/authorizePriceDetail</b>
+	 * <p>房源授权价详情</p>
+	 */
+	@RequestMapping("authorizePriceDetail")
+	@RestReturn(String.class)
+	public RestResponse authorizePriceDetail(AuthorizePriceCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.authorizePriceDetail(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listPropApartments</b>
+	 * <p>更新房源授权价详情</p>
+	 */
+	@RequestMapping("updateAuthorizePrice")
+	@RestReturn(String.class)
+	public RestResponse updateAuthorizePrice(AuthorizePriceCommand cmd) {
+		propertyMgrService.updateAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deleteAuthorizePrice</b>
+	 * <p>删除房源授权价详情</p>
+	 */
+	@RequestMapping("deleteAuthorizePrice")
+	@RestReturn(String.class)
+	public RestResponse deleteAuthorizePrice(AuthorizePriceCommand cmd) {
+		propertyMgrService.deleteAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /pm/exportApartmentsInBuilding</b>
+     * <p>对接下载中心，导出授权价的房源列表</p>
+     */
+	@RequestMapping("exportApartmentsInBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd) {
+		propertyMgrService.exportApartmentsInBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /pm/importAddressAuthorizePriceData</b>
+     * <p>批量导入房源的授权价</p>
+     */
+    @RequestMapping(value="importAddressAuthorizePriceData", method = RequestMethod.POST)
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importAddressAuthorizePriceData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    	RestResponse response = new RestResponse(propertyMgrService.importAddressAuthorizePriceData(cmd, files[0]));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return null;
+    }
 	
 }
