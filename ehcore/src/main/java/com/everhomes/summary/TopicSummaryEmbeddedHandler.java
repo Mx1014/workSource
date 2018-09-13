@@ -42,7 +42,7 @@ public class TopicSummaryEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
         Long embeddedObjId = post.getEmbeddedId();
         if(embeddedObjId != null) {
             Post orgPost = this.forumProvider.findPostById(embeddedObjId);

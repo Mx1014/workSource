@@ -320,7 +320,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
     
     @Override
-    public ActivityRoster findRosterByOrderNo(Long orderNo) {
+    public ActivityRoster findRosterByOrderNo(String orderNo) {
         ActivityRoster[] rosters = new ActivityRoster[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
                 (context, obj) -> {
