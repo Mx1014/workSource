@@ -33,6 +33,7 @@ public class VisitorSysDoorAccessProviderImpl implements VisitorSysDoorAccessPro
         if(null != userId)
             bean.setCreatorUid(userId);
         bean.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        bean.setStatus((byte)2);
         EhVisitorSysDoorAccessDao dao = getDao(getReadWriteContext());
         dao.insert(bean);
         return bean;
@@ -65,7 +66,12 @@ public class VisitorSysDoorAccessProviderImpl implements VisitorSysDoorAccessPro
     }
 
     @Override
-    public List<VisitorSysDoorAccess> listVisitorSysDoorAccessByOwnerId(Integer namespaceId, String ownerType, Long ownerId) {
+    public List<VisitorSysDoorAccess> listVisitorSysDoorAccessByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+        return this.listVisitorSysDoorAccess(namespaceId,ownerType,ownerId,null);
+    }
+
+    @Override
+    public List<VisitorSysDoorAccess> listVisitorSysDoorAccess(Integer namespaceId, String ownerType, Long ownerId, Long doorAccessId) {
         SelectQuery query = getReadOnlyContext().selectQuery(Tables.EH_VISITOR_SYS_DOOR_ACCESS);
         if(null != namespaceId)
             query.addConditions(Tables.EH_VISITOR_SYS_DOOR_ACCESS.NAMESPACE_ID.eq(namespaceId));
@@ -73,10 +79,11 @@ public class VisitorSysDoorAccessProviderImpl implements VisitorSysDoorAccessPro
             query.addConditions(Tables.EH_VISITOR_SYS_DOOR_ACCESS.OWNER_TYPE.eq(ownerType));
             query.addConditions(Tables.EH_VISITOR_SYS_DOOR_ACCESS.OWNER_ID.eq(ownerId));
         }
+        if(null != doorAccessId)
+            query.addConditions(Tables.EH_VISITOR_SYS_DOOR_ACCESS.DOOR_ACCESS_ID.eq(doorAccessId));
+        query.addConditions(Tables.EH_VISITOR_SYS_DOOR_ACCESS.STATUS.eq((byte)2));
         return query.fetch().map(r -> ConvertHelper.convert(r,VisitorSysDoorAccess.class));
     }
-
-
 
     private EhVisitorSysDoorAccessDao getDao(DSLContext context) {
         return new EhVisitorSysDoorAccessDao(context.configuration());

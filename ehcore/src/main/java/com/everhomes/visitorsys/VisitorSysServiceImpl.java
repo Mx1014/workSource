@@ -168,6 +168,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private AppNamespaceMappingProvider appNamespaceMappingProvider;
     @Autowired
     private AppProvider appProvider;
+    @Autowired
+    private VisitorSysDoorAccessProvider visitorSysDoorAccessProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -2308,18 +2310,27 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         doorCmd.setNamespaceId(visitor.getNamespaceId());
         doorCmd.setUserName(visitor.getVisitorName());
         doorCmd.setDescription(visitor.getVisitReason());
-        doorCmd.setAuthRuleType((byte)0);
-        long now = System.currentTimeMillis();
-        Calendar instance = Calendar.getInstance();
-        instance.setTimeInMillis(now);
-        doorCmd.setValidFromMs(now);
-        if(visitor.getInvalidTime()!=null && visitor.getInvalidTime().length()>0) {
-            Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
-            if (matcher.find()) {
-                instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
-                doorCmd.setValidEndMs(instance.getTimeInMillis());
+//      两种授权方式
+        if(null != visitor.getAuthRuleType() && visitor.getAuthRuleType().equals((byte)1)){
+            doorCmd.setAuthRuleType(visitor.getAuthRuleType());
+            if(null != visitor.getDoorAccessInvalidTimes())
+                doorCmd.setTotalAuthAmount(visitor.getDoorAccessInvalidTimes());
+        }else{
+            // TODO: 2018/9/13 修改门禁有效时间字段？ 
+            doorCmd.setAuthRuleType((byte)0);
+            long now = System.currentTimeMillis();
+            Calendar instance = Calendar.getInstance();
+            instance.setTimeInMillis(now);
+            doorCmd.setValidFromMs(now);
+            if(visitor.getInvalidTime()!=null && visitor.getInvalidTime().length()>0) {
+                Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
+                if (matcher.find()) {
+                    instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
+                    doorCmd.setValidEndMs(instance.getTimeInMillis());
+                }
             }
         }
+
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
             doorCmd.setHeadImgUri(visitor.getVisitorPicUri());
         }
@@ -2632,21 +2643,47 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public List<VisitorSysDoorAccessDTO> listDoorAccess(BaseVisitorsysCommand cmd) {
-        return null;
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        return results.stream().map(r->ConvertHelper.convert(r,VisitorSysDoorAccessDTO.class)).collect(Collectors.toList());
     }
 
     @Override
     public void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
+        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getDoorAccessId());
+        if(null != results){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_ALREADY_EXIST,"Record Already exist.");
+        }
+        VisitorSysDoorAccess bean = ConvertHelper.convert(cmd,VisitorSysDoorAccess.class);
+        bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
+        visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
 
     }
 
     @Override
     public void deleteDoorAccess(DeleteDoorAccessCommand cmd) {
-
+        if(null == cmd.getId()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+        }
+        VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
+        if(null != bean)
+            visitorSysDoorAccessProvider.deleteVisitorSysDoorAccesss(bean.getId());
     }
 
     @Override
     public void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        results.forEach(r ->{
+            if(r.getId().equals(cmd.getId())){
+                r.setDefaultDoorAccessFlag(TrueOrFalseFlag.TRUE.getCode());
+                visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(r);
+            }else{
+                if(TrueOrFalseFlag.TRUE.getCode().equals(r.getDefaultDoorAccessFlag())){
+                    r.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
+                    visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(r);
+                }
 
+            }
+        });
     }
 }

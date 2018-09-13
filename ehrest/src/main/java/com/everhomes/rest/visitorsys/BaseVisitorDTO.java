@@ -64,6 +64,8 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
     private Integer doorAccessInvalidTimes;
     private Integer doorAccessInvalidDuration;
 
+    private String idNumber;
+
     public Long getId() {
         return id;
     }
@@ -230,6 +232,14 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
 
     public void setDoorAccessInvalidDuration(Integer doorAccessInvalidDuration) {
         this.doorAccessInvalidDuration = doorAccessInvalidDuration;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     @Override
