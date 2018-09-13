@@ -1,7 +1,12 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ *     <li>createTime: 开门日期</li>
+ *     <li>tempNumber: 对应临时授权次数</li>
+ * </ul>
+ */
 public class TempStatisticByTimeDTO {
     private Long logTime;
 

@@ -4,7 +4,11 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
-
+/**
+ * <ul>
+ *     <li>dtos:数据统计列表 {@link com.everhomes.rest.aclink.TempStatisticByTimeDTO}</li>
+ * </ul>
+ */
 public class TempStatisticByTimeResponse {
     @ItemType(TempStatisticByTimeDTO.class)
     private List<TempStatisticByTimeDTO> dtos;

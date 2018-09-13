@@ -205,21 +205,37 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
             condition = condition.and(t.OWNER_TYPE.eq(cmd.getOwnerType()));
         }
         if(cmd.getOwnerId() != null){
-            condition= condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
+            condition = condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
+        }
+        Condition condition1 = t1.ID.isNotNull();
+        if(cmd.getOwnerType() != null){
+            condition1 = condition1.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(cmd.getOwnerId() != null){
+            condition1 = condition1.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
+        }
+        Condition condition2 = t2.ID.isNotNull();
+        if(cmd.getOwnerType() != null){
+            condition2 = condition2.and(t2.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(cmd.getOwnerId() != null){
+            condition2 = condition2.and(t2.OWNER_ID.eq(cmd.getOwnerId()));
         }
 
         Result<Record1<Integer>> rlt1 = context.select(t1.ID.count().as("door"))
-                .from(t1).fetch();
+                .from(t1)
+                .where(condition1)
+                .fetch();
         Result<Record1<Integer>> rlt2 = context.select(t.ID.count().as("open"))
                 .from(t)
                 .where(condition)
                 .fetch();
-        Result<Record1<Integer>> rlt3 = context.select(t.AUTH_ID.count().as("temp"))
+        Result<Record1<Integer>> rlt3 = context.select(t.AUTH_ID.count().as("tempopen"))
                 .from(t,t2)
                 .where(condition)
                 .and(t.AUTH_ID.eq(t2.ID))
-                .and(t2.AUTH_TYPE.eq((byte)1)).fetch();
-        Result<Record1<Integer>> rlt4 = context.select(t.AUTH_ID.count().as("perm"))
+                .and(t2.AUTH_TYPE.ne((byte)0)).fetch();
+        Result<Record1<Integer>> rlt4 = context.select(t.AUTH_ID.count().as("permopen"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
                 .and(t2.AUTH_TYPE.eq((byte)0)).fetch();
@@ -235,18 +251,29 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
                 .and(t.EVENT_TYPE.eq(2L)).fetch();
-        Result<Record1<Integer>> rlt8 = context.select(t.AUTH_ID.count().as("face"))
+        Result<Record1<Integer>> rlt8 = context.select(t.AUTH_ID.count().as("button"))
                 .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
                 .where(condition)
                 .and(t.EVENT_TYPE.eq(3L)).fetch();
+        Result<Record1<Integer>> rlt9 = context.select(t.AUTH_ID.count().as("face"))
+                .from(t).leftOuterJoin(t2).on(t.AUTH_ID.eq(t2.ID))
+                .where(condition)
+                .and(t.EVENT_TYPE.eq(4L)).fetch();
+        Result<Record1<Integer>> rlt10 = context.select(t2.ID.count().as("temp"))
+                .from(t2)
+                .where(condition2)
+                .and(t2.AUTH_TYPE.ne((byte)0))
+                .fetch();
         dto.setActiveDoor(new Long((Integer)rlt1.get(0).getValue("door")));
         dto.setOpenTotal(new Long ((Integer)rlt2.get(0).getValue("open")));
-        dto.setTempAuthTotal(new Long ((Integer)rlt3.get(0).getValue("temp")));
-        dto.setPermAuthTotal(new Long ((Integer)rlt4.get(0).getValue("perm")));
+        dto.setTempOpenTotal(new Long ((Integer)rlt3.get(0).getValue("tempopen")));
+        dto.setPermOpenTotal(new Long ((Integer)rlt4.get(0).getValue("permopen")));
         dto.setBluetoothTotal(new Long ((Integer)rlt5.get(0).getValue("bluetooth")));
         dto.setQrTotal(new Long ((Integer)rlt6.get(0).getValue("qr")));
         dto.setRemoteTotal(new Long ((Integer)rlt7.get(0).getValue("remote")));
-        dto.setFaceTotal(new Long ((Integer)rlt8.get(0).getValue("face")));
+        dto.setButtonTotal(new Long ((Integer)rlt8.get(0).getValue("button")));
+        dto.setFaceTotal(new Long ((Integer)rlt9.get(0).getValue("face")));
+        dto.setTempAuthTotal(new Long ((Integer)rlt10.get(0).getValue("temp")));
         return dto;
     }
     //add by liqingyan
@@ -303,7 +330,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
                 .leftOuterJoin(t2).
                         on(t2.ID.eq(t.AUTH_ID))
                 .where(condition)
-                .and(t2.AUTH_TYPE.eq((byte)0))
+                .and(t2.AUTH_TYPE.ne((byte)0))
                 .groupBy(DSL.date(t.CREATE_TIME).as("d"));
         groupBy.fetch().map((r) ->{
             TempStatisticByTimeDTO dto = new TempStatisticByTimeDTO();

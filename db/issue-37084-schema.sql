@@ -2138,7 +2138,7 @@ CREATE TABLE `eh_categories`(
   `id` BIGINT NOT NULL,
   `parent_id` BIGINT NOT NULL DEFAULT 0,
   `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
-  `name` VARCHAR(64) NOT NULL,
+issue-37084-schema.sql  `name` VARCHAR(64) NOT NULL,
   `path` VARCHAR(128),
   `default_order` INTEGER,
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',

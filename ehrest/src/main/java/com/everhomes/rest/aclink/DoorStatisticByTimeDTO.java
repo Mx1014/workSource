@@ -3,7 +3,12 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
-
+/**
+ * <ul>
+ *     <li>createTime: 开门日期</li>
+ *     <li>tempNumber: 对应开门次数</li>
+ * </ul>
+ */
 public class DoorStatisticByTimeDTO {
 
     private Long logTime;

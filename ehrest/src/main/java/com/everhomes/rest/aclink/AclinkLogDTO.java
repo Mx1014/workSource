@@ -12,7 +12,7 @@ import com.everhomes.discover.ItemType;
  *     <li>userIdentifier:手机号码</li>
  *     <li>doorName:门禁名称</li>
  *     <li>authType:授权类型 (0为常规授权，1为临时授权)</li>
- *     <li>eventType:开门方式</li>
+ *     <li>eventType:开门方式 {@link com.everhomes.rest.aclink.AclinkLogEventType}</li>
  *     <li>logTime:开门时间 </li>
  * </ul>
  */
