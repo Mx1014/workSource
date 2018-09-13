@@ -3,6 +3,8 @@ package com.everhomes.workReport;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.Organization;
@@ -63,6 +65,9 @@ public class WorkReportServiceImpl implements WorkReportService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     private DateTimeFormatter reportFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -129,8 +134,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         Long userId = UserContext.currentUserId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
+
         if (report == null)
             return null;
+        ReportValiditySettingDTO originValidity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
+        LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         //  update it.
         if (cmd.getReportType() != null)
             report.setReportType(cmd.getReportType());
@@ -151,6 +159,20 @@ public class WorkReportServiceImpl implements WorkReportService {
             workReportProvider.updateWorkReport(report);
             updateWorkReportScopeMap(report.getNamespaceId(), report.getId(), cmd.getScopes());
             return null;
+        });
+
+        //  Enable another thread to update the data.
+        ExecutorUtil.submit(() -> {
+            //  Make sure that the msg time could be chaned once at the same time.
+            coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
+                Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
+                //  update the rxMsg
+                if (cmd.getRxMsgSetting() != null)
+                    updateWorkReportValReceiverMsg(report, cmd.getRxMsgSetting(), reportTime);
+                //  update the auMsg
+                if (cmd.getAuMsgSetting() != null)
+                    workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), originValidity, reportTime);
+            });
         });
 
         //  return back
@@ -198,6 +220,18 @@ public class WorkReportServiceImpl implements WorkReportService {
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
         workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
+    }
+
+    private void updateWorkReportValReceiverMsg(WorkReport report, ReportMsgSettingDTO msgSetting, Timestamp reportTime) {
+        List<WorkReportValReceiverMsg> msgs = workReportValProvider.listReportValReceiverMsgByReportTime
+                (report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
+        Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
+                msgSetting.getMsgTimeType(), msgSetting.getMsgTimeMark(), msgSetting.getMsgTime()));
+        if (msgs.size() > 0)
+            msgs.forEach(m -> {
+                m.setReminderTime(reminderTime);
+                workReportValProvider.updateWorkReportValReceiverMsg(m);
+            });
     }
 
     @Override

@@ -1,6 +1,11 @@
 package com.everhomes.workReport;
 
+import com.everhomes.rest.workReport.ReportMsgSettingDTO;
+import com.everhomes.rest.workReport.ReportValiditySettingDTO;
 import com.everhomes.user.User;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public interface WorkReportMessageService {
 
@@ -15,4 +20,6 @@ public interface WorkReportMessageService {
     void workReportAuMessage();
 
     void createWorkReportAuMessage();
+
+    WorkReportScopeMsg createWorkReportScopeMsg(WorkReport report, ReportMsgSettingDTO auMsgSetting, ReportValiditySettingDTO validity, Timestamp reportTime);
 }

@@ -147,6 +147,7 @@ public enum CoordinationLocks {
     ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
     VISITOR_SYS_CONFIG("visitor_sys_config"),
+    WORK_REPORT_MSG("work_report_msg"),
 	
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),

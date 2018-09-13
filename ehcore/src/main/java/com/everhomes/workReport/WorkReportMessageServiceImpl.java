@@ -311,45 +311,50 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      */
     @Scheduled(cron = "0 0 5 * * ?")
     @Override
-    public void createWorkReportAuMessage(){
+    public void createWorkReportAuMessage() {
         List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
             query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
             query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
             return query;
         });
-        LocalDateTime time = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         for (WorkReport r : results) {
             //  获取汇报时间
             ReportValiditySettingDTO validitySetting = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
-            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), time, validitySetting);
-            //  获取提醒时间
             ReportMsgSettingDTO auMsgSetting = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
-            Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(r.getReportType(), reportTime.getTime(),
-                    auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
-            Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(r.getReportType(), reportTime.getTime(),
-                    validitySetting.getEndType(), validitySetting.getEndMark(), validitySetting.getEndTime()));
-            //  生成提醒数据
-            WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(r.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
-            if(msg !=null){
-                msg.setReminderTime(reminderTime);
-                msg.setEndTime(endTime);
-                msg.setScopeIds(listScopeIds(r));
-                workReportProvider.updateWorkReportScopeMsg(msg);
-            }
-            else{
-                msg = new WorkReportScopeMsg();
-                msg.setNamespaceId(r.getNamespaceId());
-                msg.setOrganizationId(r.getOrganizationId());
-                msg.setReportId(r.getId());
-                msg.setReportName(r.getReportName());
-                msg.setReportType(r.getReportType());
-                msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
-                msg.setReminderTime(reminderTime);
-                msg.setEndTime(endTime);
-                msg.setScopeIds(listScopeIds(r));
-                workReportProvider.createWorkReportScopeMsg(msg);
-            }
+            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), time, validitySetting);
+            createWorkReportScopeMsg(r, auMsgSetting, validitySetting, reportTime);
         }
+    }
+
+    @Override
+    public WorkReportScopeMsg createWorkReportScopeMsg(WorkReport report, ReportMsgSettingDTO auMsgSetting, ReportValiditySettingDTO validity, Timestamp reportTime) {
+        //  获取提醒时间
+        Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
+                auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
+        Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
+                validity.getEndType(), validity.getEndMark(), validity.getEndTime()));
+        //  生成提醒数据
+        WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
+        if (msg != null) {
+            msg.setReminderTime(reminderTime);
+            msg.setEndTime(endTime);
+            msg.setScopeIds(listScopeIds(report));
+            workReportProvider.updateWorkReportScopeMsg(msg);
+        } else {
+            msg = new WorkReportScopeMsg();
+            msg.setNamespaceId(report.getNamespaceId());
+            msg.setOrganizationId(report.getOrganizationId());
+            msg.setReportId(report.getId());
+            msg.setReportName(report.getReportName());
+            msg.setReportType(report.getReportType());
+            msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
+            msg.setReminderTime(reminderTime);
+            msg.setEndTime(endTime);
+            msg.setScopeIds(listScopeIds(report));
+            workReportProvider.createWorkReportScopeMsg(msg);
+        }
+        return msg;
     }
 
     private String listScopeIds(WorkReport report) {
