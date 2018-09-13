@@ -131,7 +131,9 @@ public class ZhuzongPaymentCardVendorHandler implements PaymentCardVendorHandler
         if ("4".equals(applyCard.getResultID())) //不存在
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,1001,
                     "该账户不存在");
-
+        if (!"0".equals(applyCard.getResultID()))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
+                    "查询第三方接口失败");
         User user = UserContext.current().getUser();
         PaymentCard paymentCard = new PaymentCard();
         paymentCard.setOwnerId(cmd.getOwnerId());
