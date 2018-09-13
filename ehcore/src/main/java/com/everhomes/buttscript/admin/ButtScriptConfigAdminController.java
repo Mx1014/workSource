@@ -25,7 +25,7 @@ public class ButtScriptConfigAdminController {
     private ButtScriptConfigService buttScriptConfigService ;
 
     /**
-     * <b>URL: /admin/buttScriptConfig/addButtScriptConfing</b>
+     * <b>URL: /admin/buttScriptConfig/findButtScriptConfing</b>
      * <p>1)通过域空间查询分类信息接口</p>
      */
     @RequestMapping("findButtScriptConfing")
