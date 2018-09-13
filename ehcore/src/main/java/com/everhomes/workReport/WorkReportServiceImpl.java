@@ -229,6 +229,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 msgSetting.getMsgTimeType(), msgSetting.getMsgTimeMark(), msgSetting.getMsgTime()));
         if (msgs.size() > 0)
             msgs.forEach(m -> {
+                m.setReportName(report.getReportName());
                 m.setReminderTime(reminderTime);
                 workReportValProvider.updateWorkReportValReceiverMsg(m);
             });

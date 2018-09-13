@@ -338,6 +338,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
         WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
         if (msg != null) {
             msg.setReminderTime(reminderTime);
+            msg.setReportName(report.getReportName());
             msg.setEndTime(endTime);
             msg.setScopeIds(listScopeIds(report));
             workReportProvider.updateWorkReportScopeMsg(msg);
