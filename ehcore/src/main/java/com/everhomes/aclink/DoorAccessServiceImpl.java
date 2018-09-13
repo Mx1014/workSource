@@ -5462,7 +5462,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		        OpenAuthDTO dto1 = ConvertHelper.convert(dto, OpenAuthDTO.class);
 		        dto1.setMacAddresses(doorAccess.getHardwareId());
 		        dto1.setAuthId(auth.getId());
-		        response.getAuthList().add(dto);
+		        response.getAuthList().add(dto1);
 			}
 			//一个door 批量处理完一起更新
 	        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
