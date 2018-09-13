@@ -265,9 +265,6 @@ public class AssetServiceImpl implements AssetService {
     private ContentServerService contentServerService;
     
     @Autowired
-    private PaymentService paymentService;
-    
-    @Autowired
     private UserService userService;
     
     @Autowired
