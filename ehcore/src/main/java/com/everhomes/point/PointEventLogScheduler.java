@@ -95,12 +95,12 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() == null
-                && serverId != null && serverId.trim().length() > 0) {
-            initEventProcessor();
-            initScheduledTask();
-            initRestartSubscriber();
-        }
+        // if (event.getApplicationContext().getParent() == null
+        //         && serverId != null && serverId.trim().length() > 0) {
+        //     initEventProcessor();
+        //     initScheduledTask();
+        //     initRestartSubscriber();
+        // }
     }
 
     private void initEventProcessor() {

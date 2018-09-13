@@ -21,4 +21,6 @@ public interface PayServiceErrorCode {
     int ERROR_WITHDRAW_FAILED  =10011;
     /** 提现订单不存在 */
     int ERROR_WITHDRAW_ORDER_NOT_FOUND  =10012;
+    /** 支付回调链接配置为空 */
+    int ERROR_PAY_CALLBACK_URL_EMPTY  =10013;
 }
