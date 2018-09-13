@@ -3596,26 +3596,17 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
-		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		config.setNoticeContact(cmd.getContact());
-		newParkingLot.setRechargeJson(JSONObject.toJSONString(config));
-		newParkingLot.setId(parkingLot.getId());
-		newParkingLot.setCreateTime(parkingLot.getCreateTime());
-		newParkingLot.setCreatorUid(parkingLot.getCreatorUid());
-		newParkingLot.setNamespaceId(parkingLot.getNamespaceId());
-		newParkingLot.setOwnerType(parkingLot.getOwnerType());
-		newParkingLot.setOwnerId(parkingLot.getOwnerId());
-		newParkingLot.setSummary(cmd.getSummary());
-		parkingProvider.updateParkingLot(newParkingLot);
+		parkingLot.setId(parkingLot.getId());
+		parkingLot.setSummary(cmd.getSummary());
+		parkingLot.setNoticeContact(cmd.getContact());
+		parkingProvider.updateParkingLot(parkingLot);
 	}
 
 	@Override
 	public UserNoticeDTO getParkingUserNotice(UserNoticeCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		UserNoticeDTO userNotice = ConvertHelper.convert(parkingLot,UserNoticeDTO.class);
-		ParkingRechargeConfig rechargeConfig = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		userNotice.setContact(rechargeConfig.getNoticeContact());
+		userNotice.setContact(parkingLot.getNoticeContact());
 		userNotice.setSummary(parkingLot.getSummary());
 		return userNotice;
 	}

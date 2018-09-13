@@ -16,15 +16,18 @@ public class UserNoticeDTO {
 	private String summary;
     
 
+
     public String getContact() {
-        return contact;
-    }
+		return contact;
+	}
 
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
 
-    public UserNoticeDTO() {
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+
+	public UserNoticeDTO() {
     }
 
 
