@@ -3282,7 +3282,7 @@ public class ParkingServiceImpl implements ParkingService {
 			PayUserDTO payUserDTO = map.get(convert.getPayeeId());
 			if(payUserDTO!=null){
 				convert.setPayeeUserType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());
-				convert.setPayeeUserName(payUserDTO.getUserName());
+				convert.setPayeeUserName(payUserDTO.getRemark());
 				convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
 				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
 				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus()+1);//由，0非认证，1认证，变为 1，非认证，2，审核通过

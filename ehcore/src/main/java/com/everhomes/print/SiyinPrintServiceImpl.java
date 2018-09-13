@@ -1838,7 +1838,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
 		if(payUserDTO!=null){
 			convert.setPayeeUserType(payUserDTO.getUserType());
-			convert.setPayeeUserName(payUserDTO.getUserName());
+			convert.setPayeeUserName(payUserDTO.getRemark());
 			convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
 			convert.setPayeeAccountCode(payUserDTO.getAccountCode());
 			convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
