@@ -802,10 +802,10 @@ CREATE TABLE `eh_aclink_form_titles` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int(11) NOT NULL ,
 `owner_id`  bigint(20) NULL COMMENT '所属对象id',
-`owner_type`  bigint(20) NULL COMMENT '所属对象类型 0园区 1公司 2家庭 3门禁',
+`owner_type`  tinyint(4) NULL COMMENT '所属对象类型 0园区 1公司 2家庭 3门禁',
 `path` varchar(1024) DEFAULT NULL COMMENT '记录更新人userId',
 `name` varchar(64) NULL COMMENT '表单项名称',
-`item_type` bigint(20) NULL COMMENT '表单项类型, 0 表单中间结点 1 文本 2 单选 3 多选',
+`item_type` tinyint(4) NULL COMMENT '表单项类型, 0 表单中间结点 1 文本 2 单选 3 多选',
 `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
 `creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
 `create_time` datetime NOT NULL COMMENT '记录创建时间',
@@ -819,10 +819,10 @@ CREATE TABLE `eh_aclink_form_values` (
 `namespace_id` int(11) NOT NULL ,
 `title_id` bigint(20) NOT NULL COMMENT '对应表单标题的id',
 `value` varchar(1024) NULL COMMENT '表单项的值',
-`type` bigint(20) NULL COMMENT '值类型, 0 初始值(select,checkbox等) 1 默认值 2 输入值',
+`type` tinyint(4) NULL COMMENT '值类型, 0 初始值(select,checkbox等) 1 默认值 2 输入值',
 `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
 `owner_id` bigint(20) NOT NULL COMMENT '记录所属对象Id',
-`owner_type` bigint(20) NOT NULL COMMENT '记录所属对象类型 0园区 1公司 2家庭 3门禁 4用户 5授权记录',
+`owner_type` tinyint(4) NOT NULL COMMENT '记录所属对象类型 0园区 1公司 2家庭 3门禁 4用户 5授权记录',
 `creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
 `create_time` datetime NOT NULL COMMENT '记录创建时间',
 `operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
@@ -830,7 +830,7 @@ CREATE TABLE `eh_aclink_form_values` (
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 输入值';
 
-ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` BIGINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
-ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` BIGINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
+ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
+ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
 
 -- --------------------- SECTION END ---------------------------------------------------------
