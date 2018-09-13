@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.organization.pmsy;
+package com.everhomes.asset.pmsy;
 
 import java.util.List;
 
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.pmsy.PmsyProvider;
+import com.everhomes.organization.pmsy.PmsyService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;

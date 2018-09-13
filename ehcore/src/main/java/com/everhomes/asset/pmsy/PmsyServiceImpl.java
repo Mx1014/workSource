@@ -1,7 +1,6 @@
-package com.everhomes.organization.pmsy;
+package com.everhomes.asset.pmsy;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +30,12 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.organization.pmsy.PmsyCommunity;
+import com.everhomes.organization.pmsy.PmsyOrder;
+import com.everhomes.organization.pmsy.PmsyOrderItem;
+import com.everhomes.organization.pmsy.PmsyPayer;
+import com.everhomes.organization.pmsy.PmsyProvider;
+import com.everhomes.organization.pmsy.PmsyService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.app.AppConstants;
@@ -97,73 +101,94 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Override
 	public List<AddressDTO> listAddresses(ListResourceCommand cmd){
-		if(cmd.getUserName() == null){
-			LOGGER.error("the username is not null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"the username is not null.");
-		}
-		if(cmd.getUserContact() == null){
-			LOGGER.error("the userContact is not null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"the userContact is not null.");
-		}
-		PmsyPayer pmsyPayer = null;
-		if(cmd.getPayerId() != null){
-			pmsyPayer = pmsyProvider.findPmPayersById(cmd.getPayerId());
-			if(pmsyPayer != null && (!pmsyPayer.getUserName().equals(cmd.getUserName()) ||
-					!pmsyPayer.getUserContact().equals(cmd.getUserContact()))){
-				LOGGER.error("the payer is not exists.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"the payer is not exists.");
-			}
-		}else{
-			pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(cmd.getUserName(),cmd.getUserContact());
-			if(pmsyPayer == null){
-				pmsyPayer = new PmsyPayer();
-				User user = UserContext.current().getUser();
-				Integer namespaceId = UserContext.current().getNamespaceId();
-				Long userId = user.getId();
-				pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
-				pmsyPayer.setCreatorUid(userId);
-				pmsyPayer.setNamespaceId(namespaceId);
-				pmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
-				pmsyPayer.setUserContact(cmd.getUserContact());
-				pmsyPayer.setUserName(cmd.getUserName());
-				pmsyProvider.createPmPayer(pmsyPayer);
-			}
-		}
 		List<AddressDTO> resultList = new ArrayList<>();
-		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
-		if(json == null){
-			LOGGER.error("the request of siyuan is fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
-					"the request of siyuan is fail.");
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		if(isZuolinTest()) {
+			//处于左邻测试环境，则伪造测试数据
+			AddressDTO dto1 = new AddressDTO();
+			dto1.setCustomerId("0100102016050000000742");
+			dto1.setPayerId(10L);
+			dto1.setProjectId("0040042021605000000001");
+			dto1.setResourceId("010010201605000000742");
+			dto1.setResourceName("西海明珠花园");
+			resultList.add(dto1);
+			
+			AddressDTO dto2 = new AddressDTO();
+			dto2.setCustomerId("0100102016050000000742");
+			dto2.setPayerId(10L);
+			dto2.setProjectId("0040042021605000000001");
+			dto2.setResourceId("010010201605000000742");
+			dto2.setResourceName("西海明珠大厦");
+			resultList.add(dto2);
+		}else {
+			//处于正式环境，走正式的对接流程
+			if(cmd.getUserName() == null){
+				LOGGER.error("the username is not null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"the username is not null.");
+			}
+			if(cmd.getUserContact() == null){
+				LOGGER.error("the userContact is not null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"the userContact is not null.");
+			}
+			PmsyPayer pmsyPayer = null;
+			if(cmd.getPayerId() != null){
+				pmsyPayer = pmsyProvider.findPmPayersById(cmd.getPayerId());
+				if(pmsyPayer != null && (!pmsyPayer.getUserName().equals(cmd.getUserName()) ||
+						!pmsyPayer.getUserContact().equals(cmd.getUserContact()))){
+					LOGGER.error("the payer is not exists.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+							"the payer is not exists.");
+				}
+			}else{
+				pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(cmd.getUserName(),cmd.getUserContact());
+				if(pmsyPayer == null){
+					pmsyPayer = new PmsyPayer();
+					User user = UserContext.current().getUser();
+					Integer namespaceId = UserContext.current().getNamespaceId();
+					Long userId = user.getId();
+					pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					pmsyPayer.setCreatorUid(userId);
+					pmsyPayer.setNamespaceId(namespaceId);
+					pmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
+					pmsyPayer.setUserContact(cmd.getUserContact());
+					pmsyPayer.setUserName(cmd.getUserName());
+					pmsyProvider.createPmPayer(pmsyPayer);
+				}
+			}
+			String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
+			if(json == null){
+				LOGGER.error("the request of siyuan is fail.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+						"the request of siyuan is fail.");
+			}
+			
+			Long payerId = pmsyPayer.getId();
+			Gson gson = new Gson();
+			Map map = gson.fromJson(json, Map.class);
+			if(map.containsKey("_ERROR"))
+				return resultList;
+			List list = (List) map.get("UserRev_OwnerVerify");
+			Map map2 = (Map) list.get(0);
+			List list2 = (List) map2.get("Syswin");
+			resultList = (List<AddressDTO>) list2.stream().map(r -> {
+				Map map3 = (Map) r;
+				AddressDTO dto = new AddressDTO();
+				dto.setCustomerId((String)map3.get("CusID"));
+				dto.setPayerId(payerId);
+				dto.setProjectId((String)map3.get("ProjectID"));
+				dto.setResourceId((String)map3.get("ResID"));
+				StringBuilder resourceName = new StringBuilder();
+				resourceName.append(map3.get("ProjectName"))
+							.append(" ")
+							.append(map3.get("BuildingName"))
+							.append(" ")
+							.append(map3.get("ResName"));
+				dto.setResourceName(resourceName.toString());
+				return dto;
+			}).collect(Collectors.toList());
 		}
-		
-		Long payerId = pmsyPayer.getId();
-		Gson gson = new Gson();
-		Map map = gson.fromJson(json, Map.class);
-		if(map.containsKey("_ERROR"))
-			return resultList;
-		List list = (List) map.get("UserRev_OwnerVerify");
-		Map map2 = (Map) list.get(0);
-		List list2 = (List) map2.get("Syswin");
-		resultList = (List<AddressDTO>) list2.stream().map(r -> {
-			Map map3 = (Map) r;
-			AddressDTO dto = new AddressDTO();
-			dto.setCustomerId((String)map3.get("CusID"));
-			dto.setPayerId(payerId);
-			dto.setProjectId((String)map3.get("ProjectID"));
-			dto.setResourceId((String)map3.get("ResID"));
-			StringBuilder resourceName = new StringBuilder();
-			resourceName.append(map3.get("ProjectName"))
-						.append(" ")
-						.append(map3.get("BuildingName"))
-						.append(" ")
-						.append(map3.get("ResName"));
-			dto.setResourceName(resourceName.toString());
-			return dto;
-		}).collect(Collectors.toList());
 		return resultList;
 	}
 	@Override
@@ -286,15 +311,6 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		
 		return response;
-	}
-	
-	public boolean isZuolinTest() {
-		//判断是否处于左邻测试环境，如果是，则伪造测试数据
-		String haianEnvironment = configProvider.getValue(999993, "pay.v2.asset.haian_environment", "");
-		if(haianEnvironment.equals("beta")) {
-			return true;
-		}
-		return false;
 	}
 	
 	@Override
@@ -487,37 +503,6 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	
 	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
-		/*PmsyOrder order = createPmsyOrder(cmd);
-		
-		PreOrderCommand preOrderCommand = new PreOrderCommand();
-
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
-		preOrderCommand.setOrderId(order.getId());
-		Long amount = changePayAmount(order.getOrderAmount());
-		preOrderCommand.setAmount(amount);
-
-		preOrderCommand.setPayerId(UserContext.currentUserId());
-		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-		//preOrderCommand.setNamespaceId(999993);//杨崇鑫用于测试
-		//preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
-		preOrderCommand.setClientAppName(cmd.getClientAppName());
-
-		
-		//通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
-        query.addFrom(t);
-        query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
-        query.fetch().map(r -> {
-            preOrderCommand.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));
-            preOrderCommand.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));
-            return null;
-        });
-		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
-		return callBack;*/
-		
 		PmsyOrder order = createPmsyOrder(cmd);
 		
 		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
@@ -644,18 +629,19 @@ public class PmsyServiceImpl implements PmsyService{
         return amount.multiply(new BigDecimal(100)).toString();
     }
 
-	private BigDecimal changePayAmount(Long amount){
-
-        if(amount == null){
-            return new BigDecimal(0);
-        }
-        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
-    }
-	
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
 		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
         DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
         //支付模块回调接口，通知支付结果
         handler.payNotify(cmd);
     }
+	
+	public boolean isZuolinTest() {
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		String haianEnvironment = configProvider.getValue(999993, "pay.v2.asset.haian_environment", "");
+		if(haianEnvironment.equals("beta")) {
+			return true;
+		}
+		return false;
+	}
 }
