@@ -124,6 +124,25 @@ INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum'
 -- AUTHOR: 严军
 -- REMARK: 删除待办事项菜单
 UPDATE eh_web_menus SET `status` = 0 WHERE id in = 48130000;
+-- AUTHOR:huangmingbo 20180919
+-- REMARK: issue-36688/issue-33683/ 停车缴费V6.6.3 服务联盟V3.6
+-- 37669修复
+update eh_service_alliance_categories set default_order = id;
+
+-- 33683 停车缴费V6.6.3
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10001', 'zh_CN', 'token获取失败');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10002', 'zh_CN', '生成请求摘要失败');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10003', 'zh_CN', '不支持当前充值类型');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10004', 'zh_CN', '不支持按天计算逾期金额');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10005', 'zh_CN', '未找到月卡信息');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10006', 'zh_CN', '未获取到费率信息');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10007', 'zh_CN', '未获取到月卡对应的费率信息');
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.loginUrl', 'http://syxtest.zuolin.com/jsaims/login', '捷顺登录地址', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.funcUrl', 'http://syxtest.zuolin.com/jsaims/as', '捷顺接口请求地址', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.version', '2', '捷顺接口版本', 0, NULL, 1);
+
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -132,7 +151,17 @@ UPDATE eh_web_menus SET `status` = 0 WHERE id in = 48130000;
 -- AUTHOR: liangqishi  20180702
 -- REMARK: （此行放说明，可以多行，多行时每行前面都有REMARK）某模块增加初始化数据。。。。。。。
 -- REMARK:。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
-INSERT INTO xxxx() VALUES();
+
+-- 大沙河创新大厦停车场
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.cid', '880075500000001', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.usr', '880075500000001', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.psw', '888888', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.signKey', '7ac3e2ee1075bf4bb6b816c1e80126c0', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.parkCode', '0010028888', '小区编号', 0, NULL, 1);
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) VALUES ((@max_lots_id := @max_lots_id + 1), 'community', 240111044332059932, '创新大厦停车场', 'JIESHUN_DSHCXMall', '', 2, 1, now(), 999967, '{"expiredRechargeFlag":1,"expiredRechargeMonthCount":1,"expiredRechargeType":1,"maxExpiredDay":3,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
@@ -154,7 +183,21 @@ INSERT INTO xxxx() VALUES();
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
 -- AUTHOR: liangqishi  20180702
 -- REMARK: 某模块增加初始化数据
-INSERT INTO xxxx() VALUES();
+
+-- AUTHOR:huangmingbo 20180919
+-- REMARK: issue-36688 停车缴费V6.6.3 光企云二期停车场
+update eh_parking_lots set name = '光大we谷A区停车场' where vendor_name = 'GUANG_DA_WE_GU';
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.cid', '880075500000001', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.usr', '880075500000001', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.psw', '888888', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.signKey', '7ac3e2ee1075bf4bb6b816c1e80126c0', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.parkCode', '0010028888', '小区编号', 0, NULL, 1);
+
+
+set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) VALUES ((@max_lots_id := @max_lots_id + 1), 'community', 240111044331056800, '光大we谷B区停车场', 'JIESHUN_GQY2', '', 2, 1, now(), 999979, '{"expiredRechargeFlag":1,"expiredRechargeType":1,,"expiredRechargeMonthCount":1,"maxExpiredDay":180,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
+
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay
