@@ -19,7 +19,7 @@ import java.util.List;
  * <li>path：路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
  * <li>level：当前层级。没有填0</li>
  * <li>addressId：地址</li>
- * <li>OrganizationType：组织类型，仅用来区分机构是物业、工作站、公安、普通公司等，注意其与groupType意义的区别：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
+ * <li>organizationType：组织类型，仅用来区分机构是物业、工作站、公安、普通公司等，注意其与groupType意义的区别：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
  * <li>status：状态：参考{@link com.everhomes.rest.organization.OrganizationStatus}</li>
  * <li>memberStatus：成员状态：参考{@link com.everhomes.rest.organization.OrganizationMemberStatus}</li>
  * <li>description：组织描述</li>
@@ -62,7 +62,7 @@ public class OrganizationDTO {
 	private String  path;
 	private Integer level;
 	private Long addressId;
-	private String OrganizationType;
+	private String organizationType;
 	private Byte    status;
 	private Byte memberStatus;
 	private String description;
@@ -304,11 +304,11 @@ public class OrganizationDTO {
 	}
 
 	public String getOrganizationType() {
-		return OrganizationType;
+		return organizationType;
 	}
 
 	public void setOrganizationType(String organizationType) {
-		OrganizationType = organizationType;
+		this.organizationType = organizationType;
 	}
 
 	public Long getId() {
