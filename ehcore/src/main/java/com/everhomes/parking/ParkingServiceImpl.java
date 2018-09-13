@@ -3432,7 +3432,9 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
 		String parkingUrlFormat = configProvider.getValue("parking.wxparking.urlformat","%s/pp/b/a.html#/home?token=%s&ns=%s");
-		String parkingUrl = String.format(parkingUrlFormat, configProvider.getValue("home.url",""),transformToken(cmd.getParkingLotId()+""),UserContext.getCurrentNamespaceId());
+		//String parkingUrl = String.format(parkingUrlFormat, configProvider.getValue("home.url",""),transformToken(cmd.getParkingLotId()+""),UserContext.getCurrentNamespaceId());
+		String parkingUrl = String.format(parkingUrlFormat, "http://beta.zuolin.com",transformToken(cmd.getParkingLotId()+""),UserContext.getCurrentNamespaceId());
+
 		BufferedOutputStream bos = null;
 		ByteArrayOutputStream out = null;
 		try {
@@ -3541,6 +3543,8 @@ public class ParkingServiceImpl implements ParkingService {
 			if(parkingLot.getFuncList()==null || parkingLot.getFuncList().trim().length()==0){
 				JSONArray array = new JSONArray();
 				array.add(ParkingBusinessType.VIP_PARKING.getCode());
+				array.add(ParkingBusinessType.INVOICE_APPLY.getCode());
+				array.add(ParkingBusinessType.USER_NOTICE.getCode());
 				if(parkingLot.getTempfeeFlag()==1){
 					array.add(ParkingBusinessType.TEMPFEE.getCode());
 				}

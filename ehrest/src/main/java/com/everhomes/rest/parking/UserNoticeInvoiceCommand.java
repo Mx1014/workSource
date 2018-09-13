@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>用户须知详情信息</p>
+ * <p>获取用户是否开启发票申请与用户须知</p>
  * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>

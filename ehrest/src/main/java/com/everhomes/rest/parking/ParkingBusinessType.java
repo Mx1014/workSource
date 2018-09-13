@@ -12,7 +12,7 @@ package com.everhomes.rest.parking;
  * <li>FREE_PLACE("freePlace"),: 显示空余车位数量 V6.6</li>
  * <li> MONTH_CARD_APPLY("monthCardApply"),: 在线月卡申请 V6.6</li>
  * <li>USER_NOTICE("userNotice"),: 用户须知</li>
- * <li>INVOICE_APPLY("invoice"),: 发票申请</li>
+ * <li>INVOICE_APPLY("invoiceApply"),: 发票申请</li>
  * </ul>
  */
 public enum ParkingBusinessType {
