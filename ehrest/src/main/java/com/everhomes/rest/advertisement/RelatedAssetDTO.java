@@ -4,31 +4,51 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>assetType：关联资产类型（1：apartment，2：building，3：community）</li>
- * 	<li>assetId：关联资产id </li>
+ * 	<li>buildingId：楼宇id</li>
+ * 	<li>buildingName：楼宇名称 </li>
+ *	<li>apartmentId：房源id</li>
+ * 	<li>apartmentName：房源名称</li>
  * </ul>
  */
 public class RelatedAssetDTO {
 	
-	private Byte assetType;
-	private Long assetId;
+	private Long buildingId;
+	private String buildingName;
+	private Long apartmentId;
+	private String apartmentName;
 	
-	public Byte getAssetType() {
-		return assetType;
+	public Long getBuildingId() {
+		return buildingId;
 	}
-	
-	public void setAssetType(Byte assetType) {
-		this.assetType = assetType;
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
 	}
-	
-	public Long getAssetId() {
-		return assetId;
+
+	public String getBuildingName() {
+		return buildingName;
 	}
-	
-	public void setAssetId(Long assetId) {
-		this.assetId = assetId;
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
-	
+
+	public Long getApartmentId() {
+		return apartmentId;
+	}
+
+	public void setApartmentId(Long apartmentId) {
+		this.apartmentId = apartmentId;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

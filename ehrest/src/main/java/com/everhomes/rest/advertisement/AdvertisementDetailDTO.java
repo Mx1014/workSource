@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li>id: 招商广告id</li>
  * 	<li>title: 招商广告标题</li>
  * 	<li>advertisementType: 广告类型（1-招租广告，2-招商广告）</li>
  * 	<li>businessStatus: 招商状态</li>
@@ -35,8 +36,9 @@ import com.everhomes.util.StringHelper;
  *  <li>formValues: 自定义表单传值，参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
-public class CreateAdvertisementCommand {
+public class AdvertisementDetailDTO {
 	
+	private Long id;
 	private String title;
 	private Byte advertisementType;
 	private Byte businessStatus;
@@ -69,6 +71,12 @@ public class CreateAdvertisementCommand {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getTitle() {
 		return title;
 	}
@@ -224,5 +232,5 @@ public class CreateAdvertisementCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
+
 }

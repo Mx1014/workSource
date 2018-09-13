@@ -13,9 +13,11 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.advertisement.AdvertisementDetailDTO;
 import com.everhomes.rest.advertisement.ChangeAdvertisementOrderCommand;
 import com.everhomes.rest.advertisement.CreateAdvertisementCommand;
 import com.everhomes.rest.advertisement.DeleteAdvertisementCommand;
+import com.everhomes.rest.advertisement.FindAdvertisementCommand;
 import com.everhomes.rest.advertisement.ListAdvertisementsCommand;
 import com.everhomes.rest.advertisement.ListAdvertisementsResponse;
 import com.everhomes.rest.advertisement.UpdateAdvertisementCommand;
@@ -77,12 +79,26 @@ public class AdvertisementController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /advertisement/listAdvertisements</b>
-	 * <p>查找招商广告</p>
+	 * <p>查找招商广告列表</p>
 	 */
 	@RequestMapping("listAdvertisements")
 	@RestReturn(value=ListAdvertisementsResponse.class)
 	public RestResponse listAdvertisements(ListAdvertisementsCommand cmd){
 		ListAdvertisementsResponse result = advertisementService.listAdvertisements(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /advertisement/findAdvertisement</b>
+	 * <p>查找招商广告</p>
+	 */
+	@RequestMapping("findAdvertisement")
+	@RestReturn(value=AdvertisementDetailDTO.class)
+	public RestResponse findAdvertisement(FindAdvertisementCommand cmd){
+		AdvertisementDetailDTO result = advertisementService.findAdvertisement(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
