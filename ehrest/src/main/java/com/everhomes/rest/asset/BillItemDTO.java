@@ -10,7 +10,6 @@ import java.math.BigDecimal;
  *<ul>
  * <li>billItemId:收费项目的id</li>
  * <li>billItemName:收费项目名称</li>
- * <li>amountReceivable:应收金额</li>
  * <li>description:描述</li>
  * <li>dateStr:账期</li>
  * <li>addressId:地址id</li>
@@ -22,6 +21,10 @@ import java.math.BigDecimal;
  * <li>energyConsume: 费项的用量</li>
  * <li>itemFineType: 费项类型，eh_payment_bill_items：费项，eh_payment_late_fine：滞纳金 ，参考{com.everhomes.rest.asset.AssetItemFineType}</li>
  * <li>itemType:费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）参考{com.everhomes.rest.asset.AssetSubtractionType}</li>
+ * <li>amountReceivable:应收金额</li>
+ * <li>amountReceivableWithoutTax:应收（不含税）</li>
+ * <li>taxAmount: 税额</li>
+ * <li>taxRate: 税率</li>
  *</ul>
  */
 public class BillItemDTO {
