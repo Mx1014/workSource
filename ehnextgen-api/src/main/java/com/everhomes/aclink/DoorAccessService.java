@@ -173,4 +173,12 @@ public interface DoorAccessService {
 	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 
 	public void updateAccessType(Long doorId, byte doorType);
+
+	public ListZLDoorAccessResponse listDoorAccessMacByApp();
+
+	public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd);
+
+	public void createVisitorBatch(CreateVisitorBatchCommand cmd);
+
+	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd);
 }
