@@ -22,7 +22,7 @@ public enum DoorAccessType {
     ZLACLINK_WIFI((byte) 0), ZLACLINK_NOWIFI((byte) 1), ACLINK_ZL_GROUP((byte) 5), ACLINK_LINGLING_GROUP((byte) 6),
     ACLINK_LINGLING((byte) 11), ACLINK_HUARUN_GROUP((byte) 12), ACLINK_WANGLONG((byte) 13), ACLINK_WANGLONG_GROUP((byte) 14),
     ACLINK_WANGLONG_DOOR((byte) 15), ACLINK_WANGLONG_DOOR_GROUP((byte) 16), ACLINK_BUS((byte) 17),ACLINK_UCLBRT_DOOR((byte) 18);
-
+   
     private byte code;
     
     public byte getCode() {
