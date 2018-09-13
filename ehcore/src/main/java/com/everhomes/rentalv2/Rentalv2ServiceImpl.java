@@ -4716,7 +4716,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd.getRentalType(), cmd.getPackageName());
 		//设置优惠信息
 		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
@@ -4818,7 +4818,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				null, cmd.getRentalType(),cmd.getPackageName());
 
 		//设置优惠信息
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs, cmd.getSceneToken(), cmd.getRentalType(), cmd.getPackageName());
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs,  cmd.getRentalType(), cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
@@ -4871,7 +4871,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd.getPackageName());
 		LOGGER.info("processDayRuleDTO costs time :"+(System.currentTimeMillis()-timeStamp)/1000);
 		//设置优惠信息
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
@@ -4901,16 +4901,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return response;
 	}
 
-	private PriceRuleDTO processPriceCut(Long siteId, RentalResource rs, String sceneToken,
+	private PriceRuleDTO processPriceCut(Long siteId, RentalResource rs,
 										 Byte rentalType, String packageName) {
 		PriceRuleDTO dto = new PriceRuleDTO();
 		//解析场景信息
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-//		SceneTokenDTO sceneTokenDTO = null;
-//		if (null != sceneToken) {
-//			User user = UserContext.current().getUser();
-//			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
-//		}
+
 
 		if (packageName == null) { //使用本身的优惠
 			List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(rs.getResourceType(),
@@ -4918,52 +4913,50 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			Rentalv2PriceRule priceRule = priceRules.stream().filter(p -> p.getRentalType().equals(rentalType)).findFirst().get();
 			if (priceRule == null)
 				return dto;
-			//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-//			if (null != sceneTokenDTO) {
-//				String scene = sceneTokenDTO.getScene();
-//				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
-//					dto.setFullPrice(priceRule.getOrgMemberFullPrice());
-//					dto.setCutPrice(priceRule.getOrgMemberCutPrice());
-//					dto.setDiscountRatio(priceRule.getOrgMemberDiscountRatio());
-//					dto.setDiscountType(priceRule.getOrgMemberDiscountType());
-//				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
-//					dto.setFullPrice(priceRule.getApprovingUserFullPrice());
-//					dto.setCutPrice(priceRule.getApprovingUserCutPrice());
-//					dto.setDiscountRatio(priceRule.getApprovingUserDiscountRatio());
-//					dto.setDiscountType(priceRule.getApprovingUserDiscountType());
-//				}else{
+			if (!StringUtils.isBlank(currentSceneType.get())) {
+				String scene = currentSceneType.get();
+				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+					dto.setFullPrice(priceRule.getOrgMemberFullPrice());
+					dto.setCutPrice(priceRule.getOrgMemberCutPrice());
+					dto.setDiscountRatio(priceRule.getOrgMemberDiscountRatio());
+					dto.setDiscountType(priceRule.getOrgMemberDiscountType());
+				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+					dto.setFullPrice(priceRule.getApprovingUserFullPrice());
+					dto.setCutPrice(priceRule.getApprovingUserCutPrice());
+					dto.setDiscountRatio(priceRule.getApprovingUserDiscountRatio());
+					dto.setDiscountType(priceRule.getApprovingUserDiscountType());
+				}else{
 					dto.setFullPrice(priceRule.getFullPrice());
 					dto.setCutPrice(priceRule.getCutPrice());
 					dto.setDiscountRatio(priceRule.getDiscountRatio());
 					dto.setDiscountType(priceRule.getDiscountType());
-//				}
-//			}
+				}
+			}
 		} else {
 			List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rs.getResourceType(),
 					PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType, packageName);
 			Rentalv2PricePackage pricePackage = pricePackages.get(0);
 			if (pricePackage == null)
 				return dto;
-			//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-//			if (null != sceneTokenDTO) {
-//				String scene = sceneTokenDTO.getScene();
-//				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
-//					dto.setFullPrice(pricePackage.getOrgMemberFullPrice());
-//					dto.setCutPrice(pricePackage.getOrgMemberCutPrice());
-//					dto.setDiscountRatio(pricePackage.getOrgMemberDiscountRatio());
-//					dto.setDiscountType(pricePackage.getOrgMemberDiscountType());
-//				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
-//					dto.setFullPrice(pricePackage.getApprovingUserFullPrice());
-//					dto.setCutPrice(pricePackage.getApprovingUserCutPrice());
-//					dto.setDiscountRatio(pricePackage.getApprovingUserDiscountRatio());
-//					dto.setDiscountType(pricePackage.getApprovingUserDiscountType());
-//				}else{
+			if (!StringUtils.isBlank(currentSceneType.get())) {
+				String scene = currentSceneType.get();
+				if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+					dto.setFullPrice(pricePackage.getOrgMemberFullPrice());
+					dto.setCutPrice(pricePackage.getOrgMemberCutPrice());
+					dto.setDiscountRatio(pricePackage.getOrgMemberDiscountRatio());
+					dto.setDiscountType(pricePackage.getOrgMemberDiscountType());
+				}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+					dto.setFullPrice(pricePackage.getApprovingUserFullPrice());
+					dto.setCutPrice(pricePackage.getApprovingUserCutPrice());
+					dto.setDiscountRatio(pricePackage.getApprovingUserDiscountRatio());
+					dto.setDiscountType(pricePackage.getApprovingUserDiscountType());
+				}else{
 					dto.setFullPrice(pricePackage.getFullPrice());
 					dto.setCutPrice(pricePackage.getCutPrice());
 					dto.setDiscountRatio(pricePackage.getDiscountRatio());
 					dto.setDiscountType(pricePackage.getDiscountType());
-//				}
-//			}
+				}
+			}
 		}
 		return dto;
 	}
@@ -5012,7 +5005,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		processMonthRuleDTOs(start, end, response, rule, rs, null, cmd.getPackageName());
 		//设置优惠信息
 		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
@@ -5664,7 +5657,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//设置优惠信息
 		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(ruleDto.getFullPrice());
 		response.setCutPrice(ruleDto.getCutPrice());
 		response.setDiscountType(ruleDto.getDiscountType());
@@ -5858,7 +5851,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
 		//设置优惠信息
-		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(ruleDto.getFullPrice());
 		response.setCutPrice(ruleDto.getCutPrice());
 		response.setDiscountType(ruleDto.getDiscountType());
@@ -6012,7 +6005,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//设置优惠信息
 		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(ruleDto.getFullPrice());
 		response.setCutPrice(ruleDto.getCutPrice());
 		response.setDiscountType(ruleDto.getDiscountType());
@@ -6168,8 +6161,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setAttachments(convertAttachments(attachments));
 
 		//设置优惠信息
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs, null, cmd.getRentalType(),cmd.getPackageName());
+		PriceRuleDTO ruleDto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(ruleDto.getFullPrice());
 		response.setCutPrice(ruleDto.getCutPrice());
 		response.setDiscountType(ruleDto.getDiscountType());
