@@ -4219,13 +4219,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setDtos(new ArrayList<AclinkLogDTO>());
         if(CollectionUtils.isEmpty(cmd.getMacAddresses())){
 			return resp;
-		}
-        List<Long> doorIds = cmd.getMacAddresses().stream().filter(mac -> mac != null).map(mac->{
-			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
-			if(null == doorAccess)
-				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
-			return doorAccess.getId();
-		}).collect(Collectors.toList());
+		} 
 		 
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
@@ -4247,7 +4241,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
                             .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
                 } 
-                query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.in(doorIds));
+                query.addConditions(Tables.EH_ACLINK_LOGS.HARDWARE_ID.in(cmd.getMacAddresses()));
                 query.addConditions(Tables.EH_ACLINK_LOGS.NAMESPACE_ID.eq(namespaceId));
                 return query;
             }
@@ -5467,7 +5461,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			//一个door 批量处理完一起更新
 	        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
             cmd1.setDoorId(doorAccess.getId());
-            faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+            try{
+            	faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+            }catch(Exception e){
+            	LOGGER.error("notify sync vistors error", e);
+            }
 		}
 		
 		return response;
