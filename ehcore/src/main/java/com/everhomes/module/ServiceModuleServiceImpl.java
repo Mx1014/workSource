@@ -1847,22 +1847,35 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
 
-        if(cmd.getLocationType() == null){
-            LOGGER.error("invalid parameter, cmd = {}.", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        List<AppCategoryDTO> parentDtos = new ArrayList<>();
+
+        for(ServiceModuleLocationType locationType: ServiceModuleLocationType.values()){
+
+            //接口传来location则使用传来的
+            if(cmd.getLocationType() != null && locationType.getCode() != cmd.getLocationType()){
+                continue;
+            }
+
+            AppCategoryDTO parentDto = new AppCategoryDTO();
+            parentDto.setLocationType(locationType.getCode());
+            parentDto.setParentId(0L);
+
+            List<AppCategory> appCategories = appCategoryProvider.listLeafAppCategories(locationType.getCode());
+            if(appCategories != null && appCategories.size() >= 0){
+                List<AppCategoryDTO> dtos = new ArrayList<>();
+                for(AppCategory appCategory: appCategories){
+                    AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+                    dtos.add(dto);
+                }
+
+                parentDto.setDtos(dtos);
+                parentDtos.add(parentDto);
+            }
         }
 
         ListLeafAppCategoryResponse response = new ListLeafAppCategoryResponse();
-        List<AppCategory> appCategories = appCategoryProvider.listLeafAppCategories(cmd.getLocationType());
-        if(appCategories != null && appCategories.size() >= 0){
-            List<AppCategoryDTO> dtos = new ArrayList<>();
-            for(AppCategory appCategory: appCategories){
-                AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
-                dtos.add(dto);
-            }
+        response.setDtos(parentDtos);
 
-            response.setDtos(dtos);
-        }
 
         return response;
     }
