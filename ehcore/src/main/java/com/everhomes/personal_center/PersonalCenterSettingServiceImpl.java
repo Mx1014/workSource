@@ -139,7 +139,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
             if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                UserTreasureDTO point = pointService.getPointTreasure();
+                UserTreasureDTO point = null;
+                 try {
+                     point = pointService.getPointTreasure();
+                 }catch (Exception e) {
+                     LOGGER.error("get point exception");
+                     e.printStackTrace();
+                 }
                 if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
                     String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
                     dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
