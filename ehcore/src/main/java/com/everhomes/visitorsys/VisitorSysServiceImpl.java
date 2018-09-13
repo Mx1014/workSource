@@ -2630,5 +2630,23 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return idCard;
     }
 
+    @Override
+    public List<VisitorSysDoorAccessDTO> listDoorAccess(BaseVisitorsysCommand cmd) {
+        return null;
+    }
 
+    @Override
+    public void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteDoorAccess(DeleteDoorAccessCommand cmd) {
+
+    }
+
+    @Override
+    public void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+
+    }
 }
