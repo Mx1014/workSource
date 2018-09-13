@@ -503,8 +503,15 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	
 	public PreOrderDTO createPmBillOrderV2(CreatePmsyBillOrderCommand cmd){
-		PmsyOrder order = createPmsyOrder(cmd);
-		
+		PmsyOrder order = new PmsyOrder();
+		//判断是否处于左邻测试环境，如果是，则伪造测试数据
+		if(isZuolinTest()) {
+			//处于左邻测试环境，则伪造测试数据
+			order.setOrderAmount(new BigDecimal("0.01"));
+		}else {
+			//处于正式环境，走正式的对接流程
+			order = createPmsyOrder(cmd);
+		}
 		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
         DefaultAssetVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "HAIAN");
         CreatePaymentBillOrderCommand createPaymentBillOrderCommand = new CreatePaymentBillOrderCommand(); 
@@ -525,6 +532,9 @@ public class PmsyServiceImpl implements PmsyService{
               return null;
         });
   		createPaymentBillOrderCommand.setSourceType(SourceType.MOBILE.getCode());//手机APP支付
+  		
+  		//issue-27397 ： 物业缴费V6.8（海岸馨服务项目对接）
+  		createPaymentBillOrderCommand.setExtendInfo("西海明珠花园");
   			
         return handler.createOrder(createPaymentBillOrderCommand);
 	}

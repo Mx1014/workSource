@@ -79,6 +79,19 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
         assetProvider.createBillOrderMaps(billOrderList);
     }
     
+    /**
+	 * 构造扩展信息，该信息在支付结束时会透传回来给业务系统
+	 * @param cmd 下单请求信息
+	 * @param billGroup 帐单组
+	 * @return 扩展信息
+	 */
+	protected String genPaymentExtendInfo(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append("来源:");
+        strBuilder.append(cmd.getExtendInfo());
+        return strBuilder.toString();
+	}
+    
     public void payNotify(OrderPaymentNotificationCommand cmd) {
     	if(LOGGER.isDebugEnabled()) {
     		LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
