@@ -4,6 +4,19 @@ import com.everhomes.util.StringHelper;
 
 import java.util.Date;
 
+/**
+ * <ul>
+ * <li>name: 姓名</li>
+ * <li>people: 民族</li>
+ * <li>birthday: 出生日期</li>
+ * <li>address: 地址</li>
+ * <li>number: 身份证号</li>
+ * <li>dept: 发证机关</li>
+ * <li>validtermOfStart: 有效期起</li>
+ * <li>validtermOfEnd: 有效期止</li>
+ * <li>sex: 性别</li>
+ * </ul>
+ */
 public class IdentifierCardDTO {
     private String name;
     private String people;
