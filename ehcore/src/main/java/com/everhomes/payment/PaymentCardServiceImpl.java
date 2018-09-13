@@ -138,8 +138,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
 //							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
     		LOGGER.error("Already open card.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Already open card.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
+					"不能重复绑定");
     	}
     	PaymentCardIssuer cardIssuer = paymentCardProvider.findPaymentCardIssuerById(cmd.getIssuerId());
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(cardIssuer.getVendorName());
