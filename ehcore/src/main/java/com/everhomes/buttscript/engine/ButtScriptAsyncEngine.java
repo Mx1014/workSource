@@ -21,14 +21,11 @@ public class ButtScriptAsyncEngine extends GogsAsyncNashornScript {
     private Map<String, Object> param;
 
     /**
-     * 事件的触发者
+     * 脚本入参
      */
-    private UserDTO operator ;
+    private ButtScriptParameter buttparam ;
 
-    /**
-     * 事件对象本身
-     */
-    private LocalEvent  event ;
+
 
     public ButtScriptAsyncEngine(Map<String, Object> param) {
         this.param = param;
@@ -37,13 +34,11 @@ public class ButtScriptAsyncEngine extends GogsAsyncNashornScript {
     /**
      *
      * @param param 固定入参
-     * @param operator  事件的触发者
-     * @param event   事件对象本身
+     * @param buttparam  脚本入参
      */
-    public ButtScriptAsyncEngine(Map<String, Object> param, UserDTO operator ,LocalEvent event) {
+    public ButtScriptAsyncEngine(Map<String, Object> param, ButtScriptParameter buttparam) {
         this.param = param;
-        this.operator =  operator;
-        this.event = event;
+        this.buttparam = buttparam ;
     }
 
     @Override
@@ -51,7 +46,7 @@ public class ButtScriptAsyncEngine extends GogsAsyncNashornScript {
         objectMirror.callMember(FUNCTION_NAME, getArgs());
     }
     private Object[] getArgs() {
-        return new Object[]{operator,event};
+        return new Object[]{buttparam};
     }
     @Override
     protected GogsRepo getGogsRepo() {

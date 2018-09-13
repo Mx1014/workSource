@@ -1,5 +1,7 @@
 package com.everhomes.buttscript.engine;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>infoType: 脚本分类</li>
@@ -44,5 +46,10 @@ class EventResultLog{
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

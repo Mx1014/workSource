@@ -18,6 +18,7 @@ CREATE TABLE `eh_butt_script_config` (
   `owner_id`  bigint(20)   ,
   `owner_type`  varchar(64)   ,
   `remark`  varchar(240)   COMMENT '备注',
+  `status`  tinyint(4)    COMMENT '状态;0失效,1生效',
 
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '存储创建GOGS仓库时所需的指定相关表';
@@ -38,6 +39,7 @@ CREATE TABLE `eh_butt_info_type_event_mapping` (
   `namespace_id` int(11)  COMMENT '域空间ID',
   `event_name`  varchar(128)  COMMENT  '触发该脚本的事件',
   `sync_flag`  tinyint(4)  COMMENT  '0 同步;1异步  同步执行还是异执行',
+  `describe`  varchar(256)  COMMENT  '描述',
 
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '脚本与事件映射表';

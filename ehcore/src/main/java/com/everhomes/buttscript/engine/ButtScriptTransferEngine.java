@@ -19,14 +19,9 @@ public class ButtScriptTransferEngine  extends GogsTransferNashornScript<Object>
     private Map<String, Object> param;
 
     /**
-     * 事件的触发者
+     * 脚本入参
      */
-    private UserDTO operator ;
-
-    /**
-     * 事件对象本身
-     */
-    private LocalEvent  event ;
+    private ButtScriptParameter buttparam ;
 
 
     public ButtScriptTransferEngine(LinkedTransferQueue<Object> queue, Map<String, Object> param) {
@@ -38,21 +33,19 @@ public class ButtScriptTransferEngine  extends GogsTransferNashornScript<Object>
      *
      * @param queue
      * @param param
-     *@param operator  事件的触发者
-     * @param event   事件对象本身
+     *@param buttparam  脚本入参
      */
-    public ButtScriptTransferEngine(LinkedTransferQueue<Object> queue, Map<String, Object> param, UserDTO operator , LocalEvent event) {
+    public ButtScriptTransferEngine(LinkedTransferQueue<Object> queue, Map<String, Object> param, ButtScriptParameter buttparam) {
         super(queue);
         this.param = param;
-        this.operator =  operator;
-        this.event = event;
+        this.buttparam =  buttparam;
     }
     @Override
     protected Object processInternal(ScriptObjectMirror objectMirror) {
         return objectMirror.callMember(FUNCTION_NAME, getArgs());
     }
     private Object[] getArgs() {
-        return new Object[]{operator,event};
+        return new Object[]{buttparam};
     }
     @Override
     protected GogsRepo getGogsRepo() {

@@ -19,15 +19,17 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 
-public  class ButtScriptSchedulerClient {
+@Service
+public  class ButtScriptSchedulerMain {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ButtScriptSchedulerClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ButtScriptSchedulerMain.class);
 
 
     @Autowired
@@ -69,12 +71,14 @@ public  class ButtScriptSchedulerClient {
         resultLog.setNamespaceId(namespaceId);
         List<ButtInfoTypeEventMapping> buttList =  buttInfoTypeEventMappingProvider.findButtInfoTypeEventMapping(eventName ,namespaceId);
         if(buttList == null || buttList.size() <1){
+            resultLog.setErrorMsg("can not found any mapping to this event");
+            LOGGER.info(StringHelper.toJsonString(resultLog));
             return null;
         }
         //返回结果已按异步优先在前排序
         for(ButtInfoTypeEventMapping bte : buttList){
             ButtScriptPublishInfo publishInfo = buttScriptPublishInfoProvider.getButtScriptPublishInfo(namespaceId,bte.getInfoType());
-            if(publishInfo == null){ //当没有发布的脚本时
+            if(publishInfo == null){//当没有发布的脚本时
                 addResultLog(resultLog,bte,null,null);
                 continue;
             }
@@ -99,7 +103,7 @@ public  class ButtScriptSchedulerClient {
             doButtScriptAsync(bte,publishInfo.getCommitVersion(),localEvent);
             addResultLog(resultLog,bte,publishInfo.getCommitVersion(),null);
         }
-        //查询到该事件影响到哪些脚本,然后分别执行这些脚本
+        LOGGER.info(StringHelper.toJsonString(resultLog));
         return null;
 
     }
@@ -139,8 +143,10 @@ public  class ButtScriptSchedulerClient {
         param.put("scriptPath", path);// 脚本路径
         param.put("lastCommit", lastCommit);// 版本ID
         param.put("gogsRepo", anyRepo);
-        LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
-        scriptEngineService.push(new ButtScriptAsyncEngine(param,getOperator(),event));
+        ButtScriptParameter buttScriptParameter = new ButtScriptParameter();
+        buttScriptParameter.setEvent(event);
+        buttScriptParameter.setOperator(getOperator());
+        scriptEngineService.push(new ButtScriptAsyncEngine(param,buttScriptParameter));
     }
 
     /**
@@ -158,7 +164,10 @@ public  class ButtScriptSchedulerClient {
         param.put("lastCommit", lastCommit);// 版本ID
         param.put("gogsRepo", anyRepo);
         LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
-        scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param,getOperator(),event));
+        ButtScriptParameter buttScriptParameter = new ButtScriptParameter();
+        buttScriptParameter.setEvent(event);
+        buttScriptParameter.setOperator(getOperator());
+        scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param,buttScriptParameter));
         // 这里就获取到了 processInternal 的返回结果 result
         Object result = scriptEngineService.poll(transferQueue);
         return result ;

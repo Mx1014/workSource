@@ -17,11 +17,20 @@ public class ButtScriptSchedulerResultLog {
     private String eventName ;
     private Integer namespaceId ;
     private List<EventResultLog> logs ;
+    private String errorMsg ;
 
     public ButtScriptSchedulerResultLog(){
         if(logs == null){
             logs = new ArrayList<EventResultLog>();
         }
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 
     public String getEventName() {
