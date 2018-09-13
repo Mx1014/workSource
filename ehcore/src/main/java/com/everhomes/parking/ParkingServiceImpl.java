@@ -3598,7 +3598,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		ParkingLot newParkingLot = ConvertHelper.convert(parkingLot,ParkingLot.class);
 		ParkingRechargeConfig config = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		config.setContact(cmd.getContact());
+		config.setNoticeContact(cmd.getContact());
 		newParkingLot.setRechargeJson(JSONObject.toJSONString(config));
 		newParkingLot.setId(parkingLot.getId());
 		newParkingLot.setCreateTime(parkingLot.getCreateTime());
@@ -3615,7 +3615,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		UserNoticeDTO userNotice = ConvertHelper.convert(parkingLot,UserNoticeDTO.class);
 		ParkingRechargeConfig rechargeConfig = JSONObject.parseObject(parkingLot.getRechargeJson(),new TypeReference<ParkingRechargeConfig>() {});
-		userNotice.setContact(rechargeConfig.getContact());
+		userNotice.setContact(rechargeConfig.getNoticeContact());
 		userNotice.setSummary(parkingLot.getSummary());
 		return userNotice;
 	}
