@@ -64,7 +64,7 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
         List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
         PaymentBillOrder orderBill  = new PaymentBillOrder();
         orderBill.setNamespaceId(cmd.getNamespaceId());
-        orderBill.setAmount(new BigDecimal(cmd.getAmount()));
+        orderBill.setAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
         orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
         orderBill.setPaymentStatus(orderResponse.getPaymentStatus());
         orderBill.setPaymentOrderId(orderResponse.getPayResponse().getOrderId());//支付订单ID
