@@ -2810,8 +2810,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-                 ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
-                 if (roster != null && roster.getPayFlag() != null && roster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
+                 ActivityRoster cancelRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.CANCEL.getCode());
+                 if (cancelRoster != null && cancelRoster.getPayFlag() != null && cancelRoster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
                      dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
                  }
 	             dto.setActivityId(activity.getId());
