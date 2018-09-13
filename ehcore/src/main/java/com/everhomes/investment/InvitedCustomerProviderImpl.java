@@ -379,6 +379,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 
     private List<Long> getKeyWordCustomerIds(String keyWord) {
         List<Long> keyWordIds = new ArrayList<>();
+        keyWord = StringUtils.trim(keyWord);
         if (StringUtils.isNotBlank(keyWord)) {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
             com.everhomes.server.schema.tables.EhCustomerTrackers trackers = Tables.EH_CUSTOMER_TRACKERS;
