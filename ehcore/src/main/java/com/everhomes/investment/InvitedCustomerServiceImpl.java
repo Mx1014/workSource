@@ -171,13 +171,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     public void updateInvestment(CreateInvitedCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 
-        if(cmd.getCustomerSource() == null){
+        if(cmd.getLevelItemId() != null){
             if(cmd.getLevelItemId()== CustomerLevelType.REGISTERED_CUSTOMER.getCode()){
                 cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
             }else{
                 cmd.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
             }
         }
+
 
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         // reflush contacts
@@ -292,6 +293,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Override
     public SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd) {
         Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+
         SearchEnterpriseCustomerResponse searchResponse = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
         SearchInvestmentResponse response = new SearchInvestmentResponse();
         response.setDtos(searchResponse.getDtos());
@@ -467,11 +469,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             List<CustomerTrackerDTO> trackers = invitedCustomerDTO.getTrackers();
 
             if(trackers != null && trackers.size() > 0){
-                trackers.forEach(r -> {
-                    if(r.getTrackerUid().equals(UserContext.current().getUser().getId())) {
-                        trackers.remove(r);
+                for(CustomerTrackerDTO tracker : trackers){
+                    if(tracker.getTrackerUid().equals(UserContext.current().getUser().getId())) {
+                        trackers.remove(tracker);
+                        break;
                     }
-                });
+                }
             }
 
             invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
