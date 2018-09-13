@@ -534,7 +534,7 @@ public class PmsyServiceImpl implements PmsyService{
   		createPaymentBillOrderCommand.setSourceType(SourceType.MOBILE.getCode());//手机APP支付
   		
   		//issue-27397 ： 物业缴费V6.8（海岸馨服务项目对接）
-  		createPaymentBillOrderCommand.setExtendInfo("西海明珠花园");
+  		createPaymentBillOrderCommand.setExtendInfo(cmd.getHaianCommunityName());
   			
         return handler.createOrder(createPaymentBillOrderCommand);
 	}
