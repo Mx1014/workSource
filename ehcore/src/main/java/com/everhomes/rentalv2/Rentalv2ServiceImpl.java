@@ -4676,7 +4676,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
-
+		currentSceneType.set(cmd.getSceneType());
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
@@ -4779,7 +4779,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
-
+		currentSceneType.set(cmd.getSceneType());
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
@@ -4837,7 +4837,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
-
+		currentSceneType.set(cmd.getSceneType());
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
@@ -4980,7 +4980,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 //		correctRetalResource(rs, cmd.getRentalType());
 		processCells(rs, cmd.getRentalType());
-
+		currentSceneType.set(cmd.getSceneType());
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
@@ -5631,7 +5631,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		java.util.Date reserveTime = new java.util.Date();
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
-
+		currentSceneType.set(cmd.getSceneType());
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
@@ -5826,7 +5826,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
-
+		currentSceneType.set(cmd.getSceneType());
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
@@ -5978,7 +5978,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		java.util.Date reserveTime = new java.util.Date();
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
-
+		currentSceneType.set(cmd.getSceneType());
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
@@ -6150,8 +6150,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		java.util.Date reserveTime = new java.util.Date();
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
-
-//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		currentSceneType.set(cmd.getSceneType());
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
