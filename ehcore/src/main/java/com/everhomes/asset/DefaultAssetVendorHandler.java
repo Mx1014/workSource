@@ -29,6 +29,8 @@ import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessOrderType;
@@ -86,6 +88,9 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	
 	@Autowired
     private DbProvider dbProvider;
+	
+	@Autowired
+	private AssetService assetService;
 	
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
@@ -558,6 +563,16 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds, purchaseOrderDTO.getPaymentType());
             return null;
         });
+        //物业缴费V6.6统一账单：账单状态改变回调接口
+        for(Long billId : billIds) {
+        	ListBillDetailCommand ncmd = new ListBillDetailCommand();
+            ncmd.setBillId(Long.valueOf(billId));
+            ListBillDetailResponse billDetail = listBillDetail(ncmd);
+            AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
+            if(null != handler){
+            	handler.payNotifyBillSourceModule(billDetail);
+            }
+        }
     }
     
     /**
