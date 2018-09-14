@@ -61,19 +61,19 @@ UPDATE eh_service_module_entries SET app_category_id = 18 WHERE location_type = 
 
 
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('1', '企业办公', '0', '4', NULL, '1', '0');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('3', 'OA管理', '476', '4', NULL, '1', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('4', 'HR管理', '476', '4', NULL, '2', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('5', 'ERP', '476', '4', NULL, '3', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('6', '信息发布', '479', '4', NULL, '1', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('7', '社群运营', '479', '4', NULL, '2', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('8', '基础数据管理', '477', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('3', 'OA管理', '1', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('4', 'HR管理', '1', '4', NULL, '2', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('5', 'ERP', '1', '4', NULL, '3', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('6', '信息发布', '102', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('7', '社群运营', '102', '4', NULL, '2', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('8', '基础数据管理', '100', '4', NULL, '1', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('9', '招商租赁', '0', '2', NULL, '3', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('10', '招商与租赁管理', '477', '4', NULL, '2', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('11', '客服管理', '479', '4', NULL, '3', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('10', '招商与租赁管理', '100', '4', NULL, '2', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('11', '客服管理', '102', '4', NULL, '3', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('12', '园区服务', '0', '2', NULL, '4', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('13', '服务联盟', '480', '4', NULL, '1', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('14', '物业管理', '478', '4', NULL, '1', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('15', '运营统计', '479', '4', NULL, '4', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('13', '服务联盟', '103', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('14', '物业管理', '101', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('15', '运营统计', '102', '4', NULL, '4', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('16', '信息发布', '0', '2', NULL, '1', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('17', '社群运营', '0', '2', NULL, '2', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('18', '服务联盟', '0', '2', NULL, '5', '1');
@@ -81,6 +81,8 @@ INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `ap
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('101', '物业服务', '0', '4', NULL, '3', '0');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('102', '园区运营', '0', '4', NULL, '4', '0');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('103', '服务联盟', '0', '4', NULL, '5', '0');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('500000002', '分类123', '0', '1', NULL, '1', '1');
+
 
 -- 微商城设置为内部链接
 UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 92100;
