@@ -1,8 +1,8 @@
 // @formatter:off
 package com.everhomes.parking.invoice;
 
-import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.invoice.*;
 
 import java.util.List;
@@ -20,5 +20,5 @@ public interface InvoiceService {
 
     List<ParkingLotDTO> listAllParkingLots(ListAllParkingLotsCommand cmd);
 
-	ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo);
+	ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo(long orderNo);
 }

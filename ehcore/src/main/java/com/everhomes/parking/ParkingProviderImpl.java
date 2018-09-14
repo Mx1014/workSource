@@ -1388,11 +1388,11 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public ParkingRechargeOrder parkingRechargeOrdersByOrderNo(long orderNo) {
+	public ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo(long orderNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
 		SelectConditionStep<Record> sql = context.select().from(Tables.EH_PARKING_RECHARGE_ORDERS)
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.ORDER_NO.eq(orderNo));
 		Record record = sql.fetchOne();
-		return ConvertHelper.convert(record, ParkingRechargeOrder.class);
+		return ConvertHelper.convert(record, ParkingRechargeOrderDTO.class);
 	}
 }

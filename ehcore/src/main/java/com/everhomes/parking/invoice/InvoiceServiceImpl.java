@@ -7,6 +7,7 @@ import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.invoice.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
@@ -91,7 +92,7 @@ public class InvoiceServiceImpl implements InvoiceService{
     }
     
     @Override
-    public ParkingRechargeOrder parkingRechargeOrdersByOrderNo (long orderNo){
+    public ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo (long orderNo){
 		return parkingProvider.parkingRechargeOrdersByOrderNo(orderNo);
     }
 }

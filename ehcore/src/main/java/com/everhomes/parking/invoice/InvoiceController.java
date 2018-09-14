@@ -102,7 +102,7 @@ public class InvoiceController extends ControllerBase {
     @RestReturn(value=ParkingRechargeOrder.class)
     public RestResponse parkingRechargeOrdersByOrderNo(ParkingRechargeOrdersByOrderNoCommand cmd) {
 
-    	ParkingRechargeOrder parkingRechargeOrder = invoiceService.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
+    	ParkingRechargeOrderDTO parkingRechargeOrder = invoiceService.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
         RestResponse response = new RestResponse(parkingRechargeOrder);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
