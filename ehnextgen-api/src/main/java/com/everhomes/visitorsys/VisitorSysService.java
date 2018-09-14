@@ -152,4 +152,6 @@ public interface VisitorSysService {
     void deleteDoorAccess(DeleteDoorAccessCommand cmd);
 
     void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd);
+
+    void removeInvalidTime();
 }

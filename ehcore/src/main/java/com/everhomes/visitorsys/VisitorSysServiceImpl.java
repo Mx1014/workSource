@@ -1072,6 +1072,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             List<VisitorsysApprovalFormItem> formConfig = JSONObject.parseObject(forms.getTemplateText(),
                     new TypeReference<List<VisitorsysApprovalFormItem>>() {
                     });
+            for(VisitorsysApprovalFormItem form : formConfig){
+                if("invalidTime".equals(form.getFieldName())){
+                    formConfig.remove(form);
+                    break;
+                }
+            }
             response.setFormConfig(formConfig);
         }
         VisitorsysBaseConfig visitorsysBaseConfig = new VisitorsysBaseConfig();
@@ -2692,5 +2698,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
             }
         });
+    }
+
+    @Override
+    public void removeInvalidTime() {
+        List<VisitorSysConfiguration> configs = visitorSysConfigurationProvider.listVisitorSysConfiguration();
     }
 }
