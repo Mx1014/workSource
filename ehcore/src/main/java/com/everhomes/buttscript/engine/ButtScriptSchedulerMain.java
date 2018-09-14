@@ -145,7 +145,7 @@ public  class ButtScriptSchedulerMain {
         param.put("gogsRepo", anyRepo);
         ButtScriptParameter buttScriptParameter = new ButtScriptParameter();
         buttScriptParameter.setEvent(event);
-        buttScriptParameter.setOperator(getOperator());
+        buttScriptParameter.setOperator(getOperator(event.getContext().getNamespaceId(),event.getContext().getUid()));
         scriptEngineService.push(new ButtScriptAsyncEngine(param,buttScriptParameter));
     }
 
@@ -166,7 +166,7 @@ public  class ButtScriptSchedulerMain {
         LinkedTransferQueue<Object> transferQueue = new LinkedTransferQueue<>();
         ButtScriptParameter buttScriptParameter = new ButtScriptParameter();
         buttScriptParameter.setEvent(event);
-        buttScriptParameter.setOperator(getOperator());
+        buttScriptParameter.setOperator(getOperator(event.getContext().getNamespaceId(),event.getContext().getUid()));
         scriptEngineService.push(new ButtScriptTransferEngine(transferQueue, param,buttScriptParameter));
         // 这里就获取到了 processInternal 的返回结果 result
         Object result = scriptEngineService.poll(transferQueue);
@@ -205,10 +205,8 @@ public  class ButtScriptSchedulerMain {
      * 获取当前环境用户的信息
      * @return
      */
-    private UserDTO getOperator(){
+    private UserDTO getOperator(Integer namespaceId ,Long operatorUid){
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Long operatorUid = UserContext.currentUserId();
         LOGGER.info("there is get namespaceId:{} ,operatorUid:{}",namespaceId ,operatorUid);
         User user = userProvider.findUserById(operatorUid);
 
