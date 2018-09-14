@@ -18,7 +18,7 @@ public class ButtInfoTypeEventMappingDTO {
     private  String   infoType ;
     private  String  eventName ;
     private  String   describe ;
-    private  Byte   synFlag;
+    private  Byte   syncFlag;
     private  Long   id ;
 
     public Integer getNamespaceId() {
@@ -53,12 +53,12 @@ public class ButtInfoTypeEventMappingDTO {
         this.describe = describe;
     }
 
-    public Byte getSynFlag() {
-        return synFlag;
+    public Byte getSyncFlag() {
+        return syncFlag;
     }
 
-    public void setSynFlag(Byte synFlag) {
-        this.synFlag = synFlag;
+    public void setSyncFlag(Byte syncFlag) {
+        this.syncFlag = syncFlag;
     }
 
     public Long getId() {

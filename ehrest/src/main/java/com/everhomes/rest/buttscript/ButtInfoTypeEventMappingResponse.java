@@ -2,6 +2,7 @@ package com.everhomes.rest.buttscript;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,6 +15,12 @@ public class ButtInfoTypeEventMappingResponse {
 
     private Long    nextPageAnchor  ;
     private List<ButtInfoTypeEventMappingDTO> dtos ;
+
+    public ButtInfoTypeEventMappingResponse(){
+        if(dtos == null){
+            dtos = new ArrayList<ButtInfoTypeEventMappingDTO>();
+        }
+    }
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
