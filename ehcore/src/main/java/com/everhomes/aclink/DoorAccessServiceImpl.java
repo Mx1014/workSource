@@ -2724,8 +2724,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
            
             }
-        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0));
-        LOGGER.debug("UCL请求时间" + (tUcl));
+        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
         return resp;              
      }
     
