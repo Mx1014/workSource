@@ -32,6 +32,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteConditionStep;
@@ -615,5 +616,13 @@ public class RemindProviderImpl implements RemindProvider {
         return result.map((r) -> {
             return ConvertHelper.convert(r, Remind.class);
         });
+    }
+    
+    @Override
+    public Remind getRemindById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhRemindsDao dao = new EhRemindsDao(context.configuration());
+        EhReminds remind = dao.findById(id);
+        return ConvertHelper.convert(remind, Remind.class);
     }
 }

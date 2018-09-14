@@ -83,16 +83,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -786,10 +776,15 @@ public class RemindServiceImpl implements RemindService  {
             //plandate只保留日期部分的时间戳
             remindDTO.setPlanDate(remind.getPlanDate().getTime() - remindDTO.getPlanTime());
         }
-
+        //提醒如果有track对象则去找track对象的提醒设置
+        Integer remindSettingId = remind.getRemindTypeId();
+        if(remind.getTrackRemindId() != null){
+        	Remind trackRemind = remindProvider.getRemindById(remind.getTrackRemindId()); 
+        	remindSettingId = trackRemind.getRemindTypeId();
+        }
         RemindSetting remindSetting = null;
-        if (remind.getRemindTypeId() != null) {
-            remindSetting = remindProvider.getRemindSettingById(remind.getRemindTypeId());
+        if (remindSettingId != null) {
+            remindSetting = remindProvider.getRemindSettingById(remindSettingId);
             if (remindSetting.getFixTime() != null) {
                 remindDTO.setPlanTime(DateStatisticHelper.getDateTimeLong(remindSetting.getFixTime()));
             }

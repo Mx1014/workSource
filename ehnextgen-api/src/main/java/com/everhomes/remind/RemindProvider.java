@@ -83,4 +83,6 @@ public interface RemindProvider {
 
     List<Remind> findUndoRemindsByRemindTime(Timestamp remindStartTime, Timestamp remindEndTime, int count);
 
+	Remind getRemindById(Long trackRemindId);
+
 }
