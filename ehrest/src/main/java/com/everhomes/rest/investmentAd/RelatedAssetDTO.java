@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import com.everhomes.util.StringHelper;
 

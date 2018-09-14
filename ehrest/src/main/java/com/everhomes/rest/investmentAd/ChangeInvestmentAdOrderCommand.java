@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import java.util.List;
 
@@ -10,15 +10,15 @@ import com.everhomes.util.StringHelper;
  * 	<li>advertisementOrders: 排序数组</li>
  * </ul>
  */
-public class ChangeAdvertisementOrderCommand {
-	@ItemType(AdvertisementOrderDTO.class)
-	private List<AdvertisementOrderDTO> advertisementOrders;
+public class ChangeInvestmentAdOrderCommand {
+	@ItemType(InvestmentAdOrderDTO.class)
+	private List<InvestmentAdOrderDTO> advertisementOrders;
 
-	public List<AdvertisementOrderDTO> getAdvertisementOrders() {
+	public List<InvestmentAdOrderDTO> getAdvertisementOrders() {
 		return advertisementOrders;
 	}
 
-	public void setAdvertisementOrders(List<AdvertisementOrderDTO> advertisementOrders) {
+	public void setAdvertisementOrders(List<InvestmentAdOrderDTO> advertisementOrders) {
 		this.advertisementOrders = advertisementOrders;
 	}
 

@@ -1,4 +1,4 @@
-package com.everhomes.advertisement;
+package com.everhomes.investmentAd;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 
-public class AdvertisementFLowCaseListener implements FlowModuleListener{
+public class InvestmentAdFLowCaseListener implements FlowModuleListener{
 
 	@Autowired
     private FlowService flowService;

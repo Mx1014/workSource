@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>defaultOrder: 排序字段</li>
  * </ul>
  */
-public class AdvertisementOrderDTO {
+public class InvestmentAdOrderDTO {
 	
 	private Long advertisementId;
 	private Long defaultOrder;

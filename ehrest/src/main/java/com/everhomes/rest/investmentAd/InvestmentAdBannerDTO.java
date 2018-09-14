@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>contentUrl：附件url </li>
  * </ul>
  */
-public class AdvertisementAttachmentDTO {
+public class InvestmentAdBannerDTO {
 	
 	private String contentUri;
 	private String contentUrl;

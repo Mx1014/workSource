@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import java.util.List;
 
@@ -7,14 +7,14 @@ import com.everhomes.discover.ItemType;
 /**
  * <ul>
  * 	<li>nextPageAnchor: 分页锚点</li>
- *  <li>advertisements: 广告信息，参考{@link com.everhomes.rest.advertisement.AdvertisementDTO}</li>
+ *  <li>advertisements: 广告信息，参考{@link com.everhomes.rest.investmentAd.InvestmentAdDTO}</li>
  * </ul>
  */
-public class ListAdvertisementsResponse {
+public class ListInvestmentAdResponse {
 	
 	private Long nextPageAnchor;
-    @ItemType(AdvertisementDTO.class)
-    private List<AdvertisementDTO> advertisements;
+    @ItemType(InvestmentAdDTO.class)
+    private List<InvestmentAdDTO> advertisements;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -24,11 +24,11 @@ public class ListAdvertisementsResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<AdvertisementDTO> getAdvertisements() {
+	public List<InvestmentAdDTO> getAdvertisements() {
 		return advertisements;
 	}
 
-	public void setAdvertisements(List<AdvertisementDTO> advertisements) {
+	public void setAdvertisements(List<InvestmentAdDTO> advertisements) {
 		this.advertisements = advertisements;
 	}
     

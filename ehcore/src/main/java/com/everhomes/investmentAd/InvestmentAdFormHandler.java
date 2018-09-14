@@ -1,4 +1,4 @@
-package com.everhomes.advertisement;
+package com.everhomes.investmentAd;
 
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "business_invitation")
-public class AdvertisementFormHandler implements GeneralFormModuleHandler{
+public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {

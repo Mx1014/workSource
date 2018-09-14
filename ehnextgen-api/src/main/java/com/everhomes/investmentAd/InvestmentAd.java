@@ -1,4 +1,4 @@
-package com.everhomes.advertisement;
+package com.everhomes.investmentAd;
 
 import com.everhomes.server.schema.tables.pojos.EhInvestmentAdvertisements;
 import com.everhomes.util.StringHelper;

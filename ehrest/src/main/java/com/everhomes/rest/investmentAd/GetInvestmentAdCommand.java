@@ -1,22 +1,22 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>advertisementId: 招商广告id</li>
+ * 	<li>AdvertisementId: 招商广告id</li>
  * </ul>
  */
-public class DeleteAdvertisementCommand {
+public class GetInvestmentAdCommand {
 	
-	private Long advertisementId;
+	private Long AdvertisementId;
 
 	public Long getAdvertisementId() {
-		return advertisementId;
+		return AdvertisementId;
 	}
 
 	public void setAdvertisementId(Long advertisementId) {
-		this.advertisementId = advertisementId;
+		AdvertisementId = advertisementId;
 	}
 	
 	@Override

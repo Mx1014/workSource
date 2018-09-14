@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  *  <li>defaultOrder: 排序字段</li>
  * </ul>
  */
-public class AdvertisementDTO {
+public class InvestmentAdDTO {
 	
 	private Long advertisementId;
 	private String title;

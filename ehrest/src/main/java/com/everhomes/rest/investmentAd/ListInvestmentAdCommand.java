@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import java.math.BigDecimal;
 
@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  *  <li>keywords: 关键字</li>
  * </ul>
  */
-public class ListAdvertisementsCommand {
+public class ListInvestmentAdCommand {
 	
 	private Integer namespaceId;
 	private Long communityId;

@@ -1,4 +1,4 @@
-package com.everhomes.rest.advertisement;
+package com.everhomes.rest.investmentAd;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,14 +28,14 @@ import com.everhomes.util.StringHelper;
  *  <li>postUri: 招商广告封面图</li>
  *  <li>defaultOrder: 排序字段</li>
  *  <li>assetRelated: 招商广告是否关联楼宇房源</li>
- *  <li>relatedAssets: 招商广告关联的楼宇房源，参考{@link com.everhomes.rest.advertisement.RelatedAssetDTO}</li>
- *  <li>attachments: 招商广告轮播图，，参考{@link com.everhomes.rest.advertisement.AdvertisementAttachmentDTO}</li>
+ *  <li>relatedAssets: 招商广告关联的楼宇房源，参考{@link com.everhomes.rest.investmentAd.RelatedAssetDTO}</li>
+ *  <li>attachments: 招商广告轮播图，，参考{@link com.everhomes.rest.investmentAd.InvestmentAdBannerDTO}</li>
  *  <li>customFormFlag: 是否启用了自定义表单</li>
  *  <li>generalFormId: 自定义表单id</li>
  *  <li>formValues: 自定义表单传值，参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
-public class UpdateAdvertisementCommand {
+public class UpdateInvestmentAdCommand {
 	private String title;
 	private Byte advertisementType;
 	private Byte businessStatus;
@@ -59,8 +59,8 @@ public class UpdateAdvertisementCommand {
 	private Byte assetRelated;
 	@ItemType(RelatedAssetDTO.class)
 	private List<RelatedAssetDTO> relatedAssets;
-	@ItemType(AdvertisementAttachmentDTO.class)
-	private List<AdvertisementAttachmentDTO> attachments;
+	@ItemType(InvestmentAdBannerDTO.class)
+	private List<InvestmentAdBannerDTO> attachments;
 	
 	private Byte customFormFlag;
 	private Long generalFormId;
@@ -193,10 +193,10 @@ public class UpdateAdvertisementCommand {
 	public void setRelatedAssets(List<RelatedAssetDTO> relatedAssets) {
 		this.relatedAssets = relatedAssets;
 	}
-	public List<AdvertisementAttachmentDTO> getAttachments() {
+	public List<InvestmentAdBannerDTO> getAttachments() {
 		return attachments;
 	}
-	public void setAttachments(List<AdvertisementAttachmentDTO> attachments) {
+	public void setAttachments(List<InvestmentAdBannerDTO> attachments) {
 		this.attachments = attachments;
 	}
 	public Byte getCustomFormFlag() {
