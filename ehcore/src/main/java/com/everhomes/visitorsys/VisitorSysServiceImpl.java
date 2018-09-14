@@ -2316,7 +2316,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(null != visitor.getDoorAccessInvalidTimes())
                 doorCmd.setTotalAuthAmount(visitor.getDoorAccessInvalidTimes());
         }else{
-            // TODO: 2018/9/13 修改门禁有效时间字段？ 
+            // TODO: 2018/9/13 修改门禁有效时间字段？
             doorCmd.setAuthRuleType((byte)0);
             long now = System.currentTimeMillis();
             Calendar instance = Calendar.getInstance();
@@ -2644,6 +2644,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public List<VisitorSysDoorAccessDTO> listDoorAccess(BaseVisitorsysCommand cmd) {
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        if(null == cmd.getNamespaceId())
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         return results.stream().map(r->ConvertHelper.convert(r,VisitorSysDoorAccessDTO.class)).collect(Collectors.toList());
     }
@@ -2651,10 +2653,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
         List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getDoorAccessId());
-        if(null != results){
+        if(null != results && results.size() > 0){
             throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_ALREADY_EXIST,"Record Already exist.");
         }
         VisitorSysDoorAccess bean = ConvertHelper.convert(cmd,VisitorSysDoorAccess.class);
+        if(null == cmd.getNamespaceId())
+            bean.setNamespaceId(UserContext.getCurrentNamespaceId());
         bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
         visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
 
@@ -2672,6 +2676,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+        if(null == cmd.getId()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+        }
         List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         results.forEach(r ->{
             if(r.getId().equals(cmd.getId())){

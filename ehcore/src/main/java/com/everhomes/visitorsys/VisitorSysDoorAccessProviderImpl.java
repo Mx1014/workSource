@@ -13,10 +13,12 @@ import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
 
+@Component
 public class VisitorSysDoorAccessProviderImpl implements VisitorSysDoorAccessProvider {
 
     @Autowired
