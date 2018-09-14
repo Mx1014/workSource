@@ -1,11 +1,13 @@
 package com.everhomes.point.rpc;
 
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +64,12 @@ public class PointServerRPCRestService {
         //SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
+        Timestamp start = new Timestamp(DateHelper.currentGMTTime().getTime());
+        LOGGER.debug("start time, start = {}", start);
         ResponseEntity<? extends RestResponseBase> responseEntity = template.exchange(requestEntity, responseType);
+        Timestamp end = new Timestamp(DateHelper.currentGMTTime().getTime());
+        LOGGER.debug("end time, end = {}", end);
+        LOGGER.debug("use time, use = {}", end.getTime()-start.getTime());
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("coreserver rest call, request = {}", requestEntity.toString());
