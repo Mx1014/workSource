@@ -1065,4 +1065,18 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    //20180914 add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/checkMobilePrivilege</b>
+     * <p>移动端管理权限检验</p>
+     * @return
+     */
+    @RequestMapping("checkMobilePrivilege")
+    @RestReturn(value=CheckMobilePrivilegeResponse.class)
+    public RestResponse checkMobilePrivilege(@Valid CheckMobilePrivilegeCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.checkMobilePrivilege(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

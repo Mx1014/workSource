@@ -97,6 +97,8 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
+    //20180914 add by liqingyan
+    CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd);
 
     void test();
 

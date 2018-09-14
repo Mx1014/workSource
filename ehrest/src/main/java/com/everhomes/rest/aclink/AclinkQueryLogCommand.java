@@ -31,6 +31,34 @@ public class AclinkQueryLogCommand {
     private String startStr;
     private String endStr;
     private Integer namespaceId;
+    //权限
+    private Long appId;
+    private Long currentPMId;
+    private Long currentProjectId;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
 
     public Long getEventType() {
         return eventType;

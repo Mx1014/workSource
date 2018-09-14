@@ -20,6 +20,34 @@ public class TempStatisticByTimeCommand {
     private Long startTime;
 
     private Long endTime;
+    //权限
+    private Long appId;
+    private Long currentPMId;
+    private Long currentProjectId;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
 
     public Long getOwnerId() {
         return ownerId;

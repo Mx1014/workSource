@@ -13,8 +13,6 @@ import java.util.List;
 
 import com.everhomes.rest.aclink.*;
 import com.everhomes.server.schema.tables.EhDoorAccess;
-import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
-import org.apache.poi.ddf.NullEscherSerializationListener;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,7 +299,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         groupBy.fetch().map((r) -> {
             DoorStatisticByTimeDTO dto = new DoorStatisticByTimeDTO();
             dto.setCreateTime(r.getValue("d").toString());
-            dto.setOpenNumber(Long.parseLong(r.getValue("num").toString()));
+            dto.setNumber(Long.parseLong(r.getValue("num").toString()));
             dtos.add(dto);
             return null;
         });
@@ -335,7 +333,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         groupBy.fetch().map((r) ->{
             TempStatisticByTimeDTO dto = new TempStatisticByTimeDTO();
             dto.setCreateTime(r.getValue("d").toString());
-            dto.setTempNumber(Long.parseLong(r.getValue("num").toString()));
+            dto.setNumber(Long.parseLong(r.getValue("num").toString()));
             dtos.add(dto);
             return null;
         });

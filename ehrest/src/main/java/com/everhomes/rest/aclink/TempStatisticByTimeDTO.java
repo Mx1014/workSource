@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>createTime: 开门日期</li>
- *     <li>tempNumber: 对应临时授权次数</li>
+ *     <li>number: 对应临时授权次数</li>
  * </ul>
  */
 public class TempStatisticByTimeDTO {
@@ -12,14 +12,14 @@ public class TempStatisticByTimeDTO {
 
     private String createTime;
 
-    private Long tempNumber;
+    private Long number;
 
-    public Long getTempNumber() {
-        return tempNumber;
+    public Long getNumber() {
+        return number;
     }
 
-    public void setTempNumber(Long tempNumber) {
-        this.tempNumber = tempNumber;
+    public void setNumber(Long number) {
+        this.number = number;
     }
 
     public Long getLogTime() {

@@ -1,28 +1,20 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
- * <li>ownerId：所属机构Id</li>
- * <li>ownerType：所属机构类型 0小区1企业2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
- * <li>currentPMId: 当前管理公司ID（organizationID）</li>
+ * <li>ownerType：所属组织类型 0小区 1企业 2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
+ * <li>ownerId:所属组织Id</li>
+ * <li>currentPMId: 当前管理公司ID（organizationId）</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
  * </ul>
+ *
  */
-
-public class DoorStatisticCommand {
-
-    private Long ownerId;
-
+public class CheckMobilePrivilegeCommand {
     private Byte ownerType;
-
-    private Integer pageSize;
-
+    private Long ownerId;
     //权限
     private Long appId;
     private Long currentPMId;
@@ -51,28 +43,18 @@ public class DoorStatisticCommand {
     public void setCurrentProjectId(Long currentProjectId) {
         this.currentProjectId = currentProjectId;
     }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
     public Byte getOwnerType() {
         return ownerType;
     }
     public void setOwnerType(Byte ownerType) {
         this.ownerType = ownerType;
     }
-
-    public Integer getPageSize() {
-        return pageSize;
+    public Long getOwnerId() {
+        return ownerId;
     }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
