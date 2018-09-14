@@ -12,6 +12,9 @@
 -- AUTHOR: 黄明波 20180906
 -- REMARK: 只在----深圳湾----调用/yellowPage/syncSARequestInfo 接口
 
+-- AUTHOR: 梁家声 20180914
+-- REMARK: 修改content配置，将auth改为3
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -308,6 +311,23 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guangda
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
+
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://core.gd-we.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', 'fa0e2f1f-01b9-447b-824d-a91b7157c976', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', 'xNTG+ggO1qIg01zqRTxqbjl+jPAAS5L3Q3TgxefXWpLoiQ0v9+8VUXR6xyqhOEBcFQFp4AbVa08daxHtaOZOrw==', '连接统一订单服务器的appsecret', 0, NULL, 0);
+
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.url','https://core.gd-we.com','the point url','0',NULL,NULL);
+ 
+ 
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
@@ -409,6 +429,23 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: anbang
 -- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
+
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://park.huimenggj.cn/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', '31128781-55bf-48ca-8e4d-002be862909f', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', 'ZF+K+ovW6J1uICefPRUC1bBxF9cdxUk9KLbzbnGzRw9+dVwSCZoP/m9qIUitOgoo0GG9YWDzyu8MDnPKxLKSIA==', '连接统一订单服务器的appsecret', 0, NULL, 0);
+
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.url','https://park.huimenggj.cn','the point url','0',NULL,NULL);
+ 
+ 
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
@@ -453,6 +490,23 @@ VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+
+-- AUTHOR: liangqishi 20180811
+-- REMARK: 增加连接统一订单服务器的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.connect_url', 'https://inno.xintiandi.com/gorder', '连接统一订单服务器的链接', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_key', '7477cabb-71ec-4372-a484-4c436f787ab8', '连接统一订单服务器的appkey', 0, NULL, 0);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('gorder.server.app_secret', '3EaZQ7LV+MwxGm1mrYbEBWr6x0FbAZjiR7m/I4u1V49E6H1XtZOJwkDIWLAHUOJh6PCwQ5mYdwMlSPh0MXTkuw==', '连接统一订单服务器的appsecret', 0, NULL, 0);
+
+-- AUTHOR: 黄良铭
+-- REMARK: 积分所需配置表 及菜单
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+ VALUES(@b_id:= @b_id +1,'server.point.url','https://inno.xintiandi.com','the point url','0',NULL,NULL);
+ 
+ 
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心隐私配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
