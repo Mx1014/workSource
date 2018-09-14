@@ -3,7 +3,7 @@
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 
 -- AUTHOR: liangqishi 20180823
--- REMARK: 为统一订单申请专有域名gorder.zuolin.com
+-- REMARK: 不用为统一订单申请专有域名，使用各系统的默认域名(独立部署的也一样)
 
 -- AUTHOR: 黄良铭 20180905
 -- REMARK: coreserver 配置中需加入kafka的配置信息.具体请见(http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011)
@@ -40,8 +40,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10010', 'zh_CN', '没有配置收款方帐号');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10011', 'zh_CN', '缴费订单创建失败');
-
-
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
 	VALUES ('gorder.default.personal_bind_phone', '12000001802', '支付个人帐号默认的绑定手机号', 0, NULL, 0);
