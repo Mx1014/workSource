@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerId:所属组织Id</li>
  * <li>ownerType：所属组织类型 0小区 1企业 2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
- * <li>eventType:事件类型 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 人脸开门</li>
+ * <li>eventType:事件类型 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 物理按键,4 人脸开门</li>
  * <li>keyWord:关键字</li>
  * <li>doorId:门禁id</li>
  * <li>pageAnchor:锚点</li>

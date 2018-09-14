@@ -32,7 +32,14 @@ public class CreateFormalAuthBatchCommand {
 	private List<Long> familyFloorIds;
 	private List<Long> familyAddressIds;
 	private List<CreateFormalAuthCommand> doorAuthlist;
+	private String keyU;//梯控用
 	
+	public String getKeyU() {
+		return keyU;
+	}
+	public void setKeyU(String keyU) {
+		this.keyU = keyU;
+	}
 	public List<Long> getCompanyCommunityIds() {
 		return companyCommunityIds;
 	}

@@ -7,15 +7,24 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: id</li>
  * <li>type: 门禁组类型 0单个门禁 1门禁组 2园区 3楼栋 4楼层 5门牌{@link com.everhomes.rest.aclink.AuthGroupType}</li>
- * <li>rightRemote: 远程开门权限 0无 1有 null无</li>
- * <li>rightVisitor: 访客授权权限 0无 1有 null无</li>
+ * <li>rightOpen: 开门权限 0无 1有 null默认有</li>
+ * <li>rightRemote: 远程开门权限 0无 1有 null默认无</li>
+ * <li>rightVisitor: 访客授权权限 0无 1有 null默认无</li>
  * </ul>
  */
 public class CreateFormalAuthCommand {
 	private Long id;
 	private Byte type;
+	private Byte rightOpen;
 	private Byte rightRemote;
 	private Byte rightVisitor;
+	
+	public Byte getRightOpen() {
+		return rightOpen;
+	}
+	public void setRightOpen(Byte rightOpen) {
+		this.rightOpen = rightOpen;
+	}
 	public Long getId() {
 		return id;
 	}
