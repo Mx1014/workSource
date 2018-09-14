@@ -95,20 +95,6 @@ public class ParkingController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /parking/getUserNotice</b>
-     * <p>获取用户须知</p>
-     */
-    @RequestMapping("getUserNotice")
-    @RestReturn(value=UserNoticeDTO.class)
-    public RestResponse getUserNotice(UserNoticeCommand cmd) {
-    	UserNoticeDTO userNotice = parkingService.getParkingUserNotice(cmd);
-        RestResponse response = new RestResponse(userNotice);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
 
     /**
      * <b>URL: /parking/updateUserNotice</b>
@@ -124,20 +110,6 @@ public class ParkingController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /parking/getUserNoticeInvoice</b>
-     * <p>获取用户是否开启了用户须知于发票申请</p>
-     */
-    @RequestMapping("getUserNoticeInvoice")
-    @RestReturn(value=UserNoticeInvoiceDTO.class)
-    public RestResponse getUserNoticeInvoice(UserNoticeInvoiceCommand cmd) {
-    	UserNoticeInvoiceDTO userNoticeInvoice = parkingService.getParkingUserNoticeInvoice(cmd);
-        RestResponse response = new RestResponse(userNoticeInvoice);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
     
     /**
      * <b>URL: /parking/getParkingCards</b>

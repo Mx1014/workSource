@@ -3601,25 +3601,5 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingLot.setNoticeContact(cmd.getContact());
 		parkingProvider.updateParkingLot(parkingLot);
 	}
-
-	@Override
-	public UserNoticeDTO getParkingUserNotice(UserNoticeCommand cmd) {
-		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		UserNoticeDTO userNotice = ConvertHelper.convert(parkingLot,UserNoticeDTO.class);
-		userNotice.setContact(parkingLot.getNoticeContact());
-		userNotice.setSummary(parkingLot.getSummary());
-
-		return userNotice;
-	}
-	
-	@Override
-	public UserNoticeInvoiceDTO getParkingUserNoticeInvoice(UserNoticeInvoiceCommand cmd) {
-		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-		UserNoticeInvoiceDTO userNoticeInvoice = ConvertHelper.convert(parkingLot,UserNoticeInvoiceDTO.class);
-		ParkingLotConfig config = JSONObject.parseObject(parkingLot.getConfigJson(),new TypeReference<ParkingLotConfig>() {});
-		userNoticeInvoice.setNoticeFlag(config.getNoticeFlag());
-		userNoticeInvoice.setInvoiceFlag(config.getInvoiceFlag());
-		return userNoticeInvoice;
-	}
 	
 }
