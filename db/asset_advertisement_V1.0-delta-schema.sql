@@ -46,7 +46,6 @@ CREATE TABLE `eh_investment_advertisement_banners` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT NULL,
   `advertisement_id` bigint(20) DEFAULT NULL COMMENT '关联的广告id',
-  `content_type` varchar(32) DEFAULT NULL COMMENT '附件类型',
   `content_uri` varchar(256) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0: inactive, 1: confirming, 2: active',
   `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人',

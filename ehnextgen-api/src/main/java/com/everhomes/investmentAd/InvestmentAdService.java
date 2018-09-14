@@ -11,9 +11,9 @@ import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
 
 public interface InvestmentAdService {
 
-	void deleteInvestmentAd(DeleteInvestmentAdCommand cmd);
-
 	void createInvestmentAd(CreateInvestmentAdCommand cmd);
+
+	void deleteInvestmentAd(DeleteInvestmentAdCommand cmd);
 
 	void updateInvestmentAd(UpdateInvestmentAdCommand cmd);
 
