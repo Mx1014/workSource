@@ -27,6 +27,14 @@ public class PointServerRPCRestService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointServerRPCRestService.class);
 
+    RestTemplate  template;
+    {
+    	SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+    	factory.setConnectTimeout(60000);
+        factory.setReadTimeout(60000);
+        template = new RestTemplate(factory);
+    }
+    
   /*  @Autowired
     private RestTemplate template;*/
 
@@ -51,10 +59,8 @@ public class PointServerRPCRestService {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(60000);
-        factory.setReadTimeout(60000);
-        RestTemplate  template = new RestTemplate(factory);
+        //SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
         ResponseEntity<? extends RestResponseBase> responseEntity = template.exchange(requestEntity, responseType);
 
