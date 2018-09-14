@@ -964,7 +964,6 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
-
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -972,6 +971,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 				d.setParkingLotName(parkingLot.getName());
 				d.setContact(parkingLot.getContact());
+				d.setInvoiceFlag(parkingLot.getInvoiceFlag());
 				return d;
 			}).collect(Collectors.toList()));
 			if(size != cmd.getPageSize()){
