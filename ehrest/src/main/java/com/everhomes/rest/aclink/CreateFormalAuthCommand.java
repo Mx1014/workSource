@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
+ * <li>id: id,选楼层时,要拼接楼栋id,如1001_1</li>
  * <li>type: 门禁组类型 0单个门禁 1门禁组 2园区 3楼栋 4楼层 5门牌{@link com.everhomes.rest.aclink.AuthGroupType}</li>
  * <li>rightOpen: 开门权限 0无 1有 null默认有</li>
  * <li>rightRemote: 远程开门权限 0无 1有 null默认无</li>
@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateFormalAuthCommand {
-	private Long id;
+	private String id;
 	private Byte type;
 	private Byte rightOpen;
 	private Byte rightRemote;
@@ -25,10 +25,10 @@ public class CreateFormalAuthCommand {
 	public void setRightOpen(Byte rightOpen) {
 		this.rightOpen = rightOpen;
 	}
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public Byte getType() {

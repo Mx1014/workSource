@@ -2,6 +2,8 @@
 package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
@@ -26,8 +28,10 @@ import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAclinkCamerasDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhAclinkCameras;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuthLogs;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
@@ -1425,5 +1429,44 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             locator.setAnchor(dtos.get(dtos.size() - 1).getId());
         }
         return dtos;
+	}
+
+	@Override
+	public void createDoorAuthBatch(List<DoorAuth> cAuths) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
+		List<EhDoorAuth> list = new ArrayList<>();
+		for(DoorAuth auth : cAuths){
+			list.add(ConvertHelper.convert(auth, EhDoorAuth.class));
+		}
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhDoorAuth.class, null);
+		
+	}
+
+	@Override
+	public void updateDoorAuthBatch(List<DoorAuth> uAuths) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
+		List<EhDoorAuth> list = new ArrayList<>();
+		for(DoorAuth auth : uAuths){
+			list.add(ConvertHelper.convert(auth, EhDoorAuth.class));
+		}
+		dao.update(list);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDoorAuth.class, null);
+		
+	}
+
+	@Override
+	public void createDoorAuthLogBatch(List<DoorAuthLog> logs) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthLogsDao dao = new EhDoorAuthLogsDao(context.configuration());
+		List<EhDoorAuthLogs> list = new ArrayList<>();
+		for(DoorAuthLog log : logs){
+			list.add(ConvertHelper.convert(log, EhDoorAuthLogs.class));
+		}
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhDoorAuthLogs.class, null);
+		
 	}
 }

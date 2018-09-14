@@ -409,7 +409,7 @@ public class AclinkAdminController extends ControllerBase {
      * <p>获取门禁组-门禁关系</p>
      * @return 门禁列表
      */
-    @RequestMapping("getTempAuthSettings")
+    @RequestMapping("setTempAuthSettings")
     @RestReturn(value=String.class)
     public RestResponse setTempAuthSettings(@Valid SetTempAuthSettingsCommand cmd) {
 //    	Map<String, String> resMap = new HashMap<>();

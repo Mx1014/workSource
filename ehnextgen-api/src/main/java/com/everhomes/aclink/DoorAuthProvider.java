@@ -104,4 +104,10 @@ public interface DoorAuthProvider {
     List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
 
 	List<AclinkAuthDTO> listFormalAuth(CrossShardListingLocator locator, Integer pageSize, ListFormalAuthCommand cmd);
+
+	void createDoorAuthBatch(List<DoorAuth> cAuths);
+
+	void updateDoorAuthBatch(List<DoorAuth> uAuths);
+
+	void createDoorAuthLogBatch(List<DoorAuthLog> logs);
 }

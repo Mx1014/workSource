@@ -11,11 +11,11 @@ import com.everhomes.util.StringHelper;
  * <li>orgIds: 被授权的组织节点id列表</li>
  * <li>companyCommunityIds: 被授权的公司的项目id列表(选则任意楼栋,则传communityId)</li>
  * <li>companyBuildingIds: 被授权的公司的楼栋id列表</li>
- * <li>companyFloorIds: 被授权的公司的楼层id列表</li>
+ * <li>companyFloorIds: 被授权的公司的楼层id列表 (暂无)</li>
  * <li>companyAddressIds: 被授权的公司的门牌id列表</li>
  * <li>familyCommunityIds: 被授权的家庭的项目id列表(选则任意楼栋,则传communityId)</li>
  * <li>familyBuildingIds: 被授权的家庭的楼栋id列表</li>
- * <li>familyFloorIds: 被授权的家庭的楼层id列表</li>
+ * <li>familyFloorIds: 被授权的家庭的楼层id列表 (暂无)</li>
  * <li>familyAddressIds: 被授权的家庭的门牌id列表</li>
  * <li>doorAuthlist: 门禁(组)/地址列表，必填项{@link com.everhomes.rest.aclink.CreateFormalAuthCommand}</li>
  * </ul>
