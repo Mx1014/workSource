@@ -8041,7 +8041,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	//一房一价
 	@Override
 	public void setAuthorizePrice(AuthorizePriceCommand cmd) {
+		if (cmd.getNamespaceId() == null || cmd.getCommunityId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not exist.");
+		}
 		AddressProperties addressProperties = ConvertHelper.convert(cmd, AddressProperties.class);
+		AddressProperties existProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, addressProperties.getBuildingId(), addressProperties.getAddressId());
+
+		if (existProperties != null) {
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+					ContractErrorCode.ERROR_ADDRESS_PROPERTIES_IS_EXIST, "AddressProperties is already exist!");
+		}
+		
 		propertyMgrProvider.createAuthorizePrice(addressProperties);
 	}
 

@@ -537,7 +537,7 @@ public interface PropertyMgrProvider {
 
 	void createAuthorizePrice(AddressProperties addressProperties);
 
-	List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, int pageSize);
+	List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, Integer pageSize);
 
 	AddressProperties findAddressPropertiesById(Long id);
 

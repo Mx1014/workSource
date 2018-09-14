@@ -11,12 +11,18 @@ public enum ApartmentRentType {
 	DAY((byte) 1, 30, false), 
 	NATURAL_MONTH((byte) 2, 0, false), 
 	NATURAL_QUARTER((byte) 3, 3, false),
-	NATURAL_YEAR((byte) 4, 12, false);
+	NATURAL_YEAR((byte) 4, 12, false),
 	//每平米计算
 	/*DAY_SQUARE_METRE((byte) 5, 30, true), 
 	NATURAL_MONTH_SQUARE_METRE((byte) 6, 0, true), 
 	NATURAL_QUARTER_SQUARE_METRE((byte) 7, 3, true), 
 	NATURAL_YEAR_SQUARE_METRE((byte) 8, 12, true);*/
+	
+	CONTRACT_MONTH((byte)6, 0, false),//合同月
+    CONTRACT_QUARTER((byte)7, 3, false),//合同季
+    CONTRACT_YEAR((byte)8, 12, false),//合同年
+	CONTRACT_TWOMONTH((byte)9, 2, false),//新增按合同两个月
+	CONTRACT_SIXMONTH((byte)10, 6, false);//新增按合同6个月
 
 	private byte code;
 	private Integer offset;

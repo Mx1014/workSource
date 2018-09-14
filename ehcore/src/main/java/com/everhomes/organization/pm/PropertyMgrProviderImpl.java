@@ -2266,26 +2266,32 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddressProperties.class, null);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, int pageSize) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		List<AddressProperties> result  = new ArrayList<AddressProperties>();
-		SelectQuery<EhAddressPropertiesRecord> query = context.selectQuery(Tables.EH_ADDRESS_PROPERTIES);
+	public List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class));
+		SelectJoinStep<Record> query = context.select(Tables.EH_ADDRESS_PROPERTIES.fields()).from(Tables.EH_ADDRESS_PROPERTIES);
+		Condition cond = Tables.EH_ADDRESS_PROPERTIES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.BUILDING_ID.eq(buildingId));
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.COMMUNITY_ID.eq(communityId));
 		
-        query.addConditions(Tables.EH_ADDRESS_PROPERTIES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_ADDRESS_PROPERTIES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_ADDRESS_PROPERTIES.BUILDING_ID.eq(buildingId));
-        query.addConditions(Tables.EH_ADDRESS_PROPERTIES.COMMUNITY_ID.eq(communityId));
-		query.addOrderBy(Tables.EH_ADDRESS_PROPERTIES.ID.desc());
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.ID.gt(pageAnchor));
+		}
+		query.orderBy(Tables.EH_ADDRESS_PROPERTIES.CREATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());
 			LOGGER.debug("listCommunityPmOwnersByTel, bindValues = {}" , query.getBindValues());
 		}
 		
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, AddressProperties.class));
-			return null;
-		});
+		List<AddressProperties> result = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_ADDRESS_PROPERTIES.recordType(), AddressProperties.class));
+
 		return result;
 	}
 
