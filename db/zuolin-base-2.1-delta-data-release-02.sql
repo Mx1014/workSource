@@ -1,3 +1,6 @@
+-- 标注版zuolin-base-2.1之前的数据
+
+
 
 -- add by yuanlei
 SET @id = (SELECT MAX(id) + INTERVAL(500000000, MAX(id)) * 500000000 from eh_launch_pad_layouts);

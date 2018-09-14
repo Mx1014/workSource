@@ -1,3 +1,5 @@
+-- 标注版zuolin-base-2.1之前的脚本
+
 
 -- -- 广告管理 v1.4 加字段    add by xq.tian  2018/03/07
 -- ALTER TABLE eh_banners ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE';
