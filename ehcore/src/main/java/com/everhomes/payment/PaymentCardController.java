@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.*;
@@ -379,6 +380,22 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("exportCardTransactions")
     public void exportCardTransactions(SearchCardTransactionsCommand cmd,HttpServletResponse response) {
     	paymentCardService.exportCardTransactions(cmd, response);
+    }
+
+    /**
+     * <b>URL: /payment/listPayeeAccounts</b>
+     * <p>
+     * 查询企业账户信息
+     * </p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListBizPayeeAccountDTO.class,collection = true)
+    public RestResponse listPayeeAccounts( ListPayeeAccountsCommand cmd) {
+        List<ListBizPayeeAccountDTO> list =  paymentCardPayService.listPayeeAccounts(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**
