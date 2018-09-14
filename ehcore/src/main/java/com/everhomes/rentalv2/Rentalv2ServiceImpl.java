@@ -2543,7 +2543,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag) {
-
+	    //防止二次进入
+        if (order.getStatus().equals(status))
+            return;
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
 		List<RentalBillRuleDTO> rules = new ArrayList<>();
 		List<Long> resourceRuleIds = new ArrayList<>();
