@@ -58,7 +58,6 @@ import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -598,6 +597,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         String noticeToken = WebTokenGenerator.getInstance().toWebToken(enterpriseNoticeId);
         String homeUrl = configurationProvider.getValue(0, ConfigConstants.HOME_URL, "");
         String webUri = configurationProvider.getValue(0, ConfigConstants.ENTERPRISE_NOTICE_WEB_SHARE_URL,
+
                 "/announcement/build/index.html?ns=%s&noticeToken=%s");
         if (!StringUtils.hasText(homeUrl) || !StringUtils.hasText(webUri)) {
             LOGGER.error("Invalid home url or share uri, homeUrl={}, shareUrl={}", homeUrl, webUri);

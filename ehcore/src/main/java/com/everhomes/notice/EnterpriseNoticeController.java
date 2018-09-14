@@ -24,7 +24,6 @@ import com.everhomes.rest.notice.UnStickyEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import com.everhomes.util.RequireAuthentication;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

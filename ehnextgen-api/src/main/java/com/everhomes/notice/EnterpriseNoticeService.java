@@ -39,8 +39,11 @@ public interface EnterpriseNoticeService {
 
     EnterpriseNoticeDTO getSharedEnterpriseNoticeDetailInfo(String enterpriseNoticeToken);
 
+<<<<<<< HEAD
 	void stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd);
 
 	void unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd);
 
+=======
+>>>>>>> issue-33887
 }
