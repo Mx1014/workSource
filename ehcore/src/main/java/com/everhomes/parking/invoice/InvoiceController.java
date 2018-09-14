@@ -99,7 +99,7 @@ public class InvoiceController extends ControllerBase {
      * <p>查询指定订单发票</p>
      */
     @RequestMapping("parkingRechargeOrdersByOrderNo")
-    @RestReturn(value=ParkingRechargeOrder.class)
+    @RestReturn(value=ParkingRechargeOrderDTO.class)
     public RestResponse parkingRechargeOrdersByOrderNo(ParkingRechargeOrdersByOrderNoCommand cmd) {
 
     	ParkingRechargeOrderDTO parkingRechargeOrder = invoiceService.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
