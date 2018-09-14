@@ -3608,6 +3608,7 @@ public class ParkingServiceImpl implements ParkingService {
 		UserNoticeDTO userNotice = ConvertHelper.convert(parkingLot,UserNoticeDTO.class);
 		userNotice.setContact(parkingLot.getNoticeContact());
 		userNotice.setSummary(parkingLot.getSummary());
+
 		return userNotice;
 	}
 	
