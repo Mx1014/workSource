@@ -1836,7 +1836,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             }
             signupInfoDTO.setValues(results);
         }
-        User user = getUserFromPhoneWithNamespaceId(signupInfoDTO.getPhone(), activity.getNamespaceId());
+        User user = userProvider.findUserById(activityRoster.getUid());
+        if (user == null) {
+            user = new User();
+            user.setId(0L);
+            user.setExecutiveTag((byte) 0);
+        }
         signupInfoDTO.setNickName(user.getNickName());
         signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
