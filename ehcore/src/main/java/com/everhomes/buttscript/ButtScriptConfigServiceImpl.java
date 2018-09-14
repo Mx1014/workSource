@@ -80,6 +80,9 @@ public class ButtScriptConfigServiceImpl implements  ButtScriptConfigService{
         ButtScriptConfig bo = ConvertHelper.convert(cmd, ButtScriptConfig.class);
         bo.setOwnerId(cmd.getModuleId());
         bo.setOwnerType(cmd.getModuleType());
+        if(bo.getStatus()==null){
+            bo.setStatus(TrueOrFalseCode.TRUE.getCode());
+        }
         bo = buttScriptConfigProvider.crteateButtScriptConfig(bo);
         return ConvertHelper.convert(bo, ButtScriptConfigDTO.class);
     }

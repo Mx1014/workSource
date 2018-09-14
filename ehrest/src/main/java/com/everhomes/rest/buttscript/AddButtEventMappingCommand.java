@@ -19,7 +19,7 @@ public class AddButtEventMappingCommand {
     private String   infoType ;
     private String   eventName ;
     private String   describe ;
-    private Byte    synFlag;
+    private Byte    syncFlag;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -53,12 +53,12 @@ public class AddButtEventMappingCommand {
         this.describe = describe;
     }
 
-    public Byte getSynFlag() {
-        return synFlag;
+    public Byte getSyncFlag() {
+        return syncFlag;
     }
 
-    public void setSynFlag(Byte synFlag) {
-        this.synFlag = synFlag;
+    public void setSyncFlag(Byte syncFlag) {
+        this.syncFlag = syncFlag;
     }
 
     @Override
