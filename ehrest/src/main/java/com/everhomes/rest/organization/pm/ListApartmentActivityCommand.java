@@ -10,6 +10,9 @@ import com.everhomes.util.StringHelper;
 public class ListApartmentActivityCommand {
 	
 	private Long addressId;
+	private Integer namespaceId;
+	private Long pageAnchor;
+	private Integer pageSize;
 
 	public Long getAddressId() {
 		return addressId;
@@ -17,6 +20,30 @@ public class ListApartmentActivityCommand {
 
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
+	}
+	
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override

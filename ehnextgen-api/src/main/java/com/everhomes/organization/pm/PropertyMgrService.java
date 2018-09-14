@@ -2,6 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
@@ -511,5 +512,5 @@ public interface PropertyMgrService {
 
 	List<ListReservationsDTO> findReservations(FindReservationsCommand cmd);
 
-	ListSignupInfoResponse listApartmentActivity(ListApartmentActivityCommand cmd);
+	ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd);
 }

@@ -8,6 +8,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.SignupInfoDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
@@ -2348,9 +2349,9 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>查询房源下的业主活动记录（活动记录来自园区活动管理）</p>
 	 */
 	@RequestMapping("listApartmentActivity")
-	@RestReturn(value=ListSignupInfoResponse.class)
+	@RestReturn(value=ListSignupInfoByOrganizationIdResponse.class)
 	public RestResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
-		ListSignupInfoResponse result = propertyMgrService.listApartmentActivity(cmd);
+		ListSignupInfoByOrganizationIdResponse result = propertyMgrService.listApartmentActivity(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

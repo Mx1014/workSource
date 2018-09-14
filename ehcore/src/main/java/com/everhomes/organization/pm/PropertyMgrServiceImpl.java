@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressArrangement;
 import com.everhomes.address.AddressProvider;
@@ -135,6 +136,7 @@ import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressArrangementType;
@@ -165,6 +167,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -489,6 +492,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
+   	
+   	@Autowired
+   	private ActivityService activityService;
 
     private String queueName = "property-mgr-push";
 
@@ -7997,9 +8003,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	}
 
 	@Override
-	public ListSignupInfoResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
+	public ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
+		ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
 		
-		
-		return null;
+		ListApartmentEnterpriseCustomersCommand cmd2 = new ListApartmentEnterpriseCustomersCommand();
+		cmd2.setAddressId(cmd.getAddressId());
+		List<EnterpriseCustomerDTO> enterpriseCustomers = addressService.listApartmentEnterpriseCustomers(cmd2);
+		if (enterpriseCustomers!=null && enterpriseCustomers.size()>0) {
+			EnterpriseCustomerDTO enterpriseCustomer = enterpriseCustomers.get(0);
+			response = activityService.listSignupInfoByOrganizationId(enterpriseCustomer.getOrganizationId(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
+		}
+		return response;
 	}
 }
