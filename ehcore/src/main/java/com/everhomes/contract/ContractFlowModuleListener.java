@@ -664,20 +664,14 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			ResultPrice = amount.multiply(BigDecimal.valueOf(ApartmentRentType.DAY.getOffset()));
 			break;
 		case NATURAL_MONTH:
-			/*ResultPrice = amount;
-			break;*/
 		case CONTRACT_MONTH:
 			ResultPrice = amount;
 			break;
 		case NATURAL_QUARTER:
-			/*ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
-			break;*/
 		case CONTRACT_QUARTER:
 			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
 			break;
 		case NATURAL_YEAR:
-			/*ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.NATURAL_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
-			break;*/
 		case CONTRACT_YEAR:
 			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
 			break;	

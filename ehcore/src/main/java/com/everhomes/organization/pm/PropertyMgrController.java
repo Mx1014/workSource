@@ -2415,7 +2415,7 @@ public class PropertyMgrController extends ControllerBase {
     	RestResponse response = new RestResponse(propertyMgrService.importAddressAuthorizePriceData(cmd, files[0]));
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
-    	return null;
+    	return response;
     }
 	
 }

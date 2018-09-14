@@ -8398,13 +8398,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			addressProperties.setChargingItemsId((long) chargingItemId);
 			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
 			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
-
 			propertyMgrProvider.createAuthorizePrice(addressProperties);
 		} else {
-			if (addressProperties.getChargingItemsId() != (long) chargingItemId) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Invalid id parameter in the command");
-			}
 			addressProperties.setChargingItemsId((long) chargingItemId);
 			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
 			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
