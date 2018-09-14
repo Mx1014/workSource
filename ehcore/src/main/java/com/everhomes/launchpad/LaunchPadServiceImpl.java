@@ -3260,14 +3260,30 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			return null;
 		}
 
-		Set<Long> itemIds = new HashSet<>();
+		List<Long> itemIds = new ArrayList<>();
 		for(UserLaunchPadItem item: items){
 			itemIds.add(item.getItemId());
 		}
 
-		List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(new ArrayList<>(itemIds));
+		List<LaunchPadItem> launchPadItems = launchPadProvider.listLaunchPadItemsByIds(itemIds);
 
-		List<AppDTO> dtos = itemToAppDto(launchPadItems);
+		if(launchPadItems == null){
+			return null;
+		}
+
+		//按照UserLaunchPadItem的顺序对LaunchPadItem重新排序
+		List<LaunchPadItem> orderLaunchPadItems = new ArrayList<>();
+		for(Long itemId: itemIds){
+			for(LaunchPadItem launchPadItem: launchPadItems){
+				if(itemId.equals(launchPadItem.getId())){
+					orderLaunchPadItems.add(launchPadItem);
+					break;
+				}
+			}
+		}
+
+
+		List<AppDTO> dtos = itemToAppDto(orderLaunchPadItems);
 
 		return dtos;
 	}
@@ -3366,8 +3382,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						"launchPadItem not found.");
 			}
 
-
-			Integer order = 1;
 			for (LaunchPadItem item: launchPadItems){
 
 				if(!cmd.getGroupId().equals(item.getGroupId())){
@@ -3381,6 +3395,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				userItem.setItemName(item.getItemName());
 				userItem.setItemId(item.getId());
 				userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+
+				Integer order = cmd.getItemIds().indexOf(item.getId());
+
 				userItem.setDefaultOrder(order);
 				userItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 				userItem.setOwnerId(ownerId);
@@ -3390,7 +3407,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				launchPadProvider.createUserLaunchPadItem(userItem);
-				order = order + 1;
 			}
 			return null;
 		}));

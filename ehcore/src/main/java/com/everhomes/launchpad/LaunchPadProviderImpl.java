@@ -919,6 +919,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
 		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+		query.addOrderBy(Tables.EH_USER_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
 
 		List<UserLaunchPadItem> response = query.fetch().map((r) -> ConvertHelper.convert(r, UserLaunchPadItem.class));
 
