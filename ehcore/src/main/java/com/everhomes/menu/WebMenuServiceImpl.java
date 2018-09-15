@@ -332,16 +332,43 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//1、查询已安装的应用
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
-		List<ServiceModuleApp> apps = new ArrayList<>();
+		List<ServiceModuleApp> apps;
 		if(namespaceId == 2){
 			apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), null, null, organizationId, TrueOrFalseFlag.TRUE.getCode(), null, null, 10000);
 		}else {
 			apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion.getId(), null);
 		}
 
+		if(apps == null || apps.size()  == 0){
+			return null;
+		}
+
 		//2、过滤有pc工作台用户端的应用
 
-		return null;
+		//一次查询减轻数据库压力
+		Set<Long> moduleIds = new HashSet<>();
+		for(ServiceModuleApp app: apps){
+			if(app.getModuleId() != null && app.getModuleId() != 0){
+				moduleIds.add(app.getModuleId());
+			}
+		}
+		List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(new ArrayList<>(moduleIds), ServiceModuleLocationType.PC_WORKPLATFORM.getCode(), ServiceModuleSceneType.CLIENT.getCode());
+		if(entries == null || entries.size()  == 0){
+			return null;
+		}
+
+		List<Long> clientAppIds = new ArrayList<>();
+		for(ServiceModuleApp app: apps){
+			for (ServiceModuleEntry entry: entries){
+				if(entry.getModuleId().equals(app.getModuleId())){
+					clientAppIds.add(app.getOriginId());
+					break;
+				}
+			}
+
+		}
+
+		return clientAppIds;
 	}
 
 
@@ -504,7 +531,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		for (ServiceModuleEntry entry: entries){
 			for (WebMenu menu : menus) {
-				if(entry.getModuleId().equals(menu.getModuleId())){
+				//模块和场景都一致
+				if(entry.getModuleId().equals(menu.getModuleId()) && entry.getSceneType().equals(menu.getSceneType())){
 					WebMenuDTO menuDto = ConvertHelper.convert(menu, WebMenuDTO.class);
 					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
 					menuDto.setAppConfig(appDTO);

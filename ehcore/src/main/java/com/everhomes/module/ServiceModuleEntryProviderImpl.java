@@ -86,6 +86,30 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
     }
 
 
+    @Override
+    public List<ServiceModuleEntry> listServiceModuleEntries(List<Long> moduleIds, Byte locationType, Byte sceneType) {
+        List<ServiceModuleEntry> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhServiceModuleEntriesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ENTRIES);
+        if(moduleIds != null && moduleIds.size() > 0){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID.in(moduleIds));
+        }
+
+        if(locationType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
+        }
+        if(sceneType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
+        }
+
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModuleEntry.class));
+            return null;
+        });
+        return results;
+    }
+
+
 
     @Override
     public void delete(Long id) {

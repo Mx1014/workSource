@@ -59,11 +59,11 @@ UPDATE eh_service_module_entries SET app_category_id = 16 WHERE location_type = 
 UPDATE eh_service_module_entries SET app_category_id = 17 WHERE location_type = 2 and app_category_id = 7;
 UPDATE eh_service_module_entries SET app_category_id = 18 WHERE location_type = 2 and app_category_id = 13;
 
-
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('1', '企业办公', '0', '4', NULL, '1', '0');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('3', 'OA管理', '1', '4', NULL, '1', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('4', 'HR管理', '1', '4', NULL, '2', '1');
-INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('5', 'ERP', '1', '4', NULL, '3', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('1', '协同办公', '104', '4', NULL, '1', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('2', '人力资源', '104', '4', NULL, '2', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('3', 'OA管理', '104', '4', NULL, '3', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('4', 'HR管理', '104', '4', NULL, '4', '1');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('5', 'ERP', '104', '4', NULL, '5', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('6', '信息发布', '102', '4', NULL, '1', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('7', '社群运营', '102', '4', NULL, '2', '1');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('8', '基础数据管理', '100', '4', NULL, '1', '1');
@@ -81,7 +81,20 @@ INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `ap
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('101', '物业服务', '0', '4', NULL, '3', '0');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('102', '园区运营', '0', '4', NULL, '4', '0');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('103', '服务联盟', '0', '4', NULL, '5', '0');
+INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('104', '企业办公', '0', '4', NULL, '1', '0');
 INSERT INTO `eh_app_categories` (`id`, `name`, `parent_id`, `location_type`, `app_type`, `default_order`, `leaf_flag`) VALUES ('500000002', '分类123', '0', '1', NULL, '1', '1');
+
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58000000', '协同办公', '40000010', NULL, NULL, '1', '2', '/40000010/58000000', 'park', '4', NULL, '2', 'system', 'classify', '2', '1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('59000000', '人力资源', '40000010', NULL, NULL, '1', '2', '/40000010/59000000', 'park', '7', NULL, '2', 'system', 'classify', '2', '1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58010000', '审批', '58000000', NULL, 'approval-work', '0', '2', '/40000010/58000000/58010000', 'park', '10', '52000', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58020000', '工作汇报', '58000000', NULL, 'working-conference', '0', '2', '/40000010/58000000/58020000', 'park', '20', '54000', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58030000', '文档', '58000000', NULL, 'document-work', '0', '2', '/40000010/58000000/58030000', 'park', '30', '55000', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58040000', '企业公告', '58000000', NULL, 'notice-work', '0', '2', '/40000010/58000000/58040000', 'park', '40', '57000', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58050000', '日程提醒', '58000000', NULL, 'time-schedule', '0', '2', '/40000010/58000000/58050000', 'park', '50', '59100', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('58060000', '会议预订', '58000000', NULL, 'meeting-work', '0', '2', '/40000010/58000000/58060000', 'park', '60', '53000', '3', 'system', 'module', '2', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('59010000', '通讯录', '59000000', NULL, 'address-book', '0', '2', '/40000010/59000000/59010000', 'park', '10', '50100', '3', 'system', 'module', '2', '2');
+
 
 
 -- 微商城设置为内部链接
