@@ -12,14 +12,14 @@ import com.everhomes.util.StringHelper;
  */
 public class ChangeInvestmentAdOrderCommand {
 	@ItemType(InvestmentAdOrderDTO.class)
-	private List<InvestmentAdOrderDTO> advertisementOrders;
+	private List<InvestmentAdOrderDTO> investmentAdOrders;
 
-	public List<InvestmentAdOrderDTO> getAdvertisementOrders() {
-		return advertisementOrders;
+	public List<InvestmentAdOrderDTO> getInvestmentAdOrders() {
+		return investmentAdOrders;
 	}
-
-	public void setAdvertisementOrders(List<InvestmentAdOrderDTO> advertisementOrders) {
-		this.advertisementOrders = advertisementOrders;
+	
+	public void setInvestmentAdOrders(List<InvestmentAdOrderDTO> investmentAdOrders) {
+		this.investmentAdOrders = investmentAdOrders;
 	}
 
 	@Override

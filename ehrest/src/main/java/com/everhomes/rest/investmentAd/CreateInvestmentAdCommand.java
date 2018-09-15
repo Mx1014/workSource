@@ -34,7 +34,7 @@ import com.everhomes.util.StringHelper;
  *  <li>assetDispalyFlag: 招商广告是否显示</li>
  *  <li>relatedAssets: 招商广告关联的楼宇房源，参考{@link com.everhomes.rest.investmentAd.RelatedAssetDTO}</li>
  *  <li>banners: 招商广告轮播图，参考{@link com.everhomes.rest.investmentAd.InvestmentAdBannerDTO}</li>
- *  <li>customFormFlag: 是否启用了自定义表单</li>
+ *  <li>customFormFlag: 是否添加自定义表单：0-否，1-是</li>
  *  <li>generalFormId: 自定义表单id</li>
  *  <li>formValues: 自定义表单传值，参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
@@ -63,7 +63,6 @@ public class CreateInvestmentAdCommand {
 	private String contactPhone;
 	private String description;
 	private String posterUri;
-	private Long defaultOrder;
 	
 	private Byte assetDispalyFlag;
 	@ItemType(RelatedAssetDTO.class)
@@ -251,14 +250,6 @@ public class CreateInvestmentAdCommand {
 
 	public void setPosterUri(String posterUri) {
 		this.posterUri = posterUri;
-	}
-
-	public Long getDefaultOrder() {
-		return defaultOrder;
-	}
-
-	public void setDefaultOrder(Long defaultOrder) {
-		this.defaultOrder = defaultOrder;
 	}
 
 	public Byte getAssetDispalyFlag() {

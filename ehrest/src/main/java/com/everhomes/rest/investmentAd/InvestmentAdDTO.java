@@ -7,9 +7,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>advertisementId: 招商广告id</li>
+ * 	<li>id: 招商广告id</li>
  *  <li>title: 招商广告标题</li>
- * 	<li>businessStatus: 招商状态</li>
+ * 	<li>investmentStatus: 招商状态</li>
  * 	<li>availableAreaMin: 最小招商面积</li>
  * 	<li>availableAreaMax: 最大招商面积</li>
  *  <li>priceUnit: 租金面积</li>
@@ -24,9 +24,9 @@ import com.everhomes.util.StringHelper;
  */
 public class InvestmentAdDTO {
 	
-	private Long advertisementId;
+	private Long id;
 	private String title;
-	private Byte businessStatus;
+	private Byte investmentStatus;
 	private BigDecimal availableAreaMin;
 	private BigDecimal availableAreaMax;
 	private BigDecimal assetPriceMin;
@@ -50,23 +50,23 @@ public class InvestmentAdDTO {
 	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
-	public Long getAdvertisementId() {
-		return advertisementId;
+	public Long getId() {
+		return id;
 	}
-	public void setAdvertisementId(Long advertisementId) {
-		this.advertisementId = advertisementId;
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Byte getInvestmentStatus() {
+		return investmentStatus;
+	}
+	public void setInvestmentStatus(Byte investmentStatus) {
+		this.investmentStatus = investmentStatus;
 	}
 	public String getTitle() {
 		return title;
 	}
 	public void setTitle(String title) {
 		this.title = title;
-	}
-	public Byte getBusinessStatus() {
-		return businessStatus;
-	}
-	public void setBusinessStatus(Byte businessStatus) {
-		this.businessStatus = businessStatus;
 	}
 	public BigDecimal getAvailableAreaMin() {
 		return availableAreaMin;

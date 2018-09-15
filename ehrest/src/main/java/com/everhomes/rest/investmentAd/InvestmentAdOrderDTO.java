@@ -10,14 +10,14 @@ import com.everhomes.util.StringHelper;
  */
 public class InvestmentAdOrderDTO {
 	
-	private Long advertisementId;
+	private Long investmentAdId;
 	private Long defaultOrder;
 	
-	public Long getAdvertisementId() {
-		return advertisementId;
+	public Long getInvestmentAdId() {
+		return investmentAdId;
 	}
-	public void setAdvertisementId(Long advertisementId) {
-		this.advertisementId = advertisementId;
+	public void setInvestmentAdId(Long investmentAdId) {
+		this.investmentAdId = investmentAdId;
 	}
 	public Long getDefaultOrder() {
 		return defaultOrder;

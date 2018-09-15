@@ -39,9 +39,13 @@ import com.everhomes.util.StringHelper;
 public class InvestmentAdDetailDTO {
 	
 	private Long id;
+	private Integer namespaceId;
+	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String title;
-	private Byte advertisementType;
-	private Byte businessStatus;
+	private Byte investmentType;
+	private Byte investmentStatus;
 	private BigDecimal availableAreaMin;
 	private BigDecimal availableAreaMax;
 	private BigDecimal assetPriceMin;
@@ -53,18 +57,19 @@ public class InvestmentAdDetailDTO {
 	private String address;
 	private Double longitude;
 	private Double latitude;
-	private String contacts;
+	private String contactName;
 	private String contactPhone;
 	private String description;
-	private String postUri;
+	private String posterUri;
+	private String posterUrl;
 	private Long defaultOrder;
 	
-	private Byte assetRelated;
+	private Byte assetDispalyFlag;
 	@ItemType(RelatedAssetDTO.class)
 	private List<RelatedAssetDTO> relatedAssets;
 	
 	@ItemType(InvestmentAdBannerDTO.class)
-	private List<InvestmentAdBannerDTO> attachments;
+	private List<InvestmentAdBannerDTO> banners;
 	
 	private Byte customFormFlag;
 	private Long generalFormId;
@@ -74,160 +79,251 @@ public class InvestmentAdDetailDTO {
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public Byte getAdvertisementType() {
-		return advertisementType;
+
+	public Byte getInvestmentType() {
+		return investmentType;
 	}
-	public void setAdvertisementType(Byte advertisementType) {
-		this.advertisementType = advertisementType;
+
+	public void setInvestmentType(Byte investmentType) {
+		this.investmentType = investmentType;
 	}
-	public Byte getBusinessStatus() {
-		return businessStatus;
+
+	public Byte getInvestmentStatus() {
+		return investmentStatus;
 	}
-	public void setBusinessStatus(Byte businessStatus) {
-		this.businessStatus = businessStatus;
+
+	public void setInvestmentStatus(Byte investmentStatus) {
+		this.investmentStatus = investmentStatus;
 	}
+
 	public BigDecimal getAvailableAreaMin() {
 		return availableAreaMin;
 	}
+
 	public void setAvailableAreaMin(BigDecimal availableAreaMin) {
 		this.availableAreaMin = availableAreaMin;
 	}
+
 	public BigDecimal getAvailableAreaMax() {
 		return availableAreaMax;
 	}
+
 	public void setAvailableAreaMax(BigDecimal availableAreaMax) {
 		this.availableAreaMax = availableAreaMax;
 	}
+
 	public BigDecimal getAssetPriceMin() {
 		return assetPriceMin;
 	}
+
 	public void setAssetPriceMin(BigDecimal assetPriceMin) {
 		this.assetPriceMin = assetPriceMin;
 	}
+
 	public BigDecimal getAssetPriceMax() {
 		return assetPriceMax;
 	}
+
 	public void setAssetPriceMax(BigDecimal assetPriceMax) {
 		this.assetPriceMax = assetPriceMax;
 	}
+
 	public Byte getPriceUnit() {
 		return priceUnit;
 	}
+
 	public void setPriceUnit(Byte priceUnit) {
 		this.priceUnit = priceUnit;
 	}
+
 	public Integer getApartmentFloorMin() {
 		return apartmentFloorMin;
 	}
+
 	public void setApartmentFloorMin(Integer apartmentFloorMin) {
 		this.apartmentFloorMin = apartmentFloorMin;
 	}
+
 	public Integer getApartmentFloorMax() {
 		return apartmentFloorMax;
 	}
+
 	public void setApartmentFloorMax(Integer apartmentFloorMax) {
 		this.apartmentFloorMax = apartmentFloorMax;
 	}
+
 	public String getOrientation() {
 		return orientation;
 	}
+
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
 	}
+
 	public String getAddress() {
 		return address;
 	}
+
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
 	public Double getLongitude() {
 		return longitude;
 	}
+
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
+
 	public Double getLatitude() {
 		return latitude;
 	}
+
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	public String getContacts() {
-		return contacts;
+
+	public String getContactName() {
+		return contactName;
 	}
-	public void setContacts(String contacts) {
-		this.contacts = contacts;
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
+
 	public String getContactPhone() {
 		return contactPhone;
 	}
+
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getPostUri() {
-		return postUri;
+
+	public String getPosterUri() {
+		return posterUri;
 	}
-	public void setPostUri(String postUri) {
-		this.postUri = postUri;
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
 	}
+	
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
+	}
+	
 	public Long getDefaultOrder() {
 		return defaultOrder;
 	}
+
 	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
-	public Byte getAssetRelated() {
-		return assetRelated;
+
+	public Byte getAssetDispalyFlag() {
+		return assetDispalyFlag;
 	}
-	public void setAssetRelated(Byte assetRelated) {
-		this.assetRelated = assetRelated;
+
+	public void setAssetDispalyFlag(Byte assetDispalyFlag) {
+		this.assetDispalyFlag = assetDispalyFlag;
 	}
+
 	public List<RelatedAssetDTO> getRelatedAssets() {
 		return relatedAssets;
 	}
+
 	public void setRelatedAssets(List<RelatedAssetDTO> relatedAssets) {
 		this.relatedAssets = relatedAssets;
 	}
-	public List<InvestmentAdBannerDTO> getAttachments() {
-		return attachments;
+
+	public List<InvestmentAdBannerDTO> getBanners() {
+		return banners;
 	}
-	public void setAttachments(List<InvestmentAdBannerDTO> attachments) {
-		this.attachments = attachments;
+
+	public void setBanners(List<InvestmentAdBannerDTO> banners) {
+		this.banners = banners;
 	}
+
 	public Byte getCustomFormFlag() {
 		return customFormFlag;
 	}
+
 	public void setCustomFormFlag(Byte customFormFlag) {
 		this.customFormFlag = customFormFlag;
 	}
+
 	public Long getGeneralFormId() {
 		return generalFormId;
 	}
+
 	public void setGeneralFormId(Long generalFormId) {
 		this.generalFormId = generalFormId;
 	}
+
 	public List<PostApprovalFormItem> getFormValues() {
 		return formValues;
 	}
+
 	public void setFormValues(List<PostApprovalFormItem> formValues) {
 		this.formValues = formValues;
 	}
-	
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>namespaceId: 域空间id</li>
  *  <li>communityId: 园区id</li>
- * 	<li>businessStatus: 招商状态</li>
- *  <li>advertisementType: 广告类型（1-招租广告，2-招商广告）</li>
+ * 	<li>investmentStatus: 招商状态</li>
+ *  <li>investmentType: 广告类型（1-招租广告，2-招商广告）</li>
  * 	<li>availableAreaMin: 最小招商面积</li>
  * 	<li>availableAreaMax: 最大招商面积</li>
  * 	<li>assetPriceMin: 最小租金</li>
@@ -18,14 +18,16 @@ import com.everhomes.util.StringHelper;
  * 	<li>apartmentFloorMax: 最大楼层</li>
  *  <li>orientation: 朝向</li>
  *  <li>keywords: 关键字</li>
+ *  <li>sortField: 排序字段</li>
+ *  <li>sortType: 1-升序，2-降序</li>
  * </ul>
  */
 public class ListInvestmentAdCommand {
 	
 	private Integer namespaceId;
 	private Long communityId;
-	private Byte businessStatus;
-	private Byte advertisementType;
+	private Byte investmentStatus;
+	private Byte investmentType;
 	private BigDecimal availableAreaMin;
 	private BigDecimal availableAreaMax;
 	private BigDecimal assetPriceMin;
@@ -34,6 +36,10 @@ public class ListInvestmentAdCommand {
 	private Integer apartmentFloorMax;
 	private String orientation;
 	private String keywords;
+	private Integer pageSize;
+	private Long PageAnchor;
+	private String sortField;
+	private Byte sortType;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -47,17 +53,17 @@ public class ListInvestmentAdCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	public Byte getBusinessStatus() {
-		return businessStatus;
+	public Byte getInvestmentStatus() {
+		return investmentStatus;
 	}
-	public void setBusinessStatus(Byte businessStatus) {
-		this.businessStatus = businessStatus;
+	public void setInvestmentStatus(Byte investmentStatus) {
+		this.investmentStatus = investmentStatus;
 	}
-	public Byte getAdvertisementType() {
-		return advertisementType;
+	public Byte getInvestmentType() {
+		return investmentType;
 	}
-	public void setAdvertisementType(Byte advertisementType) {
-		this.advertisementType = advertisementType;
+	public void setInvestmentType(Byte investmentType) {
+		this.investmentType = investmentType;
 	}
 	public BigDecimal getAvailableAreaMin() {
 		return availableAreaMin;
@@ -107,7 +113,30 @@ public class ListInvestmentAdCommand {
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
 	}
-	
+	public Integer getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+	public Long getPageAnchor() {
+		return PageAnchor;
+	}
+	public void setPageAnchor(Long pageAnchor) {
+		PageAnchor = pageAnchor;
+	}
+	public String getSortField() {
+		return sortField;
+	}
+	public void setSortField(String sortField) {
+		this.sortField = sortField;
+	}
+	public Byte getSortType() {
+		return sortType;
+	}
+	public void setSortType(Byte sortType) {
+		this.sortType = sortType;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
