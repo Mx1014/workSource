@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.category.GetCategoryCommand;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -377,5 +378,18 @@ public class CategoryController extends ControllerBase {
 		}).collect(Collectors.toList());
 
 		return new RestResponse(dtoResultList);
+	}
+
+	/**
+	 * <b>URL: /category/getCategory</b>
+	 */
+	@RequestMapping("getCategory")
+	@RestReturn(value = CategoryDTO.class)
+	public RestResponse getCategory(GetCategoryCommand cmd) {
+        CategoryDTO categoryDTO = new CategoryDTO();
+        if (this.categoryProvider.findCategoryById(cmd.getId()) != null) {
+            categoryDTO = ConvertHelper.convert(this.categoryProvider.findCategoryById(cmd.getId()), CategoryDTO.class);
+        }
+		return new RestResponse(categoryDTO);
 	}
 }

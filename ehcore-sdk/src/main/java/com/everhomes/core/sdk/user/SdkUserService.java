@@ -1,7 +1,12 @@
 package com.everhomes.core.sdk.user;
 
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.category.GetCategoryCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
 import com.everhomes.rest.user.ListBorderAndContentResponse;
+import com.everhomes.rest.user.SendVerificationCodeCommand;
 import com.everhomes.rest.user.SetUserCurrentCommunityCommand;
 import com.everhomes.rest.user.SetUserDefaultCommunityCommand;
 import com.everhomes.rest.user.sdk.LogonInfoCommand;
@@ -48,5 +53,34 @@ public class SdkUserService {
         cmd.setNamespaceId(namecpaceId);
         cmd.setCommunityId(communityId);
         RestResponse response = sdkRestClient.restCall("post", "/evh/user/updateUserCurrentCommunityToProfile", cmd, RestResponse.class);
+    }
+
+    public void sendVerificationCodeSms(Integer namecpaceId, String phoneNumber, String code) {
+        SendVerificationCodeCommand cmd = new SendVerificationCodeCommand();
+        cmd.setNamespaceId(namecpaceId);
+        cmd.setPhoneNumber(phoneNumber);
+        cmd.setCode(code);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/user/sendVerificationCodeSms", cmd, RestResponse.class);
+    }
+
+    public void processUserForMember(Integer namecpaceId, String identifierToken, Long ownerId) {
+        ProcessUserForMemberCommand cmd = new ProcessUserForMemberCommand();
+        cmd.setNamespaceId(namecpaceId);
+        cmd.setIdentifierToken(identifierToken);
+        cmd.setOwnerId(ownerId);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/org/processUserForMember", cmd, RestResponse.class);
+    }
+    public RestResponse getCommunityById(Long id){
+        GetCommunityByIdCommand cmd = new GetCommunityByIdCommand();
+        cmd.setId(id);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/community/get", cmd, RestResponse.class);
+        return response;
+    }
+
+    public CategoryDTO getCategoryById(Long id){
+        GetCategoryCommand cmd = new GetCategoryCommand();
+        cmd.setId(id);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/category/getCategory", cmd, RestResponse.class);
+        return (CategoryDTO) response.getResponseObject();
     }
 }

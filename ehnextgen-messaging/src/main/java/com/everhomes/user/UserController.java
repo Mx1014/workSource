@@ -1778,4 +1778,13 @@ public class UserController extends ControllerBase {
 		// xxx
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/logonInfo</b>
+     * <p>获取登录信息</p>
+     */
+    @RequestMapping("sendVerificationCodeSms")
+    public void sendVerificationCodeSms(@Valid SendVerificationCodeCommand cmd) {
+        this.userService.sendVerificationCodeSms(cmd.getNamespaceId(), cmd.getPhoneNumber(), cmd.getCode());
+    }
 }
