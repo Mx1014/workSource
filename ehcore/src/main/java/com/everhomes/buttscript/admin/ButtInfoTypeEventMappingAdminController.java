@@ -1,11 +1,14 @@
 package com.everhomes.buttscript.admin;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.buttscript.ButtInfoTypeEventMappingService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.buttscript.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +33,9 @@ public class ButtInfoTypeEventMappingAdminController {
     @RestReturn(value=ButtInfoTypeEventMappingResponse.class)
     public RestResponse findButtEventMapping(FindButtEventMappingCommand cmd ) {
 
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         ButtInfoTypeEventMappingResponse resultDTO = buttInfoTypeEventMappingService.findButtEventMapping(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -43,7 +49,8 @@ public class ButtInfoTypeEventMappingAdminController {
     @RequestMapping("updateButtEventMapping")
     @RestReturn(value=String.class)
     public RestResponse updateButtEventMapping(UpdateButtEventMappingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         buttInfoTypeEventMappingService.updateButtEventMapping(cmd);
         RestResponse response = new RestResponse();
         setResponseSuccess(response);
@@ -57,7 +64,8 @@ public class ButtInfoTypeEventMappingAdminController {
     @RequestMapping("addButtEventMapping")
     @RestReturn(value=ButtInfoTypeEventMappingDTO.class)
     public RestResponse addButtEventMapping(AddButtEventMappingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         ButtInfoTypeEventMappingDTO resultDTO = buttInfoTypeEventMappingService.crteateButtEventMapping(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -71,7 +79,8 @@ public class ButtInfoTypeEventMappingAdminController {
     @RequestMapping("deleteButtEventMapping")
     @RestReturn(value=String.class)
     public RestResponse deleteButtEventMapping(DeleteButtEventMappingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         buttInfoTypeEventMappingService.deleteButtEventMapping(cmd);
         RestResponse response = new RestResponse();
         setResponseSuccess(response);

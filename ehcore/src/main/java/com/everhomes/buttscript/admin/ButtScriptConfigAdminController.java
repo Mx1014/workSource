@@ -1,12 +1,15 @@
 package com.everhomes.buttscript.admin;
 
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.buttscript.ButtScriptConfigService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.buttscript.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +34,8 @@ public class ButtScriptConfigAdminController {
     @RequestMapping("findButtScriptConfing")
     @RestReturn(value=ButtScriptConfingResponse.class)
     public RestResponse findButtScriptConfing(FindButtScriptConfingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         ButtScriptConfingResponse resultDTO = buttScriptConfigService.findButtScriptConfigByNamespaceId(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -45,7 +49,8 @@ public class ButtScriptConfigAdminController {
     @RequestMapping("updateButtScriptConfing")
     @RestReturn(value=String.class)
     public RestResponse updateButtScriptConfing(UpdateButtScriptConfingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         buttScriptConfigService.updateButtScriptConfing(cmd);
         RestResponse response = new RestResponse();
         setResponseSuccess(response);
@@ -59,7 +64,8 @@ public class ButtScriptConfigAdminController {
     @RequestMapping("addButtScriptConfing")
     @RestReturn(value=ButtScriptConfigDTO.class)
     public RestResponse addButtScriptConfing(AddButtScriptConfingCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         ButtScriptConfigDTO resultDTO = buttScriptConfigService.crteateButtScriptConfing(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -73,7 +79,8 @@ public class ButtScriptConfigAdminController {
     @RequestMapping("updateButtScriptConfingStatus")
     @RestReturn(value=String.class)
     public RestResponse updateButtScriptConfingStatus(UpdateButtScriptConfingStatusCommand cmd ) {
-
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         buttScriptConfigService.updateButtScriptConfingStatus(cmd);
         RestResponse response = new RestResponse();
         setResponseSuccess(response);

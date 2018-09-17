@@ -1,5 +1,6 @@
 package com.everhomes.buttscript.admin;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.buttscript.ButtScriptService;
 import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
@@ -9,6 +10,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.buttscript.*;
 import com.everhomes.rest.configurations.admin.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +36,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("getScriptByNamespace")
     @RestReturn(value=ScriptDTO.class)
 	public RestResponse getScriptByNamespace( GetScriptCommand cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		ScriptDTO resultDTO = buttScriptService.getScriptByNamespace(cmd);
         RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -47,7 +51,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("saveScript")
     @RestReturn(value=ScriptVersionInfoDTO.class)
 	public RestResponse saveScript( SaveScriptCommand cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		ScriptVersionInfoDTO resultDTO = buttScriptService.saveScript(cmd);
 		RestResponse response = new RestResponse(resultDTO);
         setResponseSuccess(response);
@@ -61,7 +66,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("findScriptVersionInfoByNamespaceId")
     @RestReturn(value=ScriptVersionInfoResponse.class)
 	public RestResponse findScriptVersionInfoByNamespaceId( FindScriptVersionInfoCommand cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		ScriptVersionInfoResponse res = buttScriptService.findScriptVersionInfoByNamespaceId(cmd);
 		RestResponse response = new RestResponse(res);
         setResponseSuccess(response);
@@ -76,7 +82,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("publishScriptVersion")
     @RestReturn(value=String.class)
 	public RestResponse publishScriptVersion( PublishScriptVersionCommand cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		buttScriptService.publishScriptVersion(cmd);
 		RestResponse response = new RestResponse();
         setResponseSuccess(response);
@@ -91,7 +98,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("findScriptInfoType")
     @RestReturn(value=ScriptnInfoTypeResponse.class)
 	public RestResponse findScriptInfoType( FindScriptInfoTypeCommand cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		ScriptnInfoTypeResponse res = buttScriptService.findScriptInfoType(cmd);
 		RestResponse response = new RestResponse(res);
         setResponseSuccess(response);
@@ -105,7 +113,8 @@ public class ButtScriptAdminController extends ControllerBase{
 	@RequestMapping("publishScriptVersionCancel")
 	@RestReturn(value=String.class)
 	public RestResponse publishScriptVersionCancel( PublishScriptVersionCancelCommand  cmd ) {
-
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		buttScriptService.publishScriptVersionCancel(cmd);
 		RestResponse response = new RestResponse();
 		setResponseSuccess(response);
