@@ -4,6 +4,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.category.GetCategoryCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.contentserver.ParseURICommand;
+import com.everhomes.rest.contentserver.UploadFileCommand;
 import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
 import com.everhomes.rest.region.GetRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -91,5 +94,20 @@ public class SdkUserService {
         cmd.setId(id);
         RestResponse response = sdkRestClient.restCall("post", "/evh/region/getRegion", cmd, RestResponse.class);
         return (RegionDTO) response.getResponseObject();
+    }
+
+    public CsFileLocationDTO getUploadFile(String fileName, String url){
+        UploadFileCommand cmd = new UploadFileCommand();
+        cmd.setFileName(fileName);
+        cmd.setUrl(url);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/contentServer/uploadFileByUrl", cmd, RestResponse.class);
+        return (CsFileLocationDTO) response.getResponseObject();
+    }
+
+    public String getFileUrl(String uri){
+        ParseURICommand cmd = new ParseURICommand();
+        cmd.setUri(uri);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, RestResponse.class);
+        return (String) response.getResponseObject();
     }
 }

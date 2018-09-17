@@ -230,4 +230,19 @@ public class ContentServerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     *
+     * <b>URL: /contentServer/uploadFileByUrl</b>
+     * <p>上传图片</p>
+     */
+    @RequestMapping("uploadFileByUrl")
+    @RestReturn(value = CsFileLocationDTO.class)
+    public RestResponse uploadFileByUrl(@Valid UploadFileCommand cmd) {
+        CsFileLocationDTO dto = contentService.uploadFileByUrl(cmd.getFileName(), cmd.getUrl());
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
