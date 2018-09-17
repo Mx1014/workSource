@@ -15,6 +15,9 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:分页大小</li>
  * <li>namespaceId: 域空间ID</li>
+ * <li>currentPMId: 当前管理公司ID(organizationID)</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  *
  */

@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>dtos:数据统计列表 {@link com.everhomes.rest.aclink.DoorStatisticDTO}</li>
+ *     <li>若用户无权限，抛出异常"errorCode":100055,"errorDescription":"校验应用权限失败"</li>
  * </ul>
  */
 public class DoorStatisticResponse {

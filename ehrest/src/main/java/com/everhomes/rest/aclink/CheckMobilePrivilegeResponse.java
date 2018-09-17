@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>privilegeType[Boolean]:权限检验状态 true有权限 false缺失参数 抛出异常无权限</li>
+ * <li>privilegeType[Boolean]:权限检验状态 true有权限 false缺失参数</li>
+ * <li>若用户无权限，抛出异常"errorCode":100055,"errorDescription":"校验应用权限失败"</li>
  * </ul>
  */
 public class CheckMobilePrivilegeResponse {

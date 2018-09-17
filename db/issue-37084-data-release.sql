@@ -1,5 +1,5 @@
 -- 新增公共门禁权限子模块
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -26,7 +26,7 @@ VALUES
 		41011,
 		'门禁授权',
 		'40000',
-		'/200/10000/41010/41011',
+		'/200/40000/41010/41011',
 		'1',
 		'4',
 		'2',
@@ -44,8 +44,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -72,7 +71,7 @@ VALUES
 		41012,
 		'门禁日志',
 		'40000',
-		'/200/10000/41010/41012',
+		'/200/40000/41010/41012',
 		'1',
 		'4',
 		'2',
@@ -90,8 +89,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -118,7 +116,7 @@ VALUES
 		41013,
 		'数据统计',
 		'40000',
-		'/200/10000/41010/41013',
+		'/200/40000/41010/41013',
 		'1',
 		'4',
 		'2',
@@ -136,8 +134,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -164,7 +161,7 @@ VALUES
 		41014,
 		'移动端管理',
 		'40000',
-		'/200/10000/41010/41014',
+		'/200/40000/41010/41014',
 		'1',
 		'4',
 		'2',
@@ -184,7 +181,7 @@ VALUES
 	);
 
 -- 新增企业门禁权限子模块
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -229,8 +226,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -275,8 +271,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -321,8 +316,7 @@ VALUES
 		'1',
 		'subModule'
 	);
-
-INSERT INTO `ehcore`.`eh_service_modules` (
+INSERT INTO `eh_service_modules` (
 	`id`,
 	`name`,
 	`parent_id`,
@@ -369,7 +363,7 @@ VALUES
 	);
 
 -- 新增门禁权限项
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -384,7 +378,7 @@ VALUES
 		'公共门禁 全部权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -399,7 +393,7 @@ VALUES
 		'公共门禁 门禁授权权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -414,7 +408,7 @@ VALUES
 		'公共门禁 门禁日志权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -429,7 +423,7 @@ VALUES
 		'公共门禁 数据统计权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -445,7 +439,7 @@ VALUES
 		NULL
 	);
 
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -460,7 +454,7 @@ VALUES
 		'企业门禁 全部权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -475,7 +469,7 @@ VALUES
 		'企业门禁 门禁授权权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -490,7 +484,7 @@ VALUES
 		'企业门禁 门禁日志权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -505,7 +499,7 @@ VALUES
 		'企业门禁 数据统计权限',
 		NULL
 	);
-INSERT INTO `ehcore`.`eh_acl_privileges` (
+INSERT INTO `eh_acl_privileges` (
 	`id`,
 	`app_id`,
 	`name`,
@@ -784,4 +778,930 @@ VALUES
 	);
 
 
+  -- 新增两个门禁模块：公共门禁beta，企业门禁beta
+  INSERT INTO `eh_web_menus` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`icon_url`,
+	`data_type`,
+	`leaf_flag`,
+	`status`,
+	`path`,
+	`type`,
+	`sort_num`,
+	`module_id`,
+	`level`,
+	`condition_type`,
+	`category`,
+	`config_type`
+)
+VALUES
+	(
+		16030610,
+		'公共门禁beta',
+		16030000,
+		NULL,
+		'public-access',
+		1,
+		2,
+		'/16000000/16030000/16030610',
+		'zuolin',
+		40,
+		41110,
+		3,
+		'system',
+		'module',
+		NULL
+	);
+	INSERT INTO `eh_web_menus` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`icon_url`,
+	`data_type`,
+	`leaf_flag`,
+	`status`,
+	`path`,
+	`type`,
+	`sort_num`,
+	`module_id`,
+	`level`,
+	`condition_type`,
+	`category`,
+	`config_type`
+)
+VALUES
+	(
+		48140010,
+		'企业门禁beta',
+		48000000,
+		NULL,
+		'entrance-guard',
+		1,
+		2,
+		'/40000010/48000000/48140010',
+		'park',
+		80,
+		41120,
+		3,
+		'system',
+		'module',
+		NULL
+	);
 
+	-- 新增公共门禁beta子模块
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		41110,
+		'公共门禁beta',
+		'40000',
+		'/200/40000/41110',
+		'1',
+		'3',
+		'2',
+		10,
+		NOW(),
+		'{\"isSupportQR\":1,\"isSupportSmart\":0}',
+		'78',
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'module'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41111',
+		'门禁授权',
+		'40000',
+		'/200/40000/41110/41111',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41112',
+		'门禁日志',
+		'40000',
+		'/200/40000/41110/41112',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41113',
+		'数据统计',
+		'40000',
+		'/200/40000/41110/41113',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41114',
+		'移动端管理',
+		'40000',
+		'/200/40000/41110/41114',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+	-- 新增企业门禁beta子模块
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41120',
+		'企业门禁beta',
+		'310000',
+		'/100/310000/41120',
+		'1',
+		'3',
+		'2',
+		'100',
+		NOW(),
+		'{\"isSupportQR\":1,\"isSupportSmart\":0}',
+		'79',
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'module'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41121',
+		'门禁授权',
+		'310000',
+		'/100/310000/41120/41121',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41122',
+		'门禁日志',
+		'310000',
+		'/100/310000/41120/41122',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41123',
+		'数据统计',
+		'310000',
+		'/100/310000/41120/41123',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+INSERT INTO `eh_service_modules` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`path`,
+	`type`,
+	`level`,
+	`status`,
+	`default_order`,
+	`create_time`,
+	`instance_config`,
+	`action_type`,
+	`update_time`,
+	`operator_uid`,
+	`creator_uid`,
+	`description`,
+	`multiple_flag`,
+	`module_control_type`,
+	`access_control_type`,
+	`menu_auth_flag`,
+	`category`
+)
+VALUES
+	(
+		'41124',
+		'移动端管理',
+		'310000',
+		'/100/310000/41120/41124',
+		'1',
+		'4',
+		'2',
+		'0',
+		NOW(),
+		NULL,
+		NULL,
+		NOW(),
+		'0',
+		'0',
+		'0',
+		'0',
+		'community_control',
+		'2',
+		'1',
+		'subModule'
+	);
+  -- 新增公共门禁beta权限
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4111041110,
+		0,
+		'公共门禁beta 全部权限',
+		'公共门禁beta 全部权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4111041111,
+		0,
+		'公共门禁beta 门禁授权',
+		'公共门禁beta 门禁授权权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4111041112,
+		0,
+		'公共门禁beta 门禁日志',
+		'公共门禁beta 门禁日志权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4111041113,
+		0,
+		'公共门禁beta 数据统计',
+		'公共门禁beta 数据统计权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4111041114,
+		0,
+		'公共门禁beta 移动端管理',
+		'公共门禁beta 移动端管理权限',
+		NULL
+	);
+  -- 新增企业门禁beta权限
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4112041120,
+		0,
+		'企业门禁beta 全部权限',
+		'企业门禁beta 全部权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4112041121,
+		0,
+		'企业门禁beta 门禁授权',
+		'企业门禁beta 门禁授权权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4112041122,
+		0,
+		'企业门禁beta 门禁日志',
+		'企业门禁beta 门禁日志权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4112041123,
+		0,
+		'企业门禁beta 数据统计',
+		'企业门禁beta 数据统计权限',
+		NULL
+	);
+INSERT INTO `eh_acl_privileges` (
+	`id`,
+	`app_id`,
+	`name`,
+	`description`,
+	`tag`
+)
+VALUES
+	(
+		4112041124,
+		0,
+		'企业门禁beta 移动端管理',
+		'企业门禁beta 移动端管理权限',
+		NULL
+	);
+  -- 模块权限关联
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41110',
+		'0',
+		4111041110,
+		'全部权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41111',
+		'0',
+		4111041111,
+		'门禁授权权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41112',
+		'0',
+		4111041112,
+		'门禁日志权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41113',
+		'0',
+		4111041113,
+		'数据统计权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41114',
+		'0',
+		4111041114,
+		'移动端管理权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41120',
+		'0',
+		4112041120,
+		'全部权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41121',
+		'0',
+		4112041121,
+		'门禁授权权限',
+		'0',
+		NOW()
+	);
+	SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41122',
+		'0',
+		4112041122,
+		'门禁日志权限',
+		'0',
+		NOW()
+	);
+	SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41123',
+		'0',
+		4112041123,
+		'数据统计权限',
+		'0',
+		NOW()
+	);
+  SET @mp_id = (
+	SELECT
+		MAX(id)
+	FROM
+		eh_service_module_privileges
+);
+INSERT INTO `eh_service_module_privileges` (
+	`id`,
+	`module_id`,
+	`privilege_type`,
+	`privilege_id`,
+	`remark`,
+	`default_order`,
+	`create_time`
+)
+VALUES
+	(
+		@mp_id :=@mp_id + 1,
+		'41124',
+		'0',
+		4112041124,
+		'移动端管理权限',
+		'0',
+		NOW()
+	);

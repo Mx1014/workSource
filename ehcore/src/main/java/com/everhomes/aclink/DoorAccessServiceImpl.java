@@ -536,17 +536,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
         //添加权限 add by liqingyan
-//        if (cmd.getCommunityType() != null && cmd.getCommunityType() == 0 && cmd.getCommunityId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCommunityId(), 4101041011L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-//        if (cmd.getCommunityType() != null && cmd.getCommunityType() == 1 && cmd.getCommunityId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCommunityId(), 4102041021L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041021L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041121L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041011L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041111L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
@@ -840,7 +834,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         return wb;
     }
-//add by liqingyan 需要翻译中文
+//add by liqingyan 待翻译
     /**
      * 创建导出日志excel
      * @param cmd
@@ -4251,28 +4245,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd) {
         //添加权限 by liqingyan
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041022L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041122L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041012L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041112L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
         resp.setDtos(new ArrayList<AclinkLogDTO>());
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-
-//        if(cmd.getStartTime() == null) {
-//            cmd.setStartTime(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
-//        }else{
-//            cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
-//        }
-//        if(cmd.getEndTime() == null) {
-//            cmd.setEndTime(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
-//        }else{
-//            cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
-//        }
-
         List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -4318,17 +4300,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
         //添加权限
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getOwnerId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getOwnerId(), 4102041023L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
-//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getOwnerId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getOwnerId(), 4101041013L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-//        }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041023L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041013L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         DoorStatisticResponse resp = new DoorStatisticResponse();
         resp.setDtos(new DoorStatisticDTO());
@@ -4342,10 +4318,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd){
         //添加权限
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041023L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041013L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         DoorStatisticByTimeResponse resp = new DoorStatisticByTimeResponse();
         resp.setDtos(new ArrayList<DoorStatisticByTimeDTO>());
@@ -4359,10 +4335,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd){
         //添加权限
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041023L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041013L, cmd.getAppId(), null, cmd.getCurrentProjectId());//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
         TempStatisticByTimeResponse resp = new TempStatisticByTimeResponse();
         resp.setDtos(new ArrayList<TempStatisticByTimeDTO>());
@@ -5443,16 +5419,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     	
     	LOGGER.info("delete all auths ok! ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
 	}
+	//add by liqingyan
 	@Override
     public CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd){
         CheckMobilePrivilegeResponse rsp = new CheckMobilePrivilegeResponse();
+        //添加权限
         if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4102041024L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-            rsp.setPrivilegeType(Boolean.TRUE);//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041124L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+            rsp.setPrivilegeType(Boolean.TRUE);
         }
         else if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4101041014L, cmd.getAppId(), null, cmd.getCurrentProjectId());
-            rsp.setPrivilegeType(Boolean.TRUE);//订单记录权限
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041114L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+            rsp.setPrivilegeType(Boolean.TRUE);
         }
         else rsp.setPrivilegeType(Boolean.FALSE);
         return rsp;

@@ -8,6 +8,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：所属机构类型 0小区1企业2家庭</li>
  * <li>startTime: 查询开始日期</li>
  * <li>endTime: 查询结束日期</li>
+ * <li>currentPMId: 当前管理公司ID(organizationID)</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * </ul>
  */
 public class DoorStatisticByTimeCommand {
