@@ -477,13 +477,20 @@ public class FieldServiceImpl implements FieldService {
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
         // add  privilege code for checking different  privileges
+        String code = "";
         if (1 == cmd.getPrivilegeCode()) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+            code =  DynamicExcelStrings.CUSTOEMR;
         }
         if (2 == cmd.getPrivilegeCode()) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+            code =  DynamicExcelStrings.CUSTOEMR;
         }
-        return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+        if (3 == cmd.getPrivilegeCode()) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, ServiceModuleConstants.BUSINESS_INVITATION, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+            code =  DynamicExcelStrings.INVITED_CUSTOMER;
+        }
+        return dynamicExcelService.importMultiSheet(file, code, null, cmd);
     }
 
     @Override

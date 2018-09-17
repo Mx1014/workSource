@@ -272,6 +272,28 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     @Override
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomersById(SearchEnterpriseCustomerCommand cmd){
+        SearchEnterpriseCustomerResponse response = new SearchEnterpriseCustomerResponse();
+
+        List<Long> ids = cmd.getCustomerIds();
+        List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
+        Map<Long, EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
+        if(customers != null && customers.size() > 0) {
+            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            ids.forEach(id -> {
+                EnterpriseCustomer customer = customers.get(id);
+                if(customer != null) {
+                    EnterpriseCustomerDTO dto = convertToDTO(customer);
+                    dtos.add(dto);
+                }
+            });
+        }
+//        Collections.sort(dtos);
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
@@ -369,7 +391,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }*/
         //增加如果不是admin只能看自己为跟进人
         if (!isAdmin) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+            if(cmd.getCustomerSource() == null || cmd.getCustomerSource() == InvitedCustomerType.INVITED_CUSTOMER.getCode()){
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackerUid", UserContext.currentUserId()));
+            }else{
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+            }
         }
         //有无跟进人
         if(null != cmd.getType()){
@@ -381,15 +407,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
-        if(cmd.getTrackingUids()!=null && cmd.getTrackingUids().size()>0){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
-        }
+
+
+
+
+
         //跟进时间、资产类型、资产面积、资产单价增加筛选
         if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
         	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
         	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+
+        if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
         }
         
         if(null != cmd.getPropertyType()){
@@ -430,6 +462,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getSourceItemId()!=null && StringUtils.isBlank(cmd.getSourceType())){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
             fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
+        }
+
+        if(cmd.getEntryStatusItemId()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("entryStatusItemId", cmd.getEntryStatusItemId()));
         }
 
         if(cmd.getCustomerSource() != null){
@@ -774,6 +810,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 dto.setDropBox9ItemName(null);
             }
         }
+
+        if (null != dto.getEntryStatusItemId()) {
+            ScopeFieldItem entryStatusItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntryStatusItemId());
+            if (null != entryStatusItem) {
+                dto.setEntryStatusItemName(entryStatusItem.getItemDisplayName());
+            } else {
+                dto.setEntryStatusItemName(null);
+            }
+        }
+
 
 
         if (null != dto.getAptitudeFlagItemId()) {

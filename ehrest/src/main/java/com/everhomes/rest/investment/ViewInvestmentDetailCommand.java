@@ -16,6 +16,15 @@ public class ViewInvestmentDetailCommand {
 
     private Long orgId;
 
+    private Boolean isAdmin;
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public Long getId() {
         return id;

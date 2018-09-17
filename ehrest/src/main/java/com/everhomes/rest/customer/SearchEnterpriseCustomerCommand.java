@@ -104,9 +104,22 @@ public class SearchEnterpriseCustomerCommand {
 
     private Byte customerSource;
 
-    private BigDecimal startAreaSize;
-    private BigDecimal endAreaSize;
+    private BigDecimal requirementMinArea;
+    private BigDecimal requirementMaxArea;
 
+    private Long entryStatusItemId;
+
+    private List<Long> trackerUids;
+
+    private List<Long> customerIds;
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
 
     public Byte getCustomerSource() {
         return customerSource;
@@ -374,19 +387,35 @@ public class SearchEnterpriseCustomerCommand {
         this.customerName = customerName;
     }
 
-    public BigDecimal getStartAreaSize() {
-        return startAreaSize;
+    public BigDecimal getRequirementMinArea() {
+        return requirementMinArea;
     }
 
-    public void setStartAreaSize(BigDecimal startAreaSize) {
-        this.startAreaSize = startAreaSize;
+    public void setRequirementMinArea(BigDecimal requirementMinArea) {
+        this.requirementMinArea = requirementMinArea;
     }
 
-    public BigDecimal getEndAreaSize() {
-        return endAreaSize;
+    public BigDecimal getRequirementMaxArea() {
+        return requirementMaxArea;
     }
 
-    public void setEndAreaSize(BigDecimal endAreaSize) {
-        this.endAreaSize = endAreaSize;
+    public void setRequirementMaxArea(BigDecimal requirementMaxArea) {
+        this.requirementMaxArea = requirementMaxArea;
+    }
+
+    public List<Long> getTrackerUids() {
+        return trackerUids;
+    }
+
+    public void setTrackerUids(List<Long> trackerUids) {
+        this.trackerUids = trackerUids;
+    }
+
+    public List<Long> getCustomerIds() {
+        return customerIds;
+    }
+
+    public void setCustomerIds(List<Long> customerIds) {
+        this.customerIds = customerIds;
     }
 }

@@ -1,7 +1,14 @@
 package com.everhomes.investment;
 
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface InvitedCustomerService {
 
@@ -21,4 +28,10 @@ public interface InvitedCustomerService {
     void giveUpInvitedCustomer(ViewInvestmentDetailCommand cmd) ;
 
     void syncTrackerData();
+
+    void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
+
+    List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd);
+
+
 }

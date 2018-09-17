@@ -104,6 +104,8 @@ public class CreateInvitedCustomerCommand {
 
     private Long originPotentialSourceId;
 
+    private Boolean changeCustomerFlag;
+
 
     //新增的客户字段
     private Long buyOrLeaseItemId;
@@ -178,6 +180,23 @@ public class CreateInvitedCustomerCommand {
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+    private Boolean isAdmin;
+
+    public Boolean getChangeCustomerFlag() {
+        return changeCustomerFlag;
+    }
+
+    public void setChangeCustomerFlag(Boolean changeCustomerFlag) {
+        this.changeCustomerFlag = changeCustomerFlag;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
 
     public Long getId() {
         return id;

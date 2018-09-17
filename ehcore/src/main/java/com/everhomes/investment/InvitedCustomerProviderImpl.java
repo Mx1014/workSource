@@ -7,8 +7,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.investment.InvitedCustomerStatus;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -251,7 +253,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             return result[0];
         } catch (Exception ex) {
             // fetchAny() maybe return null
-            ex.printStackTrace();
+            LOGGER.info("This Customer don't have NewestRequirement");
+
             return null;
         }
     }
@@ -318,7 +321,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             return result[0];
         } catch (Exception ex) {
             // fetchAny() maybe return null
-            ex.printStackTrace();
+            LOGGER.info("This Customer don't have NewestCurrentRent");
+
             return null;
         }
     }
@@ -491,6 +495,20 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                 .set(tracker.STATUS, CommonStatus.INACTIVE.getCode())
                 .where(tracker.CUSTOMER_ID.eq(customerId))
                 .and(tracker.CUSTOMER_SOURCE.eq(code))
+                .execute();
+    }
+
+
+    @Override
+    public void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
+        context.update(customer)
+                .set(customer.CUSTOMER_SOURCE, InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode())
+                .set(customer.LEVEL_ITEM_ID, (long)CustomerLevelType.REGISTERED_CUSTOMER.getCode())
+                .set(customer.CONTACT_MOBILE, phoneNumber.toString())
+                .set(customer.CONTACT_NAME, contactName)
+                .where(customer.ID.eq(customerId))
                 .execute();
     }
 }

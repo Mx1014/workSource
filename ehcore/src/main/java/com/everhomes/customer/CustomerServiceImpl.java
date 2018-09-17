@@ -549,7 +549,12 @@ public class CustomerServiceImpl implements CustomerService {
         cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
-        return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+        if(cmd.getCustomerIds() != null && cmd.getCustomerIds().size() > 0){
+            return enterpriseCustomerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+            return enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
     }
     @Override
     public Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
@@ -1132,6 +1137,7 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
+        updateCustomer.setCustomerSource(customer.getCustomerSource());
         updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
@@ -4896,6 +4902,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd) {
         //  export with the file download center
         Map<String, Object> params = new HashMap<>();
+
         //  the value could be null if it is not exist
         params.put("namespaceId", cmd.getNamespaceId());
         params.put("communityId", cmd.getCommunityId());
@@ -4925,6 +4932,15 @@ public class CustomerServiceImpl implements CustomerService {
         params.put("sortField", cmd.getSortField());
         params.put("sortType", cmd.getSortType());
         params.put("task_Id", cmd.getTaskId());
+        params.put("customerSource", cmd.getCustomerSource());
+        params.put("requirementMinArea", cmd.getRequirementMinArea());
+        params.put("requirementMaxArea", cmd.getRequirementMaxArea());
+        params.put("entryStatusItemId", cmd.getEntryStatusItemId());
+        params.put("trackerUids", cmd.getTrackerUids());
+        params.put("customerName", cmd.getCustomerName());
+
+
+
         String fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());

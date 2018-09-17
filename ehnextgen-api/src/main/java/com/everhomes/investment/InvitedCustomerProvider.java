@@ -55,7 +55,7 @@ public interface InvitedCustomerProvider {
 
     CustomerCurrentRent findNewestCurrentRentByCustomerId(Long customerId);
 
-    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin,BigDecimal startAreaSize, BigDecimal endAreaSize, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback);
+    List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin, BigDecimal startAreaSize, BigDecimal endAreaSize, Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback);
 
     void deleteInvitedCustomer(Long id);
 
@@ -72,4 +72,6 @@ public interface InvitedCustomerProvider {
     List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize);
 
     void deleteCustomerTrackersByCustomerId(Long customerId, byte code);
+
+    void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
 }

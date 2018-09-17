@@ -1,6 +1,7 @@
 package com.everhomes.investment;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -8,6 +9,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -19,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value="investment enterprise controller", site="core")
 @RestController
 @RequestMapping("/invitedCustomer")
-public class InvitedCustomerController {
+public class InvitedCustomerController extends ControllerBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerController.class);
 
@@ -110,10 +114,10 @@ public class InvitedCustomerController {
      * <p> 转换招商客户为已成交客户 </p>
      */
     @RequestMapping("changeInvestmentToCustomer")
-    @RestReturn(value=String.class)
+    @RestReturn(value=Long.class, collection = true)
     public RestResponse changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd) {
-        //createCustomerEntryInfo
-        RestResponse response = new RestResponse();
+        List<Long> customerIds = invitedCustomerService.changeInvestmentToCustomer(cmd);
+        RestResponse response = new RestResponse(customerIds);
         response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -141,7 +145,7 @@ public class InvitedCustomerController {
      */
     @RequestMapping("importInvestmentEnterpriseData")
     @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importInvestmentEnterpriseData(@Valid importInvestmentEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    public RestResponse importInvestmentEnterpriseData(@Valid ImportInvitedCustomerDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
         if (null == files || null == files[0]) {
@@ -154,6 +158,16 @@ public class InvitedCustomerController {
         response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+
+    /**
+     * <b>URL: /invitedCustomer/exportEnterpriseCustomerTemplate</b>
+     * <p>导出企业客户excel模板</p>
+     */
+    @RequestMapping("exportEnterpriseCustomerTemplate")
+    public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        invitedCustomerService.exportEnterpriseCustomerTemplate(cmd, response);
     }
 
     /**
