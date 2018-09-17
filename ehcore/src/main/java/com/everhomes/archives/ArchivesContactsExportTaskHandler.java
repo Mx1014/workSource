@@ -56,6 +56,7 @@ public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandle
         cmd.setFilterScopeTypes(filterScopeTypes);
         cmd.setTargetTypes(targetTypes);
         cmd.setNamespaceId(namespaceId);
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");

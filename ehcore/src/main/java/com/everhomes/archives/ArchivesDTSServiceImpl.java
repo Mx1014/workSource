@@ -312,7 +312,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         //  1.head
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
-        headRow.setHeight((short) (50 * 20));
+        headRow.setHeight((short) (150 * 20));
         createExcelHead(workbook, headRow, ArchivesExcelLocaleString.C_HEAD);
         //  2.title
         Row titleRow = sheet.createRow(1);
