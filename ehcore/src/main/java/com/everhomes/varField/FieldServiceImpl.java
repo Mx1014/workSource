@@ -18,6 +18,7 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.PmTaskService;
@@ -69,6 +70,9 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerContactType;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -1363,7 +1367,14 @@ public class FieldServiceImpl implements FieldService {
 
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
-        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+        PropertyDescriptor pd;
+        if(fieldName.equals("customerContact") || fieldName.equals("channelContact")){
+            pd = new PropertyDescriptor("contacts",clz);
+        }else if(fieldName.equals("trackerUid")) {
+            pd = new PropertyDescriptor("trackers",clz);
+        }else{
+            pd = new PropertyDescriptor(fieldName,clz);
+        }
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
@@ -1407,6 +1418,51 @@ public class FieldServiceImpl implements FieldService {
                 List<String> entryInfo = new ArrayList<>();
                 entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
                 return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
+        }
+        if("channelContact".equals(fieldName)){
+            List<CustomerContactDTO> customerContacts = (ArrayList<CustomerContactDTO>)invoke;
+            if(customerContacts.size()>0){
+                List<String> customerContact = new ArrayList<>();
+                customerContacts.forEach((c)->{
+                    if(c.getContactType().equals(CustomerContactType.CHANNEL_CONTACT.getCode())){
+                        customerContact.add(c.getName()+"("+c.getPhoneNumber()+")");
+                    }
+                });
+                return String.join(",", customerContact);
+            }else {
+                return "";
+            }
+        }
+        if("customerContact".equals(fieldName)){
+            List<CustomerContactDTO> customerContacts = (ArrayList<CustomerContactDTO>)invoke;
+            if(customerContacts.size()>0){
+                List<String> customerContact = new ArrayList<>();
+                customerContacts.forEach((c)->{
+                    if(c.getContactType().equals(CustomerContactType.CUSTOMER_CONTACT.getCode())){
+                        customerContact.add(c.getName()+"("+c.getPhoneNumber()+")");
+                    }
+                });
+                return String.join(",", customerContact);
+            }else {
+                return "";
+            }
+        }
+        if("trackerUid".equals(fieldName)){
+            List<CustomerTrackerDTO> trackers = (ArrayList<CustomerTrackerDTO>)invoke;
+            if(trackers.size()>0){
+                List<String> tracker = new ArrayList<>();
+                trackers.forEach((c)->{
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(c.getTrackerUid());
+                    if (members != null && members.size()>0) {
+                        c.setTrackerPhone(members.get(0).getContactToken());
+                        c.setTrackerName(members.get(0).getContactName());
+                    }
+                    tracker.add(c.getTrackerName()+"("+c.getTrackerPhone()+")");
+                });
+                return String.join(",", tracker);
             }else {
                 return "";
             }

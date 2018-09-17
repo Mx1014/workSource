@@ -2,6 +2,7 @@ package com.everhomes.rest.investment;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -23,6 +24,15 @@ public class CustomerRequirementAddressDTO {
     private Long customerId;
     private Long addressId;
     private String addressName;
+    private Double addressArea;
+
+    public Double getAddressArea() {
+        return addressArea;
+    }
+
+    public void setAddressArea(Double addressArea) {
+        this.addressArea = addressArea;
+    }
 
     public Long getRequirementId() {
         return requirementId;

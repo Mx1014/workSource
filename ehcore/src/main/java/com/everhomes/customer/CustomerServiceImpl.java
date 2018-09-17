@@ -4950,7 +4950,13 @@ public class CustomerServiceImpl implements CustomerService {
         List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
         if (results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
-            return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
+            String code = "";
+            if(cmd.getModuleName().equals("enterprise_customer")){
+                code = DynamicExcelStrings.CUSTOEMR;
+            }else if(cmd.getModuleName().equals("investment_promotion")){
+                code = DynamicExcelStrings.INVITED_CUSTOMER;
+            }
+            return dynamicExcelService.exportDynamicExcel( code, null, sheetNames, cmd, true, true, null);
         }
         return null;
     }

@@ -935,75 +935,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
             createChannelContact(enterpriseCustomer, channelContactString );
             customerSearcher.feedDoc(enterpriseCustomer);
             //这里还需要增加企业管理员的record和role  & address buildings 呵
-            createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
-            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            //createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
+            //createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
         }
         return failedNumber;
-    }
-
-    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
-        if (StringUtils.isNotBlank(customerAddressString)) {
-            //todo:校验格式
-            String[] buildingNames = null;
-            try {
-                String  regex  = "^((?:(?!([,，/])).)*/(?:(?!([,，/])).)*,)*(?:(?!([,，/])).)*/(?:(?!([,，/])).)*";
-                if(!Pattern.matches(regex,customerAddressString)){
-                    throw  new Exception("customer enterprise admins format error");
-                }
-                customerAddressString = customerAddressString.replaceAll("\n", "");
-                buildingNames = customerAddressString.split(",");
-                if (buildingNames.length > 0) {
-                    for (String buildingNameString : buildingNames) {
-                        String buildingName = buildingNameString.split("/")[0];
-                        String apartmentName = buildingNameString.split("/")[1];
-                        //issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
-                        //Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
-                        Address address = addressProvider.findActiveAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
-                        Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
-                        if (address == null || building == null) {
-                            Map<String, String> dataMap = new LinkedHashMap<>();
-                            columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                            LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
-                            importLogs.setData(dataMap);
-                            importLogs.setErrorDescription("address and building not exist");
-                            importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
-                            importLogs.setFieldName(column.getHeaderDisplay());
-                            importLogs.setSheetName(sheetName);
-                            return true;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Map<String, String> dataMap = new LinkedHashMap<>();
-                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                LOGGER.error("wrong building and address format  : field ={}", column.getHeaderDisplay());
-                importLogs.setData(dataMap);
-                importLogs.setErrorDescription("wrong building and address format");
-                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
-                importLogs.setFieldName(column.getHeaderDisplay());
-                importLogs.setSheetName(sheetName);
-                return true;
-            }
-        }
-        if (StringUtils.isNotBlank(customerAdminString)) {
-            try {
-                String  regex  = "^((?:(?!([,|()])).)*\\(\\d+\\),)*(?:(?!([,|()])).)*\\(\\d+\\)";
-                if(!Pattern.matches(regex,customerAdminString)){
-                    throw  new Exception("customer enterprise admins format error");
-                }
-            } catch (Exception e) {
-                Map<String, String> dataMap = new LinkedHashMap<>();
-                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
-                importLogs.setData(dataMap);
-                importLogs.setErrorDescription("customer enterprise admins format error");
-                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
-                importLogs.setFieldName(column.getHeaderDisplay());
-                importLogs.setSheetName(sheetName);
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean dealDynamicItemsAndTrackingUidField(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, List<DynamicColumnDTO> columns, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column,String sheetName ) {
@@ -1102,7 +1037,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                     LOGGER.error("can't find any scope items :item field ={}",column.getHeaderDisplay());
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("can't find any scope items ");
-                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
+                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
                     importLogs.setSheetName(sheetName);
                     return true;

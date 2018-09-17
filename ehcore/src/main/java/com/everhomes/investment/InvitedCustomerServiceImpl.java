@@ -1,6 +1,7 @@
 package com.everhomes.investment;
 
 
+import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -445,7 +446,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 if(addresses != null){
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
                     dtos.forEach(r ->{
-                        r.setAddressName(addressProvider.findAddressById(r.getAddressId()).getBuildingName() + "/" + addressProvider.findAddressById(r.getAddressId()).getApartmentName());
+                        Address address = addressProvider.findAddressById(r.getAddressId());
+                        r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                        r.setAddressArea(address.getBuildArea());
                     });
                     requirementDTO.setAddresses(dtos);
                 }
@@ -464,11 +467,6 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             }
 
 
-
-
-
-
-
             return invitedCustomerDTO;
         }
 
@@ -485,7 +483,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 List<CustomerRequirementAddressDTO> addressesDTO = new ArrayList<>();
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
-                    addressDTO.setAddressName(addressProvider.findAddressById(addressDTO.getAddressId()).getBuildingName() + "/" + addressProvider.findAddressById(addressDTO.getAddressId()).getApartmentName());
+                    Address address = addressProvider.findAddressById(addressDTO.getAddressId());
+                    addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                    addressDTO.setAddressArea(address.getRentArea());
                     addressesDTO.add(addressDTO);
 
                 });
