@@ -5,6 +5,8 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.category.GetCategoryCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
+import com.everhomes.rest.region.GetRegionCommand;
+import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.user.ListBorderAndContentResponse;
 import com.everhomes.rest.user.SendVerificationCodeCommand;
 import com.everhomes.rest.user.SetUserCurrentCommunityCommand;
@@ -82,5 +84,12 @@ public class SdkUserService {
         cmd.setId(id);
         RestResponse response = sdkRestClient.restCall("post", "/evh/category/getCategory", cmd, RestResponse.class);
         return (CategoryDTO) response.getResponseObject();
+    }
+
+    public RegionDTO getRegionById(Long id){
+        GetRegionCommand cmd = new GetRegionCommand();
+        cmd.setId(id);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/region/getRegion", cmd, RestResponse.class);
+        return (RegionDTO) response.getResponseObject();
     }
 }
