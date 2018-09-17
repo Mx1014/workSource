@@ -26,6 +26,7 @@ import java.util.List;
  * <li>contractId: 合同ID</li>
  * <li>dateStrBegin:计费开始</li>
  * <li>dateStrEnd:计费结束</li>
+ * <li>organizationId：当前登陆的企业ID</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -48,6 +49,8 @@ public class ModifyNotSettledBillCommand {
     private Long contractId;
     private String dateStrBegin;
     private String dateStrEnd;
+    //物业缴费V6.0 新增权限
+    private Long organizationId;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -192,5 +195,13 @@ public class ModifyNotSettledBillCommand {
 
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

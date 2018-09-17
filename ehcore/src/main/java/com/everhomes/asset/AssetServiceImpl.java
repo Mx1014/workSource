@@ -936,6 +936,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY,cmd.getOrganizationId());
     	assetProvider.modifyNotSettledBill(cmd);
     }
 
@@ -949,6 +950,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_DELETE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -5456,6 +5458,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM,cmd.getOrganizationId());
 		assetProvider.batchModifyBillSubItem(cmd);
 	}
 	
@@ -5557,10 +5560,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
 	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_SETTLED,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
 
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_PAID,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
 	

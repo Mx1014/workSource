@@ -63,11 +63,30 @@ delete from eh_service_module_privileges where privilege_id=204001001;
 -- REMARK: 物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
 update eh_acl_privileges set name='新增账单、批量导入',description='账单管理 新增账单、批量导入' where id=204001002;
 update eh_service_module_privileges set remark='新增账单、批量导入' where privilege_id=204001002;
-
-
-
-
-
+-- REMARK: 物业缴费V6.0 新增以下权限：“账单修改、删除”
+SET @p_id = 204001007;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '账单修改、删除', '账单管理 账单修改、删除', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '账单修改、删除', '0', NOW());
+-- REMARK: 物业缴费V6.0 新增以下权限：“未出批量转已出”
+SET @p_id = 204001008;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '未出批量转已出', '账单管理 未出批量转已出', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '未出批量转已出', '0', NOW());
+-- REMARK: 物业缴费V6.0 新增以下权限：“未缴批量转已缴”
+SET @p_id = 204001009;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '未缴批量转已缴', '账单管理 未缴批量转已缴', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '未缴批量转已缴', '0', NOW());
+-- REMARK: 物业缴费V6.0 新增以下权限：“批量减免”权限；
+SET @p_id = 204001010;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (@p_id, NULL, '批量减免', '账单管理 批量减免', NULL);
+SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量减免', '0', NOW());
 
 
 
