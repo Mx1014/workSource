@@ -6,6 +6,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.talent.*;
+import com.everhomes.rest.theme.GetThemeColorCommand;
 import com.everhomes.rest.theme.ThemeColorDTO;
 import com.everhomes.talent.TalentService;
 import com.everhomes.util.RequireAuthentication;
@@ -30,8 +31,8 @@ public class ThemeController extends ControllerBase {
 	@RequestMapping("getThemeColor")
 	@RestReturn(ThemeColorDTO.class)
 	@RequireAuthentication(false)
-	public RestResponse getThemeColor(){
-		ThemeColorDTO dto = themeService.getThemeColor();
+	public RestResponse getThemeColor(GetThemeColorCommand cmd){
+		ThemeColorDTO dto = themeService.getThemeColor(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

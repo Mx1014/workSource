@@ -4,6 +4,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.*;
+import com.everhomes.rest.theme.GetThemeColorCommand;
 import com.everhomes.rest.theme.ThemeColorDTO;
 import com.everhomes.techpark.park.ParkService;
 import com.everhomes.user.UserContext;
@@ -24,9 +25,14 @@ public class ThemeServiceImpl implements ThemeService {
 	private ConfigurationProvider configurationProvider;
 
 	@Override
-	public ThemeColorDTO getThemeColor() {
+	public ThemeColorDTO getThemeColor(GetThemeColorCommand cmd) {
 
-		String value = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "theme.color", null);
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+
+		String value = configurationProvider.getValue(namespaceId, "theme.color", null);
 
 		//没有设置则用默认的，默认的也没有则使用"#1E90FF"
 		if(value  == null){
