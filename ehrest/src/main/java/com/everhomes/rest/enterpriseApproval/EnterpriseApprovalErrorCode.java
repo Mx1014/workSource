@@ -23,4 +23,6 @@ public interface EnterpriseApprovalErrorCode {
 
     int ERROR_APPROVAL_NO_ACCESS = 20002;       //  你不在可见范围，请联系管理员。
 
+    int ERROR_APPROVAL_DELETE_UN_ABLE = 30001;   // 组织人事的审批暂不支持删除
+
 }

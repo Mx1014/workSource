@@ -1836,7 +1836,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             }
             signupInfoDTO.setValues(results);
         }
-        User user = getUserFromPhoneWithNamespaceId(signupInfoDTO.getPhone(), activity.getNamespaceId());
+        User user = userProvider.findUserById(activityRoster.getUid());
+        if (user == null) {
+            user = new User();
+            user.setId(0L);
+            user.setExecutiveTag((byte) 0);
+        }
         signupInfoDTO.setNickName(user.getNickName());
         signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
@@ -2810,8 +2815,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-                 ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
-                 if (roster != null && roster.getPayFlag() != null && ActivityRosterPayFlag.REFUND.getCode() == roster.getPayFlag()) {
+                 ActivityRoster cancelRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.CANCEL.getCode());
+                 if (cancelRoster != null && cancelRoster.getPayFlag() != null && cancelRoster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
                      dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
                  }
 	             dto.setActivityId(activity.getId());
