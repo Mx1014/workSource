@@ -326,7 +326,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return workbook;
     }
 
-    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact){
+    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact) {
         Cell cellA = dataRow.createCell(0); // 姓名
         Cell cellB = dataRow.createCell(1); // 账号
         Cell cellC = dataRow.createCell(2); // 英文名
@@ -352,8 +352,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellE.setCellValue(contact.getContactToken());
         cellF.setCellValue(contact.getContactShortToken());
         cellG.setCellValue(contact.getWorkEmail());
-        cellH.setCellValue(archivesService.convertToOrgNames(contact.getDepartments().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
-        cellI.setCellValue(archivesService.convertToOrgNames(contact.getJobPositions().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+        if (contact.getDepartments() != null)
+            cellH.setCellValue(archivesService.convertToOrgNames(contact.getDepartments().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+        if (contact.getJobPositions() != null)
+            cellI.setCellValue(archivesService.convertToOrgNames(contact.getJobPositions().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
     }
 
     @Override
