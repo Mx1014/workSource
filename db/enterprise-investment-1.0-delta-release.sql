@@ -21,7 +21,7 @@ INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid:=@eecid+1, 'enterprise_customer', 'expectedSignDate', '预计签约时间', 'Date', 10, '/1/10/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"datetime\", \"length\": 32}');
 
 
-SET @id = (select max(id) from eh_var_field_ranges);
+SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',2,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',5,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',6,'investment_promotion','enterprise_customer');
@@ -35,8 +35,8 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_pro
 
 
 SET @id = (select max(id) from eh_var_field_ranges);
-INSERT INTO `ehcore`.`eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
-INSERT INTO `ehcore`.`eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 10, 'investment_promotion', 'enterprise_customer');
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 10, 'investment_promotion', 'enterprise_customer');
 
 DELETE FROM eh_var_field_ranges WHERE field_id = 12109 AND module_name='enterprise_customer' AND module_type='enterprise_customer';
 DELETE FROM eh_var_field_ranges WHERE field_id = 5 AND module_name='enterprise_customer' AND module_type='enterprise_customer';
