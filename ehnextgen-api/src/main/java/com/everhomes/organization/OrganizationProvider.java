@@ -224,6 +224,7 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail);
 
+    OrganizationMemberDetails findOrganizationPersonnelByAccount(String account);
     /**
      * Create enterprise details
      *
@@ -256,7 +257,6 @@ public interface OrganizationProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback);
 
     OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
-
     List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count,
                                                                           ListingQueryBuilderCallback queryBuilderCallback);
 

@@ -136,6 +136,11 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
+        if(!StringUtils.isEmpty(cmd.getAccount()))
+            if (!organizationService.verifyPersonnelByAccount(cmd.getUpdateDetailId(), cmd.getWorkEmail()))
+                throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT,
+                        "Duplicate account");
+
 
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
@@ -147,6 +152,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if (employee == null)
             return null;
+        if(employee.getAccount() == null)
+            employee.setAccount(cmd.getAccount());
         employee.setEnName(cmd.getContactEnName());
         employee.setRegionCode(cmd.getRegionCode());
         employee.setContactShortToken(cmd.getContactShortToken());
