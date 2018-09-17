@@ -335,25 +335,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
-//        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-//        cmd1.setActionType((byte)13);
-//        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-//        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-//        Long appId = null;
-//        if(null != res && res.getServiceModuleApps().size() > 0){
-//            appId = res.getServiceModuleApps().get(0).getId();
-//        }
-//        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-//        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
-//            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
-//            member.setOrganizationId(organizaitonId);
-//        }
-//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                    "Insufficient privilege");
-//        }
-
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
@@ -715,6 +696,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
@@ -3230,6 +3213,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);

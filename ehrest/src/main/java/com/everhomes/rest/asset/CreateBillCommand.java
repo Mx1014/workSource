@@ -66,6 +66,8 @@ public class CreateBillCommand {
     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
     private Byte canDelete;
     private Byte canModify;
+    //物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    private Long organizationId;
     
     public Long getCategoryId() {
         return categoryId;
@@ -294,6 +296,14 @@ public class CreateBillCommand {
 
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 }
