@@ -34,7 +34,7 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12115,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_promotion','enterprise_customer');
 
 
-SET @id = (select max(id) from eh_var_field_ranges);
+SET @id = (select max(id) from eh_var_field_group_ranges);
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 10, 'investment_promotion', 'enterprise_customer');
 
@@ -214,3 +214,13 @@ END
 delimiter ;
 CALL transfer_field_group;
 -- END
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 房源招商增加“客户账单”动态表单
+INSERT INTO `eh_var_field_groups`(`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
+	VALUES (38, 'enterprise_customer', 0, '/38', '客户账单', '', 0, NULL, 2, 1, SYSDATE(), NULL, NULL);
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 38, 'enterprise_customer', 'enterprise_customer');	
+
+
+
+	
