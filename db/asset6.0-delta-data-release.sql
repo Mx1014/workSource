@@ -55,6 +55,16 @@ update eh_payment_bills set can_modify = 0 where switch=1 and status=1;
 update eh_payment_bill_items set can_delete = 0 where bill_id in (select id from eh_payment_bills where switch=1 and status=1 );
 update eh_payment_bill_items set can_modify = 0 where bill_id in (select id from eh_payment_bills where switch=1 and status=1 );
 	
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.0 将“ 账单查看、筛选”的权限去掉，因为有此模块权限的用户默认就会有查看和筛选的权限；
+delete from eh_acl_privileges where id=204001001;
+delete from eh_service_module_privileges where privilege_id=204001001;
+
+
+
+
+
+
 
 
 
