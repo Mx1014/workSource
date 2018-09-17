@@ -179,11 +179,13 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
                 if(Modifier.isStatic(mod) || Modifier.isFinal(mod)){
                     continue;
                 }
-                if (field.getType().equals(Integer.class)) {
-                    field.set(obj, Integer.valueOf(map.get(field.getName()).toString()));
-                    continue;
-                }
                 field.setAccessible(true);
+                if (field.getType().equals(Integer.class)) {
+                    if (map.get(field.getName()) != null){
+                        field.set(obj, Integer.valueOf(map.get(field.getName()).toString()));
+                        continue;
+                    }
+                }
                 field.set(obj, map.get(field.getName()));
             }
         } catch (InstantiationException e) {
