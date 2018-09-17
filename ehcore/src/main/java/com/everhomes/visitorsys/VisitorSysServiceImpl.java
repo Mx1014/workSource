@@ -1205,6 +1205,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             dto.setHardwareId(r.getHardwareId());
             dto.setMaxDuration(r.getMaxDuration());
             dto.setMaxCount(r.getMaxCount());
+            dto.setEnableAmount(r.getEnableAmount());
+            dto.setEnableDuration(r.getEnableDuration());
             return dto;
         }).collect(Collectors.toList()));
         return response;
@@ -2322,18 +2324,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(null != visitor.getDoorAccessInvalidTimes())
                 doorCmd.setTotalAuthAmount(visitor.getDoorAccessInvalidTimes());
         }else{
-            // TODO: 2018/9/13 修改门禁有效时间字段？
             doorCmd.setAuthRuleType((byte)0);
             long now = System.currentTimeMillis();
             Calendar instance = Calendar.getInstance();
             instance.setTimeInMillis(now);
             doorCmd.setValidFromMs(now);
-            if(visitor.getInvalidTime()!=null && visitor.getInvalidTime().length()>0) {
-                Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
-                if (matcher.find()) {
-                    instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
-                    doorCmd.setValidEndMs(instance.getTimeInMillis());
-                }
+            if(null != visitor.getDoorAccessInvalidDuration()){
+                instance.add(Calendar.DATE,visitor.getDoorAccessInvalidDuration());
+                doorCmd.setValidEndMs(instance.getTimeInMillis());
             }
         }
 
@@ -2678,6 +2676,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
         if(null != bean)
             visitorSysDoorAccessProvider.deleteVisitorSysDoorAccesss(bean.getId());
+        if(bean.getDefaultDoorAccessFlag().equals((byte)1)){
+            List<VisitorSysDoorAccess> dooraccesses = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(bean.getNamespaceId(),bean.getOwnerType(),bean.getOwnerId());
+            if(null != dooraccesses && dooraccesses.size() > 0){
+                VisitorSysDoorAccess newdefault = dooraccesses.get(0);
+                CreateOrUpdateDoorAccessCommand newdefaultCmd = new CreateOrUpdateDoorAccessCommand();
+                newdefaultCmd.setId(newdefault.getId());
+                newdefaultCmd.setNamespaceId(newdefault.getNamespaceId());
+                newdefaultCmd.setOwnerType(newdefault.getOwnerType());
+                newdefaultCmd.setOwnerId(newdefault.getOwnerId());
+                setDefaultAccess(newdefaultCmd);
+            }
+        }
     }
 
     @Override
