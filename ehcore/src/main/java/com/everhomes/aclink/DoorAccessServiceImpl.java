@@ -85,6 +85,8 @@ import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils; 
 import com.google.gson.JsonArray;
+import com.everhomes.util.excel.ExcelUtils;
+import com.google.gson.JsonArray;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -131,7 +133,9 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
-    
+
+    @Autowired
+    UclbrtHttpClient uclbrtHttpClient;
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
@@ -1709,7 +1713,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	cmd.setPageSize(0);
         }
         //end 20180608
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+        
+        //1.临时授权也要用蓝牙
+        //2.listAesUserKey这个接口只用支持DoorAccessDriverType是左邻的门禁
+        //by liuyilin 20180906
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
         //TODO when the key is invalid, MUST invalid it and generate a command.
         List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
         for(DoorAuth auth : auths) {
@@ -2569,6 +2577,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      * @auther wh
      * */ 
     private void doUclbrtQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+    	LOGGER.info("ucl 进入doQRKEY " );
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCreatorUid(auth.getApproveUserId());
@@ -2584,7 +2593,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
-        	qr.setQrCodeKey(UclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
+        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
         	}
@@ -2635,7 +2644,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType driverType, boolean generate) {
     	Long t0 = DateHelper.currentGMTTime().getTime();
         User user = UserContext.current().getUser();
-
+        Long t1 = DateHelper.currentGMTTime().getTime();
+        LOGGER.info("开始获取auths" );
         ListingLocator locator = new ListingLocator();
         //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), driverType != null? driverType.getCode() : null, 60));
@@ -2644,7 +2654,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
         resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
-        Long tUcl = 0L;
+
+        Long t2 = DateHelper.currentGMTTime().getTime();
+        LOGGER.info("auths 获取 "+(t2-t1));
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
@@ -2671,14 +2683,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
             	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
             	//added by wh
+            	Long t3 = DateHelper.currentGMTTime().getTime();
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
-                Long t1 = DateHelper.currentGMTTime().getTime();
                 doUclbrtQRKey(user, doorAccess, auth, qrKeys);
-                Long t2 = DateHelper.currentGMTTime().getTime();
-                LOGGER.debug("一次请求耗时" +(t2 - t1));
-                tUcl += t2 - t1;
+
+                Long t4 = DateHelper.currentGMTTime().getTime();
+
+                LOGGER.info("拿一个uclbrt 的二维码"+(t4-t3));
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
@@ -2711,8 +2724,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
            
             }
-        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0));
-        LOGGER.debug("UCL请求时间" + (tUcl));
+        LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
         return resp;              
      }
     
@@ -4397,28 +4409,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			String arg3) {
         //Must be
         try {
-        	ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					LOGGER.info("start run.....");
-					 Long id = (Long)arg2;
-			         if(null == id) {
-			              LOGGER.error("None of UserIdentifier");
-			         } else {
-			        	 if(LOGGER.isDebugEnabled()) {
-			        		 LOGGER.debug("newUserAutoAuth id= " + id); 
-			        	 }
-			              
-		              try {
-		            	  newUserAutoAuth(id);
-		              } catch(Exception exx) {
-		            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
-		            	  }
+        	//以前的平台包会在监听到publish之前就执行完update,所以没有问题;更新之后会在事务提交前就监听到,如果另起一个线程,查到的是更新前的数据,授权失败;暂改成同步执行  by liuyilin 20180827
+			LOGGER.info("start run.....");
+			 Long id = (Long)arg2;
+	         if(null == id) {
+	              LOGGER.error("None of UserIdentifier");
+	         } else {
+	        	 if(LOGGER.isDebugEnabled()) {
+	        		 LOGGER.debug("newUserAutoAuth id= " + id); 
+	        	 }
+	              
+              try {
+            	  newUserAutoAuth(id);
+              } catch(Exception exx) {
+            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
+            	  }
 
-			         }
-				}
-			});
-			
+	         }
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
         } finally{

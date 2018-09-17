@@ -244,8 +244,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private MessagingService messagingService;
 	@Autowired
 	private LocaleStringService localeStringService;
-	
-	public static ApprovalCategoryDTO defaultCategory = new ApprovalCategoryDTO(0L,ApprovalType.ABSENCE.getCode(),"事假");
 
 	@Override
 	public ApprovalCategoryDTO getApprovalCategoryDetail(GetApprovalCategoryCommand cmd) {
@@ -394,6 +392,24 @@ public class ApprovalServiceImpl implements ApprovalService {
     private ApprovalCategory getAndCheckApprovalCategory(Long id, ApprovalOwnerInfo ownerInfo) {
         return getAndCheckApprovalCategory(id, ownerInfo.getNamespaceId(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId());
     }
+
+	@Override
+	public List<ApprovalCategoryDTO> listBaseApprovalCategory(List<String> ignoreNames) {
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listBaseApprovalCategory();
+		if (CollectionUtils.isEmpty(categoryList)) {
+			return new ArrayList<>();
+		}
+
+		categoryList = categoryList.stream().filter(c -> !ignoreNames.contains(c.getCategoryName())).collect(Collectors.toList());
+
+		List<ApprovalCategoryDTO> results = categoryList.stream().map(c -> {
+			ApprovalCategoryDTO dto = ConvertHelper.convert(c, ApprovalCategoryDTO.class);
+			dto.setTimeStep(c.getTimeStep().doubleValue());
+			return dto;
+		}).collect(Collectors.toList());
+
+		return results;
+	}
 
 	@Override
 	public ListApprovalCategoryResponse initAndListApprovalCategory(ListApprovalCategoryCommand cmd) {

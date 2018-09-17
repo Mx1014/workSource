@@ -71,37 +71,29 @@ public class AppUrlServiceImpl implements AppUrlService {
 	
 	@Override
 	public void createAppInfo(CreateAppInfoCommand cmd){
+		UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
 
-		if(cmd != null && cmd.getDtos()!=null && cmd.getDtos().size()>1){
-			AppUrlDeviceDTO dto = cmd.getDtos().get(0);
-			if(dto.getId() != null){//存在ID则走更新路线
-				for(AppUrlDeviceDTO o : cmd.getDtos() ){
-					UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
-					uc.setId(o.getId());
-					uc.setOsType(o.getOsType());
-					uc.setDownloadUrl(o.getDownloadUrl());
-					uc.setDescription(cmd.getDescription());
-					uc.setLogoUrl(cmd.getLogoUrl());
-					uc.setName(cmd.getName());
-					uc.setNamespaceId(cmd.getNamespaceId());
-					
-					AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+		uc.setDescription(cmd.getDescription());
+
+		uc.setLogoUrl(cmd.getLogoUrl());
+		uc.setName(cmd.getName());
+		uc.setNamespaceId(cmd.getNamespaceId());
+
+		if(cmd != null && cmd.getDtos()!=null && cmd.getDtos().size()>0){
+			for(AppUrlDeviceDTO o : cmd.getDtos() ){
+
+				uc.setId(o.getId());
+				uc.setOsType(o.getOsType());
+				uc.setDownloadUrl(o.getDownloadUrl());
+
+				
+				AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+				if(bo.getId() != null){//存在ID则走更新路线
 					appUrlProvider.updateAppInfo(bo);
-				}
-			}else{//走新增路线
-				for(AppUrlDeviceDTO o : cmd.getDtos() ){
-					UpdateAppInfoCommand uc = new UpdateAppInfoCommand();
-					uc.setId(o.getId());
-					uc.setOsType(o.getOsType());
-					uc.setDownloadUrl(o.getDownloadUrl());
-					uc.setDescription(cmd.getDescription());
-					uc.setLogoUrl(cmd.getLogoUrl());
-					uc.setName(cmd.getName());
-					uc.setNamespaceId(cmd.getNamespaceId());
-					
-					AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+				}else{//走新增路线
 					appUrlProvider.createAppInfo(bo);
 				}
+				
 			}
 		}
 		
@@ -134,7 +126,8 @@ public class AppUrlServiceImpl implements AppUrlService {
 			returnDTO.getDtos().add(dto);
 			
 			returnDTO.setDescription(o.getDescription());
-			returnDTO.setLogoUrl(o.getLogoUrl());
+			String url = contentServerService.parserUri(o.getLogoUrl());
+			returnDTO.setLogoUrl(url);
 			returnDTO.setName(o.getName());
 			returnDTO.setNamespaceId(o.getNamespaceId());
 			

@@ -92,7 +92,16 @@ public class PunchConstants {
 	public static final int GO_OUT_TEMPLATE_TITLE = 2;
 	public static final int GO_OUT_TEMPLATE_CONTENT = 3;
 	
-	
+
 	/** punchType的scope "punch.punchType"  */
 	public static final String PUNCH_PUNCHTYPE_SCOPE ="punch.punchType";
+	/** punchType的scope "punch.time"  */
+	public static final String PUNCH_TIME_SCOPE ="punch.time";
+	// 打卡提醒
+	public static final String PUNCH_NOTIFICATION_SCOPE = "punch.remind";
+	public static final int PUNCH_NOTIFICATION_TITLE = 1;
+	public static final int PUNCH_NOTIFICATION_ON_DUTY_CONTENT = 2;
+	public static final int PUNCH_NOTIFICATION_OFF_DUTY_CONTENT = 3;
+
+	public static final String NEXT_DAY ="nextDay";
 }

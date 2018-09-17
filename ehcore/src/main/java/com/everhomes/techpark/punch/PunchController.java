@@ -283,8 +283,8 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("listApprovalCategories")
 	@RestReturn(value = ListApprovalCategoriesResponse.class)
-	public RestResponse listApprovalCategories(ListApprovalCategoriesCommand cmd) {
-		RestResponse res = new RestResponse(punchService.listApprovalCategories(cmd));
+	public RestResponse listApprovalCategories(ListApprovalCategoriesCommand cmd, HttpServletRequest request) {
+		RestResponse res = new RestResponse(punchService.listApprovalCategories(cmd, request));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
@@ -693,8 +693,8 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getAdjustRuleUrl")
 	@RestReturn(GetAdjustRuleUrlResponse.class)
-	public RestResponse getAdjustRuleUrl(){ 
-		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl()));
+	public RestResponse getAdjustRuleUrl(HttpServletRequest request){
+		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl(request)));
 	}
 
 	/**

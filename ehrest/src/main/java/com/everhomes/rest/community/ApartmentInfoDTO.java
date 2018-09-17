@@ -8,6 +8,8 @@ public class ApartmentInfoDTO {
 	private Long addressId;
 	private String communityName;
 	private String buildingName;
+	private Long buildingId;
+
 	private String apartmentFloor;
 	private String apartmentName;
 	private Byte livingStatus;
@@ -110,7 +112,15 @@ public class ApartmentInfoDTO {
 	public void setAreaAveragePrice(Double areaAveragePrice) {
 		this.areaAveragePrice = areaAveragePrice;
 	}
-	
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

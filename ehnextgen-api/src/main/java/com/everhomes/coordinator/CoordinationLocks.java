@@ -81,6 +81,8 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
+    FILE_CONTENT_CHECK("file.content.check"),
+    
     FLOW_CASE_UPDATE("flowCase.update"),
     FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
@@ -152,6 +154,8 @@ public enum CoordinationLocks {
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
+    PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
+    PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
 
 

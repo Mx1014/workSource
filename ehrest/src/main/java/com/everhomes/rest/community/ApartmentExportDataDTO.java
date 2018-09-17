@@ -8,7 +8,7 @@ public class ApartmentExportDataDTO {
 	private String buildingName;
 	private String apartmentFloor;
 	private String apartmentName;
-	private Byte   livingStatus;
+	private String livingStatus;
 	private Double areaSize;
 	private Double rentArea;
 	private Double freeArea;
@@ -42,10 +42,10 @@ public class ApartmentExportDataDTO {
 	public void setApartmentName(String apartmentName) {
 		this.apartmentName = apartmentName;
 	}
-	public Byte getLivingStatus() {
+	public String getLivingStatus() {
 		return livingStatus;
 	}
-	public void setLivingStatus(Byte livingStatus) {
+	public void setLivingStatus(String livingStatus) {
 		this.livingStatus = livingStatus;
 	}
 	public Double getAreaSize() {

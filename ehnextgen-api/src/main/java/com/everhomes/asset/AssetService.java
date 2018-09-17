@@ -149,7 +149,7 @@ public interface AssetService {
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
-	PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd);
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
@@ -203,8 +203,6 @@ public interface AssetService {
     
 	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
 	
-	void transferOrderPaymentType();
-
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
@@ -216,10 +214,6 @@ public interface AssetService {
 
 	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-	void createAnAppMapping(CreateAnAppMappingCommand cmd);
-
-	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
-    
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     
     ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
@@ -246,7 +240,7 @@ public interface AssetService {
 
 	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
 
-	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd);
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
@@ -255,6 +249,25 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+	
+	/**
+	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
+	 */
+	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId);
+
+	/**
+	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
+	 */
+	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	
+	/**
+	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
+	 */
+	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
+
+	void tranferAssetMappings();
+	
+	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
 	
 	void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId);
 }

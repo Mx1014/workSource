@@ -142,6 +142,15 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 
 	@Override
+	public ParkingRechargeOrder findParkingRechargeOrderByBizOrderNum(String bizOrderNum) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.BIZ_ORDER_NO.eq(bizOrderNum));
+		return ConvertHelper.convert(query.fetchAny(), ParkingRechargeOrder.class);
+	}
+
+	@Override
 	public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -586,14 +595,18 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-                                                              Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,
-                                                              SortField order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize){
+                                                              Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,TableField field,
+                                                              int order, String cardTypeId, String ownerKeyWords,  Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if (null != pageAnchor && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
+        if (null != pageAnchor && pageAnchor != 0) {
+        	if (order > 0)
+				query.addConditions(field.gt(new Timestamp(pageAnchor)));
+        	else
+				query.addConditions(field.lt(new Timestamp(pageAnchor)));
+		}
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
@@ -629,13 +642,21 @@ public class ParkingProviderImpl implements ParkingProvider {
 			.or(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.like("%"+ownerKeyWords+"%")));
 		}
 
-        if (null != order) {
-            query.addOrderBy(order);
+        if (null != field) {
+			if (order > 0)
+           		 query.addOrderBy(field.asc());
+			else
+				query.addOrderBy(field.desc());
         }
         if(null != pageSize)
         	query.addLimit(pageSize);
         
-        List<ParkingCardRequest> resultList = query.fetch().map(r -> ConvertHelper.convert(r, ParkingCardRequest.class));
+        List<ParkingCardRequest> resultList = query.fetch().map(r -> {
+			ParkingCardRequest convert = ConvertHelper.convert(r, ParkingCardRequest.class);
+			if (field != null)
+				convert.setAnchor((Timestamp) r.getValue(field));
+			return convert;
+		});
         
     	return resultList;
     }

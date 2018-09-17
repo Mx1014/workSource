@@ -261,6 +261,24 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
 	}
 	
+	public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
+    	LOGGER.error("Insufficient privilege, handler createOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler preparePaymentBillOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+
+	public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags) {
+		LOGGER.error("Insufficient privilege, handler listBizPayeeAccounts");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+	
 	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
 		LOGGER.error("Insufficient privilege, handler syncRuiAnCMBillToZuolin");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,

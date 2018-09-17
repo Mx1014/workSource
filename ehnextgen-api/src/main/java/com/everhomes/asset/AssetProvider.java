@@ -80,7 +80,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
 
-    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
 
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
@@ -149,12 +149,9 @@ public interface AssetProvider {
 
     String findIdentifierByUid(Long aLong);
 
-
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
-
     Long findAssetOrderByBillIds(List<String> billIds);
-
-    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+    
+    void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
 
@@ -243,7 +240,7 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId);
 
 
-    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
+    void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId, List<com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig> toSaveConfigs);
 
     AssetPaymentOrder getOrderById(Long orderId);
 
@@ -375,24 +372,25 @@ public interface AssetProvider {
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
-	void transferOrderPaymentType();    
-
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-    void insertAppMapping(EhAssetModuleAppMappings relation);
+    AssetModuleAppMapping insertAppMapping(AssetModuleAppMapping mapping);
 
-    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
-
-    boolean checkExistAsset(Long assetCategoryId);
-
-    boolean checkExistContract(Long contractCategoryId);
-
-    Long checkEnergyFlag(Integer namespaceID);
-
-    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    /**
+     * 判断缴费是否已经存在关联合同的记录
+     * @param assetCategoryId
+     * @return
+     */
+    boolean checkExistAssetMapContract(Long assetCategoryId);
     
+    boolean checkExistAssetMapEnergy(Long assetCategoryId);
+    
+    void updateAssetMapContract(AssetModuleAppMapping mapping);
+    
+    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
+
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
     String getProjectNameByBillID(Long billId);
@@ -406,6 +404,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
 	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
@@ -418,6 +417,11 @@ public interface AssetProvider {
     
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 	
+	public List<PaymentBills> findBillsByIds(List<String> billIds);
+	
+	List<PaymentBillOrder> findPaymentBillOrderRecordByOrderNum(String bizOrderNum);
+	
+	void updatePaymentBillOrder(String bizOrderNum, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel);
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void updateBillDueDayCount(Long billId, Long dueDayCount);
@@ -430,6 +434,27 @@ public interface AssetProvider {
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 	
+	void tranferAssetMappings();
+	
+	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
+	
+	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,
+			String sourceType);
+	
+	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	
+	/**
+	 * 物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
+	 * @param billGroupId
+	 * @param chargingItemId
+	 * @return
+	 */
+	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
+	
+	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
+	
+	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
+				
 	Long createCMBill(PaymentBills paymentBills);
 	
 	void createCMBillItem(PaymentBillItems items);

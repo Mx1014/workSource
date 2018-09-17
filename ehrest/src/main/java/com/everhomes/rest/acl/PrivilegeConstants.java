@@ -274,6 +274,9 @@ public interface PrivilegeConstants {
 
 
     long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+    long ENTERPRISE_CUSTOMER_CHANGE_APTITUDE = 21116L;// 转为资质客户
+
+
 
     long CONTRACT_MODULE = 21200L; //合同模块id
     long CONTRACT_CREATE = 21201L;//新增合同
@@ -360,6 +363,7 @@ public interface PrivilegeConstants {
     long REQUISITION_MODULE = 25000L;
     long REQUISITION_VIEW = 250001001L;
     long REQUISITION_CREATE = 250001002L;
+    long REQUISITION_DELETE = 250001003L;
 
     //企业管理
     long ORGANIZATION_CREATE = 33001L;

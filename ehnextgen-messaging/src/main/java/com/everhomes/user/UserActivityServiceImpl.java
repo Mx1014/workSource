@@ -956,6 +956,49 @@ public class UserActivityServiceImpl implements UserActivityService {
         return rsp;
     }
 
+    @Override
+    public GetUserTreasureNewResponse getUserTreasureNew() {
+        GetUserTreasureNewResponse rsp = new GetUserTreasureNewResponse();
+
+        if(!userService.isLogon()) {
+            return rsp;
+        }
+
+        User user = UserContext.current().getUser();
+
+        BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
+
+        // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+        // UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_ORDER_COUNT);
+
+        if (response != null && response.getResponse() != null) {
+            long promotionCount = response.getResponse().promotionCount;
+            long shoppingCardCount = response.getResponse().shoppingCardCount;
+            long orderCount = response.getResponse().orderCount;
+
+            rsp.setCoupon(promotionCount + shoppingCardCount);
+            rsp.setOrder(orderCount);
+        }
+        if (rsp.getCoupon() == null) {
+            rsp.setCoupon(0L);
+        }
+        if (rsp.getOrder() == null) {
+            rsp.setOrder(0L);
+        }
+        UserTreasureDTO point = new UserTreasureDTO();
+        try {
+            point = pointService.getPointTreasure();
+        }catch (Exception e) {
+            LOGGER.error("get point exception");
+            e.printStackTrace();
+        }
+        rsp.setPoint(point.getCount());
+        if (rsp.getPoint() == null) {
+            rsp.setPoint(0L);
+        }
+        return rsp;
+    }
+
     private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
         Map<String, Object> param = new HashMap<>();
         param.put("namespaceId", user.getNamespaceId());

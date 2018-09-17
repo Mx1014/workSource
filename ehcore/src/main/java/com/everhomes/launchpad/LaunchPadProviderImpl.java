@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
+import com.everhomes.rest.portal.PortalPublishType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -461,15 +462,23 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 
 	@Override
-	public void deleteLaunchPadLayout(Integer namespaceId, String name) {
+	public void deleteLaunchPadLayout(Integer namespaceId, String name, Byte publishType) {
 
 		assert namespaceId != null;
 		assert name != null;
+		assert publishType != null;
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLaunchPadLayouts.class));
 		DeleteQuery<EhLaunchPadLayoutsRecord> query = context.deleteQuery(Tables.EH_LAUNCH_PAD_LAYOUTS);
 		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name));
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+			query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNull());
+		}else {
+			query.addConditions(Tables.EH_LAUNCH_PAD_LAYOUTS.PREVIEW_PORTAL_VERSION_ID.isNotNull());
+		}
+
 		query.execute();
 	}
 
@@ -747,6 +756,10 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
 		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
+
+        //增加版本功能，默认找正式版本，有特别标识的找该版本功能
+        condition = condition.and(getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 		if(sceneType != null){
 			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
 		}
@@ -759,7 +772,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		if(condition != null)
 			step.where(condition);
 
-		Record record = step.fetchOne();
+		Record record = step.fetchAny();
 
 		if(record != null){
 			return ConvertHelper.convert(record, LaunchPadItem.class);

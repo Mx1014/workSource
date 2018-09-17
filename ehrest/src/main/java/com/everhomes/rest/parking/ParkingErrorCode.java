@@ -38,6 +38,8 @@ public interface ParkingErrorCode {
     int RECHARE_TIME_OUT = 10031;  //获取充值结果超时
 
     int ERROR_PARKING_TYPE_NOT_FOUND = 10032;  //未查询到月卡类型信息
+
+    int CAR_ENTRY_INFO_NOT_FOUND = 10033;
     
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败

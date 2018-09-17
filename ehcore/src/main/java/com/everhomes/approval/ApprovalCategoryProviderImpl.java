@@ -19,7 +19,6 @@ import com.everhomes.server.schema.tables.records.EhApprovalCategoryInitLogsReco
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -90,12 +89,13 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 	}
 
 	@Override
-	public ApprovalCategory findApprovalCategoryByOriginId(Long originId, Long ownerId) {
+	public ApprovalCategory findApprovalCategoryByOriginId(Long originId, Integer namespaceId, Long ownerId) {
 		assert (originId != null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhApprovalCategoriesRecord> query = context.selectQuery(Tables.EH_APPROVAL_CATEGORIES);
 		query.addConditions(Tables.EH_APPROVAL_CATEGORIES.ORIGIN_ID.eq(originId));
 		query.addConditions(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_APPROVAL_CATEGORIES.STATUS.ne(ApprovalCategoryStatus.DELETED.getCode()));
 
 		EhApprovalCategoriesRecord record = query.fetchOne();

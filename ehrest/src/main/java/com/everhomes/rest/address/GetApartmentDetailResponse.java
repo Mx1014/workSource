@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetApartmentDetailResponse {
 	private String buildingName;
+	private Long buildingId;
 	private String apartmentName;
 	private Byte status;
 	private Double areaSize;
@@ -64,7 +65,16 @@ public class GetApartmentDetailResponse {
 	private Byte arrangementInvolved;
 	private Byte individualCustomerInvolved;
 	private Byte enterpriseCustomerInvolved;
+	private Integer buildingFloorNumber;
 	
+	public Integer getBuildingFloorNumber() {
+		return buildingFloorNumber;
+	}
+
+	public void setBuildingFloorNumber(Integer buildingFloorNumber) {
+		this.buildingFloorNumber = buildingFloorNumber;
+	}
+
 	public Byte getIndividualCustomerInvolved() {
 		return individualCustomerInvolved;
 	}
@@ -280,6 +290,13 @@ public class GetApartmentDetailResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
 
 	@Override
 	public String toString() {

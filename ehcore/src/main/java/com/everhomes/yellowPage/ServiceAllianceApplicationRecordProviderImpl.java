@@ -4,6 +4,7 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,5 +92,20 @@ public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAlli
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public ServiceAllianceApplicationRecord findServiceAllianceApplicationRecordByFlowCaseId(Long flowCaseId) {
+
+		List<ServiceAllianceApplicationRecord> records = getReadOnlyContext().select()
+				.from(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS)
+				.where(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS.FLOW_CASE_ID.eq(flowCaseId)).fetch()
+				.map(r -> ConvertHelper.convert(r, ServiceAllianceApplicationRecord.class));
+
+		if (CollectionUtils.isEmpty(records)) {
+			return null;
+		}
+
+		return records.get(0);
 	}
 }

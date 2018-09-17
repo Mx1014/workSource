@@ -58,17 +58,9 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
-import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/contract")
@@ -591,4 +583,20 @@ public class ContractController extends ControllerBase {
 		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
 		return new RestResponse(detail);
 	}
+	
+	/**
+	 * <b>URL: /contract/dealBillsGeneratedByDenunciationContract</b>
+	 * <p>删除历史退约合同产生的多余账单</p>
+	 */
+	@RequestMapping("dealBillsGeneratedByDenunciationContract")
+	@RestReturn(String.class)
+	public RestResponse dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.dealBillsGeneratedByDenunciationContract(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

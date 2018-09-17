@@ -602,6 +602,21 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /parking/wechatPayNotify</b>
+     * <p>提供微信扫码支付成功后调用(临时)</p>
+     */
+    @RequestMapping("wechatPayNotify")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse wechatPayNotify(WechatPayNotifyCommand cmd) {
+        parkingService.notifyParkingRechargeOrderPaymentWechat(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/getRechargeOrderResult</b>
             * <p>支付后，获取支付结果</p>
             */
