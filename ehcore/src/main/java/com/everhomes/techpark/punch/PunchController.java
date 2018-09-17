@@ -62,6 +62,7 @@ import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentRespo
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
 import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
+import com.everhomes.rest.techpark.punch.ThirdPartPunchClockCommand;
 import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
@@ -708,5 +709,21 @@ public class PunchController extends ControllerBase {
 		return new RestResponse(resp);
 	}
 	
-	
+
+	/**
+	 * <b>URL: /techpark/punch/thirdPartPunchClock</b>
+	 * <p>
+	 * 第三方调用的打卡服务
+	 * </p>
+	 */
+	@RequestMapping("thirdPartPunchClock")
+	@RestReturn(value = String.class)
+	public RestResponse thirdPartPunchClock(@Valid ThirdPartPunchClockCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(punchService.thirdPartPunchClock(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

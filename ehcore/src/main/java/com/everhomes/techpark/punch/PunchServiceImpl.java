@@ -204,6 +204,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -240,6 +241,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -2257,10 +2259,10 @@ public class PunchServiceImpl implements PunchService {
         //
         byte punchCode;
         PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
-
+        
         try {
             punchCode = verifyPunchClock(cmd, punchLog).getCode();
-            return createPunchLog(cmd, punchTime, punchCode, punchLog);
+            return createPunchLog(punchTime, punchCode, punchLog);
         } catch (Exception e) {
             //有报错就表示不成功
             LOGGER.error("punch clock error", e);
@@ -2270,19 +2272,22 @@ public class PunchServiceImpl implements PunchService {
         }
     }
 
-    private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime,
-                                              byte punchCode, PunchLog punchLog) {
+    private PunchClockResponse createPunchLog(String punchTime,
+			byte punchCode, PunchLog punchLog) {
 
         PunchClockResponse response = new PunchClockResponse();
+        if(punchLog.getCreateType() == null){
+			punchLog.setCreateType(CreateType.NORMAL_PUNCH.getCode());
+		}
         Long userId = UserContext.current().getUser().getId();
         // new Date()为获取当前系统时间为打卡时间
         punchLog.setUserId(userId);
         punchLog.setPunchTime(Timestamp.valueOf(punchTime));
         Calendar punCalendar = Calendar.getInstance();
         punCalendar.setTime(punchLog.getPunchTime());
-        punchLog.setPunchDate(calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId));
+        punchLog.setPunchDate(calculatePunchDate(punCalendar, punchLog.getEnterpriseId(), userId));
 
-        PunchLogDTO punchType = getPunchType(userId, cmd.getEnterpriseId(), punchLog.getPunchTime(), punchLog.getPunchDate());
+        PunchLogDTO punchType = getPunchType(userId, punchLog.getEnterpriseId(), punchLog.getPunchTime(), punchLog.getPunchDate());
         response.setClockStatus(punchType.getClockStatus());
         punchLog.setPunchOrganizationId(punchType.getPunchOrgnizationId());
         punchLog.setRuleTime(punchType.getRuleTime());
@@ -2293,7 +2298,7 @@ public class PunchServiceImpl implements PunchService {
             punchType.setPunchType(PunchType.OFF_DUTY.getCode());
         }
         punchLog.setPunchIntervalNo(punchType.getPunchIntervalNo());
-        if (null == cmd.getPunchType()) {
+        if (null == punchLog.getPunchType()) {
             punchLog.setPunchType(punchType.getPunchType());
         } else {
             switch (PunchType.fromCode(punchType.getPunchType())) {
@@ -2325,7 +2330,7 @@ public class PunchServiceImpl implements PunchService {
 //		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
 //		    this.dbProvider.execute((status) -> {
         try {
-            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, cmd.getEnterpriseId());
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, punchLog.getEnterpriseId());
             refreshPunchDayLog(memberDetail, punCalendar);
         } catch (ParseException e) {
             LOGGER.error("refresh punch day log error", e);
@@ -7729,12 +7734,11 @@ public class PunchServiceImpl implements PunchService {
             if (r.getA() == null || r.getA().trim().equals("")) {
                 LOGGER.error("have row is empty.rowIndex=" + (rowIndex + 1));
                 break;
-            }
-            PunchClockCommand cmd = new PunchClockCommand();
-            cmd.setEnterpriseId(Long.valueOf(r.getA()));
+            } 
             try {
-                PunchLog pl = ConvertHelper.convert(cmd, PunchLog.class);
-                createPunchLog(cmd, datetimeSF.get().format(new SimpleDateFormat("yyyy/MM/dd  HH:mm:ss").parse(r.getB())), ClockCode.SUCESS.getCode(), pl);
+                PunchLog pl = new PunchLog();
+                pl.setEnterpriseId(Long.valueOf(r.getA()));
+                createPunchLog( datetimeSF.get().format(new SimpleDateFormat("yyyy/MM/dd  HH:mm:ss").parse(r.getB())), ClockCode.SUCESS.getCode(), pl);
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -12711,5 +12715,18 @@ public class PunchServiceImpl implements PunchService {
             return null;
         });
     }
+
+	@Override
+	public PunchClockResponse thirdPartPunchClock(ThirdPartPunchClockCommand cmd) { 
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
+        cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
+		String punchTime = datetimeSF.get().format(new Date());
+		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
+		if(punchLog.getCreateType() == null){
+			punchLog.setCreateType(CreateType.OTHER_THRID_PUNCH.getCode());
+		}
+		punchLog.setPunchType(PunchType.ON_DUTY.getCode());
+		return createPunchLog(punchTime, ClockCode.SUCESS.getCode(), punchLog);
+	}
 
 }

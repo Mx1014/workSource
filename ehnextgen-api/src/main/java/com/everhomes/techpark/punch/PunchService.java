@@ -76,6 +76,7 @@ import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
+import com.everhomes.rest.techpark.punch.ThirdPartPunchClockCommand;
 import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
@@ -449,6 +450,8 @@ public interface PunchService {
 	 * 用于上线时进行手动初始化操作
 	 */
 	void punchDayLogInitializeByMonth(String initMonth) throws ParseException;
+
+	PunchClockResponse thirdPartPunchClock(ThirdPartPunchClockCommand cmd);
 
 
 
