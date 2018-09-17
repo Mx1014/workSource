@@ -830,6 +830,20 @@ CREATE TABLE `eh_aclink_form_values` (
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 输入值';
 
+CREATE TABLE `eh_aclink_group` (
+`id` bigint(20) NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`name` varchar(1024) NULL COMMENT '门禁组名称',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`owner_id` bigint(20) NOT NULL COMMENT '记录所属对象Id',
+`owner_type` tinyint(4) NOT NULL COMMENT '记录所属对象类型 0园区 1公司 2家庭 3门禁 4用户 5授权记录',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁组';
+
 ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
 ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
 
