@@ -79,6 +79,14 @@ public class UpdateFieldGroupsCommand {
         this.ownerId = ownerId;
     }
 
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

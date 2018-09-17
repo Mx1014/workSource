@@ -1995,7 +1995,8 @@ public class FieldServiceImpl implements FieldService {
                 ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
                 scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
                 scopeFieldGroup.setCommunityId(cmd.getCommunityId());
-
+                scopeFieldGroup.setOwnerId(cmd.getOwnerId());
+                scopeFieldGroup.setOwnerType(cmd.getOwnerType());
                 scopeFieldGroup.setCategoryId(cmd.getCategoryId());
 
                 if(scopeFieldGroup.getId() == null) {
@@ -2047,6 +2048,8 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
                 scopeField.setCreatorUid(UserContext.currentUserId());
                 scopeField.setDefaultOrder(defaultOrder++);
+                scopeField.setOwnerType(scopeFieldGroup.getOwnerType());
+                scopeField.setOwnerId(scopeFieldGroup.getOwnerId());
                 fieldProvider.createScopeField(scopeField);
                 if(field.getFieldParam().contains("select")){
                     List<FieldItem> systemItems = fieldProvider.listFieldItems(field.getId());
