@@ -132,6 +132,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public WorkReportDTO updateWorkReport(UpdateWorkReportCommand cmd) {
         Long userId = UserContext.currentUserId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
 
@@ -163,6 +164,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         //  Enable another thread to update the data.
         ExecutorUtil.submit(() -> {
+            UserContext.setCurrentNamespaceId(namespaceId);
             //  Make sure that the msg time could be chaned once at the same time.
             coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
                 Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);

@@ -328,12 +328,12 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     }
 
     @Override
-    public WorkReportScopeMsg createWorkReportScopeMsg(WorkReport report, ReportMsgSettingDTO auMsgSetting, ReportValiditySettingDTO validity, Timestamp reportTime) {
+    public WorkReportScopeMsg createWorkReportScopeMsg(WorkReport report, ReportMsgSettingDTO auMsgSetting, ReportValiditySettingDTO validitySetting, Timestamp reportTime) {
         //  获取提醒时间
         Timestamp reminderTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
                 auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
         Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
-                validity.getEndType(), validity.getEndMark(), validity.getEndTime()));
+                validitySetting.getEndType(), validitySetting.getEndMark(), validitySetting.getEndTime()));
         //  生成提醒数据
         WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
         if (msg != null) {

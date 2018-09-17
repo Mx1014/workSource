@@ -366,7 +366,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/createAuMessageTest</b>
-     * <p>测试提醒信息 </p>
+     * <p>创建提醒信息 </p>
      */
     @RequestMapping("createAuMessageTest")
     @RestReturn(value=String.class)
