@@ -141,7 +141,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT,
                         "Duplicate account");
 
-
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 

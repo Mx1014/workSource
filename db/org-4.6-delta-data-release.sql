@@ -1,0 +1,2 @@
+SET @locale_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100014', 'zh_CN', '邮箱重复');
