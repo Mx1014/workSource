@@ -1,4 +1,9 @@
-package com.everhomes;
+package com.everhomes.eureka;
+
+import com.netflix.appinfo.*;
+import com.netflix.discovery.DiscoveryClient;
+import com.netflix.discovery.EurekaClient;
+import com.netflix.discovery.EurekaClientConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,16 +12,7 @@ import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Date;
-
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.appinfo.EurekaInstanceConfig;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.appinfo.MyDataCenterInstanceConfig;
-import com.netflix.appinfo.providers.EurekaConfigBasedInstanceInfoProvider;
-import com.netflix.discovery.DefaultEurekaClientConfig;
-import com.netflix.discovery.DiscoveryClient;
-import com.netflix.discovery.EurekaClient;
-import com.netflix.discovery.EurekaClientConfig;
+import java.util.HashMap;
 
 /**
  * Sample Eureka client that discovers the example service using Eureka and sends requests.
@@ -32,10 +28,29 @@ public class ExampleEurekaClient {
 
     private static synchronized ApplicationInfoManager initializeApplicationInfoManager(EurekaInstanceConfig instanceConfig) {
         if (applicationInfoManager == null) {
-            EurekaConfigBasedInstanceInfoProvider provider = new EurekaConfigBasedInstanceInfoProvider(instanceConfig);
-            applicationInfoManager = new ApplicationInfoManager(instanceConfig, provider.get());
-        }
+            HashMap<String, String> mt = new HashMap<>();
+            mt.put("management.port", "9090");
+            mt.put("jmx.port", "36083");
 
+            InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder()
+                    .setInstanceId("10.1.110.80:core:8080")
+                    .setAppName("core")
+                    .setIPAddr("10.1.110.80")
+                    .setPort(8080)
+                    .setSecurePort(443)
+                    .setVIPAddress("core")
+                    .setSecureVIPAddress("core")
+                    .setHostName("10.1.110.80")
+                    .setDataCenterInfo(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn))
+                    .setHomePageUrl("http://10.1.110.80:8080", "")
+                    .setStatusPageUrl("http://10.1.110.80:8080/actuator/info", "")
+                    .setHealthCheckUrls("http://10.1.110.80:8080/actuator/info", "", "")
+                    .setLeaseInfo(new LeaseInfo(30, 90, 0L, 0L, 0L, 0L, 0L))
+                    .setMetadata(mt)
+                    .build();
+
+            applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
+        }
         return applicationInfoManager;
     }
 
@@ -43,15 +58,13 @@ public class ExampleEurekaClient {
         if (eurekaClient == null) {
             eurekaClient = new DiscoveryClient(applicationInfoManager, clientConfig);
         }
-
         return eurekaClient;
     }
-
 
     public void sendRequestToServiceUsingEureka(EurekaClient eurekaClient) {
         // initialize the client
         // this is the vip address for the example service to talk to as defined in conf/sample-eureka-service.properties
-        String vipAddress = "sampleservice.mydomain.net";
+        String vipAddress = "core";
 
         InstanceInfo nextServerInfo = null;
         try {
@@ -98,17 +111,19 @@ public class ExampleEurekaClient {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         ExampleEurekaClient sampleClient = new ExampleEurekaClient();
 
         // create the client
         ApplicationInfoManager applicationInfoManager = initializeApplicationInfoManager(new MyDataCenterInstanceConfig());
         applicationInfoManager.setInstanceStatus(InstanceInfo.InstanceStatus.UP);
+
         EurekaClient client = initializeEurekaClient(applicationInfoManager, new DefaultEurekaClientConfig());
 
         // use the client
         sampleClient.sendRequestToServiceUsingEureka(client);
 
+        Thread.sleep(10000);
 
         // shutdown the client
         eurekaClient.shutdown();
