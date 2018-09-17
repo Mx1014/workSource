@@ -31,6 +31,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -324,11 +325,12 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin,BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
+    public List<InvitedCustomerStatisticsDTO> getInvitedCustomerStatistics(Boolean isAdmin, String keyWord, BigDecimal startAreaSize,BigDecimal endAreaSize,Set<Long> itemIds, Map<Long, FieldItemDTO> itemsMap, ListingQueryBuilderCallback callback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         List<Long> customerIds = getRelatedStatistics(startAreaSize,endAreaSize,isAdmin);
         List<Long> trackerIds = getPrivilegeControlData(isAdmin);
+        List<Long> keyIds = getKeyWordCustomerIds(keyWord);
         Field<?>[] fieldArray = new Field[itemIds.size()+1];
         List<Field<?>> fields = new ArrayList<>();
         itemIds.forEach((itemId) -> {
@@ -347,6 +349,9 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if (!isAdmin) {
             query.addConditions(customer.ID.in(trackerIds));
+        }
+        if(StringUtils.isNotBlank(keyWord)){
+            query.addConditions(customer.ID.in(keyIds));
         }
         query.addFrom(customer);
         callback.buildCondition(null, query);
@@ -370,6 +375,33 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             return null;
         });
         return result;
+    }
+
+    private List<Long> getKeyWordCustomerIds(String keyWord) {
+        List<Long> keyWordIds = new ArrayList<>();
+        keyWord = StringUtils.trim(keyWord);
+        if (StringUtils.isNotBlank(keyWord)) {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+            com.everhomes.server.schema.tables.EhCustomerTrackers trackers = Tables.EH_CUSTOMER_TRACKERS;
+            com.everhomes.server.schema.tables.EhCustomerContacts contacts = Tables.EH_CUSTOMER_CONTACTS;
+            com.everhomes.server.schema.tables.EhOrganizationMembers members = Tables.EH_ORGANIZATION_MEMBERS;
+            List<Long> memberIds = context.select(members.TARGET_ID)
+                    .from(members)
+                    .where(members.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                    .and(members.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                    .and(members.CONTACT_NAME.like("%" + keyWord + "%"))
+                    .fetchInto(Long.class);
+            keyWordIds = context.select(trackers.CUSTOMER_ID)
+                    .from(trackers)
+                    .where(trackers.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                    .and(trackers.CUSTOMER_ID.in(memberIds))
+                    .union(context.select(contacts.CUSTOMER_ID)
+                            .from(contacts)
+                            .where(contacts.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                            .and(contacts.NAME.like("%" + keyWord + "%"))
+                    ).fetchInto(Long.class);
+        }
+        return keyWordIds;
     }
 
     private List<Long> getPrivilegeControlData(Boolean isAdmin) {
