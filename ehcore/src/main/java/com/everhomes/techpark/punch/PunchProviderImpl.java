@@ -106,6 +106,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -4417,5 +4418,31 @@ public class PunchProviderImpl implements PunchProvider {
         deleteQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.lt(beforePunchDate));
         return deleteQuery.execute();
     }
+
+	@Override
+	public Integer countPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			String queryByMonth) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
+        SelectJoinStep<Record1<Integer>> step =context.selectCount().from(Tables.EH_PUNCH_STATISTICS); 
+        Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
+        if (deptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds)); 
+        if (!StringUtils.isEmpty(queryByMonth)) { 
+            condition = condition.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(queryByMonth));
+        }
+        return step.where(condition).fetchCount();
+	}
+
+	@Override
+	public Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			java.util.Date queryDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
+		SelectJoinStep<Record1<Integer>> step =context.selectCount().from(Tables.EH_PUNCH_DAY_LOGS); 
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
+        if (deptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));  
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(new java.sql.Date(queryDate.getTime()))); 
+        return step.where(condition).fetchCount();
+	}
 }
 

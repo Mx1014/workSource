@@ -474,5 +474,11 @@ public interface PunchProvider {
 	void updatePunchNotification(PunchNotification punchNotification);
 
 	int deleteAllPunchNotificationsBeforeDate(Date beforePunchDate);
+
+	Integer countPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			String queryByMonth);
+
+	Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			java.util.Date queryDate);
  
 }

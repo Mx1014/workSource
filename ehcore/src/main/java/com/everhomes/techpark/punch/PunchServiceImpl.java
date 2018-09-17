@@ -10689,13 +10689,22 @@ public class PunchServiceImpl implements PunchService {
 		if(!StringUtils.isEmpty(cmd.getQueryByMonth())){
 			//按月查询查statistics表 
 			results = listMonthPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), null, pageOffset, pageSize + 1);
+			List<Long> deptIds = findSubDepartmentIds(cmd.getDepartmentId()); 
+			Integer totalCount = punchProvider.countPunchSatisticsByItemTypeAndDeptIds(cmd.getOrganizationId(), deptIds, cmd.getQueryByMonth());
+			response.setTotal(totalCount);
 		}else if(null != cmd.getQueryByDate()){
 			//按日查询查pdl表
 			Date queryDate = new Date(cmd.getQueryByDate()); 
 			results = listDailyPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate, null, pageOffset, pageSize + 1); 
+			List<Long> deptIds = findSubDepartmentIds(cmd.getDepartmentId()); 
+			Integer totalCount = punchProvider.countPunchDayLogsByItemTypeAndDeptIds(cmd.getOrganizationId(), deptIds, queryDate);
+			response.setTotal(totalCount);
 		}else{
 			//查当天的就直接查 OrganizationMemberDetails 表
-			results = listTodayPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), pageOffset, pageSize + 1); 
+
+			results = listTodayPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), pageOffset, pageSize + 1);
+			Integer totalCount = organizationProvider.countOrganizationMemberDetails(cmd.getOrganizationId(), cmd.getDepartmentId());
+			response.setTotal(totalCount);
 		}
 		
 		if (null == results || results.size() == 0)
