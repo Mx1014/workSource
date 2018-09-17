@@ -78,3 +78,139 @@ update eh_var_field_groups set title = '拜访信息' where id =24;
 
 
 -- END
+
+-- AUTH 黄鹏宇 2018年9月11日
+-- REMARK 根据用户等级分类是招商客户还是租客
+UPDATE eh_enterprise_customers SET customer_source = 1 where level_item_id = 6;
+UPDATE eh_enterprise_customers SET customer_source = 0 where level_item_id <> 6 || level_item_id is null;
+
+
+
+
+-- AUTHOR  jiarui  20180831
+-- REMARK:迁移联系人数据
+DROP PROCEDURE if exists transfer_contact;
+delimiter //
+CREATE PROCEDURE `transfer_contact` ()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE customerSource TINYINT;
+  DECLARE communityId LONG;
+  DECLARE customerId LONG;
+  DECLARE contactName VARCHAR(1024);
+  DECLARE contactPhone VARCHAR(1024);
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE k_id LONG DEFAULT (IFNULL((SELECT MAX(id) from eh_customer_contacts),0));
+  DECLARE cur CURSOR FOR select id, namespace_id,community_id,customer_source, contact_name,contact_phone from eh_enterprise_customers where status = 2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO customerId,ns,communityId,customerSource,contactName,contactPhone;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+				set k_id = k_id +1;
+
+                INSERT INTO eh_customer_contacts VALUES(k_id,ns,communityId,customerId,contactName,contactPhone,null,null,null,0,customerSource,2,now(),1,null,null);
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL transfer_contact;
+
+
+
+-- AUTHOR  jiarui  20180910
+-- REMARK:迁移跟进人数据
+DROP PROCEDURE if exists migrate_tracker;
+delimiter //
+CREATE PROCEDURE `migrate_tracker` ()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE customerSource TINYINT;
+  DECLARE communityId LONG;
+  DECLARE customerId LONG;
+  DECLARE trackerId LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE k_id LONG DEFAULT (IFNULL((SELECT MAX(id) from eh_customer_trackers ),0));
+  DECLARE cur CURSOR FOR select id, namespace_id,community_id,customer_source, tracking_uid from eh_enterprise_customers where status = 2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO customerId,ns,communityId,customerSource,trackerId;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+				        set k_id = k_id +1;
+                INSERT INTO eh_customer_trackers VALUES(k_id,ns,communityId,customerId,trackerId,customerSource,customerSource,2,NOW(),1,null,null);
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL migrate_tracker;
+-- END
+
+
+-- AUTHOR:黄鹏宇 2018-9-12
+-- REMARK:迁移客户表单field进入range表中
+
+DROP PROCEDURE if exists transfer_field;
+delimiter //
+CREATE DEFINER=`root`@`%` PROCEDURE `transfer_field`()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE field_id BIGINT;
+	DECLARE group_path_1 VARCHAR(128);
+  DECLARE k_id LONG DEFAULT (IFNULL((SELECT MAX(id) from eh_var_field_ranges),0));
+	DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select id,group_path from eh_var_fields where module_name = 'enterprise_customer' and status = 2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO field_id,group_path_1;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+				set k_id = k_id +1;
+
+                INSERT INTO eh_var_field_ranges VALUES(k_id,group_path_1,field_id,'enterprise_customer','enterprise_customer');
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL transfer_field;
+-- END
+
+
+-- AUTHOR:黄鹏宇 2018-9-12
+-- REMARK:迁移客户表单field_group进入range表中
+DROP PROCEDURE if exists transfer_field_group;
+delimiter //
+CREATE DEFINER=`root`@`%` PROCEDURE `transfer_field_group`()
+BEGIN
+  DECLARE ns INTEGER;
+  DECLARE group_id BIGINT;
+  DECLARE k_id LONG DEFAULT (IFNULL((SELECT MAX(id) from eh_var_field_group_ranges),0));
+	DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select id from eh_var_field_groups where module_name = 'enterprise_customer' and status = 2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+                FETCH cur INTO group_id;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+				set k_id = k_id +1;
+
+                INSERT INTO eh_var_field_group_ranges VALUES(k_id,group_id,'enterprise_customer','enterprise_customer');
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL transfer_field_group;
+-- END
