@@ -574,7 +574,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .from(Tables.EH_FLOW_EVENT_LOGS)
                 .where(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId))
                 .and(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId))
-                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
+                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
                 .fetchAnyInto(Long.class);
     }
 
