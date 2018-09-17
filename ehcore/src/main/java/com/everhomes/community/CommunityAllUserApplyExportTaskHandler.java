@@ -3,6 +3,7 @@ package com.everhomes.community;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
@@ -216,6 +217,7 @@ public class CommunityAllUserApplyExportTaskHandler implements FileDownloadTaskH
                     if (!StringUtils.isBlank(user.getIdentityNumberTag())) {
                         communityAllUserDTO.setIdentityNumber(user.getIdentityNumberTag());
                     }
+                    communityAllUserDTO.setVipLevel(user.getVipLevel());
                 }
                 communityAllUserDTO.setApplyTimeString(null != user.getCreateTime() ? sdf.format(user.getCreateTime()) : "-");
                 List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
@@ -241,6 +243,15 @@ public class CommunityAllUserApplyExportTaskHandler implements FileDownloadTaskH
         List<String> titleNames = new ArrayList<String>(Arrays.asList("昵称", "姓名", "手机号", "性别", "认证状态", "社交账号", "企业", "职位", "是否高管", "家庭地址", "身份证号",
                 "个人邮箱", "注册时间", "最近活跃时间"));
         List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 40, 10, 20, 20, 30, 30, 20, 40, 40, 30, 40, 40));
+
+        String showVipFlag = this.configurationProvider.getValue(cmd.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
+        if ("true".equals(showVipFlag)) {
+            propertyNames = new ArrayList<String>(Arrays.asList("nickName", "userName", "phone", "genderString", "authString", "vipLevel", "userSourceTypeString", "enterpriseNames",
+                    "position", "executiveFlagString", "addresses", "identityNumber", "email", "applyTimeString", "recentlyActiveTimeString"));
+            titleNames = new ArrayList<String>(Arrays.asList("昵称", "姓名", "手机号", "性别", "认证状态", "会员等级", "社交账号", "企业", "职位", "是否高管", "家庭地址",
+                    "身份证号", "个人邮箱", "注册时间", "最近活跃时间"));
+            titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 40, 10, 20, 20, 20, 30, 30, 20, 40, 40, 30, 40, 40));
+        }
 
         excelUtils.setNeedSequenceColumn(true);
         OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, communityAllUserDTOS);

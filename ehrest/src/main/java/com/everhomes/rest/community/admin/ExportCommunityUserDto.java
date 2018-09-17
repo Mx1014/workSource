@@ -30,6 +30,7 @@ import java.util.List;
  *     <li>organizations: organizations {@link OrganizationDetailDTO}</li>
  *     <li>email: 邮箱</li>
  *     <li>identifierNumberTag: 身份证号</li>
+ *     <li>vipLevel: 会员等级</li>
  * </ul>
  */
 public class ExportCommunityUserDto {
@@ -78,6 +79,16 @@ public class ExportCommunityUserDto {
 	private String email;
 
 	private String identifierNumberTag;
+
+	private Integer vipLevel;
+
+	public Integer getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(Integer vipLevel) {
+		this.vipLevel = vipLevel;
+	}
 
 	public String getIdentifierNumberTag() {
 		return identifierNumberTag;

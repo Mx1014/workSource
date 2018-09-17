@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.community;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
@@ -54,6 +56,8 @@ public class CommunityResidentialUserApplyExportTaskHandler implements FileDownl
     @Autowired
     private CommunityProvider communityProvider;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     @Override
     public void beforeExecute(Map<String, Object> params) {
 
@@ -102,6 +106,7 @@ public class CommunityResidentialUserApplyExportTaskHandler implements FileDownl
                     if (!StringUtils.isBlank(user.getIdentityNumberTag())) {
                         exportCommunityUserDto.setIdentityNumber(user.getIdentityNumberTag());
                     }
+                    exportCommunityUserDto.setVipLevel(user.getVipLevel());
                 }
                 exportCommunityUserDto.setApplyTimeString(null != r.getApplyTime() ? sdf.format(r.getApplyTime()) : "-");
                 exportCommunityUserDto.setRecentlyActiveTimeString(null != r.getRecentlyActiveTime() ? sdf.format(r.getRecentlyActiveTime()) : "-");
@@ -121,6 +126,14 @@ public class CommunityResidentialUserApplyExportTaskHandler implements FileDownl
                 "个人邮箱", "注册时间", "最近活跃时间"));
         List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 40, 10, 20, 20, 30, 30, 20, 40, 40));
 
+        String showVipFlag = this.configurationProvider.getValue(cmd.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
+        if ("true".equals(showVipFlag)) {
+            propertyNames = new ArrayList<String>(Arrays.asList("nickName", "phone", "genderString", "authString", "vipLevel", "userSourceTypeString",
+                    "address", "identityNumber", "email", "applyTimeString", "recentlyActiveTimeString"));
+            titleNames = new ArrayList<String>(Arrays.asList("昵称", "手机号", "性别", "认证状态", "会员等级", "社交账号", "家庭地址", "身份证号",
+                    "个人邮箱", "注册时间", "最近活跃时间"));
+            titleSizes = new ArrayList<Integer>(Arrays.asList(20, 40, 10, 20, 20, 20, 30, 30, 20, 40, 40));
+        }
         excelUtils.setNeedSequenceColumn(true);
         OutputStream outputStream = excelUtils.getOutputStream(propertyNames, titleNames, titleSizes, dtoList);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);

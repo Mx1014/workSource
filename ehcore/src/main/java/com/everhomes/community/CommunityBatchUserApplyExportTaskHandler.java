@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.community;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
@@ -66,6 +68,9 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public void beforeExecute(Map<String, Object> params) {
 
@@ -85,6 +90,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
         Long taskId = (Long) params.get("taskId");
         XSSFWorkbook workbook = new XSSFWorkbook();
         if (!CollectionUtils.isEmpty(communityIds)) {
+            String showVipFlag = this.configurationProvider.getValue(namespaceId, ConfigConstants.SHOW_USER_VIP_LEVEL, "");
 
             for (Long communityId : communityIds) {
                 Community community = this.communityProvider.findCommunityById(communityId);
@@ -97,6 +103,10 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                 if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
                     title = new ArrayList<String>(Arrays.asList("昵称", "手机号", "性别", "认证状态", "社交账号", "家庭地址", "身份证号",
                             "个人邮箱", "注册时间", "最近活跃时间"));
+                    if ("true".equals(showVipFlag)) {
+                        title = new ArrayList<String>(Arrays.asList("昵称", "手机号", "性别", "认证状态", "会员等级", "社交账号", "家庭地址", "身份证号",
+                                "个人邮箱", "注册时间", "最近活跃时间"));
+                    }
                     List<ExportCommunityUserAddressDTO> list = createCommunityUserAddressData(communityId, namespaceId);
                     if (!CollectionUtils.isEmpty(list)) {
                         for (ExportCommunityUserAddressDTO exportCommunityUserDto : list) {
@@ -105,6 +115,9 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                             data.add(exportCommunityUserDto.getPhone());
                             data.add(exportCommunityUserDto.getGenderString());
                             data.add(exportCommunityUserDto.getAuthString());
+                            if ("true".equals(showVipFlag)) {
+                                data.add(exportCommunityUserDto.getVipLevel().toString());
+                            }
                             data.add(exportCommunityUserDto.getUserSourceTypeString());
                             data.add(exportCommunityUserDto.getAddress());
                             data.add(exportCommunityUserDto.getIdentityNumber());
@@ -117,6 +130,10 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                 }else {
                     title = new ArrayList<String>(Arrays.asList("昵称", "姓名", "手机号", "性别", "认证状态", "社交账号", "企业", "职位", "是否高管", "身份证号",
                             "个人邮箱", "注册时间", "最近活跃时间"));
+                    if ("true".equals(showVipFlag)) {
+                        title = new ArrayList<String>(Arrays.asList("昵称", "姓名", "手机号", "性别", "认证状态", "会员等级", "社交账号", "企业", "职位", "是否高管", "身份证号",
+                                "个人邮箱", "注册时间", "最近活跃时间"));
+                    }
                     List<ExportCommunityUserDto> list = createCommunityUserData(communityId, namespaceId);
                     if (!CollectionUtils.isEmpty(list)) {
                         for (ExportCommunityUserDto exportCommunityUserDto : list) {
@@ -126,6 +143,9 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                             data.add(exportCommunityUserDto.getPhone());
                             data.add(exportCommunityUserDto.getGenderString());
                             data.add(exportCommunityUserDto.getAuthString());
+                            if ("true".equals(showVipFlag)) {
+                                data.add(exportCommunityUserDto.getVipLevel().toString());
+                            }
                             data.add(exportCommunityUserDto.getUserSourceTypeString());
                             data.add(exportCommunityUserDto.getEnterpriseName());
                             data.add(exportCommunityUserDto.getPosition());
@@ -244,6 +264,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                     if (!StringUtils.isBlank(user.getIdentityNumberTag())) {
                         exportCommunityUserDto.setIdentifierNumberTag(user.getIdentityNumberTag());
                     }
+                    exportCommunityUserDto.setVipLevel(user.getVipLevel());
                 }
                 exportCommunityUserDto.setApplyTimeString(null != r.getApplyTime() ? sdf.format(r.getApplyTime()) : "-");
                 exportCommunityUserDto.setRecentlyActiveTimeString(null != r.getRecentlyActiveTime() ? sdf.format(r.getRecentlyActiveTime()) : "-");
@@ -297,6 +318,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                     if (!StringUtils.isBlank(user.getIdentityNumberTag())) {
                         exportCommunityUserDto.setIdentityNumber(user.getIdentityNumberTag());
                     }
+                    exportCommunityUserDto.setVipLevel(user.getVipLevel());
                 }
                 exportCommunityUserDto.setApplyTimeString(null != r.getApplyTime() ? sdf.format(r.getApplyTime()) : "-");
                 exportCommunityUserDto.setRecentlyActiveTimeString(null != r.getRecentlyActiveTime() ? sdf.format(r.getRecentlyActiveTime()) : "-");

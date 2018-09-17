@@ -2215,8 +2215,12 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
 			//dto.setAddressDtos(addressDtos);
-
-			//最新活跃时间 add by sfyan 20170620
+            String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
+            if ("true".equals(showVipFlag)) {
+                dto.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            }
+            dto.setVipLevel(user.getVipLevel());
+            //最新活跃时间 add by sfyan 20170620
 			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
 			if(userActivities.size() > 0){
 				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
@@ -2268,7 +2272,12 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setExecutiveFlag(user.getExecutiveTag());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
-		}
+            String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
+            if ("true".equals(showVipFlag)) {
+                dto.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            }
+            dto.setVipLevel(user.getVipLevel());
+        }
 
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
 		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
@@ -2317,7 +2326,14 @@ public class CommunityServiceImpl implements CommunityService {
                     list.add(commercial);
                 }
             }
-
+            User user = this.userProvider.findUserById(cmd.getUserId());
+            if (user != null) {
+                communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
+            }
+            String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
+            if ("true".equals(showVipFlag)) {
+                communityUserAddressDTO.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            }
             if (!CollectionUtils.isEmpty(list)) {
                 communityUserAddressDTO = list.get(0);
                 List<OrganizationDetailDTO> orgDtos = new ArrayList<>();

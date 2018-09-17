@@ -28,6 +28,8 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
  *     <li>email: 邮箱</li>
+ *     <li>vipLevel: 会员等级</li>
+ *     <li>showVipLevelFlag: 是否展示会员等级，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class CommunityUserAddressDTO {
@@ -70,6 +72,26 @@ public class CommunityUserAddressDTO {
 	private Long recentlyActiveTime;
 
 	private String email;
+
+	private Integer vipLevel;
+
+	private Byte showVipLevelFlag;
+
+    public Byte getShowVipLevelFlag() {
+        return showVipLevelFlag;
+    }
+
+    public void setShowVipLevelFlag(Byte showVipLevelFlag) {
+        this.showVipLevelFlag = showVipLevelFlag;
+    }
+
+    public Integer getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(Integer vipLevel) {
+		this.vipLevel = vipLevel;
+	}
 
 	public String getEmail() {
 		return email;

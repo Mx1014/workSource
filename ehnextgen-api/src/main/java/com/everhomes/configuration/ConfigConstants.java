@@ -214,4 +214,5 @@ public interface ConfigConstants {
     String ENTERPRISE_NOTICE_WEB_SHARE_URL = "enterprise.notice.share.url";
 
     public static final String SHOW_PRIVATE_FLAG = "personal.show.private.flag";
+    public static final String SHOW_USER_VIP_LEVEL = "user.show.vip.level";
 }

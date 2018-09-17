@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
  *     <li>email: 邮箱</li>
+ *     <li>vipLevel: 会员等级</li>
  * </ul>
  */
 public class ExportCommunityAllUserDTO {
@@ -61,6 +62,16 @@ public class ExportCommunityAllUserDTO {
 	private String userSourceTypeString;
 	private String recentlyActiveTimeString;
 	private String email;
+
+	private Integer vipLevel;
+
+	public Integer getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(Integer vipLevel) {
+		this.vipLevel = vipLevel;
+	}
 
 	public String getAuthString() {
 		return authString;
