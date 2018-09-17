@@ -36,6 +36,7 @@ import javax.validation.constraints.NotNull;
  * <li>targetIdForEnt: 对公转账的企业id</li>
  * <li>dueDayCountStart: 欠费天数开始范围</li>
  * <li>dueDayCountEnd: 欠费天数结束范围</li>
+ * <li>moduleId:模块ID</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -53,22 +54,21 @@ public class ListBillsCommand {
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
-
     private Long billGroupId;
-    
     private String buildingName;
     private String apartmentName;
     private Byte status;
     private String targetType;
     private String contractNum;
     private Long organizationId;
-
     private Long categoryId;
-    
+    private Integer paymentType;
+    private Byte isUploadCertificate;
+    private String customerTel;
     private Long targetIdForEnt;
-    
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
+    private Long moduleId;
 
     public Long getCategoryId() {
         return categoryId;
@@ -77,13 +77,6 @@ public class ListBillsCommand {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
-
-    
-    private Integer paymentType;
-    private Byte isUploadCertificate;
-    private String customerTel;
-
-
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -294,5 +287,13 @@ public class ListBillsCommand {
 
 	public void setDueDayCountEnd(Long dueDayCountEnd) {
 		this.dueDayCountEnd = dueDayCountEnd;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 }
