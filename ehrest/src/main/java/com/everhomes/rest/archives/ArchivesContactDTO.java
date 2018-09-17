@@ -23,6 +23,7 @@ import java.util.List;
  * <li>contactShortToken: 短号</li>
  * <li>workEmail: 工作邮箱</li>
  * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
+ * <li>account: 账号(唯一标识)</li>
  * </ul>
  */
 public class ArchivesContactDTO {
@@ -60,6 +61,9 @@ public class ArchivesContactDTO {
     private String stick;
 
     private Byte visibleFlag;
+
+    private String account;
+
 
 
     //  export
@@ -216,16 +220,24 @@ public class ArchivesContactDTO {
         this.jobPositionString = jobPositionString;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public List<OrganizationDTO> getJobLevels() {
         return jobLevels;
     }
 
     public void setJobLevels(List<OrganizationDTO> jobLevels) {
         this.jobLevels = jobLevels;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

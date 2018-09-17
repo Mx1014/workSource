@@ -25,7 +25,7 @@ public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandle
     private TaskService taskService;
 
     @Autowired
-    private ArchivesService archivesService;
+    private ArchivesDTSService archivesDTSService;
 
     @Override
     public void beforeExecute(Map<String, Object> params) {
@@ -59,7 +59,7 @@ public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandle
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        OutputStream outputStream = archivesService.getArchivesContactsExportStream(cmd, taskId);
+        OutputStream outputStream = archivesDTSService.getArchivesContactsExportStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

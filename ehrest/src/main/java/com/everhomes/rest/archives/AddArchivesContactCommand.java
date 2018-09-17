@@ -21,7 +21,7 @@ import java.util.List;
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
  * <li>updateDetailId: 编辑人员的id</li>
  * <li>namespaceId: 域空间ID</li>
- * <li>account: 账号(唯一标识)z</li>
+ * <li>account: 账号(唯一标识)</li>
  * </ul>
  */
 public class AddArchivesContactCommand {

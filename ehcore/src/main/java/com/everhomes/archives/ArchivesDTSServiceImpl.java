@@ -1,5 +1,6 @@
 package com.everhomes.archives;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.organization.ImportFileService;
@@ -13,9 +14,12 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.*;
@@ -249,6 +253,129 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     @Override
     public ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd) {
         return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
+    @Override
+    public void exportArchivesContacts(ListArchivesContactsCommand cmd) {
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("keywords", cmd.getKeywords());
+        params.put("filterScopeTypes", JSON.toJSONString(cmd.getFilterScopeTypes()));
+        params.put("targetTypes", JSON.toJSONString(cmd.getTargetTypes()));
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        String fileName = ArchivesExcelLocaleString.C_FILENAME + "_" + employeeFormat.format(LocalDate.now()) + ".xlsx";
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    @Override
+    public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId) {
+        //  title
+        List<String> title = new ArrayList<>(Arrays.asList("姓名", "账号", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
+        taskService.updateTaskProcess(taskId, 10);
+        //  data
+        ListArchivesContactsResponse response = archivesService.listArchivesContacts(cmd);
+        taskService.updateTaskProcess(taskId, 40);
+        /*
+        OutputStream outputStream = null;
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        taskService.updateTaskProcess(taskId, 10);
+        if (response.getContacts() != null && response.getContacts().size() > 0) {
+            //  1.设置导出文件名与 sheet 名
+            String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.CONTACT_LIST, "zh_CN", "userLists");
+            ExcelUtils excelUtils = new ExcelUtils(fileName, fileName);
+            //  2.设置导出标题栏
+            List<String> titleNames;
+            //  3.设置格式长度
+            List<Integer> cellSizes = new ArrayList<>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
+            //  4.设置导出变量名
+            List<String> propertyNames = new ArrayList<>(Arrays.asList("contactName", "genderString", "contactToken",
+                    "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
+            excelUtils.setNeedSequenceColumn(false);
+            //  5.处理导出变量的值并导出
+            List<ArchivesContactDTO> contacts = response.getContacts().stream().peek(this::convertArchivesContactForExcel).collect(Collectors.toList());
+            taskService.updateTaskProcess(taskId, 60);
+            outputStream = excelUtils.getOutputStream(propertyNames, titleNames, cellSizes, contacts);
+            taskService.updateTaskProcess(taskId, 90);
+        }*/
+        XSSFWorkbook workbook = exportArchivesContactsFiles(title, response.getContacts());
+        taskService.updateTaskProcess(taskId, 95);
+        return writeExcel(workbook);
+    }
+
+    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts){
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.C_FILENAME);
+        // sheet.createFreezePane(1,2,1,1);
+        //  1.head
+        Row headRow = sheet.createRow(0);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
+        headRow.setHeight((short) (50 * 20));
+        createExcelHead(workbook, headRow, ArchivesExcelLocaleString.C_HEAD);
+        //  2.title
+        Row titleRow = sheet.createRow(1);
+        createExcelTitle(workbook, sheet, titleRow, title);
+        //  3.data
+        XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
+        for (int rowIndex = 2; rowIndex < contacts.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createContactsFileData(dataRow, bodyStyle, contacts.get(rowIndex - 2));
+        }
+        return workbook;
+    }
+
+    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact){
+        Cell cellA = dataRow.createCell(0); // 姓名
+        Cell cellB = dataRow.createCell(1); // 账号
+        Cell cellC = dataRow.createCell(2); // 英文名
+        Cell cellD = dataRow.createCell(3); // 性别
+        Cell cellE = dataRow.createCell(4); // 手机
+        Cell cellF = dataRow.createCell(5); // 短号
+        Cell cellG = dataRow.createCell(6); // 工作邮箱
+        Cell cellH = dataRow.createCell(7); // 部门
+        Cell cellI = dataRow.createCell(8); // 岗位
+        cellA.setCellStyle(style);
+        cellB.setCellStyle(style);
+        cellC.setCellStyle(style);
+        cellD.setCellStyle(style);
+        cellE.setCellStyle(style);
+        cellF.setCellStyle(style);
+        cellG.setCellStyle(style);
+        cellH.setCellStyle(style);
+        cellI.setCellStyle(style);
+        cellA.setCellValue(contact.getContactName());
+        cellB.setCellValue(contact.getAccount());
+        cellC.setCellValue(contact.getContactEnName());
+        cellD.setCellValue(ArchivesUtil.resolveArchivesEnum(contact.getGender(), ArchivesParameter.GENDER));
+        cellE.setCellValue(contact.getContactToken());
+        cellF.setCellValue(contact.getContactShortToken());
+        cellG.setCellValue(contact.getWorkEmail());
+        cellH.setCellValue(archivesService.convertToOrgNames(contact.getDepartments().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+        cellI.setCellValue(archivesService.convertToOrgNames(contact.getJobPositions().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+    }
+
+    @Override
+    public void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd) {
+        if (StringUtils.isEmpty(cmd.getPassword())) {
+            LOGGER.error("Password is null ");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("Unable to find owner user,  namespaceId={}", namespaceId);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User account has not been activated yet");
+
+        if (!EncryptionUtils.validateHashPassword(cmd.getPassword(), user.getSalt(), user.getPasswordHash())) {
+            LOGGER.error("Password does not match for " + user.getIdentifierToken());
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
     }
 
     @Override
@@ -551,24 +678,18 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         Row titleRow = sheet.createRow(1);
         createExcelTitle(workbook, sheet, titleRow, title);
         //  3.data
+        XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
         for (int rowIndex = 2; rowIndex < value.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
-            createEmployeesFileData(workbook, dataRow, value.get(rowIndex - 2).getVals());
+            createEmployeesFileData(dataRow, bodyStyle, value.get(rowIndex - 2).getVals());
         }
         return workbook;
     }
 
-    private void createEmployeesFileData(XSSFWorkbook workbook, Row dataRow, List<String> list) {
-        //  设置样式
-        XSSFCellStyle contentStyle = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setFontName("微软雅黑");
-        contentStyle.setAlignment(HorizontalAlignment.CENTER);
-        contentStyle.setFont(font);
+    private void createEmployeesFileData(Row dataRow, XSSFCellStyle style, List<String> list) {
         for (int i = 0; i < list.size(); i++) {
             Cell cell = dataRow.createCell(i);
-            cell.setCellStyle(contentStyle);
+            cell.setCellStyle(style);
             cell.setCellValue(list.get(i));
         }
     }
@@ -654,8 +775,8 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return true;
         if (ArchivesExcelLocaleString.T_EMPLOYEE_TYPE.equals(text))
             return true;
-        if (ArchivesExcelLocaleString.T_DEPARTMENT.equals(text))
-            return true;
+/*        if (ArchivesExcelLocaleString.T_DEPARTMENT.equals(text))
+            return true;*/
         return false;
     }
 
@@ -684,6 +805,16 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
         return titleStyle;
+    }
+
+    private XSSFCellStyle commonBodyStyle(XSSFWorkbook workbook){
+        XSSFCellStyle contentStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("微软雅黑");
+        contentStyle.setAlignment(HorizontalAlignment.CENTER);
+        contentStyle.setFont(font);
+        return contentStyle;
     }
 
     private void writeHttpExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
