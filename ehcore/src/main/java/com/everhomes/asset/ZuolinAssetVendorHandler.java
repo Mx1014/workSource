@@ -1,36 +1,5 @@
 package com.everhomes.asset;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.hssf.util.HSSFColor;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -45,91 +14,19 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.AssetBillStatDTO;
-import com.everhomes.rest.asset.AssetBillStatus;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.AssetEnergyType;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.AssetPaymentBillSourceId;
-import com.everhomes.rest.asset.AssetServiceErrorCode;
-import com.everhomes.rest.asset.AssetTargetType;
-import com.everhomes.rest.asset.BatchImportBillsCommand;
-import com.everhomes.rest.asset.BatchImportBillsResponse;
-import com.everhomes.rest.asset.BillDTO;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.BillForClientV2;
-import com.everhomes.rest.asset.BillGroupDTO;
-import com.everhomes.rest.asset.BillIdAndAmount;
-import com.everhomes.rest.asset.BillIdAndType;
-import com.everhomes.rest.asset.BillIdCommand;
-import com.everhomes.rest.asset.BillItemDTO;
-import com.everhomes.rest.asset.BillItemIdCommand;
-import com.everhomes.rest.asset.BillStaticsCommand;
-import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.CreateBillCommand;
-import com.everhomes.rest.asset.ExemptionItemDTO;
-import com.everhomes.rest.asset.ExemptionItemIdCommand;
-import com.everhomes.rest.asset.ExportBillTemplatesCommand;
-import com.everhomes.rest.asset.FieldValueDTO;
-import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
-import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
-import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
-import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
-import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
-import com.everhomes.rest.asset.ListAllBillsForClientCommand;
-import com.everhomes.rest.asset.ListAllBillsForClientDTO;
-import com.everhomes.rest.asset.ListBillDetailCommand;
-import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.asset.ListBillDetailVO;
-import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
-import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
-import com.everhomes.rest.asset.ListBillItemsResponse;
-import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
-import com.everhomes.rest.asset.ListPayeeAccountsCommand;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ListPaymentBillResp;
-import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
-import com.everhomes.rest.asset.ListUploadCertificatesCommand;
-import com.everhomes.rest.asset.PaymentExpectanciesResponse;
-import com.everhomes.rest.asset.PaymentExpectancyDTO;
-import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowBillForClientDTO;
-import com.everhomes.rest.asset.ShowBillForClientV2Command;
-import com.everhomes.rest.asset.ShowBillForClientV2DTO;
-import com.everhomes.rest.asset.ShowCreateBillDTO;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.SimpleAssetBillDTO;
-import com.everhomes.rest.asset.TenantType;
-import com.everhomes.rest.asset.UploadCertificateInfoDTO;
-import com.everhomes.rest.asset.listBillExemtionItemsCommand;
-import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
@@ -151,12 +48,7 @@ import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RegularExpressionUtils;
@@ -165,12 +57,33 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/4/11.
  */
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX + "ZUOLIN")
-public class ZuolinAssetVendorHandler extends AssetVendorHandler {
+public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(ZuolinAssetVendorHandler.class);
     @Autowired
     private AssetProvider assetProvider;
@@ -194,17 +107,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     private AssetService assetService;
 
     @Autowired
-    private PaymentService paymentService;
-
-    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
     private ContractServiceImpl contractService;
 
-    @Autowired
-    private AssetPayService assetPayService;
-    
     @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
 
@@ -219,9 +126,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private UserService userService;
-    
-    @Autowired
-    private AssetPayServiceForEnt assetPayServiceForEnt;
     
     @Autowired
     private LocaleStringProvider localeStringProvider;
@@ -834,91 +738,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
-
-    @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        List<BillIdAndAmount> bills = cmd.getBills();
-        List<String> billIds = new ArrayList<>();
-        Long amountsInCents = 0l;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
-            String amountOwed = billIdAndAmount.getAmountOwed();
-            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
-            amountsInCents += amountOwedInCents.longValue();
-        }
-        //对左邻的用户，直接检查bill的状态即可
-        checkHasPaidBills(billIds);
-        //这种检查的逻辑是不对的
-//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
-//        if(checkedOrderId !=null){
-//            //重复下单的返回
-//            return null;
-//        }
-        //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,orderId);
-        Long payerId = Long.parseLong(cmd.getPayerId());
-        //检查下单人的类型和id，不能为空
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-//            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-//                payerId = Long.parseLong(cmd.getPayerId());
-//            }else{
-//                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-//                throw new RuntimeErrorException("individual make asset order failed");
-//            }
-            payerId = UserContext.currentUserId();
-        }
-
-        //组装command ， 请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
-        cmd2pay.setCommunityId(cmd.getCommunityId());
-//        cmd2pay.setAmount(1l);
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        cmd2pay.setNamespaceId(cmd.getNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-
-        //不填写paymentType，支持所有除了微信公众号的支付手段
-//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
-
-        //这个参数组装有什么用？
-//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-//        paymentParamsDTO.setPayType("no_credit");
-//        User user = UserContext.current().getUser();
-//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-//        cmd2pay.setPaymentParams(paymentParamsDTO);
-
-        //通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
-        if(billIds != null) {
-        	Long billId = Long.parseLong(billIds.get(0));
-        	projectName = assetProvider.getProjectNameByBillID(billId);
-        }
-        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        String billGroupName = "";
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        	billGroupName = paymentBillGroup.getName();
-        }
-        cmd2pay.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
-        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
-//        response.setAmount(String.valueOf(preOrder.getAmount()));
-//        response.setExpiredIntervalTime(15l*60l);
-//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
-//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
-//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
-//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
-//        response.setPayMethod(preOrder.getPayMethod());
-
-        return preOrder;
-    }
-
+    
     private void checkHasPaidBills(List<String> billIds) {
         List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
         if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
@@ -2013,34 +1833,34 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        treeMap.putAll(cellsMap);
 //        return treeMap.values().toArray(new String[treeMap.size()]);
     }
-    @Override
-    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
-        Long billId = cmd.getBillId();
-        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
-        PaymentBills bill = assetProvider.findPaymentBillById(billId);
-        if(bill == null || assetOrders.size() < 1){
-            return new ListPaymentBillResp();
-        }
-        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
-        paycmd.setNamespaceId(bill.getNamespaceId());
-        paycmd.setOrderType("wuyecode");
-        paycmd.setPageAnchor(cmd.getPageAnchor());
-        paycmd.setPageSize(cmd.getPageSize());
-        if(cmd.getCommunityId() == null){
-            paycmd.setCommunityId(bill.getOwnerId());
-        }else{
-            paycmd.setCommunityId(cmd.getCommunityId());
-        }
-        paycmd.setUserType(cmd.getUserType());
-        paycmd.setUserId(cmd.getUserId());
-        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
-        try {
-            return paymentService.listPaymentBill(paycmd);
-        } catch (Exception e) {
-            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
-            return new ListPaymentBillResp();
-        }
-    }
+//    @Override
+//    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+//        Long billId = cmd.getBillId();
+//        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
+//        PaymentBills bill = assetProvider.findPaymentBillById(billId);
+//        if(bill == null || assetOrders.size() < 1){
+//            return new ListPaymentBillResp();
+//        }
+//        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
+//        paycmd.setNamespaceId(bill.getNamespaceId());
+//        paycmd.setOrderType("wuyecode");
+//        paycmd.setPageAnchor(cmd.getPageAnchor());
+//        paycmd.setPageSize(cmd.getPageSize());
+//        if(cmd.getCommunityId() == null){
+//            paycmd.setCommunityId(bill.getOwnerId());
+//        }else{
+//            paycmd.setCommunityId(cmd.getCommunityId());
+//        }
+//        paycmd.setUserType(cmd.getUserType());
+//        paycmd.setUserId(cmd.getUserId());
+//        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
+//        try {
+//            return paymentService.listPaymentBill(paycmd);
+//        } catch (Exception e) {
+//            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
+//            return new ListPaymentBillResp();
+//        }
+//    }
 
 
     @Override
@@ -2129,74 +1949,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return contractService.listCustomerContracts(cmd);
     }
     
-    public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-    	//调接口从电商获取收款方账户
-    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
-    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
-    	}else {
-    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
-    	}
-    }
-    
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	PaymentCallBackHandler handler = PlatformContext.getComponent(
-    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE);
-    	//支付模块回调接口，通知支付结果
-    	assetPayService.payNotify(cmd, handler);
-    }
-    
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	return assetProvider.showCreateBillSubItemList(cmd);
     }        
-    
-    public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
-        List<BillIdAndAmount> bills = cmd.getBills();
-        List<String> billIds = new ArrayList<>();
-        Long amountsInCents = 0l;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
-            String amountOwed = billIdAndAmount.getAmountOwed();
-            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
-            amountsInCents += amountOwedInCents.longValue();
-        }
-        //对左邻的用户，直接检查bill的状态即可
-        checkHasPaidBills(billIds);
-        //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,orderId);
-        Long payerId = Long.parseLong(cmd.getPayerId());
-        //检查下单人的类型和id，不能为空
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-            payerId = UserContext.currentUserId();
-        }
-        //组装command ， 请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
-        cmd2pay.setCommunityId(cmd.getCommunityId());
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        cmd2pay.setNamespaceId(cmd.getNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-        //通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
-        if(billIds != null) {
-        	Long billId = Long.parseLong(billIds.get(0));
-        	projectName = assetProvider.getProjectNameByBillID(billId);
-        }
-        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        String billGroupName = "";
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        	billGroupName = paymentBillGroup.getName();
-        }
-        cmd2pay.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
-        PreOrderDTO preOrder = assetPayServiceForEnt.createPreOrder(cmd2pay);
-        return preOrder;
-    }
-    
 }

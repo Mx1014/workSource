@@ -149,12 +149,9 @@ public interface AssetProvider {
 
     String findIdentifierByUid(Long aLong);
 
-
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
-
     Long findAssetOrderByBillIds(List<String> billIds);
-
-    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+    
+    void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
 
@@ -419,6 +416,11 @@ public interface AssetProvider {
     
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 	
+	public List<PaymentBills> findBillsByIds(List<String> billIds);
+	
+	List<PaymentBillOrder> findPaymentBillOrderRecordByOrderNum(String bizOrderNum);
+	
+	void updatePaymentBillOrder(String bizOrderNum, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel);
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void updateBillDueDayCount(Long billId, Long dueDayCount);

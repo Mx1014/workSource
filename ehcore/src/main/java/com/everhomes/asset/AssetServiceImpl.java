@@ -264,9 +264,6 @@ public class AssetServiceImpl implements AssetService {
     private ContentServerService contentServerService;
     
     @Autowired
-    private PaymentService paymentService;
-    
-    @Autowired
     private UserService userService;
     
     @Autowired
@@ -3473,10 +3470,11 @@ public class AssetServiceImpl implements AssetService {
 
 
     @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+    public PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd) {
         AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        return handler.placeAnAssetOrder(cmd);
+        cmd.setSourceType(SourceType.MOBILE.getCode());
+        return handler.createOrder(cmd);
     }
 
     @Override
@@ -4957,7 +4955,12 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listPayeeAccounts(cmd);
+        //调接口从电商获取收款方账户
+    	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    	}else {
+    		return handler.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    	}
     }
 
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
@@ -5660,17 +5663,16 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 	
-	
-
-	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
+        cmd.setSourceType(SourceType.PC.getCode());
+        PreOrderDTO preOrderDTO = handler.createOrder(cmd);
         return preOrderDTO;
 	}
 
 	public GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd) {
-		//查询eh_payment_order_records表，获取支付状态
+		//查询eh_payment_bill_orders表，获取支付状态
 		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getPaymentOrderId());
 		return response;
 	}

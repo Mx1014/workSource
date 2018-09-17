@@ -24,6 +24,7 @@ import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
+import com.everhomes.rest.contract.DenunciationContractBillsCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractDTO;
@@ -316,6 +317,12 @@ public class SZWContractHandler implements ContractService{
 
 	@Override
 	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}

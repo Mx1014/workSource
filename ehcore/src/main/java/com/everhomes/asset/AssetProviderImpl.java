@@ -2862,7 +2862,6 @@ public class AssetProviderImpl implements AssetProvider {
     public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
-//<<<<<<< HEAD
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         String variableJson = context.select(t.VARIABLES_JSON_STRING)
                 .from(t)
@@ -2877,7 +2876,6 @@ public class AssetProviderImpl implements AssetProvider {
             vid.setVariableValue(entry.getValue());
             vid.setVariableId(entry.getKey());
             list.add(vid);
-//=======
 //
 //
 //        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
@@ -2900,7 +2898,6 @@ public class AssetProviderImpl implements AssetProvider {
 //                viv.setVariableValue(standard.getSuggestUnitPrice());
 //            }
 //            list.add(viv);
-//>>>>>>> payment_wentian_2.0
         }
         return list;
     }
@@ -3300,48 +3297,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.OWNER_UID.eq(aLong))
                 .fetchOne(0,String.class);
     }
-
-
-    @Override
-    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
-        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
-        AssetPaymentOrder order = new AssetPaymentOrder();
-        order.setClientAppName(clientAppName);
-        order.setCommunityId(String.valueOf(communityId));
-        order.setContractId(contactNum);
-        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        order.setId(nextOrderId);
-        order.setNamespaceId(namespaceId);
-        // GET THE START TIME AND EXPIRTIME
-        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
-        Calendar c = Calendar.getInstance();
-        //expiretime为妙，所以乘以1000得到milliseconds
-        long l = startTime.getTime() + expireTimePeriod*1000l;
-
-        Timestamp endTime = new Timestamp(l);
-        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-        order.setOrderExpireTime(endTime);
-        order.setOrderType(orderType);
-
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < 17; i++){
-            sb.append(r.nextInt(10));
-        }
-        order.setOrderNo(Long.parseLong(sb.toString()));
-        order.setUid(UserContext.currentUserId());
-        order.setPayAmount(new BigDecimal(amountOwed));
-        order.setPayerType(payerType);
-        order.setStatus((byte)0);
-        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
-        dao.insert(order);
-        return nextOrderId;
-    }
-
-
+    
     @Override
     public Long findAssetOrderByBillIds(List<String> billIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -3403,22 +3359,18 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
+    public void createBillOrderMaps(List<PaymentBillOrder> billOrderList) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills.class),bills.size());
-        long nextSequence = nextBlockSequence - bills.size()+1;
-        List<com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
-        for(int i = 0; i < bills.size(); i ++){
-            com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills orderBill  = new com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills();
-            BillIdAndAmount billIdAndAmount = bills.get(i);
-            orderBill.setId(nextSequence++);
-            orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
-            orderBill.setBillId(billIdAndAmount.getBillId());
-            orderBill.setOrderId(orderId);
-            orderBill.setStatus(0);
-            orderBills.add(orderBill);
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillOrders.class), billOrderList.size());
+        
+        List<EhPaymentBillOrders> orderBills = new ArrayList<>();
+        for(PaymentBillOrder billdOrder : billOrderList){
+            EhPaymentBillOrders billOrderInDb  = ConvertHelper.convert(billdOrder, EhPaymentBillOrders.class);
+            billOrderInDb.setId(nextBlockSequence++);
+            orderBills.add(billOrderInDb);
         }
-        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
+        
+        EhPaymentBillOrdersDao dao = new EhPaymentBillOrdersDao(dslContext.configuration());
         dao.insert(orderBills);
     }
 
@@ -4861,7 +4813,6 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(contract.CONTRACT_ID.eq(contractId))
                     .fetch(contract.IN_WORK);
         }
-//<<<<<<< HEAD
 //        if ( aByte == null) {
 //        	return false;
 //            //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
@@ -5991,22 +5942,17 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
+        		t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         Byte status = new Byte("1");
         query.addConditions(t.SWITCH.eq(status));
-        query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
         	query.addConditions(t.CATEGORY_ID.eq(categoryId));//增加多入口查询条件
         }
@@ -6023,41 +5969,41 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.TARGET_NAME.like("%" + targetName + "%"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
+            query.addConditions(DSL.cast(t2.PAYMENT_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
         	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
             //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
             //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
             if(paymentType.equals(0)) {//微信
-            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
-            			.or(t4.PAYMENT_TYPE.eq("7"))
-            			.or(t4.PAYMENT_TYPE.eq("9"))
-            			.or(t4.PAYMENT_TYPE.eq("12"))
-            			.or(t4.PAYMENT_TYPE.eq("21"))
+            	query.addConditions(t2.PAYMENT_TYPE.eq(1)
+            			.or(t2.PAYMENT_TYPE.eq(7))
+            			.or(t2.PAYMENT_TYPE.eq(9))
+            			.or(t2.PAYMENT_TYPE.eq(12))
+            			.or(t2.PAYMENT_TYPE.eq(21))
             	);
             }else if(paymentType.equals(1)) {//支付宝
-            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
-            			.or(t4.PAYMENT_TYPE.eq("10"))
-            			.or(t4.PAYMENT_TYPE.eq("13"))
+            	query.addConditions(t2.PAYMENT_TYPE.eq(8)
+            			.or(t2.PAYMENT_TYPE.eq(10))
+            			.or(t2.PAYMENT_TYPE.eq(13))
             	);
             }else if(paymentType.equals(2)){//对公转账
-            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
+            	query.addConditions(t2.PAYMENT_TYPE.eq(2));
             }
         }
         if(!org.springframework.util.StringUtils.isEmpty(paymentOrderNum)){
-        	query.addConditions(t3.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
+        	query.addConditions(t2.PAYMENT_ORDER_ID.like("%" + paymentOrderNum + "%"));
         }
-        query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
-        query.addOrderBy(t3.CREATE_TIME.desc());
+        query.addConditions(t2.PAYMENT_STATUS.eq(PurchaseOrderPaymentStatus.PAID.getCode()));//EhAssetPaymentOrderBills中的status1代表支付成功
+        query.addOrderBy(t2.PAYMENT_TIME.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
         	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
         	dto.setBillId(r.getValue(t.ID));//账单ID
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
+        	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID
         	ListBillDetailVO listBillDetailVO = listBillDetailForPaymentV2(dto.getBillId());
         	dto.setDateStrBegin(listBillDetailVO.getDateStrBegin());
         	dto.setDateStrEnd(listBillDetailVO.getDateStrEnd());
@@ -6077,7 +6023,7 @@ public class AssetProviderImpl implements AssetProvider {
     		}
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
-            String payTime = r.getValue(t3.CREATE_TIME).toString();
+            String payTime = r.getValue(t2.PAYMENT_TIME).toString();
 			try {
 				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
 			}catch (Exception e){
@@ -6086,7 +6032,7 @@ public class AssetProviderImpl implements AssetProvider {
             }
             dto.setPayTime(payTime);
             //获得付款人员（缴费人名称、缴费人电话）
-            User userById = userProvider.findUserById(r.getValue(t4.UID));
+            User userById = userProvider.findUserById(r.getValue(t2.UID));
             if(userById != null) {
             	dto.setPayerName(userById.getNickName());
                 UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
@@ -6095,43 +6041,15 @@ public class AssetProviderImpl implements AssetProvider {
                 }
             }
             try {
-            	Integer queryPaymentType = Integer.parseInt(r.getValue(t4.PAYMENT_TYPE));
+            	Integer queryPaymentType = r.getValue(t2.PAYMENT_TYPE);
                 dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
             }catch(Exception e){
-            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t4.PAYMENT_TYPE), e);
+            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t2.PAYMENT_TYPE), e);
             }
             dto.setPaymentStatus(1);//1：已完成，0：订单异常
             list.add(dto);
             return null;
         });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			//dto.setAmount(AmountUtil.centToUnit(LongUtil.convert(orderDTO.getAmount())));
-            			if(orderDTO.getPaymentType() != null) {
-            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
-            			}
-            			list.set(j, dto);
-            		}
-            	}
-            }
-        }
         return list;
     }
 	
@@ -6391,41 +6309,6 @@ public class AssetProviderImpl implements AssetProvider {
         }
        return response;
 	}
-	
-	
-	private void queryAndTransfer(List<Long> queryIds, List<PaymentOrderBillDTO> list) {
-		DSLContext writeContext = getReadWriteContext();
-		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-		if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transferOrderPaymentType(request), cmd={}", queryIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(queryIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transferOrderPaymentType(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			if(orderDTO.getPaymentType() != null) {
-            				writeContext.update(t4)
-	                            .set(t4.PAYMENT_TYPE, orderDTO.getPaymentType().toString())
-	                            .where(t4.ID.eq(dto.getBillId()))
-	                            .execute();
-            				writeContext.update(t)
-	                            .set(t.PAYMENT_TYPE, orderDTO.getPaymentType())
-	                            .where(t.ID.eq(dto.getBillId()))
-	                            .execute();
-            			}
-            		}
-            	}
-            }
-        }
-	}
 
     public String getProjectNameByBillID(Long billId) {
 		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)
@@ -6678,17 +6561,14 @@ public class AssetProviderImpl implements AssetProvider {
 	public GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId) {
 		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-		EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(t2.STATUS);
-        query.addFrom(t2);
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-		query.addConditions(t3.PAYMENT_ORDER_ID.eq(orderId));
+		query.addSelect(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_STATUS);
+        query.addFrom(Tables.EH_PAYMENT_BILL_ORDERS);
+		query.addConditions(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_ORDER_ID.eq(orderId));
 		query.fetch().map(r -> {
-			Integer status = r.getValue(t2.STATUS);
+			Integer status = r.getValue(Tables.EH_PAYMENT_BILL_ORDERS.PAYMENT_STATUS);
 			if(status != null && status.equals(1)) {
-				response.setPayState(1);//EhAssetPaymentOrderBills中的status1代表支付成功
+				response.setPayState(1);//支付状态，0-待支付、1-支付成功、2-支付中、5-支付失败
 			}else{
 				response.setPayState(0);
 			}
@@ -6810,69 +6690,29 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 	
-	public void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds) {
-    	byte de_coupling = 1;
-        if(communityIds!=null && communityIds.size() >1){
-        	//1、创建基础费项数据(eh_payment_charging_items)
-        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
-            for(int i = 0; i < communityIds.size(); i ++){
-                Long cid = communityIds.get(i);
-                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cid);
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	de_coupling = 0;
-                	cmd.setOwnerId(cid);
-                	//2、创建收费项配置作用域数据
-                	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
-                }
-            }
-        }else{
-            //只有一个园区,不是list过来的
-        	//1、创建基础费项数据(eh_payment_charging_items)
-        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
-        	//2、创建收费项配置作用域数据
-        	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
-        }
+	public List<PaymentBills> findBillsByIds(List<String> billIds) {
+        return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetchInto(PaymentBills.class);
     }
-	
-	private PaymentChargingItem createChargingItemForOneCommunity(CreateChargingItemCommand cmd) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        //创建基础费项数据(eh_payment_charging_items)
-        EhPaymentChargingItemsDao chargingItemsDao = new EhPaymentChargingItemsDao(context.configuration());
-        PaymentChargingItem paymentChargingItem = new PaymentChargingItem();
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItems.class));
-        paymentChargingItem.setId(nextSequence);
-        paymentChargingItem.setName(cmd.getChargingItemName());
-        paymentChargingItem.setCreatorUid(UserContext.currentUserId());
-        paymentChargingItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        paymentChargingItem.setNamespaceId(cmd.getNamespaceId());
-        paymentChargingItem.setOwnerId(cmd.getOwnerId());
-        paymentChargingItem.setOwnerType(cmd.getOwnerType());
-        paymentChargingItem.setCategoryId(cmd.getCategoryId());
-        chargingItemsDao.insert(paymentChargingItem);
-        return paymentChargingItem;
+
+	public List<PaymentBillOrder> findPaymentBillOrderRecordByOrderNum(String bizOrderNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentBillOrdersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_BILL_ORDERS);
+        query.addConditions(Tables.EH_PAYMENT_BILL_ORDERS.ORDER_NUMBER.eq(bizOrderNum));
+        return query.fetchInto(PaymentBillOrder.class);
 	}
-	
-	private void createChargingItemScopesForOneCommunity(CreateChargingItemCommand cmd, PaymentChargingItem paymentChargingItem, Byte decouplingFlag) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        //创建收费项配置作用域数据
-        EhPaymentChargingItemScopesDao chargingItemScopesDao = new EhPaymentChargingItemScopesDao(context.configuration());
-        PaymentChargingItemScope scope = new PaymentChargingItemScope();
-        scope.setChargingItemId(paymentChargingItem.getId());
-        long scopesNextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
-        scope.setId(scopesNextSequence);
-        scope.setNamespaceId(cmd.getNamespaceId());
-        scope.setOwnerId(cmd.getOwnerId());
-        scope.setOwnerType(cmd.getOwnerType());
-        scope.setCategoryId(cmd.getCategoryId());
-        scope.setProjectLevelName(cmd.getProjectLevelName());
-        scope.setDecouplingFlag(decouplingFlag);
-        scope.setTaxRate(cmd.getTaxRate());//增加税率
-        chargingItemScopesDao.insert(scope);
+
+	public void updatePaymentBillOrder(String bizOrderNum, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhPaymentBillOrders t = Tables.EH_PAYMENT_BILL_ORDERS.as("t");
+        context.update(t)
+                .set(t.PAYMENT_STATUS, paymentStatus)
+                .set(t.PAYMENT_TYPE, paymentType)
+                .set(t.PAYMENT_TIME, payDatetime)
+                .set(t.PAYMENT_CHANNEL, paymentChannel)
+                .where(t.ORDER_NUMBER.eq(bizOrderNum))
+                .execute();
 	}
 
 	public void tranferAssetMappings() {
@@ -7084,6 +6924,71 @@ public class AssetProviderImpl implements AssetProvider {
 	        .where(Tables.EH_ASSET_APP_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
 	        .fetchInto(AppAssetCategory.class);
 		return list;
+	}
+	
+	public void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds) {
+    	byte de_coupling = 1;
+        if(communityIds!=null && communityIds.size() >1){
+        	//1、创建基础费项数据(eh_payment_charging_items)
+        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
+            for(int i = 0; i < communityIds.size(); i ++){
+                Long cid = communityIds.get(i);
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cid);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	de_coupling = 0;
+                	cmd.setOwnerId(cid);
+                	//2、创建收费项配置作用域数据
+                	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
+                }
+            }
+        }else{
+            //只有一个园区,不是list过来的
+        	//1、创建基础费项数据(eh_payment_charging_items)
+        	PaymentChargingItem paymentChargingItem = createChargingItemForOneCommunity(cmd);
+        	//2、创建收费项配置作用域数据
+        	createChargingItemScopesForOneCommunity(cmd, paymentChargingItem, de_coupling);
+        }
+    }
+	
+	private PaymentChargingItem createChargingItemForOneCommunity(CreateChargingItemCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建基础费项数据(eh_payment_charging_items)
+        EhPaymentChargingItemsDao chargingItemsDao = new EhPaymentChargingItemsDao(context.configuration());
+        PaymentChargingItem paymentChargingItem = new PaymentChargingItem();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItems.class));
+        paymentChargingItem.setId(nextSequence);
+        paymentChargingItem.setName(cmd.getChargingItemName());
+        paymentChargingItem.setCreatorUid(UserContext.currentUserId());
+        paymentChargingItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        paymentChargingItem.setNamespaceId(cmd.getNamespaceId());
+        paymentChargingItem.setOwnerId(cmd.getOwnerId());
+        paymentChargingItem.setOwnerType(cmd.getOwnerType());
+        paymentChargingItem.setCategoryId(cmd.getCategoryId());
+        chargingItemsDao.insert(paymentChargingItem);
+        return paymentChargingItem;
+	}
+	
+	private void createChargingItemScopesForOneCommunity(CreateChargingItemCommand cmd, PaymentChargingItem paymentChargingItem, Byte decouplingFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建收费项配置作用域数据
+        EhPaymentChargingItemScopesDao chargingItemScopesDao = new EhPaymentChargingItemScopesDao(context.configuration());
+        PaymentChargingItemScope scope = new PaymentChargingItemScope();
+        scope.setChargingItemId(paymentChargingItem.getId());
+        long scopesNextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
+        scope.setId(scopesNextSequence);
+        scope.setNamespaceId(cmd.getNamespaceId());
+        scope.setOwnerId(cmd.getOwnerId());
+        scope.setOwnerType(cmd.getOwnerType());
+        scope.setCategoryId(cmd.getCategoryId());
+        scope.setProjectLevelName(cmd.getProjectLevelName());
+        scope.setDecouplingFlag(decouplingFlag);
+        scope.setTaxRate(cmd.getTaxRate());//增加税率
+        chargingItemScopesDao.insert(scope);
 	}
 	
     /**

@@ -149,7 +149,7 @@ public interface AssetService {
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
-	PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO placeAnAssetOrder(CreatePaymentBillOrderCommand cmd);
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
@@ -240,7 +240,7 @@ public interface AssetService {
 
 	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
 
-	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+	PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd);
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     

@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: namespaceId</li>
  *     <li>name: name</li>
  *     <li>description: description</li>
+ *     <li>appKey: appKey</li>
+ *     <li>secretKey: secretKey</li>
  * </ul>
  */
 public class CreateAppCommand {
@@ -14,6 +16,8 @@ public class CreateAppCommand {
     private Integer namespaceId;
     private String name;
     private String description;
+    private String appKey;
+    private String secretKey;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -37,6 +41,22 @@ public class CreateAppCommand {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAppKey() {
+        return appKey;
+    }
+
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     @Override

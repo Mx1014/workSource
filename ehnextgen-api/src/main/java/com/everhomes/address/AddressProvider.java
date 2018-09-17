@@ -106,8 +106,8 @@ public interface AddressProvider {
 	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
 	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
 	Integer countApartmentNumberByBuildingName(Long communityId, String buildingName);
-	Integer countRelatedEnterpriseCustomerNumber(Long communityId,String buildingName);
-	Integer countRelatedOrganizationOwnerNumber(Long communityId, String name);
+	Integer countRelatedEnterpriseCustomerNumber(Long communityId,Long buildingId);
+	Integer countRelatedOrganizationOwnerNumber(Long communityId, Long buildingId);
 	List<Address> findActiveAddressByCommunityId(Long id);
 	List<Address> listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd);
 	Byte getAddressLivingStatusByAddressId(Long addressId);

@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *         <li>company:公司</li>
  *         <li>school:学校</li>
  *         <li>occupation:职业</li>
+ *         <li>email: 邮箱</li>
  *         </ul>
  */
 public class SetUserInfoCommand {
@@ -30,6 +31,15 @@ public class SetUserInfoCommand {
     private String company;
     private String school;
     private String occupation;
+    private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public SetUserInfoCommand() {
     }
