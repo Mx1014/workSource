@@ -3325,6 +3325,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<OrganizationMember> listAllOrganizationMembersByUID(List<Long> uIds) {
+        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+        Condition condition = t1.field("target_id").in(uIds);
+        result = context.select().from(t1).where(condition).orderBy(t1.field("id").desc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, OrganizationMember.class);
+                });
+        return result;
+    }
+
+    @Override
     public List<OrganizationTaskTarget> listOrganizationTaskTargetsByOwner(String ownerType, Long ownerId, String taskType) {
         List<OrganizationTaskTarget> list = new ArrayList<OrganizationTaskTarget>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

@@ -1,11 +1,11 @@
 package com.everhomes.rest.community.admin;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,15 +22,15 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>executiveFlag: 是否高管 0-否 1-是</li>
  *     <li>position: 职位</li>
  *     <li>identityNumber: 身份证号</li>
- *     <li>orgDtos: 地址， 参考{@link com.everhomes.rest.organization.OrganizationDetailDTO}</li>
- *     <li>addressDtos: 地址， 参考{@link com.everhomes.rest.address.AddressDTO}</li>
- *     <li>memberLogDTOs: 用户认证记录， 参考{@link com.everhomes.rest.community.admin.OrganizationMemberLogDTO}</li>
+ *     <li>orgDtos: 地址， 参考{@link OrganizationDetailDTO}</li>
+ *     <li>addressDtos: 地址， 参考{@link AddressDTO}</li>
+ *     <li>memberLogDTOs: 用户认证记录， 参考{@link OrganizationMemberLogDTO}</li>
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
  *     <li>email: 邮箱</li>
  * </ul>
  */
-public class CommunityUserAddressDTO {
+public class ExportCommunityAllUserDTO {
 
 	private Long id;
 
@@ -42,34 +42,89 @@ public class CommunityUserAddressDTO {
 
 	private Long communityId;
 
-	private Integer isAuth;
-
-	private Timestamp applyTime;
+	private String authString;
+	private String applyTimeString;
 
 	private String phone;
 
 	private Byte gender;
+	private String genderString;
 
 	private Long createTime;
 
-	private Byte executiveFlag;
+	private String executiveFlagString;
 	private String position;
 	private String identityNumber;
+	private String enterpriseNames;
+	private String addresses;
 
-	@ItemType(OrganizationDetailDTO.class)
-	private List<OrganizationDetailDTO> orgDtos;
-
-	@ItemType(AddressDTO.class)
-	private List<AddressDTO> addressDtos;
-
-	@ItemType(OrganizationMemberLogDTO.class)
-	private List<OrganizationMemberLogDTO> memberLogDTOs;
-
-	private Byte userSourceType;
-
-	private Long recentlyActiveTime;
-
+	private String userSourceTypeString;
+	private String recentlyActiveTimeString;
 	private String email;
+
+	public String getAuthString() {
+		return authString;
+	}
+
+	public void setAuthString(String authString) {
+		this.authString = authString;
+	}
+
+	public String getApplyTimeString() {
+		return applyTimeString;
+	}
+
+	public void setApplyTimeString(String applyTimeString) {
+		this.applyTimeString = applyTimeString;
+	}
+
+	public String getGenderString() {
+		return genderString;
+	}
+
+	public void setGenderString(String genderString) {
+		this.genderString = genderString;
+	}
+
+	public String getExecutiveFlagString() {
+		return executiveFlagString;
+	}
+
+	public void setExecutiveFlagString(String executiveFlagString) {
+		this.executiveFlagString = executiveFlagString;
+	}
+
+	public String getEnterpriseNames() {
+		return enterpriseNames;
+	}
+
+	public void setEnterpriseNames(String enterpriseNames) {
+		this.enterpriseNames = enterpriseNames;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
+
+	public String getUserSourceTypeString() {
+		return userSourceTypeString;
+	}
+
+	public void setUserSourceTypeString(String userSourceTypeString) {
+		this.userSourceTypeString = userSourceTypeString;
+	}
+
+	public String getRecentlyActiveTimeString() {
+		return recentlyActiveTimeString;
+	}
+
+	public void setRecentlyActiveTimeString(String recentlyActiveTimeString) {
+		this.recentlyActiveTimeString = recentlyActiveTimeString;
+	}
 
 	public String getEmail() {
 		return email;
@@ -85,14 +140,6 @@ public class CommunityUserAddressDTO {
 
 	public void setCreateTime(Long createTime) {
 		this.createTime = createTime;
-	}
-
-	public Byte getExecutiveFlag() {
-		return executiveFlag;
-	}
-
-	public void setExecutiveFlag(Byte executiveFlag) {
-		this.executiveFlag = executiveFlag;
 	}
 
 	public String getPosition() {
@@ -143,22 +190,6 @@ public class CommunityUserAddressDTO {
 		this.communityId = communityId;
 	}
 
-	public Integer getIsAuth() {
-		return isAuth;
-	}
-
-	public void setIsAuth(Integer isAuth) {
-		this.isAuth = isAuth;
-	}
-
-	public Timestamp getApplyTime() {
-		return applyTime;
-	}
-
-	public void setApplyTime(Timestamp applyTime) {
-		this.applyTime = applyTime;
-	}
-
 	public String getPhone() {
 		return phone;
 	}
@@ -183,43 +214,4 @@ public class CommunityUserAddressDTO {
 		this.gender = gender;
 	}
 
-	public List<OrganizationDetailDTO> getOrgDtos() {
-		return orgDtos;
-	}
-
-	public void setOrgDtos(List<OrganizationDetailDTO> orgDtos) {
-		this.orgDtos = orgDtos;
-	}
-
-	public List<AddressDTO> getAddressDtos() {
-		return addressDtos;
-	}
-
-	public void setAddressDtos(List<AddressDTO> addressDtos) {
-		this.addressDtos = addressDtos;
-	}
-
-	public List<OrganizationMemberLogDTO> getMemberLogDTOs() {
-		return memberLogDTOs;
-	}
-
-	public void setMemberLogDTOs(List<OrganizationMemberLogDTO> memberLogDTOs) {
-		this.memberLogDTOs = memberLogDTOs;
-	}
-
-	public Byte getUserSourceType() {
-		return userSourceType;
-	}
-
-	public void setUserSourceType(Byte userSourceType) {
-		this.userSourceType = userSourceType;
-	}
-
-	public Long getRecentlyActiveTime() {
-		return recentlyActiveTime;
-	}
-
-	public void setRecentlyActiveTime(Long recentlyActiveTime) {
-		this.recentlyActiveTime = recentlyActiveTime;
-	}
 }
