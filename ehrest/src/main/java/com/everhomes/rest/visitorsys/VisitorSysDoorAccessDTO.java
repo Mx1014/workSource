@@ -10,9 +10,13 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId : 所属Id</li>
  *  <li>doorAccessId : 门禁Id</li>
  *  <li>doorAccessName : 门禁名称</li>
- *  <li>authRuleType : 授权规则种类，0 时长，1 次数</li>
- *  <li>maxDuration : 访客授权最长有效期</li>
- *  <li>maxCount : 访客授权最大次数</li>
+ *  <li>defaultAuthRuleType : 默认授权规则种类，0 时长，1 次数（业务系统）</li>
+ *  <li>defaultMaxDuration : 默认访客授权最长有效期（业务系统）</li>
+ *  <li>defaultMaxCount : 默认访客授权最大次数（业务系统）</li>
+ *  <li>maxDuration : 访客授权最长有效期（门禁系统）</li>
+ *  <li>maxCount : 访客授权最大次数（门禁系统）</li>
+ *  <li>enableAmount:门禁是否允许授权按次开门，1是0否（门禁系统）</li>
+ *  <li>enableDuration:门禁是否允许授权按时间开门，1是0否（门禁系统）</li>
  *  <li>defaultDoorAccessFlag : 默认门禁组 0 非默认 1 默认</li>
  * </ul>
  */
@@ -25,9 +29,13 @@ public class VisitorSysDoorAccessDTO {
     private Long ownerId;
     private Long doorAccessId;
     private String doorAccessName;
-    private Byte authRuleType;
+    private Byte defaultAuthRuleType;
+    private Integer defaultMaxDuration;
+    private Integer defaultMaxCount;
     private Integer maxDuration;
     private Integer maxCount;
+    private Byte enableAmount;
+    private Byte enableDuration;
     private Byte defaultDoorAccessFlag;
 
     public Long getId() {
@@ -78,14 +86,6 @@ public class VisitorSysDoorAccessDTO {
         this.doorAccessName = doorAccessName;
     }
 
-    public Byte getAuthRuleType() {
-        return authRuleType;
-    }
-
-    public void setAuthRuleType(Byte authRuleType) {
-        this.authRuleType = authRuleType;
-    }
-
     public Integer getMaxDuration() {
         return maxDuration;
     }
@@ -100,6 +100,46 @@ public class VisitorSysDoorAccessDTO {
 
     public void setMaxCount(Integer maxCount) {
         this.maxCount = maxCount;
+    }
+
+    public Byte getDefaultAuthRuleType() {
+        return defaultAuthRuleType;
+    }
+
+    public void setDefaultAuthRuleType(Byte defaultAuthRuleType) {
+        this.defaultAuthRuleType = defaultAuthRuleType;
+    }
+
+    public Integer getDefaultMaxDuration() {
+        return defaultMaxDuration;
+    }
+
+    public void setDefaultMaxDuration(Integer defaultMaxDuration) {
+        this.defaultMaxDuration = defaultMaxDuration;
+    }
+
+    public Integer getDefaultMaxCount() {
+        return defaultMaxCount;
+    }
+
+    public void setDefaultMaxCount(Integer defaultMaxCount) {
+        this.defaultMaxCount = defaultMaxCount;
+    }
+
+    public Byte getEnableAmount() {
+        return enableAmount;
+    }
+
+    public void setEnableAmount(Byte enableAmount) {
+        this.enableAmount = enableAmount;
+    }
+
+    public Byte getEnableDuration() {
+        return enableDuration;
+    }
+
+    public void setEnableDuration(Byte enableDuration) {
+        this.enableDuration = enableDuration;
     }
 
     public Byte getDefaultDoorAccessFlag() {

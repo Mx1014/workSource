@@ -10,9 +10,9 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId : 所属Id</li>
  *  <li>doorAccessId : 门禁Id</li>
  *  <li>doorAccessName : 门禁名称</li>
- *  <li>authRuleType : 授权规则种类，0 时长，1 次数</li>
- *  <li>maxDuration : 访客授权最长有效期</li>
- *  <li>maxCount : 访客授权最大次数</li>
+ *  <li>defaultAuthRuleType : 授权规则种类，0 时长，1 次数</li>
+ *  <li>defaultMaxDuration : 访客授权最长有效期</li>
+ *  <li>defaultMaxCount : 访客授权最大次数</li>
  *  <li>defaultDoorAccessFlag : 默认门禁组 0 非默认 1 默认</li>
  * </ul>
  */
