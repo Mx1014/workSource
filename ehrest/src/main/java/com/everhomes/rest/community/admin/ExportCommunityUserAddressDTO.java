@@ -1,11 +1,11 @@
 package com.everhomes.rest.community.admin;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,17 +22,16 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>executiveFlag: 是否高管 0-否 1-是</li>
  *     <li>position: 职位</li>
  *     <li>identityNumber: 身份证号</li>
- *     <li>orgDtos: 地址， 参考{@link com.everhomes.rest.organization.OrganizationDetailDTO}</li>
- *     <li>addressDtos: 地址， 参考{@link com.everhomes.rest.address.AddressDTO}</li>
- *     <li>memberLogDTOs: 用户认证记录， 参考{@link com.everhomes.rest.community.admin.OrganizationMemberLogDTO}</li>
+ *     <li>orgDtos: 地址， 参考{@link OrganizationDetailDTO}</li>
+ *     <li>addressDtos: 地址， 参考{@link AddressDTO}</li>
+ *     <li>memberLogDTOs: 用户认证记录， 参考{@link OrganizationMemberLogDTO}</li>
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
  *     <li>email: 邮箱</li>
  *     <li>vipLevel: 会员等级</li>
- *     <li>showVipLevelFlag: 是否展示会员等级，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
-public class CommunityUserAddressDTO {
+public class ExportCommunityUserAddressDTO {
 
 	private Long id;
 
@@ -45,12 +44,15 @@ public class CommunityUserAddressDTO {
 	private Long communityId;
 
 	private Integer isAuth;
+	private String authString;
 
 	private Timestamp applyTime;
+	private String applyTimeString;
 
 	private String phone;
 
 	private Byte gender;
+    private String genderString;
 
 	private Long createTime;
 
@@ -64,34 +66,75 @@ public class CommunityUserAddressDTO {
 	@ItemType(AddressDTO.class)
 	private List<AddressDTO> addressDtos;
 
+	private String address;
 	@ItemType(OrganizationMemberLogDTO.class)
 	private List<OrganizationMemberLogDTO> memberLogDTOs;
 
 	private Byte userSourceType;
+    private String userSourceTypeString;
 
 	private Long recentlyActiveTime;
+    private String recentlyActiveTimeString;
 
-	private String email;
-
-	private Integer vipLevel;
-
-	private Byte showVipLevelFlag;
-
-    public Byte getShowVipLevelFlag() {
-        return showVipLevelFlag;
-    }
-
-    public void setShowVipLevelFlag(Byte showVipLevelFlag) {
-        this.showVipLevelFlag = showVipLevelFlag;
-    }
+    private Integer vipLevel;
 
     public Integer getVipLevel() {
-		return vipLevel;
-	}
+        return vipLevel;
+    }
 
-	public void setVipLevel(Integer vipLevel) {
-		this.vipLevel = vipLevel;
-	}
+    public void setVipLevel(Integer vipLevel) {
+        this.vipLevel = vipLevel;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAuthString() {
+        return authString;
+    }
+
+    public void setAuthString(String authString) {
+        this.authString = authString;
+    }
+
+    public String getApplyTimeString() {
+        return applyTimeString;
+    }
+
+    public void setApplyTimeString(String applyTimeString) {
+        this.applyTimeString = applyTimeString;
+    }
+
+    public String getGenderString() {
+        return genderString;
+    }
+
+    public void setGenderString(String genderString) {
+        this.genderString = genderString;
+    }
+
+    public String getUserSourceTypeString() {
+        return userSourceTypeString;
+    }
+
+    public void setUserSourceTypeString(String userSourceTypeString) {
+        this.userSourceTypeString = userSourceTypeString;
+    }
+
+    public String getRecentlyActiveTimeString() {
+        return recentlyActiveTimeString;
+    }
+
+    public void setRecentlyActiveTimeString(String recentlyActiveTimeString) {
+        this.recentlyActiveTimeString = recentlyActiveTimeString;
+    }
+
+    private String email;
 
 	public String getEmail() {
 		return email;

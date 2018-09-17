@@ -56,4 +56,8 @@ CREATE TABLE `eh_butt_script_last_commit` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'last_commit 存储表';
 -- END
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户增加会员等级
+ALTER TABLE `eh_users` ADD COLUMN `vip_level` INTEGER COMMENT '会员等级';
+
 -- --------------------- SECTION END ---------------------------------------------------------
