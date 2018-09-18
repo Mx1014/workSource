@@ -54,6 +54,17 @@ public class CMContractHeader {
     
     private String SignDate;
 
+    private String Modifydate;
+
+    public String getModifydate() {
+        return Modifydate;
+    }
+
+    public void setModifydate(String modifydate) {
+        Modifydate = modifydate;
+    }
+
+
     public String getSignDate() {
 		return SignDate;
 	}
