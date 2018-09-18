@@ -356,6 +356,47 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/setUserDefaultCommunity</b>
+	 * <p>设置用户默认园区</p>
+	 */
+	@RequestMapping("setUserDefaultCommunity")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse setUserDefaultCommunity(@Valid SetUserDefaultCommunityCommand cmd) {
+
+        userService.setDefaultCommunity(cmd.getUserId(), cmd.getNamespaceId());
+
+		return new RestResponse();
+	}
+
+    /**
+     * <b>URL: /user/setUserDefaultCommunity</b>
+     * <p>设置微信用户默认园区</p>
+     */
+    @RequestMapping("setUserDefaultCommunityForWx")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse setUserDefaultCommunityForWx(@Valid SetUserDefaultCommunityCommand cmd) {
+
+        userService.setDefaultCommunityForWx(cmd.getUserId(), cmd.getNamespaceId());
+
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /user/updateUserCurrentCommunityToProfile</b>
+     * <p>设置微信用户默认园区</p>
+     */
+    @RequestMapping("updateUserCurrentCommunityToProfile")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse updateUserCurrentCommunityToProfile(@Valid SetUserCurrentCommunityCommand cmd) {
+
+        userService.updateUserCurrentCommunityToProfile(cmd.getUserId(), cmd.getCommunityId(), cmd.getNamespaceId());
+
+        return new RestResponse();
+    }
+	/**
 	 * <b>URL: /user/verifyAndLogonByIdentifier</b>
 	 * <p>通过用户标识验证并登录</p>
 	 * @return {@link LogonCommandResponse}
@@ -748,6 +789,24 @@ public class UserController extends ControllerBase {
 		return response;
 	}
 
+    /**
+     * <b>URL: /user/listBorderAndContent</b>
+     * <p>获取borderServer地址</p>
+     * @return OK
+     */
+    @RequestMapping("listBorderAndContent")
+    @RestReturn(ListBorderAndContentResponse.class)
+    public RestResponse listBorderAndContent() {
+
+        List<String> strings = this.listAllBorderAccessPoints();
+        ListBorderAndContentResponse res = new ListBorderAndContentResponse();
+        res.setBorders(strings);
+        res.setContentUrl(contentServerService.getContentServer());
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	private List<String> listAllBorderAccessPoints() {
 		List<Border> borders = this.borderProvider.listAllBorders();
 		return borders.stream().map((Border border) -> {
@@ -1719,4 +1778,13 @@ public class UserController extends ControllerBase {
 		// xxx
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/logonInfo</b>
+     * <p>获取登录信息</p>
+     */
+    @RequestMapping("sendVerificationCodeSms")
+    public void sendVerificationCodeSms(@Valid SendVerificationCodeCommand cmd) {
+        this.userService.sendVerificationCodeSms(cmd.getNamespaceId(), cmd.getPhoneNumber(), cmd.getCode());
+    }
 }

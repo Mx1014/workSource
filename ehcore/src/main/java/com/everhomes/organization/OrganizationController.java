@@ -1662,4 +1662,12 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/processUserForMember</b>
+     * <p>通过项目id，获取当前项目用户认证的企业列表，</p>
+     */
+    @RequestMapping("processUserForMember")
+    public void processUserForMember(ProcessUserForMemberCommand cmd){
+        organizationService.processUserForMember(cmd.getNamespaceId(),cmd.getIdentifierToken(),cmd.getOwnerId());
+    }
 }

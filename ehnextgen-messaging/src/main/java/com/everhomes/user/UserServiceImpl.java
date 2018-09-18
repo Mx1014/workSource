@@ -637,7 +637,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return StringUtils.join(Arrays.asList(keys), ":");
     }
 
-    private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
+    @Override
+    public void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
         String templateScope = SmsTemplateCode.SCOPE;
         int templateId = SmsTemplateCode.VERIFICATION_CODE;
