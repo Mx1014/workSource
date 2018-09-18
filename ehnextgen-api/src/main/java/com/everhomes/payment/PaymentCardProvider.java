@@ -7,6 +7,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 
 public interface PaymentCardProvider {
 	List<PaymentCardIssuerCommunity> listPaymentCardIssuerCommunity(Long ownerId,String ownerType);
+
+	void updatePaymentCardIssuerCommunity(PaymentCardIssuerCommunity community);
 	
 	List<PaymentCard> listPaymentCard(Long ownerId,String ownerType,Long userId);
 	
@@ -22,7 +24,7 @@ public interface PaymentCardProvider {
 	
 	void createPaymentCardRechargeOrder(PaymentCardRechargeOrder paymentCardRechargeOrder);
 	
-	List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Long pageAnchor,Integer pageSize);
+	List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Byte status,Long pageAnchor,Integer pageSize);
 	
 	List<PaymentCardRechargeOrder> searchCardRechargeOrder(String ownerType,Long ownerId,Timestamp startDate,Timestamp endDate,
     		String rechargeType,Byte rechargeStatus,String keyword,Long pageAnchor,Integer pageSize);
@@ -31,6 +33,8 @@ public interface PaymentCardProvider {
     		String consumeType,Byte status,String keyword,Long pageAnchor,Integer pageSize);
 	
 	PaymentCardRechargeOrder findPaymentCardRechargeOrderById(Long orderId);
+
+	PaymentCardRechargeOrder findPaymentCardRechargeOrderByBizOrderNum(String bizOrderNum);
 	
 	void updatePaymentCardRechargeOrder(PaymentCardRechargeOrder order);
 	
@@ -53,4 +57,10 @@ public interface PaymentCardProvider {
 	List<PaymentCardRechargeOrder> listPaymentCardRechargeOrders(Integer pageSize,
 			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 			CrossShardListingLocator locator);
+
+	List<PaymentCardAccount> listPaymentCardAccounts(String ownerType, Long ownerId);
+
+	void deleteAccounts(String ownerType, Long ownerId);
+
+	void createPaymentCardAccount(PaymentCardAccount account);
 }
