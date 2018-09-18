@@ -100,6 +100,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long taskId;
 
+
     private Long admissionItemId;
 
     private Byte customerSource;
@@ -117,6 +118,9 @@ public class SearchEnterpriseCustomerCommand {
     private Long minTrackingPeriod;
 
     private Long maxTrackingPeriod;
+
+    private Byte convertFlag;
+
 
     public Long getMinTrackingPeriod() {
         return minTrackingPeriod;
@@ -156,6 +160,14 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setAdmissionItemId(Long admissionItemId) {
         this.admissionItemId = admissionItemId;
+    }
+
+    public Byte getConvertFlag() {
+        return convertFlag;
+    }
+
+    public void setConvertFlag(Byte convertFlag) {
+        this.convertFlag = convertFlag;
     }
 
     public Long getTaskId() {

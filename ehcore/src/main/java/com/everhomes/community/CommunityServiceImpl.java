@@ -1212,7 +1212,8 @@ public class CommunityServiceImpl implements CommunityService {
 						propertyMgrService.deleteApartment(command);
 					});
 				}
-				customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
+				//删除楼宇下的房源与企业客户的关联
+				//customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
 				//删除楼栋时，用置状态的方式代替直接删除楼栋的方式(影响较大) by tangcen 2018年8月5日15:14:43
 				//this.communityProvider.deleteBuilding(building);
 				building.setStatus(BuildingAdminStatus.INACTIVE.getCode());
@@ -3196,10 +3197,15 @@ public class CommunityServiceImpl implements CommunityService {
 			cmd.setAreaId(areaId);
 			Community community = createCommunity(userId, cmd);
 			cs.add(community);
-			
+			//创建经纬度数据
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
-			
+			//添加园区与域空间的关联
 			createNamespaceResource(namespaceId, community.getId());
+			//添加企业可见园区,管理公司可以看到添加的园区
+			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+			organizationCommunity.setCommunityId(community.getId());
+			organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+			organizationProvider.createOrganizationCommunity(organizationCommunity);
 			
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
@@ -3238,8 +3244,16 @@ public class CommunityServiceImpl implements CommunityService {
 		//创建社区
 		Community community = ConvertHelper.convert(cmd, Community.class);
 		community.setAptCount(0);
-		community.setDefaultForumId(1L);
-		community.setFeedbackForumId(2L);
+		//设置默认的forumId，要使用原有的项目里的forumId
+		ListingLocator locator = new ListingLocator();
+		List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+		if(communities != null && communities.size() > 0){
+			community.setDefaultForumId(communities.get(0).getDefaultForumId());
+			community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
+		}else {
+			community.setDefaultForumId(1L);
+			community.setFeedbackForumId(2L);
+		}
 		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		communityProvider.createCommunity(userId, community);
 		
@@ -3809,17 +3823,20 @@ public class CommunityServiceImpl implements CommunityService {
         List<ComOrganizationMemberDTO> dtoList = organizationMembers.stream()
             .map((c) -> {
                 ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
-                if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
-                    User operator = userProvider.findUserById(c.getOperatorUid());
-                    UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-                    dto.setOperatorName(operator != null ? operator.getNickName() : "");
-                    dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
-                    dto.setOperateType(OperateType.MANUAL.getCode());
-                } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
-                    // FIXME 临时解决   2017/07/27  xq.tian
-                    dto.setOperatorName("--");
-                    dto.setOperateType(OperateType.NOT_MANUAL.getCode());
-                }
+				if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
+					User operator = userProvider.findUserById(c.getOperatorUid());
+					UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+					dto.setOperatorName(operator != null ? operator.getNickName() : "");
+					dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                    if (OperateType.IMPORT.getCode().equals(c.getSourceType())) {
+                        dto.setOperateType(OperateType.IMPORT.getCode());
+                    }else {
+                        dto.setOperateType(OperateType.MANUAL.getCode());
+                    }
+				} else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+					dto.setOperatorName("--");
+                    dto.setOperateType(OperateType.EMAIL.getCode());
+				}
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
@@ -5083,10 +5100,10 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setAreaAveragePrice(doubleRoundHalfUp(areaAveragePrice,2));
     	}
     	
-		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getName());
+		Integer relatedEnterpriseCustomerNumber = addressProvider.countRelatedEnterpriseCustomerNumber(building.getCommunityId(),building.getId());
 		dto.setRelatedEnterpriseCustomerNumber(relatedEnterpriseCustomerNumber);
 		
-		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getName());
+		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getId());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
 		
 		if (dto.getAreaSize()!=null) {
@@ -5218,28 +5235,15 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 		
-		long startTime01 = System.currentTimeMillis();
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
-		long endTime01 = System.currentTimeMillis();
-		long timeCost01 = endTime01 - startTime01;
-		LOGGER.info("timeCost01:{}ms",timeCost01);
 		
-		long startTime02 = System.currentTimeMillis();
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
-		long endTime02 = System.currentTimeMillis();
-		long timeCost02 = endTime02 - startTime02;
-		LOGGER.info("timeCost02:{}ms",timeCost02);
 		
-		long startTime03 = System.currentTimeMillis();
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
-		long endTime03 = System.currentTimeMillis();
-		long timeCost03 = endTime03 - startTime03;
-		LOGGER.info("timeCost03:{}ms",timeCost03);
 		
 		//用于存储已经计算过的合同id
 //		List<Long> contractIds = new ArrayList<>();
 		
-		long startTime04 = System.currentTimeMillis();
 		List<Long> filterAddressIdList = new ArrayList<>();
 		for (Address address : addresses) {
 			filterAddressIdList.add(address.getId());
@@ -5289,9 +5293,6 @@ public class CommunityServiceImpl implements CommunityService {
 		totalRent = contractProvider.getTotalRentByAddressIds(filterAddressIdList);
 		result.setTotalRent(totalRent);
 		
-		long endTime04 = System.currentTimeMillis();
-		long timeCost04 = endTime04 - startTime04;
-		LOGGER.info("timeCost04:{}ms",timeCost04);
 		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
 //		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
 //		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
@@ -5501,7 +5502,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setBuildingName(address.getBuildingName());
 		dto.setApartmentFloor(address.getApartmentFloor());
 		dto.setApartmentName(address.getApartmentName());
-		dto.setLivingStatus(livingStatus);
+		dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 		dto.setAreaSize(address.getAreaSize());
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());

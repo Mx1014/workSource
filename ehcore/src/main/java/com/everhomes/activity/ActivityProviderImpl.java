@@ -320,7 +320,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
     
     @Override
-    public ActivityRoster findRosterByOrderNo(Long orderNo) {
+    public ActivityRoster findRosterByOrderNo(String orderNo) {
         ActivityRoster[] rosters = new ActivityRoster[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
                 (context, obj) -> {
@@ -807,6 +807,24 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.update(activityBizPayee);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityBizPayee.class, null);
+    }
+
+    @Override
+    public List<ActivityRoster> listActivityRosterByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select(Tables.EH_ACTIVITY_ROSTER.fields()).from(Tables.EH_ACTIVITY_ROSTER)
+                .join(Tables.EH_ORGANIZATION_MEMBERS)
+                .on(Tables.EH_ACTIVITY_ROSTER.UID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
+                .where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(pageAnchor==null?DSL.trueCondition():Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+                .orderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc(), Tables.EH_ACTIVITY_ROSTER.ID.asc())
+                .limit(pageSize + 1)
+                .fetch();
+        if (result != null && result.isNotEmpty()) {
+            return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+        }
+        return new ArrayList<ActivityRoster>();
     }
 
     @Override

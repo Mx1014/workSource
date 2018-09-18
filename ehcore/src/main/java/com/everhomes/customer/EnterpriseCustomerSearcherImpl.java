@@ -59,6 +59,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -554,15 +555,28 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
         Map<Long, EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
-        if(customers != null && customers.size() > 0) {
-            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
-            ids.forEach(id -> {
-                EnterpriseCustomer customer = customers.get(id);
-                if(customer != null) {
-                    EnterpriseCustomerDTO dto = convertToDTO(customer);
-                    dtos.add(dto);
-                }
-            });
+
+        if(cmd.getConvertFlag() == null || cmd.getConvertFlag() == 0) {
+            if (customers != null && customers.size() > 0) {
+                //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+                ids.forEach(id -> {
+                    EnterpriseCustomer customer = customers.get(id);
+                    if (customer != null) {
+                        EnterpriseCustomerDTO dto = convertToDTO(customer);
+                        dtos.add(dto);
+                    }
+                });
+            }
+        }else{
+            if (customers != null && customers.size() > 0) {
+                ids.forEach(id -> {
+                    EnterpriseCustomer customer = customers.get(id);
+                    if (customer != null) {
+                        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+                        dtos.add(dto);
+                    }
+                });
+            }
         }
 //        Collections.sort(dtos);
         response.setDtos(dtos);

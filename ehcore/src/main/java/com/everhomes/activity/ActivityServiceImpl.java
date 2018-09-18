@@ -2,6 +2,25 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.archives.ArchivesUtil;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community_form.CommunityFormProvider;
+import com.everhomes.community_form.CommunityFormType;
+import com.everhomes.community_form.CommunityGeneralForm;
+import com.everhomes.general_approval.GeneralApprovalService;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -30,6 +49,7 @@ import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.InteractSetting;
 import com.everhomes.forum.Post;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -39,6 +59,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.order.OrderService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
@@ -52,8 +73,10 @@ import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -65,6 +88,7 @@ import com.everhomes.rest.activity.ActivityChargeFlag;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityFormIdCommand;
 import com.everhomes.rest.activity.ActivityGoodsDTO;
 import com.everhomes.rest.activity.ActivityListCommand;
 import com.everhomes.rest.activity.ActivityListResponse;
@@ -101,6 +125,8 @@ import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
 import com.everhomes.rest.activity.DeleteSignupInfoCommand;
 import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
 import com.everhomes.rest.activity.ExportActivityCommand;
+import com.everhomes.rest.activity.ExportActivitySignupDTO;
+import com.everhomes.rest.activity.ExportActivitySignupTemplateCommand;
 import com.everhomes.rest.activity.ExportOrganizationCommand;
 import com.everhomes.rest.activity.ExportSignupInfoCommand;
 import com.everhomes.rest.activity.ExportTagCommand;
@@ -139,6 +165,7 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoCommand;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.ManualSignupCommand;
@@ -162,6 +189,7 @@ import com.everhomes.rest.activity.StatisticsSummaryResponse;
 import com.everhomes.rest.activity.StatisticsTagCommand;
 import com.everhomes.rest.activity.StatisticsTagDTO;
 import com.everhomes.rest.activity.StatisticsTagResponse;
+import com.everhomes.rest.activity.UpdateActivityFormCommand;
 import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
 import com.everhomes.rest.activity.UpdateSignupInfoCommand;
 import com.everhomes.rest.activity.UserAuthFlag;
@@ -176,11 +204,13 @@ import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.ArchivesLocaleStringCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.ActivityEnrollDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community_form.CommunityFormErrorCode;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
@@ -200,6 +230,44 @@ import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessOrderType;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
+import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
+import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.gorder.order.RefundOrderCommandResponse;
+import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormFileValue;
+import com.everhomes.rest.general_approval.GeneralFormFileValueDTO;
+import com.everhomes.rest.general_approval.GeneralFormImageValue;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormSubFormValue;
+import com.everhomes.rest.general_approval.GeneralFormSubFormValueDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
+import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
+import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -234,6 +302,7 @@ import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -291,7 +360,17 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -313,6 +392,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -327,7 +407,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -485,10 +567,30 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     private NamespaceProvider namespaceProvider;
 
     @Autowired
+    private GeneralFormService generalFormService;
+
+    @Autowired
+    private GeneralFormValProvider generalFormValProvider;
+
+    @Autowired
     private SensitiveWordService sensitiveWordService;
 
     @Autowired
+    private GeneralOrderService orderService;
+
+    @Autowired
+    private ActivitySignupFormHandler activitySignupFormHandler;
+    @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private CommunityFormProvider communityFormProvider;
+
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private GeneralApprovalService generalApprovalService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -504,7 +606,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     }
 
     @Override
-    public void createPost(ActivityPostCommand cmd, Long postId) {
+    public void createPost(ActivityPostCommand cmd, Long postId, Long communityId) {
         User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
         activity.setId(cmd.getId());
@@ -598,7 +700,17 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
-        
+        CommunityGeneralForm communityGeneralForm = this.communityFormProvider.findCommunityGeneralForm(communityId, CommunityFormType.ACTIVITY_SIGNUP);
+        if (communityGeneralForm != null) {
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(communityGeneralForm.getFormOriginId());
+            if (form != null) {
+                roster.setFormId(form.getId());
+                if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                    form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                    generalFormProvider.updateGeneralForm(form);
+                }
+            }
+        }
         activityProvider.createActivityRoster(roster);
 //        // 注册成功事件 add by jiarui
 //        LocalEventBus.publish(event -> {
@@ -622,7 +734,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     public ActivityDTO signup(ActivitySignupCommand cmd) {
 
     	//检查版本  add by yanjun 20170626
-    	checkPayVersion(cmd);
+        //对接表单后，不能确认是微信端报名还是客户端报名。也不需要在判断版本 add by yanlong.liang 20180813
+//    	checkPayVersion(cmd);
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
@@ -733,7 +846,24 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 }
 
 //	            activityProvider.createActivityRoster(roster);
+                if (cmd.getValues() == null) {
+                    UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),UserContext.getCurrentNamespaceId());
+                    if (userIdentifier != null) {
+                        roster.setPhone(userIdentifier.getIdentifierToken());
+                    }
+                    roster.setRealName(user.getNickName());
+                }
                 createActivityRoster(roster);
+
+                if (cmd.getValues() != null) {
+                    //报名对接表单，添加表单值数据
+                    addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                    addGeneralFormValuesCommand.setSourceId(roster.getId());
+                    addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                    addGeneralFormValuesCommand.setValues(cmd.getValues());
+                    this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                }
 
                 //启动定时器，当时间超过设定时间时，取消订单。 条件与前面设置订单号、订单开始时间一致。放在此处是因为定时器需要rosterId   add by yanjun 20170516
                 if (activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0) {
@@ -799,6 +929,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
                     sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
                 }
+                Map<String, String> rosterMap = new HashMap<String, String>();
+                rosterMap.put("postName", activity.getSubject());
+                sendMessageCode(user.getId(), user.getLocale(), rosterMap, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_SUCCESS, null);
                 long signupStatEndTime = System.currentTimeMillis();
                 LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime),
                         (signupStatEndTime - rosterStatStartTime), cmd);
@@ -934,7 +1067,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     private void populateNewRosterOrder(ActivityRoster roster, Long categoryId){
     	Long orderNo = this.onlinePayService.createBillId(DateHelper
 				.currentGMTTime().getTime());
-    	roster.setOrderNo(orderNo);
     	roster.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
     	
     	GetRosterOrderSettingCommand settingCmd = new GetRosterOrderSettingCommand();
@@ -1077,58 +1209,295 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //		return callBack;
 //	}
 
+//    @Override
+//    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+//        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+//        if(roster == null){
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+//                    "no roster.");
+//        }
+//        if (roster.getPayOrderId() != null) {
+//            activityProvider.deleteRoster(roster);
+//            roster.setId(null);
+//            roster.setPayOrderId(null);
+//            Long orderNo = this.onlinePayService.createBillId(DateHelper
+//                    .currentGMTTime().getTime());
+//            roster.setOrderNo(orderNo);
+//            activityProvider.createActivityRoster(roster);
+//        }
+//        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+//        if(activity == null){
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+//                    "no activity.");
+//        }
+//
+//        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+//        setPreOrder(cmd,createOrderCommand,roster,activity);
+//
+//        PreOrderDTO callback = new PreOrderDTO();
+//        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
+//        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+//        callback.setExpiredIntervalTime(response.getExpirationMillis());
+//
+//        //组装支付方式
+//        List<PayMethodDTO> list = new ArrayList<>();
+//        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+//            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+//            payMethodDTO.setPaymentName(p.getPaymentName());
+//            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+//            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+//            payMethodDTO.setPaymentLogo(paymentLogo);
+//            payMethodDTO.setPaymentType(p.getPaymentType());
+//            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+//            if(bizPaymentParamsDTO != null) {
+//                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+//            }
+//            payMethodDTO.setPaymentParams(paymentParamsDTO);
+//            list.add(payMethodDTO);
+//        }
+//        callback.setPayMethod(list);
+//        roster.setPayOrderId(callback.getOrderId());
+//        activityProvider.updateRoster(roster);
+//        return callback;
+//    }
+
+    private PurchaseOrderCommandResponse createCommonSignupOrder(CreateSignupOrderV2Command cmd) {
+        //校验参数
+        ActivityRoster roster = checkRoster(cmd);
+        Activity activity = checkActivity(roster);
+
+        //收款方
+        ActivityBizPayee activityBizPayee = checkPaymentPayeeId(activity);
+
+        //组装订单数据
+        CreatePurchaseOrderCommand createPurchaseOrderCommand = preparePaymentSignupOrder(cmd, roster, activity, activityBizPayee);
+
+        // 发送下单请求
+        return sendCreatePreOrderRequest(createPurchaseOrderCommand);
+    }
+
     @Override
-    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+    public PreOrderDTO createUniteSignupOrder(CreateSignupOrderV2Command cmd) {
+        PurchaseOrderCommandResponse response = createCommonSignupOrder(cmd);
+
+        afterSignupOrderCreated(cmd,response);
+        // 返回给客户端支付的报文
+        return populatePreOrderDto(response);
+    }
+
+    private ActivityRoster checkRoster(CreateSignupOrderV2Command cmd){
         ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         if(roster == null){
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
                     "no roster.");
         }
-        if (roster.getPayOrderId() != null) {
-            activityProvider.deleteRoster(roster);
-            roster.setId(null);
-            roster.setPayOrderId(null);
-            Long orderNo = this.onlinePayService.createBillId(DateHelper
-                    .currentGMTTime().getTime());
-            roster.setOrderNo(orderNo);
-            activityProvider.createActivityRoster(roster);
-        }
+        return roster;
+    }
+    private Activity checkActivity(ActivityRoster roster) {
         Activity activity = activityProvider.findActivityById(roster.getActivityId());
         if(activity == null){
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no activity.");
         }
+        return activity;
+    }
+    private ActivityBizPayee checkPaymentPayeeId(Activity activity){
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(),activity.getNamespaceId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
+        return activityBizPayee;
+    }
 
-        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
-        setPreOrder(cmd,createOrderCommand,roster,activity);
+    private CreatePurchaseOrderCommand preparePaymentSignupOrder(CreateSignupOrderV2Command cmd, ActivityRoster roster, Activity activity, ActivityBizPayee activityBizPayee) {
+        CreatePurchaseOrderCommand createPurchaseOrderCommand = new CreatePurchaseOrderCommand();
 
-        PreOrderDTO callback = new PreOrderDTO();
-        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
-        callback = ConvertHelper.convert(response, PreOrderDTO.class);
-        callback.setExpiredIntervalTime(response.getExpirationMillis());
+        BigDecimal amout = activity.getChargePrice();
+        if(amout == null){
+            createPurchaseOrderCommand.setAmount(new BigDecimal(0).longValue());
+        }
+        createPurchaseOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
-        //组装支付方式
-        List<PayMethodDTO> list = new ArrayList<>();
+        createPurchaseOrderCommand.setAccountCode(generateAccountCode());
+        createPurchaseOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        createPurchaseOrderCommand.setBusinessOrderType(generateBusinessOrderType(cmd));
+        createPurchaseOrderCommand.setBusinessPayerType(BusinessPayerType.USER.getCode());
+        createPurchaseOrderCommand.setBusinessPayerId(String.valueOf(UserContext.currentUserId()));
+        createPurchaseOrderCommand.setBusinessPayerParams(getBusinessPayerParams(cmd));
+
+        createPurchaseOrderCommand.setPaymentPayeeId(activityBizPayee.getBizPayeeId());
+        createPurchaseOrderCommand.setPaymentPayeeType(activityBizPayee.getBizPayeeType());
+
+        createPurchaseOrderCommand.setExtendInfo(getExtendInfo(activity));
+        createPurchaseOrderCommand.setPaymentParams(getPaymentParams(cmd));
+        createPurchaseOrderCommand.setExpirationMillis(getExpirationMillis(roster));
+        createPurchaseOrderCommand.setCallbackUrl(getPayCallbackUrl());
+        createPurchaseOrderCommand.setGoodName("活动报名");
+        createPurchaseOrderCommand.setGoodsDescription(null);
+        createPurchaseOrderCommand.setIndustryName(null);
+        createPurchaseOrderCommand.setIndustryCode(null);
+        createPurchaseOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        createPurchaseOrderCommand.setOrderRemark1("活动报名");
+        createPurchaseOrderCommand.setOrderRemark3(null);
+        createPurchaseOrderCommand.setOrderRemark4(null);
+        createPurchaseOrderCommand.setOrderRemark5(null);
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        return createPurchaseOrderCommand;
+    }
+
+    private PurchaseOrderCommandResponse sendCreatePreOrderRequest(CreatePurchaseOrderCommand createOrderCommand) {
+        CreatePurchaseOrderRestResponse createOrderResp = orderService.createPurchaseOrder(createOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
+        }
+
+        PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
+
+        return orderCommandResponse;
+    }
+
+    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
+    }
+    private String generateAccountCode(){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        return "NS"+namespaceId;
+    }
+
+    private String generateBusinessOrderType(CreateSignupOrderV2Command cmd){
+        if (cmd.getPaymentType() != null) {
+            return BusinessOrderType.ACTIVITYSIGNUPORDERWECHAT.getCode();
+        }else {
+            return BusinessOrderType.ACTIVITYSIGNUPORDER.getCode();
+        }
+    }
+
+    private String getBusinessPayerParams(CreateSignupOrderV2Command cmd) {
+        OwnerType businessPayerType = OwnerType.USER;
+
+        // 如果参数中的付款方ID不正确，则使用当前用户ID
+        Long businessPayerId = UserContext.currentUserId();
+
+        UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, UserContext.getCurrentNamespaceId());
+        String buyerPhone = null;
+        if(buyerIdentifier != null) {
+            buyerPhone = buyerIdentifier.getIdentifierToken();
+        }
+        // 找不到手机号则默认一个
+        if(buyerPhone == null || buyerPhone.trim().length() == 0) {
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("businessPayerPhone", buyerPhone);
+        return StringHelper.toJsonString(map);
+    }
+
+    private String getExtendInfo(Activity activity) {
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        return "应用名称："+activityCategories.getName()+"；活动名称："+activity.getSubject();
+    }
+
+    private Map<String, String> getPaymentParams(CreateSignupOrderV2Command cmd) {
+        Map<String, String> map = null;
+
+        PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+        if (paymentType == PaymentType.WECHAT_JS_ORG_PAY) {
+            Long businessPayerId = UserContext.currentUserId();
+            User payer = userProvider.findUserById(businessPayerId);
+            if(payer != null) {
+                map = new HashMap<String, String>();
+                map.put("acct", payer.getNamespaceUserToken());
+            } else {
+                LOGGER.error("User not found, userId={}, activityId={}", businessPayerId, cmd.getActivityId());
+            }
+        }
+
+        return map;
+    }
+
+    private Long getExpirationMillis(ActivityRoster roster) {
+        GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+        timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+        Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+        return expiredTime;
+    }
+
+    private String getPayCallbackUrl() {
+        String configKey = "pay.v2.callback.url.activity";
+        String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), configKey, "");
+        if(backUrl == null || backUrl.trim().length() == 0) {
+            LOGGER.error("Payment callback url empty, configKey={}", configKey);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAY_CALLBACK_URL_EMPTY,
+                    "Payment callback url empty");
+        }
+
+        if(!backUrl.toLowerCase().startsWith("http")) {
+            String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+            backUrl = homeUrl + contextPath + backUrl;
+        }
+        return backUrl;
+    }
+
+    private PreOrderDTO populatePreOrderDto(PurchaseOrderCommandResponse orderResponse){
+        OrderCommandResponse orderCommandResponse = orderResponse.getPayResponse();
+        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
             PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-            payMethodDTO.setPaymentName(p.getPaymentName());
-            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
-            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+            payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
             payMethodDTO.setPaymentLogo(paymentLogo);
-            payMethodDTO.setPaymentType(p.getPaymentType());
+            payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
             PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
             if(bizPaymentParamsDTO != null) {
                 paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
             }
             payMethodDTO.setPaymentParams(paymentParamsDTO);
-            list.add(payMethodDTO);
+            payMethods.add(payMethodDTO);
         }
-        callback.setPayMethod(list);
-        roster.setPayOrderId(callback.getOrderId());
+        dto.setPayMethod(payMethods);
+        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+        if(orderResponse.getAmount() != null) {
+            dto.setAmount(orderResponse.getAmount().longValue());
+        }
+        dto.setOrderId(orderResponse.getOrderId());
+        return dto;
+    }
+
+
+    private void afterSignupOrderCreated(CreateSignupOrderV2Command cmd, PurchaseOrderCommandResponse response){
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        roster.setPayOrderId(response.getOrderId());
+        roster.setOrderNo(response.getBusinessOrderNumber());
         activityProvider.updateRoster(roster);
-        return callback;
     }
 
     private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
@@ -1243,35 +1612,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
         CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
         createSignupOrderV2Command.setActivityId(cmd.getActivityId());
-        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-        if(roster == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-                    "no roster.");
-        }
-        if (roster.getPayOrderId() != null) {
-            activityProvider.deleteRoster(roster);
-            roster.setId(null);
-            roster.setPayOrderId(null);
-            Long orderNo = this.onlinePayService.createBillId(DateHelper
-                    .currentGMTTime().getTime());
-            roster.setOrderNo(orderNo);
-            activityProvider.createActivityRoster(roster);
-        }
-        Activity activity = activityProvider.findActivityById(roster.getActivityId());
-        if(activity == null){
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-                    "no activity.");
-        }
-        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
-        setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
-        LOGGER.info("createPreOrder createOrderCommand={}",createOrderCommand);
-        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
-        CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
-        callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
+        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+
+        PurchaseOrderCommandResponse response = this.createCommonSignupOrder(createSignupOrderV2Command);
+
+        CreateWechatJsPayOrderResp callback = ConvertHelper.convert(response.getPayResponse(),CreateWechatJsPayOrderResp.class);
         callback.setPayNo(response.getOrderId().toString());
-        roster.setPayOrderId(response.getOrderId());
-        activityProvider.updateRoster(roster);
+        afterSignupOrderCreated(createSignupOrderV2Command, response);
         return callback;
 	}
 
@@ -1389,6 +1736,17 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
+
+	            if (cmd.getValues() != null) {
+                    //报名对接表单，添加表单值数据
+                    addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                    addGeneralFormValuesCommand.setSourceId(roster.getId());
+                    addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                    addGeneralFormValuesCommand.setValues(cmd.getValues());
+                    this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                }
+
 	            activityProvider.updateActivity(activity);
                 // 注册成功事件 add by jiarui
                 LocalEventBus.publish(event -> {
@@ -1437,22 +1795,121 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
-		User user = getUserFromPhone(activityRoster.getPhone());
-		signupInfoDTO.setNickName(user.getNickName());
-		signupInfoDTO.setType(getAuthFlag(user));
 		if (activity != null && activityRoster.getUid().longValue() == activity.getCreatorUid().longValue()) {
 			signupInfoDTO.setCreateFlag((byte)1);
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
-		
+        GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
+		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
+		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+		getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
+		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
+		if (values != null) {
+            List<PostApprovalFormItem> results = new ArrayList<>();
+            for(PostApprovalFormItem postApprovalFormItem : values) {
+                GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(postApprovalFormItem.getFieldType());
+                if (null != fieldType) {
+                    switch (GeneralFormFieldType.fromCode(postApprovalFormItem.getFieldType())) {
+                        case SINGLE_LINE_TEXT:
+                        case NUMBER_TEXT:
+                        case DATE:
+                        case DROP_BOX:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case MULTI_LINE_TEXT:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case IMAGE:
+                            break;
+                        case FILE:
+                            break;
+                        case INTEGER_TEXT:
+                            results.add(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()));
+                            break;
+                        case SUBFORM:
+                            break;
+                    }
+                }
+                if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
+                    signupInfoDTO.setPhone(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                }
+            }
+            signupInfoDTO.setValues(results);
+        }
+        User user = getUserFromPhone(signupInfoDTO.getPhone());
+        signupInfoDTO.setNickName(user.getNickName());
+        signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
 		}
-		
+		signupInfoDTO.setActivityName(activity.getSubject());
 		return signupInfoDTO;
 	}
+
+	/**************process form item start***********************/
+	//在OriginFiledFlag为Need时，value为{text:xxx}的格式，所有需要再手动转一次。
+    //当OriginFiledFLag为NONEED是,获取到的value是正确的，但是fieldDisplayName被去掉了。
+    private PostApprovalFormItem processCommonTextField(PostApprovalFormItem formVal, String jsonVal) {
+        try {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }catch (JSONException json) {
+            LOGGER.info("value = {}", jsonVal);
+            formVal.setFieldValue(jsonVal);
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal) {
+        //  取出子表单字段值
+        PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
+        List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+        //  解析子表单的值
+        for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+            subForms.add(processSubFormItemField(dto.getFieldExtra(), itemValue));
+        }
+        GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+        subFormValue.setSubForms(subForms);
+        formVal.setFieldValue(subFormValue.toString());
+        return formVal;
+    }
+
+    private GeneralFormSubFormValueDTO processSubFormItemField(String extraJson, PostApprovalFormSubformItemValue value) {
+        //  1.取出子表单字段初始内容
+        //  2.将子表单中的值解析
+        //  3.将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubFormValueDTO result = JSON.parseObject(extraJson, GeneralFormSubFormValueDTO.class);
+        Map<String, String> fieldMap = new HashMap<>();
+
+        for (PostApprovalFormItem formVal : value.getValues()) {
+            switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case MULTI_LINE_TEXT:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case IMAGE:
+                    break;
+                case FILE:
+                    break;
+                case INTEGER_TEXT:
+                    processCommonTextField(formVal, formVal.getFieldValue());
+                    break;
+                case SUBFORM:
+                    break;
+            }
+            fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
+        }
+        for (GeneralFormFieldDTO dto : result.getFormFields())
+            dto.setFieldValue(fieldMap.get(dto.getFieldName()));
+        return result;
+    }
+    /**************process form item end***********************/
 
 	private Byte getAuthFlag(User user) {
 		if (user.getId().longValue() == 0L) {
@@ -1485,16 +1942,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setLotteryFlag((byte) 0);
         roster.setPhone(cmd.getPhone());
-        roster.setRealName(cmd.getRealName());
-        roster.setGender(cmd.getGender());
+        roster.setRealName(user.getNickName());
+        roster.setGender(user.getGender());
         roster.setCommunityName(cmd.getCommunityName());
-        roster.setOrganizationName(cmd.getOrganizationName());
-        roster.setPosition(cmd.getPosition());
-        roster.setLeaderFlag(cmd.getLeaderFlag());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
-        roster.setEmail(cmd.getEmail());
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
-
+        if (cmd.getFormId() != null) {
+            roster.setFormId(cmd.getFormId());
+        }
         return roster;
 	}
 
@@ -1517,29 +1972,31 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
 		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
-	        	ActivityRoster roster = convertToRoster(cmd);
+	        	ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
 	        	if (cmd.getCheckinFlag().byteValue() != roster.getCheckinFlag().byteValue()) {
 	        		updateActivityCheckin(roster, cmd.getCheckinFlag());
 	        		roster.setCheckinFlag(cmd.getCheckinFlag());
 	        		roster.setCheckinUid(UserContext.current().getUser().getId());
 	    		}
 	        	activityProvider.updateRoster(roster);
+                List<GeneralFormVal> list = this.generalFormValProvider.queryGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
+                if (CollectionUtils.isEmpty(list)) {
+                    LOGGER.error("GeneralFormVal is null.");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "GeneralFormVal is null.");
+                }
+                Long formOriginId = list.get(0).getFormOriginId();
+                this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
+                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                addGeneralFormValuesCommand.setGeneralFormId(formOriginId);
+                addGeneralFormValuesCommand.setSourceId(roster.getId());
+                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                addGeneralFormValuesCommand.setValues(cmd.getValues());
+                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
 	        	return roster;
 	        });
 		}).first();
 		return convertActivityRoster(activityRoster, null);
-	}
-
-	private ActivityRoster convertToRoster(UpdateSignupInfoCommand cmd) {
-		ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
-		roster.setRealName(cmd.getRealName());
-		roster.setGender(cmd.getGender());
-		roster.setCommunityName(cmd.getCommunityName());
-		roster.setOrganizationName(cmd.getOrganizationName());
-		roster.setPosition(cmd.getPosition());
-		roster.setLeaderFlag(cmd.getLeaderFlag());
-		roster.setEmail(cmd.getEmail());
-		return roster;
 	}
 
 	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
@@ -1576,8 +2033,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
-
+			List<List<PostApprovalFormItem>> values = new ArrayList<>();
+            GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+            getTemplateBySourceIdCommand.setOwnerId(activity.getId());
+            GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+            List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId(),values, form);
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
 			//检查是否超过报名人数限制, add by tt, 20161012
@@ -1588,19 +2048,37 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			}
 
 			dbProvider.execute(s->{
-				rosters.forEach(r -> {
+			    for (int i=0;i < rosters.size(); i++) {
+                    ActivityRoster r = rosters.get(i);
+                    ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+                    if(oldRoster != null){
+                        if (form != null) {
+                            //表单数据更新时，先删除旧的数据，在增加新的数据.
+                            this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,oldRoster.getId());
 
-					ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
-					if(oldRoster != null){
-						getNewForImport(oldRoster, r);
-						activityProvider.updateRoster(oldRoster);
-					}else {
-						r.setConfirmUid(user.getId());
-						r.setActivityId(cmd.getActivityId());
-						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
-						activityProvider.createActivityRoster(r);
-
-						// 报名活动事件
+                            addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                            addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
+                            addGeneralFormValuesCommand.setSourceId(oldRoster.getId());
+                            addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                            addGeneralFormValuesCommand.setValues(values.get(i));
+                            this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        }
+                        activityProvider.updateRoster(oldRoster);
+                    }else {
+                        r.setConfirmUid(user.getId());
+                        r.setActivityId(cmd.getActivityId());
+                        r.setStatus(ActivityRosterStatus.NORMAL.getCode());
+                        activityProvider.createActivityRoster(r);
+                        if (form != null) {
+                            //报名对接表单，添加表单值数据
+                            addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                            addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
+                            addGeneralFormValuesCommand.setSourceId(r.getId());
+                            addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                            addGeneralFormValuesCommand.setValues(values.get(i));
+                            this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        }
+                        // 报名活动事件
                         LocalEventBus.publish(event -> {
                             LocalEventContext context = new LocalEventContext();
                             context.setUid(r.getUid());
@@ -1611,7 +2089,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             event.setEntityId(activity.getId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.dft());
                         });
-                        // 注册成功事件 add by jiarui
+					// 注册成功事件 add by jiarui
                         LocalEventBus.publish(event -> {
                             LocalEventContext localEventcontext = new LocalEventContext();
                             localEventcontext.setUid(UserContext.currentUserId());
@@ -1624,9 +2102,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
                             event.setEntityId(UserContext.currentUserId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
-                        });
-					}
-				});
+                        });}
+				}
 				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - result.getUpdate());
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - result.getUpdate());
 	            activityProvider.updateActivity(activity);
@@ -1683,12 +2160,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId, List<List<PostApprovalFormItem>> values, GeneralFormDTO form) {
 		@SuppressWarnings("rawtypes")
 		List<ImportSignupErrorDTO> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
-
 		//此处添加陈宫失败数，因为过着这个方法后就拿不到总数和失败数了。 add by yajun 20170827
 		result.setTotal(0);
 		result.setFail(0);
@@ -1698,6 +2174,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosters;
 		}
 
+        RowResult titleRow = (RowResult)rows.get(1);
+		Integer size = titleRow.getCells().size();
 		//Excel模板从第三行开始 edit by yanjun 20170829
 		for(int i=2, len=rows.size(); i<len; i++) {
 
@@ -1727,7 +2205,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			// 这里是的getUserFromPhone有点小问题的，id为0的用户在我们系统中是存在的，可能会有某些地方显示异常。
 			// 尝试过将uid设置成null，导致了app查询报名用户和后台导出报名出现了nullpointexception，还有报名、确认、取消、签到、支付、退款、活动详情及报名统计多个接口等没测试。
 			// 素我无能为力，暂时保持原样。
-			User user = getUserFromPhone(row.getA().trim());
+            List<ActivityRoster> rosterList = this.activityProvider.listRosters(activityId,ActivityRosterStatus.NORMAL);
+            String phone = row.getA();
+            if (!CollectionUtils.isEmpty(rosterList)) {
+                if (rosterList.get(0).getFormId() != null) {
+                    phone = row.getB();
+                }
+            }
+			User user = getUserFromPhone(phone.trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
 			roster.setUid(user.getId());
@@ -1737,17 +2222,23 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
 	        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        roster.setLotteryFlag((byte) 0);
-	        roster.setPhone(row.getA().trim());
-	        roster.setRealName(row.getB().trim());
-	        roster.setGender(getGender(getStrTrim(row.getC())));
-	        roster.setCommunityName(getStrTrim(row.getD()));
-	        roster.setOrganizationName(getStrTrim(row.getE()));
-	        roster.setPosition(getStrTrim(row.getF()));
-	        roster.setLeaderFlag(getLeaderFlag(getStrTrim(row.getG())));
-	        roster.setEmail(getStrTrim(row.getH()));
-	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
-	        
-	        rosters.add(roster);
+            roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+            roster.setRealName(user.getNickName());
+            roster.setPhone(phone.trim());
+            if (form != null) {
+                List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
+                LOGGER.info("cell length = {}", size);
+                for (int j=0;j<size;j++) {
+                    PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
+                    String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
+                    LOGGER.info("value = {}",value);
+                    postApprovalFormItem.setFieldValue(getStrTrim(value));
+                    postApprovalFormItems.add(postApprovalFormItem);
+                }
+                values.add(postApprovalFormItems);
+            }
+
+            rosters.add(roster);
 		}
 
 		//保存错误信息
@@ -1838,9 +2329,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		String  locale = UserContext.current().getUser().getLocale();
 		String scope = ActivityLocalStringCode.SCOPE;
 
+		List<ActivityRoster> rosters = this.activityProvider.listRosters(activityId,ActivityRosterStatus.NORMAL);
+		String phone = row.getA();
+		if (!CollectionUtils.isEmpty(rosters)) {
+		    if (rosters.get(0).getFormId() != null) {
+		        phone = row.getB();
+            }
+        }
 		String errorString = "";
 		//手机不能为空
-		if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
+		if (org.apache.commons.lang.StringUtils.isBlank(phone)) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_PHONE_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The phone number is empty");
 			rosterError.setDescription(errorString);
@@ -1848,7 +2346,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosterError;
 		}
 		//手机格式简单检验
-		if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+		if (phone == null || phone.trim().length() != 11 || !phone.trim().startsWith("1")) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_INVALID_PHONE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "Invalid phone number");
 			rosterError.setDescription(errorString);
@@ -1856,18 +2354,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			return rosterError;
 		}
 
-		//新增条件真实姓名必填  add by yanjun 20170628
-		if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
-			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REALNAME_EMPTY);
-			errorString = localeStringService.getLocalizedString(scope, code, locale, "The realName is empty");
-			rosterError.setDescription(errorString);
-			rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
-			return rosterError;
-		}
-
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
-			if(newRosters.get(i).getPhone().equals(row.getA())){
+			if(newRosters.get(i).getPhone().equals(phone)){
 				String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ROSTER_IN_EXCEL);
 				errorString = localeStringService.getLocalizedString(scope, code, locale, "Repeat roster in this Excel, checked with phone");
 				rosterError.setDescription(errorString);
@@ -1877,7 +2366,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}
 
 		//检查是否已经报过名
-		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
+		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, phone, ActivityRosterStatus.NORMAL.getCode());
 		if(oldRoster != null){
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ALREADY_EXISTS_UPDATE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, update now");
@@ -1997,7 +2486,27 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
-	@Override
+    @Override
+    public ListSignupInfoByOrganizationIdResponse listSignupInfoByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize) {
+        ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
+	    List<ActivityRoster> list = this.activityProvider.listActivityRosterByOrganizationId(organizationId, namespaceId, pageAnchor, pageSize);
+	    if (list.size() > pageSize){
+            ActivityRoster remove = list.remove(list.size() -1);
+            response.setNextAnchor(remove.getId());
+        }
+        List<SignupInfoDTO> signupInfoDTOList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(list)) {
+	        for (ActivityRoster activityRoster : list) {
+                Activity activity = checkActivityExist(activityRoster.getActivityId());
+                SignupInfoDTO signupInfoDTO = convertActivityRoster(activityRoster, activity);
+                signupInfoDTOList.add(signupInfoDTO);
+            }
+        }
+        response.setSignupInfoDTOs(signupInfoDTOList);
+        return response;
+    }
+
+    @Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
@@ -2057,8 +2566,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	
 	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster, activity);
-		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender())==null?UserGender.UNDISCLOSURED.getText():UserGender.fromCode(signupInfoDTO.getGender()).getText());
-		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag())==null?TrueOrFalseFlag.FALSE.getText():TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
 		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType())==null?UserAuthFlag.NOT_REGISTER.getText():UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
 		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
 		//signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
@@ -2180,11 +2687,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setActivityId(activity.getId());
         roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setConfirmFamilyId(user.getAddressId());
+        roster.setCommunityName(cmd.getCommunityName());
         if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
-        
+        if (cmd.getFormId() != null) {
+            roster.setFormId(cmd.getFormId());
+        }
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
 
@@ -2202,11 +2712,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     	if(roster.getPhone() == null){
     		roster.setPhone(signupInfoDTO.getPhone());
     	}
-    	if(roster.getRealName() == null){
-    		roster.setRealName(signupInfoDTO.getRealName());
-    	}
-    	roster.setGender(signupInfoDTO.getGender());
-    	roster.setCommunityName(signupInfoDTO.getCommunityName());
+    	roster.setGender(user.getGender());
+    	//不需要补充以下数据,通过表单传入.
+//    	roster.setCommunityName(signupInfoDTO.getCommunityName());
 
     	//产品沟通不默认设置公司和职位，因为小区场景默认是没有公司和职位的  add by yanjun 20180515
 //    	if(roster.getOrganizationName() == null){
@@ -2215,10 +2723,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //    	if(roster.getPosition() == null){
 //    		roster.setPosition(signupInfoDTO.getPosition());
 //    	}
-    	if(roster.getEmail() == null){
-    		roster.setEmail(signupInfoDTO.getEmail());
-    	}
-    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
+//    	if(roster.getEmail() == null){
+//    		roster.setEmail(signupInfoDTO.getEmail());
+//    	}
+//    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
     	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
 	}
     
@@ -2228,36 +2736,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     	if (userIdentifiers != null && userIdentifiers.size() > 0) {
     		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
 		}
-    	signupInfoDTO.setGender(user.getGender());
-    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag()==null?TrueOrFalseFlag.FALSE.getCode():user.getExecutiveTag());
     	signupInfoDTO.setNickName(user.getNickName());
-    	
-    	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
-    	if (organizationMember != null) {
-    		signupInfoDTO.setRealName(organizationMember.getContactName());
-    		Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
-    		//如果是职位，取之
-			if (OrganizationGroupType.fromCode(organizationMember.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
-				if (organization != null) {
-					signupInfoDTO.setPosition(organization.getName());
-				}
-			}
-			//找出公司
-			Long organizationId = Long.parseLong(organization.getPath().split("/")[1]);
-			Organization rootOrganization = organizationProvider.findOrganizationById(organizationId);
-			if (rootOrganization != null) {
-				signupInfoDTO.setOrganizationName(rootOrganization.getName());
-				//找出园区
-				OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(rootOrganization.getId());
-				if (organizationCommunityRequest != null) {
-					Community community = communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
-					if (community != null) {
-						signupInfoDTO.setCommunityName(community.getName());
-					}
-				}
-			}
-		}
-    	
+
     	return signupInfoDTO;
     }
 
@@ -2346,6 +2826,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	             dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 	             dto.setProcessStatus(getStatus(activity).getCode());
 	             dto.setFamilyId(activity.getCreatorFamilyId());
+                 ActivityRoster creator = activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                 if (creator.getFormId() == null) {
+                     dto.setSignupFormFlag(TrueOrFalseFlag.FALSE.getCode());
+                  }else {
+                        dto.setSignupFormFlag(TrueOrFalseFlag.TRUE.getCode());
+                 }
 	             dto.setGroupId(activity.getGroupId());
 	             dto.setStartTime(activity.getStartTime().toString());
 	             dto.setStopTime(activity.getEndTime().toString());
@@ -2401,17 +2887,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
-		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
-			refundV1(activity, roster, userId, refoundOrderNo);
-		}else {
-            Long orderId = refundV3(activity, roster, userId);
-            if (orderId != null) {
-                roster.setRefundPayOrderId(orderId);
-            }
+        RefundOrderCommandResponse refundOrderCommandResponse = refundActivitySignupOrder(activity, roster, userId);
+        if (refundOrderCommandResponse != null) {
+            roster.setRefundPayOrderId(refundOrderCommandResponse.getOrderId());
         }
-
 		roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
-		roster.setRefundOrderNo(refoundOrderNo);
+		roster.setRefundOrderNo(refundOrderCommandResponse.getBusinessOrderNumber());
 		roster.setRefundAmount(roster.getPayAmount());
 		roster.setRefundTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateRoster(roster);
@@ -2512,6 +2993,37 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             return refundResponse.getResponse().getOrderId();
         }
         return null;
+    }
+
+    private RefundOrderCommandResponse refundActivitySignupOrder(Activity activity, ActivityRoster roster, Long userId){
+        CreateRefundOrderCommand createRefundOrderCommand = prepareRefundCommand(roster);
+        CreateRefundOrderRestResponse refundOrderRestResponse = this.orderService.createRefundOrder(createRefundOrderCommand);
+        if(refundOrderRestResponse != null && refundOrderRestResponse.getErrorCode() != null && refundOrderRestResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), StringHelper.toJsonString(refundOrderRestResponse));
+        } else{
+            LOGGER.error("Refund from vendor failed, orderNo={}, userId={}, activityId={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), StringHelper.toJsonString(refundOrderRestResponse));
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill  refound error");
+        }
+
+        return refundOrderRestResponse.getResponse();
+    }
+
+    private CreateRefundOrderCommand prepareRefundCommand(ActivityRoster roster){
+        CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        createRefundOrderCommand.setAccountCode(generateAccountCode());
+        createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
+        createRefundOrderCommand.setAmount(roster.getPayAmount().longValue());
+        createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
+        createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
+        createRefundOrderCommand.setCallbackUrl(getPayCallbackUrl());
+        createRefundOrderCommand.setSourceType(SourceType.MOBILE.getCode());
+        return createRefundOrderCommand;
     }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
@@ -3332,7 +3844,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         //返回系统当前时间 add by yanjun 20170510
         dto.setSystemTime(DateHelper.currentGMTTime().getTime());
         
-        
+        ActivityRoster creator = activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+        if (creator.getFormId() == null) {
+            dto.setSignupFormFlag(TrueOrFalseFlag.FALSE.getCode());
+        }else {
+            dto.setSignupFormFlag(TrueOrFalseFlag.TRUE.getCode());
+        }
         //活动添加是否有活动附件标识 add by xiongying 20161207
         boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
         dto.setActivityAttachmentFlag(existAttachments);
@@ -6703,36 +7220,44 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
-        ActivitySignupOrderV2CallBackHandler handler = PlatformContext.getComponent(
-                PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
         }
         if(cmd == null || cmd.getPaymentErrorCode() != "200") {
             LOGGER.error("payNotify fail, cmd={}", cmd);
         }
-        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
-        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+
+        GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
+        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+        getPurchaseOrderCommand.setAccountCode(generateAccountCode());
+        getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-GetPurchaseOrderCommand=" + GsonUtil.toJson(getPurchaseOrderCommand));
+        }
+        GetPurchaseOrderRestResponse response = orderService.getPurchaseOrder(getPurchaseOrderCommand);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-getPurchaseOrder response=" + GsonUtil.toJson(response));
+        }
+        if(response == null || !response.getErrorCode().equals(200)) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+                    "PayNotify getPurchaseOrder by bizOrderNum is error!");
+        }
+        PurchaseOrderDTO purchaseOrderDTO = response.getResponse();
+
+
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(purchaseOrderDTO.getPaymentOrderType());
         if(orderType != null) {
             switch (orderType) {
                 case PURCHACE:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                    if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.PAID.getCode()){
                         //支付成功
-                        handler.paySuccess(srvCmd);
+                       paySuccess(purchaseOrderDTO);
                     }
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
+                    if(purchaseOrderDTO.getPaymentStatus() == PurchaseOrderPaymentStatus.FAILED.getCode()){
                         //支付失败
-                        handler.payFail(srvCmd);
-                    }
-                    break;
-                case REFUND:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                        //退款成功
-                        handler.refundSuccess(srvCmd);
-                    }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                        //退款失败
-                        handler.refundFail(srvCmd);
+                        payFaild(purchaseOrderDTO);
                     }
                     break;
                 default:
@@ -6743,6 +7268,61 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
     }
 
+    private void paySuccess(PurchaseOrderDTO purchaseOrderDTO){
+        LOGGER.info("PurchaseOrderDTO paySuccess start dto = {}", StringHelper.toJsonString(purchaseOrderDTO));
+
+        ActivityRoster roster = activityProvider.findRosterByPayOrderId(purchaseOrderDTO.getId());
+        if(roster == null){
+            LOGGER.info("can not find roster by orderno = {}", purchaseOrderDTO.getId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            LOGGER.info("can not find activity by id = {}", roster.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+        //检验支付结果和应价格是否相等
+        checkPayAmount(new BigDecimal(purchaseOrderDTO.getAmount()), activity.getChargePrice());
+        //支付宝回调时，可能会同时回调多次，
+        roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
+        roster.setPayTime(purchaseOrderDTO.getPaymentTime());
+
+        String amount = String.valueOf(purchaseOrderDTO.getAmount() * 1.0/100);
+        roster.setPayAmount(new BigDecimal(amount));
+        LOGGER.info("amount = {}, roster amount = {}", amount, roster.getPayAmount());
+        roster.setVendorType(String.valueOf(purchaseOrderDTO.getPaymentType()));
+        roster.setOrderType(String.valueOf(purchaseOrderDTO.getPaymentType()));
+        roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
+
+        activityProvider.updateRoster(roster);
+    }
+
+    private void payFaild(PurchaseOrderDTO purchaseOrderDTO) {
+        LOGGER.info("PurchaseOrderDTO payFail dto = {}", purchaseOrderDTO);
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.error("onlinePayBillFail");
+        ActivityRoster roster = activityProvider.findRosterByPayOrderId(purchaseOrderDTO.getId());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
+        cancelCmd.setActivityId(roster.getActivityId());
+        cancelCmd.setUserId(roster.getUid());
+        cancelCmd.setCancelType(ActivityCancelType.PAY_FAIL.getCode());
+        this.cancelSignup(cancelCmd);
+        LOGGER.info("PurchaseOrderDTO payFail end");
+    }
+    private void checkPayAmount(BigDecimal payAmount, BigDecimal chargePrice) {
+        if(payAmount == null || chargePrice == null || payAmount.longValue() != chargePrice.multiply(new BigDecimal(100)).longValue()){
+            LOGGER.error("payAmount and chargePrice is not equal.");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
+                    "payAmount and chargePrice is not equal.");
+        }
+    }
     @Override
     public void exportActivity(ExportActivityCommand cmd) {
 
@@ -6828,7 +7408,373 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
     }
+    @Override
+    public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
+        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+        getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
+        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+        String fileName = "活动报名模板";
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
+        List<String> titleNames = new ArrayList<>();
+        List<String> propertyNames = new ArrayList<>();
+        List<Integer> titleSizes = new ArrayList<>();
+        if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
+            List<GeneralFormFieldDTO> formFieldDTOS = form.getFormFields();
+            for (GeneralFormFieldDTO generalFormFieldDTO : formFieldDTOS) {
+                if (GeneralFormDataVisibleType.HIDDEN.getCode().equals(generalFormFieldDTO.getVisibleType())) {
+                    continue;
+                }
+                titleNames.add(generalFormFieldDTO.getFieldDisplayName());
+                titleSizes.add(20);
 
+            }
+            excelSettings(excelUtils, form);
+        }else {
+            titleNames.add("手机");
+            titleSizes.add(20);
+            List<Integer> mandatoryTitle = new ArrayList<>();
+            mandatoryTitle.add(1);
+            excelUtils.setNeedMandatoryTitle(true);
+            excelUtils.setMandatoryTitle(mandatoryTitle);
+            excelUtils.setTitleRemark(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark"), (short) 18, (short) 4480);
+            excelUtils.setNeedSequenceColumn(false);
+            excelUtils.setNeedTitleRemark(true);
+        }
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
+    }
+
+//    @Override
+//    public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
+//        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+//        getTemplateBySourceIdCommand.setOwnerId(cmd.getActivityId());
+//        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+//        String fileName = "活动报名模板";
+//        String head = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark");
+//
+//        List<String> title = new ArrayList<>();
+//        if (form != null && !CollectionUtils.isEmpty(form.getFormFields())) {
+//            title.addAll(form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList()));
+//        }else {
+//            title.add("手机号码");
+//        }
+//
+//        XSSFWorkbook workbook = new XSSFWorkbook();
+//        Sheet sheet = workbook.createSheet(fileName);
+//        sheet.createFreezePane(1,2,1,1);
+//
+//        //  1.set the header
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1 > 2? title.size() -1 : 5));
+//        Row headRow = sheet.createRow(0);
+//        headRow.setHeight((short) (150 * 20));
+//        createExcelHead(workbook, headRow, head);
+//
+//        //  2.set the title
+//        Row titleRow = sheet.createRow(1);
+//        createExcelTitle(workbook, sheet, titleRow, title);
+//
+//        writeHttpExcel(workbook, httpResponse, fileName);
+//
+//    }
+
+    private void writeHttpExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            DownloadUtil.download(out, httpResponse, fileName);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        }finally {
+            try {
+                workbook.close();
+            } catch (IOException e) {
+                LOGGER.error("export error, e = {}", e);
+            }
+        }
+    }
+
+    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook){
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setColor(IndexedColors.RED.index);
+        font.setBold(true);
+        font.setFontName("微软雅黑");
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setFont(font);
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
+    }
+
+    private void createExcelHead(XSSFWorkbook workbook, Row headRow, String head) {
+        XSSFCellStyle headStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        // font.setBold(true);
+        font.setFontName("微软雅黑");
+        headStyle.setFont(font);
+        headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headStyle.setFillForegroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex()); //  find it in the IndexedColors
+        headStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headStyle.setWrapText(true);
+
+        Cell cell = headRow.createCell(0);
+        cell.setCellStyle(headStyle);
+        cell.setCellValue(head);
+    }
+
+    @Override
+    public void exportActivitySignupNew(ExportSignupInfoCommand cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("activityId",cmd.getActivityId());
+        String fileName = String.format("报名信息_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivitySignupExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    @Override
+    public OutputStream getActivitySignupExportStream(ExportSignupInfoCommand cmd, Long taskId) {
+        Activity activity = checkActivityExist(cmd.getActivityId());
+        List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+        List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 1, 0, 100000);
+        List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 2, 0, 100000);
+        List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 0, 0, 100000);
+
+        rosters.addAll(rostersConfirms);
+        rosters.addAll(rostersRejects);
+        rosters.addAll(rostersUnConfirms);
+
+        if (rosters.size() > 0) {
+            ActivityRoster creator = new ActivityRoster();
+            for (ActivityRoster roster : rosters) {
+                if (activity.getCreatorUid().equals(roster.getUid())) {
+                    creator = roster;
+                    break;
+                }
+            }
+            GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+            List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别", "项目名称"));
+            List<GeneralFormFieldDTO> itemList = new ArrayList<>();
+            if (form != null) {
+                itemList = JSONObject.parseArray(form.getTemplateText(),
+                        GeneralFormFieldDTO.class);
+                for (GeneralFormFieldDTO generalFormFieldDTO : itemList) {
+                    titleNames.add(generalFormFieldDTO.getFieldDisplayName());
+                }
+            }
+            titleNames.addAll(Arrays.asList("报名时间", "报名来源", "报名状态"));
+            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+                titleNames.add("已付金额");
+                titleNames.add("已退金额");
+            }
+
+
+            if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+                titleNames.add("是否签到");
+            }
+            taskService.updateTaskProcess(taskId, 20);
+            List<ExportActivitySignupDTO> values = new ArrayList<>();
+            for (int i = 0; i<signupInfoDTOs.size();i++) {
+                SignupInfoDTO signupInfoDTO = signupInfoDTOs.get(i);
+                if (signupInfoDTO == null) {
+                    continue;
+                }
+                ExportActivitySignupDTO exportActivitySignupDTO = new ExportActivitySignupDTO();
+                List<String> signupValue = new ArrayList<>();
+                if (signupInfoDTO.getCreateFlag().equals((byte)1)) {
+                    signupValue.add("创建者");
+                }else {
+                    signupValue.add(i+"");
+                }
+                signupValue.add(signupInfoDTO.getPhone());
+                signupValue.add(signupInfoDTO.getNickName());
+                if (UserGender.fromCode(signupInfoDTO.getGender()) == null) {
+                    signupValue.add("-");
+                }else {
+                    signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+                }
+                signupValue.add(signupInfoDTO.getCommunityName());
+                if (signupInfoDTO.getCreateFlag().equals((byte)1)) {
+                    if (!CollectionUtils.isEmpty(itemList)) {
+                        for (GeneralFormFieldDTO s : itemList) {
+                            signupValue.add("");
+                        }
+                    }
+                }
+                if (!CollectionUtils.isEmpty(signupInfoDTO.getValues()) && !CollectionUtils.isEmpty(itemList)) {
+                    for (GeneralFormFieldDTO generalFormFieldDTO : itemList) {
+                        String value = "";
+                        for (PostApprovalFormItem postApprovalFormItem : signupInfoDTO.getValues()) {
+                            if (postApprovalFormItem.getFieldName().equals(generalFormFieldDTO.getFieldName())) {
+                                value = postApprovalFormItem.getFieldValue();
+                            }
+                        }
+                        signupValue.add(value);
+                    }
+                }
+                signupValue.add(signupInfoDTO.getSignupTime());
+                signupValue.add(signupInfoDTO.getSourceFlagText());
+                signupValue.add(signupInfoDTO.getSignupStatusText());
+                if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+                    if (signupInfoDTO.getPayAmount() == null) {
+                        signupValue.add(String.valueOf(new BigDecimal(0)));
+                    }else {
+                        signupValue.add(String.valueOf(signupInfoDTO.getPayAmount()));
+                    }
+                    if (signupInfoDTO.getRefundAmount() == null) {
+                        signupValue.add(String.valueOf(new BigDecimal(0)));
+                    }else {
+                        signupValue.add(String.valueOf(signupInfoDTO.getRefundAmount()));
+
+                    }
+                }
+                if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+                    signupValue.add(signupInfoDTO.getCheckinFlagText());
+                }
+                exportActivitySignupDTO.setVals(signupValue);
+                values.add(exportActivitySignupDTO);
+            }
+            taskService.updateTaskProcess(taskId, 75);
+
+            //  write excel
+            XSSFWorkbook workbook = exportActivitySignupFiles(titleNames, values);
+            taskService.updateTaskProcess(taskId, 95);
+
+            return writeExcel(workbook);
+        }else {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_NO_ROSTER, "no roster in this activity");
+        }
+    }
+
+    @Override
+    public ListGeneralFormResponse listActivitySignupGeneralForms(ListGeneralFormsCommand cmd) {
+        GeneralForm initActivitySignupForm = this.activitySignupFormHandler.getDefaultGeneralForm(cmd.getOwnerType());
+        GeneralFormDTO dto = ConvertHelper.convert(initActivitySignupForm, GeneralFormDTO.class);
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        List<GeneralFormDTO> list = new ArrayList<>();
+        list.add(dto);
+        ListGeneralFormResponse response = this.generalFormService.listGeneralForms(cmd);
+        list.addAll(response.getForms());
+        response.setForms(list);
+        return response;
+    }
+
+    @Override
+    public GeneralFormDTO updateGeneralForm(UpdateActivityFormCommand cmd) {
+        UpdateApprovalFormCommand updateApprovalFormCommand = ConvertHelper.convert(cmd, UpdateApprovalFormCommand.class);
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+
+        GeneralFormDTO generalFormDTO = this.generalFormService.updateGeneralForm(updateApprovalFormCommand);
+        if (!form.getId().equals(generalFormDTO.getId())) {
+            List<CommunityGeneralForm> list = this.communityFormProvider.listCommunityGeneralFormByFormId(form.getId());
+            if (!CollectionUtils.isEmpty(list)) {
+                for(CommunityGeneralForm communityGeneralForm : list) {
+                    communityGeneralForm.setFormOriginId(generalFormDTO.getId());
+                    this.communityFormProvider.updateCommunityGeneralForm(communityGeneralForm);
+                }
+            }
+        }
+        return generalFormDTO;
+    }
+
+    @Override
+    public void deleteActivityFormById(ActivityFormIdCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+        List<CommunityGeneralForm> list = this.communityFormProvider.listCommunityGeneralFormByFormId(form.getId());
+        if (!CollectionUtils.isEmpty(list)) {
+            LOGGER.error("cann't delete this form");
+            throw RuntimeErrorException.errorWith(CommunityFormErrorCode.SCOPE,
+                    CommunityFormErrorCode.ERROR_CANNOT_DELETE, "cannot delete this form, formId = " + form.getId());
+        }
+        ApprovalFormIdCommand approvalFormIdCommand = ConvertHelper.convert(cmd,ApprovalFormIdCommand.class);
+        generalApprovalService.deleteApprovalFormById(approvalFormIdCommand);
+    }
+
+    private XSSFWorkbook exportActivitySignupFiles(List<String> title, List<ExportActivitySignupDTO> value) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet("报名信息");
+        sheet.createFreezePane(1,2,1,1);
+        //  2.title
+        Row titleRow = sheet.createRow(0);
+        createExcelTitle(workbook, sheet, titleRow, title);
+        //  3.data
+        for (int rowIndex = 1; rowIndex <= value.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createActivityFileData(workbook, dataRow, value.get(rowIndex - 1).getVals());
+        }
+        return workbook;
+    }
+    private void createActivityFileData(XSSFWorkbook workbook, Row dataRow, List<String> list) {
+        //  设置样式
+        XSSFCellStyle contentStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("微软雅黑");
+        contentStyle.setAlignment(HorizontalAlignment.CENTER);
+        contentStyle.setFont(font);
+        for (int i = 0; i < list.size(); i++) {
+            Cell cell = dataRow.createCell(i);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(list.get(i));
+        }
+    }
+    private void createExcelTitle(XSSFWorkbook workbook, Sheet sheet, Row titleRow, List<String> title) {
+        XSSFCellStyle commonStyle = commonTitleStyle(workbook);
+        for (int i = 0; i < title.size(); i++) {
+            Cell cell = titleRow.createCell(i);
+            sheet.setColumnWidth( i,18 * 256);
+            cell.setCellStyle(commonStyle);
+            cell.setCellValue(title.get(i));
+        }
+    }
+    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook){
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setBold(true);
+        font.setFontName("微软雅黑");
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setFont(font);
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
+    }
+    private void excelSettings(ExcelUtils excelUtils, GeneralFormDTO form) {
+        List<Integer> mandatoryTitle = new ArrayList<>();
+        for (GeneralFormFieldDTO formFieldDTO : form.getFormFields()) {
+            if (TrueOrFalseFlag.TRUE.getCode().equals(formFieldDTO.getRequiredFlag())) {
+                mandatoryTitle.add(1);
+            }else {
+                mandatoryTitle.add(0);
+            }
+        }
+        excelUtils.setNeedMandatoryTitle(true);
+        excelUtils.setMandatoryTitle(mandatoryTitle);
+        excelUtils.setTitleRemark(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark"), (short) 18, (short) 4480);
+        excelUtils.setNeedSequenceColumn(false);
+        excelUtils.setNeedTitleRemark(true);
+    }
+
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        }finally {
+            try {
+                workbook.close();
+            } catch (IOException e) {
+                LOGGER.error("export error, e = {}", e);
+            }
+        }
+        return out;
+    }
 //	@Override
 //	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
 //		List<ActivityRosterError> dtos = activityProvider.listActivityRosterErrorByJobId(cmd.getJobId());

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
@@ -21,6 +22,7 @@ import com.everhomes.rest.asset.BillItemIdCommand;
 import com.everhomes.rest.asset.BillStaticsCommand;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.asset.ExemptionItemIdCommand;
 import com.everhomes.rest.asset.ExportBillTemplatesCommand;
 import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
@@ -53,7 +55,11 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
+import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -253,10 +259,29 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
-
+	
 	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
 		LOGGER.error("Insufficient privilege, handler payBillsForEnt");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
+    
+    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
+    	LOGGER.error("Insufficient privilege, handler createOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler preparePaymentBillOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+
+	public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags) {
+		LOGGER.error("Insufficient privilege, handler listBizPayeeAccounts");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+    
 }

@@ -2,6 +2,8 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
@@ -509,4 +511,6 @@ public interface PropertyMgrService {
 	List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd);
 
 	List<ListReservationsDTO> findReservations(FindReservationsCommand cmd);
+
+	ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd);
 }

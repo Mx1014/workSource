@@ -596,4 +596,20 @@ public class ContractController extends ControllerBase {
 		List<ContractCategoryListDTO> categoryList = contractService.getContractCategoryList(cmd);
 		return new RestResponse(categoryList);
 	}
+
+	/**
+	 * <b>URL: /contract/dealBillsGeneratedByDenunciationContract</b>
+	 * <p>删除历史退约合同产生的多余账单</p>
+	 */
+	@RequestMapping("dealBillsGeneratedByDenunciationContract")
+	@RestReturn(String.class)
+	public RestResponse dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.dealBillsGeneratedByDenunciationContract(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

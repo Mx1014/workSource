@@ -3,7 +3,10 @@ package com.everhomes.rest.activity;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
@@ -13,13 +16,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>id: id</li>
  * <li>phone: 手机</li>
  * <li>nickName: 昵称</li>
- * <li>realName: 真实姓名</li>
+ * <li>realName:真实名称</li>
  * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>communityName: 园区名称</li>
- * <li>organizationId:公司Id，如果用户没有使用当前场景的公司，则不传id仅传名称</li>
- * <li>organizationName: 企业名称</li>
- * <li>position: 职位</li>
- * <li>leaderFlag: 是否高管，1是0否</li>
+ * <li>values: values: 报名中，每项对应的值{@link PostApprovalFormItem}</li>
  * <li>type: 类型，1认证2非认证3非注册</li>
  * <li>sourceFlag: 来源，1自发报名2后台录入</li>
  * <li>confirmFlag: 报名确认，1已确认0未确认</li>
@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  *<li>refundTime:退款时间</li>
  *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
  *<li>signupStatusText:报名状态text</li>
+ * <li>activityName: 活动名称</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -47,13 +48,9 @@ public class SignupInfoDTO {
 	private String nickName;
 	private String realName;
 	private Byte gender;
-	private String genderText;
 	private String communityName;
-	private Long organizationId;
-	private String organizationName;
-	private String position;
-	private Byte leaderFlag;
-	private String leaderFlagText;
+	@ItemType(PostApprovalFormItem.class)
+	List<PostApprovalFormItem> values;
 	private Byte type;
 	private String typeText;
 	private Byte sourceFlag;
@@ -78,24 +75,54 @@ public class SignupInfoDTO {
     private Timestamp refundTime;
 	private Byte status;
 	private String signupStatusText;
-	
-	public Byte getCreateFlag() {
+	private String activitySubject;
+	private String activityName;
+
+	public String getActivityName() {
+		return activityName;
+	}
+
+	public void setActivityName(String activityName) {
+		this.activityName = activityName;
+	}
+
+	public String getActivitySubject() {
+		return activitySubject;
+	}
+
+	public void setActivitySubject(String activitySubject) {
+		this.activitySubject = activitySubject;
+	}
+
+	public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public Byte getCreateFlag() {
 		return createFlag;
 	}
 	public void setCreateFlag(Byte createFlag) {
 		this.createFlag = createFlag;
-	}
-	public String getGenderText() {
-		return genderText;
-	}
-	public void setGenderText(String genderText) {
-		this.genderText = genderText;
-	}
-	public String getLeaderFlagText() {
-		return leaderFlagText;
-	}
-	public void setLeaderFlagText(String leaderFlagText) {
-		this.leaderFlagText = leaderFlagText;
 	}
 	public String getTypeText() {
 		return typeText;
@@ -139,49 +166,16 @@ public class SignupInfoDTO {
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
 	}
-	public String getRealName() {
-		return realName;
-	}
-	public void setRealName(String realName) {
-		this.realName = realName;
-	}
-	public Byte getGender() {
-		return gender;
-	}
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
-	public String getCommunityName() {
-		return communityName;
-	}
-	public void setCommunityName(String communityName) {
-		this.communityName = communityName;
-	}
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-	public String getOrganizationName() {
-		return organizationName;
-	}
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
-	public String getPosition() {
-		return position;
-	}
-	public void setPosition(String position) {
-		this.position = position;
-	}
-	public Byte getLeaderFlag() {
-		return leaderFlag;
-	}
-	public void setLeaderFlag(Byte leaderFlag) {
-		this.leaderFlag = leaderFlag;
-	}
-	public Byte getType() {
+
+    public List<PostApprovalFormItem> getValues() {
+        return values;
+    }
+
+    public void setValues(List<PostApprovalFormItem> values) {
+        this.values = values;
+    }
+
+    public Byte getType() {
 		return type;
 	}
 	public void setType(Byte type) {

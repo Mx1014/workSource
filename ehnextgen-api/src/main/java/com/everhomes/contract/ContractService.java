@@ -67,6 +67,9 @@ public interface ContractService {
 
 	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
 	void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd);
+
 	List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd);
+
+	void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd);
    
 }

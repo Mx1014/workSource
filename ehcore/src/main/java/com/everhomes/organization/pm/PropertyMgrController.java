@@ -8,6 +8,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
+import com.everhomes.rest.activity.SignupInfoDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
@@ -1787,7 +1790,7 @@ public class PropertyMgrController extends ControllerBase {
 
 	/**
 	 * <b>URL: /pm/listApartmentOrganizationOwnerBehaviors</b>
-	 * <p>查询门牌下的业主活动记录</p>
+	 * <p>查询门牌下的业主活动记录（这个是个人客户迁入迁出的记录）（5.9.0以后暂时不用这个接口了）</p>
 	 */
 	@RequestMapping("listApartmentOrganizationOwnerBehaviors")
 	@RestReturn(value=OrganizationOwnerBehaviorDTO.class, collection = true)
@@ -2340,5 +2343,19 @@ public class PropertyMgrController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
+	
+	/**
+	 * <b>URL: /pm/listApartmentActivity</b>
+	 * <p>查询房源下的业主活动记录（活动记录来自园区活动管理）</p>
+	 */
+	@RequestMapping("listApartmentActivity")
+	@RestReturn(value=ListSignupInfoByOrganizationIdResponse.class)
+	public RestResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
+		ListSignupInfoByOrganizationIdResponse result = propertyMgrService.listApartmentActivity(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }
