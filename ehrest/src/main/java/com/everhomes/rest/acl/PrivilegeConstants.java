@@ -388,4 +388,15 @@ public interface PrivilegeConstants {
     // 停车缴费权限常量
     long PARKING_APPLY_MANAGERMENT = 4080040810L;//
     long PARKING_ORDER_MANAGERMENT = 4080040820L;
+    
+    //------- 房源招商 --------
+    long INVESTMENT_ADVERTISEMENT_CREATE = 150101L;//发布招商信息权限
+    long INVESTMENT_ADVERTISEMENT_UPDATE = 150102L;//编辑招商信息权限
+    long INVESTMENT_ADVERTISEMENT_DELETE = 150103L;//删除招商信息权限
+    long INVESTMENT_ADVERTISEMENT_EXPORT = 150104L; //导出招商信息权限
+    long INVESTMENT_ADVERTISEMENT_CHANGE_ORDER = 150105L; //排序权限
+    long INVESTMENT_APPLY_EXPORT = 150106L;//导出申请记录权限
+    long INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER = 150107L;//转为意向客户权限
+    long INVESTMENT_APPLY_DELETE = 150108L;//删除申请记录权限
+    
 }

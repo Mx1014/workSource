@@ -757,9 +757,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             }
             String source_type = "EhGeneralFormValRequests";
 
-
             addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
-
             cmd2.setGeneralFormVersion(generalForm.getFormVersion());
             cmd2.setGeneralFormId(generalForm.getFormOriginId());
             cmd2.setSourceId(source_id);

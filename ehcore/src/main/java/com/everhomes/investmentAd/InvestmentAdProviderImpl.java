@@ -22,6 +22,7 @@ import com.everhomes.investmentAd.InvestmentAdProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.investmentAd.InvestmentAdDTO;
 import com.everhomes.rest.investmentAd.InvestmentAdGeneralStatus;
+import com.everhomes.rest.investmentAd.InvestmentAdSortType;
 import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -36,6 +37,8 @@ import com.everhomes.server.schema.tables.records.EhInvestmentAdvertisementBanne
 import com.everhomes.server.schema.tables.records.EhInvestmentAdvertisementsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 @Component
 public class InvestmentAdProviderImpl implements InvestmentAdProvider{
@@ -175,11 +178,22 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		if (StringUtils.isNotBlank(cmd.getKeywords())) {
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.TITLE.like(DSL.concat("%",cmd.getKeywords(),"%")));
 		}
+		//排序
+		if (cmd.getSortField().equals("defaultOrder")) {
+			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER);
+		}else if(cmd.getSortField().equals("availableAreaMin")){
+			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN);
+		}else if (cmd.getSortField().equals("assetPriceMin")) {
+			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN);
+		}
 		
-		query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER.ge(cmd.getPageAnchor()));
-		query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER);
-		query.addOrderBy(DSL.val(1).desc());
-		query.addLimit(cmd.getPageSize() + 1);
+		if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
+			query.addOrderBy(DSL.val(1).asc());
+		}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
+			query.addOrderBy(DSL.val(1).desc());
+		}
+		
+		query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize() + 1);
 		
 		query.fetch().forEach(r->{
 			InvestmentAdDTO dto = new InvestmentAdDTO();
@@ -216,7 +230,7 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		SelectQuery<EhInvestmentAdvertisementAssetsRecord> query = context.selectQuery(Tables.EH_INVESTMENT_ADVERTISEMENT_ASSETS);
 		query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENT_ASSETS.ADVERTISEMENT_ID.eq(investmentAdId));
 		query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENT_ASSETS.STATUS.eq(InvestmentAdGeneralStatus.ACTIVE.getCode()));
-		return null;
+		return query.fetchInto(InvestmentAdAsset.class);
 	}
 
 	@Override

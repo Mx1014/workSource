@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>apartmentFloorMax: 最大楼层</li>
  *  <li>orientation: 朝向</li>
  *  <li>keywords: 关键字</li>
- *  <li>sortField: 排序字段</li>
+ *  <li>sortField: 排序字段:defaultOrder,availableAreaMin,assetPriceMin</li>
  *  <li>sortType: 1-升序，2-降序</li>
  * </ul>
  */
@@ -26,6 +26,7 @@ public class ListInvestmentAdCommand {
 	
 	private Integer namespaceId;
 	private Long communityId;
+	private Long organizationId;
 	private Byte investmentStatus;
 	private Byte investmentType;
 	private BigDecimal availableAreaMin;
@@ -41,6 +42,12 @@ public class ListInvestmentAdCommand {
 	private String sortField;
 	private Byte sortType;
 	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

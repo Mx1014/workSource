@@ -45,6 +45,7 @@ public class UpdateInvestmentAdCommand {
 	private Long id;
 	private Integer namespaceId;
 	private Long communityId;
+	private Long organizationId; 
 	private String ownerType;
 	private Long ownerId;
 	private String title;
@@ -78,6 +79,14 @@ public class UpdateInvestmentAdCommand {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
 	public Long getId() {
 		return id;
 	}

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -28,7 +27,8 @@ import com.everhomes.investmentAd.InvestmentAdService;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
 import com.everhomes.rest.investmentAd.InvestmentAdGeneralStatus;
 import com.everhomes.rest.investmentAd.InvestmentAdOrderDTO;
-import com.everhomes.rest.community.BuildingOrderDTO;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
@@ -44,12 +44,10 @@ import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
 import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.expansion.LeasePromotionAttachment;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Component
 public class InvestmentAdServiceImpl implements InvestmentAdService{
@@ -77,9 +75,13 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	@Autowired
 	private AddressProvider addressProvider;
 	
+	@Autowired
+	protected UserPrivilegeMgr userPrivilegeMgr;
+	
 	@Override
 	public void createInvestmentAd(CreateInvestmentAdCommand cmd) {
 		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		//创建招商广告
 		InvestmentAd investmentAd = ConvertHelper.convert(cmd,InvestmentAd.class);
@@ -87,6 +89,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 			String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
 			investmentAd.setGeohash(geohash);
 		}
+		investmentAd.setStatus(InvestmentAdGeneralStatus.ACTIVE.getCode());
 		Long investmentAdId = investmentAdProvider.createInvestmentAd(investmentAd);
 		//记录招商广告关联的资产
 		addInvestmentAdAssets(cmd.getRelatedAssets(),investmentAd);
@@ -101,6 +104,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	@Override
 	public void deleteInvestmentAd(DeleteInvestmentAdCommand cmd) {
 		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_DELETE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		InvestmentAd investmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (investmentAd == null) {
@@ -113,6 +117,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	@Override
 	public void updateInvestmentAd(UpdateInvestmentAdCommand cmd) {
 		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		InvestmentAd existInvestmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (existInvestmentAd == null) {
@@ -145,8 +150,6 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 
 	@Override
 	public ListInvestmentAdResponse listInvestmentAds(ListInvestmentAdCommand cmd) {
-		//TODO 加权限 ；目前只能按照defaultOrder排序
-		
 		ListInvestmentAdResponse response = new ListInvestmentAdResponse();
 		
 		if(cmd.getPageAnchor() == null){
@@ -158,8 +161,8 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		List<InvestmentAdDTO> advertisements = investmentAdProvider.listInvestmentAds(cmd);
 		
 		if (advertisements.size() > cmd.getPageSize()) {
-			InvestmentAdDTO remove = advertisements.remove(advertisements.size()-1);
-			response.setNextPageAnchor(remove.getDefaultOrder());
+			advertisements.remove(advertisements.size()-1);
+			response.setNextPageAnchor(cmd.getPageAnchor() + cmd.getPageSize().longValue());
 		}
 		response.setAdvertisements(advertisements);
 		return response;
@@ -167,8 +170,6 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 
 	@Override
 	public InvestmentAdDetailDTO getInvestmentAd(GetInvestmentAdCommand cmd) {
-		//TODO 加权限
-		
 		InvestmentAd investmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (investmentAd == null) {
 			LOGGER.error("investmentAd not found, cmd={}", cmd);
@@ -187,21 +188,27 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		}
 		//处理招商广告关联的轮播图
 		List<InvestmentAdBanner> investmentAdBanners = investmentAdProvider.findBannersByInvestmentAdId(investmentAd.getId());
-		List<InvestmentAdBannerDTO> banners= investmentAdBanners.stream().map(b->{
-			InvestmentAdBannerDTO bannerDTO = new InvestmentAdBannerDTO();
-			bannerDTO.setContentUri(b.getContentUri());
-			bannerDTO.setContentUrl(contentServerService.parserUri(b.getContentUri(), EntityType.USER.getCode(), userId));
-			return bannerDTO;
-		}).collect(Collectors.toList());
-		dto.setBanners(banners);
+		if (investmentAdBanners != null && investmentAdBanners.size() > 0) {
+			List<InvestmentAdBannerDTO> banners = new ArrayList<>();
+			for (InvestmentAdBanner investmentAdBanner : investmentAdBanners) {
+				InvestmentAdBannerDTO bannerDTO = new InvestmentAdBannerDTO();
+				bannerDTO.setContentUri(investmentAdBanner.getContentUri());
+				bannerDTO.setContentUrl(contentServerService.parserUri(investmentAdBanner.getContentUri(), EntityType.USER.getCode(), userId));
+			}
+			dto.setBanners(banners);
+		}
 		//处理招商广告关联的资产
 		List<InvestmentAdAsset> investmentAdAssets = investmentAdProvider.findAssetsByInvestmentAdId(investmentAd.getId());
-		List<RelatedAssetDTO> relatedAssets = investmentAdAssets.stream().map(a->{
-			return convertToAssetDTO(a);
-		}).collect(Collectors.toList());
-		dto.setRelatedAssets(relatedAssets);
+		if (investmentAdAssets != null && investmentAdAssets.size() > 0) {
+			List<RelatedAssetDTO> relatedAssets = new ArrayList<>();
+			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
+				RelatedAssetDTO assetDTO = convertToAssetDTO(investmentAdAsset);
+				relatedAssets.add(assetDTO);
+			}
+			dto.setRelatedAssets(relatedAssets);
+		}
 		//处理自定义表单
-		if (investmentAd.getCustomFormFlag() == 1) {
+		if (investmentAd.getCustomFormFlag() != null && investmentAd.getCustomFormFlag() == 1) {
 			dto.setFormValues(getInvestmentAdGeneralFormValues(investmentAd.getId()));
 		}
 		return dto;
@@ -210,6 +217,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	@Override
 	public void changeInvestmentAdOrder(ChangeInvestmentAdOrderCommand cmd) {
 		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CHANGE_ORDER, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		if (cmd.getInvestmentAdOrders() != null && cmd.getInvestmentAdOrders().size() > 0) {
 			List<InvestmentAdOrderDTO> investmentAdOrders = cmd.getInvestmentAdOrders();
@@ -300,6 +308,8 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		return formValues;
 	}
 	
-	
+	private void checkPrivilegeAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, null, null, null, communityId);
+	}
 	
 }

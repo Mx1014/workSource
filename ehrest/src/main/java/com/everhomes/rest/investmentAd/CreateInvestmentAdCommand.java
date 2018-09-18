@@ -43,6 +43,7 @@ public class CreateInvestmentAdCommand {
 	
 	private Integer namespaceId;
 	private Long communityId;
+	private Long organizationId;
 	private String ownerType;
 	private Long ownerId;
 	private String title;
@@ -76,6 +77,14 @@ public class CreateInvestmentAdCommand {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 	
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
