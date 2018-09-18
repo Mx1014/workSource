@@ -29,9 +29,10 @@ import java.sql.Timestamp;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
- * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
- * <li>doorAccessInvalidTimes: 门禁使用次数</li>
- * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
+ * <li>doorAccessAuthDurationType: 访客授权有效期种类,0 天数，1 小时数</li>
+ * <li>doorAccessAuthDuration: 访客授权有效期</li>
+ * <li>doorAccessEnableAuthCount: 访客授权次数开关 0 关 1 开</li>
+ * <li>doorAccessAuthCount: 访客授权次数</li>
  * </ul>
  */
 public class BaseVisitorDTO extends BaseVisitorsysCommand{
@@ -60,9 +61,10 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
     private String officeLocationName;
     private Timestamp createTime;
 
-    private Byte authRuleType;
-    private Integer doorAccessInvalidTimes;
-    private Integer doorAccessInvalidDuration;
+    private Byte doorAccessAuthDurationType;
+    private Integer doorAccessAuthDuration;
+    private Byte doorAccessEnableAuthCount;
+    private Integer doorAccessAuthCount;
 
     private String idNumber;
 
@@ -212,28 +214,36 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
         this.createTime = createTime;
     }
 
-    public Byte getAuthRuleType() {
-        return authRuleType;
+    public Byte getDoorAccessAuthDurationType() {
+        return doorAccessAuthDurationType;
     }
 
-    public void setAuthRuleType(Byte authRuleType) {
-        this.authRuleType = authRuleType;
+    public void setDoorAccessAuthDurationType(Byte doorAccessAuthDurationType) {
+        this.doorAccessAuthDurationType = doorAccessAuthDurationType;
     }
 
-    public Integer getDoorAccessInvalidTimes() {
-        return doorAccessInvalidTimes;
+    public Integer getDoorAccessAuthDuration() {
+        return doorAccessAuthDuration;
     }
 
-    public void setDoorAccessInvalidTimes(Integer doorAccessInvalidTimes) {
-        this.doorAccessInvalidTimes = doorAccessInvalidTimes;
+    public void setDoorAccessAuthDuration(Integer doorAccessAuthDuration) {
+        this.doorAccessAuthDuration = doorAccessAuthDuration;
     }
 
-    public Integer getDoorAccessInvalidDuration() {
-        return doorAccessInvalidDuration;
+    public Byte getDoorAccessEnableAuthCount() {
+        return doorAccessEnableAuthCount;
     }
 
-    public void setDoorAccessInvalidDuration(Integer doorAccessInvalidDuration) {
-        this.doorAccessInvalidDuration = doorAccessInvalidDuration;
+    public void setDoorAccessEnableAuthCount(Byte doorAccessEnableAuthCount) {
+        this.doorAccessEnableAuthCount = doorAccessEnableAuthCount;
+    }
+
+    public Integer getDoorAccessAuthCount() {
+        return doorAccessAuthCount;
+    }
+
+    public void setDoorAccessAuthCount(Integer doorAccessAuthCount) {
+        this.doorAccessAuthCount = doorAccessAuthCount;
     }
 
     public String getIdNumber() {

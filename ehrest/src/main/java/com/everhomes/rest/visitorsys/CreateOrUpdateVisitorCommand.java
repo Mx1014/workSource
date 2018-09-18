@@ -36,9 +36,10 @@ import java.util.List;
  * <li>sendSmsFlag: (选填)是否发送邀请函短信，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  * <li>visitorSignUri: (选填)签名图片或者pdf的地址</li>
  * <li>visitorSignCharacter: (选填)访客签名字符串</li>
- * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
- * <li>doorAccessInvalidTimes: 门禁使用次数</li>
- * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
+ * <li>doorAccessAuthDurationType: 访客授权有效期种类,0 天数，1 小时数</li>
+ * <li>doorAccessAuthDuration: 访客授权有效期</li>
+ * <li>doorAccessEnableAuthCount: 访客授权次数开关 0 关 1 开</li>
+ * <li>doorAccessAuthCount: 访客授权次数</li>
  * <li>doorAccessEndTime: 门禁授权结束时间有效期</li>
  * </ul>
  */

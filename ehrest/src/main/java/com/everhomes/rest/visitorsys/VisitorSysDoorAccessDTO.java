@@ -10,9 +10,10 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId : 所属Id</li>
  *  <li>doorAccessId : 门禁Id</li>
  *  <li>doorAccessName : 门禁名称</li>
- *  <li>defaultAuthRuleType : 默认授权规则种类，0 时长，1 次数（业务系统）</li>
- *  <li>defaultMaxDuration : 默认访客授权最长有效期（业务系统）</li>
- *  <li>defaultMaxCount : 默认访客授权最大次数（业务系统）</li>
+ *  <li>defaultAuthDurationType : 默认访客授权有效期种类,0 天数，1 小时数</li>
+ *  <li>defaultAuthDuration : 默认访客授权有效期</li>
+ *  <li>defaultEnableAuthCount : 默认访客授权次数开关 0 关 1 开</li>
+ *  <li>defaultAuthCount : 默认访客授权次数</li>
  *  <li>maxDuration : 访客授权最长有效期（门禁系统）</li>
  *  <li>maxCount : 访客授权最大次数（门禁系统）</li>
  *  <li>enableAmount:门禁是否允许授权按次开门，1是0否（门禁系统）</li>
@@ -29,9 +30,10 @@ public class VisitorSysDoorAccessDTO {
     private Long ownerId;
     private Long doorAccessId;
     private String doorAccessName;
-    private Byte defaultAuthRuleType;
-    private Integer defaultMaxDuration;
-    private Integer defaultMaxCount;
+    private Byte defaultAuthDurationType;
+    private Integer defaultAuthDuration;
+    private Byte defaultEnableAuthCount;
+    private Integer defaultAuthCount;
 //  ---------从门禁获取数据---------
     private Integer maxDuration;
     private Integer maxCount;
@@ -104,29 +106,6 @@ public class VisitorSysDoorAccessDTO {
         this.maxCount = maxCount;
     }
 
-    public Byte getDefaultAuthRuleType() {
-        return defaultAuthRuleType;
-    }
-
-    public void setDefaultAuthRuleType(Byte defaultAuthRuleType) {
-        this.defaultAuthRuleType = defaultAuthRuleType;
-    }
-
-    public Integer getDefaultMaxDuration() {
-        return defaultMaxDuration;
-    }
-
-    public void setDefaultMaxDuration(Integer defaultMaxDuration) {
-        this.defaultMaxDuration = defaultMaxDuration;
-    }
-
-    public Integer getDefaultMaxCount() {
-        return defaultMaxCount;
-    }
-
-    public void setDefaultMaxCount(Integer defaultMaxCount) {
-        this.defaultMaxCount = defaultMaxCount;
-    }
 
     public Byte getEnableAmount() {
         return enableAmount;
@@ -150,6 +129,38 @@ public class VisitorSysDoorAccessDTO {
 
     public void setDefaultDoorAccessFlag(Byte defaultDoorAccessFlag) {
         this.defaultDoorAccessFlag = defaultDoorAccessFlag;
+    }
+
+    public Byte getDefaultAuthDurationType() {
+        return defaultAuthDurationType;
+    }
+
+    public void setDefaultAuthDurationType(Byte defaultAuthDurationType) {
+        this.defaultAuthDurationType = defaultAuthDurationType;
+    }
+
+    public Integer getDefaultAuthDuration() {
+        return defaultAuthDuration;
+    }
+
+    public void setDefaultAuthDuration(Integer defaultAuthDuration) {
+        this.defaultAuthDuration = defaultAuthDuration;
+    }
+
+    public Byte getDefaultEnableAuthCount() {
+        return defaultEnableAuthCount;
+    }
+
+    public void setDefaultEnableAuthCount(Byte defaultEnableAuthCount) {
+        this.defaultEnableAuthCount = defaultEnableAuthCount;
+    }
+
+    public Integer getDefaultAuthCount() {
+        return defaultAuthCount;
+    }
+
+    public void setDefaultAuthCount(Integer defaultAuthCount) {
+        this.defaultAuthCount = defaultAuthCount;
     }
 
     @Override
