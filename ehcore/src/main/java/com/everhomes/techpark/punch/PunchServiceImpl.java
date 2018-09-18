@@ -2344,7 +2344,10 @@ public class PunchServiceImpl implements PunchService {
 //		    return null;
 //		});
         response.setPunchTime(punchTime);
-
+        //发消息
+        if(CreateType.NORMAL_PUNCH != CreateType.fromCode(punchLog.getCreateType())){
+        	
+        }
         return response;
     }
 
