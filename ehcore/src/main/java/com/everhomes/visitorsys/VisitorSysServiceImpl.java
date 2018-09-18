@@ -2330,21 +2330,24 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         doorCmd.setUserName(visitor.getVisitorName());
         doorCmd.setDescription(visitor.getVisitReason());
 //      两种授权方式
-        if(null != visitor.getAuthRuleType() && visitor.getAuthRuleType().equals((byte)1)){
-            doorCmd.setAuthRuleType(visitor.getAuthRuleType());
-            if(null != visitor.getDoorAccessInvalidTimes())
-                doorCmd.setTotalAuthAmount(visitor.getDoorAccessInvalidTimes());
-        }else{
-            doorCmd.setAuthRuleType((byte)0);
-            long now = System.currentTimeMillis();
-//            Calendar instance = Calendar.getInstance();
-//            instance.setTimeInMillis(now);
-            doorCmd.setValidFromMs(now);
-            doorCmd.setValidEndMs(visitor.getDoorAccessEndTime());
-//            if(null != visitor.getDoorAccessInvalidDuration()){
-//                instance.add(Calendar.DATE,visitor.getDoorAccessInvalidDuration());
-//                doorCmd.setValidEndMs(instance.getTimeInMillis());
-//            }
+        doorCmd.setAuthRuleType((byte)0);
+        long now = System.currentTimeMillis();
+        Calendar instance = Calendar.getInstance();
+        instance.setTimeInMillis(now);
+        doorCmd.setValidFromMs(now);
+        doorCmd.setValidEndMs(visitor.getDoorAccessEndTime());
+        if(null != visitor.getDoorAccessAuthDuration()){
+            if(visitor.getDoorAccessAuthDurationType().equals((byte)0)){
+                instance.add(Calendar.DAY_OF_MONTH,visitor.getDoorAccessAuthDuration());
+            }else{
+                instance.add(Calendar.HOUR_OF_DAY,visitor.getDoorAccessAuthDuration());
+            }
+            visitor.setDoorAccessEndTime(instance.getTimeInMillis());
+            doorCmd.setValidEndMs(instance.getTimeInMillis());
+        }
+        if(visitor.getDoorAccessEnableAuthCount().equals((byte)1) && null != visitor.getDoorAccessAuthCount()){
+            doorCmd.setAuthRuleType((byte)1);
+            doorCmd.setTotalAuthAmount(visitor.getDoorAccessAuthCount());
         }
 
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
