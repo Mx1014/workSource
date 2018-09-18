@@ -103,6 +103,8 @@ import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.CMBill;
+import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
@@ -5870,9 +5872,51 @@ public class AssetServiceImpl implements AssetService {
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
 	 */
 	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
-		AssetVendor vendor = checkAssetVendor(namespaceId,0);
-        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        handler.syncRuiAnCMBillToZuolin(cmSyncObject, namespaceId);
+		List<CMDataObject> data = cmSyncObject.getData();
+		if(data != null) {
+			for(CMDataObject cmDataObject : data) {
+				List<CMBill> cmBills = cmDataObject.getBill();
+				for(CMBill cmBill : cmBills) {
+					PaymentBills paymentBills = new PaymentBills();
+					paymentBills.setNamespaceId(namespaceId);
+					paymentBills.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
+					paymentBills.setBillGroupId(4L);//TODO 后面看是否给一个默认的账单组
+					if(cmDataObject.getContractHeader() != null) {
+						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+					}
+					paymentBills.setContractId(cmBill.getRentalID() != null ? Long.parseLong(cmBill.getRentalID()) : null);
+					paymentBills.setDateStrBegin(cmBill.getStartDate());
+					paymentBills.setDateStrEnd(cmBill.getEndDate());
+					if(cmBill.getStatus() != null && cmBill.getStatus().equals("已出账单")) {
+						paymentBills.setSwitch((byte) 1);
+					}else {
+						paymentBills.setSwitch((byte) 01);
+					}
+					paymentBills.setAmountOwed(new BigDecimal(cmBill.getBalanceAmt()));
+					//paymentBills.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
+					paymentBills.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
+					paymentBills.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
+					
+					Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
+					
+					PaymentBillItems items = new PaymentBillItems();
+					items.setBillId(billId);
+					items.setNamespaceId(namespaceId);
+					items.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
+					items.setBillGroupId(4L);//TODO 后面看是否给一个默认的账单组
+					if(cmDataObject.getContractHeader() != null) {
+						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+					}
+					items.setChargingItemName(cmBill.getBillItemName());
+					items.setAmountOwed(new BigDecimal(cmBill.getBalanceAmt()));
+					//items.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
+					items.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
+					items.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
+					
+					assetProvider.createCMBillItem(items);
+				}
+			}
+		}
 	}
 
 }
