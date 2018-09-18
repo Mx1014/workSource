@@ -103,6 +103,7 @@ import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
