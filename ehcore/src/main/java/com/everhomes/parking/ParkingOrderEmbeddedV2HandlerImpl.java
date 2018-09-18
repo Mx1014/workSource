@@ -65,13 +65,16 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		this.checkPayAmountIsNull(cmd.getAmount());//
 
 
-		Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+
 		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + orderId).enter(()-> {
-
-			ParkingRechargeOrder order = checkOrder(orderId);
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
+			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+			if (order == null) { //做一下兼容
+				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+				order = checkOrder(orderId);
+			}
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 
@@ -131,14 +134,33 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 						public void run() {
 
 							LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto), null);
+							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + cmd.getBizOrderNum(), JSONObject.toJSONString(dto), null);
 
-							localBus.publish(this, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto));
+							localBus.publish(this, "Parking-Recharge" + cmd.getBizOrderNum(), JSONObject.toJSONString(dto));
 						}
 					});
 				}
 
 			}
+
+			if(order.getStatus() == ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode()) {
+				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
+				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setOrderNo(parkingService.createOrderNo(lot));
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+
+			if(order.getStatus() == ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode()) {
+				order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
+				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setOrderNo(parkingService.createOrderNo(lot));
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+
 			return null;
 		});
 
@@ -265,12 +287,15 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 	private void refundSuccess(OrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
-		Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(orderId);
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+		if (order == null) { //做一下兼容
+			Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+			order = checkOrder(orderId);
+		}
 
 		if(order == null){
-			LOGGER.error("the order {} not found.",orderId);
+			LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the order not found.");
 		}

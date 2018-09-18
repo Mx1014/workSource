@@ -1,6 +1,5 @@
 package com.everhomes.warehouse;
 
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -16,16 +15,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.*;
 import com.everhomes.portal.PortalService;
-import com.everhomes.purchase.PurchaseService;
 import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -765,6 +759,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                         log.setStockAmount(materialStock.getAmount());
                         log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
                         log.setDeliveryUid(uid);
+                        log.setWarehouseOrderId(finalOrder.getId());
                         warehouseProvider.creatWarehouseStockLogs(log);
                         warehouseStockLogSearcher.feedDoc(log);
                     }
@@ -1729,15 +1724,14 @@ public class WarehouseServiceImpl implements WarehouseService {
                         dto.setRequestUserName(members.get(0).getContactName());
                     }
                 }
+                //领用人
+                User user = userProvider.findUserById(request.getRequestUid());
+    			if(user != null) {
+    				dto.setRequestUserName(user.getNickName());
+    			}
             }
             //返回requisitionId
             dto.setRequisitionId(warehouseProvider.findRequisitionId(requestMaterial.getRequestId()));
-            // #36197 领用管理不显示领用人 -- by djm
-            User user = userProvider.findUserById(requestMaterial.getRequestId());
-			if(user != null) {
-				dto.setRequestUserName(user.getNickName());
-			}
-            
             repeadFilter.add(requestMaterial.getRequestId());
             requestDTOs.add(dto);
         }
@@ -1936,7 +1930,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                             dto.setRequestUserName(members.get(0).getContactName());
                         }
                     }
-                    // #36197 领用管理不显示领用人 -- by djm
+                    //领用人
                     User user = userProvider.findUserById(request.getRequestUid());
         			if(user != null) {
         				dto.setRequestUserName(user.getNickName());
@@ -2159,6 +2153,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 			SearchWarehousesResponse warehousesResponse = warehouseSearcher.query(searchWarehousesDTO);
 			List<WarehouseDTO> warehouses = warehousesResponse.getWarehouseDTOs();
 			if (warehouses.size()<1) {
+				data.setMaterial(null);
 				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST);
 				log.setData(data);
 				log.setErrorLog("WarehouseName not exist");

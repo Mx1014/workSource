@@ -5,9 +5,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.point.rpc.PointServiceRPCRest;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.point.*;
 import com.everhomes.user.UserContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,9 @@ public class PointController extends ControllerBase {
 
     @Autowired
     private PointService pointService;
+    
+    @Autowired
+    private PointServiceRPCRest pointServiceRPCRest;
 
     /**
      * <b>URL: /point/getUserPoint</b>
@@ -63,7 +68,8 @@ public class PointController extends ControllerBase {
         if (cmd.getUserId() == null) {
             cmd.setUserId(UserContext.currentUserId());
         }
-        ListPointLogsResponse response = pointService.listPointLogs(cmd);
+        //ListPointLogsResponse response = pointService.listPointLogs(cmd);
+        ListPointLogsResponse response = pointServiceRPCRest.getUserPointLogs(cmd);
         return success(response);
     }
 

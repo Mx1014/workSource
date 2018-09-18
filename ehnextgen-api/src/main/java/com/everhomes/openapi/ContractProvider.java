@@ -111,7 +111,7 @@ public interface ContractProvider {
 	Boolean getContractTemplateById(Long id);
 
 	Double getTotalRentInCommunity(Long communityId);
-	Integer countRelatedContractNumberInBuilding(String buildingName);
+	Integer countRelatedContractNumberInBuilding(String buildingName,Long communityId);
 
 	Double getTotalRentInBuilding(String buildingName);
 
@@ -123,6 +123,12 @@ public interface ContractProvider {
 	EnterpriseCustomerAptitudeFlag updateAptitudeCustomer(Long ownerId, Integer namespaceId, Byte adptitudeFlag);
 
 	Long findCategoryIdByNamespaceId(Integer namespaceId);
+
+	Integer getRelatedContractCountByAddressIds(List<Long> addressIdList);
+
+	Double getTotalRentByAddressIds(List<Long> addressIdList);
+
+	List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode);
 
 	
 

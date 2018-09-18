@@ -26,6 +26,8 @@ import com.everhomes.util.StringHelper;
  * <li>groupIds: groupIds</li>
  * <li>jobPositionIds: 添加到多群组</li>
  * <li>jobLevelIds: jobLevelIds</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>operateType: 审核类型</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
@@ -55,6 +57,12 @@ public class AddOrganizationPersonnelCommand {
 
 	private Byte visibleFlag;
 	
+	/**
+	 * add by huangliangming 邮箱认证用户的时候无法靠当前环境获取
+	 * 得到namespaceId(获取得0,是不对的),所以要靠传参
+	 */
+	private Integer namespaceId;
+	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
 
@@ -67,7 +75,17 @@ public class AddOrganizationPersonnelCommand {
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
 
-	public AddOrganizationPersonnelCommand() {
+	private Byte operateType;
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
+    }
+
+    public AddOrganizationPersonnelCommand() {
 	}
 
 	public Long getOrganizationId() {
@@ -79,6 +97,15 @@ public class AddOrganizationPersonnelCommand {
 		this.organizationId = organizationId;
 	}
 
+	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public String getTargetType() {
 		return targetType;

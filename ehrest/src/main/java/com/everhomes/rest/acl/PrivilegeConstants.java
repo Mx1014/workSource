@@ -199,6 +199,12 @@ public interface PrivilegeConstants {
     long ASSET_MANAGEMENT_CREATE = 204001002L;
     long ASSET_MANAGEMENT_NOTICE = 204001003L;
     long ASSET_MANAGEMENT_CHANGE_STATUS = 204001004L;
+    long ASSET_MANAGEMENT_MODIFY = 204001007L;
+    long ASSET_MANAGEMENT_DELETE = 204001007L;
+    long ASSET_MANAGEMENT_TO_SETTLED = 204001008L;//未出批量转已出
+    long ASSET_MANAGEMENT_TO_PAID = 204001009L;//未缴批量转已缴
+    long ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM = 204001010L;//批量减免
+    
     long ASSET_STATISTICS_VIEW = 204001005L;
 
     // ---------------- 组织架构权限 -----------------------
@@ -274,6 +280,9 @@ public interface PrivilegeConstants {
 
 
     long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+    long ENTERPRISE_CUSTOMER_CHANGE_APTITUDE = 21116L;// 转为资质客户
+
+
 
     long CONTRACT_MODULE = 21200L; //合同模块id
     long CONTRACT_CREATE = 21201L;//新增合同
@@ -360,6 +369,7 @@ public interface PrivilegeConstants {
     long REQUISITION_MODULE = 25000L;
     long REQUISITION_VIEW = 250001001L;
     long REQUISITION_CREATE = 250001002L;
+    long REQUISITION_DELETE = 250001003L;
 
     //企业管理
     long ORGANIZATION_CREATE = 33001L;

@@ -1223,6 +1223,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+        List<ServiceModuleIncludeFunction> includeFunctions = serviceModuleProvider.listIncludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
+        if (includeFunctions != null && includeFunctions.size() > 0) {
+            includeFunctions.forEach(includeFunction -> {
+                functionIds.remove(includeFunction.getFunctionId());
+            });
+        }
 
         return functionIds;
     }

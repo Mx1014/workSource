@@ -33,7 +33,7 @@ public interface ActivityProivider {
     
     ActivityRoster findRosterByPhoneAndActivityId(Long activityId, String phone, Byte status);
     
-    ActivityRoster findRosterByOrderNo(Long orderNo);
+    ActivityRoster findRosterByOrderNo(String orderNo);
 
     ActivityRoster findRosterByPayOrderId(Long payOrderId);
 

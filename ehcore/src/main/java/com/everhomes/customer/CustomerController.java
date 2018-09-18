@@ -136,6 +136,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -1809,6 +1810,20 @@ public class CustomerController extends ControllerBase {
     public RestResponse listPotentialTalent(DeleteEnterpriseCommand cmd) {
        List<CustomerTalentDTO> dtos =  customerService.listPotentialTalent(cmd);
         RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/changeCustomerAptitude</b>
+     * <p>一键转为资质客户</p>
+     */
+    @RequestMapping("changeCustomerAptitude")
+    @RestReturn(value = String.class)
+    public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
+        customerService.changeCustomerAptitude(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

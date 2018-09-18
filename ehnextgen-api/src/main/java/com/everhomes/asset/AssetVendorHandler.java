@@ -21,6 +21,7 @@ import com.everhomes.rest.asset.BillItemIdCommand;
 import com.everhomes.rest.asset.BillStaticsCommand;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.asset.ExemptionItemIdCommand;
 import com.everhomes.rest.asset.ExportBillTemplatesCommand;
 import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
@@ -52,7 +53,9 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -259,4 +262,29 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
+	
+	public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
+    	LOGGER.error("Insufficient privilege, handler createOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    protected PreOrderCommand preparePaymentBillOrder(CreatePaymentBillOrderCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler preparePaymentBillOrder");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+
+	public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags) {
+		LOGGER.error("Insufficient privilege, handler listBizPayeeAccounts");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+	
+	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
+		LOGGER.error("Insufficient privilege, handler syncRuiAnCMBillToZuolin");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+	
 }

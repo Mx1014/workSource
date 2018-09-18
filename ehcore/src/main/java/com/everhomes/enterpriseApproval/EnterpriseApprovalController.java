@@ -4,8 +4,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdCommand;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.CreateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowsCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalIdCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsResponse;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsCommand;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;
+import com.everhomes.rest.enterpriseApproval.UpdateEnterpriseApprovalCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -87,6 +99,20 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /enterpriseApproval/deleteApprovalFlow</b>
+     * <p>删除流程</p>
+     */
+    @RequestMapping("deleteApprovalFlow")
+    @RestReturn(value = String.class)
+    public RestResponse deleteApprovalFlow(@Valid ApprovalFlowIdCommand cmd) {
+        enterpriseApprovalService.deleteApprovalFlow(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /enterpriseApproval/listApprovalProcessors</b>
      * <p>获取原始审批人</p>
      */
@@ -160,13 +186,13 @@ public class EnterpriseApprovalController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /enterpriseApproval/listAvailableApprovalGroups</b>
+     * <b>URL: /enterpriseApproval/listEnterpriseApprovalGroups</b>
      * <p>OA 审批分类列表(组列表)</p>
      */
-    @RequestMapping("listAvailableApprovalGroups")
+    @RequestMapping("listEnterpriseApprovalGroups")
     @RestReturn(value = EnterpriseApprovalGroupDTO.class, collection = true)
-    public RestResponse listAvailableApprovalGroups(){
-        List<EnterpriseApprovalGroupDTO> res = enterpriseApprovalService.listAvailableApprovalGroups();
+    public RestResponse listEnterpriseApprovalGroups(){
+        List<EnterpriseApprovalGroupDTO> res = enterpriseApprovalService.listEnterpriseApprovalGroups();
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -176,7 +202,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/createEnterpriseApproval</b>
      * <p>OA 新增审批</p>
-     * @return
      */
     @RequestMapping("createEnterpriseApproval")
     @RestReturn(value=EnterpriseApprovalDTO.class)

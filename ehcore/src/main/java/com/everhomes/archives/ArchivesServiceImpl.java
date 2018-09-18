@@ -111,11 +111,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
-        //  校验权限 by lei.lv
-        if (cmd.getDetailId() != null) {
+        //  校验权限 by lei.lv  update by huanglm
+        /*if (cmd.getDetailId() != null) {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
             organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
-        }
+        }*/
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -130,7 +130,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getJobLevelIds() != null)
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
-
+        addCommand.setNamespaceId(cmd.getNamespaceId());
+        addCommand.setOperateType(cmd.getOperateType());
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
             if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
@@ -152,7 +153,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         employee.setContactShortToken(cmd.getContactShortToken());
         employee.setWorkEmail(cmd.getWorkEmail());
         employee.setContractPartyId(cmd.getOrganizationId());
-
+        //员工认证时，没有填写邮箱地址，使用申请加入公司时使用的邮箱。add by yanlong.liang
+        //如果影响到了组织架构，请删除
+        if (StringUtils.isEmpty(cmd.getWorkEmail())) {
+            OrganizationMember organizationMember = this.organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(memberDTO.getTargetId(),memberDTO.getOrganizationId());
+            if (organizationMember != null) {
+                employee.setWorkEmail(organizationMember.getStringTag3());
+            }
+        }
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
         dto.setContactToken(employee.getContactToken());
@@ -192,14 +200,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
-                TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
-                transferCommand.setOrganizationId(cmd.getOrganizationId());
-                transferCommand.setDetailIds(cmd.getDetailIds());
-                transferCommand.setDepartmentIds(cmd.getDepartmentIds());
-                transferCommand.setJobPositionIds(cmd.getJobPositionIds());
-                transferCommand.setJobLevelIds(cmd.getJobLevelIds());
+                TransferArchivesEmployeesCommand tCommand = new TransferArchivesEmployeesCommand();
+                tCommand.setNamespaceId(cmd.getNamespaceId());
+                tCommand.setOrganizationId(cmd.getOrganizationId());
+                tCommand.setDetailIds(cmd.getDetailIds());
+                tCommand.setDepartmentIds(cmd.getDepartmentIds());
+                tCommand.setJobPositionIds(cmd.getJobPositionIds());
+                tCommand.setJobLevelIds(cmd.getJobLevelIds());
                 //  调整部门、岗位、职级并同步到detail表
-                organizationService.transferOrganizationPersonels(transferCommand);
+                organizationService.transferOrganizationPersonels(tCommand);
             }
             return null;
         });
@@ -241,7 +250,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void stickArchivesContact(StickArchivesContactCommand cmd) {
         Long userId = UserContext.currentUserId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {

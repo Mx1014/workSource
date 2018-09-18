@@ -1,18 +1,5 @@
 package com.everhomes.messaging.admin;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-
 import com.everhomes.family.FamilyService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
@@ -25,6 +12,15 @@ import com.everhomes.rest.messaging.admin.SendMessageAdminCommand;
 import com.everhomes.rest.messaging.admin.SendMessageAdminTargetType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -121,13 +117,12 @@ public class AdminPusherAction implements Runnable {
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
-            }
+        }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -138,9 +133,8 @@ public class AdminPusherAction implements Runnable {
     
     @Override
     public void run() {
-        SendMessageAdminTargetType targetType = SendMessageAdminTargetType.fromCode(this.cmd.getTargetToken());
+        SendMessageAdminTargetType targetType = SendMessageAdminTargetType.fromCode(this.cmd.getTargetType());
         log.info("Running config id= " + cmd.getTargetToken());
-        
         switch(targetType) {
         case CITY:
             this.runCity();

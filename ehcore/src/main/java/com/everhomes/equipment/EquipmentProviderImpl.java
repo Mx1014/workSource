@@ -7,6 +7,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -43,6 +44,7 @@ import com.everhomes.search.EquipmentStandardMapSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPmNotifyRecords;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoryMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentAttachmentsDao;
@@ -2970,6 +2972,31 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
+    public List<Long> listNotifyRecordByPlanId(Long planId, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> result = new ArrayList<>();
+        EhPmNotifyRecords record = Tables.EH_PM_NOTIFY_RECORDS;
+        com.everhomes.server.schema.tables.EhEquipmentInspectionTasks tasks = Tables.EH_EQUIPMENT_INSPECTION_TASKS;
+        result = context.select(record.ID)
+                .from(record, tasks)
+                .where(tasks.PLAN_ID.eq(planId))
+                .and(tasks.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(), EquipmentTaskStatus.DELAY.getCode()))
+                .and(record.OWNER_ID.eq(tasks.ID))
+                .and(record.OWNER_TYPE.eq(EntityType.EQUIPMENT_TASK.getCode()))
+                .and(record.ID.gt(locator.getAnchor()))
+                .orderBy(record.ID.asc())
+                .limit(pageSize + 1)
+                .fetchInto(Long.class);
+        if (result != null && result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1));
+        }else {
+            locator.setAnchor(null);
+        }
+        return result;
+    }
+
+    @Override
     public List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardId(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         return  context.selectFrom(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP)
@@ -3379,4 +3406,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
         return tasksList;
     }
+
+
 }
