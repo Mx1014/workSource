@@ -107,11 +107,32 @@ public class SearchEnterpriseCustomerCommand {
     private BigDecimal requirementMinArea;
     private BigDecimal requirementMaxArea;
 
+
     private Long entryStatusItemId;
 
     private List<Long> trackerUids;
 
     private List<Long> customerIds;
+
+    private Long minTrackingPeriod;
+
+    private Long maxTrackingPeriod;
+
+    public Long getMinTrackingPeriod() {
+        return minTrackingPeriod;
+    }
+
+    public void setMinTrackingPeriod(Long minTrackingPeriod) {
+        this.minTrackingPeriod = minTrackingPeriod;
+    }
+
+    public Long getMaxTrackingPeriod() {
+        return maxTrackingPeriod;
+    }
+
+    public void setMaxTrackingPeriod(Long maxTrackingPeriod) {
+        this.maxTrackingPeriod = maxTrackingPeriod;
+    }
 
     public Long getEntryStatusItemId() {
         return entryStatusItemId;
