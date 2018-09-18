@@ -2594,13 +2594,13 @@ public class CommunityServiceImpl implements CommunityService {
                 List<Long> userIds = new ArrayList<>();
                 userIds.add(user.getId());
                 List<OrganizationMember> members = this.organizationProvider.listAllOrganizationMembersByUID(userIds);
-                StringBuilder realName = new StringBuilder();
+                Set<String> nameSet = new HashSet<>();
                 if (!CollectionUtils.isEmpty(members)) {
                     for (OrganizationMember organizationMember : members) {
-                        realName.append(organizationMember.getContactName()).append(";");
+                        nameSet.add(organizationMember.getContactName());
                     }
                 }
-                communityAllUserDTO.setUserName(StringUtils.isBlank(realName.toString())?"-":realName.toString().substring(0,realName.toString().length()-1));
+                communityAllUserDTO.setUserName(nameSet.size() <= 0?"-":nameSet.toString().substring(1,nameSet.toString().length()-1).replaceAll(",",";"));
                 communityAllUserDTO.setPhone(user.getIdentifierToken());
                 communityAllUserDTO.setGender(user.getGender());
                 if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
