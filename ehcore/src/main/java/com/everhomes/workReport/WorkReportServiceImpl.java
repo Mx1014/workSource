@@ -162,24 +162,26 @@ public class WorkReportServiceImpl implements WorkReportService {
             return null;
         });
 
-        //  Enable another thread to update the data.
-        if(validity == null)
-            validity = cmd.getValiditySetting();
-        ReportValiditySettingDTO originValidity = validity; // 新建的汇报没有默认有效时间，故赋予默认值避免空指针.
-        ExecutorUtil.submit(() -> {
-            UserContext.setCurrentNamespaceId(namespaceId);
-            //  Make sure that the msg time could be chaned once at the same time.
-            coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
+        if (validity == null)
+            validity = cmd.getValiditySetting(); // 新建的汇报没有默认有效时间，故赋予默认值避免空指针.
+        if (WorkReportStatus.fromCode(report.getStatus()) == WorkReportStatus.RUNNING) {
+            ReportValiditySettingDTO originValidity = validity;
+            //  Enable another thread to update the data.
+            ExecutorUtil.submit(() -> {
+                UserContext.setCurrentNamespaceId(namespaceId);
+                //  Make sure that the msg time could be chaned once at the same time.
+                coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
 
-                Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
-                //  update the rxMsg
-                if (cmd.getRxMsgSetting() != null)
-                    updateWorkReportValReceiverMsg(report, cmd.getRxMsgSetting(), reportTime);
-                //  update the auMsg
-                if (cmd.getAuMsgSetting() != null)
-                    workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), originValidity, reportTime);
+                    Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
+                    //  update the rxMsg
+                    if (cmd.getRxMsgSetting() != null)
+                        updateWorkReportValReceiverMsg(report, cmd.getRxMsgSetting(), reportTime);
+                    //  update the auMsg
+                    if (cmd.getAuMsgSetting() != null)
+                        workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), originValidity, reportTime);
+                });
             });
-        });
+        }
 
         //  return back
         WorkReportDTO dto = new WorkReportDTO();
