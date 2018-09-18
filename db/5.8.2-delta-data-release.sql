@@ -161,4 +161,7 @@ UPDATE eh_service_module_apps set instance_config = '{"realm":"qualityInspection
 UPDATE eh_service_module_apps set instance_config = '{"realm":"equipmentInspection","entryUrl":"https://park-std.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
 
 
-
+-- 设置oa模块
+UPDATE eh_service_modules set app_type = 0 WHERE id in (59100, 53000);
+-- 更新应用信息
+UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id in (59100, 53000);
