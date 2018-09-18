@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespaceId: 域空间ID(必填)</li>
+ * <li>status: 生效状态</li>
  * <li>pageSize: </li>
  * <li>pageAnchor:</li>
  * </ul>
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
 public class FindButtScriptConfingCommand {
 
     private Integer namespaceId ;
+    private Byte status ;
     private Integer   pageSize ;
     private Long pageAnchor   ;
 
@@ -37,6 +39,14 @@ public class FindButtScriptConfingCommand {
 
     public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

@@ -37,7 +37,7 @@ public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public List<ButtScriptConfig> findButtScriptConfigByNamespaceId(Integer namespaceId) {
+    public List<ButtScriptConfig> findButtScriptConfigByNamespaceId(Integer namespaceId ,Byte status) {
         if(namespaceId == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "namespaceId is null  .");
@@ -47,7 +47,10 @@ public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
         List<ButtScriptConfig> list =   this.query(new ListingLocator(), 0, (locator1, query) -> {
 
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-            query.addConditions(t.STATUS.eq((byte)1));
+            if(status != null){
+                query.addConditions(t.STATUS.eq(status));
+            }
+
 
             return query;
         });

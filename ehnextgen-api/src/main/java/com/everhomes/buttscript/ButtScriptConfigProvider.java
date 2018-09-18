@@ -12,7 +12,7 @@ public interface ButtScriptConfigProvider {
      * @param namespaceId
      * @return
      */
-    List<ButtScriptConfig> findButtScriptConfigByNamespaceId(Integer namespaceId);
+    List<ButtScriptConfig> findButtScriptConfigByNamespaceId(Integer namespaceId,Byte status);
 
 
     ButtScriptConfig findButtScriptConfig(Integer namespaceId , String infoType);
