@@ -33,6 +33,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -387,6 +388,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if (StringUtils.isNotBlank(keyWord)) {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
             com.everhomes.server.schema.tables.EhCustomerTrackers trackers = Tables.EH_CUSTOMER_TRACKERS;
+            com.everhomes.server.schema.tables.EhEnterpriseCustomers customers = Tables.EH_ENTERPRISE_CUSTOMERS;
             com.everhomes.server.schema.tables.EhCustomerContacts contacts = Tables.EH_CUSTOMER_CONTACTS;
             com.everhomes.server.schema.tables.EhOrganizationMembers members = Tables.EH_ORGANIZATION_MEMBERS;
             List<Long> memberIds = context.select(members.TARGET_ID)
@@ -395,15 +397,22 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                     .and(members.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                     .and(members.CONTACT_NAME.like("%" + keyWord + "%"))
                     .fetchInto(Long.class);
+            if(CollectionUtils.isEmpty(memberIds)){
+                return new ArrayList<>();
+            }
             keyWordIds = context.select(trackers.CUSTOMER_ID)
                     .from(trackers)
                     .where(trackers.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-                    .and(trackers.CUSTOMER_ID.in(memberIds))
+                    .and(trackers.TRACKER_UID.in(memberIds))
                     .union(context.select(contacts.CUSTOMER_ID)
                             .from(contacts)
                             .where(contacts.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                             .and(contacts.NAME.like("%" + keyWord + "%"))
-                    ).fetchInto(Long.class);
+                    ).union(context.select(customers.ID)
+                            .from(customers)
+                            .where(customers.STATUS.eq(CommonStatus.ACTIVE.getCode())
+                                    .and(customers.TRACKING_UID.in(memberIds))))
+                    .fetchInto(Long.class);
         }
         return keyWordIds;
     }
@@ -430,10 +439,20 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             SelectQuery<EhCustomerRequirementsRecord> query = context.selectQuery(requirements);
             query.addSelect(requirements.CUSTOMER_ID);
             query.addConditions(requirements.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-            if (startAreaSize != null)
+//            if (startAreaSize != null)
+//                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+//            if (endAreaSize != null)
+//                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+            if (startAreaSize != null && endAreaSize != null) {
                 query.addConditions(requirements.MIN_AREA.le(startAreaSize));
-            if (endAreaSize != null)
                 query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+            }
+            if (startAreaSize != null && endAreaSize == null) {
+                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+            }
+            if (startAreaSize == null) {
+                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+            }
             requires = query.fetchInto(Long.class);
 
         }
