@@ -39,6 +39,7 @@ import java.util.List;
  * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
  * <li>doorAccessInvalidTimes: 门禁使用次数</li>
  * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
+ * <li>doorAccessEndTime: 门禁授权结束时间有效期</li>
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{

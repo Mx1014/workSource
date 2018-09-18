@@ -17,6 +17,8 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 	private Integer statsWeek;
 	private Long communityId;
 
+	private Long doorAccessEndTime;
+
 	public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
 		return communityFormValues;
 	}
@@ -63,6 +65,18 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public Long getDoorAccessEndTime() {
+		return doorAccessEndTime;
+	}
+
+	public void setDoorAccessEndTime(Long doorAccessEndTime) {
+		this.doorAccessEndTime = doorAccessEndTime;
 	}
 
 	@Override

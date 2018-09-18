@@ -4,6 +4,8 @@ package com.everhomes.visitorsys;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.DoorAccess;
+import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -35,10 +37,7 @@ import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.aclink.CreateLocalVistorCommand;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
@@ -170,6 +169,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private AppProvider appProvider;
     @Autowired
     private VisitorSysDoorAccessProvider visitorSysDoorAccessProvider;
+    @Autowired
+    private DoorAccessProvider doorAccessProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -656,6 +657,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         createVisitorActions(visitor);
         sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
+        relatedVisitor.setDoorAccessEndTime(cmd.getDoorAccessEndTime());
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
@@ -1196,6 +1198,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         ListDoorAccessResponse listDoorAccessResponse = doorAccessService.listDoorAccessGroup(doorcmd);
         if(listDoorAccessResponse==null || listDoorAccessResponse.getDoors()==null){
             return null;
+        }
+        List<VisitorSysDoorAccess> defaultConfigs = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        for (VisitorSysDoorAccess d1 : defaultConfigs) {
+            for (DoorAccessDTO d : listDoorAccessResponse.getDoors()) {
+                if (d1.getDoorAccessId().equals(d.getId())) {
+                    listDoorAccessResponse.getDoors().remove(d);
+                    break;
+                }
+            }
         }
         ListDoorGuardsResponse response = new ListDoorGuardsResponse();
         response.setDoorGuardList(listDoorAccessResponse.getDoors().stream().map(r->{
@@ -2326,13 +2337,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else{
             doorCmd.setAuthRuleType((byte)0);
             long now = System.currentTimeMillis();
-            Calendar instance = Calendar.getInstance();
-            instance.setTimeInMillis(now);
+//            Calendar instance = Calendar.getInstance();
+//            instance.setTimeInMillis(now);
             doorCmd.setValidFromMs(now);
-            if(null != visitor.getDoorAccessInvalidDuration()){
-                instance.add(Calendar.DATE,visitor.getDoorAccessInvalidDuration());
-                doorCmd.setValidEndMs(instance.getTimeInMillis());
-            }
+            doorCmd.setValidEndMs(visitor.getDoorAccessEndTime());
+//            if(null != visitor.getDoorAccessInvalidDuration()){
+//                instance.add(Calendar.DATE,visitor.getDoorAccessInvalidDuration());
+//                doorCmd.setValidEndMs(instance.getTimeInMillis());
+//            }
         }
 
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
@@ -2651,7 +2663,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(null == cmd.getNamespaceId())
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
-        return results.stream().map(r->ConvertHelper.convert(r,VisitorSysDoorAccessDTO.class)).collect(Collectors.toList());
+        return results.stream().map(r->{
+            VisitorSysDoorAccessDTO dto = ConvertHelper.convert(r,VisitorSysDoorAccessDTO.class);
+            DoorAccess result = doorAccessProvider.getDoorAccessById(dto.getDoorAccessId());
+            dto.setMaxCount(result.getMaxCount());
+            dto.setMaxDuration(result.getMaxDuration());
+            dto.setEnableAmount(result.getEnableAmount());
+            dto.setEnableDuration(result.getEnableDuration());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
