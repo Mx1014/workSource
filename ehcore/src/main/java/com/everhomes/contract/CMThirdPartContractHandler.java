@@ -162,7 +162,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             date = "2018-08-28";
         }
         params.put("Date", date);
-        params.put("currentpage", pageOffset);
+        params.put("CurrentPage", pageOffset);
 
         String enterprises = null;
         String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
@@ -177,6 +177,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
 //        }
 //        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
+
+
+        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
+
 
         enterprises = "{\n" +
                 "\t\"errorCode\": \"0\",\n" +
@@ -326,7 +330,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             	syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
             	
                 date = getNextDay(date, sdf);
-                syncContractsFromThirdPart("1", date, communityIdentifier, taskId, categoryId, contractApplicationScene);
+                //String.valueOf(Integer.valueOf(pageOffset) + 1
+                syncContractsFromThirdPart("1" , date, communityIdentifier, taskId, categoryId, contractApplicationScene);
             }else{
             	//存储瑞安合同
             	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);

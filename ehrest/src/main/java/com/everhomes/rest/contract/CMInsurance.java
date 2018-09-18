@@ -10,16 +10,16 @@ public class CMInsurance {
 
     private String InsuranceType;
 
-    private BigDecimal InsuranceMoney;
+    private String InsuranceMoney;
 
-    private String Modifydate;
+    private String ModifyDate;
 
-    public String getModifydate() {
-        return Modifydate;
+    public String getModifyDate() {
+        return ModifyDate;
     }
 
-    public void setModifydate(String modifydate) {
-        Modifydate = modifydate;
+    public void setModifyDate(String modifyDate) {
+        ModifyDate = modifyDate;
     }
 
     public String getRentalID() {
@@ -38,11 +38,11 @@ public class CMInsurance {
         InsuranceType = insuranceType;
     }
 
-    public BigDecimal getInsuranceMoney() {
+    public String getInsuranceMoney() {
         return InsuranceMoney;
     }
 
-    public void setInsuranceMoney(BigDecimal insuranceMoney) {
+    public void setInsuranceMoney(String insuranceMoney) {
         InsuranceMoney = insuranceMoney;
     }
 
