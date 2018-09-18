@@ -30,5 +30,6 @@ public interface ServiceModuleConstants {
     long DECORATION_MODULE = 43000L;
 
     long REQUISITION_MODULE = 25000L; // 请示单模块
+    long PAYMENT_CARD_MODULE = 41200L;
 
 }
