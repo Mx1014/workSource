@@ -119,6 +119,12 @@ INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
 INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
 INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+
+
+-- AUTHOR: 严军
+-- REMARK: 删除待办事项菜单
+UPDATE eh_web_menus SET `status` = 0 WHERE id in = 48130000;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
