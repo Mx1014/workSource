@@ -7,6 +7,7 @@ import java.util.List;
 
 public class CMDataObject {
 
+	//外部数据
     private CMContractHeader ContractHeader;
 
     private List<CMContractUnit> ContractUnit;
@@ -18,7 +19,11 @@ public class CMDataObject {
     private List<CMInsurance> Insurance;
 
     private List<CMBill> Bill;
-
+    
+    //内部数据
+    private Long communityId;//园区ID
+    private Long customerId;//客户ID
+    private Long contractId;//合同ID
 
     public CMContractHeader getContractHeader() {
         return ContractHeader;
@@ -72,4 +77,28 @@ public class CMDataObject {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
 }
