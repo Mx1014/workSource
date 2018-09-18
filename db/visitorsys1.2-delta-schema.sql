@@ -18,6 +18,7 @@ CREATE TABLE `eh_visitor_sys_door_access` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁对接表';
 
 ALTER TABLE `eh_visitor_sys_visitors`
-ADD COLUMN `auth_rule_type`  tinyint(4) NULL COMMENT '授权规则种类，0 时长，1 次数' AFTER `notify_third_success_flag`,
-ADD COLUMN `door_access_invalid_times`  int NULL COMMENT '门禁使用次数' AFTER `auth_rule_type`,
-ADD COLUMN `door_access_invalid_duration`  int NULL COMMENT '门禁有效期（天）' AFTER `door_access_invalid_times`;
+ADD COLUMN `door_access_auth_duration_type` tinyint(4) NULL COMMENT '访客授权有效期种类,0 天数，1 小时数',
+ADD COLUMN `door_access_auth_duration` int NULL COMMENT '访客授权有效期',
+ADD COLUMN `door_access_enable_auth_count` TINYINT(4) DEFAULT 0 COMMENT '访客授权次数开关 0 关 1 开',
+ADD COLUMN `door_access_auth_count` int NULL COMMENT '访客授权次数';
