@@ -1534,6 +1534,8 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setCanModify(cmd.getCanModify());
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                    //瑞安CM对接 账单、费项表增加是否是只读字段
+                    //item.setIsReadonly(isReadonly);
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -4108,6 +4110,7 @@ public class AssetProviderImpl implements AssetProvider {
         group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
         group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         group.setCategoryId(cmd.getCategoryId());
+        group.setIsDefault((byte)0);//标识是否是默认账单组的字段：1：默认；0：非默认
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
@@ -4610,7 +4613,7 @@ public class AssetProviderImpl implements AssetProvider {
 			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(brotherGroupId));
 		}
 		if(isDefault != null) {
-			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.is.eq(brotherGroupId));
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.IS_DEFAULT.eq(isDefault));
 		}
 		List<PaymentBillGroup> records = query.fetchInto(PaymentBillGroup.class);
 		return records.get(0);

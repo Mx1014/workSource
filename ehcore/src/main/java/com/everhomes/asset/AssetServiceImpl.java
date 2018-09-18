@@ -5781,7 +5781,7 @@ public class AssetServiceImpl implements AssetService {
 				Long charingItemId = mapping.getChargingItemId();
 				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
 				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), 
-						categoryId, brotherGroupId);
+						categoryId, brotherGroupId, null);
 				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
 				ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 				dtos.add(dto);
@@ -5880,12 +5880,9 @@ public class AssetServiceImpl implements AssetService {
 					PaymentBills paymentBills = new PaymentBills();
 					paymentBills.setNamespaceId(namespaceId);
 					paymentBills.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
-					//通过园区ID获取到对应的账单组ID
-					assetProvider.getBillGroup(namespaceId, 240111044332063578L, null, null, null, 1);
-					
-					paymentBills.setBillGroupId(1L);//TODO 后面看是否给一个默认的账单组
-					
-					
+					//通过园区ID获取到对应的默认账单组ID
+					PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, 240111044332063578L, null, null, null, (byte)1);
+					paymentBills.setBillGroupId(group.getId());
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
