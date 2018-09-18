@@ -260,7 +260,7 @@ public class ButtScriptServiceImpl implements ButtScriptService {
     @Override
     public ScriptnInfoTypeResponse findScriptInfoType(FindScriptInfoTypeCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        List<ButtScriptConfig> list =  buttScriptConfigProvider.findButtScriptConfigByNamespaceId(namespaceId);
+        List<ButtScriptConfig> list =  buttScriptConfigProvider.findButtScriptConfigByNamespaceId(namespaceId , (byte) 1);
         ScriptnInfoTypeResponse res = new ScriptnInfoTypeResponse();
         if(list != null && list.size()>0){
             for(ButtScriptConfig conf :list){
