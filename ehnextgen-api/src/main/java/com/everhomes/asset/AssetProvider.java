@@ -455,6 +455,8 @@ public interface AssetProvider {
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 				
+	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
+	
 	Long createCMBill(PaymentBills paymentBills);
 	
 	void createCMBillItem(PaymentBillItems items);

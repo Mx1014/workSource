@@ -270,5 +270,7 @@ public interface AssetService {
 	
 	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
 	
+	void createChargingItem(CreateChargingItemCommand cmd);
+	
 	void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId);
 }

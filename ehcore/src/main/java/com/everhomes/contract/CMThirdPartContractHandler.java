@@ -162,21 +162,22 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             date = "2018-08-28";
         }
         params.put("Date", date);
+        params.put("currentpage", pageOffset);
 
         String enterprises = null;
         String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
 //        String url = "http://183.62.222.87:5902/sf";
-        try {
-            String codeStr = JSONObject.toJSONString(params);
-            codeString.put("CodeStr", codeStr);
-            enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
-        } catch (Exception e) {
-            LOGGER.error("sync customer from RuiAnCM error: {}", e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
-        }
+        
+//        try {
+//            String codeStr = JSONObject.toJSONString(params);
+//            codeString.put("CodeStr", codeStr);
+//            enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
+//        } catch (Exception e) {
+//            LOGGER.error("sync customer from RuiAnCM error: {}", e);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
+//        }
+//        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
 
-
-        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
         enterprises = "{\n" +
                 "\t\"errorCode\": \"0\",\n" +
                 "\t\"data\": [{\n" +
@@ -334,6 +335,23 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             	
             }
         }
+
+        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
+            List<CMDataObject> dtos = cmSyncObject.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
+
+                //数据有下一页则继续请求
+                if(!cmSyncObject.getTotalpage().equals(cmSyncObject.getCurrentpage())) {
+                    syncContractsFromThirdPart(String.valueOf(Integer.valueOf(cmSyncObject.getCurrentpage()) + 1), date, communityIdentifier, taskId, categoryId, contractApplicationScene);
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(cmSyncObject.getTotalpage().equals(cmSyncObject.getCurrentpage())) {
+                //syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
+            }
+        }
         /*EbeiJsonEntity<List<EbeiContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<EbeiJsonEntity<List<EbeiContract>>>(){});
         if(SUCCESS_CODE.equals(entity.getResponseCode())) {
             List<EbeiContract> dtos = entity.getData();
@@ -349,6 +367,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                 syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
             }
         }*/
+    }
+    public static void main(String[] args) {
+        System.out.println(String.valueOf(Integer.valueOf("1") + 1));
     }
 
     
@@ -371,7 +392,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
     }
     
-    
+
 
     private String getNextDay(String date, SimpleDateFormat sdf){
         try {

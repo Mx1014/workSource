@@ -24,6 +24,9 @@ import java.util.List;
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  * <li>contractNum: 合同编号</li>
  * <li>contractId: 合同ID</li>
+ * <li>dateStrBegin:计费开始</li>
+ * <li>dateStrEnd:计费结束</li>
+ * <li>organizationId：当前登陆的企业ID</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -44,6 +47,10 @@ public class ModifyNotSettledBillCommand {
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     private String contractNum;
     private Long contractId;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    //物业缴费V6.0 新增权限
+    private Long organizationId;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -172,5 +179,29 @@ public class ModifyNotSettledBillCommand {
 
 	public void setContractId(Long contractId) {
 		this.contractId = contractId;
+	}
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

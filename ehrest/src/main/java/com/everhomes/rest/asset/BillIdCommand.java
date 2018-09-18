@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
+ * <li>namespaceId:域空间ID</li>
  * <li>ownerId:所属者ID</li>
  * <li>ownerType:所属者类型</li>
  * <li>billId:账单id</li>
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class BillIdCommand {
+	private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
     private String billId;
@@ -77,4 +79,12 @@ public class BillIdCommand {
     public BillIdCommand() {
 
     }
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }
