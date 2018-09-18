@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -447,8 +448,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
                 Long startTime = cmd.getMinTrackingPeriod();
                 Long endTime = cmd.getMinTrackingPeriod();
-                rf.gte(startTime);
-                rf.lte(endTime);
+                rf.gte(new Timestamp(startTime));
+                rf.lte(new Timestamp(endTime));
                 fb = FilterBuilders.andFilter(fb, rf);
             }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
@@ -463,14 +464,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
-        if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
-            if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long startTime = cmd.getMinTrackingPeriod();
-                Long endTime = cmd.getMinTrackingPeriod();
-                rf.gte(startTime);
-                rf.lte(endTime);
-                fb = FilterBuilders.andFilter(fb, rf);
+        if(null != cmd.getRequirementMinArea() || null != cmd.getRequirementMaxArea()){
+            if(null != cmd.getRequirementMinArea() && null != cmd.getRequirementMaxArea()){
+                RangeFilterBuilder rf1 = new RangeFilterBuilder("requirementMinArea");
+                RangeFilterBuilder rf2 = new RangeFilterBuilder("requirementMaxArea");
+
+                Long startArea = cmd.getMinTrackingPeriod();
+                Long endArea = cmd.getMinTrackingPeriod();
+                rf1.gte(startArea);
+                rf2.lte(endArea);
+                fb = FilterBuilders.andFilter(fb, rf1);
+                fb = FilterBuilders.andFilter(fb, rf2);
             }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
                 Long startTime = cmd.getMinTrackingPeriod();
