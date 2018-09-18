@@ -5880,7 +5880,12 @@ public class AssetServiceImpl implements AssetService {
 					PaymentBills paymentBills = new PaymentBills();
 					paymentBills.setNamespaceId(namespaceId);
 					paymentBills.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
-					paymentBills.setBillGroupId(4L);//TODO 后面看是否给一个默认的账单组
+					//通过园区ID获取到对应的账单组ID
+					assetProvider.getBillGroup(namespaceId, 240111044332063578L, null, null, null, 1);
+					
+					paymentBills.setBillGroupId(1L);//TODO 后面看是否给一个默认的账单组
+					
+					
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}

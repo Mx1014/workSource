@@ -4594,7 +4594,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOneInto(PaymentBillGroup.class);
     }
     
-    public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId) {
+    public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault) {
     	SelectQuery<EhPaymentBillGroupsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_GROUPS).getQuery();
 		query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.NAMESPACE_ID.eq(namespaceId));
 		if(ownerId != null){
@@ -4608,6 +4608,9 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 		if(brotherGroupId != null){
 			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(brotherGroupId));
+		}
+		if(isDefault != null) {
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.is.eq(brotherGroupId));
 		}
 		List<PaymentBillGroup> records = query.fetchInto(PaymentBillGroup.class);
 		return records.get(0);

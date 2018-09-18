@@ -10,13 +10,12 @@ INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace
 	VALUES (@id:=@id+1, 'contractService', '999929', NULL, 999929, NULL, 1);
 	
 -- AUTHOR: 杨崇鑫
--- REMARK: 初始化瑞安CM对接的默认账单组
-set @id = IFNULL((SELECT MAX(`id`) FROM `eh_payment_bill_groups`),0);
-INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `category_id`, `biz_payee_type`, `biz_payee_id`) 
-	select @id:=@id+1, 999929, id, 'community', '缴费', 2, 5, 67663, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 1, 5, 1, NULL, 4, 3, NULL, NULL
+-- REMARK: 初始化瑞安CM对接的默认账单组，由于该账单组是默认账单组，所以不允许删除
+set @id = 1000000;
+INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `category_id`, `biz_payee_type`, `biz_payee_id`, `is_default`) 
+	select @id:=@id+1, 999929, id, 'community', '缴费', 2, 5, 67663, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 1, 5, 1, NULL, 4, 3, NULL, NULL, 1
 		from eh_communities;
-
-
+		
 -- AUTHOR: 唐岑
 -- REMARK: 创建新的园区
 -- 添加园区

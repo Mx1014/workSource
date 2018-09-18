@@ -166,17 +166,17 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         String enterprises = null;
         String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
 //        String url = "http://183.62.222.87:5902/sf";
-        try {
-            String codeStr = JSONObject.toJSONString(params);
-            codeString.put("CodeStr", codeStr);
-            enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
-        } catch (Exception e) {
-            LOGGER.error("sync customer from RuiAnCM error: {}", e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
-        }
+        
+//        try {
+//            String codeStr = JSONObject.toJSONString(params);
+//            codeString.put("CodeStr", codeStr);
+//            enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
+//        } catch (Exception e) {
+//            LOGGER.error("sync customer from RuiAnCM error: {}", e);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
+//        }
+//        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
 
-
-        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
         enterprises = "{\n" +
                 "\t\"errorCode\": \"0\",\n" +
                 "\t\"data\": [{\n" +
