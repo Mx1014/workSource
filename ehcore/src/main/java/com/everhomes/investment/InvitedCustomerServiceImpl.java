@@ -351,7 +351,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
 
-                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(isAdmin,cmd.getKeyword(),cmd.getRequirementMinArea(), cmd.getRequirementMaxArea(), itemsMap.keySet(), itemsMap, (locator, query) -> {
+                statistics = invitedCustomerProvider.getInvitedCustomerStatistics(isAdmin, cmd.getKeyword(), cmd.getRequirementMinArea(), cmd.getRequirementMaxArea(), itemsMap.keySet(), itemsMap, (locator, query) -> {
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                     query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(cmd.getCommunityId()));
                     if (cmd.getCorpIndustryItemId() != null) {
@@ -360,8 +360,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     if (cmd.getSourceItemId() != null) {
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.SOURCE_ITEM_ID.eq(cmd.getSourceItemId()));
                     }
-                    if(cmd.getCustomerSource()!=null){
+                    if (cmd.getCustomerSource() != null) {
                         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_SOURCE.eq(cmd.getCustomerSource()));
+                    }
+                    if (cmd.getMinTrackingPeriod() != null) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.ge(new Timestamp(cmd.getMinTrackingPeriod())));
+                    }
+                    if (cmd.getMaxTrackingPeriod() != null) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME.le(new Timestamp(cmd.getMaxTrackingPeriod())));
                     }
 
                     return query;
