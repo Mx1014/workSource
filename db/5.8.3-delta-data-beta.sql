@@ -25,6 +25,9 @@
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR:
 -- REMARK:
+-- AUTHOR: 郑思挺
+-- REMARK: 住总钱包
+UPDATE `eh_configurations` set `value` = 'http://111.207.114.167:9010' where `name` = 'paymentCard.zhuzong.url';
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
