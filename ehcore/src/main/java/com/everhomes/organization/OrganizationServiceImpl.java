@@ -6876,6 +6876,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             deleteAuthByOwnerCommand.setUserId(userId);
             this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
         }
+        
+     // 离开企业事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(user.getId());
+            context.setNamespaceId(user.getNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(user.getId());
+            event.setEventName(SystemEvent.ACCOUNT_LEAVE_ENTERPRISE.dft());
+        });
 //        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
 //        member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 //        updateEnterpriseContactStatus(userId, member);

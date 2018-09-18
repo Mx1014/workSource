@@ -47,6 +47,7 @@ public class ButtScriptConfigProviderImpl implements ButtScriptConfigProvider {
         List<ButtScriptConfig> list =   this.query(new ListingLocator(), 0, (locator1, query) -> {
 
             query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            query.addConditions(t.STATUS.eq((byte)1));
 
             return query;
         });
