@@ -15,6 +15,11 @@ set @id = 1000000;
 INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `category_id`, `biz_payee_type`, `biz_payee_id`, `is_default`) 
 	select @id:=@id+1, 999929, id, 'community', '缴费', 2, 5, 67663, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 1, 5, 1, NULL, 4, 3, NULL, NULL, 1
 		from eh_communities;
+-- REMARK:瑞安CM对接 账单区分数据来源
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'asset.source', '10005', 'zh_CN', '瑞安CM产生');
+		
 		
 -- AUTHOR: 唐岑
 -- REMARK: 创建新的园区

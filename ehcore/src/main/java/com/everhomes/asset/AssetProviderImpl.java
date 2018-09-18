@@ -669,7 +669,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -822,6 +822,8 @@ public class AssetProviderImpl implements AssetProvider {
             //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
             dto.setCanDelete(r.getValue(t.CAN_DELETE));
             dto.setCanModify(r.getValue(t.CAN_MODIFY));
+            //瑞安CM对接 账单、费项表增加是否是只读字段:只读状态：0：非只读；1：只读
+            dto.setIsReadOnly(r.getValue(t.IS_READONLY));
             list.add(dto);
             return null;});
         return list;
@@ -1535,7 +1537,7 @@ public class AssetProviderImpl implements AssetProvider {
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     //瑞安CM对接 账单、费项表增加是否是只读字段
-                    //item.setIsReadonly(isReadonly);
+                    item.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1715,6 +1717,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCanModify(cmd.getCanModify());
             //物业缴费V6.0 账单、费项表增加是否删除状态字段
             newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+            //瑞安CM对接 账单、费项表增加是否是只读字段
+            newBill.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);

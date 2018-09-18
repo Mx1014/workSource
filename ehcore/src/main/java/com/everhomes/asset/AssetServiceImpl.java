@@ -1252,6 +1252,8 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 	item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                	//瑞安CM对接 账单、费项表增加是否是只读字段
+                	item.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1381,6 +1383,8 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 	newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                	//瑞安CM对接 账单、费项表增加是否是只读字段
+                	newBill.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
@@ -5876,12 +5880,14 @@ public class AssetServiceImpl implements AssetService {
 		if(data != null) {
 			for(CMDataObject cmDataObject : data) {
 				List<CMBill> cmBills = cmDataObject.getBill();
+				Long communityId = cmDataObject.getCommunityId();
+				communityId = 240111044332063578L;//TODO 后面鹏宇会一起传过来
 				for(CMBill cmBill : cmBills) {
 					PaymentBills paymentBills = new PaymentBills();
 					paymentBills.setNamespaceId(namespaceId);
-					paymentBills.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
+					paymentBills.setOwnerId(communityId);
 					//通过园区ID获取到对应的默认账单组ID
-					PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, 240111044332063578L, null, null, null, (byte)1);
+					PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
 					paymentBills.setBillGroupId(group.getId());
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
@@ -5898,14 +5904,27 @@ public class AssetServiceImpl implements AssetService {
 					//paymentBills.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
 					paymentBills.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
 					paymentBills.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
+					//物业缴费V6.6（对接统一账单） 账单要增加来源
+					paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+					LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
+					paymentBills.setSourceName(localeString.getText());
+		            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+					paymentBills.setCanDelete((byte)0);
+					paymentBills.setCanModify((byte)0);
+		            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+					paymentBills.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+		            //瑞安CM对接 账单、费项表增加是否是只读字段
+					paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+					//瑞安CM对接 账单表增加第三方唯一标识字段
+					paymentBills.setThirdBillId(cmBill.getBillScheduleID());
 					
 					Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
 					
 					PaymentBillItems items = new PaymentBillItems();
 					items.setBillId(billId);
 					items.setNamespaceId(namespaceId);
-					items.setOwnerId(240111044332063578L);//TODO 后面鹏宇会一起传过来
-					items.setBillGroupId(4L);//TODO 后面看是否给一个默认的账单组
+					items.setOwnerId(communityId);
+					items.setBillGroupId(group.getId());
 					if(cmDataObject.getContractHeader() != null) {
 						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
