@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -195,5 +197,64 @@ public class DateStatisticHelper {
 		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
 		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
 		return cal.getTime();
+	}
+
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	public static Long getDateTimeLong(Timestamp planDate) {
+		return getDateTimeLong(planDate.getTime());
+	}
+
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	public static Long getDateTimeLong(Time planDate) {
+		return getDateTimeLong(planDate.getTime());
+	}
+
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	private static Long getDateTimeLong(long time) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		return getDateTimeLong(calendar);
+	}
+
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	private static Long getDateTimeLong(Date time) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(time);
+		return getDateTimeLong(calendar);
+	}
+	/**
+	 * 获取日期的时间部分的毫秒数
+	 * E.g. 2018-8-24 15:19:09.230 getDateTimeLong result is: 15*3600*1000+19*60*1000+9*1000+230=55149230
+	 * @return Long 毫秒数
+	 * */
+	private static Long getDateTimeLong(Calendar calendar) {
+		Long result = 0L;
+		result += calendar.get(Calendar.HOUR_OF_DAY) * 3600 * 1000L;
+		result += calendar.get(Calendar.MINUTE) * 60 * 1000L;
+		result += calendar.get(Calendar.SECOND) * 1000L;
+		result += calendar.get(Calendar.MILLISECOND);
+		return result;
+	}
+	public static Boolean isSameDay(Date d1, Date d2){
+		if(null == d1 || null == d2)
+			return false;
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+		return df.format(d1).equals(df.format(d2));
 	}
 }

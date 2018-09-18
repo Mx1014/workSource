@@ -31,17 +31,20 @@ public class AppController extends ControllerBase {
     @RequestMapping("isTrustedApp")
     @RestReturn(value=String.class)
     public RestResponse isTrustedApp(@Valid TrustedAppCommand cmd) {
-        if (cmd.getThirdPartyAppKey() != null) {
-            if (s_trustedApps.contains(cmd.getThirdPartyAppKey())) {
-                return new RestResponse("YES");
-            }
-            return new RestResponse("NO");
+        String appKey = cmd.getThirdPartyAppKey();
+        if (appKey == null) {
+            appKey = cmd.getAppKey();
         }
-        if (cmd.getAppKey() != null) {
-            if (s_trustedApps.contains(cmd.getAppKey())) {
+
+        if (s_trustedApps.contains(appKey)) {
+            return new RestResponse("YES");
+        }
+
+        App app = appService.find(appKey);
+        if (app != null && app.getName() != null) {
+            if (app.getName().trim().startsWith("zuolin")) {
                 return new RestResponse("YES");
             }
-            return new RestResponse("NO");
         }
         return new RestResponse("NO");
     }

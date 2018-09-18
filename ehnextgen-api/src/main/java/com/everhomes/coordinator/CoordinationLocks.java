@@ -81,6 +81,8 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
+    FILE_CONTENT_CHECK("file.content.check"),
+    
     FLOW_CASE_UPDATE("flowCase.update"),
     FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),

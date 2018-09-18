@@ -20,5 +20,13 @@ public interface NewsServiceErrorCode {
 	int ERROR_NEWS_MODULE_NOT_FOUND = 10014;
 	int ERROR_ENCODE_STRING_EXCEPTION = 10015;
 	int ERROR_PORTAL_ITEM_GROUP_NOT_FOUND = 10016;
+	
+	// openapi 错误码
+	int ERROR_NEWS_NOT_FOUND = 11000; //文章不存在
+	int ERROR_PARAMS_NOT_VALID = 11001; //参数不合法
+	int ERROR_NEWS_OWNER_NOT_FOUND = 11002; //项目不存在
+	
+	int ERROR_NOT_LEGAL_REQUEST = 90000; //非法访问
+	int ERROR_APPKEY_NAMESPACE_MAP_NOT_FOUND = 90001; //未找到appkey对应namespaceId
 
 }
