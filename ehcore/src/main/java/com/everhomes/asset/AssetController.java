@@ -671,11 +671,11 @@ public class AssetController extends ControllerBase {
 
 	/**
 	 * <p>删除一个账单</p>
-	 * <b>URL: /asset/deletBill</b>
+	 * <b>URL: /asset/deleteBill</b>
 	 */
-	@RequestMapping("deletBill")
+	@RequestMapping("deleteBill")
 	@RestReturn(value = String.class)
-	public RestResponse deletBill(BillIdCommand cmd) {
+	public RestResponse deleteBill(BillIdCommand cmd) {
 		String result = assetService.deleteBill(cmd);
 		RestResponse response = new RestResponse();
 		if (result.equals("OK")) {
@@ -1518,5 +1518,19 @@ public class AssetController extends ControllerBase {
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		return restResponse;
 	}
+	
+	/**
+     * <p>新增收费项配置（物业缴费V6.0（UE优化）-30557）</p>
+     * <b>URL: /asset/createChargingItem</b>
+     */
+    @RequestMapping("createChargingItem")
+    @RestReturn(value = String.class)
+    public RestResponse createChargingItem(CreateChargingItemCommand cmd) {
+        assetService.createChargingItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
 }

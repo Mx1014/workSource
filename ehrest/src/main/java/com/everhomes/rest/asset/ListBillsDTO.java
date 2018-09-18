@@ -35,6 +35,13 @@ import java.math.BigDecimal;
  * <li>customerTel:客户手机号</li>
  * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
  * <li>dueDayCount:欠费天数</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>canDelete:0：不可删除；1：可删除</li>
+ * <li>canModify:0：不可编辑；1：可编辑</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -68,6 +75,18 @@ public class ListBillsDTO {
     private String addresses;
     
     private Long dueDayCount;//欠费天数
+    
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
+    
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
+    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+    private Byte canDelete;
+    private Byte canModify;
 
     public Integer getPaymentType() {
 		return paymentType;
@@ -299,5 +318,61 @@ public class ListBillsDTO {
 
 	public void setDueDayCount(Long dueDayCount) {
 		this.dueDayCount = dueDayCount;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public Long getConsumeUserId() {
+		return consumeUserId;
+	}
+
+	public void setConsumeUserId(Long consumeUserId) {
+		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public Byte getCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(Byte canDelete) {
+		this.canDelete = canDelete;
+	}
+
+	public Byte getCanModify() {
+		return canModify;
+	}
+
+	public void setCanModify(Byte canModify) {
+		this.canModify = canModify;
 	}
 }

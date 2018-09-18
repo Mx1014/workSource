@@ -103,7 +103,6 @@ import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -336,25 +335,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
-//        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-//        cmd1.setActionType((byte)13);
-//        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-//        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-//        Long appId = null;
-//        if(null != res && res.getServiceModuleApps().size() > 0){
-//            appId = res.getServiceModuleApps().get(0).getId();
-//        }
-//        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-//        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
-//            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
-//            member.setOrganizationId(organizaitonId);
-//        }
-//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                    "Insufficient privilege");
-//        }
-
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
@@ -716,6 +696,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
@@ -954,6 +936,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY,cmd.getOrganizationId());
     	assetProvider.modifyNotSettledBill(cmd);
     }
 
@@ -967,6 +950,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_DELETE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -1245,6 +1229,26 @@ public class AssetServiceImpl implements AssetService {
                 			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
                 		}
                 	}
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		//物业缴费V6.0（UE优化) 账单区分数据来源
+                		item.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		item.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
+                	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1354,6 +1358,26 @@ public class AssetServiceImpl implements AssetService {
                     if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
                         newBill.setStatus((byte)1);
                     }
+                    //物业缴费V6.0（UE优化) 账单区分数据来源
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	newBill.setCanDelete((byte)1);
+                    	newBill.setCanModify((byte)1);
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	newBill.setCanDelete((byte)0);
+                    	newBill.setCanModify((byte)0);
+                	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
@@ -2285,7 +2309,6 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
-
     }
 
     @Override
@@ -3114,7 +3137,7 @@ public class AssetServiceImpl implements AssetService {
             }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
                 hasPay = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
-                hasUploadCertificate = view.getHasView();                
+                hasUploadCertificate = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
             	hasEnergy = view.getHasView();
             }
@@ -3192,6 +3215,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -5423,7 +5448,7 @@ public class AssetServiceImpl implements AssetService {
 		} catch (Exception e) {
 			LOGGER.error("exportOrdersUtil cmd={}, Exception={}", cmd, e);
 		}
-    }	
+    }
 	
 	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
 		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
@@ -5433,6 +5458,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM,cmd.getOrganizationId());
 		assetProvider.batchModifyBillSubItem(cmd);
 	}
 	
@@ -5534,10 +5560,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
 	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_SETTLED,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
 
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_PAID,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
 	
@@ -5626,8 +5654,6 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 	
-	
-
 	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
@@ -5651,15 +5677,6 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 	
-	/**
-	 * 同步瑞安CM的账单数据到左邻的数据库表中
-	 */
-	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
-		AssetVendor vendor = checkAssetVendor(namespaceId,0);
-        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        handler.syncRuiAnCMBillToZuolin(cmSyncObject, namespaceId);
-	}
-
 	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         //1、判断缴费是否已经存在关联合同的记录
         cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
@@ -5831,4 +5848,30 @@ public class AssetServiceImpl implements AssetService {
 
         return handler;
     }
+
+	public void createChargingItem(CreateChargingItemCommand cmd) {
+		Long communityId = cmd.getOwnerId();
+        Integer namespaceId = cmd.getNamespaceId();
+        List<Long> communityIds = new ArrayList<>();
+		//如果communityId是空或者-1的话，那么会把communityId设置成域空间ID，代表全部
+        if(communityId == null || communityId == -1){
+        	cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            communityIds = getAllCommunity(namespaceId,true);
+        }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
+        assetProvider.createChargingItem(cmd, communityIds);
+	}
+	
+	/**
+	 * 同步瑞安CM的账单数据到左邻的数据库表中
+	 */
+	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
+		AssetVendor vendor = checkAssetVendor(namespaceId,0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        handler.syncRuiAnCMBillToZuolin(cmSyncObject, namespaceId);
+	}
+
 }
