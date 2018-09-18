@@ -20,6 +20,8 @@ public class CMContractHeader {
 
     private String AccountID;
 
+    private String OA_AccountID;
+
     private String AccountName;
 
     private String Connector;
@@ -54,16 +56,24 @@ public class CMContractHeader {
     
     private String SignDate;
 
-    private String Modifydate;
+    private String ModifyDate;
 
-    public String getModifydate() {
-        return Modifydate;
+
+    public String getOA_AccountID() {
+        return OA_AccountID;
     }
 
-    public void setModifydate(String modifydate) {
-        Modifydate = modifydate;
+    public void setOA_AccountID(String OA_AccountID) {
+        this.OA_AccountID = OA_AccountID;
     }
 
+    public String getModifyDate() {
+        return ModifyDate;
+    }
+
+    public void setModifyDate(String modifyDate) {
+        ModifyDate = modifyDate;
+    }
 
     public String getSignDate() {
 		return SignDate;

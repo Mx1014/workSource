@@ -162,7 +162,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             date = "2018-08-28";
         }
         params.put("Date", date);
-        params.put("currentpage", pageOffset);
+        params.put("CurrentPage", pageOffset);
 
         String enterprises = null;
         String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
@@ -178,137 +178,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
 
         enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
-        enterprises = "{\n" +
-                "\t\"errorCode\": \"0\",\n" +
-                "\t\"data\": [{\n" +
-                "\t\t\"ContractHeader\": {\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"RentalType\": \"变更\",\n" +
-                "\t\t\t\"PropertyID\": \"365\",\n" +
-                "\t\t\t\"DebtorID\": \"8180\",\n" +
-                "\t\t\t\"DebtorAcct\": \"CQR3D113A-A\",\n" +
-                "\t\t\t\"AccountID\": \"19565\",\n" +
-                "\t\t\t\"OA_AccountID\": \"\",\n" +
-                "\t\t\t\"AccountName\": \"重庆亦诚亦可文化传播有限公司\",\n" +
-                "\t\t\t\"Connector\": \"\",\n" +
-                "\t\t\t\"ConnectorPhone\": \"\",\n" +
-                "\t\t\t\"ContractNo\": \"CQTD-L-2016342\",\n" +
-                "\t\t\t\"Mail\": \"\",\n" +
-                "\t\t\t\"MoveinTime\": \"2016-04-01\",\n" +
-                "\t\t\t\"GFA\": \"\",\n" +
-                "\t\t\t\"NFA\": \"\",\n" +
-                "\t\t\t\"LFA\": \"767.51\",\n" +
-                "\t\t\t\"MailingAddress\": \"重庆渝中区瑞天路128号D113\",\n" +
-                "\t\t\t\"StartDate\": \"2016-04-01\",\n" +
-                "\t\t\t\"EndDate\": \"2019-05-31\",\n" +
-                "\t\t\t\"StampingDate\": \"2016-08-01\",\n" +
-                "\t\t\t\"TerminateDate\": \"2018-07-31\",\n" +
-                "\t\t\t\"ContractAmt\": \"1119611.20\",\n" +
-                "\t\t\t\"Recordstatus\": \"已终止\"\n" +
-                "\t\t},\n" +
-                "\t\t\"ContractUnit\": [{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"UnitID\": \"23997\",\n" +
-                "\t\t\t\"GFA\": \"990.02\",\n" +
-                "\t\t\t\"NAF\": \"753.74\",\n" +
-                "\t\t\t\"LFA\": \"767.51\"\n" +
-                "\t\t}],\n" +
-                "\t\t\"ContractFee\": [{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"StartDate\": \"2016-04-01\",\n" +
-                "\t\t\t\"EndDate\": \"2016-05-31\",\n" +
-                "\t\t\t\"CalculateMethod\": \"月总价\",\n" +
-                "\t\t\t\"DocumentAmt\": \"1000.00\",\n" +
-                "\t\t\t\"ChargeAmt\": \"952.38\",\n" +
-                "\t\t\t\"TaxAmt\": \"47.62\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"StartDate\": \"2016-06-01\",\n" +
-                "\t\t\t\"EndDate\": \"2016-06-30\",\n" +
-                "\t\t\t\"CalculateMethod\": \"月总价\",\n" +
-                "\t\t\t\"DocumentAmt\": \"8000.00\",\n" +
-                "\t\t\t\"ChargeAmt\": \"7619.05\",\n" +
-                "\t\t\t\"TaxAmt\": \"380.95\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"StartDate\": \"2016-07-01\",\n" +
-                "\t\t\t\"EndDate\": \"2019-05-31\",\n" +
-                "\t\t\t\"CalculateMethod\": \"月总价\",\n" +
-                "\t\t\t\"DocumentAmt\": \"10000.00\",\n" +
-                "\t\t\t\"ChargeAmt\": \"9523.81\",\n" +
-                "\t\t\t\"TaxAmt\": \"476.19\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillItemName\": \"物业管理费\",\n" +
-                "\t\t\t\"StartDate\": \"2016-04-01\",\n" +
-                "\t\t\t\"EndDate\": \"2018-03-31\",\n" +
-                "\t\t\t\"CalculateMethod\": \"月单价\",\n" +
-                "\t\t\t\"DocumentAmt\": \"40.00\",\n" +
-                "\t\t\t\"ChargeAmt\": \"37.74\",\n" +
-                "\t\t\t\"TaxAmt\": \"2.26\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillItemName\": \"物业管理费\",\n" +
-                "\t\t\t\"StartDate\": \"2018-04-01\",\n" +
-                "\t\t\t\"EndDate\": \"2019-05-31\",\n" +
-                "\t\t\t\"CalculateMethod\": \"月单价\",\n" +
-                "\t\t\t\"DocumentAmt\": \"40.00\",\n" +
-                "\t\t\t\"ChargeAmt\": \"37.74\",\n" +
-                "\t\t\t\"TaxAmt\": \"2.26\"\n" +
-                "\t\t}],\n" +
-                "\t\t\"RentalOption\": [],\n" +
-                "\t\t\"Insurance\": [],\n" +
-                "\t\t\"Bill\": [{\n" +
-                "\t\t\t\"PropertyID\": \"365\",\n" +
-                "\t\t\t\"DebtorID\": \"8180\",\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillID\": \"\",\n" +
-                "\t\t\t\"BillType\": \"保底租金账单\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"DocumentDate\": \"2016-04-01\",\n" +
-                "\t\t\t\"StartDate\": \"2016-04-01\",\n" +
-                "\t\t\t\"EndDate\": \"2016-04-30\",\n" +
-                "\t\t\t\"Status\": \"未发单\",\n" +
-                "\t\t\t\"DocumentAmt\": \"1000.00\",\n" +
-                "\t\t\t\"BalanceAmt\": \"0.00\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"PropertyID\": \"365\",\n" +
-                "\t\t\t\"DebtorID\": \"8180\",\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillID\": \"\",\n" +
-                "\t\t\t\"BillType\": \"保底租金账单\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"DocumentDate\": \"2016-05-01\",\n" +
-                "\t\t\t\"StartDate\": \"2016-05-01\",\n" +
-                "\t\t\t\"EndDate\": \"2016-05-31\",\n" +
-                "\t\t\t\"Status\": \"未发单\",\n" +
-                "\t\t\t\"DocumentAmt\": \"1000.00\",\n" +
-                "\t\t\t\"BalanceAmt\": \"0.00\"\n" +
-                "\t\t},\n" +
-                "\t\t{\n" +
-                "\t\t\t\"PropertyID\": \"365\",\n" +
-                "\t\t\t\"DebtorID\": \"8180\",\n" +
-                "\t\t\t\"RentalID\": \"9981\",\n" +
-                "\t\t\t\"BillID\": \"\",\n" +
-                "\t\t\t\"BillType\": \"保底租金账单\",\n" +
-                "\t\t\t\"BillItemName\": \"保底租金\",\n" +
-                "\t\t\t\"DocumentDate\": \"2016-06-01\",\n" +
-                "\t\t\t\"StartDate\": \"2016-06-01\",\n" +
-                "\t\t\t\"EndDate\": \"2016-06-30\",\n" +
-                "\t\t\t\"Status\": \"未发单\",\n" +
-                "\t\t\t\"DocumentAmt\": \"8000.00\",\n" +
-                "\t\t\t\"BalanceAmt\": \"0.00\"\n" +
-                "\t\t}]\n" +
-                "\t}]\n" +
-                "}";
+
         Map result = JSONObject.parseObject(enterprises);
         CMSyncObject cmSyncObject =
                 (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
@@ -326,7 +196,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             	syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
             	
                 date = getNextDay(date, sdf);
-                syncContractsFromThirdPart("1", date, communityIdentifier, taskId, categoryId, contractApplicationScene);
+                //String.valueOf(Integer.valueOf(pageOffset) + 1
+                syncContractsFromThirdPart("1" , date, communityIdentifier, taskId, categoryId, contractApplicationScene);
             }else{
             	//存储瑞安合同
             	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);

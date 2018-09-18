@@ -23,14 +23,14 @@ public class CMContractFee {
 
     private String TaxAmt;
 
-    private String Modifydate;
+    private String ModifyDate;
 
-    public String getModifydate() {
-        return Modifydate;
+    public String getModifyDate() {
+        return ModifyDate;
     }
 
-    public void setModifydate(String modifydate) {
-        Modifydate = modifydate;
+    public void setModifyDate(String modifyDate) {
+        ModifyDate = modifyDate;
     }
 
     public String getRentalID() {
