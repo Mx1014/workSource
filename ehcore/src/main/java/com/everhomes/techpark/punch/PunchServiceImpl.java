@@ -329,6 +329,11 @@ public class PunchServiceImpl implements PunchService {
             return new SimpleDateFormat("yyyy年MM月");
         }
     };
+    private ThreadLocal<SimpleDateFormat> datetimeChineseSF = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        }
+    };
     private ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -2346,12 +2351,24 @@ public class PunchServiceImpl implements PunchService {
         response.setPunchTime(punchTime);
         //发消息
         if(CreateType.NORMAL_PUNCH != CreateType.fromCode(punchLog.getCreateType())){
-        	
+        	sendPunchMsg(punchLog);
         }
         return response;
     }
 
-    private Byte getDeviceChangeFlag(Long userId,  Long enterpriseId,
+    private void sendPunchMsg(PunchLog punchLog) {  
+        Map<String,String> map = new HashMap<>(); 
+        String locale = UserContext.current().getUser() == null ? PunchConstants.locale : UserContext.current().getUser().getLocale();
+        String createType = localeStringService.getLocalizedString(PunchConstants.PUNCH_CREATE_TYPE, String.valueOf(punchLog.getCreateType()), locale, "");
+		map.put("createType", createType);
+		map.put("punchTime", datetimeChineseSF.get().format(punchLog.getPunchTime()));
+        String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_CREATE_MSG,
+                PunchConstants.PUNCH_EXCEL_SCHEDULING_REMINDER, locale, map, "");
+        sendMessageToUser(punchLog.getUserId(), result);
+
+	}
+
+	private Byte getDeviceChangeFlag(Long userId,  Long enterpriseId,
 			PunchLog punchLog) {
 		PunchLog lastLog = punchProvider.findLastPunchLog(userId, enterpriseId, punchLog.getPunchTime());
 		if(null !=lastLog && punchLog.getIdentification() != null && !punchLog.getIdentification().equals(lastLog.getIdentification())){

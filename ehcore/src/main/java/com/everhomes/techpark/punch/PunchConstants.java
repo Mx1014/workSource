@@ -98,4 +98,6 @@ public class PunchConstants {
 	/** punchType的scope "punch.time"  */
 	public static final String PUNCH_TIME_SCOPE ="punch.time";
 	public static final String NEXT_DAY ="nextDay";
+	public static final String PUNCH_CREATE_TYPE ="punch.create.type";
+	public static final String PUNCH_CREATE_MSG ="punch.create";
 }
