@@ -138,7 +138,7 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         if (report == null)
             return null;
-        ReportValiditySettingDTO originValidity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
+        ReportValiditySettingDTO validity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
         LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         //  update it.
         if (cmd.getReportType() != null)
@@ -163,10 +163,14 @@ public class WorkReportServiceImpl implements WorkReportService {
         });
 
         //  Enable another thread to update the data.
+        if(validity == null)
+            validity = cmd.getValiditySetting();
+        ReportValiditySettingDTO originValidity = validity; // 新建的汇报没有默认有效时间，故赋予默认值避免空指针.
         ExecutorUtil.submit(() -> {
             UserContext.setCurrentNamespaceId(namespaceId);
             //  Make sure that the msg time could be chaned once at the same time.
             coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
+
                 Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
                 //  update the rxMsg
                 if (cmd.getRxMsgSetting() != null)
