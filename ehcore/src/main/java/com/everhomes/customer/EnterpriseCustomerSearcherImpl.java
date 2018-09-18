@@ -308,7 +308,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         } else {
             if(StringUtils.isNotBlank(cmd.getKeyword())) {
-                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName")
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName",5.0f)
                         .field("contactName", 5.0f)
                         .field("contactAddress", 4.0f)
                         .field("contactPhone", 3.0f)
@@ -316,7 +316,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                         .field("trackingName", 3.0f);
             }
 
-            if (cmd.getCustomerName() != null) {
+            if (StringUtils.isNotBlank(cmd.getCustomerName() )) {
                 if(qb != null) {
                     qb = QueryBuilders.boolQuery().must(qb).must(QueryBuilders.queryString("*" + cmd.getCustomerName() + "*").field("name"));
                 }else{
@@ -447,7 +447,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
                 Long startTime = cmd.getMinTrackingPeriod();
-                Long endTime = cmd.getMinTrackingPeriod();
+                Long endTime = cmd.getMaxTrackingPeriod();
                 rf.gte(new Timestamp(startTime));
                 rf.lte(new Timestamp(endTime));
                 fb = FilterBuilders.andFilter(fb, rf);
@@ -458,7 +458,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 fb = FilterBuilders.andFilter(fb, rf);
             }else{
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long endTime = cmd.getMinTrackingPeriod();
+                Long endTime = cmd.getMaxTrackingPeriod();
                 rf.lte(endTime);
                 fb = FilterBuilders.andFilter(fb, rf);
             }

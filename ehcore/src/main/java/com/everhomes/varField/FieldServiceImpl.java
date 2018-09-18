@@ -1427,8 +1427,10 @@ public class FieldServiceImpl implements FieldService {
             if(customerContacts.size()>0){
                 List<String> customerContact = new ArrayList<>();
                 customerContacts.forEach((c)->{
-                    if(c.getContactType().equals(CustomerContactType.CHANNEL_CONTACT.getCode())){
-                        customerContact.add(c.getName()+"("+c.getPhoneNumber()+")");
+                    if(c.getContactType() != null) {
+                        if (c.getContactType().equals(CustomerContactType.CHANNEL_CONTACT.getCode())) {
+                            customerContact.add(c.getName() + "(" + c.getPhoneNumber() + ")");
+                        }
                     }
                 });
                 return String.join(",", customerContact);
@@ -1441,8 +1443,10 @@ public class FieldServiceImpl implements FieldService {
             if(customerContacts.size()>0){
                 List<String> customerContact = new ArrayList<>();
                 customerContacts.forEach((c)->{
-                    if(c.getContactType().equals(CustomerContactType.CUSTOMER_CONTACT.getCode())){
-                        customerContact.add(c.getName()+"("+c.getPhoneNumber()+")");
+                    if(c.getContactType() != null) {
+                        if (c.getContactType().equals(CustomerContactType.CUSTOMER_CONTACT.getCode())) {
+                            customerContact.add(c.getName() + "(" + c.getPhoneNumber() + ")");
+                        }
                     }
                 });
                 return String.join(",", customerContact);
