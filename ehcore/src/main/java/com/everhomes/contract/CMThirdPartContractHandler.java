@@ -429,7 +429,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         if(community == null) {
             return ;
         }
-        List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCustomerType.EBEI.getCode(), community.getId(), categoryId);
+        List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCommunityType.RUIAN_CM.getCode(), community.getId(), categoryId);
 
         List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
 
@@ -554,7 +554,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contract.setNamespaceContractType(NamespaceContractType.RUIAN_CM.getCode());
         contract.setNamespaceContractToken(ebeiContract.getContractHeader().getRentalID());
         contract.setContractNumber(ebeiContract.getContractHeader().getContractNo());
-        //contract.setName(ebeiContract.getSerialNumber());
+        contract.setName("瑞安合同");
         //contract.setBuildingRename(ebeiContract.getBuildingRename());
         
         contract.setCategoryId(categoryId);
