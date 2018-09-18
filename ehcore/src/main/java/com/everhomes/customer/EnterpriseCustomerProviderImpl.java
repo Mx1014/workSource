@@ -98,6 +98,7 @@ import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2444,5 +2445,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     }
 
-
+    @Override
+    public Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(DSL.max(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME))
+                .from(Tables.EH_CUSTOMER_TRACKINGS)
+                .where(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(customerSource))
+                .fetchAnyInto(Timestamp.class);
+    }
 }

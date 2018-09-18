@@ -242,4 +242,5 @@ public interface EnterpriseCustomerProvider {
 
     void updateCustomerAptitudeFlag(Long id, Long approvalStatus);
 
+    Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource);
 }
