@@ -833,14 +833,85 @@ VALUES
 )
 VALUES
 	(
+		16030620,
+		'公共门禁beta',
+		45000000,
+		NULL,
+		'public-access',
+		1,
+		2,
+		'/40000040/45000000/16030620',
+		'park',
+		30,
+		41110,
+		3,
+		'system',
+		'module',
+		NULL
+	);
+
+	INSERT INTO `eh_web_menus` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`icon_url`,
+	`data_type`,
+	`leaf_flag`,
+	`status`,
+	`path`,
+	`type`,
+	`sort_num`,
+	`module_id`,
+	`level`,
+	`condition_type`,
+	`category`,
+	`config_type`
+)
+VALUES
+	(
 		48140010,
+		'企业门禁beta',
+		16040000,
+		NULL,
+		'enterprise-guard',
+		1,
+		2,
+		'/23000000/16040000/48140010',
+		'zuolin',
+		60,
+		41120,
+		3,
+		'system',
+		'module',
+		NULL
+	);
+		INSERT INTO `eh_web_menus` (
+	`id`,
+	`name`,
+	`parent_id`,
+	`icon_url`,
+	`data_type`,
+	`leaf_flag`,
+	`status`,
+	`path`,
+	`type`,
+	`sort_num`,
+	`module_id`,
+	`level`,
+	`condition_type`,
+	`category`,
+	`config_type`
+)
+VALUES
+	(
+		48140020,
 		'企业门禁beta',
 		48000000,
 		NULL,
-		'entrance-guard',
+		'enterprise-guard',
 		1,
 		2,
-		'/40000010/48000000/48140010',
+		'/40000010/48000000/48140020',
 		'park',
 		80,
 		41120,
