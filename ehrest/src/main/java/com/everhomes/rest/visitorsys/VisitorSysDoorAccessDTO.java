@@ -32,10 +32,12 @@ public class VisitorSysDoorAccessDTO {
     private Byte defaultAuthRuleType;
     private Integer defaultMaxDuration;
     private Integer defaultMaxCount;
+//  ---------从门禁获取数据---------
     private Integer maxDuration;
     private Integer maxCount;
     private Byte enableAmount;
     private Byte enableDuration;
+//  ------------------------------
     private Byte defaultDoorAccessFlag;
 
     public Long getId() {
