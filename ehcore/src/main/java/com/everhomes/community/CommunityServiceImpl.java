@@ -277,6 +277,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.collect.Lists;
+import org.elasticsearch.common.collect.Sets;
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -2600,7 +2602,14 @@ public class CommunityServiceImpl implements CommunityService {
                         nameSet.add(organizationMember.getContactName());
                     }
                 }
-                communityAllUserDTO.setUserName(nameSet.size() <= 0?"-":nameSet.toString().substring(1,nameSet.toString().length()-1).replaceAll(",",";"));
+                String userName = "-";
+                if (nameSet.size() > 0 && nameSet.size() <= 2) {
+                    userName = nameSet.toString().substring(1, nameSet.toString().length() -1 ).replaceAll(",",";");
+                }else if (nameSet.size() > 2) {
+                    List<String> nameList = Lists.newArrayList(nameSet);
+                    userName = nameList.get(0) + ";" + nameList.get(1) + "...";
+                }
+                communityAllUserDTO.setUserName(userName);
                 communityAllUserDTO.setPhone(user.getIdentifierToken());
                 communityAllUserDTO.setGender(user.getGender());
                 if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
@@ -2737,13 +2746,25 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
-				for (OrganizationMember member : members) {
+                Set<String> nameSet = new HashSet<>();
+
+                for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
-					//dto.setOrganizationMemberName(member.getContactName());
+                    if (!CollectionUtils.isEmpty(members)) {
+                        nameSet.add(member.getContactName());
+                    }
 					ms.add(member);
 				}
+				String userName = "-";
+                if (nameSet.size() > 0 && nameSet.size() <= 2) {
+                    userName = nameSet.toString().substring(1, nameSet.toString().length() -1 ).replaceAll(",",";");
+                }else if (nameSet.size() > 2) {
+                    List<String> nameList = Lists.newArrayList(nameSet);
+                    userName = nameList.get(0) + ";" + nameList.get(1) + "...";
+                }
+				dto.setUserName(userName);
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
