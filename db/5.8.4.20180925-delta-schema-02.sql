@@ -481,8 +481,6 @@ CREATE TABLE `eh_recommend_apps` (
   KEY `u_eh_recommend_app_scope_id` (`scope_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
 
-ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
-
 -- 服务广场通用配置表
 CREATE TABLE `eh_launch_pad_configs` (
   `id` bigint(20) NOT NULL,

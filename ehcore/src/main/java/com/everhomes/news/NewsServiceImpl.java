@@ -123,9 +123,6 @@ public class NewsServiceImpl implements NewsService {
 	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
 	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
 
-	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
-	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
-
 	@Autowired
 	private UserService userService;
 
