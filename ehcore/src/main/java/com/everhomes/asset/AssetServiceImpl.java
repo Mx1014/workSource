@@ -6000,10 +6000,7 @@ public class AssetServiceImpl implements AssetService {
 					paymentBills.setThirdBillId(cmBill.getBillScheduleID());
 					paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					
-					Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
-					
 					PaymentBillItems items = new PaymentBillItems();
-					items.setBillId(billId);
 					items.setNamespaceId(namespaceId);
 					items.setOwnerId(communityId);
 					items.setOwnerType("community");
@@ -6039,7 +6036,24 @@ public class AssetServiceImpl implements AssetService {
 					items.setStatus(billStatus);
 					items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					
-					assetProvider.createCMBillItem(items);
+					PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillScheduleID());
+					if(existCmBill != null) {
+						//如果账单的唯一标识存在，那么是更新
+						Long billId = existCmBill.getId();
+						paymentBills.setId(billId);
+						assetProvider.updateCMBill(paymentBills);
+						PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
+						if(existCmBillItem != null) {
+							items.setId(existCmBillItem.getId());
+							assetProvider.updateCMBillItem(items);
+						}
+					}else {
+						//如果账单的唯一标识不存在，那么是新增
+						Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
+						items.setBillId(billId);
+						assetProvider.createCMBillItem(items);
+					}
+					
 				}
 			}
 		}

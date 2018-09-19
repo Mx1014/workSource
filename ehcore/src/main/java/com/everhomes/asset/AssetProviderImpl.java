@@ -7103,6 +7103,32 @@ public class AssetProviderImpl implements AssetProvider {
         return dto;
     }
     
+    public PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	List<PaymentBills> list = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId))
+                .and(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
+                .fetchInto(PaymentBills.class);
+    	if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+    
+    public PaymentBillItems getCMBillItemByBillId(Long billId) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	List<PaymentBillItems> list = context.selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                .fetchInto(PaymentBillItems.class);
+    	if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+    
     public Long createCMBill(PaymentBills bill) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
         
@@ -7127,6 +7153,24 @@ public class AssetProviderImpl implements AssetProvider {
         dao.insert(items);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBillItems.class, null);
+	}
+
+	public void updateCMBill(PaymentBills paymentBills) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, paymentBills.getId()));
+		EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        paymentBills.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(paymentBills);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBills.class, paymentBills.getId());
+	}
+
+	public void updateCMBillItem(PaymentBillItems items) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, items.getId()));
+		EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+		items.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(items);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBillItems.class, items.getId());
 	}
 	
 }

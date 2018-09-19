@@ -457,7 +457,15 @@ public interface AssetProvider {
 				
 	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 	
+	PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId);
+	
+	PaymentBillItems getCMBillItemByBillId(Long billId);
+	
 	Long createCMBill(PaymentBills paymentBills);
 	
 	void createCMBillItem(PaymentBillItems items);
+	
+	void updateCMBill(PaymentBills paymentBills);
+	
+	void updateCMBillItem(PaymentBillItems items);
 }
