@@ -3198,6 +3198,7 @@ public class PunchServiceImpl implements PunchService {
             if (NormalFlag.NO == NormalFlag.fromCode(pdl.getNormalFlag())) {
                 statistic.setFullNormalFlag(NormalFlag.NO.getCode());
             }
+
             statistic.setRestDayCount(statistic.getRestDayCount() + (NormalFlag.YES == NormalFlag.fromCode(pdl.getRestFlag()) ? 1 : 0));
             List<TimeInterval> tiDTOs = null;
             PunchTimeRule ptr = null;
@@ -3285,6 +3286,11 @@ public class PunchServiceImpl implements PunchService {
             }
         }
 
+        if(NormalFlag.YES == NormalFlag.fromCode(statistic.getFullNormalFlag())){
+        	statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+        }else{
+        	statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+        }
     }
 
     private Byte countWorkDay(String[] status, List<PunchExceptionRequest> exceptionRequests, Integer abonormalExceptionRequestCount) {
@@ -10475,6 +10481,11 @@ public class PunchServiceImpl implements PunchService {
         }
         pdl.setAbsentFlag(isAbsence(statusList));
         pdl.setNormalFlag(isFullNormal(statusList));
+        if(NormalFlag.YES == NormalFlag.fromCode(pdl.getNormalFlag())){
+        	pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+        }else{
+        	pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+        }
         pdl.setBelateCount(belateCount(statusList));
         pdl.setLeaveEarlyCount(leaveEarlyCount(statusList));
         pdl.setForgotPunchCountOnDuty(forgotCountOnDuty(statusList));
