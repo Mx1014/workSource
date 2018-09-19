@@ -7,6 +7,7 @@ import com.everhomes.asset.AssetService;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -24,6 +25,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZjSyncdataBackup;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
@@ -43,6 +45,7 @@ import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationSearcher;
@@ -450,9 +453,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         if(community == null) {
             return ;
         }
+        
+        List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
+        //这部分已经传过来
+        
+        
         List<Contract> myContractList = contractProvider.listContractByNamespaceType(namespaceId, NamespaceCommunityType.RUIAN_CM.getCode(), community.getId(), categoryId);
 
-        List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
+        
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myContractList size: {}, theirContractList size: {}",
                 namespaceId, myContractList.size(), mergeContractList.size());
@@ -525,90 +533,181 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
     }
     
-    private void insertContract(Integer namespaceId, Long communityId, CMDataObject ebeiContract, Long categoryId) {
+    private void insertContract(Integer namespaceId, Long communityId, CMDataObject cmContractData, Long categoryId) {
         Contract contract = new Contract();
         contract.setNamespaceId(namespaceId);
         contract.setCommunityId(communityId);
         contract.setNamespaceContractType(NamespaceContractType.RUIAN_CM.getCode());
-        contract.setNamespaceContractToken(ebeiContract.getContractHeader().getRentalID());
-        contract.setContractNumber(ebeiContract.getContractHeader().getContractNo());
-        //contract.setName(ebeiContract.getSerialNumber());
-        //contract.setBuildingRename(ebeiContract.getBuildingRename());
+        contract.setNamespaceContractToken(cmContractData.getContractHeader().getRentalID());
+        contract.setContractNumber(cmContractData.getContractHeader().getContractNo());
+        contract.setName("瑞安合同");
+        //contract.setBuildingRename(cmContractData.getBuildingRename());
         contract.setCategoryId(categoryId);
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getStartDate())) {
-            contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getContractHeader().getStartDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getStartDate())) {
+            contract.setContractStartDate(dateStrToTimestamp(cmContractData.getContractHeader().getStartDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getEndDate())) {
-            contract.setContractEndDate(dateStrToTimestamp(ebeiContract.getContractHeader().getEndDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getEndDate())) {
+            contract.setContractEndDate(dateStrToTimestamp(cmContractData.getContractHeader().getEndDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getSignDate())) {
-            contract.setSignedTime(dateStrToTimestamp(ebeiContract.getContractHeader().getSignDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getSignDate())) {
+            contract.setSignedTime(dateStrToTimestamp(cmContractData.getContractHeader().getSignDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getTerminateDate())) {
-            contract.setDenunciationTime(dateStrToTimestamp(ebeiContract.getContractHeader().getTerminateDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getTerminateDate())) {
+            contract.setDenunciationTime(dateStrToTimestamp(cmContractData.getContractHeader().getTerminateDate()));
         }
-        //contract.setVersion(ebeiContract.getVersion());
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getLFA())) {
-            contract.setRentSize(Double.valueOf(ebeiContract.getContractHeader().getLFA()));
+        //contract.setVersion(cmContractData.getVersion());
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getLFA())) {
+            contract.setRentSize(Double.valueOf(cmContractData.getContractHeader().getLFA()));
         }
-        contract.setStatus(convertContractStatus(ebeiContract.getContractHeader().getRecordstatus()));
-        contract.setCustomerName(ebeiContract.getContractHeader().getAccountName());
-        contract.setCustomerId(Long.parseLong(ebeiContract.getContractHeader().getAccountID()));
+        contract.setStatus(convertContractStatus(cmContractData.getContractHeader().getRecordstatus()));
+        contract.setCustomerName(cmContractData.getContractHeader().getAccountName());
+        //contract.setCustomerId(Long.parseLong(cmContractData.getContractHeader().getAccountID()));
+        //处理过的客户ID
+        contract.setCustomerId(cmContractData.getCustomerId());
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
-        /*EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceCustomerType.EBEI.getCode(), ebeiContract.getOwnerId());
+        
+        EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
-            customer.setContactAddress(ebeiContract.getBuildingRename());
+            //customer.setContactAddress(cmContractData.getBuildingRename());
             customerProvider.updateEnterpriseCustomer(customer);
-            insertOrUpdateOrganizationAddresses(ebeiContract.getHouseInfoList(),customer);
+            insertOrUpdateOrganizationAddresses(cmContractData.getContractUnit(),customer);
             contract.setCustomerId(customer.getId());
-        }*/
+        }
+        
         contract.setCreateUid(UserContext.currentUserId());
         contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         contractProvider.createContract(contract);
-        dealContractApartments(contract, ebeiContract.getContractUnit());
+        dealContractApartments(contract, cmContractData.getContractUnit());
         contractSearcher.feedDoc(contract);
+        
+        //返回合同的id给缴费用
+        cmContractData.setContractId(contract.getId());
 
     }
     
-    private void updateContract(Contract contract, Long communityId, CMDataObject ebeiContract, Long categoryId, Byte contractApplicationScene) {
+    private void insertOrUpdateOrganizationAddresses(List<CMContractUnit> apartmentIdentifier, EnterpriseCustomer customer){
+        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+        List<CMContractUnit> apartments = apartmentIdentifier.stream().collect(Collectors.toList());
+        LOGGER.debug("insertOrUpdateOrganizationAddresses customer: {}, myOrganizationAddressList: {}, apartments: {}",
+                customer.getName(), StringHelper.toJsonString(myOrganizationAddressList), StringHelper.toJsonString(apartments));
+        for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+            Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
+                if (address.getNamespaceAddressType().equals(NamespaceContractType.RUIAN_CM.getCode())) {
+                    for(CMContractUnit identifier : apartmentIdentifier) {
+                        if(address.getNamespaceAddressToken().equals(identifier.getUnitID())) {
+                            apartments.remove(identifier);
+                        }
+                    }
+                }
+            } else {
+                deleteOrganizationAddress(organizationAddress);
+            }
+        }
+        LOGGER.debug("insertOrUpdateOrganizationAddresses after remove apartments: {}", StringHelper.toJsonString(apartmentIdentifier));
+        if(apartments != null && apartments.size() > 0) {
+            apartments.forEach(apartment -> {
+                insertOrganizationAddress(apartment, customer);
+            });
+        }
+
+    }
+    
+    private void insertOrganizationAddress(CMContractUnit apartmentIdentifier, EnterpriseCustomer customer) {
+        if (apartmentIdentifier == null) {
+            return;
+        }
+        Long before = System.currentTimeMillis();
+        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceContractType.RUIAN_CM.getCode(), apartmentIdentifier.getUnitID());
+        Long after = System.currentTimeMillis();
+        LOGGER.info("address time before index:{}", after-before);
+        if (address == null) {
+            return;
+        }
+        Building building = buildingProvider.findBuildingByName(customer.getNamespaceId(), address.getCommunityId(), address.getBuildingName());
+
+        OrganizationAddress organizationAddress = new OrganizationAddress();
+        organizationAddress.setOrganizationId(customer.getOrganizationId());
+        organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+        organizationAddress.setCreatorUid(1L);
+        organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationAddress.setOperatorUid(1L);
+        organizationAddress.setUpdateTime(organizationAddress.getCreateTime());
+        organizationAddress.setAddressId(address.getId());
+        if (building == null) {
+            organizationAddress.setBuildingId(0L);
+        }else {
+            organizationAddress.setBuildingId(building.getId());
+            organizationAddress.setBuildingName(building.getName());
+        }
+
+        organizationProvider.createOrganizationAddress(organizationAddress);
+        // add sync to customer entry info  20180523
+        organizationService.updateCustomerEntryInfo(customer, organizationAddress);
+    }
+    
+    private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
+        if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+            organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+            organizationAddress.setOperatorUid(1L);
+            organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationProvider.updateOrganizationAddress(organizationAddress);
+            EnterpriseCustomer customer =  customerProvider.findByOrganizationId(organizationAddress.getOrganizationId());
+            if (customer != null) {
+                customerProvider.deleteCustomerEntryInfoByCustomerIdAndAddressId(customer.getId(), organizationAddress.getAddressId());
+            }
+        }
+    }
+    
+    private void updateContract(Contract contract, Long communityId, CMDataObject cmContractData, Long categoryId, Byte contractApplicationScene) {
         contract.setCommunityId(communityId);
         contract.setNamespaceContractType(NamespaceContractType.RUIAN_CM.getCode());
-        contract.setNamespaceContractToken(ebeiContract.getContractHeader().getRentalID());
-        contract.setContractNumber(ebeiContract.getContractHeader().getContractNo());
+        contract.setNamespaceContractToken(cmContractData.getContractHeader().getRentalID());
+        contract.setContractNumber(cmContractData.getContractHeader().getContractNo());
         contract.setName("瑞安合同");
-        //contract.setBuildingRename(ebeiContract.getBuildingRename());
+        //contract.setBuildingRename(cmContractData.getBuildingRename());
         
         contract.setCategoryId(categoryId);
         
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getStartDate())) {
-            contract.setContractStartDate(dateStrToTimestamp(ebeiContract.getContractHeader().getStartDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getStartDate())) {
+            contract.setContractStartDate(dateStrToTimestamp(cmContractData.getContractHeader().getStartDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getEndDate())) {
-            contract.setContractEndDate(dateStrToTimestamp(ebeiContract.getContractHeader().getEndDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getEndDate())) {
+            contract.setContractEndDate(dateStrToTimestamp(cmContractData.getContractHeader().getEndDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getSignDate())) {
-            contract.setSignedTime(dateStrToTimestamp(ebeiContract.getContractHeader().getSignDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getSignDate())) {
+            contract.setSignedTime(dateStrToTimestamp(cmContractData.getContractHeader().getSignDate()));
         }
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getTerminateDate())) {
-            contract.setDenunciationTime(dateStrToTimestamp(ebeiContract.getContractHeader().getTerminateDate()));
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getTerminateDate())) {
+            contract.setDenunciationTime(dateStrToTimestamp(cmContractData.getContractHeader().getTerminateDate()));
         }
-        //contract.setVersion(ebeiContract.getContractHeader().getVersion());
-        if(StringUtils.isNotBlank(ebeiContract.getContractHeader().getLFA())) {
-            contract.setRentSize(Double.valueOf(ebeiContract.getContractHeader().getLFA()));
+        //contract.setVersion(cmContractData.getContractHeader().getVersion());
+        if(StringUtils.isNotBlank(cmContractData.getContractHeader().getLFA())) {
+            contract.setRentSize(Double.valueOf(cmContractData.getContractHeader().getLFA()));
         }
-        contract.setStatus(convertContractStatus(ebeiContract.getContractHeader().getRecordstatus()));
-        contract.setCustomerName(ebeiContract.getContractHeader().getAccountName());
-        contract.setCustomerId(Long.parseLong(ebeiContract.getContractHeader().getAccountID()));
+        contract.setStatus(convertContractStatus(cmContractData.getContractHeader().getRecordstatus()));
+        contract.setCustomerName(cmContractData.getContractHeader().getAccountName());
+        //contract.setCustomerId(Long.parseLong(cmContractData.getContractHeader().getAccountID()));
+        //处理过的客户ID
+        contract.setCustomerId(cmContractData.getCustomerId());
+        
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
+        EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
+        if(customer != null) {
+            //customer.setContactAddress(cmContractData.getBuildingRename());
+            customerProvider.updateEnterpriseCustomer(customer);
+            insertOrUpdateOrganizationAddresses(cmContractData.getContractUnit(),customer);
+            contract.setCustomerId(customer.getId());
+        }
          
         contractProvider.updateContract(contract);
-        dealContractApartments(contract, ebeiContract.getContractUnit());
+        dealContractApartments(contract, cmContractData.getContractUnit());
         contractSearcher.feedDoc(contract);
     }
     
-    private void dealContractApartments(Contract contract, List<CMContractUnit> ebeiContractRoomInfos) {
+    private void dealContractApartments(Contract contract, List<CMContractUnit> cmContractRoomInfos) {
         List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
         Map<String, ContractBuildingMapping> map = new HashMap<>();
         if(existApartments != null && existApartments.size() > 0) {
@@ -622,16 +721,16 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
 
         Double totalSize = 0.0;
-        if(ebeiContractRoomInfos != null && ebeiContractRoomInfos.size() > 0) {
-            for(CMContractUnit ebeiContractRoomInfo : ebeiContractRoomInfos) {
-                ContractBuildingMapping mapping = map.get(ebeiContractRoomInfo.getUnitID());
+        if(cmContractRoomInfos != null && cmContractRoomInfos.size() > 0) {
+            for(CMContractUnit cmContractRoomInfo : cmContractRoomInfos) {
+                ContractBuildingMapping mapping = map.get(cmContractRoomInfo.getUnitID());
                 if(mapping == null) {
                     mapping = new ContractBuildingMapping();
                     mapping.setNamespaceId(contract.getNamespaceId());
                     mapping.setContractId(contract.getId());
-                    mapping.setAreaSize(Double.valueOf(ebeiContractRoomInfo.getLFA()));
+                    mapping.setAreaSize(Double.valueOf(cmContractRoomInfo.getLFA()));
                     mapping.setContractNumber(contract.getContractNumber());
-                    Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.RUIAN_CM.getCode(), ebeiContractRoomInfo.getUnitID());
+                    Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.RUIAN_CM.getCode(), cmContractRoomInfo.getUnitID());
                     if(address != null) {
                         mapping.setAddressId(address.getId());
                         mapping.setBuildingName(address.getBuildingName());
@@ -655,7 +754,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     }
 
                 } else {
-                    map.remove(ebeiContractRoomInfo.getUnitID());
+                    map.remove(cmContractRoomInfo.getUnitID());
                 }
             }
         }
