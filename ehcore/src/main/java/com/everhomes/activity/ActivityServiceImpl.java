@@ -857,6 +857,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1739,6 +1746,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -2007,6 +2022,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
                 addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
                 addGeneralFormValuesCommand.setGeneralFormId(formOriginId);
+                addGeneralFormValuesCommand.setGeneralFormVersion(list.get(0).getFormVersion());
                 addGeneralFormValuesCommand.setSourceId(roster.getId());
                 addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                 addGeneralFormValuesCommand.setValues(cmd.getValues());
@@ -2079,6 +2095,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(oldRoster.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         activityProvider.updateRoster(oldRoster);
@@ -2094,6 +2111,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(r.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         // 报名活动事件
