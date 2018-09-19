@@ -47,5 +47,11 @@ ALTER TABLE `eh_file_management_catalogs` ADD COLUMN `operator_name`  VARCHAR(25
 ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_name` (`content_name`);
 ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_catalog_id` (`catalog_id`);
 ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`parent_id`);
+ 
+-- AUTHOR: 吴寒
+-- REMARK: issue-33943 日程提醒1.2
+ALTER TABLE eh_remind_settings ADD COLUMN app_version VARCHAR(32) DEFAULT '5.8.0' COMMENT '对应app版本(历史数据5.8.0),根据APP版本选择性展示';
+ALTER TABLE eh_remind_settings ADD COLUMN before_time BIGINT COMMENT '提前多少时间(毫秒数)不超过1天的部分在这里减';
+
 
 -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
