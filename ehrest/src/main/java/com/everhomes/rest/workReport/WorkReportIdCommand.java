@@ -9,9 +9,19 @@ import com.everhomes.util.StringHelper;
  */
 public class WorkReportIdCommand {
 
+    private Integer namespaceId;
+
     private Long reportId;
 
     public WorkReportIdCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getReportId() {

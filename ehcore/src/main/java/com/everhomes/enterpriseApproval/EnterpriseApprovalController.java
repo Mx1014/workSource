@@ -4,8 +4,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdCommand;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.CreateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowsCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalIdCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsResponse;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsCommand;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;
+import com.everhomes.rest.enterpriseApproval.UpdateEnterpriseApprovalCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
 import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -80,6 +92,20 @@ public class EnterpriseApprovalController extends ControllerBase{
     @RestReturn(value = String.class)
     public RestResponse stopApprovalFlows(@Valid ApprovalFlowIdsCommand cmd){
         enterpriseApprovalService.stopApprovalFlows(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /enterpriseApproval/deleteApprovalFlow</b>
+     * <p>删除流程</p>
+     */
+    @RequestMapping("deleteApprovalFlow")
+    @RestReturn(value = String.class)
+    public RestResponse deleteApprovalFlow(@Valid ApprovalFlowIdCommand cmd) {
+        enterpriseApprovalService.deleteApprovalFlow(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -190,7 +216,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/deleteEnterpriseApproval</b>
      * <p>OA 删除审批</p>
-     * @return
      */
     @RequestMapping("deleteEnterpriseApproval")
     @RestReturn(value=String.class)
@@ -205,7 +230,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/updateEnterpriseApproval</b>
      * <p>OA 编辑审批</p>
-     * @return
      */
     @RequestMapping("updateEnterpriseApproval")
     @RestReturn(value=EnterpriseApprovalDTO.class)
@@ -220,7 +244,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/listEnterpriseApprovalTypes</b>
      * <p>OA 获取审批类型列表(用来做filter条件)</p>
-     * @return
      */
     @RequestMapping("listEnterpriseApprovalTypes")
     @RestReturn(value=ListEnterpriseApprovalsResponse.class)
@@ -235,7 +258,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/enableEnterpriseApproval</b>
      * <p>OA 启用审批</p>
-     * @return
      */
     @RequestMapping("enableEnterpriseApproval")
     @RestReturn(value=String.class)
@@ -250,7 +272,6 @@ public class EnterpriseApprovalController extends ControllerBase{
     /**
      * <b>URL: /enterpriseApproval/disableEnterpriseApproval</b>
      * <p>OA 禁用审批</p>
-     * @return
      */
     @RequestMapping("disableEnterpriseApproval")
     @RestReturn(value=String.class)

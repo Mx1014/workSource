@@ -11,6 +11,7 @@ import java.util.List;
  * <li>ownerId: 总公司ID，必填</li>
  * <li>planDescription: 日程描述，必填</li>
  * <li>planDate: 日程的日期时间戳，可选项</li>
+ * <li>planTime: 日程的时间 时分秒的毫秒数0到86400000，可选项(默认9点)</li>
  * <li>repeatType: 重复类型，参考{@link com.everhomes.rest.remind.RemindRepeatType}，可选项</li>
  * <li>remainTypeId: 提醒时间类型ID，可选项</li>
  * <li>remindCategoryId: 分类ID，必填</li>
@@ -24,6 +25,7 @@ public class CreateOrUpdateRemindCommand {
     private Long ownerId;
     private String planDescription;
     private Long planDate;
+    private Long planTime;
     private Byte repeatType;
     private Integer remainTypeId;
     private Long remindCategoryId;
@@ -114,4 +116,12 @@ public class CreateOrUpdateRemindCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getPlanTime() {
+		return planTime;
+	}
+
+	public void setPlanTime(Long planTime) {
+		this.planTime = planTime;
+	}
 }

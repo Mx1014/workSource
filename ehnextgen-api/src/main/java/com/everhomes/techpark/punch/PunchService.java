@@ -5,10 +5,9 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
 import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
-import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
 import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
 import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
@@ -75,6 +74,7 @@ import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
+import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.ThirdPartPunchClockCommand;
 import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
@@ -82,10 +82,8 @@ import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
-import com.everhomes.rest.techpark.punch.admin.BatchUpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
-import com.everhomes.rest.techpark.punch.admin.ExportVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
@@ -93,7 +91,6 @@ import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
-import com.everhomes.rest.techpark.punch.admin.ImportVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
@@ -112,10 +109,6 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListVacationBalanceLogsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesCommand;
-import com.everhomes.rest.techpark.punch.admin.ListVacationBalancesResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
@@ -128,18 +121,15 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
-
+import com.everhomes.uniongroup.UniongroupVersion;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -262,8 +252,6 @@ public interface PunchService {
 
 	Time getEndTime(Time startTime, Time workTime);
 
-	public GetTargetPunchAllRuleResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
-
 	public void updateTargetPunchAllRule(UpdateTargetPunchAllRuleCommand cmd);
 
 	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
@@ -361,11 +349,7 @@ public interface PunchService {
 
 	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd);
 
-	void approveAbnormalPunch(PunchExceptionRequest request);
-	
 	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
-
-	PunchLog getAbnormalPunchLog(PunchExceptionRequest request);
 
 	void punchGroupAddNewEmployee(Long groupId);
 
@@ -378,22 +362,6 @@ public interface PunchService {
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId);
-
-	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
-
-	public void updateVacationBalances(UpdateVacationBalancesCommand cmd);
-
-	void addVacationBalanceHistoryCount(Long userId, Long organizationId, BigDecimal approvalAnnualLeaveDays, BigDecimal approvalOvertimeDays);
-
-	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd);
-
-	public ListVacationBalanceLogsResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd);
-
-	public void exportVacationBalances(ExportVacationBalancesCommand cmd);
-
-	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
-
-	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
 
 	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
 	
@@ -452,7 +420,4 @@ public interface PunchService {
 	void punchDayLogInitializeByMonth(String initMonth) throws ParseException;
 
 	PunchClockResponse thirdPartPunchClock(ThirdPartPunchClockCommand cmd);
-
-
-
 }

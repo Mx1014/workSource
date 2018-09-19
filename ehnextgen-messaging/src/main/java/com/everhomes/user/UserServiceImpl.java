@@ -3353,9 +3353,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
         //加上province
-        Region city = regionProvider.findRegionById(organizationDto.getCityId());
+        //自动拆箱会导致空指针
+        Region city = null;
+        if (organizationDto.getCityId() != null) {
+            city = regionProvider.findRegionById(organizationDto.getCityId());
+        }
         if (city != null) {
-            Region province = regionProvider.findRegionById(city.getParentId());
+            Region province = null;
+            if (city.getParentId() != null) {
+                province = regionProvider.findRegionById(city.getParentId());
+            }
             if (province != null) {
                 organizationDto.setProvinceId(province.getId());
                 organizationDto.setProvinceName(province.getName());

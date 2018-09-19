@@ -582,6 +582,8 @@ public interface OrganizationProvider {
 
     List<Long> queryOrganizationPersonnelDetailIds(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
+    List<Long> queryOrganizationPersonnelTargetIds(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
     Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
     // path查询接口
@@ -679,4 +681,6 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
+
+	Integer countOrganizationMemberDetails(Long orgId, Long departmentId);
 }
