@@ -3889,7 +3889,7 @@ public class PunchProviderImpl implements PunchProvider {
 	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.gt(0));
 	        			break;
 	        		case NORMAL:
-	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(ExceptionStatus.NORMAL.getCode()));
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.FULL_NORMAL_FLAG.eq(NormalFlag.NEED.getCode()));
 	        			break;
 	        		case REST:
 	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.REST_DAY_COUNT.gt(0));
