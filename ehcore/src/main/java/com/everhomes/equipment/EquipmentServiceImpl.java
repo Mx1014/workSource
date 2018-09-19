@@ -5121,6 +5121,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			ownerType = EntityType.EQUIPMENT_TASK.getCode();
 		}
+		// delete data by id ,not add targetId and type
 		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), ownerType, scopeType, scopeId);
 		if (configuration != null) {
 			configuration.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
