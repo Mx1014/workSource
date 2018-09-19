@@ -58,4 +58,7 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','5','zh_CN','取消共享日程发消息','${trackContractName}的日程“${planDescription}” 取消共享了','0');
 
 
+-- AUTHOR: 吴寒
+-- REMARK: 会议管理V1.2
+UPDATE eh_configurations SET VALUE = 5000 WHERE NAME ='meeting.record.word.limit';
 -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
