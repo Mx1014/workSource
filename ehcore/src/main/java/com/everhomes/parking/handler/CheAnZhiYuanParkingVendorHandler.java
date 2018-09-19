@@ -197,6 +197,14 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         cardRate.setMonthCount(new BigDecimal(1));
         ratedtos.add(cardRate);
 
+//      测试用配置费用
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            ratedtos.forEach(dto ->{
+                dto.setPrice(new BigDecimal(debugfee));
+            });
+        }
+
         return ratedtos;
     }
 
@@ -220,7 +228,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             dto.setParkingName(parkingLot.getName());
 
             dto.setSpaceNo(location.getParkLotName());
-//            dto.setLocation(location.getParkLotName());
+            dto.setLocation(location.getFloorName() + location.getParkLotName());
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
 
