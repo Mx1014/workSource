@@ -28,7 +28,7 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
     private String applicationName;
     @Value("${server.port:8080}")
     private int serverPort;
-    @Value("${core.ipAddress:10.1.110.80}")
+    @Value("${CORE_IP:10.1.110.80}")
     private String ipAddress;
 
     private String instanceId;
