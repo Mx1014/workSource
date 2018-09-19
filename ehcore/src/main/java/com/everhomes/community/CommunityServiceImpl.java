@@ -277,6 +277,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.collect.Lists;
+import org.elasticsearch.common.collect.Sets;
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -2194,7 +2196,30 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 		//添加地址信息
 		addGroupAddressDto(dto, usreGroups);
-
+        //小区认证记录
+        List<GroupMemberLog> memberLogList = this.groupMemberLogProvider.listGroupMemberLogByUserId(user.getId(), null);
+        List<GroupMemberDTO> memberLogs = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(memberLogList)) {
+            memberLogList.stream().forEach(r -> {
+                GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+                GroupMemberDTO groupMemberDTO = toGroupMemberDTO(member);
+                Address address = addressProvider.findAddressById(r.getAddressId());
+                if (null != address) {
+                    groupMemberDTO.setAddressId(address.getId());
+                    groupMemberDTO.setApartmentName(address.getApartmentName());
+                    groupMemberDTO.setBuildingName(address.getBuildingName());
+                }
+                Community community = communityProvider.findCommunityById(r.getCommunityId());
+                if (community != null) {
+                    groupMemberDTO.setCityName(community.getCityName());
+                    groupMemberDTO.setAreaName(community.getAreaName());
+                    groupMemberDTO.setCommunityName(community.getName());
+                }
+                groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+                memberLogs.add(groupMemberDTO);
+            });
+        }
+        dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
 //			for (UserGroup userGroup : usreGroups) {
 //				Group group = groupProvider.findGroupById(userGroup.getGroupId());
@@ -2330,6 +2355,32 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
             }
+            //小区认证记录
+            List<GroupMemberLog> memberLogList = this.groupMemberLogProvider.listGroupMemberLogByUserId(user.getId(), null);
+            List<GroupMemberDTO> memberLogs = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(memberLogList)) {
+                memberLogList.stream().forEach(r -> {
+                    GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+                    GroupMemberDTO groupMemberDTO = toGroupMemberDTO(member);
+                    Address address = addressProvider.findAddressById(r.getAddressId());
+                    if (null != address) {
+                        groupMemberDTO.setAddressId(address.getId());
+                        groupMemberDTO.setApartmentName(address.getApartmentName());
+                        groupMemberDTO.setBuildingName(address.getBuildingName());
+                    }
+                    Community community = communityProvider.findCommunityById(r.getCommunityId());
+                    if (community != null) {
+                        groupMemberDTO.setCityName(community.getCityName());
+                        groupMemberDTO.setAreaName(community.getAreaName());
+                        groupMemberDTO.setCommunityName(community.getName());
+                    }
+                    groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+                    memberLogs.add(groupMemberDTO);
+                });
+            }
+            communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
+
+            //是否展示会员等级
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
                 communityUserAddressDTO.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
@@ -2594,13 +2645,20 @@ public class CommunityServiceImpl implements CommunityService {
                 List<Long> userIds = new ArrayList<>();
                 userIds.add(user.getId());
                 List<OrganizationMember> members = this.organizationProvider.listAllOrganizationMembersByUID(userIds);
-                StringBuilder realName = new StringBuilder();
+                Set<String> nameSet = new HashSet<>();
                 if (!CollectionUtils.isEmpty(members)) {
                     for (OrganizationMember organizationMember : members) {
-                        realName.append(organizationMember.getContactName()).append(";");
+                        nameSet.add(organizationMember.getContactName());
                     }
                 }
-                communityAllUserDTO.setUserName(StringUtils.isBlank(realName.toString())?"-":realName.toString().substring(0,realName.toString().length()-1));
+                String userName = "-";
+                if (nameSet.size() > 0 && nameSet.size() <= 2) {
+                    userName = nameSet.toString().substring(1, nameSet.toString().length() -1 ).replaceAll(",",";");
+                }else if (nameSet.size() > 2) {
+                    List<String> nameList = Lists.newArrayList(nameSet);
+                    userName = nameList.get(0) + ";" + nameList.get(1) + "...";
+                }
+                communityAllUserDTO.setUserName(userName);
                 communityAllUserDTO.setPhone(user.getIdentifierToken());
                 communityAllUserDTO.setGender(user.getGender());
                 if (NamespaceUserType.WX.getCode().equals(user.getNamespaceUserType())) {
@@ -2737,13 +2795,25 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
-				for (OrganizationMember member : members) {
+                Set<String> nameSet = new HashSet<>();
+
+                for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
-					//dto.setOrganizationMemberName(member.getContactName());
+                    if (!CollectionUtils.isEmpty(members)) {
+                        nameSet.add(member.getContactName());
+                    }
 					ms.add(member);
 				}
+				String userName = "-";
+                if (nameSet.size() > 0 && nameSet.size() <= 2) {
+                    userName = nameSet.toString().substring(1, nameSet.toString().length() -1 ).replaceAll(",",";");
+                }else if (nameSet.size() > 2) {
+                    List<String> nameList = Lists.newArrayList(nameSet);
+                    userName = nameList.get(0) + ";" + nameList.get(1) + "...";
+                }
+				dto.setUserName(userName);
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
