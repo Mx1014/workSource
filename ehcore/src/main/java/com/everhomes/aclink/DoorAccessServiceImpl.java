@@ -2705,7 +2705,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
-                Long t1 = DateHelper.currentGMTTime().getTime();
                 doUclbrtQRKey(user, doorAccess, auth, qrKeys);
                 Long t2 = DateHelper.currentGMTTime().getTime();
                 LOGGER.debug("一次请求耗时" +(t2 - t1));
