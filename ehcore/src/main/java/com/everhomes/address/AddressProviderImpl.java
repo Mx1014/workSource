@@ -1158,6 +1158,14 @@ public class AddressProviderImpl implements AddressProvider {
         return aByte;
 	}
 
-	
+	@Override
+	public List<Address> findActiveApartmentsByBuildingId(Long buildingId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select()
+				       .from(Tables.EH_ADDRESSES)
+				       .where(Tables.EH_ADDRESSES.BUILDING_ID.eq(buildingId))
+				       .and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+				       .fetchInto(Address.class);
+	}
 	
 }
