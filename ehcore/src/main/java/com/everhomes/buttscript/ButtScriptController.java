@@ -32,9 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ButtScriptController extends ControllerBase{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ButtScriptController.class);
-	
-    @Autowired
-	private ButtScriptService buttScriptService ;
+
 
 	@Autowired
 	private ButtScriptSchedulerMain buttScriptSchedulerMain ;
