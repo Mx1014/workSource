@@ -33,4 +33,10 @@ CREATE TABLE `eh_punch_notifications` (
 ALTER TABLE eh_punch_logs ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
 ALTER TABLE eh_punch_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
 
+ 
+-- AUTHOR: 吴寒
+-- REMARK: issue-36405 公告1.8 修改表结构
+ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_time` DATETIME;
+
 -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
