@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ButtScriptTestCommand {
     private String eventName ;
-    private Long userId ;
+    private String phone ;
     private Integer namespaceId ;
 
     public String getEventName() {
@@ -22,12 +22,12 @@ public class ButtScriptTestCommand {
         this.eventName = eventName;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Integer getNamespaceId() {

@@ -14,7 +14,10 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.buttscript.*;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,8 @@ public class ButtScriptController extends ControllerBase{
 	@Autowired
 	private ButtScriptSchedulerMain buttScriptSchedulerMain ;
 
+	@Autowired
+	private UserProvider userProvider ;
 
 	/**
      * <b>URL: /buttScript/buttScriptTest</b>
@@ -47,18 +52,22 @@ public class ButtScriptController extends ControllerBase{
 	public RestResponse buttScriptTest( ButtScriptTestCommand cmd ) {
 		LocalEvent event = new LocalEvent();
 		LocalEventContext context = new LocalEventContext();
-		if(cmd.getUerId() == null){
-			cmd.setUerId(UserContext.currentUserId());
-		}
+
 		if(cmd.getNamespaceId() == null){
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-		context.setUid(cmd.getUerId());
+		Long userId = UserContext.currentUserId();
+		if(!StringUtils.isBlank(cmd.getPhone())){
+			UserIdentifier iden = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(),cmd.getPhone());
+			userId = iden.getOwnerUid() ;
+		}
+
+		context.setUid(userId);
 		context.setNamespaceId(cmd.getNamespaceId());
 		event.setContext(context);
 
 		event.setEntityType("User");
-		event.setEntityId(cmd.getUerId());
+		event.setEntityId(userId);
 		event.setEventName(cmd.getEventName());
 		LOGGER.debug("event:" + event);
 		String resultStr = buttScriptSchedulerMain.doButtScriptMethod(event);
