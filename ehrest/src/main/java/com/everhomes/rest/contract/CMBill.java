@@ -30,6 +30,12 @@ public class CMBill {
     private String Status;
 
     private String DocumentAmt;
+    
+    private String ChargeAmt;
+    
+    private String TaxAmt;
+    
+    private String TaxRate;
 
     private String BalanceAmt;
 
@@ -150,5 +156,29 @@ public class CMBill {
 
 	public void setBillScheduleID(String billScheduleID) {
 		BillScheduleID = billScheduleID;
+	}
+
+	public String getChargeAmt() {
+		return ChargeAmt;
+	}
+
+	public void setChargeAmt(String chargeAmt) {
+		ChargeAmt = chargeAmt;
+	}
+
+	public String getTaxAmt() {
+		return TaxAmt;
+	}
+
+	public void setTaxAmt(String taxAmt) {
+		TaxAmt = taxAmt;
+	}
+
+	public String getTaxRate() {
+		return TaxRate;
+	}
+
+	public void setTaxRate(String taxRate) {
+		TaxRate = taxRate;
 	}
 }

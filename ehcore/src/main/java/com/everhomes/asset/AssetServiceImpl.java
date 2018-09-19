@@ -5881,8 +5881,45 @@ public class AssetServiceImpl implements AssetService {
 			for(CMDataObject cmDataObject : data) {
 				List<CMBill> cmBills = cmDataObject.getBill();
 				Long communityId = cmDataObject.getCommunityId();
-				communityId = 240111044332063578L;//TODO 后面鹏宇会一起传过来
+				Long contractId = cmDataObject.getContractId();
+				String contractNum = cmDataObject.getContractNum();
 				for(CMBill cmBill : cmBills) {
+					BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
+					BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
+					BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
+					BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
+					BigDecimal amountReceived = BigDecimal.ZERO;//待收含税
+					BigDecimal amountReceivedWithoutTax = BigDecimal.ZERO;//待收不含税
+					BigDecimal taxAmount = BigDecimal.ZERO;//税额
+					try{
+						amountOwed = new BigDecimal(cmBill.getBalanceAmt());
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					try{
+						amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					try{
+						amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					try{
+						amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					//已收=账单金额（应收）-账单欠款金额（待收）
+					amountReceived = amountReceivable.subtract(amountOwed);
+					amountReceivedWithoutTax = amountReceived;
+					try{
+						taxAmount = new BigDecimal(cmBill.getTaxAmt());
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					
 					PaymentBills paymentBills = new PaymentBills();
 					paymentBills.setNamespaceId(namespaceId);
 					paymentBills.setOwnerId(communityId);
@@ -5892,18 +5929,33 @@ public class AssetServiceImpl implements AssetService {
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
-					paymentBills.setContractId(cmBill.getRentalID() != null ? Long.parseLong(cmBill.getRentalID()) : null);
+					paymentBills.setContractId(contractId);
+					paymentBills.setContractNum(contractNum);
 					paymentBills.setDateStrBegin(cmBill.getStartDate());
 					paymentBills.setDateStrEnd(cmBill.getEndDate());
+					String dateStr = "";
+					SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+					try{
+			            // 如果传递了计费开始时间
+			            if(cmBill.getStartDate() != null){
+			            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
+			            }
+			        }catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+					paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
 					if(cmBill.getStatus() != null && cmBill.getStatus().equals("已出账单")) {
 						paymentBills.setSwitch((byte) 1);
 					}else {
 						paymentBills.setSwitch((byte) 01);
 					}
-					paymentBills.setAmountOwed(new BigDecimal(cmBill.getBalanceAmt()));
-					//paymentBills.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
-					paymentBills.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
-					paymentBills.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
+					paymentBills.setAmountReceivable(amountReceivable);
+					paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+					paymentBills.setAmountReceived(amountReceived);
+					paymentBills.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+					paymentBills.setAmountOwed(amountOwed);
+					paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
+					paymentBills.setTaxAmount(taxAmount);
 					//物业缴费V6.6（对接统一账单） 账单要增加来源
 					paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
 					LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
@@ -5929,10 +5981,13 @@ public class AssetServiceImpl implements AssetService {
 						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
 					items.setChargingItemName(cmBill.getBillItemName());
-					items.setAmountOwed(new BigDecimal(cmBill.getBalanceAmt()));
-					//items.setAmountOwedWithoutTax(new BigDecimal(cmBill.getDocumentAmt()));
-					items.setAmountReceivable(new BigDecimal(cmBill.getDocumentAmt()));
-					items.setAmountReceived(new BigDecimal(cmBill.getDocumentAmt()));
+					items.setAmountReceivable(amountReceivable);
+					items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+					items.setAmountReceived(amountReceived);
+					items.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+					items.setAmountOwed(amountOwed);
+					items.setAmountOwedWithoutTax(amountOwedWithoutTax);
+					items.setTaxAmount(taxAmount);
 					
 					assetProvider.createCMBillItem(items);
 				}
