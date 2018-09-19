@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  * <li>statusList：班次的打卡状态列表多个状态用/分隔:比如"0" "0/2/1"</li>
  * <li>clockStatus：下次打卡的打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>requestDTOs：当日申请列表 参考{@link com.everhomes.rest.approval.ExceptionRequestDTO}</li>
-* <li>enterpriseId：公司id</li> 
+ * <li>goOutPunchLogs：外出打卡列表 参考{@link com.everhomes.rest.techpark.punch.GoOutPunchLogDTO}</li>
+* <li>enterpriseId：公司id</li>
 * <li>detailId：人员detail id</li> 
 * <li>userId：人员uid</li> 
 * </ul>
@@ -40,7 +41,8 @@ public class GetPunchDayStatusResponse {
 	private String statusList;
 	@ItemType(ExceptionRequestDTO.class)
 	private List<ExceptionRequestDTO> requestDTOs;
-
+	@ItemType(GoOutPunchLogDTO.class)
+	private List<GoOutPunchLogDTO> goOutPunchLogs;
     private Long enterpriseId;
 	private Long detailId;
 	private Long userId;
@@ -159,5 +161,13 @@ public class GetPunchDayStatusResponse {
 
 	public void setRequestDTOs(List<ExceptionRequestDTO> requestDTOs) {
 		this.requestDTOs = requestDTOs;
+	}
+
+	public List<GoOutPunchLogDTO> getGoOutPunchLogs() {
+		return goOutPunchLogs;
+	}
+
+	public void setGoOutPunchLogs(List<GoOutPunchLogDTO> goOutPunchLogs) {
+		this.goOutPunchLogs = goOutPunchLogs;
 	}
 }
