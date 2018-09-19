@@ -30,6 +30,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
@@ -406,7 +407,6 @@ public class NewsServiceImpl implements NewsService {
 		return;
 	}
 
-	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
 
 	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
 
@@ -859,29 +859,6 @@ public class NewsServiceImpl implements NewsService {
 		return userProvider.findUserLike(userId, EntityType.NEWS.getCode(), newsId);
 	}
 
-	@Override
-	public SearchNewsResponse searchNews(SearchNewsCommand cmd) {
-		if (cmd.getStatus() == null) {
-			cmd.setStatus(NewsStatus.ACTIVE.getCode());
-		}
-		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds() == null) {
-			return ConvertHelper.convert(listNews(ConvertHelper.convert(cmd, ListNewsCommand.class)),
-					SearchNewsResponse.class);
-		}
-		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
-
-		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
-
-		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
-			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
-					cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
-
-		} else {
-			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
-					cmd.getTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
-		}
-	}
 
 	/**
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理 xiongying
@@ -1279,12 +1256,7 @@ public class NewsServiceImpl implements NewsService {
 		deleteNews(userId, newsChk);
 	}
 
-	@Override
-	public void deleteNews(Long userId, News news) {
 
-		//删除
-		deleteNews(userId, newsChk);
-	}
 
 	@Override
 	public void deleteNews(Long userId, News news) {
@@ -2645,28 +2617,5 @@ public class NewsServiceImpl implements NewsService {
 		return null;
 	}
 
-
-
-	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
-		News news = ConvertHelper.convert(cmd, News.class);
-		news.setNamespaceId(namespaceId);
-		news.setOwnerType(cmd.getOwnerType());
-		news.setContentType(NewsContentType.RICH_TEXT.getCode());
-		news.setTopIndex(0L);
-		news.setTopFlag(NewsTopFlag.NONE.getCode());
-		news.setStatus(generateNewsStatus(cmd.getStatus()));
-		news.setCreatorUid(userId);
-		news.setDeleterUid(0L);
-		news.setPhone(cmd.getPhone());
-
-		//调整摘要
-		adjustNewsContentAbstract(news);
-
-		if (cmd.getPublishTime() != null) {
-			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
-		}
-
-		return news;
-	}
 
 }

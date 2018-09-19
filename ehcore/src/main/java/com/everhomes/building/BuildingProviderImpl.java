@@ -19,7 +19,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.util.ConvertHelper;
-import scala.Int;
 
 @Component
 public class BuildingProviderImpl implements BuildingProvider {

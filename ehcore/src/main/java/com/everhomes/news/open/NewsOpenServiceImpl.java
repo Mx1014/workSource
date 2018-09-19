@@ -179,7 +179,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	public List<TagDTO> listNewsTags(ListNewsTagsCommand cmd) {
 		Integer namespaceId = getNamespaceId();
 		Long categoryId = getCategoryId(namespaceId, cmd.getCategoryId());
-		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, categoryId);
+		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, null, null, categoryId);
 		if (CollectionUtils.isEmpty(allTags)) {
 			return null;
 		}

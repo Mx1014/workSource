@@ -85,14 +85,6 @@ public interface NewsService {
 
 	String getNewsQR(UpdateNewsCommand cmd);
 
-	void deleteNews(Long userId, News news);
-
-	News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd);
-
-	void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd);
-
-	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
-
 	void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
 
 	void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
@@ -100,7 +92,8 @@ public interface NewsService {
 	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
 
 	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
-void deleteNews(Long userId, News news);
+
+	void deleteNews(Long userId, News news);
 
 	News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd);
 
