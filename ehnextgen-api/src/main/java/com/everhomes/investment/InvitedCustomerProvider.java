@@ -72,7 +72,7 @@ public interface InvitedCustomerProvider {
 
     List<EnterpriseCustomer> listCustomersByType(byte code, ListingLocator locator, int pageSize);
 
-    void deleteCustomerTrackersByCustomerId(Long customerId, byte code);
+    void deleteCustomerTrackersByCustomerId(Long customerId);
 
     void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
 }

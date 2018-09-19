@@ -165,7 +165,6 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        tracker.setCustomerSource(cmd.getCustomerSource());
                         invitedCustomerProvider.createTracker(tracker);
                     });
                 }
@@ -262,7 +261,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             invitedCustomerProvider.createCurrentRent(currentRent);
         }
         // update tracking user infos
-        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(),cmd.getCustomerSource());
+        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         if(cmd.getTrackers() != null){
             cmd.getTrackers().forEach((c) -> {
                 CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
@@ -270,7 +269,6 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 tracker.setNamespaceId(cmd.getNamespaceId());
                 tracker.setStatus(CommonStatus.ACTIVE.getCode());
                 tracker.setCustomerId(cmd.getId());
-                tracker.setCustomerSource(cmd.getCustomerSource());
                 invitedCustomerProvider.createTracker(tracker);
             });
         }
@@ -322,7 +320,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         customerSearcher.deleteById(cmd.getId());
         DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
         customerService.deleteEnterpriseCustomer(cmd2, true);
-        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+        invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 
     }
@@ -551,7 +549,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 }
             }
 
-            invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
             if(trackers != null && trackers.size() > 0){
                 trackers.forEach((c) -> {
                     CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
