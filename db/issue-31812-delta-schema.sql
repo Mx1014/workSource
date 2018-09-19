@@ -7,7 +7,7 @@ CREATE TABLE `eh_address_properties` (
 	`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
 	`building_id` BIGINT (20) DEFAULT NULL COMMENT '楼栋id',
 	`address_id` BIGINT (20) DEFAULT NULL COMMENT '房源id',
-	`charging_items_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT '费项id',
+	`charging_items_id` BIGINT (20) COMMENT '费项id',
 	`authorize_price` DECIMAL (10, 2) COMMENT '授权价',
 	`apartment_authorize_type` TINYINT (4) DEFAULT NULL COMMENT '房源授权价类型（1:每天; 2:每月; 3:每个季度; 4:每年;)',
 	`status` TINYINT (4) COMMENT '0-无效状态 ,2-有效状态',

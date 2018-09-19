@@ -2829,7 +2829,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         
         //房源的授权价
         AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
-        if (addressProperties != null) {
+        if (addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null) {
         	String chargingItemName = PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc();
     		String apartmentAuthorizeType = AuthorizePriceType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc(); //周期
     		response.setApartAuthorizePrice(apartmentAuthorizeType+chargingItemName+addressProperties.getAuthorizePrice());
@@ -8384,9 +8384,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		Long organizationId = findOrganizationByCommunity(community);
 		Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), building.getName(), data.getApartmentName());
 
+		Byte chargingItemId = null;
+		Byte apartmentAuthorizeType = null;
 		// 查询该房源是否已经设置过授权价，并且费项保持一致，一个房源只支持一种费项绑定
-		Byte chargingItemId = PaymentChargingItemType.fromDesc(data.getChargingItemsName()).getCode();
-		Byte apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
+		if (!StringUtils.isEmpty(data.getChargingItemsName())) {
+			chargingItemId = PaymentChargingItemType.fromDesc(data.getChargingItemsName()).getCode();
+		}
+		if (!StringUtils.isEmpty(data.getChargingItemsName())) {
+			apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
+		}
+		
 		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
 
 		if (addressProperties == null) {
@@ -8395,14 +8402,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			addressProperties.setCommunityId(community.getId());
 			addressProperties.setBuildingId(building.getId());
 			addressProperties.setAddressId(address.getId());
-			addressProperties.setChargingItemsId((long) chargingItemId);
-			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
-			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+			if (chargingItemId != null) {
+				addressProperties.setChargingItemsId((long) chargingItemId);
+			}
+			if (!StringUtils.isEmpty(data.getAuthorizePrice())) {
+				addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
+			}
+			if (apartmentAuthorizeType != null) {
+				addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+			}
+			
 			propertyMgrProvider.createAuthorizePrice(addressProperties);
 		} else {
-			addressProperties.setChargingItemsId((long) chargingItemId);
-			addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
-			addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+			if (chargingItemId != null) {
+				addressProperties.setChargingItemsId((long) chargingItemId);
+			}
+			if (!StringUtils.isEmpty(data.getAuthorizePrice())) {
+				addressProperties.setAuthorizePrice(new BigDecimal(data.getAuthorizePrice()));
+			}
+			if (apartmentAuthorizeType != null) {
+				addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
+			}
 			propertyMgrProvider.updateAuthorizePrice(addressProperties);
 		}
 	}
