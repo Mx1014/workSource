@@ -106,6 +106,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.CMBill;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
+import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -5875,15 +5876,39 @@ public class AssetServiceImpl implements AssetService {
 	/**
 	 * 同步瑞安CM的账单数据到左邻的数据库表中
 	 */
-	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
+	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId, Long contractCategoryId){
 		List<CMDataObject> data = cmSyncObject.getData();
 		if(data != null) {
 			for(CMDataObject cmDataObject : data) {
 				List<CMBill> cmBills = cmDataObject.getBill();
+				//获取左邻园区ID
 				Long communityId = cmDataObject.getCommunityId();
-				Long contractId = cmDataObject.getContractId();
-				String contractNum = cmDataObject.getContractNum();
+				//获取左邻合同ID、合同编号
+				Long contractId = null;
+				String contractNum = null;
+				String rentalID = "";
+				if(cmDataObject.getContractHeader() != null) {
+					rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
+					try {
+						Long namespaceContractToken = Long.parseLong(rentalID);
+						Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(), 
+								namespaceContractToken, contractCategoryId);
+						if(contract != null) {
+							contractId = contract.getId();
+							contractNum = contract.getContractNumber();
+						}
+					}catch (Exception e){
+			            LOGGER.error(e.toString());
+			        }
+				}
+				//获取左邻缴费应用categoryId
+				Long categoryId = null;
+				List<AssetServiceModuleAppDTO> assetServiceModuleAppDTOs = listAssetModuleApps(namespaceId);
+				if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
+					categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
+				}
 				for(CMBill cmBill : cmBills) {
+					Byte billStatus= AssetPaymentBillStatus.UNPAID.getCode();//因为瑞安CM没有已缴/未缴，所以我们全部默认为未缴
 					BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
 					BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
 					BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
@@ -5923,9 +5948,12 @@ public class AssetServiceImpl implements AssetService {
 					PaymentBills paymentBills = new PaymentBills();
 					paymentBills.setNamespaceId(namespaceId);
 					paymentBills.setOwnerId(communityId);
+					paymentBills.setOwnerType("community");
+					paymentBills.setCategoryId(categoryId);
 					//通过园区ID获取到对应的默认账单组ID
 					PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
 					paymentBills.setBillGroupId(group.getId());
+					paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
@@ -5949,6 +5977,7 @@ public class AssetServiceImpl implements AssetService {
 					}else {
 						paymentBills.setSwitch((byte) 01);
 					}
+					paymentBills.setStatus(billStatus);
 					paymentBills.setAmountReceivable(amountReceivable);
 					paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
 					paymentBills.setAmountReceived(amountReceived);
@@ -5969,6 +5998,7 @@ public class AssetServiceImpl implements AssetService {
 					paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
 					//瑞安CM对接 账单表增加第三方唯一标识字段
 					paymentBills.setThirdBillId(cmBill.getBillScheduleID());
+					paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					
 					Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
 					
@@ -5976,10 +6006,18 @@ public class AssetServiceImpl implements AssetService {
 					items.setBillId(billId);
 					items.setNamespaceId(namespaceId);
 					items.setOwnerId(communityId);
+					items.setOwnerType("community");
+					items.setCategoryId(categoryId);
 					items.setBillGroupId(group.getId());
+					items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
 					if(cmDataObject.getContractHeader() != null) {
 						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
+					items.setContractId(contractId);
+					items.setContractNum(contractNum);
+					items.setDateStrBegin(cmBill.getStartDate());
+					items.setDateStrEnd(cmBill.getEndDate());
+					items.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
 					items.setChargingItemName(cmBill.getBillItemName());
 					items.setAmountReceivable(amountReceivable);
 					items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
@@ -5988,6 +6026,18 @@ public class AssetServiceImpl implements AssetService {
 					items.setAmountOwed(amountOwed);
 					items.setAmountOwedWithoutTax(amountOwedWithoutTax);
 					items.setTaxAmount(taxAmount);
+					//物业缴费V6.6（对接统一账单） 账单要增加来源
+					items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+					items.setSourceName(localeString.getText());
+		            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+					items.setCanDelete((byte)0);
+					items.setCanModify((byte)0);
+		            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+					items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+		            //瑞安CM对接 账单、费项表增加是否是只读字段
+					items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+					items.setStatus(billStatus);
+					items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					
 					assetProvider.createCMBillItem(items);
 				}

@@ -272,5 +272,5 @@ public interface AssetService {
 	
 	void createChargingItem(CreateChargingItemCommand cmd);
 	
-	void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId);
+	void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId, Long contractCategoryId);
 }

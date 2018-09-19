@@ -7106,13 +7106,7 @@ public class AssetProviderImpl implements AssetProvider {
     public Long createCMBill(PaymentBills bill) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
         
-        bill.setCategoryId(3L);//TODO 需要从数据库中查
-        bill.setOwnerType("community");
         bill.setId(id);
-        bill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        bill.setStatus(AssetBillStatus.UNPAID.getCode());
-
-        bill.setUpdateTime(bill.getCreatTime());
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, id));
         EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
@@ -7126,13 +7120,7 @@ public class AssetProviderImpl implements AssetProvider {
 	public void createCMBillItem(PaymentBillItems items) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
         
-		items.setCategoryId(3L);//TODO 需要从数据库中查
-		items.setOwnerType("community");
 		items.setId(id);
-		items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		items.setStatus(AssetBillStatus.UNPAID.getCode());
-
-		items.setUpdateTime(items.getCreateTime());
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, id));
         EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());

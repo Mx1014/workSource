@@ -23,8 +23,6 @@ public class CMDataObject {
     //内部数据
     private Long communityId;//园区ID
     private Long customerId;//客户ID
-    private Long contractId;//合同ID
-    private String contractNum;//合同编号
 
     public CMContractHeader getContractHeader() {
         return ContractHeader;
@@ -93,21 +91,5 @@ public class CMDataObject {
 
 	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
-	}
-
-	public Long getContractId() {
-		return contractId;
-	}
-
-	public void setContractId(Long contractId) {
-		this.contractId = contractId;
-	}
-
-	public String getContractNum() {
-		return contractNum;
-	}
-
-	public void setContractNum(String contractNum) {
-		this.contractNum = contractNum;
 	}
 }

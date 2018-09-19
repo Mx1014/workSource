@@ -298,11 +298,9 @@ public class TestAssetController extends ControllerBase {
         CMSyncObject cmSyncObject =
                 (CMSyncObject) StringHelper.fromJsonString(testString, CMSyncObject.class);
         cmSyncObject.getData().get(0).setCommunityId(240111044332063578L);
-        cmSyncObject.getData().get(0).setContractId(21155L);
-        cmSyncObject.getData().get(0).setContractNum("HT-ZL-201808-4567");
         cmSyncObject.getData().get(0).setCustomerId(1041502L);
         
-		assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929);
+		assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, 3L);
 		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);

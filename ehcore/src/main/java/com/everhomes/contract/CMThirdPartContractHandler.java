@@ -338,10 +338,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }else{
             	//存储瑞安合同
             	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
-            	
-            	
             	//同步CM数据到物业账单表
-            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929);
+            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
             	
             }
         }
@@ -586,10 +584,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         contractProvider.createContract(contract);
         dealContractApartments(contract, cmContractData.getContractUnit());
         contractSearcher.feedDoc(contract);
-        
-        //返回合同的id给缴费用
-        cmContractData.setContractId(contract.getId());
-
     }
     
     private void insertOrUpdateOrganizationAddresses(List<CMContractUnit> apartmentIdentifier, EnterpriseCustomer customer){
