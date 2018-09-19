@@ -310,9 +310,18 @@ public class PointServiceImpl implements PointService {
     public UserTreasureDTO getPointTreasure() {
         UserTreasureDTO point = new UserTreasureDTO();
         point.setCount(0L);
-        //设置积分默认可见
-        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-        point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+        //设置积分默认不可见
+        point.setStatus(TrueOrFalseFlag.FALSE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+       //可不可见按配置来展示
+        String pointStatus = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "point.show.flag", "");
+        String pointUrlStatus = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "point.url.flag", "");
+       if(StringUtils.isNotBlank(pointStatus)&& pointStatus.equals("1")){
+           point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+       }
+        if(StringUtils.isNotBlank(pointUrlStatus)&& pointUrlStatus.equals("1")){
+            point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+        }
 
         GetUserPointCommand cmd = new GetUserPointCommand();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
