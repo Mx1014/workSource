@@ -14,9 +14,9 @@ public class PaymentCardPortalPublishHandler implements PortalPublishHandler {
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         if (namespaceId == 999990)
-            instanceConfig = "{“vendorName”:\"taotaogu\"}";
+            instanceConfig = "{\"vendorName\":\"taotaogu\"}";
         else if (namespaceId == 999955)
-            instanceConfig = "{“vendorName”:\"zhuzong\"}";
+            instanceConfig = "{\"vendorName\":\"zhuzong\"}";
         return instanceConfig;
     }
 
