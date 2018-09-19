@@ -11477,4 +11477,14 @@ public class PunchServiceImpl implements PunchService {
 		return createPunchLog(punchTime, ClockCode.SUCESS.getCode(), punchLog);
 	}
 
+    @Override
+    public GoOutPunchLogDTO goOutPunchClock(GoOutPunchClockCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GoOutPunchLogDTO updateGoOutPunchLog(UpdateGoOutPunchLogCommand cmd) {
+        return null;
+    }
+
 }
