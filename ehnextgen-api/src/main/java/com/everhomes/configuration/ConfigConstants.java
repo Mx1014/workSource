@@ -157,6 +157,7 @@ public interface ConfigConstants {
 	
 	String REMIND_COLOUR_LIST = "remind.colour.list";
     String REMIND_COLOUR_SHARE = "remind.colour.share";
+    String REMIND_VERSION_SEGMEN = "remind.version.segmen";
 
 	public static final String ASSET_SHENZHENWAN_EASLOGIN_ADDRESS = "asset.shenzhenwan.EASLogin_address";
 	public static final String ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS = "asset.shenzhenwan.WSWSSyncMyBayFacade_address";
