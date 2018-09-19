@@ -130,6 +130,8 @@ public interface ContractProvider {
 
 	List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode);
 
+	Contract findContractByNamespaceToken(Integer namespaceId, String namespaceContractType, Long namespaceContractToken, Long categoryId);
+
 	
 
 	

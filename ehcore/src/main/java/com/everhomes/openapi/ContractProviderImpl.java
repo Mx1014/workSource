@@ -753,6 +753,28 @@ public class ContractProviderImpl implements ContractProvider {
 
 		return result;
 	}
+	
+	@Override
+	public Contract findContractByNamespaceToken(Integer namespaceId, String namespaceContractType, Long namespaceContractToken, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceContractType));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		if (namespaceContractToken != null || "".equals(namespaceContractToken)) {
+			query.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(namespaceContractToken.toString()));
+		}
+		
+		Record result = query.fetchAny();
+		if (result != null) {
+			return ConvertHelper.convert(result, Contract.class);
+		}
+		return null;
+	}
 
 	@Override
 	public void createContractCategory(ContractCategory contractCategory) {
