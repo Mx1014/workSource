@@ -33,9 +33,11 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12114,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12115,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_promotion','enterprise_customer');
 
+UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}' WHERE id = 5;
+UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' WHERE id = 12037;
 
-update eh_var_fields set mandatory_flag = 1 where id =12111;
-update eh_var_fields set group_id = 10,group_path = '/1/10' where id in (select field_id from eh_var_field_ranges where module_name = 'investment_promotion');
+UPDATE eh_var_fields SET mandatory_flag = 1 WHERE id =12111;
+UPDATE eh_var_fields SET group_id = 10,group_path = '/1/10' WHERE id IN (SELECT field_id FROM eh_var_field_ranges WHERE module_name = 'investment_promotion');
 
 SET @id = (select max(id) from eh_var_field_group_ranges);
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');

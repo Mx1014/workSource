@@ -597,6 +597,14 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setCorpIndustryItemName(null);
             }
         }
+        if (null != dto.getSourceItemId()) {
+            ScopeFieldItem sourceItemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
+            if (null != sourceItemId) {
+                dto.setSourceItemName(sourceItemId.getItemDisplayName());
+            }else {
+                dto.setSourceItemName(null);
+            }
+        }
         if (null != dto.getContactGenderItemId()) {
             ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
             if (null != contactGenderItem) {
@@ -779,6 +787,15 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
+        if (null != dto.getEntryStatusItemId()) {
+            ScopeFieldItem itemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntryStatusItemId());
+            if (null != itemId) {
+                dto.setEntryStatusItemName(itemId.getItemDisplayName());
+            }else {
+                dto.setEntryStatusItemName(null);
+            }
+        }
+
         if(customer.getExpectedSignDate() != null){
             dto.setExpectedSignDate(customer.getExpectedSignDate().getTime());
         }
@@ -947,7 +964,6 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
-        updateCustomer.setCustomerSource(customer.getCustomerSource());
         updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
@@ -959,6 +975,12 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setVersion(customer.getVersion());
         updateCustomer.setSourceId(customer.getSourceId());
         updateCustomer.setSourceType(customer.getSourceType());
+
+        if(cmd.getCustomerSource() != null){
+            updateCustomer.setCustomerSource(cmd.getCustomerSource());
+        }else{
+            updateCustomer.setCustomerSource(customer.getCustomerSource());
+        }
         if (cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
