@@ -28,10 +28,8 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
     private String applicationName;
     @Value("${server.port:8080}")
     private int serverPort;
-    @Value("${CORE_IP:10.1.110.80}")
+    @Value("${spring.cloud.client.ip-address:10.1.10.79}")
     private String ipAddress;
-
-    private String instanceId;
 
     public EurekaAutoServiceRegistration(EurekaProperties eurekaProperties) {
         this.eurekaProperties = eurekaProperties;
@@ -86,9 +84,11 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
         if (event.getApplicationContext().getParent() != null) {
             return;
         }
-        this.instanceId = String.format("%s:%s:%s", ipAddress, applicationName, serverPort);
 
         if (eurekaProperties != null && eurekaProperties.isEnabled()) {
+            if (eurekaProperties.getInstanceId() == null) {
+                eurekaProperties.setInstanceId(String.format("%s:%s:%s", ipAddress, applicationName, serverPort));
+            }
             register();
             addVMHook();
         } else {
@@ -126,7 +126,7 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
     private void getOrRegister() {
         try {
             String url = UriComponentsBuilder.fromHttpUrl(eurekaProperties.getServiceUrl())
-                    .pathSegment("apps", applicationName.toUpperCase(), instanceId)
+                    .pathSegment("apps", applicationName.toUpperCase(), eurekaProperties.getInstanceId())
                     .toUriString();
 
             HttpResponseEntity<Instance> response = RestCallTemplate
@@ -162,7 +162,7 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
 
     private InstanceInfo.Builder instanceInfoBuilder(InstanceInfo.InstanceStatus status) {
         return InstanceInfo.Builder.newBuilder()
-                .setInstanceId(instanceId)
+                .setInstanceId(eurekaProperties.getInstanceId())
                 .setAppName(applicationName.toUpperCase())
                 .setIPAddr(ipAddress)
                 .setHostName(ipAddress)
@@ -193,7 +193,7 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
             getOrRegister();
 
             String url = UriComponentsBuilder.fromHttpUrl(eurekaProperties.getServiceUrl())
-                    .pathSegment("apps", applicationName.toUpperCase(), instanceId)
+                    .pathSegment("apps", applicationName.toUpperCase(), eurekaProperties.getInstanceId())
                     .queryParam("status", "UP")
                     .queryParam("lastDirtyTimestamp", System.currentTimeMillis())
                     .toUriString();

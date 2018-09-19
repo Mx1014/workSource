@@ -8,6 +8,7 @@ public class EurekaProperties {
 
     private boolean enabled;
     private String serviceUrl;
+    private String instanceId;
 
     public boolean isEnabled() {
         return enabled;
@@ -23,6 +24,14 @@ public class EurekaProperties {
 
     public void setServiceUrl(String serviceUrl) {
         this.serviceUrl = serviceUrl;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     @Override
