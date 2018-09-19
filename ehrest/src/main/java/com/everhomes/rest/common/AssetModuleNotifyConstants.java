@@ -9,5 +9,6 @@ public interface AssetModuleNotifyConstants {
 	String ASSET_MODULE = "asset";//缴费模块
     String CONTRACT_MODULE = "contract"; //合同模块
     String ENERGY_MODULE = "energy"; //能耗模块
+    String PRINT_MODULE = "print"; //云打印模块
 
 }

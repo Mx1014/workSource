@@ -79,4 +79,5 @@ public interface SiyinPrintService {
     void initPayeeAccount(MultipartFile[] files);
 
 	String getSiyinServerUrl();
+	void enterprisePayPrintOrder(EnterprisePayPrintOrderCommand cmd);
 }

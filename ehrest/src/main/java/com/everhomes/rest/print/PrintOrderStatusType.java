@@ -6,22 +6,21 @@ package com.everhomes.rest.print;
  * <ul>
  * <li>UNPAID(1) : 未支付</li>
  * <li>PAID(2) : 已支付</li>
+ * <li>WAIT_FOR_ENTERPRISE_PAY(3) : 已记账</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
  */
 public enum PrintOrderStatusType {
-	// * <li>INACTIVE(0) : 没激活</li>
-//	INACTIVE((byte)0),
-	UNPAID((byte)1),PAID((byte)2);
+	UNPAID((byte)1),PAID((byte)2),WAIT_FOR_ENTERPRISE_PAY((byte)3);
 	
-	private byte code;
+	private Byte code;
 
 	private PrintOrderStatusType(byte code){
 		this.code = code;
 	}
 
-	public byte getCode() {
+	public Byte getCode() {
 		return code;
 	}
 

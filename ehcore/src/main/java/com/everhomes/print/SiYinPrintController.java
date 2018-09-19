@@ -482,4 +482,18 @@ public class SiYinPrintController extends ControllerBase {
 	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
 		siyinPrintService.mfpLogNotificationV2(cmd,response);
 	}
+	
+	/**
+	 * <b>URL: /siyinprint/enterprisePayPrintOrder</b>
+	 * <p>企业支付</p>
+	 */
+	@RequestMapping("enterprisePayPrintOrder")
+	@RestReturn(value=String.class)
+	public RestResponse enterprisePayPrintOrder(EnterprisePayPrintOrderCommand cmd) {
+		siyinPrintService.enterprisePayPrintOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
