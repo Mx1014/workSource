@@ -981,6 +981,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     public void syncWorkReportReceiver() {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
         for (WorkReportValReceiverMap r : receivers) {
+            if(r.getOrganizationId() != 0)
+                continue;
             WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
             r.setOrganizationId(val.getOrganizationId());
             workReportValProvider.updateWorkReportValReceiverMap(r);
