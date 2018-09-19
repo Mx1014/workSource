@@ -958,7 +958,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());
         dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId(), reportVal.getOwnerId()));
-        dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
+        dto.setApplierUserAvatar(contentServerService.parserUri(getUserAvatar(reportVal.getApplierUserId())));
         dto.setCreateTime(reportVal.getCreateTime());
         dto.setReceivers(receivers);
         dto.setUpdateTime(reportVal.getUpdateTime());
@@ -992,6 +992,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
         for (WorkReportValReceiverMap r : receivers) {
             if (r.getReceiverAvatar() == null)
+                continue;
+            if(r.getReceiverAvatar().contains("cs://1/image"))
                 continue;
             String avatar = r.getReceiverAvatar();
             String uri = avatar.substring(avatar.indexOf("image") + 6, avatar.lastIndexOf("?"));
