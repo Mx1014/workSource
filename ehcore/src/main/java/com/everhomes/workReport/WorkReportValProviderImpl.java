@@ -140,6 +140,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
             reportVal.setReportType(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TYPE));
             reportVal.setReportTime(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TIME));
             reportVal.setApplierName(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME));
+            reportVal.setApplierAvatar(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_AVATAR));
             reportVal.setReadStatus(r.getValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS));
             reportVal.setUpdateTime(r.getValue(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME));
             results.add(reportVal);

@@ -958,7 +958,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());
         dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId(), reportVal.getOwnerId()));
-        dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
+        dto.setApplierUserAvatar(contentServerService.parserUri(getUserAvatar(reportVal.getApplierUserId())));
         dto.setCreateTime(reportVal.getCreateTime());
         dto.setReceivers(receivers);
         dto.setUpdateTime(reportVal.getUpdateTime());
