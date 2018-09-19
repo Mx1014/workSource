@@ -2679,16 +2679,28 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
-        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getDoorAccessId());
-        if(null != results && results.size() > 0){
-            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_ALREADY_EXIST,"Record Already exist.");
+        if(null == cmd.getId()){
+            List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getDoorAccessId());
+            if(null != results && results.size() > 0){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_ALREADY_EXIST,"Record Already exist.");
+            }
+            VisitorSysDoorAccess bean = ConvertHelper.convert(cmd,VisitorSysDoorAccess.class);
+            if(null == cmd.getNamespaceId())
+                bean.setNamespaceId(UserContext.getCurrentNamespaceId());
+            bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
+            visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
+        } else {
+            VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
+            if(null != cmd.getDefaultAuthDurationType())
+                bean.setDefaultAuthDurationType(cmd.getDefaultAuthDurationType());
+            if(null != cmd.getDefaultAuthDuration())
+                bean.setDefaultAuthDuration(cmd.getDefaultAuthDuration());
+            if(null != cmd.getDefaultEnableAuthCount())
+                bean.setDefaultEnableAuthCount(cmd.getDefaultEnableAuthCount());
+            if(null != cmd.getDefaultAuthCount())
+                bean.setDefaultAuthCount(cmd.getDefaultAuthCount());
+            visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(bean);
         }
-        VisitorSysDoorAccess bean = ConvertHelper.convert(cmd,VisitorSysDoorAccess.class);
-        if(null == cmd.getNamespaceId())
-            bean.setNamespaceId(UserContext.getCurrentNamespaceId());
-        bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
-        visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
-
     }
 
     @Override
