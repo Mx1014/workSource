@@ -148,8 +148,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- issue null
 UPDATE eh_web_menus SET path = '/23000000/23010000/16041900' WHERE id = 16041900;
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('59200', '企业钱包', '50000', '/100/50000/59200', '1', '3', '2', '240', '2018-09-19 14:42:53', NULL, NULL, '2018-09-19 14:43:07', '0', '0', '0', '0', 'org_control', '1', '1', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('79100000', '企业钱包', '23010000', NULL, 'enterprise-wallet', '1', '2', '/23000000/23010000/79100000', 'zuolin', '240', '59200', '3', 'system', 'module', NULL, '1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('79200000', '企业钱包', '77000000', NULL, 'enterprise-wallet', '1', '2', '/70000010/77000000/79200000', 'organization', '240', '59200', '3', 'system', 'module', NULL, '1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79100000', '企业钱包', '23010000', NULL, 'enterprise-wallet', '1', '2', '/23000000/23010000/79100000', 'zuolin', '240', '59200', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79200000', '企业钱包', '77000000', NULL, 'enterprise-wallet', '1', '2', '/70000010/77000000/79200000', 'organization', '240', '59200', '3', 'system', 'module', NULL);
+UPDATE eh_web_menus SET parent_id = 53000000, path = '/40000010/53000000/79200000', type = 'park', sort_num = 80 WHERE id =  79200000;
 
 
 
