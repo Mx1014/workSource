@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 
 /**
@@ -30,6 +31,7 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>email: 邮箱</li>
  *     <li>vipLevel: 会员等级</li>
  *     <li>showVipLevelFlag: 是否展示会员等级，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>groupmemberLogDTOs: 小区用户认证记录</li>
  * </ul>
  */
 public class CommunityUserAddressDTO {
@@ -67,6 +69,9 @@ public class CommunityUserAddressDTO {
 	@ItemType(OrganizationMemberLogDTO.class)
 	private List<OrganizationMemberLogDTO> memberLogDTOs;
 
+	@ItemType(GroupMemberDTO.class)
+	private List<GroupMemberDTO> groupmemberLogDTOs;
+
 	private Byte userSourceType;
 
 	private Long recentlyActiveTime;
@@ -76,6 +81,14 @@ public class CommunityUserAddressDTO {
 	private Integer vipLevel;
 
 	private Byte showVipLevelFlag;
+
+    public List<GroupMemberDTO> getGroupmemberLogDTOs() {
+        return groupmemberLogDTOs;
+    }
+
+    public void setGroupmemberLogDTOs(List<GroupMemberDTO> groupmemberLogDTOs) {
+        this.groupmemberLogDTOs = groupmemberLogDTOs;
+    }
 
     public Byte getShowVipLevelFlag() {
         return showVipLevelFlag;

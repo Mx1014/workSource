@@ -2196,7 +2196,30 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 		//添加地址信息
 		addGroupAddressDto(dto, usreGroups);
-
+        //小区认证记录
+        List<GroupMemberLog> memberLogList = this.groupMemberLogProvider.listGroupMemberLogByUserId(user.getId(), null);
+        List<GroupMemberDTO> memberLogs = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(memberLogList)) {
+            memberLogList.stream().forEach(r -> {
+                GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+                GroupMemberDTO groupMemberDTO = toGroupMemberDTO(member);
+                Address address = addressProvider.findAddressById(r.getAddressId());
+                if (null != address) {
+                    groupMemberDTO.setAddressId(address.getId());
+                    groupMemberDTO.setApartmentName(address.getApartmentName());
+                    groupMemberDTO.setBuildingName(address.getBuildingName());
+                }
+                Community community = communityProvider.findCommunityById(r.getCommunityId());
+                if (community != null) {
+                    groupMemberDTO.setCityName(community.getCityName());
+                    groupMemberDTO.setAreaName(community.getAreaName());
+                    groupMemberDTO.setCommunityName(community.getName());
+                }
+                groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+                memberLogs.add(groupMemberDTO);
+            });
+        }
+        dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
 //			for (UserGroup userGroup : usreGroups) {
 //				Group group = groupProvider.findGroupById(userGroup.getGroupId());
@@ -2332,6 +2355,32 @@ public class CommunityServiceImpl implements CommunityService {
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
             }
+            //小区认证记录
+            List<GroupMemberLog> memberLogList = this.groupMemberLogProvider.listGroupMemberLogByUserId(user.getId(), null);
+            List<GroupMemberDTO> memberLogs = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(memberLogList)) {
+                memberLogList.stream().forEach(r -> {
+                    GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+                    GroupMemberDTO groupMemberDTO = toGroupMemberDTO(member);
+                    Address address = addressProvider.findAddressById(r.getAddressId());
+                    if (null != address) {
+                        groupMemberDTO.setAddressId(address.getId());
+                        groupMemberDTO.setApartmentName(address.getApartmentName());
+                        groupMemberDTO.setBuildingName(address.getBuildingName());
+                    }
+                    Community community = communityProvider.findCommunityById(r.getCommunityId());
+                    if (community != null) {
+                        groupMemberDTO.setCityName(community.getCityName());
+                        groupMemberDTO.setAreaName(community.getAreaName());
+                        groupMemberDTO.setCommunityName(community.getName());
+                    }
+                    groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+                    memberLogs.add(groupMemberDTO);
+                });
+            }
+            communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
+
+            //是否展示会员等级
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
                 communityUserAddressDTO.setShowVipLevelFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
