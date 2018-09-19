@@ -286,8 +286,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                     }
                 }
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(sourceId);
-                if(request != null)
-                    returnMap.put("approvalStatus",request.getApprovalStatus());
+                if(request != null){
+                	returnMap.put("approvalStatus",request.getApprovalStatus());
+                	//--------房源招商申请业务--------
+                	if (request.getInvestmentAdId() != null) {
+                		returnMap.put("investmentAdId",request.getInvestmentAdId());
+					}
+                	returnMap.put("transformStatus",request.getTransformStatus());
+                	//--------房源招商申请业务--------
+                }
                 returnMap.put("sourceId", sourceId);
                 returnMap.put("formVersion", formVersion);
                 returnMap.put("formOriginId", formOriginId);

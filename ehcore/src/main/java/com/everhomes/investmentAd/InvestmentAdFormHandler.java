@@ -144,7 +144,6 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
     @Override
     public Long saveGeneralFormVal(PostGeneralFormValCommand cmd){
     	//TODO 权限校验
-    	
     	return generalFormService.saveGeneralForm(cmd);
     }
     @Override

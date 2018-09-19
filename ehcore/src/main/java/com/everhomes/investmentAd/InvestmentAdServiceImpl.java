@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -24,14 +27,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.fixedasset.CheckFixedAssetCategoryNameExistRequest;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investmentAd.InvestmentAdService;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
 import com.everhomes.rest.investmentAd.InvestmentAdGeneralStatus;
 import com.everhomes.rest.investmentAd.InvestmentAdOrderDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -50,6 +59,7 @@ import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
 import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
@@ -84,6 +94,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private AddressProvider addressProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private PropertyMgrProvider propertyMgrProvider;
 	
 	@Autowired
 	protected UserPrivilegeMgr userPrivilegeMgr;
@@ -198,10 +214,6 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		Long userId = UserContext.currentUserId();
 		if (null != dto.getPosterUri()) {
 			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
-		}else {
-			//TODO 设置默认封面图
-			String uri = configurationProvider.getValue("apply.entry.default.post.url", "");
-			dto.setPosterUrl(contentServerService.parserUri(uri, EntityType.USER.getCode(), userId));
 		}
 		//处理招商广告关联的轮播图
 		List<InvestmentAdBanner> investmentAdBanners = investmentAdProvider.findBannersByInvestmentAdId(investmentAd.getId());
@@ -211,6 +223,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				InvestmentAdBannerDTO bannerDTO = new InvestmentAdBannerDTO();
 				bannerDTO.setContentUri(investmentAdBanner.getContentUri());
 				bannerDTO.setContentUrl(contentServerService.parserUri(investmentAdBanner.getContentUri(), EntityType.USER.getCode(), userId));
+				banners.add(bannerDTO);
 			}
 			dto.setBanners(banners);
 		}
@@ -219,8 +232,11 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		if (investmentAdAssets != null && investmentAdAssets.size() > 0) {
 			List<RelatedAssetDTO> relatedAssets = new ArrayList<>();
 			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
-				RelatedAssetDTO assetDTO = convertToAssetDTO(investmentAdAsset);
-				relatedAssets.add(assetDTO);
+				Boolean available = checkAssetStatus(investmentAdAsset,investmentAd.getOwnerId());
+				if (available) {
+					RelatedAssetDTO assetDTO = convertToAssetDTO(investmentAdAsset);
+					relatedAssets.add(assetDTO);
+				}
 			}
 			dto.setRelatedAssets(relatedAssets);
 		}
@@ -299,6 +315,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		dto.setOrientation(investmentAd.getOrientation());
 		dto.setCreateTime(investmentAd.getCreateTime());
 		dto.setDefaultOrder(investmentAd.getDefaultOrder());
+		
+		Long userId = UserContext.currentUserId();
+		if (null != dto.getPosterUri()) {
+			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+		}
+		
 		return dto;
 	}
 	
@@ -319,6 +341,38 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				investmentAdProvider.createInvestmentAdAsset(adAsset);
 			}
 		}
+	}
+	
+	private Boolean checkAssetStatus(InvestmentAdAsset investmentAdAsset,Long organizationId) {
+		//资产类型是楼宇时，如果楼宇下没有待租状态的房源了，则不在招商广告中显示
+		//资产类型是房源时，如果房源不是待租状态，则不在招商广告中显示
+		if (InvestmentAdAssetType.BUILDING.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
+			Building building = communityProvider.findBuildingById(investmentAdAsset.getAssetId());
+			if (building.getStatus() == BuildingAdminStatus.INACTIVE.getCode()) {
+				return false;
+			}
+			//如果楼宇下的房源都不是待租状态，则返回false
+			List<Address> apartments = addressProvider.findActiveApartmentsByBuildingId(building.getId());
+			List<Long> aptIdList = apartments.stream().map(a->a.getId()).collect(Collectors.toList());
+			Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+			Set<Entry<Long, CommunityAddressMapping>> entrySet = communityAddressMappingMap.entrySet();
+			for (Entry<Long, CommunityAddressMapping> entry : entrySet) {
+				if (entry.getValue().getLivingStatus() == AddressMappingStatus.FREE.getCode()) {
+					return true;
+				}
+			}
+			return false;
+		}else if (InvestmentAdAssetType.APARTMENT.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
+			Address address = addressProvider.findAddressById(investmentAdAsset.getAssetId());
+			if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
+				return false;
+			}
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private RelatedAssetDTO convertToAssetDTO(InvestmentAdAsset investmentAdAsset){

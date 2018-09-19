@@ -37,7 +37,21 @@ public class InvestmentAdDTO {
 	private String orientation;
 	private Timestamp createTime;
 	private Long defaultOrder;
+	private String posterUri;
+	private String posterUrl;
 	
+	public String getPosterUri() {
+		return posterUri;
+	}
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
+	}
 	public Byte getPriceUnit() {
 		return priceUnit;
 	}

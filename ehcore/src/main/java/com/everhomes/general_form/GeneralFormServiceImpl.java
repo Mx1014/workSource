@@ -748,7 +748,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 generalForm = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
             }
             if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && generalForm != null) {
-                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), generalForm.getFormOriginId(), generalForm.getFormVersion());
+                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), cmd.getInvestmentAdId(),generalForm.getFormOriginId(), generalForm.getFormVersion());
             }else{
                 LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                         + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
