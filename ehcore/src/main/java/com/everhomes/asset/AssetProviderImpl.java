@@ -1708,6 +1708,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setSourceType(cmd.getSourceType());
             newBill.setSourceName(cmd.getSourceName());
             newBill.setConsumeUserId(cmd.getConsumeUserId());
+            //账单表增加第三方账单唯一标识字段
+            newBill.setThirdBillId(cmd.getThirdBillId());
             //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
             newBill.setCanDelete(cmd.getCanDelete());
             newBill.setCanModify(cmd.getCanModify());
