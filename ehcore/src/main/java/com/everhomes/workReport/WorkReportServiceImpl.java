@@ -993,6 +993,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         for (WorkReportValReceiverMap r : receivers) {
             if (r.getReceiverAvatar() == null)
                 continue;
+            if(r.getReceiverAvatar().contains("cs://1/image"))
+                continue;
             String avatar = r.getReceiverAvatar();
             String uri = avatar.substring(avatar.indexOf("image") + 6, avatar.lastIndexOf("?"));
             r.setReceiverAvatar("cs://1/image/" + uri);
