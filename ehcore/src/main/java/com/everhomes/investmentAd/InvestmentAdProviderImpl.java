@@ -136,9 +136,7 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 	}
 
 	@Override
-	public List<InvestmentAdDTO> listInvestmentAds(ListInvestmentAdCommand cmd) {
-		List<InvestmentAdDTO> result = new ArrayList<>();
-		
+	public List<InvestmentAd> listInvestmentAds(ListInvestmentAdCommand cmd) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhInvestmentAdvertisements.class));
 		SelectQuery<EhInvestmentAdvertisementsRecord> query = context.selectQuery(Tables.EH_INVESTMENT_ADVERTISEMENTS);
 		
@@ -179,40 +177,29 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.TITLE.like(DSL.concat("%",cmd.getKeywords(),"%")));
 		}
 		//排序
-		if (cmd.getSortField().equals("defaultOrder")) {
+		if (cmd.getSortField() != null) {
+			if(cmd.getSortField().equals("availableAreaMin")){
+				query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN);
+			}else if (cmd.getSortField().equals("assetPriceMin")) {
+				query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN);
+			}
+		}else {
 			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER);
-		}else if(cmd.getSortField().equals("availableAreaMin")){
-			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN);
-		}else if (cmd.getSortField().equals("assetPriceMin")) {
-			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN);
 		}
 		
-		if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
-			query.addOrderBy(DSL.val(1).asc());
-		}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
-			query.addOrderBy(DSL.val(1).desc());
+		if (cmd.getSortType() != null) {
+			if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
+				query.addOrderBy(DSL.val(1).asc());
+			}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
+				query.addOrderBy(DSL.val(1).desc());
+			}
+		}else {
+			query.addOrderBy(DSL.val(1).desc()); 
 		}
 		
 		query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize() + 1);
 		
-		query.fetch().forEach(r->{
-			InvestmentAdDTO dto = new InvestmentAdDTO();
-			dto.setId(r.getId());
-			dto.setTitle(r.getTitle());
-			dto.setInvestmentStatus(r.getInvestmentStatus());
-			dto.setAvailableAreaMin(r.getAvailableAreaMin());
-			dto.setAvailableAreaMax(r.getAvailableAreaMax());
-			dto.setPriceUnit(r.getPriceUnit());
-			dto.setAssetPriceMin(r.getAssetPriceMin());
-			dto.setAssetPriceMax(r.getAssetPriceMax());
-			dto.setApartmentFloorMin(r.getApartmentFloorMin());
-			dto.setApartmentFloorMax(r.getApartmentFloorMax());
-			dto.setOrientation(r.getOrientation());
-			dto.setCreateTime(r.getCreateTime());
-			dto.setDefaultOrder(r.getDefaultOrder());
-			result.add(dto);
-		});
-		return result;
+		return query.fetchInto(InvestmentAd.class);
 	}
 
 	@Override
@@ -246,7 +233,14 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		});
 		return result;
 	}
-	
-	
+
+	@Override
+	public void changeInvestmentStatus(Long id, Byte investmentStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhInvestmentAdvertisements.class));
+		context.update(Tables.EH_INVESTMENT_ADVERTISEMENTS)
+			   .set(Tables.EH_INVESTMENT_ADVERTISEMENTS.INVESTMENT_STATUS, investmentStatus)
+			   .where(Tables.EH_INVESTMENT_ADVERTISEMENTS.ID.eq(id))
+			   .execute();
+	}
 	
 }

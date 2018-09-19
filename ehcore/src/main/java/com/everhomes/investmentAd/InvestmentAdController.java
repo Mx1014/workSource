@@ -16,6 +16,7 @@ import com.everhomes.investmentAd.InvestmentAdService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
 import com.everhomes.rest.investmentAd.ChangeInvestmentAdOrderCommand;
+import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
@@ -119,6 +120,33 @@ public class InvestmentAdController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 
+	/**
+	 * <b>URL: /investmentAd/exportInvestmentAds</b>
+	 * <p>导出招商广告</p>
+	 */
+	@RequestMapping("exportInvestmentAds")
+	@RestReturn(value=String.class)
+	public RestResponse exportInvestmentAds(ListInvestmentAdCommand cmd){
+		investmentAdService.exportInvestmentAds(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /investmentAd/changeInvestmentStatus</b>
+	 * <p>更改招商状态</p>
+	 */
+	@RequestMapping("changeInvestmentStatus")
+	@RestReturn(value=String.class)
+	public RestResponse changeInvestmentStatus(ChangeInvestmentStatusCommand cmd){
+		investmentAdService.changeInvestmentStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

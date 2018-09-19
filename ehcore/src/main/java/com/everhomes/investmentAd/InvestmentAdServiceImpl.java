@@ -3,6 +3,7 @@ package com.everhomes.investmentAd;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +17,13 @@ import org.springframework.stereotype.Component;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investmentAd.InvestmentAdService;
@@ -29,10 +32,14 @@ import com.everhomes.rest.investmentAd.InvestmentAdGeneralStatus;
 import com.everhomes.rest.investmentAd.InvestmentAdOrderDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.investmentAd.ChangeInvestmentAdOrderCommand;
+import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
@@ -59,6 +66,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private ContentServerService contentServerService;
+	
+	@Autowired
+	private TaskService taskService;
 	
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
@@ -158,13 +168,20 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageSize(pageSize);
 		
-		List<InvestmentAdDTO> advertisements = investmentAdProvider.listInvestmentAds(cmd);
-		
-		if (advertisements.size() > cmd.getPageSize()) {
-			advertisements.remove(advertisements.size()-1);
-			response.setNextPageAnchor(cmd.getPageAnchor() + cmd.getPageSize().longValue());
+		List<InvestmentAd> investmentAds = investmentAdProvider.listInvestmentAds(cmd);
+		if (investmentAds != null && investmentAds.size() > 0) {
+			if (investmentAds.size() > cmd.getPageSize()) {
+				investmentAds.remove(investmentAds.size()-1);
+				response.setNextPageAnchor(cmd.getPageAnchor() + cmd.getPageSize().longValue());
+			}
+			
+			List<InvestmentAdDTO> advertisements = new ArrayList<>();
+			for(InvestmentAd investmentAd : investmentAds){
+				InvestmentAdDTO dto = convertToInvestmentAdDTO(investmentAd);
+				advertisements.add(dto);
+			}
+			response.setAdvertisements(advertisements);
 		}
-		response.setAdvertisements(advertisements);
 		return response;
 	}
 
@@ -242,6 +259,49 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		}
 	}
 	
+	@Override
+	public void exportInvestmentAds(ListInvestmentAdCommand cmd) {
+		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_EXPORT, cmd.getOrganizationId(), cmd.getCommunityId());
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("ListInvestmentAdCommand", cmd);
+		
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if (community == null) {
+			LOGGER.error("Community does not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
+		}
+		String fileName = String.format("房源招商广告信息_%s_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), InvestmentAdsExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	
+	@Override
+	public void changeInvestmentStatus(ChangeInvestmentStatusCommand cmd) {
+		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		investmentAdProvider.changeInvestmentStatus(cmd.getId(),cmd.getInvestmentStatus());
+	}
+	
+	private InvestmentAdDTO convertToInvestmentAdDTO(InvestmentAd investmentAd) {
+		InvestmentAdDTO dto = new InvestmentAdDTO();
+		dto.setId(investmentAd.getId());
+		dto.setTitle(investmentAd.getTitle());
+		dto.setInvestmentStatus(investmentAd.getInvestmentStatus());
+		dto.setAvailableAreaMin(investmentAd.getAvailableAreaMin());
+		dto.setAvailableAreaMax(investmentAd.getAvailableAreaMax());
+		dto.setPriceUnit(investmentAd.getPriceUnit());
+		dto.setAssetPriceMin(investmentAd.getAssetPriceMin());
+		dto.setAssetPriceMax(investmentAd.getAssetPriceMax());
+		dto.setApartmentFloorMin(investmentAd.getApartmentFloorMin());
+		dto.setApartmentFloorMax(investmentAd.getApartmentFloorMax());
+		dto.setOrientation(investmentAd.getOrientation());
+		dto.setCreateTime(investmentAd.getCreateTime());
+		dto.setDefaultOrder(investmentAd.getDefaultOrder());
+		return dto;
+	}
+	
 	private void addInvestmentAdAssets(List<RelatedAssetDTO> relatedAssets,InvestmentAd investmentAd){
 		if (relatedAssets != null && relatedAssets.size() > 0) {
 			for (RelatedAssetDTO assetDTO : relatedAssets) {
@@ -311,5 +371,5 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	private void checkPrivilegeAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, null, null, null, communityId);
 	}
-	
+
 }

@@ -24,12 +24,14 @@ public interface InvestmentAdProvider {
 
 	void deleteInvestmentAdBannerByInvestmentAdId(Long investmentAdId);
 
-	List<InvestmentAdDTO> listInvestmentAds(ListInvestmentAdCommand cmd);
+	List<InvestmentAd> listInvestmentAds(ListInvestmentAdCommand cmd);
 
 	List<InvestmentAdBanner> findBannersByInvestmentAdId(Long investmentAdId);
 
 	List<InvestmentAdAsset> findAssetsByInvestmentAdId(Long investmentAdId);
 
 	Map<Long, InvestmentAd> mapIdAndInvestmentAd(List<Long> investmentAdIds);
+
+	void changeInvestmentStatus(Long id, Byte investmentStatus);
 
 }

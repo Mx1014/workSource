@@ -2,6 +2,7 @@ package com.everhomes.investmentAd;
 
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
 import com.everhomes.rest.investmentAd.ChangeInvestmentAdOrderCommand;
+import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
@@ -22,5 +23,9 @@ public interface InvestmentAdService {
 	void changeInvestmentAdOrder(ChangeInvestmentAdOrderCommand cmd);
 
 	InvestmentAdDetailDTO getInvestmentAd(GetInvestmentAdCommand cmd);
+
+	void exportInvestmentAds(ListInvestmentAdCommand cmd);
+
+	void changeInvestmentStatus(ChangeInvestmentStatusCommand cmd);
 
 }

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: ehOrganization</li>
  *  <li>ownerId: organizationId</li>
  * 	<li>title: 招商广告标题</li>
- * 	<li>investmentType: 广告类型（1-招租广告，2-招商广告）</li>
+ * 	<li>investmentType: 广告类型（1-房源出租，2-房源出售）</li>
  * 	<li>investmentStatus: 招商状态</li>
  * 	<li>availableAreaMin: 最小招商面积</li>
  * 	<li>availableAreaMax: 最大招商面积</li>

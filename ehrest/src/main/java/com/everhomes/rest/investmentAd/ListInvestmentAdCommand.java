@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>namespaceId: 域空间id</li>
  *  <li>communityId: 园区id</li>
- * 	<li>investmentStatus: 招商状态</li>
+ * 	<li>investmentStatus: 招商状态:1-招商中,2-已下线,3-已出租</li>
  *  <li>investmentType: 广告类型（1-招租广告，2-招商广告）</li>
  * 	<li>availableAreaMin: 最小招商面积</li>
  * 	<li>availableAreaMax: 最大招商面积</li>

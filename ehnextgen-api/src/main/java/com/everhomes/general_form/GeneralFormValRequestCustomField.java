@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
 
 public enum GeneralFormValRequestCustomField {
 	
-	TRANSFORM_STATUS("integral_tag1", "integralTag1", Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG1);
+	TRANSFORM_STATUS("integral_tag1", "integralTag1", Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG1),
+	INVESTMENT_AD_ID("integral_tag2", "integralTag2", Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG2);
     
     private String fieldName;
     private String propertyName;
