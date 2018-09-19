@@ -11397,6 +11397,11 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(managerMember.getOrganizationId());
             response.setDeptId(dpt.getId());
             response.setDeptName(dpt.getName());
+            List<Long> subDptIds = findSubDepartmentIds(dpt.getId());
+            response.setHasSubDpts(NormalFlag.YES.getCode());
+            if(CollectionUtils.isEmpty(subDptIds)){
+            	response.setHasSubDpts(NormalFlag.NO.getCode());
+            }
         }
         return response;
     }
