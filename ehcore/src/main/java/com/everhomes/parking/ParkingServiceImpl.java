@@ -751,7 +751,9 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingRechargeOrder.setPrice(cmd.getPrice());
 
 			if (parkingRechargeOrder.getOrderType() == ParkingOrderType.RECHARGE.getCode()) {
+				
 				handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
+
 			}else {
 				//TODO:开卡校验
 				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
@@ -858,7 +860,7 @@ public class ParkingServiceImpl implements ParkingService {
 			createOrderCommand.setPaymentParams(flattenMap);
 			createOrderCommand.setCommitFlag(1);
 			createOrderCommand.setOrderType(3);
-			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay",""));
+			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay","NS"+UserContext.getCurrentNamespaceId()));
 		}
 		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);

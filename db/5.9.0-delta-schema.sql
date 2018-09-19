@@ -74,6 +74,32 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_id` BIGINT COMMENT '各�
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_name` VARCHAR(1024) COMMENT '账单来源（如：停车缴费，缴费的新增/导入等）';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_id` BIGINT COMMENT '企业下面的某个人的ID';
 
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.0 收费项配置可手动新增
+ALTER TABLE `eh_payment_charging_items` ADD COLUMN `namespace_id` INTEGER COMMENT '增加域空间ID作为标识';
+ALTER TABLE `eh_payment_charging_items` ADD COLUMN `owner_id` BIGINT COMMENT '增加园区ID作为标识';
+ALTER TABLE `eh_payment_charging_items` ADD COLUMN `owner_type` VARCHAR(64)  COMMENT '增加园区ID作为标识';
+ALTER TABLE `eh_payment_charging_items` ADD COLUMN `category_id` BIGINT COMMENT '多入口应用id';
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `can_delete` TINYINT DEFAULT 0 COMMENT '0：不可删除；1：可删除';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `can_modify` TINYINT DEFAULT 0 COMMENT '0：不可编辑；1：可编辑';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `can_delete` TINYINT DEFAULT 0 COMMENT '0：不可删除；1：可删除';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `can_modify` TINYINT DEFAULT 0 COMMENT '0：不可编辑；1：可编辑';
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费V6.0 账单、费项表增加是否删除状态字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT '删除状态：0：已删除；1：正常使用';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT '删除状态：0：已删除；1：正常使用';
+
+-- REMARK: 账单表增加第三方账单唯一标识字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT '账单表增加第三方唯一标识字段';
+
+-- AUTHOR: 黄明波
+-- REMARK: #33683服务联盟样式列表添加排序 #37669修复
+ALTER TABLE `eh_service_alliance_categories`	CHANGE COLUMN `default_order` `default_order` BIGINT NOT NULL DEFAULT '0' ;
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `address` `address` VARCHAR(255) NULL DEFAULT NULL ;
+-- END
+
 
 
 -- AUTHOR: 吴寒
@@ -81,7 +107,6 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_id` BIGINT COMMENT 
 ALTER TABLE `eh_file_management_contents` ADD COLUMN `operator_name`  VARCHAR(256) ;
 ALTER TABLE `eh_file_management_catalogs` ADD COLUMN `operator_name`  VARCHAR(256) ;
 -- REMARK: issue-33887: 给文件表增加索引
-ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_name` (`content_name`);
 ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_catalog_id` (`catalog_id`);
 ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`parent_id`);
 -- REMARK: issue-33887
@@ -89,13 +114,92 @@ ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`
 
 
 
+ 
+-- AUTHOR: 吴寒
+-- REMARK: issue-33943 日程提醒1.2
+ALTER TABLE eh_remind_settings ADD COLUMN app_version VARCHAR(32) DEFAULT '5.8.0' COMMENT '对应app版本(历史数据5.8.0),根据APP版本选择性展示';
+ALTER TABLE eh_remind_settings ADD COLUMN before_time BIGINT COMMENT '提前多少时间(毫秒数)不超过1天的部分在这里减';
+-- END issue-33943
 
 
+ 
+-- AUTHOR: 吴寒
+-- REMARK: 会议管理V1.2
+ALTER TABLE `eh_meeting_reservations`  CHANGE `content` `content` TEXT COMMENT '会议详细内容';
+ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+
+-- 增加附件表 会议预定和会议纪要共用
+CREATE TABLE `eh_meeting_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'owner type EhMeetingRecords/EhMeetingReservations',
+  `owner_id` BIGINT NOT NULL COMMENT 'key of the owner',
+  `content_name` VARCHAR(1024) COMMENT 'attachment object content name like: abc.jpg',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `content_size` INT(11)  COMMENT 'attachment object size',
+  `content_icon_uri` VARCHAR(1024) COMMENT 'attachment object link of content icon',
+  `creator_uid` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- END 会议管理V1.2
+
+-- AUTHOR: 荣楠
+-- REMARK: issue-34029 工作汇报1.2
+ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `organization_id` BIGINT DEFAULT 0 NOT NULL COMMENT 'the orgId for the user' AFTER `namespace_id`;
+ALTER TABLE `eh_work_report_val_receiver_map` ADD INDEX `i_work_report_receiver_id` (`receiver_user_id`) ;
+
+ALTER TABLE `eh_work_reports` ADD COLUMN `validity_setting` VARCHAR(512) COMMENT 'the expiry date of the work report' AFTER `form_version`;
+ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the receiver message settings' AFTER `validity_setting`;
+ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_seeting` VARCHAR(512) COMMENT 'the time range of the receiver message' AFTER `receiver_msg_type`;
+ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the author message settings' AFTER `receiver_msg_seeting`;
+ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_seeting` VARCHAR(512) COMMENT 'the time range of the author message' AFTER `author_msg_type`;
+
+ALTER TABLE `eh_work_report_vals` ADD COLUMN `receiver_avatar` VARCHAR(1024) COMMENT 'the avatar of the fisrt receiver' AFTER `report_type`;
+ALTER TABLE `eh_work_report_vals` ADD COLUMN `applier_avatar` VARCHAR(1024) COMMENT 'the avatar of the author' AFTER `receiver_avatar`;
+
+ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the target time of the report';
 
 
+CREATE TABLE `eh_work_report_val_receiver_msg` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
+  `report_val_id` BIGINT NOT NULL COMMENT 'id of the report val',
+  `report_name` VARCHAR(128) NOT NULL,
+  `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
+  `report_time` DATE NOT NULL COMMENT 'the target time of the report',
+  `reminder_time` DATETIME COMMENT 'the reminder time of the record',
+  `receiver_user_id` BIGINT NOT NULL COMMENT 'the id of the receiver',
+  `create_time` DATETIME COMMENT 'record create time',
 
+  KEY `i_eh_work_report_val_receiver_msg_report_id`(`report_id`),
+  KEY `i_eh_work_report_val_receiver_msg_report_val_id`(`report_val_id`),
+  KEY `i_eh_work_report_val_receiver_msg_report_time`(`report_time`),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_work_report_scope_msg` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
+  `report_name` VARCHAR(128) NOT NULL,
+  `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
+  `report_time` DATE NOT NULL COMMENT 'the target time of the report',
+  `reminder_time` DATETIME COMMENT 'the reminder time of the record',
+  `end_time` DATETIME COMMENT 'the deadline of the report',
+  `scope_ids` TEXT COMMENT 'the id list of the receiver',
+  `create_time` DATETIME COMMENT 'record create time',
 
+  KEY `i_eh_work_report_scope_msg_report_id`(`report_id`),
+  KEY `i_eh_work_report_scope_msg_report_time`(`report_time`),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- END issue-34029
 
 
 

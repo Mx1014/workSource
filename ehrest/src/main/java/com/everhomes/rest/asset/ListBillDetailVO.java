@@ -73,6 +73,8 @@ public class ListBillDetailVO {
     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
     private Byte canDelete;
     private Byte canModify;
+    //对接统一账单业务线的需求
+    private Integer paymentType;
     
     public Byte getBillStatus() {
 		return billStatus;
@@ -327,5 +329,13 @@ public class ListBillDetailVO {
 
 	public void setCanModify(Byte canModify) {
 		this.canModify = canModify;
+	}
+
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
 	}
 }

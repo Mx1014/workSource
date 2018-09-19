@@ -1712,6 +1712,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setSourceType(cmd.getSourceType());
             newBill.setSourceName(cmd.getSourceName());
             newBill.setConsumeUserId(cmd.getConsumeUserId());
+            //账单表增加第三方账单唯一标识字段
+            newBill.setThirdBillId(cmd.getThirdBillId());
             //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
             newBill.setCanDelete(cmd.getCanDelete());
             newBill.setCanModify(cmd.getCanModify());
@@ -1751,7 +1753,7 @@ public class AssetProviderImpl implements AssetProvider {
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM
-                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.CAN_DELETE, r.CAN_MODIFY)
+                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.CAN_DELETE, r.CAN_MODIFY, r.PAYMENT_TYPE)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
@@ -1786,6 +1788,8 @@ public class AssetProviderImpl implements AssetProvider {
                     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
                     vo.setCanDelete(f.getValue(r.CAN_DELETE));
                     vo.setCanModify(f.getValue(r.CAN_MODIFY));
+                    //对接统一账单业务线的需求
+                    vo.setPaymentType(f.getValue(r.PAYMENT_TYPE));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID

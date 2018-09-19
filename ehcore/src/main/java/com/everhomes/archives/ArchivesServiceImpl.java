@@ -1288,7 +1288,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                             StringHelper.toJsonString(cmd));
                 }
             }
-            //  3.添加文档
+            //  3.添加记录
             if (TrueOrFalseFlag.fromCode(cmd.getLogFlag()) != TrueOrFalseFlag.FALSE)
                 addEmployLogs(cmd);
             return null;

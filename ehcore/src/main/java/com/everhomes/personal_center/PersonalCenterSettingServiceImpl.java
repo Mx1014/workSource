@@ -153,13 +153,14 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
-                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
-                        UserProfileContstant.IS_APPLIED_SHOP);
-                dto.setLinkUrl(getApplyShopUrl());
-                if (applied != null) {
-                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
-                        dto.setLinkUrl(getManageShopUrl(user.getId()));
-                }
+//                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
+//                        UserProfileContstant.IS_APPLIED_SHOP);
+//                dto.setLinkUrl(getApplyShopUrl());
+//                if (applied != null) {
+//                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
+//                }
+                dto.setLinkUrl(getManageShopUrl(user.getId()));
+
             }
              switch (dto.getRegion()) {
                  case 0 :
@@ -209,7 +210,11 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
             if (mallId != null) {
                 manageShopPath = manageShopPath.replace("?","&");
-                return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+                if (homeurl.contains("?")) {
+                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
+                }else {
+                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+                }
             }else {
                 return homeurl + manageShopPath;
             }
