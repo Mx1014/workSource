@@ -91,7 +91,8 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `can_modify` TINYINT DEFAULT 0 CO
 ALTER TABLE `eh_payment_bills` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT '删除状态：0：已删除；1：正常使用';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT '删除状态：0：已删除；1：正常使用';
 
-
+-- REMARK: 账单表增加第三方账单唯一标识字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT '账单表增加第三方唯一标识字段';
 
 -- AUTHOR: 黄明波
 -- REMARK: #33683服务联盟样式列表添加排序 #37669修复
