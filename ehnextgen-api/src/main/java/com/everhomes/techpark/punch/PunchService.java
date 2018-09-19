@@ -322,7 +322,7 @@ public interface PunchService {
 
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
 
-	ListApprovalCategoriesResponse listApprovalCategories(ListApprovalCategoriesCommand cmd);
+	ListApprovalCategoriesResponse listApprovalCategories(ListApprovalCategoriesCommand cmd, HttpServletRequest request);
 
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd);
 

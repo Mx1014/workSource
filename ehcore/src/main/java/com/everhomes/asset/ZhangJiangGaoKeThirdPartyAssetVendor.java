@@ -1,6 +1,29 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import static com.everhomes.util.SignatureHelper.computeSignature;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.asset.zjgkVOs.BillCountResponse;
 import com.everhomes.asset.zjgkVOs.BillDetailResponse;
 import com.everhomes.asset.zjgkVOs.CommunityAddressDTO;
@@ -13,16 +36,17 @@ import com.everhomes.asset.zjgkVOs.ContractListResponse;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.asset.zjgkVOs.SearchBillsResponse;
 import com.everhomes.asset.zjgkVOs.SearchEnterpriseBillsDTO;
-import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.equipment.EquipmentService;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetTargetType;
@@ -65,9 +89,41 @@ import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -116,8 +172,6 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
 
     @Autowired
     private UserProvider userProvider;
-    @Autowired
-    private AssetPayService assetPayService;
 
     @Autowired
     private EquipmentService equipmentService;
@@ -808,81 +862,6 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     }
 
     @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
-        List<BillIdAndAmount> bills = cmd.getBills();
-        List<String> billIds = new ArrayList<>();
-        Long amountsInCents = 0l;
-        for(BillIdAndAmount billIdAndAmount : bills){
-            billIds.add(billIdAndAmount.getBillId());
-            String amountOwed = billIdAndAmount.getAmountOwed();
-            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
-            amountsInCents += amountOwedInCents.longValue();
-        }
-        //这种检查的逻辑是不对的
-//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
-//        if(checkedOrderId !=null){
-//            //重复下单的返回
-//            return null;
-//        }
-        //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId(),OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,orderId);
-        Long payerId = Long.parseLong(cmd.getPayerId());
-        //检查下单人的类型和id，不能为空
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-//            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-//                payerId = Long.parseLong(cmd.getPayerId());
-//            }else{
-//                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-//                throw new RuntimeErrorException("individual make asset order failed");
-//            }
-            payerId = UserContext.currentUserId();
-        }
-
-        //组装command ， 请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
-        cmd2pay.setCommunityId(cmd.getCommunityId());
-//        cmd2pay.setAmount(1l);
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        cmd2pay.setNamespaceId(cmd.getNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-
-        //不填写paymentType，支持所有除了微信公众号的支付手段
-//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
-
-        //这个参数组装有什么用？
-//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-//        paymentParamsDTO.setPayType("no_credit");
-//        User user = UserContext.current().getUser();
-//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-//        cmd2pay.setPaymentParams(paymentParamsDTO);
-
-        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        cmd.setBillGroupId(427L);
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        }
-        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
-//        response.setAmount(String.valueOf(preOrder.getAmount()));
-//        response.setExpiredIntervalTime(15l*60l);
-//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
-//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
-//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
-//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
-//        response.setPayMethod(preOrder.getPayMethod());
-
-        return preOrder;
-    }
-
-    @Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         return null;
     }
@@ -1290,12 +1269,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         }
     }
 
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	PaymentCallBackHandler handler = PlatformContext.getComponent(
-    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.ZJGK_RENTAL_CODE);
-    	//支付模块回调接口，通知支付结果
-    	assetPayService.payNotify(cmd, handler);
-    }
+
 
 }
 

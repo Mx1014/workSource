@@ -1,5 +1,29 @@
 package com.everhomes.organization.admin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.admin.OperateType;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.organization.*;
+
+import com.everhomes.user.UserPrivilegeMgr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -630,6 +654,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("approveForEnterpriseContact")
     @RestReturn(value = String.class)
     public RestResponse approveForEnterpriseContact(@Valid ApproveContactCommand cmd) {
+        cmd.setOperateType(OperateType.MANUAL.getCode());
         this.organizationService.approveForEnterpriseContact(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);

@@ -529,7 +529,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void feedDoc(ServiceAllianceRequestInfo request) {
 		XContentBuilder source = createDoc(request);
-        feedDoc(getDocIdByTemplateType(request.getId(), request.getTemplateType()), source);
+        feedDoc(getDocIdByTemplateType(request.getFlowCaseId(), request.getTemplateType()), source);
 	}
 
 	@Override

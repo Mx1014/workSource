@@ -418,6 +418,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("getNewsPreview")
 	@RestReturn(GetNewsDetailInfoResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse getNewsPreview(GetNewsContentCommand cmd) {
 		RestResponse response = new RestResponse(newsService.getNewsPreview(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -365,6 +365,9 @@ public class ForumServiceImpl implements ForumService {
             LocalEventContext context = new LocalEventContext();
             context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //add by liangming.huang 20180813
+            context.setCommunityId(cmd.getCommunityId());
+
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
@@ -517,6 +520,10 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(newCmd.getDescription()) && !newCmd.getDescription().equals(oldCmd.getDescription())) {
             oldCmd.setDescription(newCmd.getDescription());
             activity.setDescription(newCmd.getDescription());
+        }
+        if (!StringUtils.isEmpty(newCmd.getContentType()) && !newCmd.getContentType().equals(oldCmd.getContentType())) {
+            oldCmd.setContentType(newCmd.getContentType());
+            activity.setContentType(newCmd.getContentType());
         }
         post.setEmbeddedJson(StringHelper.toJsonString(oldCmd));
         this.activityProvider.updateActivity(activity);
@@ -722,7 +729,7 @@ public class ForumServiceImpl implements ForumService {
         if(handler != null) {
             handler.preProcessEmbeddedObject(post);
             forumProvider.createPost(post);
-            handler.postProcessEmbeddedObject(post);
+            handler.postProcessEmbeddedObject(post, cmd.getCommunityId());
         } else {
             forumProvider.createPost(post);
 

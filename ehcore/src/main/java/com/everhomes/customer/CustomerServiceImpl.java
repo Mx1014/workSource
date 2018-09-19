@@ -2827,8 +2827,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (dto.getAddressId() != null) {
             Address address = addressProvider.findAddressById(dto.getAddressId());
-            // only hook active address info
-            if (address != null && AddressAdminStatus.ACTIVE.equals(AddressAdminStatus.fromCode(address.getStatus()))) {
+            // (old) only hook active address info
+            // (old) if (address != null && AddressAdminStatus.ACTIVE.equals(AddressAdminStatus.fromCode(address.getStatus()))) {
+            //hook every address info
+            if (address != null) {
                 dto.setAddressName(address.getAddress());
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddressId(address.getId());
@@ -2851,13 +2853,13 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 }
                 dto.setApartmentLivingStatus(address.getLivingStatus());
+                
                 //issue-34394,添加buildingId信息，避免前端无法获取buildingId，导致没办法和楼栋门牌匹配上
-                Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-
-                if(building != null) {
-                    dto.setBuildingId(building.getId());
-                }
-
+                dto.setBuildingId(address.getBuildingId());
+//                Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+//                if(building != null) {
+//                    dto.setBuildingId(building.getId());
+//                }
             }
         }
         return dto;
@@ -4871,7 +4873,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         SearchEnterpriseCustomerResponse res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
         for(EnterpriseCustomerDTO dto : res.getDtos()){

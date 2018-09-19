@@ -22,6 +22,7 @@ import java.util.List;
  * <li>updateFlag: 编辑标志: 0-否, 1-是</li>
  * <li>updateDetailId: 编辑人员的id</li>
  * <li>namespaceId: 域空间ID</li>
+ * <li>operateType: 审核类型</li>
  * </ul>
  */
 public class AddArchivesContactCommand {
@@ -64,6 +65,16 @@ public class AddArchivesContactCommand {
     private Byte updateFlag;
 	
 	private Long updateDetailId;
+
+    private Byte operateType;
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
+    }
 
     public AddArchivesContactCommand() {
     }

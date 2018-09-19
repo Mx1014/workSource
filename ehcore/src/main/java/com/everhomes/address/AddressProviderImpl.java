@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -13,6 +14,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
@@ -1017,16 +1019,6 @@ public class AddressProviderImpl implements AddressProvider {
 		return result;
 	}
 
-//	@Override
-//	public AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId) {
-//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//		return context.select()
-//					.from(Tables.EH_ADDRESS_ARRANGEMENT)
-//					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
-//					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
-//					.fetchOneInto(AddressArrangement.class);
-//	}
-
 	@Override
 	public void updateAddressArrangement(AddressArrangement arrangement) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class));
@@ -1067,12 +1059,12 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public Integer countRelatedEnterpriseCustomerNumber(Long communityId,String buildingName) {
+	public Integer countRelatedEnterpriseCustomerNumber(Long communityId,Long buildingId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Long> addressIds = context.select(Tables.EH_ADDRESSES.ID)
 										.from(Tables.EH_ADDRESSES)
 										.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
-										.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_ADDRESSES.BUILDING_ID.eq(buildingId))
 										.and(Tables.EH_ADDRESSES.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
 
@@ -1082,28 +1074,41 @@ public class AddressProviderImpl implements AddressProvider {
 										.and(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
 
-		if (customerIds != null && customerIds.size() > 0) {
-			return customerIds.size();
+		List<EnterpriseCustomer> enterpriseCustomers = context.select()
+												  .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+												  .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(customerIds))
+							                      .and(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+											      .fetchInto(EnterpriseCustomer.class);
+
+		if (enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
+			return enterpriseCustomers.size();
 		}
 		return 0;
 	}
 
 	@Override
-	public Integer countRelatedOrganizationOwnerNumber(Long communityId, String buildingName) {
+	public Integer countRelatedOrganizationOwnerNumber(Long communityId, Long buildingId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Long> addressIds = context.select(Tables.EH_ADDRESSES.ID)
 										.from(Tables.EH_ADDRESSES)
 										.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
-										.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+										.and(Tables.EH_ADDRESSES.BUILDING_ID.eq(buildingId))
 										.and(Tables.EH_ADDRESSES.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
+
 		List<Long> organizationOwnerIds = context.selectDistinct(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID)
 												.from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
 												.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
 												.fetchInto(Long.class);
 
-		if (organizationOwnerIds != null && organizationOwnerIds.size() > 0) {
-			return organizationOwnerIds.size();
+		List<CommunityPmOwner> owners = context.select()
+												.from(Tables.EH_ORGANIZATION_OWNERS)
+												.where(Tables.EH_ORGANIZATION_OWNERS.ID.in(organizationOwnerIds))
+												.and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq((byte)1))
+												.fetchInto(CommunityPmOwner.class);
+
+		if (owners != null && owners.size() > 0) {
+			return owners.size();
 		}
 		return 0;
 	}

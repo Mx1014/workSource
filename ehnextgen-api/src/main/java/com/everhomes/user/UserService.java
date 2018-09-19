@@ -338,6 +338,16 @@ public interface UserService {
     List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
     String makeAnbangRedirectUrl(Long userId, String location,
             Map<String, String[]> paramMap);
+  
+    Byte isUserAuth();
+
+    UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
+
+    void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
+
+    PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
+
+    void registerWXLoginConnection(HttpServletRequest request);
 
     ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd);
     GetUserConfigAfterStartupResponse getUserConfigAfterStartup(
@@ -352,5 +362,12 @@ public interface UserService {
      * @return
      */
     UserDTO findUserInfoByUserId(UserCouponsCommand cmd);
-	Byte isUserAuth();void registerWXLoginConnection(HttpServletRequest request);
+
+
+    /**
+     * 查询超级管理员
+     * @param cmd
+     * @return
+     */
+    UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 }

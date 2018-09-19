@@ -1817,7 +1817,7 @@ public class CustomerController extends ControllerBase {
 
     /**
      * <b>URL: /customer/changeCustomerAptitude</b>
-     * <p>列出企业客户(有权限 包括个人权限和权限细化)</p>
+     * <p>一键转为资质客户</p>
      */
     @RequestMapping("changeCustomerAptitude")
     @RestReturn(value = String.class)

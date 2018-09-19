@@ -12,4 +12,6 @@ public interface AppService {
     ListAppsResponse listApps(ListAppsCommand cmd);
 
     void deleteApp(DeleteAppCommand cmd);
+
+    App find(String appKey);
 }

@@ -1,6 +1,7 @@
 package com.everhomes.news.open;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import com.everhomes.app.App;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.news.News;
 import com.everhomes.news.NewsProvider;
@@ -24,9 +27,12 @@ import com.everhomes.news.NewsTagVals;
 import com.everhomes.news.open.NewsOpenService;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.IdNameDTO;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.news.GetNewsDetailInfoCommand;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.news.open.CreateOpenNewsCommand;
 import com.everhomes.rest.news.open.CreateNewsResponse;
@@ -38,6 +44,8 @@ import com.everhomes.rest.news.open.ListOpenNewsResponse;
 import com.everhomes.rest.news.open.ListNewsTagsCommand;
 import com.everhomes.rest.news.open.TagDTO;
 import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.NewsInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
@@ -49,11 +57,16 @@ import com.everhomes.util.WebTokenGenerator;
 @Component
 public class NewsOpenServiceImpl implements NewsOpenService {
 
+	private final long NEWS_MODULE_ID = 10800L;
+
 	@Autowired
 	NewsService newsService;
 
 	@Autowired
 	NewsProvider newsProvider;
+
+	@Autowired
+	PortalService portalService;
 
 	@Autowired
 	CommunityService communityService;
@@ -66,7 +79,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	
 	@Autowired
 	ServiceModuleService serviceModuleService;
-	
+
 	@Override
 	public CreateNewsResponse createNews(CreateOpenNewsCommand cmd) {
 
@@ -166,7 +179,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	public List<TagDTO> listNewsTags(ListNewsTagsCommand cmd) {
 		Integer namespaceId = getNamespaceId();
 		Long categoryId = getCategoryId(namespaceId, cmd.getCategoryId());
-		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null,null, null, categoryId);
+		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, categoryId);
 		if (CollectionUtils.isEmpty(allTags)) {
 			return null;
 		}
@@ -242,7 +255,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	}
 
 	private List<IdNameDTO> listApplications(Integer namespaceId) {
-		List<ServiceModuleAppDTO> apps = serviceModuleService.getModuleApps(namespaceId, NEWS_MODULE_ID);
+		List<ServiceModuleAppDTO> apps = getModuleApps(namespaceId);
 		if (null == apps) {
 			return null;
 		}
@@ -256,6 +269,18 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 			return dto;
 
 		}).collect(Collectors.toList());
+	}
+
+	private List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId) {
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(NEWS_MODULE_ID);
+		ListServiceModuleAppsResponse resp = portalService.listServiceModuleApps(cmd);
+		if (null == resp || CollectionUtils.isEmpty(resp.getServiceModuleApps())) {
+			return null;
+		}
+
+		return resp.getServiceModuleApps();
 	}
 
 	private Long getCategoryId(Integer namespaceId, Long categoryId) {

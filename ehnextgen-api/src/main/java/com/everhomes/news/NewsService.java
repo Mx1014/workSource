@@ -100,7 +100,13 @@ public interface NewsService {
 	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
 
 	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
+void deleteNews(Long userId, News news);
 
+	News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd);
+
+	void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd);
+
+	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
 }
 
 

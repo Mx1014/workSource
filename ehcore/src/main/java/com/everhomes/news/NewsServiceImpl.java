@@ -30,13 +30,17 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
-import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.news.*;
+import com.everhomes.rest.news.open.CreateOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsResponse;
+import com.everhomes.rest.news.open.OpenBriefNewsDTO;
+import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
 import com.everhomes.rest.news.open.CreateOpenNewsCommand;
 import com.everhomes.rest.news.open.ListOpenNewsCommand;
 import com.everhomes.rest.news.open.ListOpenNewsResponse;
@@ -115,6 +119,9 @@ public class NewsServiceImpl implements NewsService {
 	private static final Long NEWS_MODULE_ID = 10800L;
 
 	private static final Integer NEWS_CONTENT_ABSTRACT_DEFAULT_LEN = 100;
+
+	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
+	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
 
 	private final byte TYPE_CREATE_BY_ADMIN = 0; //后台更新
 	private final byte TYPE_CREATE_BY_THIRD_PARTY = 1; //第三方更新 见NewsOpenController
@@ -388,11 +395,12 @@ public class NewsServiceImpl implements NewsService {
 		originNews.setAuthor(cmd.getAuthor());
 		originNews.setCoverUri(cmd.getCoverUri());
 		originNews.setContentAbstract(cmd.getContentAbstract());
+		// news.setCategoryId(cmd.getCategoryId());
 		originNews.setContent(cmd.getContent());
 		originNews.setSourceDesc(cmd.getSourceDesc());
 		originNews.setSourceUrl(cmd.getSourceUrl());
 		originNews.setPhone(cmd.getPhone());
-		originNews.setVisibleType(cmd.getVisibleType());
+//		originNews.setVisibleType(cmd.getVisibleType());
 		originNews.setStatus(generateNewsStatus(cmd.getStatus()));
 
 		// 调整摘要
@@ -400,6 +408,8 @@ public class NewsServiceImpl implements NewsService {
 
 		return;
 	}
+
+	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
 
 	public void updateNews(News news, List<Long> communityIds, List<Long> newsTagIds) {
 
@@ -852,6 +862,30 @@ public class NewsServiceImpl implements NewsService {
 		return userProvider.findUserLike(userId, EntityType.NEWS.getCode(), newsId);
 	}
 
+	@Override
+	public SearchNewsResponse searchNews(SearchNewsCommand cmd) {
+		if (cmd.getStatus() == null) {
+			cmd.setStatus(NewsStatus.ACTIVE.getCode());
+		}
+		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds() == null) {
+			return ConvertHelper.convert(listNews(ConvertHelper.convert(cmd, ListNewsCommand.class)),
+					SearchNewsResponse.class);
+		}
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+
+		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+
+		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),
+					cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
+
+		} else {
+			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),
+					cmd.getTagIds(), cmd.getPageAnchor(), cmd.getPageSize(), false, cmd.getStatus());
+		}
+	}
+
 	/**
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理 xiongying
 	 */
@@ -904,7 +938,11 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		if (null != communityId && isScene) {
-			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
+			if (isScene) {
+				must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
+			} else {
+				must.add(JSONObject.parse("{\"term\":{\"ownerId\":" + communityId + "}}"));
+			}
 		}
 
 		if (CollectionUtils.isEmpty(authProjectIds)) {
@@ -1239,6 +1277,13 @@ public class NewsServiceImpl implements NewsService {
 
 		// 权限核实
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), newsChk.getOwnerId(), cmd.getAppId());
+
+		//删除
+		deleteNews(userId, newsChk);
+	}
+
+	@Override
+	public void deleteNews(Long userId, News news) {
 
 		//删除
 		deleteNews(userId, newsChk);
@@ -2601,6 +2646,30 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		return null;
+	}
+
+
+
+	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
+		News news = ConvertHelper.convert(cmd, News.class);
+		news.setNamespaceId(namespaceId);
+		news.setOwnerType(cmd.getOwnerType());
+		news.setContentType(NewsContentType.RICH_TEXT.getCode());
+		news.setTopIndex(0L);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(generateNewsStatus(cmd.getStatus()));
+		news.setCreatorUid(userId);
+		news.setDeleterUid(0L);
+		news.setPhone(cmd.getPhone());
+
+		//调整摘要
+		adjustNewsContentAbstract(news);
+
+		if (cmd.getPublishTime() != null) {
+			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
+		}
+
+		return news;
 	}
 
 }

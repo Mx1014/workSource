@@ -43,6 +43,16 @@ public class CreateCommunityCommand {
     private String communityNumber;
     private Long pmOrgId;
     private Byte status;
+    private Long organizationId;
+
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getProvinceId() {
         return provinceId;

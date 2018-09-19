@@ -7,6 +7,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -2989,8 +2990,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
                 .where(tasks.PLAN_ID.eq(planId))
                 .and(tasks.STATUS.in(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode(), EquipmentTaskStatus.DELAY.getCode()))
                 .and(record.OWNER_ID.eq(tasks.ID))
+                .and(record.OWNER_TYPE.eq(EntityType.EQUIPMENT_TASK.getCode()))
                 .and(record.ID.gt(locator.getAnchor()))
-                .orderBy(record.ID)
+                .orderBy(record.ID.asc())
                 .limit(pageSize + 1)
                 .fetchInto(Long.class);
         if (result != null && result.size() > pageSize) {

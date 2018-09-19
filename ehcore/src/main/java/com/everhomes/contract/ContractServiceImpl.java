@@ -778,7 +778,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getChargingItems() != null) {
 			for (int i = 0; i < cmd.getChargingItems().size(); i++) {
 				Long billItemId = cmd.getChargingItems().get(i).getChargingItemId();
+				/*List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(billItemId,
+						cmd.getChargingItems().get(i).getChargingStandardId(), "community", cmd.getCommunityId(), null);
+				Long billGroupId = groupRules.get(0).getBillGroupId();*/
+
 				Long billGroupId = cmd.getChargingItems().get(i).getBillGroupId();
+
 				BigDecimal taxRate = assetService.getBillItemTaxRate(billGroupId, billItemId);
 				String chargingVariables = cmd.getChargingItems().get(i).getChargingVariables();
 
@@ -1977,15 +1982,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-
-					if(cmd.getCategoryId() == null){
-			            cmd.setCategoryId(0l);
-			        }else {
-			        	// 转换
-			            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-			            cmd.setCategoryId(assetCategoryId);
-					}
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), cmd.getCategoryId(), cmd.getNamespaceId());
+long assetCategoryId = 0l;
+    				if(contract.getCategoryId() != null){
+    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+    		        }
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId(), assetCategoryId, cmd.getNamespaceId());
 					parentContract.setRent(totalAmount);
 				}
 
@@ -3768,6 +3769,28 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+	}
+
+	@Override
+	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractsByNamespaceIdAndStatus(cmd.getNamespaceId(),ContractStatus.DENUNCIATION.getCode());
+
+		for (Contract contract : contracts) {
+			if (contract.getCostGenerationMethod() == null) {
+				//costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+				contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+				assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+
+				long assetCategoryId = 0l;
+				if(contract.getCategoryId() != null){
+					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+		        }
+
+				BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), assetCategoryId, contract.getNamespaceId());
+				contract.setRent(totalAmount);
+				contractProvider.updateContract(contract);
+			}
+		}
 	}
 
 }

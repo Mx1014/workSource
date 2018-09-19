@@ -36,30 +36,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
-/**
-**************************************************************
-*                                                            *
-*   .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
-*    |                     ______                     |      *
-*    |                  .-"      "-.                  |      *
-*    |                 /            \                 |      *
-*    |     _          |              |          _     |      *
-*    |    ( \         |,  .-.  .-.  ,|         / )    |      *
-*    |     > "=._     | )(__/  \__)( |     _.=" <     |      *
-*    |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
-*    |           "=._"(_     ^^     _)"_.="           |      *
-*    |               "=\__|IIIIII|__/="               |      *
-*    |              _.="| \IIIIII/ |"=._              |      *
-*    |    _     _.="_.="\          /"=._"=._     _    |      *
-*    |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
-*    |    > _.="                            "=._ <    |      *
-*    |   (_/                                    \_)   |      *
-*    |                                                |      *
-*    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
-*                                                            *
-*           LASCIATE OGNI SPERANZA, VOI CH'ENTRATE           *
-**************************************************************
-*/
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
@@ -1096,7 +1072,7 @@ public RestResponse updateBillsToSettled(UpdateBillsToSettled cmd) {
  */
 @RequestMapping("payBills")
 @RestReturn(PreOrderDTO.class)
-public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
+public RestResponse placeAnAssetOrder(CreatePaymentBillOrderCommand cmd){
     PreOrderDTO response = assetService.placeAnAssetOrder(cmd);
     RestResponse restResponse = new RestResponse(response);
     restResponse.setErrorCode(ErrorCodes.SUCCESS);
@@ -1585,7 +1561,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      */
     @RequestMapping("payBillsForEnt")
     @RestReturn(PreOrderDTO.class)
-    public RestResponse payBillsForEnt(PlaceAnAssetOrderCommand cmd){
+    public RestResponse payBillsForEnt(CreatePaymentBillOrderCommand cmd){
         PreOrderDTO response = assetService.payBillsForEnt(cmd);
         RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);

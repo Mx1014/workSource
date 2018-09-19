@@ -529,15 +529,31 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getUserInfo")
 	@RestReturn(UserInfo.class)
-	public RestResponse getUserInfo(GetUserSnapshotInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-		UserInfo info = this.userService.getUserInfo();
-		if(info==null){
-			return new RestResponse(info);
-		}
-		if(EtagHelper.checkHeaderEtagOnly(30,info.hashCode()+"", request, response)) {
-			return new RestResponse(info);
-		}
-		return new RestResponse("OK");
+	public RestResponse getUserInfo(GetUserSnapshotInfoCommand cmd) {
+        UserInfo info;
+        if (cmd.getUid() != null) {
+            info = this.userService.getUserSnapshotInfoWithPhone(cmd.getUid());
+        } else {
+            info = this.userService.getUserInfo();
+        }
+		return new RestResponse(info);
+	}
+
+	/**
+	 * <b>URL: /user/validateToken</b>
+	 * <p>校验用户的登录 token</p>
+	 */
+	@RequestMapping("validateToken")
+	@RestReturn(UserInfo.class)
+	public RestResponse validateToken(ValidateUserTokenCommand cmd, HttpServletRequest request) {
+        LoginToken loginToken = userService.getLoginToken(request);
+        if (userService.isValid(loginToken)) {
+            return new RestResponse(userService.getUserSnapshotInfoWithPhone(loginToken.getUserId()));
+        }
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+        response.setErrorDescription("invalid token");
+        return response;
 	}
 
 	/**
@@ -1527,7 +1543,7 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp; 
     }
-    
+
     /**
      * <b>URL: /user/getUserConfigAfterStartup</b>
      * <p>启动之后，去统一的接口拿用户相关的配置信息</p>
@@ -1540,9 +1556,9 @@ public class UserController extends ControllerBase {
         RestResponse resp = new RestResponse(obj);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
-        return resp; 
+        return resp;
     }
-    
+
     /**
      * <b>URL: /user/smartCardVerify</b>
      * <p>校验用户的 TOTP 是否合法 </p>
@@ -1556,9 +1572,9 @@ public class UserController extends ControllerBase {
         RestResponse resp = new RestResponse(obj);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
-        return resp; 
+        return resp;
     }
-    
+
     /**
      * <b>URL: /user/generateSmartCardCode</b>
      * <p>测试 TOTP 的生成结果</p>
@@ -1571,9 +1587,9 @@ public class UserController extends ControllerBase {
         RestResponse resp = new RestResponse(obj);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
-        return resp; 
+        return resp;
     }
-    
+
     /**
      * <b>URL: /user/genAppKey</b>
      * <p>test</p>
@@ -1662,6 +1678,63 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/getUserByPhone</b>
+	 * <p>通过域空间和手机号查询用户信息</p>
+	 * @return
+	 */
+	@RequestMapping("getUserByPhone")
+	@RestReturn(UserDTO.class)
+	public RestResponse getUserByPhone(FindUserByPhoneCommand cmd){
+
+		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+    }
+
+	/**
+	 * <b>URL: /user/sendVerificationCodeByPhone</b>
+	 * <p>给目标手机发送验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("sendVerificationCodeByPhone")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByPhone(SendVerificationCodeByPhoneCommand cmd ,HttpServletRequest request){
+		LOGGER.info("sendVerificationCodeByPhone  -->  cmd:[{}]",cmd);
+		FindUserByPhoneCommand cmd1 = ConvertHelper.convert(cmd, FindUserByPhoneCommand.class);
+		UserDTO  user = this.userService.getUserFromPhone(cmd1);
+		if(user == null) {
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exist");
+		}
+
+
+		this.userService.sendVerficationCode4Point(cmd.getNamespaceId(), user, cmd.getRegionCode(), request);
+		return new RestResponse("OK");
+
+    }
+
+
+	/**
+	 * <b>URL: /user/pointCheckVerificationCode</b>
+	 * <p>积分校验验证码接口</p>
+	 * @return
+	 */
+	@RequestMapping("pointCheckVerificationCode")
+	@RestReturn(PointCheckVCDTO.class)
+	public RestResponse pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd){
+
+		PointCheckVCDTO dto = this.userService.pointCheckVerificationCode(cmd);
+		RestResponse resp = new RestResponse(dto);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+    }
+
+
+	/**
 	 * <b>URL: /user/listUserAddress</b>
 	 * <p>根据用户域空间场景获取用户相关的地址列表</p>
 	 */
@@ -1691,5 +1764,19 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+
+	/**
+	 * <b>URL: /user/getTopAdministrator</b>
+	 * <p>查询当前企业的超管</p>
+	 * @return
+	 */
+	@RequestMapping("getTopAdministrator")
+	@RestReturn(UserDTO.class)
+	public RestResponse getTopAdministrator( GetTopAdministratorCommand cmd) {
+		RestResponse resp = new RestResponse(userService.getTopAdministrator(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 
 }
