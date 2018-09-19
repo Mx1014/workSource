@@ -25,6 +25,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -1579,6 +1580,43 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 	}
 
 
+    @Override
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType, String moduleName) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
+        CustomerEvent event = new CustomerEvent();
+        event.setId(id);
+        event.setNamespaceId(UserContext.getCurrentNamespaceId());
+        event.setCustomerType(CustomerType.ENTERPRISE.getCode());
+        event.setCustomerId(customer.getId());
+        event.setCustomerName(customer.getName());
+        event.setContactName(customer.getContactName());
+        event.setDeviceType(deviceType);
+        String content = null;
+        switch(i){
+            case 1 :
+                content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+                break;
+            case 2 :
+                content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+                break;
+            case 3 :
+                content = compareEnterpriseCustomer(customer,exist, moduleName);
+                break;
+            default :break;
+        }
+        if(StringUtils.isNotEmpty(content)){
+            event.setContent(content);
+            event.setCreatorUid(UserContext.currentUserId());
+            event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class, id));
+            EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+            LOGGER.info("saveCustomerEventWithInsert: " + event);
+            dao.insert(event);
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
+        }
+    }
+
+
 	@Override
 	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
@@ -1599,7 +1637,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 			break;
 		case 3 :
-			content = compareEnterpriseCustomer(customer,exist);
+			content = compareEnterpriseCustomer(customer,exist, null);
 			break;
 		default :break;
 		}
@@ -1630,11 +1668,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return result;
 	}
 	
-	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist) {
+	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist, String moduleName) {
 		//查出模板配置的参数
 		ListFieldCommand command = new ListFieldCommand();
 		command.setNamespaceId(customer.getNamespaceId());
-		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
+
+        if(StringUtils.isNotBlank(moduleName)){
+            command.setModuleName(moduleName);
+        }else{
+            command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME_INVITED);
+        }
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
 		command.setCommunityId(customer.getCommunityId());
 		List<FieldDTO> fields = fieldService.listFields(command);

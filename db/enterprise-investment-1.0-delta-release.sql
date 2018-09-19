@@ -34,6 +34,9 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12115,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_promotion','enterprise_customer');
 
 
+update eh_var_fields set mandatory_flag = 1 where id =12111;
+update eh_var_fields set group_id = 10,group_path = '/1/10' where id in (select field_id from eh_var_field_ranges where module_name = 'investment_promotion');
+
 SET @id = (select max(id) from eh_var_field_group_ranges);
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 10, 'investment_promotion', 'enterprise_customer');
@@ -66,7 +69,7 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VA
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150008, 0, '招商管理 导入权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150009, 0, '招商管理 导出权限', '招商管理 业务模块权限', NULL);
 
-update eh_var_fields set display_name = '拜访人' where id =211
+update eh_var_fields set display_name = '拜访人' where id =211;
 update eh_var_fields set display_name = '拜访时间' where id =11002;
 update eh_var_fields set display_name = '拜访内容' where id =11003;
 update eh_var_fields set display_name = '拜访方式' where id =11004;
@@ -213,14 +216,20 @@ END
 //
 delimiter ;
 CALL transfer_field_group;
+
 -- END
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 房源招商增加“客户账单”动态表单
 INSERT INTO `eh_var_field_groups`(`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
 	VALUES (38, 'enterprise_customer', 0, '/38', '客户账单', '', 0, NULL, 2, 1, SYSDATE(), NULL, NULL);
-INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 38, 'enterprise_customer', 'enterprise_customer');	
+set @id = IFNULL((SELECT max(id) from eh_var_field_group_ranges),1);
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 38, 'enterprise_customer', 'enterprise_customer');
 
-
-
+-- AUTHOR: 黄鹏宇
+-- REMARK: 房源招商增加“活动记录”动态表单
+INSERT INTO `eh_var_field_groups`(`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+	VALUES (39, 'enterprise_customer', 0, '/39', '活动记录', '', 0, NULL, 2, 1, SYSDATE(), NULL, NULL);
+set @id = IFNULL((SELECT max(id) from eh_var_field_group_ranges),1);
+INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 39, 'enterprise_customer', 'enterprise_customer');
 	

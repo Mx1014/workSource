@@ -145,6 +145,7 @@ public interface EnterpriseCustomerProvider {
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType, String moduleName);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	
 	void allotEnterpriseCustomer(EnterpriseCustomer customer);

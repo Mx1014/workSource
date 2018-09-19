@@ -179,6 +179,16 @@ public class InvitedCustomerDTO {
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+    private Long organizationId;
+
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public String getTransactionRatio() {
         return transactionRatio;

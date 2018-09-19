@@ -175,6 +175,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 dto.setStatus(CommonStatus.ACTIVE.getCode());
                 dto.setNamespaceId(cmd.getNamespaceId());
                 customerSearcher.feedDoc(dto);
+
                 return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
             }
         }catch(RuntimeErrorException e){
@@ -206,6 +207,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         EnterpriseCustomerDTO customerDTO = null;
         try {
             cmd2.setCheckAuthFlag(null);
+            cmd2.setModuleName("investment_promotion");
             customerDTO = customerService.updateEnterpriseCustomer(cmd2);
         }catch (RuntimeErrorException e){
             LOGGER.error(e.getMessage());

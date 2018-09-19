@@ -85,6 +85,7 @@ import java.util.List;
  */
 public class UpdateEnterpriseCustomerCommand {
     private Integer namespaceId;
+    private String moduleName;
     private Long orgId;
     private Long communityId;
     private Long id;
@@ -245,6 +246,14 @@ public class UpdateEnterpriseCustomerCommand {
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
 
     public String getTransactionRatio() {
         return transactionRatio;

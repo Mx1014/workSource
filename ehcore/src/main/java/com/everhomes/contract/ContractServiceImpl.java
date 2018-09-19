@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1943,7 +1945,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			//查询企业客户信息
 			if (contract.getCustomerType()==0) {
 				EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-				enterpriseCustomer.setLevelItemId(6L);
+				enterpriseCustomer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+				enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
 				enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
 				enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 			}

@@ -4,6 +4,7 @@ import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.activity.ActivityCategories;
 import com.everhomes.activity.ActivityProivider;
+import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
@@ -58,6 +59,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
@@ -300,6 +302,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private ActivityService activityService;
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
@@ -1018,6 +1023,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (cmd.getFoundingTime() != null) {
             updateCustomer.setFoundingTime(new Timestamp(cmd.getFoundingTime()));
         }
+        if (cmd.getExpectedSignDate() != null) {
+            updateCustomer.setExpectedSignDate(new Timestamp(cmd.getExpectedSignDate()));
+        }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         //保存经纬度
         if (null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()) {
@@ -1052,7 +1060,7 @@ public class CustomerServiceImpl implements CustomerService {
         //保存之后重查一遍 因为数据类型导致 fix 22978
         updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
-        saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
+        saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType(), cmd.getModuleName());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             Organization org = organizationProvider.findOrganizationById(updateCustomer.getOrganizationId());
@@ -3672,6 +3680,11 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist, deviceType);
     }
 
+
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist, Byte deviceType, String moduleName) {
+        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist, deviceType, moduleName);
+    }
+
     @Override
     public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
         List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
@@ -4838,6 +4851,11 @@ public class CustomerServiceImpl implements CustomerService {
         for(EnterpriseCustomerDTO dto : res.getDtos()){
             enterpriseCustomerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
         }
+    }
+
+    @Override
+    public ListSignupInfoByOrganizationIdResponse listCustomerApartmentActivity(ListCustomerApartmentActivityCommand cmd){
+        return activityService.listSignupInfoByOrganizationId(cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
     }
 
 }
