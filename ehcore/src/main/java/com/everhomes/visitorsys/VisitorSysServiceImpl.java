@@ -2749,4 +2749,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public void removeInvalidTime() {
         List<VisitorSysConfiguration> configs = visitorSysConfigurationProvider.listVisitorSysConfiguration();
     }
+
+    @Override
+    public GetConfigurationResponse getConfigurationForManage(GetConfigurationCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return getConfiguration(cmd);
+    }
 }

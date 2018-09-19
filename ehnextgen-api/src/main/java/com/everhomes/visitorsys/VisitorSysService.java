@@ -154,4 +154,6 @@ public interface VisitorSysService {
     void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd);
 
     void removeInvalidTime();
+
+    GetConfigurationResponse getConfigurationForManage(GetConfigurationCommand cmd);
 }

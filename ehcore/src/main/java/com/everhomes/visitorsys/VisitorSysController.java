@@ -970,5 +970,23 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /visitorsys/getConfigurationForManage</b>
+	 * <p>
+	 * 1.获取配置-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("getConfigurationForManage")
+	@RestReturn(GetConfigurationResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getConfigurationForManage(GetConfigurationCommand cmd) {
+		GetConfigurationResponse baseResponse = visitorSysService.getConfigurationForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 }
