@@ -143,6 +143,16 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.version', '2', '捷顺接口版本', 0, NULL, 1);
 
 
+-- AUTHOR: 严军
+-- REMARK: 增加“企业钱包”模块，更新“会议室管理”菜单path
+-- issue null
+UPDATE eh_web_menus SET path = '/23000000/23010000/16041900' WHERE id = 16041900;
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('59200', '企业钱包', '50000', '/100/50000/59200', '1', '3', '2', '240', '2018-09-19 14:42:53', NULL, NULL, '2018-09-19 14:43:07', '0', '0', '0', '0', 'org_control', '1', '1', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('79100000', '企业钱包', '23010000', NULL, 'enterprise-wallet', '1', '2', '/23000000/23010000/79100000', 'zuolin', '240', '59200', '3', 'system', 'module', NULL, '1');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('79200000', '企业钱包', '77000000', NULL, 'enterprise-wallet', '1', '2', '/70000010/77000000/79200000', 'organization', '240', '59200', '3', 'system', 'module', NULL, '1');
+
+
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
