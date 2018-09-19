@@ -228,7 +228,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             dto.setParkingName(parkingLot.getName());
 
             dto.setSpaceNo(location.getParkLotName());
-//            dto.setLocation(location.getParkLotName());
+            dto.setLocation(location.getFloorName() + location.getParkLotName());
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
 
