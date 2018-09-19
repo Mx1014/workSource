@@ -177,6 +177,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -209,6 +210,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11331,6 +11333,11 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(managerMember.getOrganizationId());
             response.setDeptId(dpt.getId());
             response.setDeptName(dpt.getName());
+            List<Long> subDptIds = findSubDepartmentIds(dpt.getId());
+            response.setHasSubDpts(NormalFlag.YES.getCode());
+            if(CollectionUtils.isEmpty(subDptIds)){
+            	response.setHasSubDpts(NormalFlag.NO.getCode());
+            }
         }
         return response;
     }
