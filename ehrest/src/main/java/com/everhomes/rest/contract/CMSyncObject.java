@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 public class CMSyncObject {
-    private String errorCode;
+    private String errorcode;
 
     private String total;
 
@@ -40,11 +40,11 @@ public class CMSyncObject {
     }
 
     public String getErrorCode() {
-        return errorCode;
+        return errorcode;
     }
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    public void setErrorCode(String errorcode) {
+        this.errorcode = errorcode;
     }
 
     public List<CMDataObject> getData() {

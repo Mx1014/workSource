@@ -8,6 +8,8 @@ import java.sql.Timestamp;
 public class CMBill {
 
     private String PropertyID;
+    
+    private String BillScheduleID;//定期账单ID（唯一标识）
 
     private String DebtorID;
 
@@ -31,14 +33,14 @@ public class CMBill {
 
     private String BalanceAmt;
 
-    private String Modifydate;
+    private String ModifyDate;
 
-    public String getModifydate() {
-        return Modifydate;
+    public String getModifyDate() {
+        return ModifyDate;
     }
 
-    public void setModifydate(String modifydate) {
-        Modifydate = modifydate;
+    public void setModifyDate(String modifyDate) {
+        ModifyDate = modifyDate;
     }
 
     public String getPropertyID() {
@@ -141,4 +143,12 @@ public class CMBill {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getBillScheduleID() {
+		return BillScheduleID;
+	}
+
+	public void setBillScheduleID(String billScheduleID) {
+		BillScheduleID = billScheduleID;
+	}
 }
