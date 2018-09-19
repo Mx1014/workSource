@@ -2597,6 +2597,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      * @auther wh
      * */ 
     private void doUclbrtQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+    	LOGGER.info("ucl 进入doQRKEY " );
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCreatorUid(auth.getApproveUserId());
@@ -2663,7 +2664,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType driverType, boolean generate) {
     	Long t0 = DateHelper.currentGMTTime().getTime();
         User user = UserContext.current().getUser();
-
+        Long t1 = DateHelper.currentGMTTime().getTime();
+        LOGGER.info("开始获取auths" );
         ListingLocator locator = new ListingLocator();
         //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), driverType != null? driverType.getCode() : null, 60));
@@ -2699,6 +2701,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
             	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
             	//added by wh
+            	Long t3 = DateHelper.currentGMTTime().getTime();
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
