@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.common;
 
+import com.everhomes.rest.announcement.AnnouncementDetailActionData;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.meeting.MeetingRecordDetailActionData;
 import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
@@ -233,6 +234,9 @@ public enum Router {
      */
     BULLETIN_OWN_BY_ORG(ActionType.NOTICE_MANAGERMENT,
             "zl://bulletin/own-by-org", NoParamActionData.class),
+
+    BULLETIN_DETAIL(ActionType.ANNOUNCEMENT_DETAIL,
+            "zl://bulletin/detail", AnnouncementDetailActionData.class),
 
     /**
      * resource-reservation

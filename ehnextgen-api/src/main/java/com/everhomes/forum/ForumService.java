@@ -113,6 +113,7 @@ public interface ForumService {
     ListPostCommandResponse listTopicsByForums(ListTopicByForumCommand cmd);
     ListPostCommandResponse listOrgTopics(QueryOrganizationTopicCommand cmd);
 //    ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd);
+    ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor);
     ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor);
     ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd);
     
