@@ -310,7 +310,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/syncWorkReportReceiver</b>
-     * <p>同步工作汇报接收人公司信息 </p>
+     * <p>同步工作汇报接收人公司信息(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("syncWorkReportReceiver")
     @RestReturn(value=String.class)
@@ -324,7 +324,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updateWorkReportReceiverAvatar</b>
-     * <p>更新工作汇报接收人头像 </p>
+     * <p>更新工作汇报接收人头像(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("updateWorkReportReceiverAvatar")
     @RestReturn(value=String.class)
@@ -338,7 +338,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/rxMessageTest</b>
-     * <p>测试接收信息 </p>
+     * <p>测试接收信息(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("rxMessageTest")
     @RestReturn(value=String.class)
@@ -352,7 +352,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/auMessageTest</b>
-     * <p>测试提醒信息 </p>
+     * <p>测试提醒信息(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("auMessageTest")
     @RestReturn(value=String.class)
@@ -366,7 +366,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/createAuMessageTest</b>
-     * <p>创建提醒信息 </p>
+     * <p>创建提醒信息(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("createAuMessageTest")
     @RestReturn(value=String.class)

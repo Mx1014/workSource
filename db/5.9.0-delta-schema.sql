@@ -75,6 +75,13 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `source_name` VARCHAR(1024) COMME
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_id` BIGINT COMMENT '企业下面的某个人的ID';
 
 
+-- AUTHOR: 黄明波
+-- REMARK: #33683服务联盟样式列表添加排序 #37669修复
+ALTER TABLE `eh_service_alliance_categories`	CHANGE COLUMN `default_order` `default_order` BIGINT NOT NULL DEFAULT '0' ;
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `address` `address` VARCHAR(255) NULL DEFAULT NULL ;
+-- END
+
+
 
 -- AUTHOR: 吴寒
 -- REMARK: issue-33887: 增加操作人姓名到目录/文件表
