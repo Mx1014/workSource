@@ -33,6 +33,4 @@ public interface ServiceModuleConstants {
     
     long BUSINESS_INVITATION = 150000L;//招商管理模块
 
-    long BUSINESS_INVITATION = 150000L; //招商管理模块
-
 }
