@@ -1851,7 +1851,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public TransformToCustomerResponse transformToCustomer(TransformToCustomerCommand cmd) {
+	public List<Long> transformToCustomer(TransformToCustomerCommand cmd) {
 		List<IntentionCustomerDTO> intentionCustomers = cmd.getIntentionCustomers();
 		
 		Map<String, CreateInvitedCustomerCommand> finalCommandMap = new HashMap<>();
@@ -1917,8 +1917,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			InvitedCustomerDTO invitedCustomer = invitedCustomerService.createInvitedCustomerWithoutAuth(createInvitedCustomerCommand);
 			customerIds.add(invitedCustomer.getId());
 		}
-		TransformToCustomerResponse response = new TransformToCustomerResponse();
-		response.setCustomerIds(customerIds);	
-		return response;
+		return customerIds;
+//		TransformToCustomerResponse response = new TransformToCustomerResponse();
+//		response.setCustomerIds(customerIds);	
+//		return response;
 	}
 }

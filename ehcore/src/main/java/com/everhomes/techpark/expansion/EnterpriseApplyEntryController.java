@@ -542,10 +542,10 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>转为意向客户（园区入驻模块）</p>
 	 */
 	@RequestMapping("transformToCustomer")
-	@RestReturn(value=TransformToCustomerResponse.class)
+	@RestReturn(value=Long.class,collection=true)
 	public RestResponse transformToCustomer(TransformToCustomerCommand cmd){
-		TransformToCustomerResponse res = enterpriseApplyEntryService.transformToCustomer(cmd);
-		RestResponse response = new RestResponse(res);
+		List<Long> result = enterpriseApplyEntryService.transformToCustomer(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

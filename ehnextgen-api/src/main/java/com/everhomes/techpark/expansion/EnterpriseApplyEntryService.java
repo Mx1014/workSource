@@ -60,6 +60,6 @@ public interface EnterpriseApplyEntryService {
 
 	void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp);
 
-	TransformToCustomerResponse transformToCustomer(TransformToCustomerCommand cmd);
+	List<Long> transformToCustomer(TransformToCustomerCommand cmd);
 	
 }
