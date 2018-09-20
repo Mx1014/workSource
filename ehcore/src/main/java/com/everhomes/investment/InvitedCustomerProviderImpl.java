@@ -434,14 +434,14 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 //            if (endAreaSize != null)
 //                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
             if (startAreaSize != null && endAreaSize != null) {
-                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
-                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+                query.addConditions(requirements.MIN_AREA.ge(startAreaSize));
+                query.addConditions(requirements.MAX_AREA.le(endAreaSize));
             }
             if (startAreaSize != null && endAreaSize == null) {
-                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+                query.addConditions(requirements.MIN_AREA.ge(startAreaSize));
             }
             if (startAreaSize == null) {
-                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+                query.addConditions(requirements.MAX_AREA.le(endAreaSize));
             }
             requires = query.fetchInto(Long.class);
 

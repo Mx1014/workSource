@@ -459,8 +459,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
                     dtos.forEach(r ->{
                         Address address = addressProvider.findAddressById(r.getAddressId());
-                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE)){
-                            r.setAddressName("房源已删除");
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
                         }else{
                             r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
                             r.setAddressArea(address.getBuildArea());
@@ -500,8 +500,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                    addressDTO.setAddressArea(address.getRentArea());
+                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+
+                    }else{
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                        addressDTO.setAddressArea(address.getRentArea());
+                    }
+
+
                     addressesDTO.add(addressDTO);
 
                 });

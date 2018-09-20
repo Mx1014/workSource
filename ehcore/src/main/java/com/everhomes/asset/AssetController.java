@@ -253,17 +253,17 @@ public class AssetController extends ControllerBase {
 	 * 删除账单
 	 * </p>
 	 */
-	@RequestMapping("deleteBill")
-	@RestReturn(value = String.class)
-	public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
-
-		assetService.deleteBill(cmd);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	@RequestMapping("deleteBill")
+//	@RestReturn(value = String.class)
+//	public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
+//
+//		assetService.deleteBill(cmd);
+//
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	// 设置用户模板显示顺序
 	// 设置用户模板
