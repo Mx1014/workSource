@@ -59,5 +59,7 @@ public interface EnterpriseApplyEntryService {
 	String getSourceTypeName(String type);
 
 	void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp);
+
+	TransformToCustomerResponse transformToCustomer(TransformToCustomerCommand cmd);
 	
 }
