@@ -64,15 +64,6 @@ public class ArchivesContactDTO {
 
     private String account;
 
-
-
-    //  export
-    private String genderString;
-
-    private String departmentString;
-
-    private String jobPositionString;
-
     public ArchivesContactDTO() {
     }
 
@@ -194,30 +185,6 @@ public class ArchivesContactDTO {
 
     public void setVisibleFlag(Byte visibleFlag) {
         this.visibleFlag = visibleFlag;
-    }
-
-    public String getGenderString() {
-        return genderString;
-    }
-
-    public void setGenderString(String genderString) {
-        this.genderString = genderString;
-    }
-
-    public String getDepartmentString() {
-        return departmentString;
-    }
-
-    public void setDepartmentString(String departmentString) {
-        this.departmentString = departmentString;
-    }
-
-    public String getJobPositionString() {
-        return jobPositionString;
-    }
-
-    public void setJobPositionString(String jobPositionString) {
-        this.jobPositionString = jobPositionString;
     }
 
     public List<OrganizationDTO> getJobLevels() {

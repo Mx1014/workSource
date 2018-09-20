@@ -121,13 +121,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             RowResult r = (RowResult) resultLists.get(i);
             ImportArchivesContactsDTO data = new ImportArchivesContactsDTO();
             data.setContactName(r.getCells().get("A") != null ? r.getCells().get("A") : "");
-            data.setContactEnName(r.getCells().get("B") != null ? r.getCells().get("B") : "");
-            data.setGender(r.getCells().get("C") != null ? r.getCells().get("C") : "");
-            data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D") : "");
-            data.setContactShortToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
-            data.setWorkEmail(r.getCells().get("F") != null ? r.getCells().get("F") : "");
-            data.setDepartment(r.getCells().get("G") != null ? r.getCells().get("G") : "");
-            data.setJobPosition(r.getCells().get("H") != null ? r.getCells().get("H") : "");
+            data.setAccount(r.getCells().get("B") != null ? r.getCells().get("B").trim() : "");
+            data.setContactEnName(r.getCells().get("C") != null ? r.getCells().get("C") : "");
+            data.setGender(r.getCells().get("D") != null ? r.getCells().get("D") : "");
+            data.setContactToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
+            data.setContactShortToken(r.getCells().get("F") != null ? r.getCells().get("F") : "");
+            data.setWorkEmail(r.getCells().get("G") != null ? r.getCells().get("G") : "");
+            data.setDepartment(r.getCells().get("H") != null ? r.getCells().get("H") : "");
+            data.setJobPosition(r.getCells().get("I") != null ? r.getCells().get("I") : "");
             datas.add(data);
         }
         return datas;
@@ -188,6 +189,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         //  姓名校验
         if (checkArchivesContactName(log, data, data.getContactName()))
+            return log;
+
+        //  账号校验
+        if (checkArchivesAccount(log, data, data.getAccount()))
             return log;
 
         //  英文名校验
@@ -304,7 +309,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return writeExcel(workbook);
     }
 
-    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts){
+    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.C_FILENAME);
@@ -551,9 +556,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 map.put(ArchivesParameter.JOB_LEVEL_IDS, organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_LEVEL.getCode()));
         }
 
-        if(ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())){
-            if (!StringUtils.isEmpty(itemValue.getFieldValue())){
-                if(checkArchivesWorkEmail(log, convertListToMap(data), itemValue.getFieldValue(), organizationId))
+        if (ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())) {
+            if (!StringUtils.isEmpty(itemValue.getFieldValue())) {
+                if (checkArchivesWorkEmail(log, convertListToMap(data), itemValue.getFieldValue(), organizationId))
                     return log;
             }
         }
@@ -670,7 +675,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.E_FILENAME);
-        sheet.createFreezePane(1,2,1,1);
+        sheet.createFreezePane(1, 2, 1, 1);
         //  1.head
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
@@ -702,7 +707,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             workbook.write(out);
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        }finally {
+        } finally {
             try {
                 workbook.close();
             } catch (IOException e) {
@@ -722,7 +727,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(fileName);
-        sheet.createFreezePane(1,2,1,1);
+        sheet.createFreezePane(1, 2, 1, 1);
 
         //  1.set the header
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
@@ -759,7 +764,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFCellStyle mandatoryStyle = mandatoryTitleStyle(workbook);
         for (int i = 0; i < title.size(); i++) {
             Cell cell = titleRow.createCell(i);
-            sheet.setColumnWidth( i,18 * 256);
+            sheet.setColumnWidth(i, 18 * 256);
             if (checkMandatory(title.get(i)))
                 cell.setCellStyle(mandatoryStyle);
             else
@@ -782,7 +787,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook){
+    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook) {
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
@@ -795,7 +800,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return titleStyle;
     }
 
-    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook){
+    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook) {
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
@@ -809,7 +814,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return titleStyle;
     }
 
-    private XSSFCellStyle commonBodyStyle(XSSFWorkbook workbook){
+    private XSSFCellStyle commonBodyStyle(XSSFWorkbook workbook) {
         XSSFCellStyle contentStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 12);
@@ -826,7 +831,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             DownloadUtil.download(out, httpResponse, fileName);
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        }finally {
+        } finally {
             try {
                 workbook.close();
             } catch (IOException e) {
@@ -887,6 +892,19 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setErrorLog("Contact name wrong format.");
             log.setCode(ArchivesLocaleStringCode.ERROR_NAME_WRONG_FORMAT);
             return true;
+        }
+        return false;
+    }
+
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account) {
+        if (!StringUtils.isEmpty(account)) {
+            if (account.length() > 32 || !Pattern.matches("^[a-zA-Z0-9_\\-.]+$", account)) {
+                LOGGER.warn("Account wrong format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Account EnName wrong format");
+                log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_WRONG_FORMAT);
+                return true;
+            }
         }
         return false;
     }

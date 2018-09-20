@@ -137,7 +137,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
         if(!StringUtils.isEmpty(cmd.getAccount()))
-            if (!organizationService.verifyPersonnelByAccount(cmd.getUpdateDetailId(), cmd.getWorkEmail()))
+            if (!organizationService.verifyPersonnelByAccount(cmd.getUpdateDetailId(), cmd.getAccount().trim()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT,
                         "Duplicate account");
 
@@ -152,7 +152,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (employee == null)
             return null;
         if(employee.getAccount() == null)
-            employee.setAccount(cmd.getAccount());
+            employee.setAccount(cmd.getAccount().trim());
         employee.setEnName(cmd.getContactEnName());
         employee.setRegionCode(cmd.getRegionCode());
         employee.setContactShortToken(cmd.getContactShortToken());

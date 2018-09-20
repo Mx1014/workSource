@@ -19,6 +19,7 @@ public interface ArchivesLocaleStringCode {
     int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
     int ERROR_DUPLICATE_WORK_EMAIL = 100014; //  邮箱重复
     int ERROR_DUPLICATE_ACCOUNT = 100015;   //  账号重复
+    int ERROR_ACCOUNT_WRONG_FORMAT = 100016;    //  账号长度不对或格式错误
 
     int ERROR_NO_TARGETS = 200001;  //  通知目标为空
     int ERROR_DELETE_ADMIN = 200002;    //  无法删除管理员，请先解除其管理权限再重试
