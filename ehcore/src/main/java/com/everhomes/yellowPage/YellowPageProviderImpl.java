@@ -397,6 +397,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		category.setId(id);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
+		category.setDefaultOrder(id);
 	        
 		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
 		dao.insert(category);
