@@ -138,19 +138,20 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 String homeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
-            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                UserTreasureDTO point = null;
-                 try {
-                     point = pointService.getPointTreasure();
-                 }catch (Exception e) {
-                     LOGGER.error("get point exception");
-                     e.printStackTrace();
-                 }
-                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
-                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
-                }
-            }
+            //为了不影响个人中心，将获取积分的数据从此处移除，放到获取用户财富中。
+//            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
+//                UserTreasureDTO point = null;
+//                 try {
+//                     point = pointService.getPointTreasure();
+//                 }catch (Exception e) {
+//                     LOGGER.error("get point exception");
+//                     e.printStackTrace();
+//                 }
+//                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
+//                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+//                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+//                }
+//            }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
 //                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
