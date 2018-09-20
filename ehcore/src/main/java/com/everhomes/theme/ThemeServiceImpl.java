@@ -32,7 +32,7 @@ public class ThemeServiceImpl implements ThemeService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 
-		String value = configurationProvider.getValue(namespaceId, "theme.color", "#1E90FF");
+		String value = configurationProvider.getValue(namespaceId, "theme.color", "#1E90FE");
 
 		ThemeColorDTO dto = new ThemeColorDTO();
 		dto.setValue(value);
