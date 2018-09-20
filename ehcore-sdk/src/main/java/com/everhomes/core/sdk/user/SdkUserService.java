@@ -12,6 +12,7 @@ import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
 import com.everhomes.rest.region.GetRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.user.ListBorderAndContentResponse;
+import com.everhomes.rest.user.ListBorderAndContentRestResponse;
 import com.everhomes.rest.user.SendVerificationCodeCommand;
 import com.everhomes.rest.user.SetUserCurrentCommunityCommand;
 import com.everhomes.rest.user.SetUserDefaultCommunityCommand;
@@ -39,8 +40,8 @@ public class SdkUserService {
     }
 
     public ListBorderAndContentResponse listAllBorderAccessPoints() {
-        RestResponse response = sdkRestClient.restCall("post", "/evh/user/listBorderAndContent", null, RestResponse.class);
-        ListBorderAndContentResponse res = (ListBorderAndContentResponse)response.getResponseObject();
+        ListBorderAndContentRestResponse response = sdkRestClient.restCall("post", "/evh/user/listBorderAndContent", null, ListBorderAndContentRestResponse.class);
+        ListBorderAndContentResponse res = response.getResponse();
         return res;
     }
 
