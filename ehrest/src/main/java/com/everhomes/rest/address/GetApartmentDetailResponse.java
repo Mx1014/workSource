@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.address;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -34,7 +35,9 @@ import com.everhomes.util.StringHelper;
  * <li>reservationInvolved: 该房源是否关联预定计划（0：否,1：是）</li>
  * <li>individualCustomerInvolved: 该房源是否关联个人客户（0：否,1：是）</li>
  * <li>enterpriseCustomerInvolved: 该房源是否关联企业客户（0：否,1：是）</li>
- * 
+ * <li>apartmentRent: 房源的租金</li>
+ * <li>apartmentRentType: 房源的租金类型</li>
+ * <li>apartAuthorizePrice: 房源授权价</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -66,7 +69,34 @@ public class GetApartmentDetailResponse {
 	private Byte individualCustomerInvolved;
 	private Byte enterpriseCustomerInvolved;
 	private Integer buildingFloorNumber;
+	private BigDecimal apartmentRent;
+	private Byte apartmentRentType;
+	private String apartAuthorizePrice;
+    
+	public String getApartAuthorizePrice() {
+		return apartAuthorizePrice;
+	}
+
+	public void setApartAuthorizePrice(String apartAuthorizePrice) {
+		this.apartAuthorizePrice = apartAuthorizePrice;
+	}
 	
+	public BigDecimal getApartmentRent() {
+		return apartmentRent;
+	}
+
+	public void setApartmentRent(BigDecimal apartmentRent) {
+		this.apartmentRent = apartmentRent;
+	}
+
+	public Byte getApartmentRentType() {
+		return apartmentRentType;
+	}
+
+	public void setApartmentRentType(Byte apartmentRentType) {
+		this.apartmentRentType = apartmentRentType;
+	}
+
 	public Integer getBuildingFloorNumber() {
 		return buildingFloorNumber;
 	}
