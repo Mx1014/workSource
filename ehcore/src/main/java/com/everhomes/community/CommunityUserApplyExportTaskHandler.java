@@ -99,15 +99,12 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
                                 executiveFlag.append("是,");
                             }
 
-                            if(org.getCommunityUserOrgDetailDTO().getPositionTag() == null || org.getCommunityUserOrgDetailDTO().getPositionTag().equals("")){
-                                positionFlag.append("-,");
-                            }else {
+                            if (!StringUtils.isBlank(org.getCommunityUserOrgDetailDTO().getPositionTag())) {
                                 positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
                             }
 
                         }else {
                             executiveFlag.append("-,");
-                            positionFlag.append("-,");
                         }
                     }
                 }else {
@@ -125,7 +122,7 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
                 exportCommunityUserDto.setAuthString(AuthFlag.fromCode(r.getIsAuth()) == AuthFlag.AUTHENTICATED ? "已认证" : "待认证");
                 exportCommunityUserDto.setUserSourceTypeString(UserSourceType.fromCode(r.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
                 exportCommunityUserDto.setEnterpriseName(enterprises.toString());
-                exportCommunityUserDto.setPosition(positionFlag.toString());
+                exportCommunityUserDto.setPosition(StringUtils.isBlank(positionFlag.toString())?"-":positionFlag.toString().substring(0,positionFlag.toString().length()-1));
                 exportCommunityUserDto.setExecutiveString(executiveFlag.toString());
                 exportCommunityUserDto.setEmail("-");
                 if (emailIdentifier != null) {

@@ -226,15 +226,12 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                                 executiveFlag.append("是,");
                             }
 
-                            if(org.getCommunityUserOrgDetailDTO().getPositionTag() == null || org.getCommunityUserOrgDetailDTO().getPositionTag().equals("")){
-                                positionFlag.append("-,");
-                            }else {
+                            if (!StringUtils.isBlank(org.getCommunityUserOrgDetailDTO().getPositionTag())) {
                                 positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
                             }
 
                         }else {
                             executiveFlag.append("-,");
-                            positionFlag.append("-,");
                         }
                     }
                 }else {
@@ -252,7 +249,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                 exportCommunityUserDto.setAuthString(AuthFlag.fromCode(r.getIsAuth()) == AuthFlag.AUTHENTICATED ? "已认证" : "待认证");
                 exportCommunityUserDto.setUserSourceTypeString(UserSourceType.fromCode(r.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
                 exportCommunityUserDto.setEnterpriseName(enterprises.toString());
-                exportCommunityUserDto.setPosition(positionFlag.toString());
+                exportCommunityUserDto.setPosition(StringUtils.isBlank(positionFlag.toString())?"-":positionFlag.toString().substring(0,positionFlag.toString().length()-1));
                 exportCommunityUserDto.setExecutiveString(executiveFlag.toString());
                 exportCommunityUserDto.setEmail("-");
                 if (emailIdentifier != null) {
@@ -355,7 +352,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
         XSSFCellStyle contentStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 12);
-        font.setFontName("微软雅黑");
+        font.setFontName("宋体");
         contentStyle.setAlignment(HorizontalAlignment.CENTER);
         contentStyle.setFont(font);
         for (int i = 0; i < list.size(); i++) {
