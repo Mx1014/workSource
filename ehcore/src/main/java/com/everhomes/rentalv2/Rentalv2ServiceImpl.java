@@ -2476,7 +2476,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		//续费 欠费订单重新生成订单号
-		if (order.getStatus() != SiteBillStatus.PAYINGFINAL.getCode()) {
+		if (order.getStatus() != SiteBillStatus.PAYINGFINAL.getCode() &&
+				order.getStatus() != SiteBillStatus.APPROVING.getCode()) {
 			order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 			rentalv2Provider.updateRentalBill(order);//更新新的订单号
 		}
@@ -4230,7 +4231,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		PreOrderDTO callBack = null;
-		if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0 )
+		if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0
+				&& order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) //只有线上支付在这个时候下单
 			callBack = rentalv2PayService.createPreOrder(preOrderCommand,order);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
