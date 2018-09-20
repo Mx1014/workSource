@@ -3831,18 +3831,35 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherGroupId = assetProvider.createBillGroup(cmd,deCouplingFlag,null);
-            //同步下去
+            brotherGroupId = getBrotherGroupId();
+            //1、先同步下去
             List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
             for(int i =0; i < allCommunity.size(); i ++){
                 Long communityId = allCommunity.get(i);
                 cmd.setOwnerId(communityId);
-                assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId);
+                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
+                }
             }
+            //2、再创建全部配置
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            assetProvider.createBillGroup(cmd,deCouplingFlag,null,brotherGroupId);
         }else{
             //去解耦同伴
-            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId);
+            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
         }
+    }
+    
+    private Long getBrotherGroupId() {
+    	long nextGroupId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_GROUPS.getClass()));
+    	return nextGroupId;
     }
 
     @Override

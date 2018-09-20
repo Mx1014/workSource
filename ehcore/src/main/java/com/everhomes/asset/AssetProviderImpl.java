@@ -4056,14 +4056,16 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId) {
+    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         Long nullId = null;
+        if(nextGroupId == null) {
+        	nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+        }
         if(deCouplingFlag == (byte) 1){
             //去解耦
             //添加
-            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
             InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
             //去解耦同伴
             context.update(t)
@@ -4075,21 +4077,7 @@ public class AssetProviderImpl implements AssetProvider {
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
         	//添加
-            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
-            if(cmd.getNamespaceId().equals(cmd.getOwnerId().intValue())){//ownerId为-1代表选择的是全部
-            	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-            }else {
-            	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-                }
-            }
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
             return nextGroupId;
         }
         return null;
@@ -6322,8 +6310,32 @@ public class AssetProviderImpl implements AssetProvider {
         	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         	}else {
-        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		scopes = context.selectFrom(t1)
+	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                    .fetchInto(PaymentBillGroup.class);
+        		if(scopes.size() > 0) {
+        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}else {
+        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}
         	}
+        	
+//        	scopes = context.selectFrom(t1)
+//            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                    .fetchInto(PaymentBillGroup.class);
+//        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
+//        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        	}else {
+//        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        	}
+        	
+        	
         }
        return response;
 	}
