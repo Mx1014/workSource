@@ -9,6 +9,10 @@
 -- REMARK: 1、备份表eh_asset_module_app_mappings
 --         2、调用接口/asset/tranferAssetMappings
 
+-- AUTHOR: 黄鹏宇 2018年9月5日
+-- REMARK: 1、调用接口/customer/syncEnterpriseCustomerIndex
+
+
 -- AUTHOR: ryan  20180918
 -- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息
 
