@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>applyEntryId：申请记录id</li> 
  * <li>customerName：承租方（即企业客户名称）</li> 
  * <li>addressId：意向房源id</li> 
  * <li>applyUserName：申请人（即客户联系人）</li>
@@ -12,11 +13,18 @@ import com.everhomes.util.StringHelper;
  */
 public class IntentionCustomerDTO {
 	
+	private Long applyEntryId;
 	private String customerName;
 	private Long addressId;
 	private String applyUserName;
 	private Long applyContact;
 	
+	public Long getApplyEntryId() {
+		return applyEntryId;
+	}
+	public void setApplyEntryId(Long applyEntryId) {
+		this.applyEntryId = applyEntryId;
+	}
 	public String getCustomerName() {
 		return customerName;
 	}

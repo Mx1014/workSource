@@ -539,7 +539,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/transformToCustomer</b>
-	 * <p>入住信息列表</p>
+	 * <p>转为意向客户（园区入驻模块）</p>
 	 */
 	@RequestMapping("transformToCustomer")
 	@RestReturn(value=TransformToCustomerResponse.class)

@@ -1858,14 +1858,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		for (IntentionCustomerDTO dto : intentionCustomers) {
 			if (finalCommandMap.containsKey(dto.getCustomerName())) {
 				CreateInvitedCustomerCommand cmd2 = finalCommandMap.get(dto.getCustomerName());
-				//TODO 企业客户意向房源;得考虑addressId重复的问题
+				//企业客户意向房源
+				//TODO 得考虑addressId重复的问题,目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:08
 				CustomerRequirementDTO requirement = cmd2.getRequirement();
 				List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
 				CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
 				addressDTO.setAddressId(dto.getAddressId());
 				addresses.add(addressDTO);
 				requirement.setAddresses(addresses);
-				//TODO 企业客户联系人;得考虑联系人重复的问题
+				//企业客户联系人
+				//TODO 得考虑联系人重复的问题，目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:12
 				List<CustomerContactDTO> contacts = cmd2.getContacts();
 				CustomerContactDTO contactDTO = new  CustomerContactDTO();
 				contactDTO.setName(dto.getApplyUserName());
@@ -1873,6 +1875,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
 			}else {
 				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
 				//企业客户
@@ -1898,6 +1902,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				cmd2.setContacts(contacts);
 				
 				finalCommandMap.put(dto.getCustomerName(), cmd2);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
 			}
 		}
 		
