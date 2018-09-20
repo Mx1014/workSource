@@ -287,14 +287,14 @@ public class AssetController extends ControllerBase {
 	 * </p>
 	 * @return
 	 */
-//	@RequestMapping("checkTokenRegister")
-//	@RestReturn(value = Boolean.class)
-//	public RestResponse checkTokenRegister(@Valid CheckTokenRegisterCommand cmd) {
-//		RestResponse response = new RestResponse(this.assetService.checkTokenRegister(cmd));
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("checkTokenRegister")
+	@RestReturn(value = Boolean.class)
+	public RestResponse checkTokenRegister(@Valid CheckTokenRegisterCommand cmd) {
+		RestResponse response = new RestResponse(this.assetService.checkTokenRegister(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /asset/notifyTimes</b>
