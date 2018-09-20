@@ -19,6 +19,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.tool.BlutoAccessor;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import net.sf.cglib.beans.BeanMap;
@@ -450,7 +451,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
 
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
-        App app = this.appProvider.findAppByKey(appKey);
+        App app = getAppByKey(appKey);
         if (app == null) {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
@@ -468,6 +469,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         String signature = getParamValue(paramMap, "signature");
 
         return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
+    }
+
+    private App getAppByKey(String appKey) {
+        // 给 SDK 调用提供的便捷方式
+        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+            App app = new App();
+            app.setAppKey(appKey);
+            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setName("SDK");
+            app.setId(0L);
+            return app;
+        }
+        return this.appProvider.findAppByKey(appKey);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {

@@ -1,5 +1,6 @@
 package com.everhomes.core.sdk.user;
 
+import com.everhomes.core.sdk.CoreSdkSettings;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.category.GetCategoryCommand;
@@ -16,15 +17,13 @@ import com.everhomes.rest.user.SetUserCurrentCommunityCommand;
 import com.everhomes.rest.user.SetUserDefaultCommunityCommand;
 import com.everhomes.rest.user.sdk.LogonInfoCommand;
 import com.everhomes.rest.user.sdk.UserLogonInfo;
-import com.everhomes.core.sdk.SdkRestClient;
+import com.everhomes.tachikoma.commons.sdk.SdkRestClient;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class SdkUserService {
 
-    private final SdkRestClient sdkRestClient = SdkRestClient.getInstance();
+    private final SdkRestClient sdkRestClient = SdkRestClient.getInstance(CoreSdkSettings.getInstance());
 
     public UserLogonInfo logonInfo() {
         LogonInfoCommand cmd = new LogonInfoCommand();
