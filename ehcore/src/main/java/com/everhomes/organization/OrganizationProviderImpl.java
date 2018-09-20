@@ -5269,7 +5269,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public Integer countOrganizationMemberDetails(Long orgId, Long departmentId){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-    	Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId); 
+    	Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(orgId); 
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode())); 
         if (departmentId != null) {
             Organization department = findOrganizationById(departmentId);
@@ -5289,7 +5289,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(dismissGroups);
             condition = condition.and(con1.or(con2));
         }
-        return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).groupBy(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).fetchCount();
+        return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS).where(condition).fetchCount();
     }
     @Override
     public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId) {
