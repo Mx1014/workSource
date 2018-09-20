@@ -29,7 +29,10 @@ import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.CreateGeneralBillCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -40,6 +43,7 @@ import com.everhomes.rest.gorder.order.OrderErrorCode;
 import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.print.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -1931,6 +1935,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"invaild ordertype,"+cmd.getOrderType());
 			}
+			
+			
 			if(cmd.getOrderType() == 3) {
 				
 				//根据统一订单生成的支付编号获得记录
@@ -1941,34 +1947,43 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 							"the order not found.");
 				}
 				
-//				Long orderNo = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));
-//				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(orderNo);
-	
 				BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
-
-				//加一个开关，方便在beta环境测试
-				boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
-				if (!flag) {
-					if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
-						LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-								"Order amount is not equal to payAmount.");
-					}
+				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount);
+				if (!isOk) {
+					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+					return;
 				}
-				Long payTime = System.currentTimeMillis();
-				Timestamp payTimeStamp = new Timestamp(payTime);
-				if(order.getOrderStatus().byteValue() == PrintOrderStatusType.UNPAID.getCode()) {
-					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-					order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-					order.setPaidTime(payTimeStamp);
-					order.setPayOrderNo(cmd.getOrderId()+"");
-					siyinPrintOrderProvider.updateSiyinPrintOrder(order);
-				}
-
+				
+				updatePrintOrder(order, cmd.getOrderId()+"");
 			}
 	}
 	
-    /*
+	@Override
+	public void updatePrintOrder(SiyinPrintOrder order, String payOrderNo) {
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		if (order.getOrderStatus().byteValue() != PrintOrderStatusType.PAID.getCode()) {
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			order.setPaidTime(payTimeStamp);
+			order.setPayOrderNo(payOrderNo);
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		}
+	}
+
+	public boolean checkNotifyPrintOrderAmount(SiyinPrintOrder order, BigDecimal payAmount) {
+		//加一个开关，方便在beta环境测试
+		boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
+		if (!flag) {
+			if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	/*
      * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
        CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
      */
@@ -2006,10 +2021,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     private String createGeneralBill(SiyinPrintOrder siyinPrintOrder, Long organizationId) {
     	CreateGeneralBillCommand cmd = new CreateGeneralBillCommand();
     	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-    	cmd.setOwnerType(siyinPrintOrder.getOwnerType());
-    	cmd.setOwnerId(siyinPrintOrder.getOwnerId());
+    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());//对应发布
+//    	cmd.setOwnerId(siyinPrintOrder.getOwnerId()); //这个需要是null，对应发布时的记录
     	cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
-    	cmd.setSourceId(siyinPrintOrder.getId());
+    	cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
+//    	cmd.setOrderId(siyinPrintOrder.getId()); //等待统一张单增加字段
     	cmd.setSourceName("云打印订单");
     	cmd.setConsumeUserId(UserContext.currentUserId());
     	cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
@@ -2028,4 +2044,51 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     	throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
     }
 
+
+	@Override
+	public List<ChargeModuleAppDTO> listChargeModuleApps(ListChargeModuleAppsCommand cmd) {
+		List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
+
+		return dtos.stream().map(r -> {
+			ChargeModuleAppDTO dto = new ChargeModuleAppDTO();
+			dto.setChargeAppName(r.getName());
+			dto.setChargeAppToken(r.getCategoryId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+
+	@Override
+	public List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
+		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
+		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+		cmd2.setCategoryId(cmd.getChargeAppToken());
+		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		List<ListBillGroupsDTO> dtos = assetService.listBillGroups(cmd2);
+		return dtos.stream().map(r -> {
+			BillGroupDTO dto = new BillGroupDTO();
+			dto.setBillGroupName(r.getBillGroupName());
+			dto.setBillGroupToken(r.getBillGroupId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd) {
+		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
+		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+		cmd2.setCategoryId(cmd.getChargeAppToken());
+		cmd2.setBillGroupId(cmd.getBillGroupToken());
+		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		List<ListChargingItemsDTO> dtos = assetService.listAvailableChargingItems(cmd2);
+		
+		return dtos.stream().map(r -> {
+			ChargeItemDTO dto = new ChargeItemDTO();
+			dto.setChargeItemName(r.getChargingItemName());
+			dto.setChargeItemToken(r.getChargingItemId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
 }
