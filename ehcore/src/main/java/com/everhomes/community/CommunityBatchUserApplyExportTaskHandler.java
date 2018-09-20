@@ -339,7 +339,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
         font.setBold(true);
-        font.setFontName("微软雅黑");
+        font.setFontName("Arial Unicode MS");
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setFont(font);
         titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -352,7 +352,7 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
         XSSFCellStyle contentStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 12);
-        font.setFontName("宋体");
+        font.setFontName("Arial Unicode MS");
         contentStyle.setAlignment(HorizontalAlignment.CENTER);
         contentStyle.setFont(font);
         for (int i = 0; i < list.size(); i++) {
