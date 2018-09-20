@@ -3,13 +3,10 @@ package com.everhomes.rest.customer;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.investment.CustomerContactDTO;
-import com.everhomes.rest.investment.CustomerCurrentRentDTO;
-import com.everhomes.rest.investment.CustomerRequirementDTO;
 import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -252,6 +249,8 @@ public class CreateEnterpriseCustomerCommand {
     private List<CustomerContactDTO>  contacts ;
     @ItemType(CustomerTrackerDTO.class)
     private List<CustomerTrackerDTO> trackers;
+
+    private CreateCustomerEntryInfoCommand entryInfos;
 
 
     public Long getOrgId() {
@@ -1371,6 +1370,15 @@ public class CreateEnterpriseCustomerCommand {
     public void setTrackers(List<CustomerTrackerDTO> trackers) {
         this.trackers = trackers;
     }
+
+    public CreateCustomerEntryInfoCommand getEntryInfos() {
+        return entryInfos;
+    }
+
+    public void setEntryInfos(CreateCustomerEntryInfoCommand entryInfos) {
+        this.entryInfos = entryInfos;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

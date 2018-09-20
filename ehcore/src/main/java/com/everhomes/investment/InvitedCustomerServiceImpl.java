@@ -332,6 +332,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         SearchEnterpriseCustomerResponse searchResponse;
         if(cmd.getCustomerIds() != null && cmd.getCustomerIds().size() > 0){
             searchResponse = customerSearcher.queryEnterpriseCustomersById(cmd);
+            SearchInvestmentResponse response = new SearchInvestmentResponse();
+            response.setDtos(searchResponse.getDtos());
+            response.setNextPageAnchor(searchResponse.getNextPageAnchor());
+            return response;
         }else {
             isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
             searchResponse = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
