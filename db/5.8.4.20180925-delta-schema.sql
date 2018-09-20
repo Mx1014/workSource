@@ -130,3 +130,13 @@ CREATE TABLE `eh_work_report_scope_msg` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- END issue-34029
 -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
+
+-- 用户启用自定义配置的标记 add by yanjun 20180920
+CREATE TABLE `eh_user_app_flags` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '位置信息，参考枚举ServiceModuleLocationType',
+  `location_target_id` bigint(20) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
+  PRIMARY KEY (`id`),
+  KEY `u_eh_user_app_flag_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户启用自定义配置的标记';
