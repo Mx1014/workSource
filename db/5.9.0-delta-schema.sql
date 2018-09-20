@@ -467,4 +467,9 @@ ADD COLUMN `account_name`  varchar(255) NULL AFTER `old_custom_object`;
 
 ALTER TABLE `eh_parking_lots` ADD COLUMN `notice_contact` varchar(20) COMMENT '用户须知联系电话';
 ALTER TABLE `eh_parking_lots` ADD COLUMN `summary` text COMMENT '用户须知';
+
+-- AUTHOR: tangcen 2018年9月20日21:38:22
+-- REMARK: 园区入驻，一键转为意向客户功能
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `transform_flag`  tinyint NULL DEFAULT 0 COMMENT '是否转化为意向客户：0-否，1-是';
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `customer_name`  varchar(255) NULL COMMENT '承租方';
 -- END
