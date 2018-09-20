@@ -11,6 +11,7 @@ import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
@@ -458,8 +459,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
                     dtos.forEach(r ->{
                         Address address = addressProvider.findAddressById(r.getAddressId());
-                        r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                        r.setAddressArea(address.getBuildArea());
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                        }else{
+                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                            r.setAddressArea(address.getBuildArea());
+                        }
                     });
                     requirementDTO.setAddresses(dtos);
                 }
@@ -495,8 +500,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                    addressDTO.setAddressArea(address.getRentArea());
+                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+
+                    }else{
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                        addressDTO.setAddressArea(address.getRentArea());
+                    }
+
+
                     addressesDTO.add(addressDTO);
 
                 });
