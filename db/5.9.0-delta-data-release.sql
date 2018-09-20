@@ -115,6 +115,11 @@ SET @mp_id = (SELECT MAX(id) FROM eh_service_module_privileges);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES (@mp_id:=@mp_id+1, '204011', '0', @p_id, '批量减免', '0', NOW());
 
+-- AUTHOR: 杨崇鑫 2018年9月13日
+-- REMARK: 物业缴费V6.8（海岸馨服务项目对接） ：release：正式环境，beta：测试环境，以此来判断是否需要为海岸造测试数据
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES ('pay.v2.asset.haian_environment', 'release', 'release：正式环境，beta：测试环境，以此来判断是否需要为海岸造测试数据', 999993, NULL, 0);
+
 
 -- AUTHOR: 张智伟 20180822
 -- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
