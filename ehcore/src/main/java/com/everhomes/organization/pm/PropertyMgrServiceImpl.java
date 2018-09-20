@@ -63,6 +63,7 @@ import com.everhomes.address.AuthorizePriceExportHandler;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -171,6 +172,8 @@ import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -242,6 +245,7 @@ import com.everhomes.rest.organization.TxType;
 import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
@@ -459,6 +463,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
 	protected TaskService taskService;
+   	
+   	@Autowired
+	private AssetService assetService;
 
    	private ActivityService activityService;
 
@@ -8126,20 +8133,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 				AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, cmd.getBuildingId(), r.getAddressId());
-				if (addressProperties != null) {
-					dto.setChargingItemsName(PaymentChargingItemType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc());
+				if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null && addressProperties.getChargingItemsId() != null) {
+					dto.setChargingItemsName(PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc());
 					dto.setApartmentAuthorizeType(AuthorizePriceType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc());
 					dto.setAuthorizePrice(addressProperties.getAuthorizePrice());
 				}
-				
 				return dto;
 			}).collect(Collectors.toList());
 
 			List<ExportApartmentsAuthorizePriceDTO> filterData = filterExportApartmentsInBuildingDTO(data, cmd);
 			taskService.updateTaskProcess(taskId, 80);
 			//动态获取费项名称
+			//1、获取categoryId 列表
+			List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
+			Set<String> chargingItemNameList = new HashSet<String>();
+			for (int i = 0; i < dtos.size(); i++) {
+				OwnerIdentityCommand ownerIdentityCommand = new OwnerIdentityCommand();
+				ownerIdentityCommand.setOwnerId(cmd.getCommunityId());
+				ownerIdentityCommand.setOwnerType("community");
+				ownerIdentityCommand.setCategoryId(dtos.get(i).getCategoryId());
+				List<ListChargingItemsDTO> listChargingItem = assetService.listChargingItems(ownerIdentityCommand);
+				for (int j = 0; j < listChargingItem.size(); j++) {
+					if (listChargingItem.get(j).getIsSelected() == 1) {
+						chargingItemNameList.add(listChargingItem.get(j).getChargingItemName());
+					}
+				}
+			}
+			String chargingItemName = "";
+			if (chargingItemNameList != null) {
+				chargingItemName = (chargingItemNameList.toString()).replace("[", "").replace("]", "");
+			}
 			
-
 			excelUtils.setNeedTitleRemark(true).setTitleRemark(
 							"填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" 
 							+ "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n"
@@ -8148,7 +8172,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 							+ "4、带有星号（*）的红色字段为必填项。\n" 
 							+ "5、楼栋名称相同的情况下，门牌不允许重复，重复只算一条。\n" 
 							+ "6、状态可填项：待租、待售、出租、已售、自用、其他。\n" 
-							+ "7、费项名称可选项为：租金、服务费。\n" 
+							+ "7、费项名称可选项为： "+chargingItemName+  "。\n" 
 							+ "8、周期可选项为：按月、按季、按年、按天。\n" 
 							+ "9、面积只允许填写数字，非数字将导致对应行导入失败\n" 
 							+ "10、导入系统已存在的门牌，将按照导入的门牌更新系统的门牌信息。\n" 
