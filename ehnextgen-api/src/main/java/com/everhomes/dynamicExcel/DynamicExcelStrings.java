@@ -7,6 +7,7 @@ package com.everhomes.dynamicExcel;
 public interface DynamicExcelStrings {
     public static final String DYNAMIC_EXCEL_HANDLER = "DynamicExcelHandler";
     String CUSTOEMR = "customer";
+    String INVITED_CUSTOMER = "investment_promotion";
 
     public static String baseIntro = "填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
             "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +

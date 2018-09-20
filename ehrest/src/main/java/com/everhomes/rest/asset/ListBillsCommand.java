@@ -72,16 +72,16 @@ public class ListBillsCommand {
     private Long targetIdForEnt;
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
-    
-    private Long moduleId;//用于下载中心
-    
-    public Long getModuleId() {
-		return moduleId;
-	}
 
-	public void setModuleId(Long moduleId) {
-		this.moduleId = moduleId;
-	}
+    private Long moduleId;//用于下载中心
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
 
     private Integer paymentType;
     private Byte isUploadCertificate;
@@ -93,37 +93,37 @@ public class ListBillsCommand {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
-    
+
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
-    
+
     //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
     private List<ReSortCmd> sorts;
-	public Long getCommunityId() {
-		return communityId;
-	}
+    public Long getCommunityId() {
+        return communityId;
+    }
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
-	public Byte getIsUploadCertificate() {
-		return isUploadCertificate;
-	}
+    public Byte getIsUploadCertificate() {
+        return isUploadCertificate;
+    }
 
-	public void setIsUploadCertificate(Byte isUploadCertificate) {
-		this.isUploadCertificate = isUploadCertificate;
-	}
+    public void setIsUploadCertificate(Byte isUploadCertificate) {
+        this.isUploadCertificate = isUploadCertificate;
+    }
 
-	public Integer getPaymentType() {
-		return paymentType;
-	}
+    public Integer getPaymentType() {
+        return paymentType;
+    }
 
-	public void setPaymentType(Integer paymentType) {
-		this.paymentType = paymentType;
-	}
+    public void setPaymentType(Integer paymentType) {
+        this.paymentType = paymentType;
+    }
 
-	public Long getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
@@ -286,39 +286,39 @@ public class ListBillsCommand {
 
     }
 
-	public String getCustomerTel() {
-		return customerTel;
-	}
+    public String getCustomerTel() {
+        return customerTel;
+    }
 
-	public void setCustomerTel(String customerTel) {
-		this.customerTel = customerTel;
-	}
+    public void setCustomerTel(String customerTel) {
+        this.customerTel = customerTel;
+    }
 
-	public Long getTargetIdForEnt() {
-		return targetIdForEnt;
-	}
+    public Long getTargetIdForEnt() {
+        return targetIdForEnt;
+    }
 
-	public void setTargetIdForEnt(Long targetIdForEnt) {
-		this.targetIdForEnt = targetIdForEnt;
-	}
+    public void setTargetIdForEnt(Long targetIdForEnt) {
+        this.targetIdForEnt = targetIdForEnt;
+    }
 
-	public Long getDueDayCountStart() {
-		return dueDayCountStart;
-	}
+    public Long getDueDayCountStart() {
+        return dueDayCountStart;
+    }
 
-	public void setDueDayCountStart(Long dueDayCountStart) {
-		this.dueDayCountStart = dueDayCountStart;
-	}
+    public void setDueDayCountStart(Long dueDayCountStart) {
+        this.dueDayCountStart = dueDayCountStart;
+    }
 
-	public Long getDueDayCountEnd() {
-		return dueDayCountEnd;
-	}
+    public Long getDueDayCountEnd() {
+        return dueDayCountEnd;
+    }
 
-	public void setDueDayCountEnd(Long dueDayCountEnd) {
-		this.dueDayCountEnd = dueDayCountEnd;
-	}
-	
-	public Long getCategoryId() {
+    public void setDueDayCountEnd(Long dueDayCountEnd) {
+        this.dueDayCountEnd = dueDayCountEnd;
+    }
+
+    public Long getCategoryId() {
         return categoryId;
     }
 
@@ -326,51 +326,51 @@ public class ListBillsCommand {
         this.categoryId = categoryId;
     }
 
-	public String getSourceType() {
-		return sourceType;
-	}
+    public String getSourceType() {
+        return sourceType;
+    }
 
-	public void setSourceType(String sourceType) {
-		this.sourceType = sourceType;
-	}
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
 
-	public Long getSourceId() {
-		return sourceId;
-	}
+    public Long getSourceId() {
+        return sourceId;
+    }
 
-	public void setSourceId(Long sourceId) {
-		this.sourceId = sourceId;
-	}
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
 
-	public String getSourceName() {
-		return sourceName;
-	}
+    public String getSourceName() {
+        return sourceName;
+    }
 
-	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
-	}
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
 
-	public Long getConsumeUserId() {
-		return consumeUserId;
-	}
+    public Long getConsumeUserId() {
+        return consumeUserId;
+    }
 
-	public void setConsumeUserId(Long consumeUserId) {
-		this.consumeUserId = consumeUserId;
-	}
+    public void setConsumeUserId(Long consumeUserId) {
+        this.consumeUserId = consumeUserId;
+    }
 
-	public Byte getDeleteFlag() {
-		return deleteFlag;
-	}
+    public Byte getDeleteFlag() {
+        return deleteFlag;
+    }
 
-	public void setDeleteFlag(Byte deleteFlag) {
-		this.deleteFlag = deleteFlag;
-	}
+    public void setDeleteFlag(Byte deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
 
-	public List<ReSortCmd> getSorts() {
-		return sorts;
-	}
+    public List<ReSortCmd> getSorts() {
+        return sorts;
+    }
 
-	public void setSorts(List<ReSortCmd> sorts) {
-		this.sorts = sorts;
-	}
+    public void setSorts(List<ReSortCmd> sorts) {
+        this.sorts = sorts;
+    }
 }

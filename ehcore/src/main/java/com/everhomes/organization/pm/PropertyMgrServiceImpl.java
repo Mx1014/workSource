@@ -31,6 +31,7 @@ import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -52,6 +53,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.ActivityService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressArrangement;
 import com.everhomes.address.AddressProperties;
@@ -138,6 +140,8 @@ import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressArrangementType;
 import com.everhomes.rest.address.AddressDTO;
@@ -172,7 +176,11 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
+<<<<<<< HEAD
 import com.everhomes.rest.contract.ContractErrorCode;
+=======
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+>>>>>>> enterprise-investment-1.0
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -450,11 +458,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	private PushMessageLogService pushMessageLogService;
    	
    	@Autowired
+<<<<<<< HEAD
 	protected LocaleStringService localeStringService;
    	
    	@Autowired
 	protected TaskService taskService;
 
+=======
+   	private ActivityService activityService;
+>>>>>>> enterprise-investment-1.0
 
     private String queueName = "property-mgr-push";
 
@@ -8386,5 +8398,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			return string.trim();
 		}
 		return "";
+	}
+	@Override
+	public ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
+		ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
+		
+		ListApartmentEnterpriseCustomersCommand cmd2 = new ListApartmentEnterpriseCustomersCommand();
+		cmd2.setAddressId(cmd.getAddressId());
+		List<EnterpriseCustomerDTO> enterpriseCustomers = addressService.listApartmentEnterpriseCustomers(cmd2);
+		if (enterpriseCustomers!=null && enterpriseCustomers.size()>0) {
+			EnterpriseCustomerDTO enterpriseCustomer = enterpriseCustomers.get(0);
+			response = activityService.listSignupInfoByOrganizationId(enterpriseCustomer.getOrganizationId(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
+		}
+		return response;
 	}
 }

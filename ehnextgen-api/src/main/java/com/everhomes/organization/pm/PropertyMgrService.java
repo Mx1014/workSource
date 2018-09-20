@@ -2,6 +2,8 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.AuthorizePriceCommand;
 import com.everhomes.rest.address.AuthorizePriceDTO;
@@ -530,4 +532,7 @@ public interface PropertyMgrService {
 	OutputStream exportOutputStreamAuthorizePriceList(ListPropApartmentsByKeywordCommand cmd, Long taskId);
 
 	Object importAddressAuthorizePriceData(ImportAddressCommand cmd, MultipartFile multipartFile);
+
+	ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd);
+
 }
