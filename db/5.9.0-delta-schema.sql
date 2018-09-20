@@ -453,3 +453,12 @@ CREATE TABLE `eh_general_form_print_templates`(
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '通用表单打印模板表';
 -- END ISSUE-35063
+
+-- AUTHOR: 郑思挺  20180920
+-- REMARK: 资源预约3.7
+ALTER TABLE `eh_rentalv2_order_records`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `account_id`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `old_custom_object`;
+-- END
+
