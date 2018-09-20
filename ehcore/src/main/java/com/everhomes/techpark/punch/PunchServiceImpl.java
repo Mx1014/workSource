@@ -3263,6 +3263,7 @@ public class PunchServiceImpl implements PunchService {
             if (NormalFlag.NO == NormalFlag.fromCode(pdl.getNormalFlag())) {
                 statistic.setFullNormalFlag(NormalFlag.NO.getCode());
             }
+
             statistic.setRestDayCount(statistic.getRestDayCount() + (NormalFlag.YES == NormalFlag.fromCode(pdl.getRestFlag()) ? 1 : 0));
             List<TimeInterval> tiDTOs = null;
             PunchTimeRule ptr = null;
@@ -3350,6 +3351,11 @@ public class PunchServiceImpl implements PunchService {
             }
         }
 
+        if(NormalFlag.YES == NormalFlag.fromCode(statistic.getFullNormalFlag())){
+        	statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+        }else{
+        	statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+        }
     }
 
     private Byte countWorkDay(String[] status, List<PunchExceptionRequest> exceptionRequests, Integer abonormalExceptionRequestCount) {
@@ -10539,6 +10545,11 @@ public class PunchServiceImpl implements PunchService {
         }
         pdl.setAbsentFlag(isAbsence(statusList));
         pdl.setNormalFlag(isFullNormal(statusList));
+        if(NormalFlag.YES == NormalFlag.fromCode(pdl.getNormalFlag())){
+        	pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+        }else{
+        	pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+        }
         pdl.setBelateCount(belateCount(statusList));
         pdl.setLeaveEarlyCount(leaveEarlyCount(statusList));
         pdl.setForgotPunchCountOnDuty(forgotCountOnDuty(statusList));
@@ -10657,6 +10668,8 @@ public class PunchServiceImpl implements PunchService {
 
     private PunchMemberDTO convertPDLToPunchMemberDTO(PunchDayLog pdl) {
         PunchMemberDTO dto = new PunchMemberDTO();
+        dto.setOrganizationId(pdl.getEnterpriseId());
+        dto.setPunchOrganizationId(pdl.getPunchOrganizationId());
         dto.setDetailId(pdl.getDetailId());
         if(null != pdl.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(pdl.getDetailId());
@@ -10834,6 +10847,8 @@ public class PunchServiceImpl implements PunchService {
 
     private PunchMemberDTO convertPSToPunchMemberDTO(PunchStatistic statistic) {
         PunchMemberDTO dto = new PunchMemberDTO();
+
+        dto.setOrganizationId(statistic.getOwnerId());
         dto.setDetailId(statistic.getDetailId());
         if(null != statistic.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(statistic.getDetailId());
@@ -10882,6 +10897,7 @@ public class PunchServiceImpl implements PunchService {
 
     private PunchMemberDTO processMemberDetailToMemberDTO(OrganizationMemberDetails detail) {
         PunchMemberDTO dto = new PunchMemberDTO();
+        dto.setOrganizationId(detail.getOrganizationId());
         dto.setDetailId(detail.getId());
         dto.setContractName(detail.getContactName());
         dto.setUserId(detail.getTargetId());
