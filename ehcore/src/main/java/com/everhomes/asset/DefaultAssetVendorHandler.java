@@ -141,7 +141,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setPaymentParams(getPaymentParams(cmd, billGroup));
         preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
         preOrderCommand.setCallbackUrl(getPayCallbackUrl(cmd));
-        preOrderCommand.setExtendInfo(cmd.getExtendInfo());
         preOrderCommand.setGoodsName("物业缴费");
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);

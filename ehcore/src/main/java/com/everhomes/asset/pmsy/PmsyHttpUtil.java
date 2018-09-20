@@ -1,4 +1,4 @@
-package com.everhomes.organization.pmsy;
+package com.everhomes.asset.pmsy;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.everhomes.organization.pmsy;
+package com.everhomes.asset.pmsy;
 
 /**
  * Created by Administrator on 2017/7/18.

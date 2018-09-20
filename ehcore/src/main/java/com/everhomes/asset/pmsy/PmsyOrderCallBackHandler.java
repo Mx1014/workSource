@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.organization.pmsy;
+package com.everhomes.asset.pmsy;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.order.OrderEmbeddedHandler;
