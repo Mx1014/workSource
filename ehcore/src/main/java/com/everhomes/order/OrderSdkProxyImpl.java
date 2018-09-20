@@ -13,7 +13,7 @@ import com.everhomes.rest.gorder.http.RestClientSettings;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 
 @Component
-public class OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{
+public class    OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSdkProxyImpl.class);
     
     @Autowired
