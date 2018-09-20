@@ -518,6 +518,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
             //EnterpriseCustomer customer =
             if(customerDTO.getContacts() != null && customerDTO.getContacts().size() > 0) {
+
                 customerDTO.setContactName(customerDTO.getContacts().get(0).getName());
                 customerDTO.setContactPhone(customerDTO.getContacts().get(0).getPhoneNumber().toString());
             }

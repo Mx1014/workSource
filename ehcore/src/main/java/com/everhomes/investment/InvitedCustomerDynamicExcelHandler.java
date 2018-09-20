@@ -915,7 +915,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
-                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerContactString, trackerUidString, channelContactString);
+
+
+
                     }
                     return failedNumber ;
                 }
@@ -1046,42 +1049,26 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
         return true;
     }
-
-    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
+    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerContactString, String trackerUidString, String channelContactString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
-            try {
-                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
-            } catch (Exception e) {
-                //todo:接口过时 没有批量删除 需要基线提供
-                LOGGER.error("create enterprise admin error :{}", e);
-            }
+
 
             //对比 如果被更新有数据则补上exist
             compareCustomerFieldValues(exist, enterpriseCustomer);
 
-            if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
-                if(StringUtils.isNotBlank(customerAddressString)){
-                    //此种场景有企业管理员 需要自动加入organizationMembers 表 用于后面用户注册激活
-                    syncCustomerInfoIntoOrganization(enterpriseCustomer);
-                }else {
-                    //单纯的保持数据一致
-                    OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                    exist.setOrganizationId(organizationDTO.getId());
-                    syncCustomerBasicInfoToOrganziation(exist);
-                }
-            }
+
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+
+            createCustomerContact(enterpriseCustomer, customerContactString);
+            createCustomerTracker(enterpriseCustomer, trackerUidString);
+            createChannelContact(enterpriseCustomer, channelContactString );
             customerSearcher.feedDoc(enterpriseCustomer);
             //修改了客户名称则要同步修改合同里面的客户名称 但合同用的customerId 好像没啥用
             syncCustomerNameToContract(exist, enterpriseCustomer);
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
 
-            if (StringUtils.isNotBlank(customerAddressString)) {
-                customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
-                createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
-            }
         }
     }
 
@@ -1147,6 +1134,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
         if(StringUtils.isNotBlank(customerTrackerString)){
             customerTrackerString = customerTrackerString.replaceAll("\n", "");
             userInfos = customerTrackerString.split(",");
+            invitedCustomerProvider.deleteCustomerTrackersByCustomerId(enterpriseCustomer.getId());
             if (userInfos.length > 0) {
                 for (String userInfosString : userInfos) {
                     String username = userInfosString.split("\\(")[0];
@@ -1179,6 +1167,8 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
         if(StringUtils.isNotBlank(customerContactString)){
             customerContactString = customerContactString.replaceAll("\n", "");
             userInfos = customerContactString.split(",");
+            invitedCustomerProvider.deleteCustomerContactsWithType(enterpriseCustomer.getId(), CustomerContactType.CUSTOMER_CONTACT.getCode());
+
             if (userInfos.length > 0) {
                 for (String userInfosString : userInfos) {
                     String name = userInfosString.split("\\(")[0];
@@ -1206,6 +1196,8 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
         if(StringUtils.isNotBlank(channelCustomerString)){
             channelCustomerString = channelCustomerString.replaceAll("\n", "");
             userInfos = channelCustomerString.split(",");
+            invitedCustomerProvider.deleteCustomerContactsWithType(enterpriseCustomer.getId(), CustomerContactType.CHANNEL_CONTACT.getCode());
+
             if (userInfos.length > 0) {
                 for (String userInfosString : userInfos) {
                     String name = userInfosString.split("\\(")[0];

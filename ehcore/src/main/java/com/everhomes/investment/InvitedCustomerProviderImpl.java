@@ -480,6 +480,17 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
+    public void deleteCustomerContactsWithType(Long id, Byte type) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhCustomerContacts contact = Tables.EH_CUSTOMER_CONTACTS;
+        context.update(contact)
+                .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(contact.CUSTOMER_ID.eq(id))
+                .and(contact.CONTACT_TYPE.eq(type))
+                .execute();
+    }
+
+    @Override
     public Long createRequirementAddress(CustomerRequirementAddress address) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhCustomerRequirementAddresses.class));

@@ -61,6 +61,7 @@ public interface InvitedCustomerProvider {
     void deleteInvitedCustomer(Long id);
 
     void deleteCustomerContacts(Long id);
+    void deleteCustomerContactsWithType(Long id, Byte type);
 
     Long createRequirementAddress(CustomerRequirementAddress address);
 

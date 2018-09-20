@@ -234,4 +234,20 @@ INSERT INTO `eh_var_field_groups`(`id`, `module_name`, `parent_id`, `path`, `tit
 	VALUES (39, 'enterprise_customer', 0, '/39', '活动记录', '', 0, NULL, 2, 1, SYSDATE(), NULL, NULL);
 set @id = IFNULL((SELECT max(id) from eh_var_field_group_ranges),1);
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 39, 'enterprise_customer', 'enterprise_customer');
-	
+
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 更改企业客户管理菜单为租客管理
+update eh_web_menus set name = '租客管理' where name = '企业客户管理';
+-- END
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 导出招商本地化
+set @id = (select max(id) from `eh_locale_strings`);
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id := @id +1, 'enterpriseCustomer.export', '2', 'zh_CN', '招商客户数据导出');
+
+
+UPDATE eh_var_fields SET display_name = '行业领域' WHERE id = 24;
+
+UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
+UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
