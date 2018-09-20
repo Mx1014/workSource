@@ -7,6 +7,7 @@ ALTER TABLE `eh_punch_logs` ADD COLUMN `create_type` TINYINT NOT NULL DEFAULT 0 
 CREATE TABLE `eh_punch_go_out_logs` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `user_id` BIGINT DEFAULT NULL COMMENT 'user''s id',
+  `detail_id` BIGINT DEFAULT NULL COMMENT 'eh_organization_member_details id',
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
   `namespace_id` INT DEFAULT NULL COMMENT 'NAMESPACE id',
   `longitude` DOUBLE DEFAULT NULL,
