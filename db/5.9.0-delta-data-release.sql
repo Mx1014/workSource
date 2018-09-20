@@ -302,11 +302,11 @@ VALUES (@parkingcardid := @parkingcardid + 1, @namespaceid, 'community', @commun
 -- AUTHOR:丁建民 20180920
 -- REMARK: issue-37007 资产设置一房一价，租赁价格大于设定的价格，则合同不需要审批
 SET @id = (SELECT MAX(id) from eh_locale_strings);
-INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20017', 'zh_CN', '周期输入格式不正确');
-INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20018', 'zh_CN', '授权价格式不正确');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20017', 'zh_CN', '周期输入格式不正确');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20018', 'zh_CN', '授权价格式不正确');
 
-INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10013', 'zh_CN', '合同计价条款计费周期不存在');
-INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10014', 'zh_CN', '该房源信息已经存在');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10013', 'zh_CN', '合同计价条款计费周期不存在');
+INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'contract', '10014', 'zh_CN', '该房源信息已经存在');
 
 
 
