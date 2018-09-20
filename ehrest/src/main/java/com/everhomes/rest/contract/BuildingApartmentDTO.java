@@ -56,7 +56,7 @@ public class BuildingApartmentDTO {
 	public void setApartmentName(String apartmentName) {
 		this.apartmentName = apartmentName;
 	}
-
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

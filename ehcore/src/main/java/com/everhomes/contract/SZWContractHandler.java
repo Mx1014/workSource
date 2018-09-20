@@ -15,6 +15,8 @@ import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractEventDTO;
@@ -322,9 +324,13 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
     
 }

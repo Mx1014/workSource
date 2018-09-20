@@ -14,6 +14,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
@@ -23,6 +25,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -107,9 +110,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     private AssetService assetService;
 
     @Autowired
-    private PaymentService paymentService;
-
-    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -129,6 +129,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
     
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -590,12 +593,40 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
+    	cmd.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：手动新增的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	cmd.setCanDelete((byte)1);
+    	cmd.setCanModify((byte)1);
+        return assetProvider.creatPropertyBill(cmd, null);
+    }
+    
+    public ListBillsDTO createBillFromImport(CreateBillCommand cmd) {
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+    	cmd.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	cmd.setCanDelete((byte)1);
+    	cmd.setCanModify((byte)1);
         return assetProvider.creatPropertyBill(cmd, null);
     }
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
         assetProvider.modifyBillStatus(Long.parseLong(cmd.getBillId()));
+        //物业缴费V6.6统一账单：账单状态改变回调接口
+        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+        ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+        ListBillDetailResponse billDetail = listBillDetail(ncmd);
+        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
+        if(null != handler){
+        	handler.payNotifyBillSourceModule(billDetail);
+        }
     }
 
     @Override
@@ -710,7 +741,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
-
+    
     private void checkHasPaidBills(List<String> billIds) {
         List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
         if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
@@ -782,6 +813,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
             query.addConditions(t.AMOUNT_OWED.greaterThan(BigDecimal.ZERO));//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的       
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addGroupBy(t.ID);
             paymentBills = query.fetchInto(PaymentBills.class);
         }
@@ -998,6 +1031,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));        
             query.addConditions(t.NAMESPACE_ID.eq(cmd.getNamespaceId()));
             query.addConditions(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME).in(addressList));
+            query.addConditions(t.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+            query.addConditions(t2.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
             query.addGroupBy(t.ID);
             query.addOrderBy(t.DATE_STR.desc());
             List<ListAllBillsForClientDTO> list = new ArrayList<>();
@@ -1184,7 +1219,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
             		modifyBillForOrg(command,isCreate);
             	}
             	if(isCreate.get(0)) {
-            		createBill(command);
+            		createBillFromImport(command);//物业缴费V6.0（UE优化) 账单区分数据来源
             	}
             }
             //设置导出报错的结果excel的标
@@ -1399,7 +1434,20 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         cmd.setContractId(list.get(0));
                     }
                 }else if(headers[j].contains("催缴手机号")){
-                	if(data[j] != null && data[j] != "") {
+                	List<String> list = new ArrayList<>();
+                	list = Arrays.asList(data[j].split(","));
+                	for (int k = 0; k < list.size(); k++) {
+                		if(list.get(k) != null && list.get(k) != "") {
+    	                    if(!RegularExpressionUtils.isValidChinesePhone(list.get(k))){
+    	                        log.setErrorLog("催缴手机号码格式不正确");
+    	                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+    	                        datas.add(log);
+    	                        continue bill;
+    	                    }
+                    	}
+					}
+                	cmd.setNoticeTelList(list);
+                	/*if(data[j] != null && data[j] != "") {
 	                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
 	                        log.setErrorLog("催缴手机号码格式不正确");
 	                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
@@ -1407,7 +1455,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 	                        continue bill;
 	                    }
                 	}
-                    cmd.setNoticeTel(data[j]);
+                    cmd.setNoticeTel(data[j]);*/
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
                 	if(itemPojo == null){
@@ -1801,34 +1849,34 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 //        treeMap.putAll(cellsMap);
 //        return treeMap.values().toArray(new String[treeMap.size()]);
     }
-    @Override
-    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
-        Long billId = cmd.getBillId();
-        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
-        PaymentBills bill = assetProvider.findPaymentBillById(billId);
-        if(bill == null || assetOrders.size() < 1){
-            return new ListPaymentBillResp();
-        }
-        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
-        paycmd.setNamespaceId(bill.getNamespaceId());
-        paycmd.setOrderType("wuyecode");
-        paycmd.setPageAnchor(cmd.getPageAnchor());
-        paycmd.setPageSize(cmd.getPageSize());
-        if(cmd.getCommunityId() == null){
-            paycmd.setCommunityId(bill.getOwnerId());
-        }else{
-            paycmd.setCommunityId(cmd.getCommunityId());
-        }
-        paycmd.setUserType(cmd.getUserType());
-        paycmd.setUserId(cmd.getUserId());
-        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
-        try {
-            return paymentService.listPaymentBill(paycmd);
-        } catch (Exception e) {
-            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
-            return new ListPaymentBillResp();
-        }
-    }
+//    @Override
+//    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+//        Long billId = cmd.getBillId();
+//        List<AssetPaymentOrder> assetOrders = assetProvider.findAssetOrderByBillId(String.valueOf(billId));
+//        PaymentBills bill = assetProvider.findPaymentBillById(billId);
+//        if(bill == null || assetOrders.size() < 1){
+//            return new ListPaymentBillResp();
+//        }
+//        ListPaymentBillCmd paycmd = new ListPaymentBillCmd();
+//        paycmd.setNamespaceId(bill.getNamespaceId());
+//        paycmd.setOrderType("wuyecode");
+//        paycmd.setPageAnchor(cmd.getPageAnchor());
+//        paycmd.setPageSize(cmd.getPageSize());
+//        if(cmd.getCommunityId() == null){
+//            paycmd.setCommunityId(bill.getOwnerId());
+//        }else{
+//            paycmd.setCommunityId(cmd.getCommunityId());
+//        }
+//        paycmd.setUserType(cmd.getUserType());
+//        paycmd.setUserId(cmd.getUserId());
+//        paycmd.setOrderIds(assetOrders.stream().map(r -> r.getId()).collect(Collectors.toList()));
+//        try {
+//            return paymentService.listPaymentBill(paycmd);
+//        } catch (Exception e) {
+//            LOGGER.error("list payment bills failed, paycmd={}",paycmd);
+//            return new ListPaymentBillResp();
+//        }
+//    }
 
 
     @Override

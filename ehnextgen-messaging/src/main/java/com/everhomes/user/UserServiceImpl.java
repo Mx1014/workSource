@@ -1846,6 +1846,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         this.userProvider.updateUser(user);
 
+        UserIdentifier emailIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.EMAIL.getCode());
+        if (emailIdentifier != null) {
+            emailIdentifier.setIdentifierToken(cmd.getEmail());
+            this.userProvider.updateIdentifier(emailIdentifier);
+        }else {
+            if (!StringUtils.isBlank(cmd.getEmail())) {
+                UserIdentifier userIdentifier = new UserIdentifier();
+                userIdentifier.setOwnerUid(user.getId());
+                userIdentifier.setIdentifierToken(cmd.getEmail());
+                userIdentifier.setIdentifierType(IdentifierType.EMAIL.getCode());
+                userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                userIdentifier.setNamespaceId(UserContext.getCurrentNamespaceId());
+                userIdentifier.setCreateTime(new Timestamp(new Date().getTime()));
+                userIdentifier.setNotifyTime(new Timestamp(new Date().getTime()));
+                this.userProvider.createIdentifier(userIdentifier);
+            }
+        }
+
         // 完善个人信息事件
         LocalEventBus.publish(event -> {
             LocalEventContext context = new LocalEventContext();
@@ -3335,9 +3353,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
         //加上province
-        Region city = regionProvider.findRegionById(organizationDto.getCityId());
+        //自动拆箱会导致空指针
+        Region city = null;
+        if (organizationDto.getCityId() != null) {
+            city = regionProvider.findRegionById(organizationDto.getCityId());
+        }
         if (city != null) {
-            Region province = regionProvider.findRegionById(city.getParentId());
+            Region province = null;
+            if (city.getParentId() != null) {
+                province = regionProvider.findRegionById(city.getParentId());
+            }
             if (province != null) {
                 organizationDto.setProvinceId(province.getId());
                 organizationDto.setProvinceName(province.getName());

@@ -12,7 +12,17 @@ import com.everhomes.util.StringHelper;
 public class ListSystemFieldCommand {
     private String moduleName;
 
+    private String moduleType;
+
     private String groupPath;
+
+    public String getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
+    }
 
     public String getGroupPath() {
         return groupPath;
