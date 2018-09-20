@@ -988,5 +988,21 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /visitorsys/listDoorAccessForManage</b>
+	 * <p>
+	 * 22.门禁授权规则列表-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("listDoorAccessForManage")
+	@RestReturn(value = VisitorSysDoorAccessDTO.class,collection = true)
+	@RequireAuthentication(false)
+	public RestResponse listDoorAccessForManage(BaseVisitorsysCommand cmd) {
+		RestResponse response = new RestResponse(visitorSysService.listDoorAccessForManage(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 }

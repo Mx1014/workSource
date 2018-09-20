@@ -2754,4 +2754,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkMoblieManagePrivilege(cmd);
         return getConfiguration(cmd);
     }
+
+    @Override
+    public List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return listDoorAccess(cmd);
+    }
 }

@@ -156,4 +156,6 @@ public interface VisitorSysService {
     void removeInvalidTime();
 
     GetConfigurationResponse getConfigurationForManage(GetConfigurationCommand cmd);
+
+    List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd);
 }
