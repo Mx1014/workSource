@@ -21,6 +21,8 @@ public class DailyPunchStatusStatisticsTodayRecordMapper implements RecordMapper
     @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.REST)
     private Integer restMemberCount;
 
+    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
 
     public Integer getUnArrivedMemberCount() {
         return unArrivedMemberCount;
@@ -76,5 +78,13 @@ public class DailyPunchStatusStatisticsTodayRecordMapper implements RecordMapper
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getGoOutPunchDayCount() {
+        return goOutPunchDayCount;
+    }
+
+    public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+        this.goOutPunchDayCount = goOutPunchDayCount;
     }
 }

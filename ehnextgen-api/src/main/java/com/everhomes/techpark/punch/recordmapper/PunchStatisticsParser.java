@@ -36,6 +36,7 @@ public interface PunchStatisticsParser {
                 item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
                 item.setNum(value != null ? (int) value : 0);
+                item.setUnit(annotation.type().getUnit());
                 items.put(annotation.defaultOrder(), item);
             }
         } catch (IllegalAccessException e) {

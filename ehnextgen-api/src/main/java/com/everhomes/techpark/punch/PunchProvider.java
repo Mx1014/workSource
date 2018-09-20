@@ -486,4 +486,6 @@ public interface PunchProvider {
 	PunchGoOutLog findPunchGoOutLogById(Long id);
 
 	void updatePunchGoOutLog(PunchGoOutLog log);
+
+	Byte processGoOutPunchFlag(Date punchDate, Long targetId);
 }

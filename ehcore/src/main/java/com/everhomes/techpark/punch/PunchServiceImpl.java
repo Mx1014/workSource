@@ -752,6 +752,7 @@ public class PunchServiceImpl implements PunchService {
         newPunchDayLog.setOvertimeTotalWorkday(pdl.getOvertimeTotalWorkday() != null ? pdl.getOvertimeTotalWorkday() : 0L);
         newPunchDayLog.setOvertimeTotalRestday(pdl.getOvertimeTotalRestday() != null ? pdl.getOvertimeTotalRestday() : 0L);
         newPunchDayLog.setOvertimeTotalLegalHoliday(pdl.getOvertimeTotalLegalHoliday() != null ? pdl.getOvertimeTotalLegalHoliday() : 0L);
+        newPunchDayLog.setGoOutPunchFlag(punchProvider.processGoOutPunchFlag(pdl.getPunchDate(), memberDetail.getTargetId()));
         punchStatusCountByPunchDayLog(newPunchDayLog);
         if (null == oldPunchDayLog) {
             // 数据库没有计算好的数据
@@ -11509,7 +11510,6 @@ public class PunchServiceImpl implements PunchService {
         log.setStatus(PunchStatus.NORMAL.getCode());
         log.setNamespaceId(UserContext.getCurrentNamespaceId());
         punchProvider.createPUnchGoOutLog(log);
-
         return convertGoOutLogDTO(log);
     }
 
@@ -11518,7 +11518,6 @@ public class PunchServiceImpl implements PunchService {
         dto.setPunchDate(log.getPunchDate() == null ? null : log.getPunchDate().getTime());
         dto.setPunchDate(log.getPunchTime() == null ? null : log.getPunchTime().getTime());
         dto.setImgUrl(contentServerService.parserUri(log.getImgUri()));
-
         return dto;
     }
 

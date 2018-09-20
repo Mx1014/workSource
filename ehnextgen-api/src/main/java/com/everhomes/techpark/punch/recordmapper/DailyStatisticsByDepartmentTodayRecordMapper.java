@@ -16,6 +16,9 @@ public class DailyStatisticsByDepartmentTodayRecordMapper extends DailyStatistic
     @PunchStatusStatisticsItem(defaultOrder = 3, type = PunchStatusStatisticsItemType.LEAVE_EARLY)
     private Integer leaveEarlyMemberCount;
 
+    @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+
     @PunchExceptionRequestStatisticsItem(defaultOrder = 1, type = PunchExceptionRequestStatisticsItemType.ASK_FOR_LEAVE)
     private Integer askForLeaveRequestMemberCount;
 
@@ -121,5 +124,13 @@ public class DailyStatisticsByDepartmentTodayRecordMapper extends DailyStatistic
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getGoOutPunchDayCount() {
+        return goOutPunchDayCount;
+    }
+
+    public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+        this.goOutPunchDayCount = goOutPunchDayCount;
     }
 }
