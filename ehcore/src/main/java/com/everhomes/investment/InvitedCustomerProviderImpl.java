@@ -183,16 +183,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
     }
 
-    @Override
-    public List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerTrackers.class));
-
-        SelectQuery<EhCustomerTrackersRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKERS);
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.TRACKER_TYPE.eq(type));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
-        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
-    }
 
     @Override
     public Long createRequirement(CustomerRequirement requirement) {

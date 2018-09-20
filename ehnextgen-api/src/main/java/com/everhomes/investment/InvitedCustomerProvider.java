@@ -35,8 +35,6 @@ public interface InvitedCustomerProvider {
 
     List<CustomerTracker> findTrackerByCustomerId(Long customerId);
 
-    List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type);
-
     //客户需求provider
     Long createRequirement(CustomerRequirement demand);
 

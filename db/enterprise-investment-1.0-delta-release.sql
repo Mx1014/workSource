@@ -7,6 +7,10 @@ set @eeciId=(select max(id)+1 from `eh_var_field_items`);
 INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', @eecid, '已入驻', 2, 2, 1, sysdate(), NULL, NULL, NULL);
 
 
+set @eeciId=(select max(id)+1 from `eh_var_field_items`);
+INSERT INTO `eh_var_field_items`(`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `business_value`) VALUES (@eeciId, 'enterprise_customer', 5, '流失客户', 2, 2, 1, sysdate(), NULL, NULL, NULL);
+
+
 
 INSERT INTO `eh_var_field_groups`(`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (20001, 'investment_enterprise', 0, '/20001' , '招商客户信息', 'com.everhomes.customer.EnterpriseCustomer', 0, NULL, 2, 1, SYSDATE(), NULL, NULL);
 
@@ -32,6 +36,8 @@ INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12113,'investment_pro
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12114,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12115,'investment_promotion','enterprise_customer');
 INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12073,'investment_promotion','enterprise_customer');
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',48,'investment_promotion','enterprise_customer');
+
 
 UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}' WHERE id = 5;
 UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' WHERE id = 12037;
@@ -237,6 +243,10 @@ INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module
 
 
 -- AUTHOR: 黄鹏宇
+-- REMARK: 更改客户状态为不可更改
+UPDATE eh_var_fields set
+
+-- AUTHOR: 黄鹏宇
 -- REMARK: 更改企业客户管理菜单为租客管理
 update eh_web_menus set name = '租客管理' where name = '企业客户管理';
 -- END
@@ -249,5 +259,26 @@ INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`
 
 UPDATE eh_var_fields SET display_name = '行业领域' WHERE id = 24;
 
+-- AUTHOR 黄鹏宇
+-- REMARK 同步名称
 UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
 UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
+
+
+-- AUTHOR 黄鹏宇
+-- REMARK 增加默认字段
+
+set @id=(select max(id) from `eh_var_field_group_scopes`);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, '基本信息', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+
+set @id=(select max(id) from `eh_var_field_scopes`);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 2, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', 1, 1, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 5, '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}', '客户状态', 1, 2, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 1210, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户联系人', 1, 3, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 12114, '{\"fieldParamType\": \"text\", \"length\": 32}', '成交几率', 0, 4, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 12112, '{\"fieldParamType\": \"text\", \"length\": 32}', '渠道联系人', 0, 5, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 12115, '{\"fieldParamType\": \"datetime\", \"length\": 32}', '预计签约时间', 0, 6, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 12113, '{\"fieldParamType\": \"text\", \"length\": 32}', '招商跟进人', 1, 7, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 6, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '客户来源', 1, 8, 2, 1, SYSDATE(), 1, SYSDATE(), NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 24, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '行业类型', 0, 9, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES (@id:=@id+1, 0, 'investment_promotion', 10, 12073, '{\"fieldParamType\": \"file\", \"length\": 9}', '附件', 0, 10, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);

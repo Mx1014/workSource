@@ -248,18 +248,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 // 基本信息 groupId 10
                 if (k == 10L) {
                     //产品要求 企业管理员和楼栋门牌放在excel的前面
-                    if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
-                        DynamicField df = new DynamicField();
-                        df.setFieldName("enterpriseAdmins");
-                        df.setDisplayName("企业管理员");
-                        df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                        fields.add(df);
-                        DynamicField df1 = new DynamicField();
-                        df1.setFieldName("entryInfos");
-                        df1.setDisplayName("楼栋门牌");
-                        df1.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                        fields.add(df1);
-                    }
+
                 }
             });
         }

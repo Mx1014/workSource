@@ -184,12 +184,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("customerSource" , customer.getCustomerSource());
             builder.field("entryStatusItemId", customer.getEntryStatusItemId());
             List<CustomerTracker> tracker;
-            if(customer.getCustomerSource() != null){
-                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), customer.getCustomerSource());
-
-            }else{
-                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
-            }
+            tracker = invitedCustomerProvider.findTrackerByCustomerId(customer.getId());
             if(tracker != null && tracker.size() > 0){
                 List<String> trackerNames = new ArrayList<>();
                 List<Long> trackerIds = new ArrayList<>();
@@ -957,7 +952,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         dto.setContacts(contactDTOS);
 
 
-        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerIdAndType(dto.getId(), customer.getCustomerSource());
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
         List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
         trackers.forEach(r-> {
             CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
