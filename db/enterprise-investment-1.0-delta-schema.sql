@@ -196,3 +196,9 @@ ALTER TABLE `eh_customer_events` ADD COLUMN investment_type TINYINT COMMENT '操
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entry_status_item_id` BIGINT COMMENT '该用户是否入驻，1-未入驻，2-入驻';
 
 -- end
+
+-- AUTHOR: 杨崇鑫  20180920
+-- REMARK: 账单表增加一个企业客户ID的字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `customer_id` BIGINT COMMENT '企业客户ID';
+
+
