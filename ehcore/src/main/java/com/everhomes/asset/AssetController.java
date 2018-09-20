@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,15 +23,12 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -835,19 +831,6 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <p>导出筛选过的所有账单</p>
-	 * <b>URL: /asset/exportPaymentBills</b>
-	 */
-	@RequestMapping("exportPaymentBills")
-	public HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-		assetService.exportPaymentBills(cmd, response);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
-	}
-
-	/**
 	 * <p>展示账单的减免项</p>
 	 * <b>URL: /asset/listBillExemptionItems</b>
 	 */
@@ -1356,19 +1339,6 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <p>对公转账：导出筛选过的所有账单</p>
-	 * <b>URL: /asset/exportSettledBillsForEnt</b>
-	 */
-	@RequestMapping("exportSettledBillsForEnt")
-	public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
-		assetService.exportSettledBillsForEnt(cmd, response);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
-	}
-
-	/**
 	 * <p>对公转账：结算-账单明细</p>
 	 * <b>URL: /asset/listPaymentBillForEnt</b>
 	 */
@@ -1532,5 +1502,34 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-
+    
+	/**
+	 * <p>导出筛选过的所有账单 (对接下载中心)</p>
+	 * <b>URL: /asset/exportPaymentBills</b>
+	 */
+	@RequestMapping("exportPaymentBills")
+	@RestReturn(value = String.class)
+	public RestResponse exportPaymentBills(@Valid ListBillsCommand cmd) {
+		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单(对接下载中心)</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    @RestReturn(value = String.class)
+    public RestResponse exportSettledBillsForEnt(@Valid ListBillsCommandForEnt cmd) {
+    	cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE_FORENT);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
 }

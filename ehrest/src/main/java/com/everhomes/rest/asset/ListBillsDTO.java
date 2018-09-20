@@ -5,6 +5,7 @@ package com.everhomes.rest.asset;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  *<ul>
@@ -56,7 +57,7 @@ public class ListBillsDTO {
     private String targetType;
     private String buildingName;
     private String apartmentName;
-    private String noticeTel;
+    //private String noticeTel;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amountOwed;
@@ -87,8 +88,18 @@ public class ListBillsDTO {
     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
     private Byte canDelete;
     private Byte canModify;
+    //催缴手机号码列表
+    private List<String> noticeTelList;
 
-    public Integer getPaymentType() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Integer getPaymentType() {
 		return paymentType;
 	}
 
@@ -231,14 +242,6 @@ public class ListBillsDTO {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
-    }
-
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
     }
 
     public BigDecimal getAmountReceivable() {

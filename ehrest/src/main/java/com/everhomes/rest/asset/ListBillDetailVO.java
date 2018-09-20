@@ -75,8 +75,18 @@ public class ListBillDetailVO {
     private Byte canModify;
     //对接统一账单业务线的需求
     private Integer paymentType;
+    //催缴手机号码列表
+    private List<String> noticeTelList;
     
-    public Byte getBillStatus() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Byte getBillStatus() {
 		return billStatus;
 	}
 

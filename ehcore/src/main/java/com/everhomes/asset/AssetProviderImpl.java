@@ -791,7 +791,11 @@ public class AssetProviderImpl implements AssetProvider {
             }
             dto.setBillId(String.valueOf(r.getValue(t.ID)));
             dto.setBillStatus(r.getValue(t.STATUS));
-            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            //dto.setNoticeTelList(r.getValue(t.NOTICETEL));
+            if (r.getValue(t.NOTICETEL) != null) {
+            	dto.setNoticeTelList(Arrays.asList((r.getValue(t.NOTICETEL)).split(",")));
+			}
+            
             dto.setNoticeTimes(r.getValue(t.NOTICE_TIMES));
             dto.setDateStr(r.getValue(t.DATE_STR));
             dto.setTargetName(r.getValue(t.TARGET_NAME));
@@ -1367,7 +1371,8 @@ public class AssetProviderImpl implements AssetProvider {
             //获取所需要的cmd的数据
             BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
             Byte isSettled = cmd.getIsSettled();
-            String noticeTel = cmd.getNoticeTel();
+            //String noticeTel = cmd.getNoticeTel();
+            List<String> noticeTelList = cmd.getNoticeTelList();
             Long ownerId = cmd.getOwnerId();
             String ownerType = cmd.getOwnerType();
             String targetName = cmd.getTargetName();
@@ -1669,7 +1674,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
-            newBill.setNoticetel(noticeTel);
+            newBill.setNoticetel(String.join(",", noticeTelList));
             newBill.setOwnerId(ownerId);
             newBill.setTargetName(targetName);
             newBill.setOwnerType(ownerType);
@@ -1720,7 +1725,7 @@ public class AssetProviderImpl implements AssetProvider {
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
             response[0].setBillGroupName(billGroupDTO.getBillGroupName());
             response[0].setBillId(String.valueOf(nextBillId));
-            response[0].setNoticeTel(noticeTel);
+            response[0].setNoticeTelList(noticeTelList);
             response[0].setBillStatus(billStatus);
             response[0].setTargetType(targetType);
             response[0].setTargetId(String.valueOf(targetId));
@@ -1756,7 +1761,10 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBillId(f.getValue(r.ID));
                     vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
                     vo.setTargetId(f.getValue(r.TARGET_ID));
-                    vo.setNoticeTel(f.getValue(r.NOTICETEL));//催缴联系号码
+                    //vo.setNoticeTel(f.getValue(r.NOTICETEL));//催缴联系号码
+                    if (f.getValue(r.NOTICETEL) != null) {
+                    	vo.setNoticeTelList(Arrays.asList((f.getValue(r.NOTICETEL)).split(",")));
+					}
                     vo.setCustomerTel(f.getValue(r.CUSTOMER_TEL));//客户手机号
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setDateStrBegin(f.getValue(r.DATE_STR_BEGIN));//账单开始时间
@@ -2520,7 +2528,7 @@ public class AssetProviderImpl implements AssetProvider {
     	Long targetId = cmd.getTargetId();
     	String targetName = cmd.getTargetName();
     	String invoiceNum = cmd.getInvoiceNum();
-    	String noticeTel = cmd.getNoticeTel();
+    	List<String> noticeTelList = cmd.getNoticeTelList();
     	Long categoryId = cmd.getCategoryId();
     	String ownerType = cmd.getOwnerType();
         Long ownerId = cmd.getOwnerId();
@@ -2745,7 +2753,8 @@ public class AssetProviderImpl implements AssetProvider {
             // 更新发票
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
-                    .set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
+                    //.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
+            		.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, String.join(",", noticeTelList))
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             return null;

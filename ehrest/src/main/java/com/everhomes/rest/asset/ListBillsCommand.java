@@ -61,26 +61,32 @@ public class ListBillsCommand {
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
-
     private Long billGroupId;
-    
     private String buildingName;
     private String apartmentName;
     private Byte status;
     private String targetType;
     private String contractNum;
     private Long organizationId;
-
     private Long categoryId;
-    
     private Long targetIdForEnt;
-    
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
     
+    private Long moduleId;//用于下载中心
+    
+    public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
+    private Long communityId;
 
     //新增账单来源信息
     private String sourceType;
@@ -93,6 +99,13 @@ public class ListBillsCommand {
     
     //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
     private List<ReSortCmd> sorts;
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
