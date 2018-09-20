@@ -176,11 +176,8 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
-<<<<<<< HEAD
 import com.everhomes.rest.contract.ContractErrorCode;
-=======
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
->>>>>>> enterprise-investment-1.0
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -458,15 +455,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	private PushMessageLogService pushMessageLogService;
    	
    	@Autowired
-<<<<<<< HEAD
 	protected LocaleStringService localeStringService;
    	
    	@Autowired
 	protected TaskService taskService;
 
-=======
    	private ActivityService activityService;
->>>>>>> enterprise-investment-1.0
 
     private String queueName = "property-mgr-push";
 
