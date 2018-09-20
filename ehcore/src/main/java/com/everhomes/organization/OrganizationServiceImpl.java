@@ -5830,6 +5830,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         } else {
 
+            addWaittingOrganizationMemberLog(organizationmember);
             sendMessageForContactApply(organizationmember);
 
             OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
@@ -5855,6 +5856,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    private void addWaittingOrganizationMemberLog(OrganizationMember organizationMember){
+
+        OrganizationMemberLog orgLog = new OrganizationMemberLog();
+        orgLog.setOrganizationId(organizationMember.getOrganizationId());
+        orgLog.setContactName(organizationMember.getContactName());
+        orgLog.setContactToken(organizationMember.getContactToken());
+        orgLog.setUserId(organizationMember.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.WAITING_FOR_APPROVAL.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(organizationMember.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
+    }
 
     private boolean checkUserEmailDomain(ApplyForEnterpriseContactNewCommand cmd) {
         if (cmd.getOrganizationId() == null) {
@@ -6025,10 +6040,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
+            //拒绝申请时，增加认证记录 add by 梁燕龙 20180920
+            addRejectOrganizationMemberLog(member);
             deleteEnterpriseContactStatus(operatorUid, member);
             sendMessageForContactReject(member , cmd.getRejectText());
         }
 
+    }
+
+    private void addRejectOrganizationMemberLog(OrganizationMember organizationMember) {
+        OrganizationMemberLog orgLog = new OrganizationMemberLog();
+        orgLog.setOrganizationId(organizationMember.getOrganizationId());
+        orgLog.setContactName(organizationMember.getContactName());
+        orgLog.setContactToken(organizationMember.getContactToken());
+        orgLog.setUserId(organizationMember.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.REJECT.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(organizationMember.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
     }
 
 

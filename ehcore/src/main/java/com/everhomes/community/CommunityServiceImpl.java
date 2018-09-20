@@ -2040,11 +2040,8 @@ public class CommunityServiceImpl implements CommunityService {
                 query.addConditions(cond);
             }
 			if (!StringUtils.isBlank(cmd.getAddress())) {
-			    Condition cond = Tables.EH_ADDRESSES.CITY_NAME.like("%" + cmd.getKeywords() + "%");
-                cond = cond.or(Tables.EH_ADDRESSES.AREA_NAME.like("%" + cmd.getKeywords() + "%"));
-                cond = cond.or(Tables.EH_ADDRESSES.BUILDING_NAME.like("%" + cmd.getKeywords() + "%"));
-                cond = cond.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeywords() + "%"));
-                query.addConditions(cond);
+			    Condition cond = Tables.EH_ADDRESSES.ADDRESS.like("%" + cmd.getKeywords() + "%");
+				query.addConditions(cond);
             }
 			if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
                 query.addConditions(Tables.EH_GROUP_MEMBERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
