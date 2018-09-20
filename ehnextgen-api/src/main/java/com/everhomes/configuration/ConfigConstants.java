@@ -216,4 +216,5 @@ public interface ConfigConstants {
  
 
     public static final String SHOW_PRIVATE_FLAG = "personal.show.private.flag";
+    public static final String SHOW_USER_VIP_LEVEL = "user.show.vip.level";
 }

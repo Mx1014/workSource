@@ -310,6 +310,8 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembersByUId(Long uId);
 
+    List<OrganizationMember> listAllOrganizationMembersByUID(List<Long> uIds);
+
     List<OrganizationMember> listOrganizationMembersTargetIdExist();
 
     void createOrganizationOwner(OrganizationOwner owner);

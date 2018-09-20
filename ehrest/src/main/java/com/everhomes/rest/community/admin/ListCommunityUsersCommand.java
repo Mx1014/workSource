@@ -8,11 +8,14 @@ package com.everhomes.rest.community.admin;
  *     <li>namespaceId: namespaceId</li>
  *     <li>executiveFlag: 是否高管 0-否 1-是</li>
  *     <li>gender: gender</li>
- *     <li>isAuth: 认证状态  1认证  2非认证</li>
- *     <li>keywords: 关键字</li>
+ *     <li>isAuth: 认证状态，请参考{@link com.everhomes.rest.organization.AuthFlag}</li>
+ *     <li>keywords: 姓名或者昵称</li>
  *     <li>communityId: 小区id</li>
  *     <li>organizationId: organizationId</li>
  *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
+ *     <li>organizationNames: 企业名称,分号隔开</li>
+ *     <li>phone: 手机号码</li>
+ *     <li>address: 家庭地址，小区的时候使用</li>
  *     <li>startTime: 注册时间-开始</li>
  *     <li>endTime: 注册时间-结束</li>
  * </ul>
@@ -42,6 +45,36 @@ public class ListCommunityUsersCommand {
 	private Long startTime;
 
 	private Long endTime;
+
+	private String organizationNames;
+
+	private String phone;
+
+	private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getOrganizationNames() {
+        return organizationNames;
+    }
+
+    public void setOrganizationNames(String organizationNames) {
+        this.organizationNames = organizationNames;
+    }
+
+    public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public Byte getGender() {
 		return gender;
