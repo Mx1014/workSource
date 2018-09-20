@@ -679,7 +679,9 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerSearcher.feedDoc(customer);
         // add entry infos for asset adding customer
         if (cmd.getEntryInfos() != null) {
-            cmd.getEntryInfos().setCheckAuth(false);
+            CreateCustomerEntryInfoCommand entryInfoCommand = cmd.getEntryInfos();
+            entryInfoCommand.setCheckAuth(false);
+            entryInfoCommand.setCustomerId(customer.getId());
             createCustomerEntryInfo(cmd.getEntryInfos());
         }
         return ConvertHelper.convert(customer,EnterpriseCustomerDTO.class);
