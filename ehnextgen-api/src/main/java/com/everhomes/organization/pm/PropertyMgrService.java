@@ -3,6 +3,8 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.ApartmentEventDTO;
+import com.everhomes.rest.address.AuthorizePriceCommand;
+import com.everhomes.rest.address.AuthorizePriceDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
@@ -11,10 +13,12 @@ import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -42,6 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -509,4 +515,19 @@ public interface PropertyMgrService {
 	List<ApartmentEventDTO> listApartmentEvents(ListApartmentEventsCommand cmd);
 
 	List<ListReservationsDTO> findReservations(FindReservationsCommand cmd);
+
+	void setAuthorizePrice(AuthorizePriceCommand cmd);
+	ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd);
+
+	AuthorizePriceDTO authorizePriceDetail(AuthorizePriceCommand cmd);
+
+	void updateAuthorizePrice(AuthorizePriceCommand cmd);
+
+	void deleteAuthorizePrice(AuthorizePriceCommand cmd);
+
+	void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd);
+
+	OutputStream exportOutputStreamAuthorizePriceList(ListPropApartmentsByKeywordCommand cmd, Long taskId);
+
+	Object importAddressAuthorizePriceData(ImportAddressCommand cmd, MultipartFile multipartFile);
 }

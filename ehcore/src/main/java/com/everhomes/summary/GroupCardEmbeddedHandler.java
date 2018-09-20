@@ -38,7 +38,7 @@ public class GroupCardEmbeddedHandler implements ForumEmbeddedHandler {
     }
 
     @Override
-    public Post postProcessEmbeddedObject(Post post) {
+    public Post postProcessEmbeddedObject(Post post,Long communityId) {
         Long embeddedObjId = post.getEmbeddedId();
         if(embeddedObjId != null) {
             Group group = this.groupProvider.findGroupById(embeddedObjId);

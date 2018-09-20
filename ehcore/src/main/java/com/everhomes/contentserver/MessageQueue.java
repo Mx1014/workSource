@@ -1,13 +1,12 @@
 package com.everhomes.contentserver;
 
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 
 @Component
 public class MessageQueue {

@@ -177,4 +177,5 @@ public interface ParkingService {
 
     void updateParkingUserNotice(UpdateUserNoticeCommand cmd);
 
+    void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd);
 }

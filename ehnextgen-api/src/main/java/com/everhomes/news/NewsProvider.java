@@ -55,4 +55,5 @@ public interface NewsProvider {
 
 	News findNewPreview(Long id);
 
+	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
 }

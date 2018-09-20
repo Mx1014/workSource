@@ -1,33 +1,48 @@
 //@formatter:off
 package com.everhomes.rest.activity;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>activityId: 活动id</li>
  * <li>phone: 手机</li>
- * <li>realName: 真实姓名</li>
- * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
+ * <li>formOriginId: 表单formOriginId</li>
+ * <li>formId:表单ID</li>
  * <li>communityName: 园区名称</li>
- * <li>organizationName: 企业名称</li>
- * <li>position: 职位</li>
- * <li>leaderFlag: 是否高管，1是0否</li>
- * <li>email: 邮箱</li>
+ * <li>values: 报名中，每项对应的值{@link PostApprovalFormItem} </li>
  * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  * </ul>
  */
 public class ManualSignupCommand {
 	private Long activityId;
 	private String phone;
-	private String realName;
-	private Byte gender;
+	private Long formId;
+	private Long formOriginId;
 	private String communityName;
-	private String organizationName;
-	private String position;
-	private Byte leaderFlag;
-	private String email;
+	@ItemType(PostApprovalFormItem.class)
+	List<PostApprovalFormItem> values;
     private String payFlag;
+
+    public Long getFormId() {
+        return formId;
+    }
+
+    public void setFormId(Long formId) {
+        this.formId = formId;
+    }
+
+    public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
 
 	public Long getActivityId() {
 		return activityId;
@@ -45,60 +60,20 @@ public class ManualSignupCommand {
 		this.phone = phone;
 	}
 
-	public String getRealName() {
-		return realName;
+	public Long getFormOriginId() {
+		return formOriginId;
 	}
 
-	public void setRealName(String realName) {
-		this.realName = realName;
+	public void setFormOriginId(Long formOriginId) {
+		this.formOriginId = formOriginId;
 	}
 
-	public Byte getGender() {
-		return gender;
+	public List<PostApprovalFormItem> getValues() {
+		return values;
 	}
 
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
-
-	public String getCommunityName() {
-		return communityName;
-	}
-
-	public void setCommunityName(String communityName) {
-		this.communityName = communityName;
-	}
-
-	public String getOrganizationName() {
-		return organizationName;
-	}
-
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
-
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public Byte getLeaderFlag() {
-		return leaderFlag;
-	}
-
-	public void setLeaderFlag(Byte leaderFlag) {
-		this.leaderFlag = leaderFlag;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
+	public void setValues(List<PostApprovalFormItem> values) {
+		this.values = values;
 	}
 
 	public String getPayFlag() {

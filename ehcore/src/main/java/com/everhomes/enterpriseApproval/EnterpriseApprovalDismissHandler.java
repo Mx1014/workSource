@@ -10,11 +10,19 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.archives.*;
+import com.everhomes.rest.archives.AddArchivesLogCommand;
+import com.everhomes.rest.archives.ArchivesDismissType;
+import com.everhomes.rest.archives.ArchivesOperationType;
+import com.everhomes.rest.archives.ArchivesParameter;
+import com.everhomes.rest.archives.DismissArchivesEmployeesCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentDismissApplicationValue;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
@@ -136,5 +144,9 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
         Long userId = UserContext.currentUserId();
         return enterpriseApprovalService.checkArchivesApproval(userId, cmd.getCurrentOrganizationId(), cmd.getSourceId(),
                 ArchivesOperationType.DISMISS.getCode());
+    }
+
+    @Override
+    public void onFlowCaseDeleted(FlowCase flowCase) {
     }
 }

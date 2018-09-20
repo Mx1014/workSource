@@ -35,4 +35,6 @@ public interface PmTaskErrorCode {
     int ERROR_STATE_ID = 10017;//非法状态
 
     int ERROR_CREATE_USER_ACCOUNT = 10018;//创建支付账号问题
+
+    int PAYMENT_ORDER_NOT_EXIST = 10019;//订单系统找不到订单
 }

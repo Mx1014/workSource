@@ -87,4 +87,6 @@ public interface UserActivityService {
 	void updateShakeOpenDoor(Byte shakeOpenDoor);
 
     GetUserTreasureResponse getUserTreasureV2();
+
+    GetUserTreasureNewResponse getUserTreasureNew();
 }
