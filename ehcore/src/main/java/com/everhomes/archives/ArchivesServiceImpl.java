@@ -152,7 +152,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (employee == null)
             return null;
         if(employee.getAccount() == null)
-            employee.setAccount(cmd.getAccount().trim());
+            employee.setAccount(cmd.getAccount());
         employee.setEnName(cmd.getContactEnName());
         employee.setRegionCode(cmd.getRegionCode());
         employee.setContactShortToken(cmd.getContactShortToken());
