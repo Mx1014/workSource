@@ -4388,7 +4388,7 @@ public class PunchProviderImpl implements PunchProvider {
 	public Integer countPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
 			String queryByMonth) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
-        SelectJoinStep<Record1<Integer>> step =context.selectCount().from(Tables.EH_PUNCH_STATISTICS); 
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS); 
         Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds)); 
@@ -4402,7 +4402,7 @@ public class PunchProviderImpl implements PunchProvider {
 	public Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
 			java.util.Date queryDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
-		SelectJoinStep<Record1<Integer>> step =context.selectCount().from(Tables.EH_PUNCH_DAY_LOGS); 
+		SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS); 
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));  
