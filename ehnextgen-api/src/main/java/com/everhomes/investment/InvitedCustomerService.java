@@ -32,6 +32,8 @@ public interface InvitedCustomerService {
     void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response);
 
     List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd);
+    
+    InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd);
 
 
 }

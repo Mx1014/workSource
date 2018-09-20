@@ -1911,7 +1911,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		Set<String> customerNameSet = finalCommandMap.keySet();
 		for (String customerName : customerNameSet) {
 			CreateInvitedCustomerCommand createInvitedCustomerCommand = finalCommandMap.get(customerName);
-			InvitedCustomerDTO invitedCustomer = invitedCustomerService.createInvitedCustomer(createInvitedCustomerCommand);
+			createInvitedCustomerCommand.setNamespaceId(cmd.getNamespaceId());
+			createInvitedCustomerCommand.setCommunityId(cmd.getCommunityId());
+			createInvitedCustomerCommand.setOrgId(cmd.getOrganizationId());
+			InvitedCustomerDTO invitedCustomer = invitedCustomerService.createInvitedCustomerWithoutAuth(createInvitedCustomerCommand);
 			customerIds.add(invitedCustomer.getId());
 		}
 		TransformToCustomerResponse response = new TransformToCustomerResponse();
