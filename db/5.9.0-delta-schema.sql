@@ -222,5 +222,7 @@ CREATE TABLE `eh_address_properties` (
 	`operator_uid` BIGINT COMMENT '最近修改人',
 	PRIMARY KEY (id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '楼宇属性信息表';
+
+alter table eh_payment_bills modify column noticeTel varchar(255) COMMENT '催缴手机号码';
 -- END issue-37007
 
