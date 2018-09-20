@@ -1035,7 +1035,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
                     importLogs.setSheetName(sheetName);
-                    return true;
+                    return false;
                 }
             }
         }
