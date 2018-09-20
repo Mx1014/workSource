@@ -327,12 +327,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd) {
-        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_VIEW, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = false;
         SearchEnterpriseCustomerResponse searchResponse;
         if(cmd.getCustomerIds() != null && cmd.getCustomerIds().size() > 0){
             searchResponse = customerSearcher.queryEnterpriseCustomersById(cmd);
-
         }else {
+            isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
             searchResponse = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
         }
         SearchInvestmentResponse response = new SearchInvestmentResponse();
