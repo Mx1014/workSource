@@ -121,6 +121,7 @@ import com.everhomes.sms.*;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -134,6 +135,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
@@ -6815,6 +6817,36 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             return org;
         }
 
+    /*******************统一用户同步数据**********************/
+    @KafkaListener(topicPattern = "user-create-event")
+    public void syncCreateUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        this.userProvider.createUser(user);
+    }
 
+    @KafkaListener(topicPattern = "user-update-event")
+    public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        this.userProvider.updateUser(user);
+    }
+
+    @KafkaListener(topicPattern = "user-delete-event")
+    public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        this.userProvider.deleteUser(user);
+    }
+
+    @KafkaListener(topicPattern = "userIdentifier-create-event")
+    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        this.userProvider.createIdentifier(userIdentifier);
+    }
+
+    @KafkaListener(topicPattern = "userIdentifier-update-event")
+    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        this.userProvider.updateIdentifier(userIdentifier);
+    }
+    /*********************同步数据 END************************/
 
 }
