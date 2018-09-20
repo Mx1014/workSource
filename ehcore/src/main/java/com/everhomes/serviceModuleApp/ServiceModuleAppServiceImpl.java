@@ -128,6 +128,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Autowired
 	private UserAppProvider userAppProvider;
 
+	@Autowired
+	private UserAppFlagProvider userAppFlagProvider;
+
 
 	@Autowired
 	private RecommendAppProvider recommendAppProvider;
@@ -550,13 +553,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), null, null);
 		if(tempApps != null && tempApps.size() > 0) {
-			List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+
+			//用户是否启用自定义配置
+			UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+
 			//有用户自定义应用
-			if (userApps != null && userApps.size() != 0) {
-				for (UserApp userApp : userApps) {
-					for (ServiceModuleApp app : tempApps) {
-						if (userApp.getAppId().equals(app.getOriginId())) {
-							apps.add(app);
+			if(userAppFlag != null){
+				List<UserApp> userApps = userAppProvider.listUserApps(UserContext.currentUserId(), ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), communityId);
+				if (userApps != null && userApps.size() != 0) {
+					for (UserApp userApp : userApps) {
+						for (ServiceModuleApp app : tempApps) {
+							if (userApp.getAppId().equals(app.getOriginId())) {
+								apps.add(app);
+							}
 						}
 					}
 				}
@@ -1224,16 +1233,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, appCategory.getId());
 
-			List<AppDTO> appDtos = new ArrayList<>();
-			if (apps != null && apps.size() > 0) {
-				for (ServiceModuleApp app : apps) {
-					AppDTO appDTO = toAppDto(app, sceneType, communityId, orgId);
-					if (appDTO == null) {
-						continue;
-					}
-					appDtos.add(appDTO);
-				}
-			}
+			List<AppDTO> appDtos = toAppDtos(communityId, orgId, sceneType, apps);
+
 			dto.setAppDtos(appDtos);
 
 			categoryDtos.add(dto);
@@ -1242,19 +1243,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleApp> userCommunityApps = findUserCommunityApps(communityId);
 
-		List<AppDTO> appDtos = new ArrayList<>();
-		if(userCommunityApps != null && userCommunityApps.size() > 0){
-			for (ServiceModuleApp app: userCommunityApps){
-				AppDTO appDTO = toAppDto(app, sceneType, communityId, orgId);
-				if(appDTO == null){
-					continue;
-				}
-				appDtos.add(appDTO);
-			}
-			//加上"全部"Icon
-			AppDTO allIcon = getAllIcon(communityId, orgId, AllOrMoreType.ALL.getCode());
-			appDtos.add(allIcon);
-		}
+		List<AppDTO> appDtos = toAppDtos(communityId, orgId, sceneType, userCommunityApps);
+
+
+		//加上"全部"Icon
+		AppDTO allIcon = getAllIcon(communityId, orgId, AllOrMoreType.ALL.getCode());
+		appDtos.add(allIcon);
 
 
 		ListAllAppsResponse response = new ListAllAppsResponse();
@@ -1264,6 +1258,21 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		response.setDefaultDtos(appDtos);
 
 		return response;
+	}
+
+	private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
+		List<AppDTO> appDtos = new ArrayList<>() ;
+		if(userCommunityApps != null && userCommunityApps.size() > 0){
+			for (ServiceModuleApp app: userCommunityApps){
+				AppDTO appDTO = toAppDto(app, sceneType, communityId, orgId);
+				if(appDTO == null){
+					continue;
+				}
+				appDtos.add(appDTO);
+			}
+		}
+
+		return appDtos;
 	}
 
 	@Override
@@ -1276,15 +1285,24 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
 		}
 
-		if(cmd.getCommunityId() == null || cmd.getAppIds() == null || cmd.getAppIds().size() == 0){
-            LOGGER.error("invalid parameter, cmd = {}.", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+		if(cmd.getCommunityId() == null){
+            LOGGER.error("communityId is null");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "communityId is null");
 
         }
 
         dbProvider.execute(status -> {
 
+        	//保存自定义标志
+			saveUserAppFlag(userId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), cmd.getCommunityId());
+
             userAppProvider.deleteByUserId(userId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), cmd.getCommunityId());
+
+
+            //没有自己的就返回吧
+            if(cmd.getAppIds() == null){
+            	return null;
+			}
 
             Integer order = 1;
 
@@ -1305,6 +1323,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	}
 
+
+	private UserAppFlag saveUserAppFlag(Long userId, Byte locationType, Long locationTargetId){
+		UserAppFlag userAppFlag = userAppFlagProvider.findUserAppFlag(userId, locationType, locationTargetId);
+		if(userAppFlag == null){
+			userAppFlag = new UserAppFlag();
+			userAppFlag.setUserId(userId);
+			userAppFlag.setLocationType(locationType);
+			userAppFlag.setLocationTargetId(locationTargetId);
+			userAppFlagProvider.createUserAppFlag(userAppFlag);
+		}
+
+		return userAppFlag;
+	}
 
 	@Override
 	public void updateRecommendApps(UpdateRecommendAppsCommand cmd) {
