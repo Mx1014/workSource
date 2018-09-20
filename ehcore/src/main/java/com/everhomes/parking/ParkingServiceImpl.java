@@ -381,6 +381,10 @@ public class ParkingServiceImpl implements ParkingService {
 		String ownerType = FlowOwnerType.PARKING.getCode();
 		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 				FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+		if (flow == null) {
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"请启用工作流。");
+		}
 		Long flowId = flow.getFlowMainId();
 		Integer requestFlowType = parkingLot.getFlowMode();
 
@@ -1794,7 +1798,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null == flowId) {
 			LOGGER.error("FlowId cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"FlowId cannot be null.");
+					"请先设置工作流.");
 		}
 
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
