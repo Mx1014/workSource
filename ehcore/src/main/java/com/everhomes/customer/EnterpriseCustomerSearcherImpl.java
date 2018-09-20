@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -166,7 +167,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
             builder.field("corpIndustryItemId", customer.getCorpIndustryItemId());
-            builder.field("levelItemId", customer.getLevelItemId());
+            // for statistics filter
+            builder.field("levelItemId", customer.getLevelItemId() == null ? 0 : customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
@@ -380,7 +382,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
 
-        if(cmd.getLevelId() != null)
+        if(cmd.getLevelId() != null )
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
 
         /*//查询全部客户、我的客户、公共客户
