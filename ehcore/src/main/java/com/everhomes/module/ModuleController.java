@@ -1,26 +1,25 @@
 package com.everhomes.module;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value = "module controller", site = "core")
 @RestController
@@ -56,6 +55,24 @@ public class ModuleController extends ControllerBase {
     @RestReturn(value = ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModules(@Valid ListServiceModulesCommand cmd) {
         List<ServiceModuleDTO> dto = serviceModuleService.listServiceModules(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /module/listServiceModulesByAppType</b>
+     * <p>
+     * 业务模块列表
+     * </p>
+     */
+    @RequestMapping("listServiceModulesByAppType")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulesByAppType(@Valid ListServiceModulesByAppTypeCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulesByAppType(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -227,6 +244,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("createServiceModule")
     @RestReturn(value = String.class)
     public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         return new RestResponse(serviceModuleService.createServiceModule(cmd));
     }
 
@@ -239,6 +258,9 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModule")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         return new RestResponse(serviceModuleService.updateServiceModule(cmd));
     }
 
@@ -251,6 +273,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteServiceModule")
     @RestReturn(value = String.class)
     public RestResponse deleteServiceModule(@Valid DeleteServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         serviceModuleService.deleteServiceModule(cmd);
         return new RestResponse();
     }
@@ -292,5 +316,250 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /module/listServiceModuleEntries</b>
+     * <p>查询模块入口</p>
+     */
+    @RequestMapping("listServiceModuleEntries")
+    @RestReturn(value = ServiceModuleEntryDTO.class)
+    public RestResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd) {
+        ListServiceModuleEntriesResponse res = serviceModuleService.listServiceModuleEntries(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/updateServiceModuleEntries</b>
+     * <p>更新模块入口</p>
+     */
+    @RequestMapping("updateServiceModuleEntries")
+    @RestReturn(value = String.class)
+    public RestResponse updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.updateServiceModuleEntries(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/reorderServiceModuleEntries</b>
+     * <p>更新入口排序</p>
+     */
+    @RequestMapping("reorderServiceModuleEntries")
+    @RestReturn(value = String.class)
+    public RestResponse reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.reorderServiceModuleEntries(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /module/createServiceModuleEntry</b>
+     * <p>新增模块入口</p>
+     */
+    @RequestMapping("createServiceModuleEntry")
+    @RestReturn(value = ServiceModuleEntryDTO.class)
+    public RestResponse createServiceModuleEntry(CreateServiceModuleEntryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        ServiceModuleEntryDTO dto = serviceModuleService.createServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/updateServiceModuleEntry</b>
+     * <p>编辑模块入口</p>
+     */
+    @RequestMapping("updateServiceModuleEntry")
+    @RestReturn(value = String.class)
+    public RestResponse updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.updateServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/deleteServiceModuleEntry</b>
+     * <p>删除模块入口</p>
+     */
+    @RequestMapping("deleteServiceModuleEntry")
+    @RestReturn(value = String.class)
+    public RestResponse deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.deleteServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listAppCategory</b>
+     * <p>查询应用入口树形目录</p>
+     */
+    @RequestMapping("listAppCategory")
+    @RestReturn(value = ListAppCategoryResponse.class)
+    public RestResponse listAppCategory(ListAppCategoryCommand cmd) {
+        ListAppCategoryResponse res = serviceModuleService.listAppCategory(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listLeafAppCategory</b>
+     * <p>查询应用入口平铺结构</p>
+     */
+    @RequestMapping("listLeafAppCategory")
+    @RestReturn(value = ListLeafAppCategoryResponse.class)
+    public RestResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
+        ListLeafAppCategoryResponse res = serviceModuleService.listLeafAppCategory(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/createAppCategory</b>
+     * <p>新增应用入口目录</p>
+     */
+    @RequestMapping("createAppCategory")
+    @RestReturn(value = AppCategoryDTO.class)
+    public RestResponse createAppCategory(CreateAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        AppCategoryDTO dto = serviceModuleService.createAppCategory(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/updateAppCategory</b>
+     * <p>编辑应用入口目录</p>
+     */
+    @RequestMapping("updateAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse updateAppCategory(UpdateAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.updateAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/deleteAppCategory</b>
+     * <p>删除应用入口目录</p>
+     */
+    @RequestMapping("deleteAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse deleteAppCategory(DeleteAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.deleteAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/reorderAppCategory</b>
+     * <p>排序应用入口目录</p>
+     */
+    @RequestMapping("reorderAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse reorderAppCategory(ReorderAppCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.reorderAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/changeServiceModuleEntryCategory</b>
+     * <p>修改应用入口到某个分类</p>
+     */
+    @RequestMapping("changeServiceModuleEntryCategory")
+    @RestReturn(value = String.class)
+    public RestResponse changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.changeServiceModuleEntryCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <p>导出模块入口信息</p>
+     * <b>URL: /module/exportServiceModuleEntries</b>
+     */
+    @RequestMapping("exportServiceModuleEntries")
+    @RestReturn(value=String.class)
+    public RestResponse exportServiceModuleEntries(HttpServletResponse response) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        serviceModuleService.exportServiceModuleEntries(response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 
 }

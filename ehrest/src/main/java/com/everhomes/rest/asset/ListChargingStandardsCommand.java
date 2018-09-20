@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 /**
  *<ul>
  * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者type</li>
+ * <li>ownerType: 所属者type community</li>
  * <li>namespaceId:域空间</li>
  * <li>chargingItemId:收费项目id</li>
  * <li>pageAnchor:锚点</li>
@@ -30,6 +30,10 @@ public class ListChargingStandardsCommand {
     private Long categoryId;
     private Long moduleId;
     private Long billGroupId;
+    // 是否查通用配置
+    private Boolean allScope = false;
+
+    private Long orgId;
 
     public Long getModuleId() {
 		return moduleId;
@@ -100,6 +104,22 @@ public class ListChargingStandardsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Boolean getAllScope() {
+        return allScope;
+    }
+
+    public void setAllScope(Boolean allScope) {
+        this.allScope = allScope;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     public ListChargingStandardsCommand() {

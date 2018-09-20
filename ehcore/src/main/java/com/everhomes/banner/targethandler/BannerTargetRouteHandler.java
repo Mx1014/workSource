@@ -5,6 +5,8 @@ import com.everhomes.banner.BannerTargetHandler;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.banner.targetdata.BannerRouteTargetData;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
@@ -30,5 +32,15 @@ public class BannerTargetRouteHandler implements BannerTargetHandler {
 
         res.setActionData(formatURI(dataObj.getUri()));
         return res;
+    }
+
+    @Override
+    public RouterInfo getRouterInfo(String targetData) {
+        return null;
+    }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        return ClientHandlerType.NATIVE.getCode();
     }
 }

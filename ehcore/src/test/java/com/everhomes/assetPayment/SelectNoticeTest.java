@@ -58,7 +58,7 @@ public class SelectNoticeTest extends CoreServerTestCase {
             cmd.setCommunityId(c.getId());
             cmd.setNamespaceId(999971);
             customerService.syncIndividualCustomers(cmd);
-//            customerService.syncEnterpriseCustomers(cmd);
+            //customerService.syncEnterpriseCustomers(cmd);
         }
     }*/
 }

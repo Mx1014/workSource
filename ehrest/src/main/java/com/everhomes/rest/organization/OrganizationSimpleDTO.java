@@ -36,6 +36,8 @@ public class OrganizationSimpleDTO {
 
 	private String contactToken;
 
+	private String displayName;
+
 	public Long getId() {
 		return id;
 	}
@@ -106,6 +108,14 @@ public class OrganizationSimpleDTO {
 
 	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	@Override

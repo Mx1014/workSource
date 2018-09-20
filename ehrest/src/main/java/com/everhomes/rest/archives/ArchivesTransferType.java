@@ -1,7 +1,5 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>PROMOTE((byte) 0): 晋升</li>

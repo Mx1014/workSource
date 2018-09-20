@@ -38,6 +38,9 @@ public class ListQualityInspectionTasksCommand {
 	private String ownerType;
 	
 	private Long targetId;
+
+	@ItemType(Long.class)
+	private List<Long> targetIds;
 	
 	private String targetType;
 	
@@ -223,6 +226,14 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
+	}
+
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
 	}
 
 	@Override

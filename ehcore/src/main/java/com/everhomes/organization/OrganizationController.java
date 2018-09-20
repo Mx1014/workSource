@@ -18,7 +18,6 @@ import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
@@ -34,9 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1601,7 +1598,158 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+//    /**
+//     * <b>URL: /org/listOrganizationsByUser</b>
+//     * <p>获取用户所在的已认证公司及公司与人的相关信息</p>
+//     */
+//    @RequestMapping("listOrganizationsByUser")
+//    @RestReturn(value = ListOrganizationsByUserResponse.class)
+//    public RestResponse listOrganizationsByUser() {
+//        List<OrganizationUserDTO> res = null;
+//        RestResponse response = new RestResponse(res);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+
+    /**
+     * <b>URL: /org/listEnterpriseByNamespaceIds</b>
+     * <p>查询域空间下公司列表</p>
+     */
+    @RequestMapping("listEnterpriseByNamespaceIds")
+    @RestReturn(value = ListPMOrganizationsResponse.class)
+    public RestResponse listEnterpriseByNamespaceIds(@Valid ListEnterpriseByNamespaceIdCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listEnterpriseByNamespaceIds(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/destoryOrganizationByOrgId</b>
+     * <p>根据企业编号来删除企业信息</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "destoryOrganizationByOrgId")
+    @RestReturn(value = String.class)
+    public RestResponse destoryOrganizationByOrgId(DestoryOrganizationCommand cmd){
+        RestResponse response = new RestResponse();
+        organizationService.destoryOrganizationByOrgId(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/enterprise/detail</b>
+     * <p>查看单个公司的具体属性(标准版)</p>
+     */
+    @RequestMapping("/enterprise/detail")
+    @RestReturn(value = EnterpriseDTO.class)
+    public RestResponse findEnterpriseDetail(@Valid FindEnterpriseDetailCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.getOrganizationDetailByOrgId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/updateWholeAddressName</b>
+     * <p>修改办公地点名称全称（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("updateWholeAddressName")
+    @RestReturn(value = String.class)
+    public RestResponse updateWholeAddressName(WholeAddressComamnd cmd){
+        RestResponse response = new RestResponse();
+        //// TODO: 2018/5/25
+        organizationService.updateWholeAddressName(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/enterprise/closeOrOpenWorkBench</b>
+     * <p>禁用或者是开启移动工作台（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/enterprise/closeOrOpenWorkBench")
+    @RestReturn(value = String.class)
+    public RestResponse changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd){
+        RestResponse response = new RestResponse();
+        organizationService.changeWorkBenchFlag(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/enterprise/edit</b>
+     * <p>编辑单个公司的具体属性(标准版)</p>
+     */
+    @RequestMapping("/enterprise/edit")
+    @RestReturn(value = EnterpriseDTO.class)
+    public RestResponse updateEnterpriseDetail(@Valid UpdateEnterpriseDetailCommand cmd) {
+        organizationService.updateEnterpriseDetail(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/workplace/edit</b>
+     * <p>编辑办公地点（包括其中的楼栋和门牌）(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/workplace/edit")
+    @RestReturn(value = String.class)
+    public RestResponse insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd){
+        organizationService.insertWorkPlacesAndBuildings(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/deleteWorkPlaces/edit</b>
+     * <p>根据组织ID删除办公地点的方法(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/deleteWorkPlaces/edit")
+    @RestReturn(value = String.class)
+    public RestResponse deleteWorkPlacesByOrganizationId(DeleteWorkPlacesCommand cmd){
+        RestResponse response = new RestResponse();
+        organizationService.deleteWorkPlacesByOrgId(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/superAdmin/edit</b>
+     * <p>更改超级管理员(标准版)</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/superAdmin/edit")
+    @RestReturn(value = String.class)
+    public RestResponse updateSuperAdminToken(UpdateSuperAdminCommand cmd){
+        organizationService.updateSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /org/getAdminType</b>
      * <p>更改超级管理员(标准版)</p>

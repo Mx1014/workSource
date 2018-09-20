@@ -21,6 +21,8 @@ public class ListScopeFieldItemCommand {
 
     private String fieldName;
 
+    private Long ownerId;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -51,6 +53,14 @@ public class ListScopeFieldItemCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

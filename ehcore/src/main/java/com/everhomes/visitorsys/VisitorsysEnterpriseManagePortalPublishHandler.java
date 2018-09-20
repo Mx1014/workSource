@@ -34,7 +34,7 @@ public class VisitorsysEnterpriseManagePortalPublishHandler implements PortalPub
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
         return instanceConfig;
     }
 

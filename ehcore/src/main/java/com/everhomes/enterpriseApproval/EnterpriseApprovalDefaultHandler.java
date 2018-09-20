@@ -1,18 +1,16 @@
 package com.everhomes.enterpriseApproval;
 
+import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.techpark.punch.PunchProvider;
-
 import com.everhomes.techpark.punch.PunchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.flow.FlowCase;
 
 /**
  * 
@@ -46,4 +44,7 @@ public class EnterpriseApprovalDefaultHandler implements EnterpriseApprovalHandl
 
 	}
 
+	@Override
+	public void onFlowCaseDeleted(FlowCase flowCase) {
+	}
 }

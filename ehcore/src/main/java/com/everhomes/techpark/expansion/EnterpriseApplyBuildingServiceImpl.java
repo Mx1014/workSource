@@ -38,7 +38,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID;
@@ -391,22 +393,20 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		List<Long> authCommunities = null;
+		Set<Long> authCommunities = new HashSet<>();
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			if (cmd.getCurrentProjectId()!=null) {
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
-				authCommunities = new ArrayList<>();
+				authCommunities = new HashSet<>();
 				authCommunities.add(cmd.getCurrentProjectId());
 			}else{//项目导航为全部 找出授权的项目
 				ListUserRelatedProjectByModuleCommand cmd2 = new ListUserRelatedProjectByModuleCommand();
 				cmd2.setAppId(cmd.getAppId());
 				cmd2.setOrganizationId(cmd.getCurrentPMId());
 				cmd2.setModuleId(40100L);
-				List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd2);
+				List<ProjectDTO> dtos = serviceModuleService.listUserRelatedCategoryProjectByModuleId(cmd2);
 				if (dtos!=null && dtos.size()>0)
-					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
-				else
-					authCommunities = new ArrayList<>();
+					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toSet());
 			}
 		}
 
@@ -418,8 +418,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
-				cmd.getAreaId(), cmd.getKeyword(),authCommunities, cmd.getPageAnchor(), pageSize);
-
+				cmd.getAreaId(), cmd.getKeyword(), new ArrayList<>(authCommunities), cmd.getPageAnchor(), pageSize);
+		Set<Long> finalAuthCommunities = authCommunities;
+		if (!authCommunities.isEmpty())
+		    communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
 		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
 
 		int size = communities.size();

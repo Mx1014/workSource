@@ -27,6 +27,10 @@ public class OwnerIdentityCommand {
     private Long moduleId;
     private Long billGroupId;
 
+    private Long orgId;
+
+    private Boolean allScope;
+
     public Long getModuleId() {
         return moduleId;
     }
@@ -70,6 +74,22 @@ public class OwnerIdentityCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
+    public Boolean getAllScope() {
+        return allScope;
+    }
+
+    public void setAllScope(Boolean allScope) {
+        this.allScope = allScope;
     }
 
     public OwnerIdentityCommand() {

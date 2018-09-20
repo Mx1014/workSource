@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *     <li>description: 门户layout描述</li>
  *     <li>type: layout类型，1-首页，2-自定义门户，3-分页签门户，参考{@link PortalLayoutType}</li>
  *     <li>indexFlag: 0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>type: 类型 参考{@link com.everhomes.rest.launchpadbase.LayoutType}</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class CreatePortalLayoutCommand {
@@ -26,6 +28,8 @@ public class CreatePortalLayoutCommand {
 	private Byte type;
 
 	private Byte indexFlag;
+
+	private Long bgColor;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -67,6 +71,13 @@ public class CreatePortalLayoutCommand {
 		this.type = type;
 	}
 
+	public Long getBgColor() {
+		return bgColor;
+	}
+
+	public void setBgColor(Long bgColor) {
+		this.bgColor = bgColor;
+	}
 	public Byte getIndexFlag() {
 		return indexFlag;
 	}

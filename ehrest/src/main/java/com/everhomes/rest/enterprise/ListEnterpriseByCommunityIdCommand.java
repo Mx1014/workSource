@@ -1,5 +1,7 @@
 package com.everhomes.rest.enterprise;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -13,13 +15,23 @@ import javax.validation.constraints.NotNull;
 public class ListEnterpriseByCommunityIdCommand {
     @NotNull
     Long communityId;
+    private Integer namespaceId;
     
     Integer status;
     
-    private String enterpriseName;
-    
     private Long pageAnchor;
     private Integer pageSize;
+    private String keyword;
+    private String enterpriseName;
+
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
 
     public Long getCommunityId() {
         return communityId;
@@ -53,13 +65,25 @@ public class ListEnterpriseByCommunityIdCommand {
         this.status = status;
     }
 
-	public String getEnterpriseName() {
-		return enterpriseName;
-	}
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
 
-	public void setEnterpriseName(String enterpriseName) {
-		this.enterpriseName = enterpriseName;
-	}
-    
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

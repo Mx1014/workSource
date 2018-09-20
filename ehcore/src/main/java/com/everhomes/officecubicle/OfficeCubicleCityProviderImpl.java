@@ -4,8 +4,10 @@ package com.everhomes.officecubicle;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Result;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,22 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 		return null;
 	}
 
+	@Override
+	public OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName,String cityName,Integer namespaceId,String ownerType,Long ownerId) {
+		List<OfficeCubicleCity> map = getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.CITY_NAME.eq(cityName))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+		if(map!=null && map.size()>0){
+			return map.get(0);
+		}
+		return null;
+	}
+
 
 	@Override
 	public List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId) {
@@ -93,6 +111,29 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCity(Integer namespaceId,Long orgId,String ownerType,Long ownerId, Long nextPageAnchor, int pageSize) {
+
+		DSLContext context = getReadOnlyContext();
+		SelectQuery query = context.selectQuery(Tables.EH_OFFICE_CUBICLE_CITIES);
+		if(null != namespaceId)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId));
+		if(null != orgId)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.ORG_ID.eq(orgId));
+		if(StringUtils.isNotEmpty(ownerType))
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId));
+		else
+		    query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull());
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2));
+		query.addOrderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc());
+		query.addConditions(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.lt(nextPageAnchor));
+		query.addLimit(pageSize);
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}
 
 	@Override
@@ -147,6 +188,28 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 				.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
 				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCityByOwnerId(String ownerType, Long ownerId) {
+		assert (null != ownerType && null != ownerId);
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
+	}
+
+	@Override
+	public List<OfficeCubicleCity> listOfficeCubicleCityByOrgId(Long orgId) {
+		assert (null != orgId);
+		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
+				.where(Tables.EH_OFFICE_CUBICLE_CITIES.ORG_ID.eq(orgId))
+				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
+                .and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull())
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleCity.class));
 	}

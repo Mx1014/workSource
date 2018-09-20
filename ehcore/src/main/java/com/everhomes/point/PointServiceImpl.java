@@ -5,6 +5,7 @@ import com.everhomes.PictureValidate.PictureValidateService;
 import com.everhomes.bus.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -12,6 +13,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.point.rpc.PointServiceRPCRest;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -34,6 +36,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +46,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
@@ -127,6 +131,12 @@ public class PointServiceImpl implements PointService {
 
     @Autowired
     private BusBridgeProvider busBridgeProvider;
+    
+    
+    @Autowired
+    private PointServiceRPCRest pointServiceRPCRest;
+    
+    
 
     @Override
     public ListPointSystemsResponse listPointSystems(ListPointSystemsCommand cmd) {
@@ -251,7 +261,7 @@ public class PointServiceImpl implements PointService {
         ValidatorUtil.validate(cmd);
     }
 
-    @Override
+   /* @Override
     public UserTreasureDTO getPointTreasure() {
         UserTreasureDTO point = new UserTreasureDTO();
         point.setCount(0L);
@@ -289,6 +299,37 @@ public class PointServiceImpl implements PointService {
         if (flag != null) {
             point.setUrlStatus(flag.getCode());
         }
+        return point;
+    }*/
+
+    /**
+     * 调用积分新系统的接口获取用户积分
+     * @return
+     */
+    @Override
+    public UserTreasureDTO getPointTreasure() {
+        UserTreasureDTO point = new UserTreasureDTO();
+        point.setCount(0L);
+        //设置积分默认可见
+        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+
+        GetUserPointCommand cmd = new GetUserPointCommand();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setNamespaceId(namespaceId);
+        Long currentUserId = UserContext.currentUserId();
+        if (currentUserId == null) {
+            return point;
+        }
+        cmd.setUid(currentUserId);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        if(dto != null){
+            point.setCount(dto.getScore());
+        }
+
+        String url = getPointSystemUrl(1L);
+        point.setUrl(url);
+
         return point;
     }
 
@@ -1206,8 +1247,13 @@ public class PointServiceImpl implements PointService {
     @Override
     public PublishEventResultDTO publishEvent(PublishEventCommand cmd) {
         ValidatorUtil.validate(cmd);
-        LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(cmd.getEventJson(), LocalEvent.class);
-        LocalEventBus.publish(localEvent);
+        boolean result = pointServiceRPCRest.publishPointCostEvent(cmd);
+        if(!result){
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "event handle failure  .");
+        }
+        /*LocalEvent localEvent = (LocalEvent) StringHelper.fromJsonString(cmd.getEventJson(), LocalEvent.class);
+        LocalEventBus.publish(localEvent);*/
         return null;
     }
 

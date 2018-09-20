@@ -161,7 +161,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 		//总公司分公司的原因改用namespaceId by xiongying20170328
 		fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+//       fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         

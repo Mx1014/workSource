@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>jobPositionIds: 添加到多群组</li>
  * <li>jobLevelIds: jobLevelIds</li>
  * <li>namespaceId: 域空间ID</li>
+ * <li>operateType: 审核类型</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
@@ -74,7 +75,17 @@ public class AddOrganizationPersonnelCommand {
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
 
-	public AddOrganizationPersonnelCommand() {
+	private Byte operateType;
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
+    }
+
+    public AddOrganizationPersonnelCommand() {
 	}
 
 	public Long getOrganizationId() {

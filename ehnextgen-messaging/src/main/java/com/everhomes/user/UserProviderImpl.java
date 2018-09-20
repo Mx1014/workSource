@@ -122,7 +122,6 @@ public class UserProviderImpl implements UserProvider {
         user.setId(id);
         if(user.getAccountName() == null) {
             long accountSeq = this.sequenceProvider.getNextSequence("usr");
-            // accountSeq += 1000000;
             user.setAccountName(String.valueOf(accountSeq));
         }
         if(user.getUuid() == null)
@@ -1994,6 +1993,63 @@ public class UserProviderImpl implements UserProvider {
         return user;
     }
 
+
+    /**
+     * 根据UserId来查询用户信息
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserDTO findUserInfoByUserId(Long userId){
+        UserDTO user = new UserDTO();
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_users和表eh_user_identifiers进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_USERS).getQuery();
+        query.addJoin(Tables.EH_USER_IDENTIFIERS,JoinType.JOIN,Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_USERS.ID.eq(userId));
+        query.addConditions(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(userId));
+        query.fetch().map( r ->{
+            user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+            user.setAccountName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+            return null;
+        });
+        return user;
+    }
+
+    /**
+     * 查询该手机号是否已经进行注册
+     * @param contactToken
+     * @return
+     */
+    @Override
+    public UserIdentifier getUserByToken(String contactToken,Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_user_identifiers表
+        UserIdentifier userIdentifier = context.select().from(Tables.EH_USER_IDENTIFIERS)
+        .where(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(contactToken))
+                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId)).fetchOneInto(UserIdentifier.class);
+        return userIdentifier;
+    }
+
+    /**
+     * 根据ownerUid和namespaceId来查询手机号
+     * @param ownerUid
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_user_identifiers表
+        String contactToken = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId)).fetchOneInto(String.class);
+        return contactToken;
+    }
 
     @Override
     public String findUserTokenOfUser(Long userId) {

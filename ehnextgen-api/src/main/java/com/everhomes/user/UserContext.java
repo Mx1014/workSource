@@ -4,6 +4,7 @@ package com.everhomes.user;
 import com.everhomes.app.App;
 import com.everhomes.domain.Domain;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.launchpadbase.AppContext;
 
 public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
@@ -18,6 +19,8 @@ public class UserContext {
     private Domain domain;
     //预览版本标志
     private Long previewPortalVersionId;
+
+    private AppContext appContext;
 
     public UserContext() {
     }
@@ -150,5 +153,13 @@ public class UserContext {
 
     public void setPreviewPortalVersionId(Long previewPortalVersionId) {
         this.previewPortalVersionId = previewPortalVersionId;
+    }
+
+    public AppContext getAppContext() {
+        return appContext;
+    }
+
+    public void setAppContext(AppContext appContext) {
+        this.appContext = appContext;
     }
 }

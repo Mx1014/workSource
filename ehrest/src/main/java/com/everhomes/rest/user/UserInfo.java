@@ -40,6 +40,7 @@ import java.util.List;
  *  <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  *  <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  *  <li>registerDays: 用户注册天数</li>
+ *  <li>showCompanyFlag: 是否展示公司</li>
  *  </ul>
  **/
 public class UserInfo {
@@ -67,7 +68,7 @@ public class UserInfo {
     private Integer namespaceId;
     private String namespaceUserToken;
     private String namespaceUserType;
-
+    private Byte showCompanyFlag;
     private String uuid;
 
     @ItemType(String.class)
@@ -86,6 +87,14 @@ public class UserInfo {
     private String registerDaysDesc;
 
     public UserInfo() {
+    }
+
+    public Byte getShowCompanyFlag() {
+        return showCompanyFlag;
+    }
+
+    public void setShowCompanyFlag(Byte showCompanyFlag) {
+        this.showCompanyFlag = showCompanyFlag;
     }
 
     public Long getId() {

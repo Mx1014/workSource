@@ -36,9 +36,13 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
 
 public class CreateEnterpriseCommand {
 	private Boolean checkPrivilege;
+	//物业管理公司id
 	private Long manageOrganizationId;
+	//公司名称
     private java.lang.String   name;
+    //公司简称
     private java.lang.String   displayName;
+    //
     private java.lang.String   avatar;
     private java.lang.String   description;
     private Long communityId;

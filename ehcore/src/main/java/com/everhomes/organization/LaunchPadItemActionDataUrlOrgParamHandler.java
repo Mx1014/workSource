@@ -3,9 +3,11 @@ package com.everhomes.organization;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserTemporaryTokenDTO;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
 import org.json.simple.JSONObject;
@@ -27,7 +29,7 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
     private ConfigurationProvider configurationProvider;
 
     @Override
-    public String refreshActionData(String actionData, SceneTokenDTO sceneToken) {
+    public String refreshActionData(String actionData) {
         if(actionData == null || "".equals(actionData)){
             return actionData;
         }
@@ -37,21 +39,18 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
             return actionData;
         }
 
-        if(sceneToken == null){
-            return actionData;
-        }
-
         String url = (String)jsonObject.get("url");
 
         if(url == null){
             return actionData;
         }
 
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-        if(UserCurrentEntityType.ORGANIZATION.equals(entityType) ||UserCurrentEntityType.ENTERPRISE.equals(entityType) ){
-            String unifiedSocialCreditCode = addUnifiedSocialCreditCode(jsonObject, sceneToken.getEntityId());
+        AppContext appContext = UserContext.current().getAppContext();
 
-            addUserTemporaryToken(jsonObject, unifiedSocialCreditCode, sceneToken.getUserId(), sceneToken.getNamespaceId());
+        if(appContext != null && appContext.getOrganizationId() != null && UserContext.currentUserId() != null && UserContext.currentUserId().longValue() != 0){
+            String unifiedSocialCreditCode = addUnifiedSocialCreditCode(jsonObject, appContext.getOrganizationId());
+
+            addUserTemporaryToken(jsonObject, unifiedSocialCreditCode, UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
         }
 
         return jsonObject.toJSONString();

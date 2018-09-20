@@ -9,6 +9,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,4 +149,37 @@ public class LaunchPadController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /launchpad/updateUserApps</b>
+     * <p>编辑用户首页数据</p>
+     */
+    @RequestMapping("updateUserApps")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserApps(UpdateUserAppsCommand cmd) {
+        launchPadService.updateUserApps(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /launchpad/listAllApps</b>
+     * <p>广场根据组件获取全部应用</p>
+     */
+    @RequestMapping("listAllApps")
+    @RestReturn(value=ListAllAppsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAllApps(ListAllAppsCommand cmd) {
+
+        ListAllAppsResponse res = launchPadService.listAllApps(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
 }

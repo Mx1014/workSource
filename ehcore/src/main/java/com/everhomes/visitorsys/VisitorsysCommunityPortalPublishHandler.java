@@ -18,7 +18,7 @@ public class VisitorsysCommunityPortalPublishHandler implements PortalPublishHan
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
         return instanceConfig;
     }
 

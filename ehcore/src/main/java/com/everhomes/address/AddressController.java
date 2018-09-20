@@ -1,35 +1,32 @@
 package com.everhomes.address;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.address.*;
-
-import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.util.RequireAuthentication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/address")
@@ -125,7 +122,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("listApartmentsByKeyword")
     @RestReturn(value=ApartmentDTO.class, collection=true)
     public RestResponse listApartmentsByKeyword(@Valid ListPropApartmentsByKeywordCommand cmd) {
-        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
+        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeywordNew(cmd);
         RestResponse response = new RestResponse(results.second());
         
         response.setErrorCode(results.first());
@@ -162,7 +159,8 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
     /**
      * <b>URL: /address/disclaimAddress</b>
      * <p>删除地址</p>
@@ -177,7 +175,26 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     *
+     * <b>URL: /address/betchDisclaimAddress</b>
+     * <p>批量删除门牌地址（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("/betchDisclaimAddress")
+    @RestReturn(value = String.class)
+    public RestResponse betchDisclaimAddress(BetchDisclaimAddressCommand cmd){
+        //批量删除门牌地址
+        addressService.betchDisclaimAddress(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
     /**
      * <b>URL: /address/searchCommunities</b>
      * <p>搜索小区</p>
@@ -450,7 +467,21 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /address/createOfficeSite/<b>
+     * <p>添加办公地点</p>
+     */
+    @RequestMapping("createOfficeSite")
+    @RestReturn(value=String.class)
+    public RestResponse createOfficeSite(@Valid CreateOfficeSiteCommand cmd) {
+//        List<EnterpriseCustomerDTO> dtos = addressService.listApartmentEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /address/createAddressArrangement</b>
      * <p>创建房源相关的拆分/合并计划</p>
@@ -464,7 +495,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /address/listAddressArrangement</b>
      * <p>查看房源相关的拆分/合并计划</p>
@@ -478,7 +509,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /address/updateAddressArrangement</b>
      * <p>修改房源相关的拆分/合并计划</p>
@@ -492,7 +523,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /address/deleteAddressArrangement</b>
      * <p>删除房源相关的拆分/合并计划</p>
@@ -506,7 +537,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /address/getHistoryApartment</b>
      * <p>查找历史房源</p>
@@ -520,7 +551,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /address/excuteAddressArrangement</b>
      * <p>测试接口：用于执行拆分合并计划</p>
@@ -534,6 +565,6 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
+
+
 }

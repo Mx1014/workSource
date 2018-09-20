@@ -141,8 +141,26 @@ public interface CommunityService {
 	
 	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
 
-	//导入项目信息
+	ListAllCommunitiesResponse listAllCommunities();
+
+	CommunityInfoDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd);
+
+	CommunityInfoDTO findDefaultCommunity();
+
+    ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd);
+
+	CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd);
+
+    void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd);
+
+	void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd);
+
+	void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId);
+
+		//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
+
+	ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
 
 	CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd);
 

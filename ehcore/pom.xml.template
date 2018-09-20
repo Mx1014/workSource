@@ -303,31 +303,6 @@
             <artifactId>httpcore</artifactId>
             <version>${httpcomponents.version}</version>
         </dependency>
-
-		<dependency>
-			<groupId>com.github.danielwegener</groupId>
-			<artifactId>logback-kafka-appender</artifactId>
-			<version>${logback-kafka-appender.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.logstash.logback</groupId>
-			<artifactId>logstash-logback-encoder</artifactId>
-			<version>${logstash-logback-encoder.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.11</artifactId>
-			<version>${kafka.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 		    <groupId>alipay-sdk</groupId>
 		    <artifactId>alipay-sdk</artifactId>
@@ -397,6 +372,7 @@
             <version>1.4</version>
         </dependency>
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar end -->
+
         <dependency>
 		    <groupId>com.everhomes</groupId>
 		    <artifactId>pay-sdk</artifactId>
@@ -413,6 +389,12 @@
           <groupId>com.hankcs</groupId>
           <artifactId>aho-corasick-double-array-trie</artifactId>
           <version>${sensitive-word.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehorder-sdk</artifactId>
+            <version>${ehorder-sdk.version}</version>
         </dependency>
 	</dependencies>
 

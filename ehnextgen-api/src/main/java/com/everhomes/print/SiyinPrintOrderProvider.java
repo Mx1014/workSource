@@ -24,6 +24,8 @@ public interface SiyinPrintOrderProvider {
 	void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag);
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
+	
+	SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum);
 
 	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 

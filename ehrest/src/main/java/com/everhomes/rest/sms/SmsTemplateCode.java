@@ -147,6 +147,9 @@ public interface SmsTemplateCode {
     int VISITORSYS_VERIFICATION_CODER = 67; //访客管理发送访客验证码
     int VISITORSYS_INVT_INVITATION_LETTER = 68; //预约访客发送访客邀请函
     int VISITORSYS_TEMP_INVITATION_LETTER = 69; //临时访客发送访客邀请函
+    
+    int POINT_VERIFICATION_CODE = 70 ; // 积分记账时需要给管理员发送验证码
+
 
     //装修办理
     int DECORATION_APPLY_SUCCESS = 70; //装修申请通过 通知负责人:尊敬的“装修公司负责人姓名”，用户（“申请人姓名”：“申请人手机号”）提交的装修申请（“租户公司名称”）已审核通过，需尽快提交相关装修资料，请前往APP查看详情，您可以点击以下链接下载APP，并使用本机号码进行注册：https://core.zuolin.com/evh/aclink/id=1283jh213a
@@ -174,5 +177,6 @@ public interface SmsTemplateCode {
     int DECORATION_MOTIFY_FEE = 81;//管理员修改装修费用的时候，短信提醒租户和装修公司 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修费用清单有更新，请前往APP查看详情。
 
     int DECORATION_MOTIFY_REFUND = 82;//修改退费信息后，短信提醒租户和装修公司负责人 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修押金退费信息有更新，请前往APP查看详情。
+
 
 }

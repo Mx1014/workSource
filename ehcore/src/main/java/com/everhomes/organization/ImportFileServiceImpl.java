@@ -259,7 +259,9 @@ public class ImportFileServiceImpl implements ImportFileService{
             }finally {
                 try {
                     wb.close();
-                    out.close();
+                    if(out != null){
+                        out.close();
+                    }
                 } catch (IOException ioe) {
                     LOGGER.error("close error", ioe);
                 }

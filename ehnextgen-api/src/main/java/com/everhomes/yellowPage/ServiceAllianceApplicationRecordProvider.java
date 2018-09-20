@@ -16,4 +16,6 @@ public interface ServiceAllianceApplicationRecordProvider {
 	List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecordByEnterpriseId(Long enterpriseId,
 			Long pageAnchor, Integer pageSize);
 
+	ServiceAllianceApplicationRecord findServiceAllianceApplicationRecordByFlowCaseId(Long flowCaseId);
+
 }

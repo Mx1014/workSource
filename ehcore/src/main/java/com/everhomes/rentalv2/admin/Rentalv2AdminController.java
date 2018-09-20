@@ -553,7 +553,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceTimeRule")
 	@RestReturn(ResourceTimeRuleDTO.class)
 	public RestResponse getResourceTimeRule(GetResourceTimeRuleCommand cmd) {
-		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){ //一个资源应该只有一条规则 忽略ownerType ownerId防止产生多条
 			cmd.setOwnerId(null);
 			cmd.setOwnerType(null);
 		}

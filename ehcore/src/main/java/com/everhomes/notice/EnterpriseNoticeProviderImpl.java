@@ -20,12 +20,14 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseNoticeReceiversRec
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteConditionStep;
 import org.jooq.Record;
 import org.jooq.Record10;
 import org.jooq.Record11;
+import org.jooq.Record12;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectForUpdateStep;
@@ -103,10 +105,10 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
 
     @Override
     public List<EnterpriseNotice> listEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId, Integer offset, Integer pageSize) {
-        SelectForUpdateStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId)
-                .orderBy(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
+        SelectForUpdateStep<Record12<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String, Byte>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId)
+                .orderBy(Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG.desc(), Tables.EH_ENTERPRISE_NOTICES.STICK_TIME.desc(), Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 
-        Result<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> result = sql.fetch();
+        Result<Record12<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String, Byte>> result = sql.fetch();
         if (result != null && result.size() > 0) {
             return result.map(r -> {
                 EnterpriseNotice enterpriseNotice = new EnterpriseNotice();
@@ -121,15 +123,16 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 enterpriseNotice.setUpdateUid(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID));
                 enterpriseNotice.setUpdateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME));
                 enterpriseNotice.setOperatorName(r.getValue(Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME));
+                enterpriseNotice.setStickFlag(r.getValue(Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG));
                 return enterpriseNotice;
             });
         }
         return Collections.emptyList();
     }
 
-    private SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId) {
+    private SelectConditionStep<Record12<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String, Byte>> baseQueryEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> baseSql = context.selectDistinct(
+        SelectConditionStep<Record12<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String, Byte>> baseSql = context.selectDistinct(
                 Tables.EH_ENTERPRISE_NOTICES.ID,
                 Tables.EH_ENTERPRISE_NOTICES.TITLE,
                 Tables.EH_ENTERPRISE_NOTICES.SUMMARY,
@@ -140,7 +143,8 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 Tables.EH_ENTERPRISE_NOTICES.CREATOR_UID,
                 Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME,
                 Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID,
-                Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME)
+                Tables.EH_ENTERPRISE_NOTICES.OPERATOR_NAME,
+                Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG)
                 .from(Tables.EH_ENTERPRISE_NOTICES)
                 .where(Tables.EH_ENTERPRISE_NOTICES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ENTERPRISE_NOTICES.OWNER_TYPE.eq(EntityType.ORGANIZATIONS.getCode()))
@@ -151,7 +155,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
 
     @Override
     public int totalCountEnterpriseNoticesByNamespaceId(Integer namespaceId, Long organizationId) {
-        SelectConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId);
+        SelectConditionStep<Record12<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, String, Byte>> sql = baseQueryEnterpriseNoticesByNamespaceId(namespaceId, organizationId);
         return sql.fetchCount();
     }
 
@@ -162,7 +166,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         }
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectOnConditionStep<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> sql = context.selectDistinct(
+        SelectOnConditionStep<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, Byte>> sql = context.selectDistinct(
                 Tables.EH_ENTERPRISE_NOTICES.ID,
                 Tables.EH_ENTERPRISE_NOTICES.TITLE,
                 Tables.EH_ENTERPRISE_NOTICES.SUMMARY,
@@ -172,7 +176,8 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
                 Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME,
                 Tables.EH_ENTERPRISE_NOTICES.CREATOR_UID,
                 Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME,
-                Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID)
+                Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID,
+                Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG)
                 .from(Tables.EH_ENTERPRISE_NOTICES)
                 .join(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS)
                 .on(Tables.EH_ENTERPRISE_NOTICES.ID.eq(Tables.EH_ENTERPRISE_NOTICE_RECEIVERS.NOTICE_ID));
@@ -186,9 +191,9 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         }
         Condition allCondition = condition0.and(condition1).and(condition2);
 
-        sql.where(allCondition).orderBy(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
+        sql.where(allCondition).orderBy(Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG.desc(), Tables.EH_ENTERPRISE_NOTICES.STICK_TIME.desc(), Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME.sort(SortOrder.DESC)).limit(offset, pageSize);
 
-        Result<Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long>> result = sql.fetch();
+        Result<Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, Byte>> result = sql.fetch();
         if (result != null && result.size() > 0) {
             return result.map(r -> {
                 return buildEnterpriseNoticeSimpleInfo(r);
@@ -197,7 +202,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         return Collections.emptyList();
     }
 
-    private EnterpriseNotice buildEnterpriseNoticeSimpleInfo(Record10<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long> r) {
+    private EnterpriseNotice buildEnterpriseNoticeSimpleInfo(Record11<Long, String, String, Byte, String, Byte, Timestamp, Long, Timestamp, Long, Byte> r) {
         EnterpriseNotice enterpriseNotice = new EnterpriseNotice();
         enterpriseNotice.setId(r.getValue(Tables.EH_ENTERPRISE_NOTICES.ID));
         enterpriseNotice.setTitle(r.getValue(Tables.EH_ENTERPRISE_NOTICES.TITLE));
@@ -209,6 +214,7 @@ public class EnterpriseNoticeProviderImpl implements EnterpriseNoticeProvider {
         enterpriseNotice.setCreateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.CREATE_TIME));
         enterpriseNotice.setUpdateUid(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_UID));
         enterpriseNotice.setUpdateTime(r.getValue(Tables.EH_ENTERPRISE_NOTICES.UPDATE_TIME));
+        enterpriseNotice.setStickFlag(r.getValue(Tables.EH_ENTERPRISE_NOTICES.STICK_FLAG));
         return enterpriseNotice;
     }
 

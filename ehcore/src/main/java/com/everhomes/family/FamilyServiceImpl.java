@@ -2,11 +2,15 @@
 package com.everhomes.family;
 
 import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -61,6 +65,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -1240,6 +1245,18 @@ public class FamilyServiceImpl implements FamilyService {
         }
         approveMember(cmd);
         
+       // 用户通过认证家庭事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(cmd.getMemberUid());
+            context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(cmd.getMemberUid());
+            event.setEventName(SystemEvent.ACCOUNT__FAMILY_AUTH_SUCCESS.dft());
+            LOGGER.info("publish event :[{}]",event);
+        });
     }
 
     @Override
@@ -2346,4 +2363,64 @@ public class FamilyServiceImpl implements FamilyService {
     	    }
 	    }
 	}
+
+
+    @Override
+    public ListUserFamilyByCommunityIdResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd) {
+
+
+        List<Family> families = familyProvider.listFamilByCommunityIdAndUid(cmd.getCommunityId(), UserContext.currentUserId());
+
+        List<FamilyDTO> dtos = new ArrayList<>();
+
+        if(families != null){
+            for(Family family: families){
+                FamilyDTO dto = ConvertHelper.convert(family,FamilyDTO.class);
+
+
+                if(family.getIntegralTag1() == null){
+                    LOGGER.error("Address id not found, family.id = " + family.getId());
+                    continue;
+                }
+
+                Address address = this.addressProvider.findAddressById(family.getIntegralTag1());
+                if (address == null) {
+                    LOGGER.error("Address is not found,addressId=" + family.getIntegralTag1());
+                }
+
+
+                if(address != null){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                    dto.setAddress(address.getAddress());
+                    dto.setAddressId(address.getId());
+                    dto.setAddressStatus(address.getStatus());
+                }
+
+                Community community = null;
+                if(address != null){
+                    community = this.communityProvider.findCommunityById(address.getCommunityId());
+                    if(community == null) {
+                        LOGGER.error("Community is not found,communityId=" + address.getCommunityId());
+                    }
+                }
+                if(community != null){
+                    dto.setCommunityName(community.getName());
+                    dto.setCommunityType(community.getCommunityType());
+                    dto.setCityName(community.getCityName());
+                    dto.setAreaName(community.getAreaName());
+                    dto.setCommunityId(community.getId());
+                    dto.setCommunityAliasName(community.getAliasName());
+                    dto.setDefaultForumId(community.getDefaultForumId());
+                    dto.setFeedbackForumId(community.getFeedbackForumId());
+                }
+
+                dtos.add(dto);
+            }
+        }
+
+        ListUserFamilyByCommunityIdResponse response = new ListUserFamilyByCommunityIdResponse();
+        response.setDtos(dtos);
+        return response;
+    }
 }

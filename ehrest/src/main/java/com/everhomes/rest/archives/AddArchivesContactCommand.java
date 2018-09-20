@@ -19,8 +19,10 @@ import java.util.List;
  * <li>jobPositionIds: 岗位 id</li>
  * <li>jobLevelIds: 职级 id</li>
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
+ * <li>updateFlag: 编辑标志: 0-否, 1-是</li>
  * <li>updateDetailId: 编辑人员的id</li>
  * <li>namespaceId: 域空间ID</li>
+ * <li>operateType: 审核类型</li>
  * </ul>
  */
 public class AddArchivesContactCommand {
@@ -60,7 +62,19 @@ public class AddArchivesContactCommand {
 
     private Byte visibleFlag;
 
-    private Long updateDetailId;
+    private Byte updateFlag;
+	
+	private Long updateDetailId;
+
+    private Byte operateType;
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
+    }
 
     public AddArchivesContactCommand() {
     }
@@ -170,6 +184,15 @@ public class AddArchivesContactCommand {
         this.visibleFlag = visibleFlag;
     }
 
+    public Byte getUpdateFlag() {
+        return updateFlag;
+    }
+
+    public void setUpdateFlag(Byte updateFlag) {
+        this.updateFlag = updateFlag;
+    }
+	
+	
     public Long getUpdateDetailId() {
         return updateDetailId;
     }

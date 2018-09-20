@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间，为空则用默认的</li>
  * <li>deviceIdentifier: 设备唯一 ID</li>
- * <li>pusherIdentify: iOS 使用，则表示正式环境的证书，测试环境的证书，是否使用 sandbox 测试的服务器；android 使用，则表示华为或者小米的 PusherToken </li>
+ * <li>pusherIdentify: iOS 使用，（1）appstore(正式版本) .iOS推送证书+使用正式推送服务器，标示appstore（2）develop的包（用电脑真机调试的包）.zuolin推送证书+用测试推送服务器，标示develop（3）ad-hoc的包（真机内测） .zuolin推送证书 + 正式推送服务器，标示appbeta。是否使用 sandbox 测试的服务器；android 使用，则表示华为或者小米的 PusherToken</li>
  * </ul>
  * @author janson
  *

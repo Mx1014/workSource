@@ -27,6 +27,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -66,6 +67,7 @@ import com.everhomes.news.NewsService;
 import com.everhomes.openapi.FunctionCardHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.otp.TimeBasedOneTimePasswordGenerator;
 import com.everhomes.point.UserLevel;
 import com.everhomes.point.UserPointService;
 import com.everhomes.qrcode.QRCodeService;
@@ -74,17 +76,20 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
+import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
@@ -92,12 +97,15 @@ import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.*;
 import com.everhomes.rest.openapi.FunctionCardDto;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
@@ -116,10 +124,13 @@ import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.smartcard.SmartCardKey;
+import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -145,6 +156,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -158,6 +171,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -364,12 +380,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private GroupService groupService;
 
     @Autowired
+    private CommunityService communityService;
+
+	@Autowired
     private PictureValidateService pictureValidateService;
 
-    @Autowired
-    private ArchivesService archivesService;
+	@Autowired
+	private SmartCardKeyProvider smartCardKeyProvider;
 
-    private static final String DEVICE_KEY = "device_login";
+	private static long stepInSecond = 30;
+
+   private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
+
+	private static final String DEVICE_KEY = "device_login";
+
+	@Autowired
+    private ArchivesService archivesService;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -659,6 +685,22 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //		}
     }
 
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param phoneNumber
+     * @param verificationCode
+     */
+
+    private void sendVerificationCodeSms4Point(Integer namespaceId, String phoneNumber, String verificationCode) {
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+        String templateScope = SmsTemplateCode.SCOPE;
+       // int templateId = SmsTemplateCode.POINT_VERIFICATION_CODE;
+         int templateId = SmsTemplateCode.VERIFICATION_CODE;
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+    }
+
     private String convert(String template, Map<String, String> variables, String defaultVal) {
         String pattern = "\\$\\{(.*?)\\}";
         Pattern match = Pattern.compile(pattern);
@@ -741,6 +783,50 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
         }
     }
+
+    /**
+     * 积分发送短信用
+     * @param namespaceId
+     * @param regionCode
+     * @param request
+     */
+    @Override
+    public void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) {
+        LOGGER.info("sendVerficationCode4Point  -->  user:[{}]",user);
+    		//检查用户是否存在
+		String phone = user.getIdentifierToken() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			LOGGER.error("namespaceId or phone is null");
+			return ;
+		}
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        	if (identifier == null) {
+        		LOGGER.error("userIdentifier  is null.namespace:[{}] ;phone:[{}]",namespaceId ,phone);
+    			return ;
+        	}
+
+        	//因为调试需要,先把这段限制去注掉
+            //this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
+            Timestamp ts = identifier.getNotifyTime();
+            //验证码过期了重新生成,没有过期则用原来的
+            if (ts == null || isVerificationExpired(ts)) {
+                String verificationCode = RandomGenerator.getRandomDigitalString(6);
+                identifier.setVerificationCode(verificationCode);
+
+                LOGGER.debug("Send notification code " + verificationCode + " to " + identifier.getIdentifierToken());
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), verificationCode);
+            } else {
+                // TODO
+                LOGGER.debug("Send notification code " + identifier.getVerificationCode() + " to " + identifier.getIdentifierToken());
+                sendVerificationCodeSms4Point(namespaceId, this.getRegionPhoneNumber(identifier.getIdentifierToken(), regionCode), identifier.getVerificationCode());
+            }
+
+            identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            identifier.setRegionCode(regionCode);
+            this.userProvider.updateIdentifier(identifier);
+    }
+
 
     @Override
     public UserLogin verifyAndLogon(VerifyAndLogonCommand cmd) {
@@ -959,7 +1045,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     @Override
-    public UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
+	public UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
         User user = this.userProvider.findUserByAccountName(userIdentifierToken);
         if (user == null) {
             if (LOGGER.isDebugEnabled()) {
@@ -1457,7 +1543,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     		LOGGER.info("request is null ");
     	}else{
     		LOGGER.info(request.toString());
-    	}*/	 
+    	}*/
     	 Cookie loginTokenCookie = findCookieInRequest("token",request);
     	 if(loginTokenCookie == null){
     		 LOGGER.info("loginTokenCookie is null ");
@@ -1467,7 +1553,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
          LoginToken loginToken = WebTokenGenerator.getInstance().fromWebToken(token, LoginToken.class);
          if(token == null)
              return ;
-         
+
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 
         String hkeyLogin = String.valueOf(loginToken.getLoginId());
@@ -1485,7 +1571,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         }
     }
-    
+
     private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
         List<Cookie> matchedCookies = new ArrayList<>();
         Cookie[] cookies = request.getCookies();
@@ -1784,6 +1870,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         user.setOccupation(cmd.getOccupation());
 
         this.userProvider.updateUser(user);
+
+        UserIdentifier emailIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.EMAIL.getCode());
+        if (emailIdentifier != null) {
+            emailIdentifier.setIdentifierToken(cmd.getEmail());
+            this.userProvider.updateIdentifier(emailIdentifier);
+        }else {
+            if (!StringUtils.isBlank(cmd.getEmail())) {
+                UserIdentifier userIdentifier = new UserIdentifier();
+                userIdentifier.setOwnerUid(user.getId());
+                userIdentifier.setIdentifierToken(cmd.getEmail());
+                userIdentifier.setIdentifierType(IdentifierType.EMAIL.getCode());
+                userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                userIdentifier.setNamespaceId(UserContext.getCurrentNamespaceId());
+                userIdentifier.setCreateTime(new Timestamp(new Date().getTime()));
+                userIdentifier.setNotifyTime(new Timestamp(new Date().getTime()));
+                this.userProvider.createIdentifier(userIdentifier);
+            }
+        }
 
         // 完善个人信息事件
         LocalEventBus.publish(event -> {
@@ -3416,6 +3520,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         try {
             sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
 
+			//sceneTokenDto = SceneTokenGenerator.fromWebToken(sceneToken);
+
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Parse scene token, userId={}, sceneToken={}", userId, sceneTokenDto);
             }
@@ -3894,7 +4000,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+        //SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
 
         //先按域空间查，ownerid和ownertype暂时不用
         ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
@@ -5653,7 +5759,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             organizationService.processUserForMember(userIdentifier);
             //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
-            
+
             UserLogin oldLogin = UserContext.current().getLogin();
             if (oldLogin != null) {
                 this.logoff(oldLogin);
@@ -5707,7 +5813,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             organizationService.processUserForMember(userIdentifier);
             //刷新地址信息
             propertyMgrService.processUserForOwner(userIdentifier);
-            
+
             user = userProvider.findUserById(user.getId());
             String salt = EncryptionUtils.createRandomSalt();
             user.setSalt(salt);
@@ -5795,7 +5901,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userProvider.updateIdentifier(userIdentifier);
             login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
-            
+
           //add by huangliangming 20180731 使得微信注册时能够激活管理员
 			// 刷新企业通讯录
             organizationService.processUserForMember(userIdentifier);
@@ -6067,21 +6173,26 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long l = configurationProvider.getLongValue(namespaceId, ConfigConstants.PAY_PLATFORM, 0L);
         resp.setPaymentPlatform(l);
 
-        Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
-        resp.setMyPublishFlag(mypublishFlag.byteValue());
+//		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
+//		resp.setMyPublishFlag(mypublishFlag.byteValue());
         //查询不显示的更多地址信息的标志
         Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 1);
         resp.setAddressDialogStyle(addressDialogStyle);
 
-        resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
+		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
-        // 客户端资源缓存配置
-        String clientCacheConfig = configurationProvider.getValue(
-                namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
+		// 客户端资源缓存配置
+		String clientCacheConfig = configurationProvider.getValue(
+		        namespaceId, ConfigConstants.CONTENT_CLIENT_CACHE_CONFIG,
                 // Default config
                 "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
-        resp.setContentCacheConfig(
-                (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+		resp.setContentCacheConfig(
+		        (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
+
+		Long userId = user == null ? null : user.getId();
+		List<IndexDTO> indexDtos = launchPadService.listIndexDtos(namespaceId, userId);
+
+		resp.setIndexDtos(indexDtos);
 
         return resp;
     }
@@ -6562,37 +6673,373 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
 
-    // 获取统一的功能卡片
-    @Override
-    public List<FunctionCardDto> listUserRelatedCards() {
-        List<FunctionCardDto> cardDtos = new ArrayList<>();
-        functionCardHandlers.forEach(r -> {
-            cardDtos.add(r.listCards(1000000, 1L));
-        });
-        return cardDtos;
+	// 获取统一的功能卡片
+	@Override
+	public List<FunctionCardDto> listUserRelatedCards(){
+		List<FunctionCardDto> cardDtos = new ArrayList<>();
+		functionCardHandlers.forEach(r->{
+			cardDtos.add(r.listCards(1000000, 1L));
+		});
+		return cardDtos;
+	}
+	@Override
+	public SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd) {
+
+		if(cmd.getIdentifierToken().length() < 7){
+			return null;
+		}
+
+		int pageSize = 10 ;
+
+		List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
+
+		List<UserDTO> dtos = new ArrayList<>();
+		if(users != null){
+			dtos = users.stream().map(r -> ConvertHelper.convert(r, UserDTO.class)).collect(Collectors.toList());
+		}
+		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	@Override
+	public ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd) {
+
+		User user = UserContext.current().getUser();
+		if(user == null || user.getId() == null){
+			return null;
+		}
+
+		List<AddressUserDTO> dtos = new ArrayList<>();
+
+		//全部或者公司
+		if(cmd.getType() == null || AddressUserType.ORGANIZATION == AddressUserType.fromCode(cmd.getType())){
+
+			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+			if(orgMembers != null && orgMembers.size() > 0){
+				for (OrganizationMember member : orgMembers) {
+					AddressUserDTO dto = new AddressUserDTO();
+
+					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
+						continue;
+					}
+					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(member.getStatus())){
+						continue;
+					}
+					if(cmd.getWorkPlatformFlag() != null && TrueOrFalseFlag.fromCode(cmd.getWorkPlatformFlag()) != TrueOrFalseFlag.fromCode(org.getWorkPlatformFlag())){
+						continue;
+					}
+
+					dto.setId(org.getId());
+					dto.setType(AddressUserType.ORGANIZATION.getCode());
+					dto.setName(org.getName());
+					//根据公司id来查询eh_organization_details表中的信息，拿到公司的简称
+					OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
+					if(organizationDetail != null){
+						dto.setAliasName(organizationDetail.getDisplayName());
+					}
+					dto.setStatus(member.getStatus());
+					dto.setWorkPlatformFlag(org.getWorkPlatformFlag());
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+					//办公地点（公司加入的园区）
+					List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(org.getId());
+					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
+                    List<CommunityInfoDTO> communityInfoDtos = new ArrayList<>();
+					if(requests != null && requests.size() > 0){
+						for (OrganizationCommunityRequest request: requests){
+							Community community = communityProvider.findCommunityById(request.getCommunityId());
+							if(community != null){
+								CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
+								communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+
+                                communityInfoDtos.add(communityInfoDTO);
+
+								//根据公司id和项目id查询公司所属项目表eh_organization_workplaces表中的信息，并且将该表中的workplace_name字段组装到communityInfoDTO对象中
+								List<OrganizationWorkPlaces> organizationWorkPlacesList = organizationProvider.findOrganizationWorkPlacesByOrgIdAndCommunityId(org.getId(),community.getId());
+								//创建一个集合List<String>来承载办公地点名称的集合
+								//List<String> siteNameList = Lists.newArrayList();
+								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
+								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+									//将每一个办公地点名称都保存在集合siteNameList中
+									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+									addressSiteDTO.setCommunityName(community.getName());
+									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+									addressSiteDTO.setCommunityId(community.getId());
+									addressSiteDtos.add(addressSiteDTO);
+								}
+
+							}
+
+						}
+					}
+
+                    //地址列表需要的默认是否是这个公司的管理员字段
+                    OrganizationMember orgMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), dto.getId());
+                    if (orgMember != null && OrganizationMemberGroupType.fromCode(orgMember.getMemberGroup()) == OrganizationMemberGroupType.MANAGER) {
+                        dto.setManagerFlag(AdminFlag.YES.getCode());
+                    }
+
+                    //略过没有关联项目的公司
+                    if(TrueOrFalseFlag.fromCode(cmd.getExcludeNoSiteFlag()) == TrueOrFalseFlag.TRUE && communityInfoDtos.size() == 0){
+                        continue;
+                    }
+
+                    communityInfoDtos = removeRepeat(communityInfoDtos);
+
+					dto.setCommunityInfoDtos(communityInfoDtos);
+					dto.setAddressSiteDtos(addressSiteDtos);
+
+					dtos.add(dto);
+				}
+			}
+
+		}
+
+
+		//全部或者家庭
+		if(cmd.getType() == null || AddressUserType.FAMILY == AddressUserType.fromCode(cmd.getType())){
+			List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(user.getId());
+
+			if(familyDtos != null && familyDtos.size() > 0){
+				for(FamilyDTO family : familyDtos){
+					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())){
+						continue;
+					}
+
+					AddressUserDTO dto = new AddressUserDTO();
+
+					dto.setId(family.getId());
+					dto.setType(AddressUserType.FAMILY.getCode());
+					dto.setName(family.getName());
+					dto.setAliasName(family.getName());
+					dto.setStatus(family.getMembershipStatus());
+					dto.setWorkPlatformFlag((byte)0);
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+                    List<CommunityInfoDTO> communityInfoDtos = new ArrayList<>();
+
+                    List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
+					Community community = communityProvider.findCommunityById(family.getCommunityId());
+					if(community !=null){
+
+                        CommunityInfoDTO communityInfoDTO = ConvertHelper.convert(community, CommunityInfoDTO.class);
+                        communityInfoDTO.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+
+                        communityInfoDtos.add(communityInfoDTO);
+
+                        AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
+                        addressSiteDTO.setCommunityId(community.getId());
+						addressSiteDTO.setCommunityName(community.getName());
+						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
+								+ community.getAreaName() + community.getAddress());
+						addressSiteDtos.add(addressSiteDTO);
+					}
+
+
+                    //略过没有关联项目的家庭
+                    if(TrueOrFalseFlag.fromCode(cmd.getExcludeNoSiteFlag()) == TrueOrFalseFlag.TRUE && communityInfoDtos.size() == 0){
+                        continue;
+                    }
+
+                    communityInfoDtos = removeRepeat(communityInfoDtos);
+
+                    dto.setCommunityInfoDtos(communityInfoDtos);
+					dto.setAddressSiteDtos(addressSiteDtos);
+
+
+					dtos.add(dto);
+				}
+			}
+
+		}
+		ListAddressUsersResponse response = new  ListAddressUsersResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	private TimeBasedOneTimePasswordGenerator getTotp() throws NoSuchAlgorithmException {
+	    TimeBasedOneTimePasswordGenerator totp = totpLocal.get();
+        if(totp == null) {
+            totp = new TimeBasedOneTimePasswordGenerator(stepInSecond, TimeUnit.SECONDS, 8);
+            totpLocal.set(totp);
+        }
+      return totp;
+	}
+
+
+	private List<CommunityInfoDTO> removeRepeat(List<CommunityInfoDTO> dtos){
+        List<CommunityInfoDTO> newDtos = new ArrayList<>();
+        for(CommunityInfoDTO communityInfoDto: dtos){
+
+            boolean existFlag = false;
+            for(CommunityInfoDTO newDto: newDtos){
+                if(communityInfoDto.getId().equals(newDto.getId())){
+                    existFlag = true;
+                    break;
+                }
+            }
+
+            if(!existFlag){
+                newDtos.add(communityInfoDto);
+            }
+        }
+
+        return newDtos;
     }
 
     @Override
-    public SearchUserByIdentifierResponse searchUserByIdentifier(SearchUserByIdentifierCommand cmd) {
+    public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
+        GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
+        resp.setSmartCardDescLink("https://www.zuolin.com");
+        TimeBasedOneTimePasswordGenerator totp;
 
-        if (cmd.getIdentifierToken().length() < 7) {
-            return null;
+        try {
+            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(UserContext.currentUserId());
+            SmartCardKey obj = null;
+            if(cards == null || cards.size() < 10) {
+                totp = getTotp();
+                KeyGenerator keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+                keyGenerator.init(512);
+                Key secretKey = keyGenerator.generateKey();
+                String resultStr = org.apache.commons.codec.binary.Base64.encodeBase64String(secretKey.getEncoded());
+
+                //use new card for this user
+                obj = new SmartCardKey();
+                obj.setNamespaceId(UserContext.getCurrentNamespaceId());
+                obj.setStatus(TrueOrFalseFlag.TRUE.getCode());
+                obj.setName("default");
+                obj.setUserId(UserContext.currentUserId());
+                obj.setCardkey(resultStr);
+                smartCardKeyProvider.createSmartCardKey(obj);
+            } else {
+                //use the newest one
+                obj = cards.get(0);
+            }
+
+            resp.setSmartCardId(obj.getId());
+            resp.setSmartCardKey(obj.getCardkey());
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("generate totp failed", e);
         }
+        return resp;
+    }
 
-        int pageSize = 10;
-
-        List<User> users = userProvider.searchUserByIdentifier(cmd.getIdentifierToken(), cmd.getNamespaceId(), pageSize);
-
-        List<UserDTO> dtos = new ArrayList<>();
-        if (users != null) {
-            dtos = users.stream().map(r -> ConvertHelper.convert(r, UserDTO.class)).collect(Collectors.toList());
-        }
-        SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
-        response.setDtos(dtos);
-        return response;
+    private int generateTotp(TimeBasedOneTimePasswordGenerator totp, String smartKey, long nowInSec) throws InvalidKeyException, NoSuchAlgorithmException {
+        SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(smartKey.getBytes()), totp.getAlgorithm());
+        int code = totp.generateOneTimePassword(key, new Date(nowInSec * 1000));
+        return code;
     }
 
     @Override
+    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        TimeBasedOneTimePasswordGenerator totp;
+        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+        resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
+        int validWindow = 1;
+
+        try {
+            totp = getTotp();
+            Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
+            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 18) {
+                return resp;
+            }
+
+            String randomUid = cmd.getCardCode().substring(1, 10);
+            String totpCode = cmd.getCardCode().substring(10, 18);
+            Long uid = Long.parseLong(randomUid);
+            Long totpCodeInt = Long.parseLong(totpCode);
+            uid = (uid ^ totpCodeInt);
+            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
+            if(cards != null) {
+
+                int j;
+                OUTLOOP:
+                for(j = 0; j < cards.size(); j++) {
+                    SmartCardKey card = cards.get(j);
+                    for(long i = -validWindow; i <= validWindow; i++) {
+                        int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
+                        if(code == totpCodeInt) {
+                            resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
+                            break OUTLOOP;
+                        }
+                    }
+                }
+
+                if(j < cards.size()) {
+                    for(j = j+1; j < cards.size(); j++) {
+                        //invalid the old one
+                        SmartCardKey card = cards.get(j);
+                        if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                            card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                            smartCardKeyProvider.updateSmartCardKey(card);
+                        }
+                    }
+                }
+
+            }
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            LOGGER.error("generate totp failed", e);
+        }
+
+        return resp;
+    }
+
+    @Override
+    public GenerateSmartCardCodeResponse generateSmartCardCode(GenerateSmartCardCodeCommand cmd) {
+        GenerateSmartCardCodeResponse resp = new GenerateSmartCardCodeResponse();
+        try {
+            TimeBasedOneTimePasswordGenerator totp = getTotp();
+            SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(cmd.getSmartCardKey().getBytes()), totp.getAlgorithm());
+            resp.setNow(DateHelper.currentGMTTime().getTime() / 1000);
+            if(cmd.getNow() == null) {
+                cmd.setNow(resp.getNow());
+            }
+
+            int topt = totp.generateOneTimePassword(key, new Date(cmd.getNow() * 1000));
+            long randomUid = UserContext.currentUserId();
+            randomUid = (randomUid) ^ (long)topt;
+            String s1 = String.valueOf(randomUid);
+            String s2 = "";
+            if(s1.length() < 9) {
+                s2 = "000000000".substring(0, 9 - s1.length()) + s1;
+            } else {
+                s2 = s1;
+            }
+
+            resp.setQrCode("1" + s2 + String.valueOf(topt));
+
+            resp.setSmartCardCode(String.valueOf(topt));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            LOGGER.error("generateOneCardCode failed", e);
+        }
+        return resp;
+
+    }
+
+	/**
+	 * 根据UserId来查询用户信息
+	 * @param cmd
+	 * @return
+	 */
+	@Override
+	public UserDTO findUserInfoByUserId(UserCouponsCommand cmd){
+		UserDTO user = new UserDTO();
+		if(cmd.getUserId() != null){
+			user = userProvider.findUserInfoByUserId(cmd.getUserId());
+		}
+		return user;
+	}
+
+	@Override
     public Byte isUserAuth() {
         User user = UserContext.current().getUser();
         int amount = this.organizationProvider.getUserOrgAmount(user.getId());
@@ -6621,22 +7068,118 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         });
         return sceneDTOList;
     }
+
+
+    /**
+     * 根据手机号查询某域空间中的用户
+     * @param cmd
+     * @return
+     */
+    @Override
+    public UserDTO getUserFromPhone(FindUserByPhoneCommand cmd) {
+        LOGGER.info("getUserFromPhone  -->  cmd:[{}]",cmd);
+		Integer namespaceId = cmd.getNamespaceId();
+		String phone = cmd.getPhone() ;
+		if(namespaceId ==null || StringUtils.isBlank(phone) ){
+			return null ;
+		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+		if (userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                return ConvertHelper.convert(user, UserDTO.class);
+            }
+        }
+		return null;
+	}
+
+
+    /**
+     * 校验验证码是否正确
+     * @param cmd
+     * @return
+     */
+    @Override
+    public PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) {
+
+        PointCheckVCDTO returnDTO = new PointCheckVCDTO();
+        String verificationCode = cmd.getVerificationCode();
+        String phone = cmd.getPhone();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (identifier == null) {
+            LOGGER.error("User identifier not found in db, namespaceId=" + namespaceId + ", phone="+phone+",cmd=" + cmd);
+            returnDTO.setResultCode(false);
+            returnDTO.setResult("User identifier not found in db");
+            return  returnDTO;
+        }
+
+        //检查传过来的验证码跟生成保存在数据库中的相等即可
+        if (identifier.getVerificationCode() != null
+                && identifier.getVerificationCode().equals(verificationCode)) {
+        	returnDTO.setResultCode(true);
+        	return  returnDTO;
+
+        }
+
+        return null;
+    }
+
     /**
      * 有简称取简称,无简称取全名
      * @param sceneList
      * @return
      */
 	private List<SceneDTO> handleSortName(List<SceneDTO> sceneList ){
-	    
+
 		  if(sceneList != null && sceneList.size()>0)
 		  {
 			  for(SceneDTO dto : sceneList){
 				  if(StringUtils.isBlank(dto.getAliasName())){
-					  dto.setAliasName(dto.getName()); 
+					  dto.setAliasName(dto.getName());
 				  }
 			  }
 		  }
 		  return sceneList ;
 	  }
-	
+@Override
+	  public UserDTO getTopAdministrator( GetTopAdministratorCommand cmd){
+
+            if(cmd.getOrgId() == null ){
+                LOGGER.error("orgId is null in the  cmd = {}",  cmd);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
+            }
+          Organization org = checkOrganization(cmd.getOrgId());
+        //  Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+          if(org != null) {
+              if (org.getAdminTargetId() != null) {
+                  UserIdentifier userIdentifier = userProvider
+                          .findClaimedIdentifierByOwnerAndType(org.getAdminTargetId(),IdentifierType.MOBILE.getCode());
+                  if (userIdentifier != null) {
+                      User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                      if (user != null) {
+                          user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                          return ConvertHelper.convert(user, UserDTO.class);
+                      }
+                  }
+                  return null;
+              }
+          }
+          return null;
+      }
+
+
+        private Organization checkOrganization(Long organizationId) {
+            Organization org = organizationProvider.findOrganizationById(organizationId);
+            if(org == null){
+                LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
+            }
+            return org;
+        }
+
+
 }

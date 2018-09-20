@@ -5,6 +5,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationWorkPlaces;
 import com.everhomes.techpark.expansion.EnterpriseDetail;
 
 public interface EnterpriseProvider {
@@ -61,4 +63,28 @@ public interface EnterpriseProvider {
     
     EnterpriseDetail findEnterpriseDetailByEnterpriseId(Long enterpriseId);
 	public EnterpriseAddress findEnterpriseAddressByEnterpriseIdAndAddressId(Long enterpriseId, Long addressId);
+
+    /**
+     * 向eh_enterprise_community_map表中持久化数据
+     * @param enterpriseCommunityMap
+     */
+    void insertIntoEnterpriseCommunityMap(EnterpriseCommunityMap enterpriseCommunityMap);
+
+    /**
+     * 向eh_organization_community_requests表中添加数据
+     * @param organizationCommunityRequest
+     */
+    void insertIntoOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param organizationWorkPlaces
+     */
+    void deleteEnterpriseByOrgIdAndCommunityId(OrganizationWorkPlaces organizationWorkPlaces);
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param enterpriseCommunityMap
+     */
+    void deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(EnterpriseCommunityMap enterpriseCommunityMap);
 }

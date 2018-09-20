@@ -1,8 +1,10 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -24,6 +26,8 @@ public class ListQualityStandardsCommand {
 	private String ownerType;
 	
 	private Long targetId;
+	@ItemType(Long.class)
+	private List<Long> targetIds;
 	
 	private String targetType;
 	
@@ -97,6 +101,14 @@ public class ListQualityStandardsCommand {
 
 	public void setPlanCondition(String planCondition) {
 		this.planCondition = planCondition;
+	}
+
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
 	}
 
 	@Override

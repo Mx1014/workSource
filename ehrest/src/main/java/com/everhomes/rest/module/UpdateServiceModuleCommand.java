@@ -5,10 +5,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id：模块id </li>
- * <li>name：模块名称</li>
- * <li>instanceConfig：模块参数，比如第三方链接值就是{"url":"http......."}</li>
- * <li>description：描述</li>
+ *     <li>id: 模块id</li>
+ *     <li>name: 模块名称</li>
+ *     <li>instanceConfig: 模块参数，比如第三方链接值就是{"url":"http......."}</li>
+ *     <li>description: 描述</li>
+ *     <li>iconUri: iconUri</li>
  * </ul>
  */
 public class UpdateServiceModuleCommand {
@@ -20,6 +21,8 @@ public class UpdateServiceModuleCommand {
 	private String instanceConfig;
 
 	private String description;
+
+	private String iconUri;
 
 	public Long getId() {
 		return id;
@@ -53,8 +56,16 @@ public class UpdateServiceModuleCommand {
 		this.description = description;
 	}
 
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

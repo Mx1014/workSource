@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAllianceTagDao;
@@ -62,26 +64,33 @@ public class AllianceTagProviderImpl implements AllianceTagProvider{
 	}
 	
 	@Override
-	public List<AllianceTag> getAllianceParentTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
+	public List<AllianceTag> getAllianceParentTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,String ownerType,Long ownerId,
 			Long type) {
-		return getAllianceTagList(locator, pageSize, namespaceId, type, 0L);
+		return getAllianceTagList(locator, pageSize, namespaceId, ownerType, ownerId, type, 0L);
 	}
 
 	@Override
 	public List<AllianceTag> getAllianceChildTagList(Integer namespaceId, Long type, Long parentId) {
-		return getAllianceTagList(null, null, namespaceId, type, parentId);
+		return getAllianceTagList(null, null, namespaceId, null, null, type, parentId);
 	}
 	
 	private List<AllianceTag> getAllianceTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
-			Long type, Long parentId) {
+			String ownerType, Long ownerId, Long type, Long parentId) {
 		
-		return listAllianceTags(pageSize, locator, (l,query)->{
-			
+		return listAllianceTags(pageSize, locator, (l, query) -> {
+
 			com.everhomes.server.schema.tables.EhAllianceTag tag = Tables.EH_ALLIANCE_TAG;
 			query.addConditions(tag.NAMESPACE_ID.eq(namespaceId));
+			if (!StringUtils.isEmpty(ownerType)) {
+				query.addConditions(tag.OWNER_TYPE.eq(ownerType));
+			}
+			
+			if (null != ownerId) {
+				query.addConditions(tag.OWNER_ID.eq(ownerId));
+			}
+			
 			query.addConditions(tag.TYPE.eq(type));
 			query.addConditions(tag.PARENT_ID.eq(parentId));
-			
 			return null;
 		});
 	}
@@ -132,5 +141,17 @@ public class AllianceTagProviderImpl implements AllianceTagProvider{
 
         return list;
     }
+
+	@Override
+	public void deleteProjectTags(Long ownerId, Long type) {
+		com.everhomes.server.schema.tables.EhAllianceTag TABLE = Tables.EH_ALLIANCE_TAG;
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(TABLE)
+				.where(
+						TABLE.OWNER_ID.eq(ownerId)
+						.and(TABLE.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()))
+						.and(TABLE.TYPE.eq(type)))
+				.execute();
+	}
 
 }

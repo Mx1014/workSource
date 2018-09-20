@@ -421,6 +421,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         List<WorkReportDTO> reports = new ArrayList<>();
         cmd.setPageSize(Integer.MAX_VALUE - 1);
 
+        if(member == null) {
+            member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+    }
+        final OrganizationMember member2 = member;
+
         //  get all work reports.
         List<WorkReport> results = workReportProvider.listWorkReports(
                 cmd.getPageAnchor(), cmd.getPageSize(), cmd.getOwnerId(), cmd.getOwnerType(),

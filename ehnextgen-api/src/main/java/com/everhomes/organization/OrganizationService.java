@@ -1,16 +1,31 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -151,7 +166,6 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -234,7 +248,10 @@ public interface OrganizationService {
 	void userJoinOrganization(UserJoinOrganizationCommand cmd);
 	void deleteOrgMember(OrganizationMemberCommand cmd);
 	void updateTopicPrivacy(UpdateTopicPrivacyCommand cmd);
-	void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
+
+    void createOrganizationCommunity(Long orgId, Long communityId);
+
+    void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
 	void createOrganizationByAdmin(CreateOrganizationByAdminCommand cmd);
 	void addOrgAddress(AddOrgAddressCommand cmd);
 	void importOrganization(MultipartFile[] files);
@@ -275,6 +292,12 @@ public interface OrganizationService {
 
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
 	ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd);
+
+	/**
+	 * 创建企业
+	 * @param cmd
+	 * @return
+	 */
 	OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd);
 	void createRoleOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
@@ -588,6 +611,7 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
+	/**创建机构账号，包括注册、把用户添加到公司**/
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName,
 			String contactToken,boolean notSendMsgFlag);
 
@@ -642,9 +666,80 @@ public interface OrganizationService {
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
 
+	/**
+	 * 根据域空间id、关键字、企业类型、来查询企业信息
+	 * @param cmd
+	 * @return
+	 */
+	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
+
+	OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd);
+
+	/**
+	 * 根据organizationId来查询公司详细信息
+	 * 表eh_organizations和表eh_organization_details进行联查
+	 * @param cmd
+	 * @return
+	 */
+	OrganizationAndDetailDTO getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd);
+
+	/**
+	 * 编辑单个公司的信息
+	 * @param cmd
+	 */
+	void updateEnterpriseDetail(UpdateEnterpriseDetailCommand cmd);
+
+	/**
+	 * 更新办公地点以及其中的楼栋和门牌
+	 * @param cmd
+	 */
+	void insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd);
+
+	/**
+	 * 根据用户id来进行更高超级管理员手机号
+	 * @param cmd
+	 */
+	void updateSuperAdmin(UpdateSuperAdminCommand cmd);
+
+	/**
+	 * 添加入驻企业（标准版）
+	 * @param cmd
+	 */
+	void createSettledEnterprise(CreateSettledEnterpriseCommand cmd);
+
+
+	/**
+	 * 根据组织ID来删除办公地点
+	 * @param cmd
+	 */
+	void deleteWorkPlacesByOrgId(DeleteWorkPlacesCommand cmd);
+
+	/**
+	 * 根据公司ID和域空间ID来删除公司以及相应的信息
+	 * @param cmd
+	 */
+	void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd);
+
+	/**
+	 * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+	 * @param cmd
+	 */
+	void changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd);
+
+	/**
+	 * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+	 * @param cmd
+	 */
+	void updateWholeAddressName(WholeAddressComamnd cmd);
+
 	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
 
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
+
+	List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId);
+
+	List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
+			AppInstanceConfigConfigMatchCallBack matchCallback);
 }
