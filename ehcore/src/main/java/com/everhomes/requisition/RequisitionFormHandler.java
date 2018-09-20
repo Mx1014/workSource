@@ -156,7 +156,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
                 DeleteFlowCaseCommand cmd2 = new DeleteFlowCaseCommand();
                 cmd2.setFlowCaseId(flowCase.getId());
                 flowService.deleteFlowCase(cmd2);
-                return generalFormService.deleteGeneralFormVal(cmd);
+                return generalFormService.deleteGeneralForm(cmd);
             }else{
                 return null;
             }

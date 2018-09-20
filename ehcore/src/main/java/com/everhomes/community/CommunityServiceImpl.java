@@ -5235,28 +5235,15 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 		
-		long startTime01 = System.currentTimeMillis();
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
-		long endTime01 = System.currentTimeMillis();
-		long timeCost01 = endTime01 - startTime01;
-		LOGGER.info("timeCost01:{}ms",timeCost01);
 		
-		long startTime02 = System.currentTimeMillis();
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
-		long endTime02 = System.currentTimeMillis();
-		long timeCost02 = endTime02 - startTime02;
-		LOGGER.info("timeCost02:{}ms",timeCost02);
 		
-		long startTime03 = System.currentTimeMillis();
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
-		long endTime03 = System.currentTimeMillis();
-		long timeCost03 = endTime03 - startTime03;
-		LOGGER.info("timeCost03:{}ms",timeCost03);
 		
 		//用于存储已经计算过的合同id
 //		List<Long> contractIds = new ArrayList<>();
 		
-		long startTime04 = System.currentTimeMillis();
 		List<Long> filterAddressIdList = new ArrayList<>();
 		for (Address address : addresses) {
 			filterAddressIdList.add(address.getId());
@@ -5306,9 +5293,6 @@ public class CommunityServiceImpl implements CommunityService {
 		totalRent = contractProvider.getTotalRentByAddressIds(filterAddressIdList);
 		result.setTotalRent(totalRent);
 		
-		long endTime04 = System.currentTimeMillis();
-		long timeCost04 = endTime04 - startTime04;
-		LOGGER.info("timeCost04:{}ms",timeCost04);
 		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
 //		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
 //		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;

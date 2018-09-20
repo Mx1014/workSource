@@ -18,6 +18,7 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.PmTaskService;
@@ -69,6 +70,9 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerContactType;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -223,7 +227,22 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
-        List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        List<FieldGroup> systemGroups = new ArrayList<>();
+        if(StringUtils.isNotBlank(cmd.getModuleType())) {
+            List<Long> groupsIds = fieldProvider.listFieldGroupRanges(cmd.getModuleName(), cmd.getModuleType());
+            if(groupsIds != null && groupsIds.size() != 0) {
+                systemGroups = fieldProvider.listFieldGroups(groupsIds);
+            }
+        }
+
+        if(systemGroups.size() == 0){
+            systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        }
+
+        for(int i =0 ; i < systemGroups.size(); i++){
+            systemGroups.get(i).setModuleName(cmd.getModuleName());
+        }
+
         if(systemGroups != null && systemGroups.size() > 0) {
             List<SystemFieldGroupDTO> groups = systemGroups.stream().map(systemGroup -> {
                 return ConvertHelper.convert(systemGroup, SystemFieldGroupDTO.class);
@@ -462,13 +481,20 @@ public class FieldServiceImpl implements FieldService {
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
         // add  privilege code for checking different  privileges
+        String code = "";
         if (1 == cmd.getPrivilegeCode()) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+            code =  DynamicExcelStrings.CUSTOEMR;
         }
         if (2 == cmd.getPrivilegeCode()) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+            code =  DynamicExcelStrings.CUSTOEMR;
         }
-        return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+        if (3 == cmd.getPrivilegeCode()) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, ServiceModuleConstants.BUSINESS_INVITATION, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+            code =  DynamicExcelStrings.INVITED_CUSTOMER;
+        }
+        return dynamicExcelService.importMultiSheet(file, code, null, cmd);
     }
 
     @Override
@@ -482,7 +508,24 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd) {
-        List<Field> systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        List<Field> systemFields = new ArrayList<>();
+
+        if(StringUtils.isNotBlank(cmd.getModuleType())) {
+            List<Long> ids = fieldProvider.listFieldRanges(cmd.getModuleName(), cmd.getModuleType(), cmd.getGroupPath());
+            if(ids != null && ids.size() != 0) {
+                systemFields = fieldProvider.listFields(ids);
+            }
+        }
+
+        if(systemFields.size() == 0) {
+            systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        }
+
+        for(int i =0 ; i < systemFields.size(); i++){
+            systemFields.get(i).setModuleName(cmd.getModuleName());
+        }
+
+
         if(systemFields != null && systemFields.size() > 0) {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
@@ -1324,7 +1367,14 @@ public class FieldServiceImpl implements FieldService {
 
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
-        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+        PropertyDescriptor pd;
+        if(fieldName.equals("customerContact") || fieldName.equals("channelContact")){
+            pd = new PropertyDescriptor("contacts",clz);
+        }else if(fieldName.equals("trackerUid")) {
+            pd = new PropertyDescriptor("trackers",clz);
+        }else{
+            pd = new PropertyDescriptor(fieldName,clz);
+        }
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
@@ -1368,6 +1418,55 @@ public class FieldServiceImpl implements FieldService {
                 List<String> entryInfo = new ArrayList<>();
                 entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
                 return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
+        }
+        if("channelContact".equals(fieldName)){
+            List<CustomerContactDTO> customerContacts = (ArrayList<CustomerContactDTO>)invoke;
+            if(customerContacts.size()>0){
+                List<String> customerContact = new ArrayList<>();
+                customerContacts.forEach((c)->{
+                    if(c.getContactType() != null) {
+                        if (c.getContactType().equals(CustomerContactType.CHANNEL_CONTACT.getCode())) {
+                            customerContact.add(c.getName() + "(" + c.getPhoneNumber() + ")");
+                        }
+                    }
+                });
+                return String.join(",", customerContact);
+            }else {
+                return "";
+            }
+        }
+        if("customerContact".equals(fieldName)){
+            List<CustomerContactDTO> customerContacts = (ArrayList<CustomerContactDTO>)invoke;
+            if(customerContacts.size()>0){
+                List<String> customerContact = new ArrayList<>();
+                customerContacts.forEach((c)->{
+                    if(c.getContactType() != null) {
+                        if (c.getContactType().equals(CustomerContactType.CUSTOMER_CONTACT.getCode())) {
+                            customerContact.add(c.getName() + "(" + c.getPhoneNumber() + ")");
+                        }
+                    }
+                });
+                return String.join(",", customerContact);
+            }else {
+                return "";
+            }
+        }
+        if("trackerUid".equals(fieldName)){
+            List<CustomerTrackerDTO> trackers = (ArrayList<CustomerTrackerDTO>)invoke;
+            if(trackers.size()>0){
+                List<String> tracker = new ArrayList<>();
+                trackers.forEach((c)->{
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(c.getTrackerUid());
+                    if (members != null && members.size()>0) {
+                        c.setTrackerPhone(members.get(0).getContactToken());
+                        c.setTrackerName(members.get(0).getContactName());
+                    }
+                    tracker.add(c.getTrackerName()+"("+c.getTrackerPhone()+")");
+                });
+                return String.join(",", tracker);
             }else {
                 return "";
             }

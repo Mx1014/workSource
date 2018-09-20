@@ -384,6 +384,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 				}
                 
                 processContractApartments(dto);
+                //查询合同适用场景，物业合同不修改资产状态。
+		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+		        if (contractCategory != null) {
+		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
                 dtos.add(dto);
             });
         }
