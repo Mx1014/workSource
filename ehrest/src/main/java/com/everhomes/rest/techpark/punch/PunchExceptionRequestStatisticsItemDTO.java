@@ -8,14 +8,14 @@ import com.everhomes.util.StringHelper;
  * <li>itemName: 统计项名称</li>
  * <li>itemType: 统计项类型，参考{@link com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType}</li>
  * <li>num: 统计值</li>
- * <li>title: 标题</li>
+ * <li>unit: 单位</li>
  * </ul>
  */
 public class PunchExceptionRequestStatisticsItemDTO {
     private String itemName;
     private Byte itemType;
     private Integer num;
-    private String title;
+    private String unit;
 
     public String getItemName() {
         return itemName;
@@ -46,11 +46,12 @@ public class PunchExceptionRequestStatisticsItemDTO {
         return StringHelper.toJsonString(this);
     }
 
-    public String getTitle() {
-        return title;
+
+    public String getUnit() {
+        return unit;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 }
