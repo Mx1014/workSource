@@ -137,13 +137,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 String homeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
-            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                UserTreasureDTO point = pointService.getPointTreasure();
-                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
-                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
-                }
-            }
+//            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
+//                UserTreasureDTO point = pointService.getPointTreasure();
+//                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
+//                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+//                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+//                }
+//            }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
                 UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
