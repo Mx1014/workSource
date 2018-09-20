@@ -144,6 +144,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
         FieldGroup group = new FieldGroup();
         //用名字搜会有问题
         if (isContainChinese(sheetName)) {
+            if(sheetName.equals("招商客户")){
+                sheetName = "客户信息";
+            }
             group = fieldProvider.findGroupByGroupDisplayName(sheetName);
         } else {
             group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));

@@ -4993,9 +4993,9 @@ public class CustomerServiceImpl implements CustomerService {
 
         String fileName;
         if(cmd.getModuleName().equals("enterprise_customer")){
-            fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.DATE_TIME)) + ".xlsx";
+            fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","1",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.DATE_TIME_NO_SLASH)) + ".xlsx";
         }else{
-            fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","2",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.DATE_TIME)) + ".xlsx";
+            fileName = String.format(localeStringService.getLocalizedString("enterpriseCustomer.export","2",UserContext.current().getUser().getLocale(),"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.DATE_TIME_NO_SLASH)) + ".xlsx";
         }
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());

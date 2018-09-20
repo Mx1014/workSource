@@ -584,11 +584,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Override
     public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response){
         List<String> sheetNames = new ArrayList<>();
-        sheetNames.add("招商客户");
+        sheetNames.add("客户信息");
         String excelTemplateName = "招商客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
         Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         cmd.setIsAdmin(isAdmin);
-        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
+        dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
 
 
