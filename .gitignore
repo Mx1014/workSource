@@ -4,6 +4,7 @@
 /statistics
 /logs
 
+ehcore-sdk/target/
 ehrest/target
 ehcore/target/
 ehborder/target/
