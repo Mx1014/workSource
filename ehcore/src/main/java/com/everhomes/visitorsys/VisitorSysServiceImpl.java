@@ -657,7 +657,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         createVisitorActions(visitor);
         sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
-        relatedVisitor.setDoorAccessEndTime(cmd.getDoorAccessEndTime());
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
@@ -2335,7 +2334,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(now);
         doorCmd.setValidFromMs(now);
-        doorCmd.setValidEndMs(visitor.getDoorAccessEndTime());
         if(null != visitor.getDoorAccessAuthDuration()){
             if(visitor.getDoorAccessAuthDurationType().equals((byte)0)){
                 instance.add(Calendar.DAY_OF_MONTH,visitor.getDoorAccessAuthDuration());
@@ -2344,6 +2342,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
             visitor.setDoorAccessEndTime(instance.getTimeInMillis());
             doorCmd.setValidEndMs(instance.getTimeInMillis());
+            visitor.setDoorAccessEndTime(instance.getTimeInMillis());
         }
         if(visitor.getDoorAccessEnableAuthCount().equals((byte)1) && null != visitor.getDoorAccessAuthCount()){
             doorCmd.setAuthRuleType((byte)1);
