@@ -46,6 +46,8 @@ public enum PunchStatusStatisticsItemType {
     @Override
     public String toString() {
         switch (this) {
+            case GO_OUT:
+                return "外出";
             case UN_ARRIVED:
                 return "未到";
             case BELATE:

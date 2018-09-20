@@ -122,6 +122,7 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
         data.setAskForLeaveRequestMemberCount(record.getValue("askForLeaveRequestMemberCount", Integer.class));
         data.setGoOutRequestMemberCount(record.getValue("goOutRequestMemberCount", Integer.class));
         data.setBusinessTripRequestMemberCount(record.getValue("businessTripRequestMemberCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         data.setOvertimeRequestMemberCount(record.getValue("overtimeRequestMemberCount", Integer.class));
         data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
         if (data.getShouldArrivedMemberCount() == null || data.getShouldArrivedMemberCount() <= 0

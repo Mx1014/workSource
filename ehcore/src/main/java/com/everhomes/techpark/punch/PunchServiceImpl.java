@@ -3238,6 +3238,7 @@ public class PunchServiceImpl implements PunchService {
         statistic.setOvertimeRequestCount(0);
         statistic.setPunchExceptionRequestCount(0);
         statistic.setRestDayCount(0);
+        statistic.setGoOutPunchDayCount(0);
         statistic.setFullNormalFlag(NormalFlag.YES.getCode());
         statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 
@@ -3266,6 +3267,7 @@ public class PunchServiceImpl implements PunchService {
             }
 
             statistic.setRestDayCount(statistic.getRestDayCount() + (NormalFlag.YES == NormalFlag.fromCode(pdl.getRestFlag()) ? 1 : 0));
+            statistic.setGoOutPunchDayCount(statistic.getGoOutPunchDayCount() + (NormalFlag.YES == NormalFlag.fromCode(pdl.getGoOutPunchFlag()) ? 1 : 0));
             List<TimeInterval> tiDTOs = null;
             PunchTimeRule ptr = null;
 
@@ -10625,6 +10627,7 @@ public class PunchServiceImpl implements PunchService {
         if(pdls != null && pdls.size() > 0){
             for(PunchDayLog pdl : pdls){
                 PunchMemberDTO dto = convertPDLToPunchMemberDTO(pdl);
+                dto.setStatisticsUnit(itemType.getUnit());
                 dto.setStatisticsCount(getPunchStatisticCountByItemType(pdl, itemType));
 
                 results.add(dto);
@@ -10642,6 +10645,9 @@ public class PunchServiceImpl implements PunchService {
         Integer result = 0 ;
         if (itemType != null) {
             switch (itemType) {
+                case GO_OUT:
+                    result = 1;
+                    break;
                 case BELATE:
                     result = pdl.getBelateCount();
                     break;
@@ -10806,10 +10812,14 @@ public class PunchServiceImpl implements PunchService {
 	    	for(PunchStatistic statistic : punchStatistics){
                 PunchMemberDTO dto = convertPSToPunchMemberDTO(statistic);
 	    		if(itemType != null){
-		        	switch(itemType){ 
-		        		case BELATE:
-		        			dto.setStatisticsCount(statistic.getBelateCount());
-		        			break;
+                    dto.setStatisticsUnit(itemType.getUnit());
+		        	switch(itemType){
+                        case GO_OUT:
+                            dto.setStatisticsCount(statistic.getGoOutPunchDayCount());
+                            break;
+                        case BELATE:
+                            dto.setStatisticsCount(statistic.getBelateCount());
+                            break;
 		        		case LEAVE_EARLY:
 		        			dto.setStatisticsCount(statistic.getLeaveEarlyCount());
 		        			break;
@@ -11165,17 +11175,17 @@ public class PunchServiceImpl implements PunchService {
         response.setRestMemberCount(new PunchStatusStatisticsItemDTO(
                 localeStringService.getLocalizedString(
                         PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.REST.getCode()), locale, PunchStatusStatisticsItemType.REST.toString()),
-                PunchStatusStatisticsItemType.REST.getCode(), 0)
+                PunchStatusStatisticsItemType.REST.getCode(), 0, PunchStatusStatisticsItemType.REST.getUnit())
         );
         response.setShouldArrivedMemberCount(new PunchStatusStatisticsItemDTO(
                 localeStringService.getLocalizedString(
                         PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.SHOULD_ARRIVE.getCode()), locale, PunchStatusStatisticsItemType.SHOULD_ARRIVE.toString()),
-                PunchStatusStatisticsItemType.SHOULD_ARRIVE.getCode(), 0)
+                PunchStatusStatisticsItemType.SHOULD_ARRIVE.getCode(), 0, PunchStatusStatisticsItemType.SHOULD_ARRIVE.getUnit())
         );
         response.setArrivedMemberCount(new PunchStatusStatisticsItemDTO(
                 localeStringService.getLocalizedString(
                         PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.ARRIVED.getCode()), locale, PunchStatusStatisticsItemType.ARRIVED.toString()),
-                PunchStatusStatisticsItemType.ARRIVED.getCode(), 0)
+                PunchStatusStatisticsItemType.ARRIVED.getCode(), 0, PunchStatusStatisticsItemType.ARRIVED.getUnit())
         );
 
         boolean isToday = dateSF.get().format(new Date()).equals(dateSF.get().format(new Date(cmd.getStatisticsDate())));
@@ -11209,7 +11219,7 @@ public class PunchServiceImpl implements PunchService {
                 PunchStatusItemDetailDTO dto = new PunchStatusItemDetailDTO();
                 dto.setPunchDate(r.getPunchDate().getTime());
                 SimpleDateFormat sf = new SimpleDateFormat("dd日 EEE", Locale.SIMPLIFIED_CHINESE);
-                dto.setDescription(sf.format(r.getPunchDate()) + "(" + getPunchStatisticCountByItemType(r, itemType) + "次)");
+                dto.setDescription(sf.format(r.getPunchDate()) + "(" + getPunchStatisticCountByItemType(r, itemType) + itemType.getUnit() + ")");
                 return dto;
             }).collect(Collectors.toList()));
         }
@@ -11509,6 +11519,10 @@ public class PunchServiceImpl implements PunchService {
         log.setPunchDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
         log.setStatus(PunchStatus.NORMAL.getCode());
         log.setNamespaceId(UserContext.getCurrentNamespaceId());
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(log.getUserId(), log.getOrganizationId());
+        if (null != memberDetail) {
+            log.setDetailId(memberDetail.getId());
+        }
         punchProvider.createPUnchGoOutLog(log);
         return convertGoOutLogDTO(log);
     }

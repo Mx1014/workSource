@@ -21,10 +21,11 @@ public class PunchStatusStatisticsItemDTO {
 
     }
 
-    public PunchStatusStatisticsItemDTO(String itemName, Byte itemType, Integer num) {
+    public PunchStatusStatisticsItemDTO(String itemName, Byte itemType, Integer num, String unit) {
         this.itemName = itemName;
         this.itemType = itemType;
         this.num = num;
+        this.unit = unit;
     }
 
     public String getItemName() {

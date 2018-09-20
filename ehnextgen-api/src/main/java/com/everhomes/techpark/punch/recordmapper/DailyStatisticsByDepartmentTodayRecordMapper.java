@@ -112,6 +112,7 @@ public class DailyStatisticsByDepartmentTodayRecordMapper extends DailyStatistic
         data.setBusinessTripRequestMemberCount(record.getValue("businessTripRequestMemberCount", Integer.class));
         data.setOvertimeRequestMemberCount(record.getValue("overtimeRequestMemberCount", Integer.class));
         data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         if (data.getShouldArrivedMemberCount() == null || data.getShouldArrivedMemberCount() <= 0
                 || data.getArrivedMemberCount() == null || data.getArrivedMemberCount() <= 0) {
             data.setRateOfAttendance(0);

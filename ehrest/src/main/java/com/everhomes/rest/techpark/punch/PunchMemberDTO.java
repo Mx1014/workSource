@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>departmentName: 部门名称</li>
  * <li>punchOrganizationId: 查询日期时所属考勤组</li>
  * <li>statisticsCount: 查询统计项的统计值</li>
+ * <li>statisticsUnit: 统计项的统计单位</li>
  * <li>ruleId: 打卡规则id 如果为空就是未设置规则</li>
  * </ul>
  */
@@ -26,6 +27,7 @@ public class PunchMemberDTO {
     private String departmentName;
     private Long punchOrganizationId;
     private Integer statisticsCount;
+    private String statisticsUnit;
     private Long ruleId;
     public Long getUserId() {
         return userId;
@@ -111,4 +113,12 @@ public class PunchMemberDTO {
 	public void setRuleId(Long ruleId) {
 		this.ruleId = ruleId;
 	}
+
+    public String getStatisticsUnit() {
+        return statisticsUnit;
+    }
+
+    public void setStatisticsUnit(String statisticsUnit) {
+        this.statisticsUnit = statisticsUnit;
+    }
 }
