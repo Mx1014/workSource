@@ -13,7 +13,7 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_NOTIFY_TARGET_NOT_REGISTER = 10008;  //手机号未注册
     static final int ERROR_NOTIFY_EMAIL_EXIST = 10009;  //该类下推送邮箱已存在
     static final int ERROR_COMMUNITY_NOT_CHOSEN = 10010;  //未选中项目
-    
+    static final int ERROR_SERVICE_TYPE_TO_UPDATE_NOT_FOUND= 10011;  //未找到需要更新的服务类型
     
     static final int ERROR_NEW_EVENT_APPLIER_NOT_EXIST = 11000;  //新事件申请用户不存在
     static final int ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST = 11001;  //未找到工作流信息

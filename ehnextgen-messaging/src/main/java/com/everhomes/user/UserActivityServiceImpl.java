@@ -993,6 +993,7 @@ public class UserActivityServiceImpl implements UserActivityService {
             e.printStackTrace();
         }
         rsp.setPoint(point.getCount());
+        rsp.setPointUrl(point.getUrl());
         if (rsp.getPoint() == null) {
             rsp.setPoint(0L);
         }

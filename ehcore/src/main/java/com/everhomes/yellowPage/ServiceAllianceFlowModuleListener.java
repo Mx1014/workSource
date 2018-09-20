@@ -458,9 +458,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		if (flowCase.getOwnerType() != null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return this.processCustomRequest(flowCase);
 
-		flowCase.setCustomObject(getCustomObject(flowCase));
-		
-		
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if (flowCase.getCreateTime() != null) {
 			entities.add(new FlowCaseEntity("申请时间", flowCase.getCreateTime().toLocalDateTime().format(fmt), FlowCaseEntityType.MULTI_LINE.getCode()));
@@ -528,6 +525,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		//后面跟自定义模块--
 		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+		
+		//把客户端或前端需要的东西放到OBEJECT中
+		flowCase.setCustomObject(getCustomObject(flowCase, entities));
+		
 		return entities;
 		
 	}
@@ -625,10 +626,22 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	 * @param approvalId
 	 * @return
 	 */
-	private String getCustomObject(FlowCase flowCase) {
+	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities) {
+
+		JSONObject json = new JSONObject();
+		for (FlowCaseEntity entity : entities) {
+			json.put(entity.getKey(), entity.getValue());
+		}
+
+		fillEnanbleProvider(json, flowCase);
+
+		return json.toJSONString();
+	}
+	
+	private void fillEnanbleProvider(JSONObject json, FlowCase flowCase) {
 
 		if (!FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType())) {
-			return null;
+			return;
 		}
 
 		Byte enableProvider = (byte) 0;
@@ -648,12 +661,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		} while (false);
 
-		JSONObject json = new JSONObject();
 		json.put("enableProvider", enableProvider);
-
-		return json.toJSONString();
 	}
-	
+
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 

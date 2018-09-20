@@ -249,7 +249,7 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
-	
+
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
 	 */
@@ -268,5 +268,6 @@ public interface AssetService {
 	void tranferAssetMappings();
 	
 	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
-	
+
+	void createChargingItem(CreateChargingItemCommand cmd);
 }
