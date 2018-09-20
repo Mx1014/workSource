@@ -480,5 +480,10 @@ public interface PunchProvider {
 
 	Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
 			java.util.Date queryDate);
- 
+
+	void createPUnchGoOutLog(PunchGoOutLog log);
+
+	PunchGoOutLog findPunchGoOutLogById(Long id);
+
+	void updatePunchGoOutLog(PunchGoOutLog log);
 }

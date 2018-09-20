@@ -11500,12 +11500,39 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public GoOutPunchLogDTO goOutPunchClock(GoOutPunchClockCommand cmd) {
-        return null;
+        checkCompanyIdIsNull(cmd.getOrganizationId());
+        cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
+        PunchGoOutLog log = ConvertHelper.convert(cmd, PunchGoOutLog.class);
+        log.setUserId(UserContext.currentUserId());
+        log.setPunchTime(new java.sql.Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setPunchDate(new java.sql.Date(DateHelper.currentGMTTime().getTime()));
+        log.setStatus(PunchStatus.NORMAL.getCode());
+        log.setNamespaceId(UserContext.getCurrentNamespaceId());
+        punchProvider.createPUnchGoOutLog(log);
+
+        return convertGoOutLogDTO(log);
+    }
+
+    private GoOutPunchLogDTO convertGoOutLogDTO(PunchGoOutLog log) {
+        GoOutPunchLogDTO dto = ConvertHelper.convert(log, GoOutPunchLogDTO.class);
+        dto.setPunchDate(log.getPunchDate() == null ? null : log.getPunchDate().getTime());
+        dto.setPunchDate(log.getPunchTime() == null ? null : log.getPunchTime().getTime());
+        dto.setImgUrl(contentServerService.parserUri(log.getImgUri()));
+
+        return dto;
     }
 
     @Override
     public GoOutPunchLogDTO updateGoOutPunchLog(UpdateGoOutPunchLogCommand cmd) {
-        return null;
+        PunchGoOutLog log = punchProvider.findPunchGoOutLogById(cmd.getId());
+        if (null == log) {
+            return null;
+        }
+        if (null == log.getDescription()) {
+            log.setDescription(cmd.getDescription());
+            punchProvider.updatePunchGoOutLog(log);
+        }
+        return convertGoOutLogDTO(log);
     }
 
 }

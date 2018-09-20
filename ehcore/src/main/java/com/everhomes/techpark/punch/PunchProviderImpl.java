@@ -33,44 +33,8 @@ import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
-import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchNotificationsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchOvertimeRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
-import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
-import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
-import com.everhomes.server.schema.tables.daos.EhPunchWorkdayRulesDao;
-import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
-import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
-import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
-import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhPunchHolidays;
-import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
-import com.everhomes.server.schema.tables.pojos.EhPunchNotifications;
-import com.everhomes.server.schema.tables.pojos.EhPunchOvertimeRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
-import com.everhomes.server.schema.tables.pojos.EhPunchRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchSpecialDays;
-import com.everhomes.server.schema.tables.pojos.EhPunchStatistics;
-import com.everhomes.server.schema.tables.pojos.EhPunchTimeIntervals;
-import com.everhomes.server.schema.tables.pojos.EhPunchTimeRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
-import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
-import com.everhomes.server.schema.tables.pojos.EhPunchWorkdayRules;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
@@ -131,6 +95,7 @@ import org.jooq.SelectQuery;
 import org.jooq.UpdateConditionStep;
 import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
+import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -4444,5 +4409,33 @@ public class PunchProviderImpl implements PunchProvider {
         condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(new java.sql.Date(queryDate.getTime()))); 
         return step.where(condition).fetchCount();
 	}
+
+    @Override
+    public void createPUnchGoOutLog(PunchGoOutLog log) {
+        String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchGoOutLogs.class);
+        long id = sequenceProvider.getNextSequence(key);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        log.setId(id);
+        EhPunchGoOutLogsDao dao = new EhPunchGoOutLogsDao(context.configuration());
+        dao.insert(log);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchGoOutLogs.class, null);
+    }
+
+    @Override
+    public PunchGoOutLog findPunchGoOutLogById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPunchGoOutLogsDao dao = new EhPunchGoOutLogsDao(context.configuration());
+        EhPunchGoOutLogs log = dao.findById(id);
+        return ConvertHelper.convert(log, PunchGoOutLog.class);
+    }
+
+    @Override
+    public void updatePunchGoOutLog(PunchGoOutLog log) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPunchGoOutLogsDao dao = new EhPunchGoOutLogsDao(context.configuration());
+        dao.update(log);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGoOutLogs.class, log.getId());
+
+    }
 }
 
