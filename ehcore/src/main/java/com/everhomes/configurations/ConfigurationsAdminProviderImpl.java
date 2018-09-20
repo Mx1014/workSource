@@ -146,7 +146,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
-	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "#bo.name"),
 			          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void crteateConfiguration(Configurations bo) {
 		
@@ -169,7 +169,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
-	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "#bo.name"),
 	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void updateConfiguration(Configurations bo) {
 		
@@ -195,7 +195,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
-	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "#bo.name"),
 	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void deleteConfiguration(Configurations bo) {
 		
