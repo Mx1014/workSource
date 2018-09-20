@@ -58,6 +58,9 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
     private Byte source = VisitorsysSourceType.INTERNAL.getCode();
     private Byte notifyThirdSuccessFlag = VisitorsysNotifyThirdType.NOT_YET.getCode();
 
+//  扫码登记或ipad自助登记标志
+    private Byte fromDevice;
+
     public Byte getSource() {
         return source;
     }
@@ -128,6 +131,14 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setVisitorSignCharacter(String visitorSignCharacter) {
         this.visitorSignCharacter = visitorSignCharacter;
+    }
+
+    public Byte getFromDevice() {
+        return fromDevice;
+    }
+
+    public void setFromDevice(Byte fromDevice) {
+        this.fromDevice = fromDevice;
     }
 
     @Override

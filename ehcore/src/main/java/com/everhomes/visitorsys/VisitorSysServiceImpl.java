@@ -652,6 +652,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private Object createVisitorSysVisitor(VisitorSysVisitor visitor, CreateOrUpdateVisitorCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//      手机扫码和ipad自助登记状态置为已到访
+        if(null != cmd.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getFromDevice()))
+            visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
@@ -1357,6 +1360,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
         beforePostForWeb(cmd);
+        cmd.setFromDevice(TrueOrFalseFlag.TRUE.getCode());
         return createOrUpdateVisitor(cmd);
 
     }
@@ -1490,6 +1494,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
         CreateOrUpdateVisitorCommand createOrUpdateVisitorCommand = ConvertHelper.convert(cmd, CreateOrUpdateVisitorCommand.class);
         createOrUpdateVisitorCommand = VisitorSysUtils.copyNotNullProperties(device, createOrUpdateVisitorCommand,new ArrayList(Arrays.asList("getId","setId")));
+        createOrUpdateVisitorCommand.setFromDevice(TrueOrFalseFlag.TRUE.getCode());
         GetBookedVisitorByIdResponse orUpdateVisitor = createOrUpdateVisitor(createOrUpdateVisitorCommand);
         return ConvertHelper.convert(orUpdateVisitor,CreateOrUpdateVisitorUIResponse.class);
     }
