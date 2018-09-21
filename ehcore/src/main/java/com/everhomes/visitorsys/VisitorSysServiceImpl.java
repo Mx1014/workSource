@@ -1312,9 +1312,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsFlag());
         VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
         boolean showQrcode =
-                communityConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
-                && communityConfig.getBaseConfig().getDoorGuardId().equals(communityVisitor.getDoorGuardId())
-                && (
+//                communityConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
+//                && communityConfig.getBaseConfig().getDoorGuardId().equals(communityVisitor.getDoorGuardId())
+//                &&
+        (
                         (
                                 doorGuardsFlag == VisitorsysFlagType.YES //园区开启门禁对接
                                 && validAfterConfirmedFlag == VisitorsysFlagType.YES//门禁二维码需要在访客确认后生效
@@ -2330,9 +2331,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysFlagType doorGuardsConfirmedFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
         VisitorsysStatus bookingStatus = checkBookingStatus(visitor.getBookingStatus());
-        if(VisitorsysFlagType.YES == doorGuardsConfirmedFlag && bookingStatus==VisitorsysStatus.NOT_VISIT){//确认到访才发放门禁二维码
-            return;
-        }
+//        if(VisitorsysFlagType.YES == doorGuardsConfirmedFlag && bookingStatus==VisitorsysStatus.NOT_VISIT){//确认到访才发放门禁二维码
+//            return;
+//        }
         //申请门禁二维码，并且设置到visitor中
         CreateLocalVistorCommand doorCmd = new CreateLocalVistorCommand();
         doorCmd.setPhone(visitor.getVisitorPhone());
@@ -2368,6 +2369,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
+            e.printStackTrace();
             LOGGER.error("error invoke dooraccess");
         }
         if(localVisitorAuth!=null){
