@@ -372,12 +372,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         if (dtos == null || dtos.size() == 0)
             return "";
         for (OrganizationDTO dto : dtos) {
-
             StringBuilder name = null;
-            String[] strList = dto.getPath().split("/");
-            for (String str : strList) {
-                name.append(fullPathMap.get(Long.valueOf(str))).append("/");
-            }
+            String[] tokens = dto.getPath().split("/");
+            for (int i = 1; i <= tokens.length; i++)
+                name.append(fullPathMap.get(Long.valueOf(tokens[i]))).append("/");
             names.append(name).append(",");
         }
         names = new StringBuilder(names.substring(0, names.length() - 1));
