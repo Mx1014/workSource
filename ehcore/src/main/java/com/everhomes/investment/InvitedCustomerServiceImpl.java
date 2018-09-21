@@ -11,6 +11,7 @@ import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
@@ -458,8 +459,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
                     dtos.forEach(r ->{
                         Address address = addressProvider.findAddressById(r.getAddressId());
-                        r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                        r.setAddressArea(address.getBuildArea());
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                        }else{
+                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                            r.setAddressArea(address.getBuildArea());
+                        }
                     });
                     requirementDTO.setAddresses(dtos);
                 }
@@ -495,8 +500,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                    addressDTO.setAddressArea(address.getRentArea());
+                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+
+                    }else{
+                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                        addressDTO.setAddressArea(address.getRentArea());
+                    }
+
+
                     addressesDTO.add(addressDTO);
 
                 });
@@ -591,7 +603,99 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
 
+    @Override
+    public InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd) {
+        InvitedCustomerDTO result;
+        if(cmd.getCustomerSource() == null){
+            if(cmd.getLevelItemId()== CustomerLevelType.REGISTERED_CUSTOMER.getCode()){
+                cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            }else{
+                cmd.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+            }
+        }
 
+        CreateEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, CreateEnterpriseCustomerCommand.class);
+
+        try{
+            EnterpriseCustomerDTO customer = customerService.createEnterpriseCustomerOutAuth(cmd2);
+
+            if(customer != null) {
+
+
+                cmd.setId(customer.getId());
+
+
+                if (cmd.getContacts() != null && cmd.getContacts().size() > 0) {
+                    cmd.getContacts().forEach((c) -> {
+                        CustomerContact contact = ConvertHelper.convert(c, CustomerContact.class);
+                        contact.setCustomerId(cmd.getId());
+                        contact.setCommunityId(cmd.getCommunityId());
+                        contact.setNamespaceId(cmd.getNamespaceId());
+                        contact.setStatus(CommonStatus.ACTIVE.getCode());
+                        contact.setCustomerSource(cmd.getCustomerSource());
+                        invitedCustomerProvider.createContact(contact);
+                    });
+                }
+                // reflush requirement
+                if (cmd.getRequirement() != null) {
+                    CustomerRequirement requirement = ConvertHelper.convert(cmd.getRequirement(), CustomerRequirement.class);
+                    requirement.setCommunityId(cmd.getCommunityId());
+                    requirement.setNamespaceId(cmd.getNamespaceId());
+                    requirement.setCustomerId(cmd.getId());
+                    requirement.setStatus(CommonStatus.ACTIVE.getCode());
+                    Long requirementId = invitedCustomerProvider.createRequirement(requirement);
+                    if (cmd.getRequirement().getAddresses() != null && cmd.getRequirement().getAddresses().size() > 0) {
+                        cmd.getRequirement().getAddresses().forEach((c) -> {
+                            CustomerRequirementAddress address = ConvertHelper.convert(c, CustomerRequirementAddress.class);
+                            address.setCustomerId(cmd.getId());
+                            address.setCommunityId(cmd.getCommunityId());
+                            address.setNamespaceId(cmd.getNamespaceId());
+                            address.setStatus(CommonStatus.ACTIVE.getCode());
+                            address.setRequirementId(requirementId);
+                            invitedCustomerProvider.createRequirementAddress(address);
+                        });
+                    }
+
+                }
+                // reflush current basic info
+                if (cmd.getCurrentRent() != null) {
+                    CustomerCurrentRent currentRent = ConvertHelper.convert(cmd.getCurrentRent(), CustomerCurrentRent.class);
+                    if (cmd.getCurrentRent().getContractIntentionDate() != null) {
+                        currentRent.setContractIntentionDate(new Timestamp(cmd.getCurrentRent().getContractIntentionDate()));
+
+                    }
+                    currentRent.setCommunityId(cmd.getCommunityId());
+                    currentRent.setNamespaceId(cmd.getNamespaceId());
+                    currentRent.setStatus(CommonStatus.ACTIVE.getCode());
+                    currentRent.setCustomerId(cmd.getId());
+                    invitedCustomerProvider.createCurrentRent(currentRent);
+                }
+                if (cmd.getTrackers() != null) {
+                    cmd.getTrackers().forEach((c) -> {
+                        CustomerTracker tracker = ConvertHelper.convert(c, CustomerTracker.class);
+                        tracker.setCommunityId(cmd.getCommunityId());
+                        tracker.setNamespaceId(cmd.getNamespaceId());
+                        tracker.setStatus(CommonStatus.ACTIVE.getCode());
+                        tracker.setCustomerId(cmd.getId());
+                        invitedCustomerProvider.createTracker(tracker);
+                    });
+                }
+
+                EnterpriseCustomer dto = ConvertHelper.convert(customer, EnterpriseCustomer.class);
+
+                dto.setStatus(CommonStatus.ACTIVE.getCode());
+                dto.setNamespaceId(cmd.getNamespaceId());
+                customerSearcher.feedDoc(dto);
+
+                return ConvertHelper.convert(cmd, InvitedCustomerDTO.class);
+            }
+        }catch(RuntimeErrorException e){
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+
+        return null;
+    }
 
 }
 

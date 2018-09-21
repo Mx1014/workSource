@@ -782,9 +782,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
                 //校验数字格式及日期格式
                 try {
-                    if(!"enterpriseAdmins".equals(column.getFieldName())
-                            && !"entryInfos".equals(column.getFieldName())
-                            &&!"channelContact".equals(column.getFieldName())
+                    if(!"channelContact".equals(column.getFieldName())
                             && !"customerContact".equals(column.getFieldName())
                             &&!"trackerUid".equals(column.getFieldName())){
                         String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
@@ -840,20 +838,12 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
                 try {
-                    if (!"enterpriseAdmins".equals(column.getFieldName())
-                            && !"entryInfos".equals(column.getFieldName())
-                            && !"channelContact".equals(column.getFieldName())
+                    if (!"channelContact".equals(column.getFieldName())
                             && !"customerContact".equals(column.getFieldName())
                             && !"trackerUid".equals(column.getFieldName())) {
                         // 非企业管理员和楼栋门牌字段 直接invoke
                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
                     } else {
-                        if ("enterpriseAdmins".equals(column.getFieldName())) {
-                            customerAdminString = column.getValue();
-                        }
-                        if ("entryInfos".equals(column.getFieldName())) {
-                            customerAddressString = column.getValue();
-                        }
                         if ("customerContact".equals(column.getFieldName())) {
                             customerContactString = column.getValue();
                         }
@@ -879,7 +869,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
 //                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
                         boolean invitedDealResult = dealDynamicTrackerUidAndContactField(customerInfo, dealString, importLogs, enterpriseCustomer, originColumns, column, sheetName);
-                        if (!invitedDealResult ) {
+                        if (invitedDealResult ) {
                             flag = false;
                             break;
                         }
@@ -1008,22 +998,6 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                             String username = userInfosString.split("\\(")[0];
                             String contactPhone = userInfosString.substring(userInfosString.indexOf("(") + 1, userInfosString.lastIndexOf(")"));
                             List<User> users = null;
-                            if (StringUtils.isNotEmpty(column.getValue())) {
-                                users = userProvider.listUserByKeyword(contactPhone, customerInfo.getNamespaceId(), new CrossShardListingLocator(), 2);
-                            }
-                            if (users != null && users.size() > 0) {
-                                trackerUids.add(users.get(0).getId().toString());
-                            } else {
-                                Map<String, String> dataMap = new LinkedHashMap<>();
-                                columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
-                                LOGGER.error("can not find tracking users   : field ={}",column.getHeaderDisplay());
-                                importLogs.setData(dataMap);
-                                importLogs.setErrorDescription("can not find tracking users");
-                                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
-                                importLogs.setFieldName(column.getHeaderDisplay());
-                                importLogs.setSheetName(sheetName);
-                                return true;
-                            }
                         }
                     }
                 } catch (Exception e) {
@@ -1039,7 +1013,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
             }
         }
-        return true;
+        return false;
     }
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerContactString, String trackerUidString, String channelContactString) {
         if (exist != null && enterpriseCustomer != null) {

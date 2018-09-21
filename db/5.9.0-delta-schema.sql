@@ -454,6 +454,25 @@ CREATE TABLE `eh_general_form_print_templates`(
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '通用表单打印模板表';
 -- END ISSUE-35063
 
+-- AUTHOR: 郑思挺  20180920
+-- REMARK: 资源预约3.7
+ALTER TABLE `eh_rentalv2_order_records`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `account_id`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `old_custom_object`;
+-- END
+
+-- AUTHOR: 缪洲
+-- REMARK: 停车缴费V6.7，增加用户须知
+
+ALTER TABLE `eh_parking_lots` ADD COLUMN `notice_contact` varchar(20) COMMENT '用户须知联系电话';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `summary` text COMMENT '用户须知';
+
+-- AUTHOR: tangcen 2018年9月20日21:38:22
+-- REMARK: 园区入驻，一键转为意向客户功能
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `transform_flag`  tinyint NULL DEFAULT 0 COMMENT '是否转化为意向客户：0-否，1-是';
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `customer_name`  varchar(255) NULL COMMENT '承租方';
+-- END
 -- AUTHOR:黄良铭
 -- REMARK:  20180903-huangliangming-用户对接脚本方案-#36568
 CREATE TABLE `eh_butt_script_config` (

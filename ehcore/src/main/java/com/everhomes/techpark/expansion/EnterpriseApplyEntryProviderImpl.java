@@ -507,4 +507,13 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		query.addOrderBy(Tables.EH_LEASE_FORM_REQUESTS.ID.asc());
 		return query.fetch().map(r->ConvertHelper.convert(r, LeaseFormRequest.class));
 	}
+
+	@Override
+	public void updateApplyEntryTransformFlag(Long applyEntryId, byte transformFlag) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseOpRequests.class));
+		UpdateQuery<EhEnterpriseOpRequestsRecord> updateQuery = context.updateQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
+		updateQuery.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(applyEntryId));
+		updateQuery.addValue(Tables.EH_ENTERPRISE_OP_REQUESTS.TRANSFORM_FLAG, transformFlag);
+		updateQuery.execute();	
+	}
 }
