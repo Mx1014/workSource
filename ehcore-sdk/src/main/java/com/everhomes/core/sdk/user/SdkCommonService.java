@@ -2,6 +2,8 @@ package com.everhomes.core.sdk.user;
 
 import com.everhomes.core.sdk.CoreSdkSettings;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.app.AppDTO;
+import com.everhomes.rest.app.GetAppCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.category.GetCategoryCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
@@ -105,5 +107,12 @@ public class SdkCommonService {
         cmd.setUri(uri);
         RestResponse response = sdkRestClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, RestResponse.class);
         return (String) response.getResponseObject();
+    }
+
+    public AppDTO getApp(String appKey) {
+        GetAppCommand cmd = new GetAppCommand();
+        cmd.setAppKey(appKey);
+        RestResponse response = sdkRestClient.restCall("post", "/evh/appkey/findApp", cmd, RestResponse.class);
+        return (AppDTO) response.getResponseObject();
     }
 }
