@@ -2753,8 +2753,11 @@ public class AssetServiceImpl implements AssetService {
         return new BigDecimal("0");
     }
 
+    /**
+     * 定时任务：未出账单转为已出账单
+     */
     @Scheduled(cron = "0 0 0 * * ?")
-    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
+    //@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
     public void updateBillSwitchOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
@@ -2780,9 +2783,10 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     * 更新欠费状态，并计算滞纳金
+     * 定时任务：更新欠费状态，并计算滞纳金
      */
     @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
     private void lateFineCal(){
     	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
     		/**
@@ -2874,7 +2878,7 @@ public class AssetServiceImpl implements AssetService {
 
     /**
      *
-     * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
+     * 定时任务：查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
     @Scheduled(cron = "0 0 12 * * ?")
     public void autoBillNotice() {
@@ -5596,6 +5600,7 @@ public class AssetServiceImpl implements AssetService {
 	 * 定时任务：每天晚上12点定时计算一下欠费天数并更新！(账单组的最晚还款日（eh_payment_bills ： due_day_deadline）)
 	 */
 	@Scheduled(cron = "0 0 0 * * ?")
+	//@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
     public void updateBillDueDayCountOnTime() {
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
         	//获得账单,分页一次最多10000个，防止内存不够

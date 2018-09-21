@@ -3237,6 +3237,8 @@ public class AssetProviderImpl implements AssetProvider {
                 //修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
                 .where(t.DATE_STR_DUE.lessOrEqual(billDateStr))//DATE_STR_DUE：应收日期（出账单日）
                 .and(t.SWITCH.eq((byte)0))
+                //瑞安CM对接：只读的账单是来源于第三方，不允许从未出转为已出
+                .and(t.IS_READONLY.eq((byte)0))//只读状态：0：非只读；1：只读
                 .execute();
     }
 
@@ -5412,6 +5414,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
                 .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                //瑞安CM对接：只读的账单不允许任何修改，要过滤掉
+                .and(Tables.EH_PAYMENT_BILLS.IS_READONLY.eq((byte)0))//只读状态：0：非只读；1：只读
                 .limit(pageOffset.intValue(), pageSize+1)
                 .fetchInto(PaymentBills.class);
         if(paymentBills.size() > pageSize){
