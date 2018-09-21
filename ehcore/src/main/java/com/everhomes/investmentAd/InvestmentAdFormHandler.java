@@ -47,7 +47,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "business_invitation")
+@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "businessInvitation")
 public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequisitionFormHandler.class);
@@ -81,7 +81,6 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
             }
             GeneralApproval approval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(
                     cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
-
 
             //创建工作流
             Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.BUSINESS_INVITATION_MODULE

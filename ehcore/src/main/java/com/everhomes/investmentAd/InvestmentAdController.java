@@ -149,4 +149,18 @@ public class InvestmentAdController extends ControllerBase{
 		return response;
 	}
 	
+//	/**
+//	 * <b>URL: /investmentAd/transformToCustomer</b>
+//	 * <p>转为意向客户</p>
+//	 */
+//	@RequestMapping("transformToCustomer")
+//	@RestReturn(value=String.class)
+//	public RestResponse transformToCustomer(TransformToCustomerCommand cmd){
+//		investmentAdService.transformToCustomer(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+	
 }
