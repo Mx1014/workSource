@@ -1821,6 +1821,7 @@ public class FlowServiceImpl implements FlowService {
         if (isMirror) {
             flow.setId(null);
             flow.setConfigStatus(FlowStatusType.CONFIG.getCode());
+            flow.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
         } else {
             flow.setFlowMainId(flow.getId());
             flow.setId(null);
