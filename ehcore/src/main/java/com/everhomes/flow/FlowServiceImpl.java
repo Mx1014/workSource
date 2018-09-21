@@ -1821,7 +1821,6 @@ public class FlowServiceImpl implements FlowService {
         if (isMirror) {
             flow.setId(null);
             flow.setConfigStatus(FlowStatusType.CONFIG.getCode());
-            flow.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
         } else {
             flow.setFlowMainId(flow.getId());
             flow.setId(null);
@@ -1834,7 +1833,6 @@ public class FlowServiceImpl implements FlowService {
         flow.setEvaluateStart(0L);
         flow.setEvaluateEnd(0L);
 
-        updateFlowVersion(flow);// 版本号加 1
         flowProvider.createFlow(flow);
 
         //step2 create flowNodes
