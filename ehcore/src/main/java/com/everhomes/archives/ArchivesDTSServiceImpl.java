@@ -384,7 +384,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 name.append(fullPathMap.get(Long.valueOf(tokens[i]))).append("/");
             names.append(name).append(",");
         }
-        names = new StringBuilder(names.substring(0, names.length() - 1));
+        names = new StringBuilder(names.substring(0, names.length() - 2));
         return names.toString();
     }
 
