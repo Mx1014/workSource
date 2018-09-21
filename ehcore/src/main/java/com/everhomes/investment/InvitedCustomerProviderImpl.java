@@ -183,16 +183,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
     }
 
-    @Override
-    public List<CustomerTracker> findTrackerByCustomerIdAndType(Long customerId, Byte type) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCustomerTrackers.class));
-
-        SelectQuery<EhCustomerTrackersRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKERS);
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.TRACKER_TYPE.eq(type));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKERS.STATUS.ne(InvitedCustomerStatus.INVALID.getCode()));
-        return query.fetch().map(r -> ConvertHelper.convert(r, CustomerTracker.class));
-    }
 
     @Override
     public Long createRequirement(CustomerRequirement requirement) {
@@ -444,14 +434,14 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 //            if (endAreaSize != null)
 //                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
             if (startAreaSize != null && endAreaSize != null) {
-                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
-                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+                query.addConditions(requirements.MIN_AREA.ge(startAreaSize));
+                query.addConditions(requirements.MAX_AREA.le(endAreaSize));
             }
             if (startAreaSize != null && endAreaSize == null) {
-                query.addConditions(requirements.MIN_AREA.le(startAreaSize));
+                query.addConditions(requirements.MIN_AREA.ge(startAreaSize));
             }
             if (startAreaSize == null) {
-                query.addConditions(requirements.MAX_AREA.ge(endAreaSize));
+                query.addConditions(requirements.MAX_AREA.le(endAreaSize));
             }
             requires = query.fetchInto(Long.class);
 
@@ -476,6 +466,17 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         context.update(contact)
                 .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
                 .where(contact.CUSTOMER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void deleteCustomerContactsWithType(Long id, Byte type) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhCustomerContacts contact = Tables.EH_CUSTOMER_CONTACTS;
+        context.update(contact)
+                .set(contact.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(contact.CUSTOMER_ID.eq(id))
+                .and(contact.CONTACT_TYPE.eq(type))
                 .execute();
     }
 

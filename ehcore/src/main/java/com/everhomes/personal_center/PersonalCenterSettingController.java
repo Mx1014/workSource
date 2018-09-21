@@ -17,6 +17,8 @@ import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
 import com.everhomes.rest.personal_center.ListUserOrganizationResponse;
 import com.everhomes.rest.personal_center.ListVersionListCommand;
 import com.everhomes.rest.personal_center.ListVersionListResponse;
+import com.everhomes.rest.personal_center.ShowPrivateSettingCommand;
+import com.everhomes.rest.personal_center.ShowPrivateSettingResponse;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.UserInfo;
@@ -57,6 +59,20 @@ public class PersonalCenterSettingController extends ControllerBase{
     public RestResponse updateShowCompanyFlag(UpdateShowCompanyCommand cmd) {
         UserInfo userInfo = this.personalCenterService.updateShowCompanyFlag(cmd);
         RestResponse response = new RestResponse(userInfo);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /personal_center/showPrivateFlag</b>
+     * <p>是否展示隐私设置</p>
+     */
+    @RequestMapping("showPrivateFlag")
+    @RestReturn(value=ShowPrivateSettingResponse.class)
+    public RestResponse showPrivateFlag(ShowPrivateSettingCommand cmd) {
+        ShowPrivateSettingResponse res = this.personalCenterService.showPrivateSetting(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

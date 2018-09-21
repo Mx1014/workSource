@@ -12,6 +12,7 @@ import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.SignupInfoDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
+import com.everhomes.rest.address.AuthorizePriceCommand;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
@@ -20,10 +21,12 @@ import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -1242,8 +1245,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/importPmBills
-	 * <p>上传缴费账单excel文件
+	 * <b>URL: /pm/importPmBills</b>
+	 * <p>上传缴费账单excel文件</p>
 	 * @param cmd
 	 * @param files 要上传文件
 	 * @return
@@ -1262,8 +1265,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/listPmBillsByConditions
-	 * <p>根据条件查询物业缴费单
+	 * <b>URL: /pm/listPmBillsByConditions</b>
+	 * <p>根据条件查询物业缴费单</p>
 	 */
 	@RequestMapping(value="listPmBillsByConditions",method = RequestMethod.POST)
 	@RestReturn(value=PmBillsDTO.class,collection=true)
@@ -1276,8 +1279,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/deletePmBills
-	 * <p>删除物业缴费单
+	 * <b>URL: /pm/deletePmBills</b>
+	 * <p>删除物业缴费单</p>
 	 */
 	@RequestMapping("deletePmBills")
 	@RestReturn(value= java.lang.String.class)
@@ -1292,8 +1295,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/updatePmBills
-	 * <p>更新物业缴费单
+	 * <b>URL: /pm/updatePmBills</b>
+	 * <p>更新物业缴费单</p>
 	 */
 	@RequestMapping("updatePmBills")
 	@RestReturn(value= java.lang.String.class)
@@ -1308,8 +1311,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/insertPmBills
-	 * <p>新增物业缴费单
+	 * <b>URL: /pm/insertPmBills</b>
+	 * <p>新增物业缴费单</p>
 	 */
 	@RequestMapping("insertPmBills")
 	@RestReturn(value= java.lang.String.class)
@@ -1324,8 +1327,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/deletePmBill
-	 * <p>删除物业缴费单
+	 * <b>URL: /pm/deletePmBill</b>
+	 * <p>删除物业缴费单</p>
 	 */
 	@RequestMapping("deletePmBill")
 	@RestReturn(value= java.lang.String.class)
@@ -1340,8 +1343,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/updatePmBill
-	 * <p>更新物业缴费单
+	 * <b>URL: /pm/updatePmBill</b>
+	 * <p>更新物业缴费单</p>
 	 */
 	@RequestMapping("updatePmBill")
 	@RestReturn(value= java.lang.String.class)
@@ -1356,8 +1359,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/insertPmBill
-	 * <p>新增物业缴费单
+	 * <b>URL: /pm/insertPmBill</b>
+	 * <p>新增物业缴费单</p>
 	 */
 	@RequestMapping("insertPmBill")
 	@RestReturn(value= java.lang.String.class)
@@ -1372,8 +1375,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/listOrgBillingTransactionsByConditions
-	 * <p>根据条件查询缴费记录
+	 * <b>URL: /pm/listOrgBillingTransactionsByConditions</b>
+	 * <p>根据条件查询缴费记录</p>
 	 */
 	@RequestMapping("listOrgBillingTransactionsByConditions")
 	@RestReturn(value=OrganizationBillingTransactionDTO.class,collection=true)
@@ -1389,8 +1392,8 @@ public class PropertyMgrController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /pm/listOweFamilysByConditions
-	 * <p>根据条件查询欠费家庭
+	 * <b>URL: /pm/listOweFamilysByConditions</b>
+	 * <p>根据条件查询欠费家庭</p>
 	 */
 	@RequestMapping("listOweFamilysByConditions")
 	@RestReturn(value=OweFamilyDTO.class,collection=true)
@@ -1407,8 +1410,8 @@ public class PropertyMgrController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /pm/listBillTxByAddressId
-	 * <p>根据家庭Id查询家庭的缴费记录
+	 * <b>URL: /pm/listBillTxByAddressId</b>
+	 * <p>根据家庭Id查询家庭的缴费记录</p>
 	 */
 	@RequestMapping("listBillTxByAddressId")
 	@RestReturn(value=FamilyBillingTransactionDTO.class,collection=true)
@@ -1422,8 +1425,8 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /pm/findBillByAddressIdAndTime
-	 * <p>根据家庭Id和日期查询家庭的账单
+	 * <b>URL: /pm/findBillByAddressIdAndTime</b>
+	 * <p>根据家庭Id和日期查询家庭的账单</p>
 	 */
 	@RequestMapping("findBillByAddressIdAndTime")
 	@RestReturn(value=PmBillsDTO.class)
@@ -1437,8 +1440,8 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/findNewestBillByAddressId
-	 * <p>根据家庭Id查询家庭的最新账单
+	 * <b>URL: /pm/findNewestBillByAddressId</b>
+	 * <p>根据家庭Id查询家庭的最新账单</p>
 	 */
 	@RequestMapping("findNewestBillByAddressId")
 	@RestReturn(value=PmBillsDTO.class)
@@ -1454,8 +1457,8 @@ public class PropertyMgrController extends ControllerBase {
 	//app
 
 	/**
-	 * <b>URL: /pm/findFamilyBillAndPaysByFamilyIdAndTime
-	 * <p>根据家庭id和日期查询家庭某月份的账单和缴费记录
+	 * <b>URL: /pm/findFamilyBillAndPaysByFamilyIdAndTime</b>
+	 * <p>根据家庭id和日期查询家庭某月份的账单和缴费记录</p>
 	 */
 	@RequestMapping("findFamilyBillAndPaysByFamilyIdAndTime")
 	@RestReturn(value=PmBillsDTO.class)
@@ -1468,8 +1471,8 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /pm/listFamilyBillsAndPaysByFamilyId
-	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录
+	 * <b>URL: /pm/listFamilyBillsAndPaysByFamilyId</b>
+	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录</p>
 	 */
 	@RequestMapping("listFamilyBillsAndPaysByFamilyId")
 	@RestReturn(ListFamilyBillsAndPaysByFamilyIdCommandResponse.class)
@@ -1486,8 +1489,8 @@ public class PropertyMgrController extends ControllerBase {
 	//线下支付
 
 	/**
-	 * <b>URL: /pm/payPmBillByAddressId
-	 * <p>缴费
+	 * <b>URL: /pm/payPmBillByAddressId</b>
+	 * <p>缴费</p>
 	 */
 	@RequestMapping("payPmBillByAddressId")
 	@RestReturn(value= java.lang.String.class)
@@ -1500,10 +1503,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	/**
-	 * <b>URL: /pm/getPmPayStatistics
-	 * <p>物业缴费统计:年度收入，待收费,欠费户数
-	 */
+	
 	@RequestMapping("getPmPayStatistics")
 	@RestReturn(GetPmPayStatisticsCommandResponse.class)
 	public RestResponse getPmPayStatistics (@Valid GetPmPayStatisticsCommand cmd){
@@ -1515,10 +1515,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /pm/sendPmPayMessageByAddressId
-	 * <p>给指定欠费家庭发缴费通知
-	 */
+	
 	@RequestMapping("sendPmPayMessageByAddressId")
 	@RestReturn(java.lang.String.class)
 	public RestResponse sendPmPayMessageByAddressId (@Valid SendPmPayMessageByAddressIdCommand cmd){
@@ -1530,10 +1527,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /pm/sendPmPayMessageToAllOweFamilies
-	 * <p>给所有欠费家庭发缴费通知
-	 */
+	
 	@RequestMapping("sendPmPayMessageToAllOweFamilies")
 	@RestReturn(java.lang.String.class)
 	public RestResponse sendPmPayMessageToAllOweFamilies (@Valid SendPmPayMessageToAllOweFamiliesCommand cmd){
@@ -1545,10 +1539,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /pm/getFamilyStatistic
-	 * <p>统计家庭的年总应付，年总实付，目前欠款
-	 */
+	
 	@RequestMapping("getFamilyStatistic")
 	@RestReturn(GetFamilyStatisticCommandResponse.class)
 	public RestResponse getFamilyStatistic (@Valid GetFamilyStatisticCommand cmd){
@@ -1560,10 +1551,7 @@ public class PropertyMgrController extends ControllerBase {
 	}
 	//线上支付
 
-	/**
-	 * <b>URL: /pm/onlinePayPmBill
-	 * <p>物业费线上支付
-	 */
+	
 	@RequestMapping("onlinePayPmBill")
 	@RestReturn(value= java.lang.String.class)
 	public RestResponse onlinePayPmBill(@Valid OnlinePayPmBillCommand cmd) {
@@ -1574,10 +1562,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	//根据订单号查询订单信息
-	/**
-	 * <b>URL: /pm/findPmBillByOrderNo
-	 * <p>根据订单号查询订单信息
-	 */
+
 	@RequestMapping("findPmBillByOrderNo")
 	@RestReturn(value=PmBillForOrderNoDTO.class)
 	public RestResponse findPmBillByOrderNo(@Valid FindPmBillByOrderNoCommand cmd) {
@@ -1587,10 +1572,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	/**
-	 * <b>URL: /pm/createPmBillOrder
-	 * <p>线上支付下订单
-	 */
+
 	@RequestMapping("createPmBillOrder")
 	@RestReturn(value=OrganizationOrderDTO.class)
 	public RestResponse createPmBillOrder(@Valid CreatePmBillOrderCommand cmd) {
@@ -2345,6 +2327,19 @@ public class PropertyMgrController extends ControllerBase {
 //	}
 	
 	/**
+	 * <b>URL: /pm/setAuthorizePrice</b>
+	 * <p> 一房一价，设置楼宇的授权价 </p>
+	 */
+	@RequestMapping("setAuthorizePrice")
+	public RestResponse setAuthorizePrice(AuthorizePriceCommand cmd){
+	    propertyMgrService.setAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /pm/listApartmentActivity</b>
 	 * <p>查询房源下的业主活动记录（活动记录来自园区活动管理）</p>
 	 */
@@ -2357,5 +2352,87 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /pm/listAuthorizePrices</b>
+	 * <p>房源授权价列表</p>
+	 */
+	@RequestMapping("listAuthorizePrices")
+	@RestReturn(value=ListAuthorizePricesResponse.class)
+	public RestResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
+		ListAuthorizePricesResponse results =  propertyMgrService.listAuthorizePrices(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
+	/**
+	 * <b>URL: /pm/authorizePriceDetail</b>
+	 * <p>房源授权价详情</p>
+	 */
+	@RequestMapping("authorizePriceDetail")
+	@RestReturn(String.class)
+	public RestResponse authorizePriceDetail(AuthorizePriceCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.authorizePriceDetail(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/updateAuthorizePrice</b>
+	 * <p>更新房源授权价详情</p>
+	 */
+	@RequestMapping("updateAuthorizePrice")
+	@RestReturn(String.class)
+	public RestResponse updateAuthorizePrice(AuthorizePriceCommand cmd) {
+		propertyMgrService.updateAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deleteAuthorizePrice</b>
+	 * <p>删除房源授权价详情</p>
+	 */
+	@RequestMapping("deleteAuthorizePrice")
+	@RestReturn(String.class)
+	public RestResponse deleteAuthorizePrice(AuthorizePriceCommand cmd) {
+		propertyMgrService.deleteAuthorizePrice(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /pm/exportApartmentsInBuilding</b>
+     * <p>对接下载中心，导出授权价的房源列表</p>
+     */
+	@RequestMapping("exportApartmentsInBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd) {
+		propertyMgrService.exportApartmentsInBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /pm/importAddressAuthorizePriceData</b>
+     * <p>批量导入房源的授权价</p>
+     */
+    @RequestMapping(value="importAddressAuthorizePriceData", method = RequestMethod.POST)
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importAddressAuthorizePriceData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    	RestResponse response = new RestResponse(propertyMgrService.importAddressAuthorizePriceData(cmd, files[0]));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+
 }

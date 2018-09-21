@@ -5,7 +5,10 @@ package com.everhomes.oauth2client.handler;
 import com.everhomes.oauth2client.HttpErrorEntity;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.google.gson.Gson;
+
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -21,6 +24,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.client.*;
 
 import javax.xml.transform.Source;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

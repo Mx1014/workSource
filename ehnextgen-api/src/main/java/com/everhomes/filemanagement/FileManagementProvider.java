@@ -35,7 +35,7 @@ public interface FileManagementProvider {
 
     void createFileContent(FileContent content);
 
-    void updateFileContentStatusByIds(List<Long> ids, Byte status);
+    void updateFileContentStatusByIds(Long id, Byte status);
 
     void deleteFileContentByCatalogId(Long catalogId);
 
@@ -45,7 +45,17 @@ public interface FileManagementProvider {
 
     FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
+//    FileContent findAllStatusFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
+
     List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix);
 
     List<FileContent> queryFileContents(ListingLocator locator, Integer namespaceId, Long ownerId, ListingQueryBuilderCallback queryBuilderCallback);
+ 
+	FileContent findFileContentByNameNotEqId(Integer namespaceId, Long ownerId, Long catalogId,
+			Long parentId, String name, String suffix, Long originContentId);
+ 
+    void deleteFileContentByContentPath(String path);
+ 
+
+//    FileCatalog findAllStatusFileCatalogByName(Integer currentNamespaceId, Long ownerId, String name);
 }

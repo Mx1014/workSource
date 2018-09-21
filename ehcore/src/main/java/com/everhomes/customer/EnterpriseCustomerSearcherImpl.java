@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -166,7 +167,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
             builder.field("corpIndustryItemId", customer.getCorpIndustryItemId());
-            builder.field("levelItemId", customer.getLevelItemId());
+            // for statistics filter
+            builder.field("levelItemId", customer.getLevelItemId() == null ? 0 : customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
@@ -182,12 +184,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("customerSource" , customer.getCustomerSource());
             builder.field("entryStatusItemId", customer.getEntryStatusItemId());
             List<CustomerTracker> tracker;
-            if(customer.getCustomerSource() != null){
-                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), customer.getCustomerSource());
-
-            }else{
-                tracker = invitedCustomerProvider.findTrackerByCustomerIdAndType(customer.getId(), InvitedCustomerType.INVITED_CUSTOMER.getCode());
-            }
+            tracker = invitedCustomerProvider.findTrackerByCustomerId(customer.getId());
             if(tracker != null && tracker.size() > 0){
                 List<String> trackerNames = new ArrayList<>();
                 List<Long> trackerIds = new ArrayList<>();
@@ -380,7 +377,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
 
-        if(cmd.getLevelId() != null)
+        if(cmd.getLevelId() != null )
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
 
         /*//查询全部客户、我的客户、公共客户
@@ -955,7 +952,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         dto.setContacts(contactDTOS);
 
 
-        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerIdAndType(dto.getId(), customer.getCustomerSource());
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
         List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
         trackers.forEach(r-> {
             CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);

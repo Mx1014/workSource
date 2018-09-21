@@ -45,6 +45,8 @@ import com.everhomes.rest.techpark.expansion.ListLeaseIssuerBuildingsResponse;
 import com.everhomes.rest.techpark.expansion.ListLeaseIssuersCommand;
 import com.everhomes.rest.techpark.expansion.ListLeaseIssuersResponse;
 import com.everhomes.rest.techpark.expansion.SetLeasePromotionConfigCommand;
+import com.everhomes.rest.techpark.expansion.TransformToCustomerCommand;
+import com.everhomes.rest.techpark.expansion.TransformToCustomerResponse;
 import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionOrderCommand;
@@ -530,6 +532,20 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	public RestResponse updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd){
 		enterpriseApplyEntryService.updateLeasePromotionOrder(cmd);
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/transformToCustomer</b>
+	 * <p>转为意向客户（园区入驻模块）</p>
+	 */
+	@RequestMapping("transformToCustomer")
+	@RestReturn(value=Long.class,collection=true)
+	public RestResponse transformToCustomer(TransformToCustomerCommand cmd){
+		List<Long> result = enterpriseApplyEntryService.transformToCustomer(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

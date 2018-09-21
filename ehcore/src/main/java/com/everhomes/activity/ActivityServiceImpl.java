@@ -858,6 +858,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1740,6 +1747,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1800,6 +1815,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
+
+        User user = userProvider.findUserById(activityRoster.getUid());
+        if (user == null) {
+            user = new User();
+            user.setId(0L);
+            user.setExecutiveTag((byte) 0);
+        }
+        signupInfoDTO.setNickName(user.getNickName());
+        signupInfoDTO.setType(getAuthFlag(user));
+
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1834,12 +1859,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
                     signupInfoDTO.setPhone(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
                 }
+                if (StringUtils.isEmpty(signupInfoDTO.getNickName()) && postApprovalFormItem.getFieldName().equals("USER_NAME")) {
+                    signupInfoDTO.setNickName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                }
             }
             signupInfoDTO.setValues(results);
         }
-        User user = getUserFromPhone(signupInfoDTO.getPhone());
-        signupInfoDTO.setNickName(user.getNickName());
-        signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
@@ -1968,6 +1993,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		return user;
 	}
 
+    private User getUserFromPhoneWithNamespaceId(String phone, Integer namespaceId) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                return user;
+            }
+        }
+        User user = new User();
+        user.setId(0L);
+        user.setExecutiveTag((byte) 0);
+        return user;
+    }
+
 	@Override
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
 		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
@@ -1989,6 +2028,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
                 addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
                 addGeneralFormValuesCommand.setGeneralFormId(formOriginId);
+                addGeneralFormValuesCommand.setGeneralFormVersion(list.get(0).getFormVersion());
                 addGeneralFormValuesCommand.setSourceId(roster.getId());
                 addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                 addGeneralFormValuesCommand.setValues(cmd.getValues());
@@ -2061,6 +2101,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(oldRoster.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         activityProvider.updateRoster(oldRoster);
@@ -2076,6 +2117,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(r.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         // 报名活动事件
@@ -2817,6 +2860,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+                 ActivityRoster cancelRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.CANCEL.getCode());
+                 if (cancelRoster != null && cancelRoster.getPayFlag() != null && cancelRoster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
+                     dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
+                 }
 	             dto.setActivityId(activity.getId());
 	             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 	             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
@@ -3018,7 +3065,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode(generateAccountCode());
         createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
-        createRefundOrderCommand.setAmount(roster.getPayAmount().longValue());
+        Double payAmount = roster.getPayAmount().doubleValue() * 100;
+        createRefundOrderCommand.setAmount(payAmount.longValue());
         createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
         createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
         createRefundOrderCommand.setCallbackUrl(getPayCallbackUrl());

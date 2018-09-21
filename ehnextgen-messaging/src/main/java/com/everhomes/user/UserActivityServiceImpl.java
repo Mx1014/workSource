@@ -985,8 +985,15 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (rsp.getOrder() == null) {
             rsp.setOrder(0L);
         }
-        UserTreasureDTO point = pointService.getPointTreasure();
+        UserTreasureDTO point = new UserTreasureDTO();
+        try {
+            point = pointService.getPointTreasure();
+        }catch (Exception e) {
+            LOGGER.error("get point exception");
+            e.printStackTrace();
+        }
         rsp.setPoint(point.getCount());
+        rsp.setPointUrl(point.getUrl());
         if (rsp.getPoint() == null) {
             rsp.setPoint(0L);
         }

@@ -24,6 +24,7 @@ import java.util.List;
  * <li>operatorName : 操作人姓名</li>
  * <li>webShareUrl: 公告分享的链接</li>
  * <li>ownerId: 公司ID</li>
+ * <li>stickFlag: 置顶状态 1置顶 0非置顶</li>
  * <li>receivers : 公告的发送范围：发送给部门或者员工，参考{@link EnterpriseNoticeReceiverDTO}</li>
  * <li>attachments : 已上传的附件，复制公告的时候会使用到，参考{@link EnterpriseNoticeAttachmentDTO }</li>
  * </ul>
@@ -44,6 +45,7 @@ public class EnterpriseNoticeDTO {
     private Date updateTime;
     private String operatorName;
     private String webShareUrl;
+    private Byte stickFlag;
     @ItemType(value = EnterpriseNoticeReceiverDTO.class)
     private List<EnterpriseNoticeReceiverDTO> receivers;
     @ItemType(value = EnterpriseNoticeAttachmentDTO.class)
@@ -189,4 +191,12 @@ public class EnterpriseNoticeDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getStickFlag() {
+		return stickFlag;
+	}
+
+	public void setStickFlag(Byte stickFlag) {
+		this.stickFlag = stickFlag;
+	}
 }

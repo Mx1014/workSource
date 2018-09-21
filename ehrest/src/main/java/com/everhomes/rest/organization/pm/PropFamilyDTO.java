@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>reservationInvolved: 是否被预定业务占用</li>
  * 	<li>buildingName: 楼栋名称</li>
  * 	<li>communityName: 项目名称</li>
+ * <li>apartAuthorizePrice: 房源授权价</li>
  * </ul>
  */
 public class PropFamilyDTO {
@@ -38,7 +39,16 @@ public class PropFamilyDTO {
     private String buildingName;
     private String communityName;
     private Long reservationId;
+    private String apartAuthorizePrice;
     
+	public String getApartAuthorizePrice() {
+		return apartAuthorizePrice;
+	}
+
+	public void setApartAuthorizePrice(String apartAuthorizePrice) {
+		this.apartAuthorizePrice = apartAuthorizePrice;
+	}
+
 	public Long getReservationId() {
 		return reservationId;
 	}
