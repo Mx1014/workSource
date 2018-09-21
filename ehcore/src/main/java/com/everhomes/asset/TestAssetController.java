@@ -162,132 +162,163 @@ public class TestAssetController extends ControllerBase {
 	public RestResponse testSyncRuiAnCMBillToZuolin(HttpServletResponse response) {
 		String testString = "{\r\n" + 
 				"    \"errorcode\": \"0\",\r\n" + 
-				"    \"total\": \"19\",\r\n" + 
+				"    \"total\": \"21\",\r\n" + 
 				"    \"currentpage\": \"1\",\r\n" + 
-				"    \"totalpage\": \"1\",\r\n" + 
+				"    \"totalpage\": \"2\",\r\n" + 
 				"    \"data\": [\r\n" + 
 				"        {\r\n" + 
 				"            \"ContractHeader\": {\r\n" + 
-				"                \"RentalID\": \"27483\",\r\n" + 
+				"                \"RentalID\": \"27481\",\r\n" + 
 				"                \"RentalType\": \"新租\",\r\n" + 
 				"                \"PropertyID\": \"443\",\r\n" + 
-				"                \"DebtorID\": \"14961\",\r\n" + 
-				"                \"DebtorAcct\": \"zzs17182\",\r\n" + 
-				"                \"AccountID\": \"12057\",\r\n" + 
-				"                \"OA_AccountID\": \"\",\r\n" + 
-				"                \"AccountName\": \"巴罗克（上海）服饰有限公司\",\r\n" + 
+				"                \"DebtorID\": \"14960\",\r\n" + 
+				"                \"DebtorAcct\": \"zzs17180\",\r\n" + 
+				"                \"AccountID\": \"12059\",\r\n" + 
+				"                \"OA_AccountID\": \"10000\",\r\n" + 
+				"                \"AccountName\": \"百草传奇餐饮（上海）有限公司\",\r\n" + 
 				"                \"Connector\": \"\",\r\n" + 
 				"                \"ConnectorPhone\": \"\",\r\n" + 
-				"                \"ContractNo\": \"20180823 - port5test001\",\r\n" + 
+				"                \"ContractNo\": \"20180822-app test001\",\r\n" + 
 				"                \"Mail\": \"\",\r\n" + 
 				"                \"MoveinTime\": \"\",\r\n" + 
 				"                \"GFA\": \"\",\r\n" + 
 				"                \"NFA\": \"\",\r\n" + 
-				"                \"LFA\": \"211.41\",\r\n" + 
-				"                \"MailingAddress\": \"address001\",\r\n" + 
-				"                \"StartDate\": \"2018-01-01\",\r\n" + 
-				"                \"EndDate\": \"2020-12-31\",\r\n" + 
+				"                \"LFA\": \"181.75\",\r\n" + 
+				"                \"MailingAddress\": \"123\",\r\n" + 
+				"                \"StartDate\": \"2018-08-01\",\r\n" + 
+				"                \"EndDate\": \"2020-07-31\",\r\n" + 
 				"                \"StampingDate\": \"\",\r\n" + 
-				"                \"TerminateDate\": \"2018-03-31\",\r\n" + 
-				"                \"ContractAmt\": \"144065.34\",\r\n" + 
-				"                \"Recordstatus\": \"已结束\",\r\n" + 
-				"                \"ModifyDate\": \"08/23/2018 07:55:11\"\r\n" + 
+				"                \"TerminateDate\": \"2018-12-31\",\r\n" + 
+				"                \"ContractAmt\": \"291981.39\",\r\n" + 
+				"                \"Recordstatus\": \"已审批\",\r\n" + 
+				"                \"ModifyDate\": \"08/22/2018 09:26:35\"\r\n" + 
 				"            },\r\n" + 
 				"            \"ContractUnit\": [\r\n" + 
 				"                {\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
-				"                    \"UnitID\": \"34559\",\r\n" + 
-				"                    \"GFA\": \"211.41\",\r\n" + 
-				"                    \"NAF\": \"211.41\",\r\n" + 
-				"                    \"LFA\": \"211.41\",\r\n" + 
-				"                    \"ModifyDate\": \"08/23/2018 15:42:59\"\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"UnitID\": \"34475\",\r\n" + 
+				"                    \"GFA\": \"181.75\",\r\n" + 
+				"                    \"NAF\": \"181.75\",\r\n" + 
+				"                    \"LFA\": \"181.75\",\r\n" + 
+				"                    \"ModifyDate\": \"08/22/2018 16:20:09\"\r\n" + 
 				"                }\r\n" + 
 				"            ],\r\n" + 
 				"            \"ContractFee\": [\r\n" + 
 				"                {\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
 				"                    \"BillItemName\": \"租金\",\r\n" + 
-				"                    \"StartDate\": \"2018-01-01\",\r\n" + 
-				"                    \"EndDate\": \"2020-12-31\",\r\n" + 
+				"                    \"StartDate\": \"2018-08-01\",\r\n" + 
+				"                    \"EndDate\": \"2020-07-31\",\r\n" + 
 				"                    \"CalculateMethod\": \"天单价\",\r\n" + 
-				"                    \"DocumentAmt\": \"11.55\",\r\n" + 
-				"                    \"ChargeAmt\": \"11.00\",\r\n" + 
-				"                    \"TaxAmt\": \"0.55\",\r\n" + 
-				"                    \"ModifyDate\": \"08/23/2018 15:45:29\"\r\n" + 
+				"                    \"DocumentAmt\": \"10.50\",\r\n" + 
+				"                    \"ChargeAmt\": \"10.00\",\r\n" + 
+				"                    \"TaxAmt\": \"0.50\",\r\n" + 
+				"                    \"ModifyDate\": \"08/22/2018 16:21:42\"\r\n" + 
 				"                }\r\n" + 
 				"            ],\r\n" + 
 				"            \"RentalOption\": [],\r\n" + 
 				"            \"Insurance\": [\r\n" + 
 				"                {\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
 				"                    \"InsuranceType\": \"默认\",\r\n" + 
 				"                    \"InsuranceMoney\": \"\",\r\n" + 
-				"                    \"ModifyDate\": \"08/23/2018 15:47:00\"\r\n" + 
+				"                    \"ModifyDate\": \"08/22/2018 16:22:16\"\r\n" + 
 				"                }\r\n" + 
 				"            ],\r\n" + 
 				"            \"Bill\": [\r\n" + 
 				"                {\r\n" + 
 				"                    \"PropertyID\": \"443\",\r\n" + 
-				"                    \"BillScheduleID\": \"9352862\",\r\n" + 
-				"                    \"DebtorID\": \"14961\",\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
-				"                    \"BillID\": \"447882\",\r\n" + 
+				"                    \"BillScheduleID\": \"9352753\",\r\n" + 
+				"                    \"DebtorID\": \"14960\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"BillID\": \"447877\",\r\n" + 
 				"                    \"BillType\": \"租金账单\",\r\n" + 
 				"                    \"BillItemName\": \"租金\",\r\n" + 
-				"                    \"DocumentDate\": \"2017-12-31\",\r\n" + 
-				"                    \"StartDate\": \"2018-01-01\",\r\n" + 
-				"                    \"EndDate\": \"2018-01-31\",\r\n" + 
+				"                    \"DocumentDate\": \"2018-07-31\",\r\n" + 
+				"                    \"StartDate\": \"2018-08-01\",\r\n" + 
+				"                    \"EndDate\": \"2018-08-31\",\r\n" + 
 				"                    \"Status\": \"已出账单\",\r\n" + 
-				"                    \"DocumentAmt\": \"75695.35\",\r\n" + 
-				"                    \"BalanceAmt\": \"0.00\",\r\n" + 
+				"                    \"DocumentAmt\": \"59159.63\",\r\n" + 
+				"                    \"ChargeAmt\": \"56342.50\",\r\n" + 
+				"                    \"TaxAmt\": \"2817.13\",\r\n" + 
+				"                    \"TaxRate\": \"0.05\",\r\n" + 
+				"                    \"BalanceAmt\": \"0.0000000000\",\r\n" + 
+				"                    \"ModifyDate\": \"08/22/2018 00:00:00\"\r\n" + 
+				"                },\r\n" + 
+				"                {\r\n" + 
+				"                    \"PropertyID\": \"443\",\r\n" + 
+				"                    \"BillScheduleID\": \"9352754\",\r\n" + 
+				"                    \"DebtorID\": \"14960\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"BillID\": \"447878\",\r\n" + 
+				"                    \"BillType\": \"租金账单\",\r\n" + 
+				"                    \"BillItemName\": \"租金\",\r\n" + 
+				"                    \"DocumentDate\": \"2018-08-31\",\r\n" + 
+				"                    \"StartDate\": \"2018-09-01\",\r\n" + 
+				"                    \"EndDate\": \"2018-09-30\",\r\n" + 
+				"                    \"Status\": \"已出账单\",\r\n" + 
+				"                    \"DocumentAmt\": \"57251.25\",\r\n" + 
+				"                    \"ChargeAmt\": \"54525.00\",\r\n" + 
+				"                    \"TaxAmt\": \"2726.25\",\r\n" + 
+				"                    \"TaxRate\": \"0.05\",\r\n" + 
+				"                    \"BalanceAmt\": \"0.0000000000\",\r\n" + 
+				"                    \"ModifyDate\": \"08/22/2018 00:00:00\"\r\n" + 
+				"                },\r\n" + 
+				"                {\r\n" + 
+				"                    \"PropertyID\": \"443\",\r\n" + 
+				"                    \"BillScheduleID\": \"9352755\",\r\n" + 
+				"                    \"DebtorID\": \"14960\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"BillID\": \"447879\",\r\n" + 
+				"                    \"BillType\": \"租金账单\",\r\n" + 
+				"                    \"BillItemName\": \"租金\",\r\n" + 
+				"                    \"DocumentDate\": \"2018-09-30\",\r\n" + 
+				"                    \"StartDate\": \"2018-10-01\",\r\n" + 
+				"                    \"EndDate\": \"2018-10-31\",\r\n" + 
+				"                    \"Status\": \"已出账单\",\r\n" + 
+				"                    \"DocumentAmt\": \"59159.63\",\r\n" + 
+				"                    \"ChargeAmt\": \"56342.50\",\r\n" + 
+				"                    \"TaxAmt\": \"2817.13\",\r\n" + 
+				"                    \"TaxRate\": \"0.05\",\r\n" + 
+				"                    \"BalanceAmt\": \"0.0000000000\",\r\n" + 
+				"                    \"ModifyDate\": \"08/31/2018 00:00:00\"\r\n" + 
+				"                },\r\n" + 
+				"                {\r\n" + 
+				"                    \"PropertyID\": \"443\",\r\n" + 
+				"                    \"BillScheduleID\": \"9352756\",\r\n" + 
+				"                    \"DebtorID\": \"14960\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"BillID\": \"\",\r\n" + 
+				"                    \"BillType\": \"租金账单\",\r\n" + 
+				"                    \"BillItemName\": \"租金\",\r\n" + 
+				"                    \"DocumentDate\": \"2018-10-31\",\r\n" + 
+				"                    \"StartDate\": \"2018-11-01\",\r\n" + 
+				"                    \"EndDate\": \"2018-11-30\",\r\n" + 
+				"                    \"Status\": \"未发单\",\r\n" + 
+				"                    \"DocumentAmt\": \"57251.25\",\r\n" + 
+				"                    \"ChargeAmt\": \"54525.00\",\r\n" + 
+				"                    \"TaxAmt\": \"2726.25\",\r\n" + 
+				"                    \"TaxRate\": \"0.05\",\r\n" + 
+				"                    \"BalanceAmt\": \"0.0000000000\",\r\n" + 
 				"                    \"ModifyDate\": \"\"\r\n" + 
 				"                },\r\n" + 
 				"                {\r\n" + 
 				"                    \"PropertyID\": \"443\",\r\n" + 
-				"                    \"BillScheduleID\": \"9352863\",\r\n" + 
-				"                    \"DebtorID\": \"14961\",\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
-				"                    \"BillID\": \"447884\",\r\n" + 
+				"                    \"BillScheduleID\": \"9352757\",\r\n" + 
+				"                    \"DebtorID\": \"14960\",\r\n" + 
+				"                    \"RentalID\": \"27481\",\r\n" + 
+				"                    \"BillID\": \"\",\r\n" + 
 				"                    \"BillType\": \"租金账单\",\r\n" + 
 				"                    \"BillItemName\": \"租金\",\r\n" + 
-				"                    \"DocumentDate\": \"2018-01-31\",\r\n" + 
-				"                    \"StartDate\": \"2018-02-01\",\r\n" + 
-				"                    \"EndDate\": \"2018-02-28\",\r\n" + 
-				"                    \"Status\": \"已出账单\",\r\n" + 
-				"                    \"DocumentAmt\": \"68369.99\",\r\n" + 
-				"                    \"BalanceAmt\": \"0.00\",\r\n" + 
-				"                    \"ModifyDate\": \"01/31/2018 00:00:00\"\r\n" + 
-				"                },\r\n" + 
-				"                {\r\n" + 
-				"                    \"PropertyID\": \"443\",\r\n" + 
-				"                    \"BillScheduleID\": \"9352864\",\r\n" + 
-				"                    \"DebtorID\": \"14961\",\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
-				"                    \"BillID\": \"447885\",\r\n" + 
-				"                    \"BillType\": \"租金账单\",\r\n" + 
-				"                    \"BillItemName\": \"租金\",\r\n" + 
-				"                    \"DocumentDate\": \"2018-02-28\",\r\n" + 
-				"                    \"StartDate\": \"2018-03-01\",\r\n" + 
-				"                    \"EndDate\": \"2018-03-31\",\r\n" + 
-				"                    \"Status\": \"已出账单\",\r\n" + 
-				"                    \"DocumentAmt\": \"75695.35\",\r\n" + 
-				"                    \"BalanceAmt\": \"0.00\",\r\n" + 
-				"                    \"ModifyDate\": \"01/31/2018 00:00:00\"\r\n" + 
-				"                },\r\n" + 
-				"                {\r\n" + 
-				"                    \"PropertyID\": \"443\",\r\n" + 
-				"                    \"BillScheduleID\": \"9352898\",\r\n" + 
-				"                    \"DebtorID\": \"14961\",\r\n" + 
-				"                    \"RentalID\": \"27483\",\r\n" + 
-				"                    \"BillID\": \"447883\",\r\n" + 
-				"                    \"BillType\": \"租金账单\",\r\n" + 
-				"                    \"BillItemName\": \"租金\",\r\n" + 
-				"                    \"DocumentDate\": \"2017-12-31\",\r\n" + 
-				"                    \"StartDate\": \"2018-01-01\",\r\n" + 
-				"                    \"EndDate\": \"2018-01-31\",\r\n" + 
-				"                    \"Status\": \"已出账单\",\r\n" + 
-				"                    \"DocumentAmt\": \"-75695.35\",\r\n" + 
-				"                    \"BalanceAmt\": \"0.00\",\r\n" + 
+				"                    \"DocumentDate\": \"2018-11-30\",\r\n" + 
+				"                    \"StartDate\": \"2018-12-01\",\r\n" + 
+				"                    \"EndDate\": \"2018-12-31\",\r\n" + 
+				"                    \"Status\": \"已缴账单\",\r\n" + 
+				"                    \"DocumentAmt\": \"59159.63\",\r\n" + 
+				"                    \"ChargeAmt\": \"56342.50\",\r\n" + 
+				"                    \"TaxAmt\": \"2817.13\",\r\n" + 
+				"                    \"TaxRate\": \"0.05\",\r\n" + 
+				"                    \"BalanceAmt\": \"0.0000000000\",\r\n" + 
 				"                    \"ModifyDate\": \"\"\r\n" + 
 				"                }\r\n" + 
 				"            ]\r\n" + 

@@ -5886,8 +5886,15 @@ public class AssetServiceImpl implements AssetService {
 		if(data != null) {
 			for(CMDataObject cmDataObject : data) {
 				List<CMBill> cmBills = cmDataObject.getBill();
-				//获取左邻园区ID
-				Long communityId = cmDataObject.getCommunityId();
+				//TODO 1、根据propertyId获取左邻communityId
+				Long communityId = null;
+				communityId = cmDataObject.getCommunityId();
+				//TODO 2、获取左邻客户ID
+				Long targetId = null;
+				targetId = cmDataObject.getCustomerId();
+				//TODO 3、获取左邻楼栋单元地址ID
+				Long addressId = null;
+				
 				//获取左邻合同ID、合同编号
 				Long contractId = null;
 				String contractNum = null;
@@ -5913,7 +5920,6 @@ public class AssetServiceImpl implements AssetService {
 					categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
 				}
 				for(CMBill cmBill : cmBills) {
-					Byte billStatus= AssetPaymentBillStatus.UNPAID.getCode();//因为瑞安CM没有已缴/未缴，所以我们全部默认为未缴
 					BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
 					BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
 					BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
@@ -5959,6 +5965,7 @@ public class AssetServiceImpl implements AssetService {
 					PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
 					paymentBills.setBillGroupId(group.getId());
 					paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+					paymentBills.setTargetId(targetId);
 					if(cmDataObject.getContractHeader() != null) {
 						paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
@@ -5977,12 +5984,21 @@ public class AssetServiceImpl implements AssetService {
 			            LOGGER.error(e.toString());
 			        }
 					paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
-					if(cmBill.getStatus() != null && cmBill.getStatus().equals("已出账单")) {
-						paymentBills.setSwitch((byte) 1);
+					if(cmBill.getStatus() != null) {
+						if(cmBill.getStatus().equals("已出账单")) {//已出未缴
+							paymentBills.setSwitch((byte) 1);
+							paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+						}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
+							paymentBills.setSwitch((byte) 1);
+							paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
+						}else {//未出未缴
+							paymentBills.setSwitch((byte) 0);
+							paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+						}
 					}else {
-						paymentBills.setSwitch((byte) 01);
+						paymentBills.setSwitch((byte) 0);//默认为未出
+						paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
 					}
-					paymentBills.setStatus(billStatus);
 					paymentBills.setAmountReceivable(amountReceivable);
 					paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
 					paymentBills.setAmountReceived(amountReceived);
@@ -5990,6 +6006,7 @@ public class AssetServiceImpl implements AssetService {
 					paymentBills.setAmountOwed(amountOwed);
 					paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
 					paymentBills.setTaxAmount(taxAmount);
+					paymentBills.setAddressId(addressId);
 					//物业缴费V6.6（对接统一账单） 账单要增加来源
 					paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
 					LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
@@ -6012,6 +6029,7 @@ public class AssetServiceImpl implements AssetService {
 					items.setCategoryId(categoryId);
 					items.setBillGroupId(group.getId());
 					items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+					items.setTargetId(targetId);
 					if(cmDataObject.getContractHeader() != null) {
 						items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
 					}
@@ -6028,6 +6046,7 @@ public class AssetServiceImpl implements AssetService {
 					items.setAmountOwed(amountOwed);
 					items.setAmountOwedWithoutTax(amountOwedWithoutTax);
 					items.setTaxAmount(taxAmount);
+					items.setAddressId(addressId);
 					//物业缴费V6.6（对接统一账单） 账单要增加来源
 					items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
 					items.setSourceName(localeString.getText());
@@ -6038,7 +6057,7 @@ public class AssetServiceImpl implements AssetService {
 					items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
 		            //瑞安CM对接 账单、费项表增加是否是只读字段
 					items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
-					items.setStatus(billStatus);
+					items.setStatus(paymentBills.getStatus());
 					items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					
 					PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillScheduleID());
