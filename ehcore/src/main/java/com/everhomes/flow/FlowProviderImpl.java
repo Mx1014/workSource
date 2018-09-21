@@ -104,9 +104,6 @@ public class FlowProviderImpl implements FlowProvider {
         }
         query.addOrderBy(t.ID.desc());
 
-        query.addLimit(count);
-        query.addOrderBy(t.ID.desc());
-
         LOGGER.debug("query flow sql: {}", query.getSQL(true));
 
         List<Flow> objs = query.fetch().map((r) -> {
