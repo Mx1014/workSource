@@ -623,7 +623,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         ListBillDetailCommand ncmd = new ListBillDetailCommand();
         ncmd.setBillId(Long.valueOf(cmd.getBillId()));
         ListBillDetailResponse billDetail = listBillDetail(ncmd);
-        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
+        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType());
         if(null != handler){
         	handler.payNotifyBillSourceModule(billDetail);
         }

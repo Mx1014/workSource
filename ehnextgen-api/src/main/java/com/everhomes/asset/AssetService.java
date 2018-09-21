@@ -270,7 +270,7 @@ public interface AssetService {
 
 	void tranferAssetMappings();
 	
-	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
+	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType);
 
 	void createChargingItem(CreateChargingItemCommand cmd);
 	

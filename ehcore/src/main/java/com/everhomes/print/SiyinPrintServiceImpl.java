@@ -868,6 +868,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				response.setSourceType(PrintScanTarget.UL_CLIENT.getCode());
 			}else{
 				response.setSourceType(PrintScanTarget.UL_PRINTER.getCode());
+				response.setPrinterName(readerName);
 		        Integer namespaceId = cmd.getNamespaceId();
 		        if(namespaceId == null){
 		        	namespaceId = UserContext.getCurrentNamespaceId();
@@ -1517,38 +1518,40 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 
-	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, String siyinUrl, Long communityId) {
+	private List<ListQueueJobsDTO> getQueueJobs(String printerName, String siyinUrl, Long communityId) {
 		List<ListQueueJobsDTO> list = new ArrayList<>();
-		readerLoop:
-		for (String printer : printers) {
-			Map<String, String> params = new HashMap<>();
-	        params.put("host_name", printer);
-	        params.put("mode", "USERLIST");
-	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
-//	        params.put("card_id", "310183-240111044331058733");
-	        params.put("language", "zh-cn");
-	        String result;
-			try {
-				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
-				String siyinCode = getSiyinCode(result);
-				if(siyinCode!=null && siyinCode.startsWith("INF")){
-					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")){
-						continue readerLoop;
-					}else{
-						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
-					}
-				}else if(siyinCode!=null){
-					addjobs(list,result,printer);
-				}else{
-					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+		Map<String, String> params = new HashMap<>();
+		params.put("host_name", printerName);
+		params.put("mode", "USERLIST");
+		params.put("card_id", 
+				new StringBuffer().append(UserContext.current().getUser().getId())
+								.append(PRINT_LOGON_ACCOUNT_SPLIT)
+								.append(communityId).toString());
+		params.put("language", "zh-cn");
+		String result;
+		try {
+			result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+			String siyinCode = getSiyinCode(result);
+			if (siyinCode != null && siyinCode.startsWith("INF")) {
+				if (siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")) {
+					return list;
+				} else {
+					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ", result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"/console/cardListener return failed, result = " + result);
 				}
-			} catch (IOException e) {
-				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
-				
+			} else if (siyinCode != null) {
+				addjobs(list, result, printerName);
+			} else {
+				LOGGER.error("siyin api:/console/cardListener request failed, result = {} ", result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"/console/cardListener return failed, result = " + result);
 			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:/console/cardListener request exception : " + e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"/console/cardListener return exception, message = " + e.getMessage());
+
 		}
 		return list;
 	}
@@ -2021,15 +2024,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     private String createGeneralBill(SiyinPrintOrder siyinPrintOrder, Long organizationId) {
     	CreateGeneralBillCommand cmd = new CreateGeneralBillCommand();
     	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());//对应发布
-//    	cmd.setOwnerId(siyinPrintOrder.getOwnerId()); //这个需要是null，对应发布时的记录
+    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+    	cmd.setOwnerId(siyinPrintOrder.getOwnerId()); 
     	cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
     	cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
-//    	cmd.setOrderId(siyinPrintOrder.getId()); //等待统一张单增加字段
+    	cmd.setThirdBillId(siyinPrintOrder.getId()+"");
     	cmd.setSourceName("云打印订单");
     	cmd.setConsumeUserId(UserContext.currentUserId());
     	cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
     	cmd.setTargetId(organizationId);
+    	cmd.setAmountReceivable(siyinPrintOrder.getOrderTotalFee());
     	
     	List<ListBillsDTO> dtos = assetService.createGeneralBill(cmd);
     	if (CollectionUtils.isEmpty(dtos)) {

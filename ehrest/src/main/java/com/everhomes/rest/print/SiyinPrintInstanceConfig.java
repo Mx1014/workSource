@@ -4,10 +4,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>p1 : p1</li>
- * <li>currentPMId : 管理公司id</li>
- * <li>currentProjectId : 当前项目id</li>
- * <li>appId : 应用的originId</li>
+ * <li>chargeAppToken : 缴费应用标识</li>
+ * <li>billGroupToken : 账单组标识</li>
+ * <li>chargeItemTorken : 收费项目标识</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年9月20日

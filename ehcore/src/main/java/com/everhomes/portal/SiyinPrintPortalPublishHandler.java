@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -54,15 +55,14 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 			return;
 		}
 
-		CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
+		AssetModuleAppMapping cmd = new AssetModuleAppMapping();
 		cmd.setNamespaceId(namespaceId);
-		cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
 		cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
 		cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
 		cmd.setAssetCategoryId(config.getChargeAppToken());
 		cmd.setBillGroupId(config.getBillGroupToken());
 		cmd.setChargingItemId(config.getChargeItemTorken());
-		assetService.createOrUpdateAnAppMapping(cmd);
+		assetService.createOrUpdateAssetMapping(cmd);
 		LOGGER.info("saveChargeConfig:"+cmd.toString());
 	}
 

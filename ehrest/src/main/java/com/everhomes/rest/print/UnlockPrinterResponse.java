@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>sourceType : ul_printer 解锁打印机/驱动扫码 {@link com.everhomes.rest.print.PrintScanTarget}</li>
+ * <li>printerName : 打印机名称，获取打印列表时需要传打印机名称</li>
  * </ul>
  *
  *  @author:dengs 2018年2月11日
@@ -21,6 +22,7 @@ public class UnlockPrinterResponse {
 	@ItemType(String.class)
 	private Map<String,String> params;
 	private String sourceType;
+	private String printerName; 
 	
 	public String getSourceType() {
 		return sourceType;
@@ -51,6 +53,12 @@ public class UnlockPrinterResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public String getPrinterName() {
+		return printerName;
+	}
+	public void setPrinterName(String printerName) {
+		this.printerName = printerName;
 	}
 	
 }

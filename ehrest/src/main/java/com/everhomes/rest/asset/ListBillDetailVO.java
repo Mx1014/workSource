@@ -68,6 +68,7 @@ public class ListBillDetailVO {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    private String thirdBillId;
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
@@ -347,5 +348,13 @@ public class ListBillDetailVO {
 
 	public void setPaymentType(Integer paymentType) {
 		this.paymentType = paymentType;
+	}
+
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
 	}
 }

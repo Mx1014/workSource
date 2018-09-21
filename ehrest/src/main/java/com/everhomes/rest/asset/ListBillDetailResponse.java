@@ -54,6 +54,7 @@ public class ListBillDetailResponse {
     private String invoiceNum;
     private String certificateNote;
     private Byte billStatus;
+    private String thirdBillId;
 	@ItemType(UploadCertificateDTO.class)
 	private List<UploadCertificateDTO> uploadCertificateDTOList;
 	//新增附件
@@ -298,5 +299,13 @@ public class ListBillDetailResponse {
 
 	public void setPaymentType(Integer paymentType) {
 		this.paymentType = paymentType;
+	}
+
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
 	}
 }

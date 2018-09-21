@@ -25,7 +25,7 @@ public class SiyinPrintGeneralBillHandler implements AssetGeneralBillHandler{
 	@Override
 	public void payNotifyBillSourceModule(ListBillDetailResponse billDetail) {
 		SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralBillId(billDetail.getBillId()+"");
-		if (null == order) {
+		if (null == order || !(order.getId()+"").equals(billDetail.getThirdBillId())) {
 			LOGGER.error("payNotifyBillSourceModule faild, param:"+billDetail.toString());
 			return;
 		}
