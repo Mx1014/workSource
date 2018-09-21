@@ -2040,7 +2040,7 @@ public class CommunityServiceImpl implements CommunityService {
                 query.addConditions(cond);
             }
 			if (!StringUtils.isBlank(cmd.getAddress())) {
-			    Condition cond = Tables.EH_ADDRESSES.ADDRESS.like("%" + cmd.getKeywords() + "%");
+			    Condition cond = Tables.EH_ADDRESSES.ADDRESS.like("%" + cmd.getAddress() + "%");
 				query.addConditions(cond);
             }
 			if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
