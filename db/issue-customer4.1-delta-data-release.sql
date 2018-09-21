@@ -19,7 +19,10 @@ INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_ty
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
 	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'asset.source', '10005', 'zh_CN', '瑞安CM产生');
-		
+-- REMARK: 瑞安CM对接 APP只支持查费，隐藏掉缴费
+SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0); 
+INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
+VALUES (@id := @id + 1, 999929, NULL, 0, 'PAY', NULL, NULL, NULL, NULL, NULL, NULL);		
 		
 -- AUTHOR: 唐岑
 -- REMARK: 创建新的园区
