@@ -6168,7 +6168,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
         resp.setContentCacheConfig(
                 (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
-
+        resp.setSecurityPayServer(this.configurationProvider.getValue(namespaceId, ConfigConstants.SECURITY_PAY_SERVER, "https://secpay.zuolin.com"));
         return resp;
     }
 
