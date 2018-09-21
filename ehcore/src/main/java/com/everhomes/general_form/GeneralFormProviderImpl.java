@@ -289,6 +289,25 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
     }
 
 	@Override
+	public GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readOnly());
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
+		if (projectType != null) {
+			query.addConditions(Tables.EH_GENERAL_FORMS.PROJECT_TYPE.eq(projectType));
+		}
+		if (projectId != null) {
+			query.addConditions(Tables.EH_GENERAL_FORMS.PROJECT_ID.eq(projectId));
+		}
+		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_GENERAL_FORMS.FORM_NAME.eq(formName));
+		query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+		return query.fetchAnyInto(GeneralForm.class);
+	}
+
+	@Override
 	public GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId) {
 		try {
 			GeneralFormTemplate[] result = new GeneralFormTemplate[1];

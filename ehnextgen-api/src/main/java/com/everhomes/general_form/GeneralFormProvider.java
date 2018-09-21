@@ -99,4 +99,6 @@ public interface GeneralFormProvider {
 
     List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
                                       String projectType, Long projectId, String ownerType, Long ownerId);
+
+    GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName);
 }

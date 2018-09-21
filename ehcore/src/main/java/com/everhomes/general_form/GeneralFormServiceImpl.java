@@ -593,7 +593,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(),
                 cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
         if (form != null)
             return ConvertHelper.convert(form, GeneralFormDTO.class);
