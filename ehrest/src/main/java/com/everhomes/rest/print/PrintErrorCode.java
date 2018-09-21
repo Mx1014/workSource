@@ -27,5 +27,6 @@ public class PrintErrorCode {
 	public static final int ERROR_PRINT_ORDER_IS_PAID = 10002;//该支付订单已支付
 	public static final int ERROR_PRINT_ORDER_ALREADY_WAITING_PAID = 10003;//该订单已记账
 	public static final int ERROR_CREATE_GENERAL_BILL= 10004;//创建统一订单失败
+	public static final int ERROR_GET_JOBS_FAILED= 10005;//获取打印renwu失败
 	
 }
