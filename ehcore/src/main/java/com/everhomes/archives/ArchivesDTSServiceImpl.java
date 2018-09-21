@@ -376,7 +376,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             String[] tokens = dto.getPath().split("/");
             if(tokens.length == 0)
                 continue;
-            for (int i = 1; i <= tokens.length; i++)
+            for (int i = 1; i < tokens.length; i++)
                 name.append(fullPathMap.get(Long.valueOf(tokens[i]))).append("/");
             names.append(name).append(",");
         }
