@@ -653,18 +653,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private Object createVisitorSysVisitor(VisitorSysVisitor visitor, CreateOrUpdateVisitorCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-//      自助登记状态置为已到访
-        VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
-            if(null != cmd.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getFromDevice()))
-                visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
-        }
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
         sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
+            //relatedVisitor.setVisitStatus();
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
@@ -2275,6 +2270,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(visitStatus == VisitorsysStatus.NOT_VISIT){//临时访客是未到访状态
                 visitStatus = VisitorsysStatus.WAIT_CONFIRM_VISIT;//设置状态为等待确认
                 visitor.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+            }
+//          自助登记状态置为已到访
+            VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+            if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+                if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+                    if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY)
+                        visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
             }
             //清理临时访客不需要的属性
             visitor.setBookingStatus(null);

@@ -19,6 +19,9 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	private Long doorAccessEndTime;
 
+	//  扫码登记或ipad自助登记标志
+	private Byte fromDevice;
+
 	public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
 		return communityFormValues;
 	}
@@ -77,6 +80,14 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	public void setDoorAccessEndTime(Long doorAccessEndTime) {
 		this.doorAccessEndTime = doorAccessEndTime;
+	}
+
+	public Byte getFromDevice() {
+		return fromDevice;
+	}
+
+	public void setFromDevice(Byte fromDevice) {
+		this.fromDevice = fromDevice;
 	}
 
 	@Override
