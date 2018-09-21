@@ -1374,6 +1374,10 @@ public class AssetProviderImpl implements AssetProvider {
             Byte isSettled = cmd.getIsSettled();
             //String noticeTel = cmd.getNoticeTel();
             List<String> noticeTelList = cmd.getNoticeTelList();
+            String noticeTelListStr = "";
+            if (noticeTelList != null) {
+            	noticeTelListStr = String.join(",", noticeTelList);
+            }
             Long ownerId = cmd.getOwnerId();
             String ownerType = cmd.getOwnerType();
             String targetName = cmd.getTargetName();
@@ -1675,7 +1679,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
-            newBill.setNoticetel(String.join(",", noticeTelList));
+            newBill.setNoticetel(noticeTelListStr);
             newBill.setOwnerId(ownerId);
             newBill.setTargetName(targetName);
             newBill.setOwnerType(ownerType);
@@ -2752,10 +2756,14 @@ public class AssetProviderImpl implements AssetProvider {
             
             reCalBillById(billId);//重新计算账单
             // 更新发票
+            String noticeTelListStr = "";
+            if (noticeTelList != null) {
+            	noticeTelListStr = String.join(",", noticeTelList);
+            }
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
                     //.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
-            		.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, String.join(",", noticeTelList))
+            		.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTelListStr)
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             return null;
