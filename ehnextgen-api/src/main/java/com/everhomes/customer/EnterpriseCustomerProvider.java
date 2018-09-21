@@ -135,15 +135,17 @@ public interface EnterpriseCustomerProvider {
 	CustomerTracking findCustomerTrackingById(Long id);
 	void deleteCustomerTracking(CustomerTracking tracking);
 	void updateCustomerTracking(CustomerTracking tracking);
-	List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId);
-	
-	void createCustomerTrackingPlan(CustomerTrackingPlan plan);
+
+    List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId, Byte customerSource);
+
+    void createCustomerTrackingPlan(CustomerTrackingPlan plan);
 	CustomerTrackingPlan findCustomerTrackingPlanById(Long id);
 	void deleteCustomerTrackingPlan(CustomerTrackingPlan plan);
 	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType, String moduleName);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	
 	void allotEnterpriseCustomer(EnterpriseCustomer customer);
@@ -241,4 +243,5 @@ public interface EnterpriseCustomerProvider {
 
     void updateCustomerAptitudeFlag(Long id, Long approvalStatus);
 
+    Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource);
 }

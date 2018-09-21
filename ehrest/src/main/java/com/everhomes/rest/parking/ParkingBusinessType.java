@@ -11,6 +11,8 @@ package com.everhomes.rest.parking;
  * <li>CAR_NUM("carNum"),: 显示在场车数量 V6.6</li>
  * <li>FREE_PLACE("freePlace"),: 显示空余车位数量 V6.6</li>
  * <li> MONTH_CARD_APPLY("monthCardApply"),: 在线月卡申请 V6.6</li>
+ * <li>USER_NOTICE("userNotice"),: 用户须知</li>
+ * <li>INVOICE_APPLY("invoiceApply"),: 发票申请</li>
  * </ul>
  */
 public enum ParkingBusinessType {
@@ -21,7 +23,10 @@ public enum ParkingBusinessType {
     SEARCH_CAR("searchCar","寻车","getSearchCarFlag","setSearchCarFlag"),
     CAR_NUM("carNum","在场车数量","getCurrentInfoType","setCurrentInfoType"),
     FREE_PLACE("freePlace","空余车位数量","getCurrentInfoType","setCurrentInfoType"),
-    MONTH_CARD_APPLY("monthCardApply","在线月卡申请","getFlowMode","setFlowMode");
+    MONTH_CARD_APPLY("monthCardApply","在线月卡申请","getFlowMode","setFlowMode"),
+	USER_NOTICE("userNotice","用户须知","getNoticeFlag","setNoticeFlag"),
+	INVOICE_APPLY("invoiceApply","发票申请","getInvoiceFlag","setInvoiceFlag");
+	
     private String code;
     private String desc;
     private String getter;

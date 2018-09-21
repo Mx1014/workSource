@@ -25,7 +25,8 @@ import com.everhomes.util.StringHelper;
  * <li>description： </li> 
  * <li>createTime： </li> 
  * <li>buildings： 楼栋列表 {@link com.everhomes.rest.community.BuildingDTO}</li>
- * <li>contract： 合同 {@link com.everhomes.rest.contract.ContractDTO}</li>  
+ * <li>contract： 合同 {@link com.everhomes.rest.contract.ContractDTO}</li> 
+ * <li>customerName:意向客户名称</li> 
  * </ul>
  */
 public class EnterpriseApplyEntryDTO {
@@ -75,6 +76,16 @@ public class EnterpriseApplyEntryDTO {
 
 	private Long communityId;
 	private String communityName;
+	
+	private String customerName;
+	
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public Long getCommunityId() {
 		return communityId;

@@ -579,95 +579,6 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return dto;
     }
 
-    public OpenCardInfoDTO getOpenCardInfo1(GetOpenCardInfoCommand cmd) {
-
-        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
-
-        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-
-        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
-                cmd.getParkingLotId(), flowCase.getFlowMainId());
-
-        Integer requestMonthCount = REQUEST_MONTH_COUNT;
-        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
-
-        if(null != parkingFlow) {
-            requestMonthCount = parkingFlow.getRequestMonthCount();
-            requestRechargeType = parkingFlow.getRequestRechargeType();
-        }
-
-        long now = System.currentTimeMillis();
-        String opendate = DATE_FORMAT.get().format(new Date(now));
-        String expirydate = DATE_FORMAT.get().format(Utils.getTimestampByAddNatureMonth(now,requestMonthCount));
-        createMonthCard(cmd.getPlateNumber(),opendate,expirydate);
-
-        OpenCardInfoDTO dto = new OpenCardInfoDTO();
-
-        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
-
-        String cardTypeId = parkingCardRequest.getCardTypeId();
-
-        ParkingLot lot = ConvertHelper.convert(cmd,ParkingLot.class);
-        lot.setId(cmd.getParkingLotId());
-
-//        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(lot, null, null);
-        if(null != card) {
-//
-//            ParkingRechargeRateDTO rate = null;
-//            for (ParkingRechargeRateDTO r : parkingRechargeRates) {
-//                if (r.getCardTypeId().equals(cardTypeId)) {
-//                    rate = r;
-//                    break;
-//                }
-//            }
-//
-//            if (null == rate) {
-//                return null;
-//            }
-
-//            dto = ConvertHelper.convert(rate,OpenCardInfoDTO.class);
-            dto.setOwnerId(cmd.getOwnerId());
-            dto.setOwnerType(cmd.getOwnerType());
-            dto.setParkingLotId(cmd.getParkingLotId());
-//            dto.setRateToken(rate.getRateToken());
-//            dto.setRateName(rate.getRateName());
-            dto.setCardType("月卡");
-//            dto.setMonthCount(rate.getMonthCount());
-            dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
-//            dto.setPrice(new BigDecimal(card.getMonthlyrent()).divide((new BigDecimal(requestMonthCount)), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
-            dto.setPrice(new BigDecimal(card.getMonthlyrent()));
-            dto.setPlateNumber(cmd.getPlateNumber());
-            dto.setOpenDate(now);
-//            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount, true));
-            expirydate = (null != card.getNewexpirydate() ? card.getNewexpirydate() : card.getExpirydate());
-            Long expiradateResult = null;
-            try {
-                expiradateResult = DATE_FORMAT.get().parse(expirydate).getTime();
-            } catch (ParseException e) {
-                LOGGER.error("parse expiry date error, date={}", expirydate);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                        "Parse expiry date error.");
-            }
-            dto.setExpireDate(expiradateResult);
-            if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
-                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
-            } else {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(now);
-                int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-                int today = calendar.get(Calendar.DAY_OF_MONTH);
-
-                BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
-                        .add(dto.getPrice().multiply(new BigDecimal(maxDay - today + 1))
-                                .divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-                dto.setPayMoney(price);
-            }
-            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
-
-            createOrder(dto.getPlateNumber(),dto.getPayMoney(),opendate,expirydate);
-        }
-        return dto;
-    }
 
     @Override
     public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
@@ -712,14 +623,14 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     protected String post(JSONObject data, String type) {
 
-        String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
+        String url = configProvider.getValue("parking.chean.url","");
 //        String url = "http://113.98.59.44:9022";
 
         url += CATEGORY_SEPARATOR + type;
 
-        String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","UT");
-        String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
-        String branchno = configProvider.getValue("parking.chean.branchno","0");
+        String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","");
+        String key = configProvider.getValue("parking.chean.privatekey","");
+        String branchno = configProvider.getValue("parking.chean.branchno","");
 //        String accessKeyId = "UT";
 //        String key = "71cfa1c59773ddfa289994e6d505bba3";
 //        String branchno ="0";
@@ -756,51 +667,4 @@ public class CheAnParkingVendorHandler extends DefaultParkingVendorHandler imple
         return result;
     }
 
-//    private String test(){
-//        JSONObject param = new JSONObject();
-//        post(param,"api.aspx/pls.parkLots.get");
-//        for(int i = 1;i<4;i++){
-//            JSONObject param1 = new JSONObject();
-//            param1.put("parkLotName","A" + i);
-//            post(param1,"api.aspx/pls.car.pos.getByNo");
-//        }
-//        return "";
-//    }
-
-//    public static void main(String[] args) {
-//        CheAnParkingVendorHandler bean = new CheAnParkingVendorHandler();
-//        bean.getParkingTempFee(null,"粤B571B5");
-//        bean.getCardInfo("粤BMP525",null);
-//      卡类型接口
-//        bean.getParkingRechargeRates(null,null,null);
-//      开卡
-//        bean.createMonthCard("粤B861A2","2018-08-22 00:00:00","2018-09-01 00:00:00");
-//      下单
-//        bean.createOrder("粤BCC345",new BigDecimal(300),"2018-08-15 00:00:00","2018-10-15 00:00:00");
-//      支付
-//        ParkingRechargeOrder order = new ParkingRechargeOrder();
-//        order.setPlateNumber("粤BCC345");
-//        order.setMonthCount(new BigDecimal(2));
-//        order.setPaidType("10001");
-//        bean.addMonthCard(order,null);
-//        LOGGER.info("amount={}",new BigDecimal("24.00"));
-//
-//        GetCarLocationCommand cmd = new GetCarLocationCommand();
-//        cmd.setPlateNumber("粤B571B5");
-//        ParkingLot pl = new ParkingLot();
-//        pl.setOwnerType("1");
-//        pl.setOwnerId(1L);
-//        pl.setId(10931L);
-//        pl.setName("1");
-//        pl.setExpiredRechargeMonthCount(2);
-//        ParkingCarLocationDTO dto = bean.getCarLocation(pl,cmd);
-//        System.out.println(dto.getEntryTime());
-//        System.out.println(dto.getParkingTime());
-//        GetExpiredRechargeInfoCommand cmd = new GetExpiredRechargeInfoCommand();
-//        cmd.setPlateNumber("粤B878U1");
-//        cmd.setOwnerId(1L);
-//        cmd.setOwnerType("1");
-//        System.out.println(bean.getExpiredRechargeInfo(pl,cmd).toString());
-//        bean.test();
-//    }
 }

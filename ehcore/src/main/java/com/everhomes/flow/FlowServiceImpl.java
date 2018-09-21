@@ -3165,7 +3165,6 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
-            cmd.setOrganizationId(null);
             details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
@@ -6288,9 +6287,12 @@ public class FlowServiceImpl implements FlowService {
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, flowCase);
         if (dto instanceof FlowCaseBriefDTO) {
             ((FlowCaseBriefDTO) dto).setEntities(entities);
+            ((FlowCaseBriefDTO) dto).setCustomObject(flowCase.getCustomObject());
         } else if (dto instanceof FlowCaseDetailDTOV2) {
             ((FlowCaseDetailDTOV2) dto).setEntities(entities);
+            ((FlowCaseDetailDTOV2) dto).setCustomObject(flowCase.getCustomObject());
         }
+        
         return dto;
     }
 
@@ -6358,13 +6360,14 @@ public class FlowServiceImpl implements FlowService {
         if (userId == null && TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) != TrueOrFalseFlag.TRUE) {
             userId = UserContext.currentUserId();
         }
+        cmd.setUserId(userId);
+
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, 20);
 
-        List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(
-                cmd.getModuleId(), cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
+        List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(cmd, pageSize, locator);
 
         SearchFlowOperateLogResponse response = new SearchFlowOperateLogResponse();
         response.setLogs(operateLogs);

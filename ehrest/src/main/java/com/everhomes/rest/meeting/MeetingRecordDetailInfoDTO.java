@@ -23,6 +23,7 @@ import java.util.List;
  * <li>memberNamesSummary: 会议抄送人列表</li>
  * <li>recordWordLimit: 会议纪要最大可输入字数</li>
  * <li>meetingRecordShareDTOS: 抄送人，参考{@link com.everhomes.rest.meeting.MeetingInvitationDTO}</li>
+ * <li>meetingAttachments: 会议附件，参考{@link com.everhomes.rest.meeting.MeetingAttachmentDTO}</li>
  * </ul>
  */
 public class MeetingRecordDetailInfoDTO {
@@ -42,6 +43,7 @@ public class MeetingRecordDetailInfoDTO {
     private String memberNamesSummary;
     private Integer recordWordLimit;
     private List<MeetingInvitationDTO> meetingRecordShareDTOS;
+    private List<MeetingAttachmentDTO> meetingAttachments;
 
 
     public Long getId() {
@@ -176,4 +178,12 @@ public class MeetingRecordDetailInfoDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<MeetingAttachmentDTO> getMeetingAttachments() {
+		return meetingAttachments;
+	}
+
+	public void setMeetingAttachments(List<MeetingAttachmentDTO> meetingAttachments) {
+		this.meetingAttachments = meetingAttachments;
+	}
 }

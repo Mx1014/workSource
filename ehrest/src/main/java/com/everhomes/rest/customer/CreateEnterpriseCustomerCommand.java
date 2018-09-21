@@ -2,6 +2,8 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
@@ -230,6 +232,25 @@ public class CreateEnterpriseCustomerCommand {
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
+
+
+
+
+
+    private String transactionRatio;
+    private Long expectedSignDate;
+    private Byte customerSource;
+    private Long entryStatusItemId;
+
+
+    // we should add new module fields
+    // investment enterprise tracking infos
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+
+    private CreateCustomerEntryInfoCommand entryInfos;
 
 
     public Long getOrgId() {
@@ -1300,6 +1321,62 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setAptitudeFlagItemName(String aptitudeFlagItemName) {
         this.aptitudeFlagItemName = aptitudeFlagItemName;
+    }
+
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Long getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Long expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public List<CustomerContactDTO> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<CustomerContactDTO> contacts) {
+        this.contacts = contacts;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
+    }
+
+    public CreateCustomerEntryInfoCommand getEntryInfos() {
+        return entryInfos;
+    }
+
+    public void setEntryInfos(CreateCustomerEntryInfoCommand entryInfos) {
+        this.entryInfos = entryInfos;
     }
 
     @Override
