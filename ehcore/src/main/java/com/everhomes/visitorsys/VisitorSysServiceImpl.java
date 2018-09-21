@@ -652,9 +652,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private Object createVisitorSysVisitor(VisitorSysVisitor visitor, CreateOrUpdateVisitorCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-//      手机扫码和ipad自助登记状态置为已到访
-        if(null != cmd.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getFromDevice()))
-            visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+//      自助登记状态置为已到访
+        VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+            if(null != cmd.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getFromDevice()))
+                visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+        }
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
