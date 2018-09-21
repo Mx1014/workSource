@@ -2356,7 +2356,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             doorCmd.setValidEndMs(instance.getTimeInMillis());
             visitor.setDoorAccessEndTime(instance.getTimeInMillis());
         }
-        if(visitor.getDoorAccessEnableAuthCount().equals((byte)1) && null != visitor.getDoorAccessAuthCount()){
+        if(null != visitor.getDoorAccessAuthCount() && visitor.getDoorAccessEnableAuthCount().equals((byte)1)){
             doorCmd.setAuthRuleType((byte)1);
             doorCmd.setTotalAuthAmount(visitor.getDoorAccessAuthCount());
         }
