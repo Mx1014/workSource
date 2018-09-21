@@ -3168,6 +3168,7 @@ public class PunchServiceImpl implements PunchService {
             Calendar startDayOfThisMonth = Calendar.getInstance();
             startDayOfThisMonth.setTime(dateSF.get().parse(startDay));
             PunchRule pr = this.getPunchRule(detail);
+            statistic.setPunchOrgName(pr.getName());
             statistic.setWorkDayCount(calculateWorkDayCountThisMonth(detail, dayLogList, startDayOfThisMonth, pr));
             this.punchProvider.createPunchStatistic(statistic);
         } catch (Exception e) {
@@ -10763,11 +10764,10 @@ public class PunchServiceImpl implements PunchService {
         checkUserStatisticPrivilege(cmd.getOrganizationId());
 
         ListPunchMembersResponse response = new ListPunchMembersResponse();
-		//如果查询日期是当天设为null
-		if(cmd.getQueryByDate() != null && 
-				dateSF.get().format(new Date(cmd.getQueryByDate())).equals(dateSF.get().format(DateHelper.currentGMTTime()))){
-			cmd.setQueryByDate(null);
-		}
+        //如果查询日期是 null设为当天 由于现在每天早上刷新日报表,不需要当天做特殊处理了
+        if (cmd.getQueryByDate() == null) {
+            cmd.setQueryByDate(DateHelper.currentGMTTime().getTime());
+        }
 		Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset(); 
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
     	List<PunchMemberDTO> results = new ArrayList<>(); 
@@ -10778,18 +10778,12 @@ public class PunchServiceImpl implements PunchService {
 			List<Long> deptIds = findSubDepartmentIds(cmd.getDepartmentId()); 
 			Integer totalCount = punchProvider.countPunchSatisticsByItemTypeAndDeptIds(cmd.getOrganizationId(), deptIds, cmd.getQueryByMonth());
 			response.setTotal(totalCount);
-		}else if(null != cmd.getQueryByDate()){
+		}else{
 			//按日查询查pdl表
 			Date queryDate = new Date(cmd.getQueryByDate()); 
 			results = listDailyPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate, null, pageOffset, pageSize + 1); 
 			List<Long> deptIds = findSubDepartmentIds(cmd.getDepartmentId()); 
 			Integer totalCount = punchProvider.countPunchDayLogsByItemTypeAndDeptIds(cmd.getOrganizationId(), deptIds, queryDate);
-			response.setTotal(totalCount);
-		}else{
-			//查当天的就直接查 OrganizationMemberDetails 表
-
-			results = listTodayPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), pageOffset, pageSize + 1);
-			Integer totalCount = organizationProvider.countOrganizationMemberDetails(cmd.getOrganizationId(), cmd.getDepartmentId());
 			response.setTotal(totalCount);
 		}
 		
