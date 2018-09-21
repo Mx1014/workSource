@@ -117,9 +117,11 @@ import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
+import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -156,7 +158,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -212,6 +213,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private static String ANBANG_CURRENT_USER_URL;
     private static Integer ANBANG_NAMESPACE_ID;
 
+    @Autowired
+    private SdkUserService sdkUserService;
 
     @Autowired
     private DbProvider dbProvider;
@@ -1699,6 +1702,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
             return true;
         } else {
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+            UserInfo userInfo = sdkUserService.validateToken(tokenString);
+            if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
+                User user = userProvider.findUserById(userInfo.getId());
+                if (user != null) {
+                    UserIdentifier identifiers = userProvider.findUserIdentifiersOfUser(user.getId(), userInfo.getNamespaceId());
+                    createLogin(userInfo.getNamespaceId(), user, identifiers.getIdentifierToken(), null);
+                    return true;
+                }
+            }
+
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }

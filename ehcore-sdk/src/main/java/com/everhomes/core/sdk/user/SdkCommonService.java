@@ -11,18 +11,14 @@ import com.everhomes.rest.contentserver.UploadFileCommand;
 import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
 import com.everhomes.rest.region.GetRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.user.ListBorderAndContentResponse;
-import com.everhomes.rest.user.ListBorderAndContentRestResponse;
-import com.everhomes.rest.user.SendVerificationCodeCommand;
-import com.everhomes.rest.user.SetUserCurrentCommunityCommand;
-import com.everhomes.rest.user.SetUserDefaultCommunityCommand;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.sdk.LogonInfoCommand;
 import com.everhomes.rest.user.sdk.UserLogonInfo;
 import com.everhomes.tachikoma.commons.sdk.SdkRestClient;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SdkUserService {
+public class SdkCommonService {
 
     private final SdkRestClient sdkRestClient = SdkRestClient.getInstance(CoreSdkSettings.getInstance());
 
