@@ -3,9 +3,7 @@ package com.everhomes.archives;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -63,6 +61,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private ImportFileService importFileService;
@@ -278,10 +279,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId) {
         //  title
         List<String> title = new ArrayList<>(Arrays.asList("姓名", "账号", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
-        taskService.updateTaskProcess(taskId, 10);
+        taskService.updateTaskProcess(taskId, 15);
         //  data
         ListArchivesContactsResponse response = archivesService.listArchivesContacts(cmd);
-        taskService.updateTaskProcess(taskId, 40);
+        taskService.updateTaskProcess(taskId, 46);
+        List<Organization> orgs = organizationProvider.listOrganizationsByPath(cmd.getOrganizationId());
+        Map<Long, String> fullPathMap = orgs.stream().collect(Collectors.toMap(Organization::getId, Organization::getName));
+        taskService.updateTaskProcess(taskId, 75);
         /*
         OutputStream outputStream = null;
         cmd.setPageSize(Integer.MAX_VALUE - 1);
@@ -304,12 +308,12 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             outputStream = excelUtils.getOutputStream(propertyNames, titleNames, cellSizes, contacts);
             taskService.updateTaskProcess(taskId, 90);
         }*/
-        XSSFWorkbook workbook = exportArchivesContactsFiles(title, response.getContacts());
+        XSSFWorkbook workbook = exportArchivesContactsFiles(title, response.getContacts(), fullPathMap);
         taskService.updateTaskProcess(taskId, 95);
         return writeExcel(workbook);
     }
 
-    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts) {
+    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts, Map<Long, String> fullPathMap) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.C_FILENAME);
@@ -326,12 +330,12 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
         for (int rowIndex = 2; rowIndex < contacts.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
-            createContactsFileData(dataRow, bodyStyle, contacts.get(rowIndex - 2));
+            createContactsFileData(dataRow, bodyStyle, contacts.get(rowIndex - 2), fullPathMap);
         }
         return workbook;
     }
 
-    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact) {
+    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact, Map<Long, String> fullPathMap) {
         Cell cellA = dataRow.createCell(0); // 姓名
         Cell cellB = dataRow.createCell(1); // 账号
         Cell cellC = dataRow.createCell(2); // 英文名
@@ -358,9 +362,26 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellF.setCellValue(contact.getContactShortToken());
         cellG.setCellValue(contact.getWorkEmail());
         if (contact.getDepartments() != null)
-            cellH.setCellValue(archivesService.convertToOrgNames(contact.getDepartments().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+            cellH.setCellValue(getFullPathOrgNames(contact.getDepartments(), fullPathMap));
         if (contact.getJobPositions() != null)
-            cellI.setCellValue(archivesService.convertToOrgNames(contact.getJobPositions().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
+            cellI.setCellValue(getFullPathOrgNames(contact.getJobPositions(), fullPathMap));
+    }
+
+    private String getFullPathOrgNames(List<OrganizationDTO> dtos, Map<Long, String> fullPathMap) {
+        StringBuilder names = null;
+        if (dtos == null || dtos.size() == 0)
+            return "";
+        for (OrganizationDTO dto : dtos) {
+
+            StringBuilder name = null;
+            String[] strList = dto.getPath().split("/");
+            for (String str : strList) {
+                name.append(fullPathMap.get(Long.valueOf(str))).append("/");
+            }
+            names.append(name).append(",");
+        }
+        names = new StringBuilder(names.substring(0, names.length() - 1));
+        return names.toString();
     }
 
     @Override
@@ -907,7 +928,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 return true;
             }
 
-            if(!organizationService.verifyPersonnelByAccount(contactToken, account.trim())){
+            if (!organizationService.verifyPersonnelByAccount(contactToken, account.trim())) {
                 LOGGER.warn("Duplicate account. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Duplicate account");

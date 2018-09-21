@@ -53,6 +53,8 @@ public interface OrganizationProvider {
 
     List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
 
+    List<Organization> listOrganizationsByPath(Long organizationId);
+
     void createOrganizationMember(OrganizationMember organizationMember);
 
     void updateOrganizationMember(OrganizationMember organizationMember);
