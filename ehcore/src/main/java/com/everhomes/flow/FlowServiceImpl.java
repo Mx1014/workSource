@@ -1833,7 +1833,6 @@ public class FlowServiceImpl implements FlowService {
         flow.setEvaluateStart(0L);
         flow.setEvaluateEnd(0L);
 
-        updateFlowVersion(flow);// 版本号加 1
         flowProvider.createFlow(flow);
 
         //step2 create flowNodes
