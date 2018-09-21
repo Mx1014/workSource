@@ -1708,8 +1708,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
                 User user = userProvider.findUserById(userInfo.getId());
                 if (user != null) {
-                    UserIdentifier identifiers = userProvider.findUserIdentifiersOfUser(user.getId(), userInfo.getNamespaceId());
-                    createLogin(userInfo.getNamespaceId(), user, identifiers.getIdentifierToken(), null);
+                    createLogin(userInfo.getNamespaceId(), user, null, null);
                     return true;
                 }
             }

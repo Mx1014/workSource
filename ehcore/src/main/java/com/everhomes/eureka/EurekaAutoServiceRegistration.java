@@ -28,7 +28,7 @@ public class EurekaAutoServiceRegistration implements ApplicationListener<Contex
     private String applicationName;
     @Value("${server.port:8080}")
     private int serverPort;
-    @Value("${spring.cloud.client.ip-address:10.1.10.79}")
+    @Value("${server.address:10.1.110.80}")
     private String ipAddress;
 
     public EurekaAutoServiceRegistration(EurekaProperties eurekaProperties) {
