@@ -109,9 +109,14 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.BindPhoneCommand;
+import com.everhomes.rest.ui.user.BindPhoneType;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneCommand;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import com.everhomes.rest.user.admin.UserAppealLogStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
@@ -1513,10 +1518,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     /**
      * 微信端活跃记录
-     * @param loginToken
-     * @param borderId
-     * @param borderSessionId
-     * @return
      */
     @Override
     public void registerWXLoginConnection(HttpServletRequest request) {
