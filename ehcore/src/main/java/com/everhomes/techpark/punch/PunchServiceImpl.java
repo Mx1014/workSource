@@ -11406,6 +11406,8 @@ public class PunchServiceImpl implements PunchService {
             	response.setDeptName(org.getName());
                 response.setAdminFlag(NormalFlag.YES.getCode());
                 response.setQueryPrivilege(NormalFlag.YES.getCode());
+                response.setHasSubDpts(checkHasSubDpt(org.getId()));
+                
                 return response;
             }
 
@@ -11418,16 +11420,22 @@ public class PunchServiceImpl implements PunchService {
             Organization dpt = checkOrganization(managerMember.getOrganizationId());
             response.setDeptId(dpt.getId());
             response.setDeptName(dpt.getName());
-            List<Long> subDptIds = findSubDepartmentIds(dpt.getId());
-            response.setHasSubDpts(NormalFlag.YES.getCode());
-            if(CollectionUtils.isEmpty(subDptIds)){
-            	response.setHasSubDpts(NormalFlag.NO.getCode());
-            }
+            response.setHasSubDpts(checkHasSubDpt(dpt.getId()));
         }
+        
         return response;
     }
 
-    private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
+    private Byte checkHasSubDpt(Long orgId) {
+    	byte result = NormalFlag.YES.getCode();
+    	List<Long> subDptIds = findSubDepartmentIds(orgId); 
+        if(CollectionUtils.isEmpty(subDptIds)){
+        	result =  NormalFlag.NO.getCode();
+        }
+		return result;
+	}
+
+	private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
         List<Organization> children = findSubDepartments(parentDepartment);
         List<Long> deptIds = new ArrayList<>();
         deptIds.add(parentDepartment.getId());
