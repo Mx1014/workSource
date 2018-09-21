@@ -290,7 +290,9 @@ public interface OrganizationService {
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
 	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
+	boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail);
 	boolean verifyPersonnelByAccount(Long detailId, String account);
+	boolean verifyPersonnelByAccount(String contactToken, String account);
 	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd);

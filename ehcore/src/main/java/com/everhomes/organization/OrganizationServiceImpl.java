@@ -7247,11 +7247,27 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public boolean verifyPersonnelByAccount(Long detailId, String account){
+    public boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(Long detailId, String account) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
         if (employee == null)
             return true;
         return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(String contactToken, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
     }
 
     @Override

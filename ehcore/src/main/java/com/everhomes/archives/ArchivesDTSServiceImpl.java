@@ -192,7 +192,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return log;
 
         //  账号校验
-        if (checkArchivesAccount(log, data, data.getAccount()))
+        if (checkArchivesAccount(log, data, data.getContactToken(), data.getAccount()))
             return log;
 
         //  英文名校验
@@ -208,7 +208,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return log;
 
         //  工作邮箱
-        if (checkArchivesWorkEmail(log, data, data.getWorkEmail(), organizationId))
+        if (checkArchivesWorkEmail(log, data, data.getContactToken(), data.getWorkEmail(), organizationId))
             return log;
 
         //  部门
@@ -556,12 +556,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 map.put(ArchivesParameter.JOB_LEVEL_IDS, organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_LEVEL.getCode()));
         }
 
-        if (ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())) {
+        //  邮箱校验存在重复校验问题 需修改逻辑
+/*        if (ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())) {
             if (!StringUtils.isEmpty(itemValue.getFieldValue())) {
                 if (checkArchivesWorkEmail(log, convertListToMap(data), itemValue.getFieldValue(), organizationId))
                     return log;
             }
-        }
+        }*/
 
         return null;
     }
@@ -896,13 +897,21 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account) {
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String contactToken, String account) {
         if (!StringUtils.isEmpty(account)) {
             if (account.length() > 32 || !Pattern.matches("^[a-zA-Z0-9_\\-.]+$", account)) {
                 LOGGER.warn("Account wrong format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Account EnName wrong format");
                 log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_WRONG_FORMAT);
+                return true;
+            }
+
+            if(!organizationService.verifyPersonnelByAccount(contactToken, account.trim())){
+                LOGGER.warn("Duplicate account. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Duplicate account");
+                log.setCode(ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT);
                 return true;
             }
         }
@@ -979,7 +988,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String workEmail, Long organizationId) {
+    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String contactToken, String workEmail, Long organizationId) {
         if (!StringUtils.isEmpty(workEmail)) {
             if (!Pattern.matches("^([a-zA-Z0-9]+[_|_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
                 LOGGER.warn("WorkEmail wrong format. data = {}", data);
@@ -988,7 +997,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 log.setCode(ArchivesLocaleStringCode.ERROR_WORK_EMAIL_WRONG_FORMAT);
                 return true;
             }
-            if (!organizationService.verifyPersonnelByWorkEmail(organizationId, null, workEmail)) {
+            if (!organizationService.verifyPersonnelByWorkEmail(organizationId, contactToken, workEmail)) {
                 LOGGER.warn("Duplicate workEmail. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Duplicate workEmail");
