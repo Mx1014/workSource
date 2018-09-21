@@ -368,7 +368,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     }
 
     private String getFullPathOrgNames(List<OrganizationDTO> dtos, Map<Long, String> fullPathMap) {
-        StringBuilder names = null;
+        StringBuilder names = new StringBuilder();
         if (dtos == null || dtos.size() == 0)
             return "";
         for (OrganizationDTO dto : dtos) {
