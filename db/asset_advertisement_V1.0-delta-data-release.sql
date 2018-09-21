@@ -33,6 +33,9 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VA
 -- 删除申请记录权限
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150000, 0, 150108, '删除申请记录', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150108, 0, '房源招商 删除申请记录权限', '招商管理 业务模块权限', NULL);
+-- 一键转为意向客户权限
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150000, 0, 150109, '一键转为意向客户', 0, SYSDATE());
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150109, 0, '房源招商 一键转为意向客户权限', '招商管理 业务模块权限', NULL);
 
 -- AUTHOR: tangcen
 -- REMARK: 添加房源招商的报错信息

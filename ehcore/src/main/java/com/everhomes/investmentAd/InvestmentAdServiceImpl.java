@@ -52,6 +52,7 @@ import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
+import com.everhomes.rest.investmentAd.IntentionCustomerCommand;
 import com.everhomes.rest.investmentAd.InvestmentAdAssetType;
 import com.everhomes.rest.investmentAd.InvestmentAdBannerDTO;
 import com.everhomes.rest.investmentAd.InvestmentAdDTO;
@@ -300,6 +301,17 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		investmentAdProvider.changeInvestmentStatus(cmd.getId(),cmd.getInvestmentStatus());
 	}
 	
+	@Override
+	public List<Long> transformToCustomer(IntentionCustomerCommand cmd) {
+		//TODO 加权限
+		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER, cmd.getOrganizationId(), cmd.getCommunityId());
+		List<Long> customerIds = new ArrayList<>();
+		
+		
+		
+		return customerIds;
+	}
+	
 	private InvestmentAdDTO convertToInvestmentAdDTO(InvestmentAd investmentAd) {
 		InvestmentAdDTO dto = new InvestmentAdDTO();
 		dto.setId(investmentAd.getId());
@@ -425,5 +437,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	private void checkPrivilegeAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, null, null, null, communityId);
 	}
+
+	
 
 }

@@ -84,7 +84,7 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
             //创建工作流
             Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.BUSINESS_INVITATION_MODULE
-                    , "business_invatation",approval.getId(), "GENERAL_APPROVAL");
+                    , "businessInvitation",approval.getId(), "GENERAL_APPROVAL");
             if (null == flow) {
                 LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.BUSINESS_INVITATION_MODULE);
                 throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
