@@ -36,17 +36,25 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 	@Override
 	public String processInstanceConfig(String instanceConfig) {
-		return null;
+		return instanceConfig;
 	}
 
 	@Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig) {
-		return null;
+		
+		SiyinPrintInstanceConfig config = JSONObject.parseObject(instanceConfig, SiyinPrintInstanceConfig.class);
+		if (null == config) {
+			return instanceConfig;
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("url", config.getUrl());
+		return json.toJSONString();
 	}
 
 	@Override
 	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
-		return null;
+		return actionData;
 	}
 	
 	private void saveChargeConfig(Integer namespaceId, SiyinPrintInstanceConfig config) {
