@@ -228,6 +228,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         //  1.设置信息
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
+        addCommand.setAccount(data.getAccount());
         addCommand.setContactEnName(data.getContactEnName());
         addCommand.setGender(ArchivesUtil.convertToArchivesEnum(data.getGender(), ArchivesParameter.GENDER));
         addCommand.setContactShortToken(data.getContactShortToken());
