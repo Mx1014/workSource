@@ -317,12 +317,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.C_FILENAME);
+        sheet.setColumnWidth(6, 30 * 256);
+        sheet.setColumnWidth(7, 49 * 256);
+        sheet.setColumnWidth(8, 49 * 256);
         // sheet.createFreezePane(1,2,1,1);
         //  1.head
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
-        sheet.setColumnWidth(7, 49 * 256);
-        sheet.setColumnWidth(8, 49 * 256);
         headRow.setHeight((short) (150 * 20));
         createExcelHead(workbook, headRow, ArchivesExcelLocaleString.C_HEAD);
         //  2.title
