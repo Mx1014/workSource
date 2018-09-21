@@ -41,6 +41,8 @@ import java.util.List;
  * <li>doorAccessEnableAuthCount: 访客授权次数开关 0 关 1 开</li>
  * <li>doorAccessAuthCount: 访客授权次数</li>
  * <li>doorAccessEndTime: 门禁授权结束时间有效期</li>
+ * <li>doorGuardId: 授权的门禁Id</li>
+ *
  * </ul>
  */
 public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
@@ -60,6 +62,8 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
 //  扫码登记或ipad自助登记标志
     private Byte fromDevice;
+
+    private String doorGuardId;
 
     public Byte getSource() {
         return source;
@@ -139,6 +143,14 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     public void setFromDevice(Byte fromDevice) {
         this.fromDevice = fromDevice;
+    }
+
+    public String getDoorGuardId() {
+        return doorGuardId;
+    }
+
+    public void setDoorGuardId(String doorGuardId) {
+        this.doorGuardId = doorGuardId;
     }
 
     @Override

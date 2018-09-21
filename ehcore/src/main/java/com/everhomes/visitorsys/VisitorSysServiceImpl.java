@@ -63,6 +63,7 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -2317,7 +2318,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private void checkDoorGuard(GetConfigurationResponse configuration, VisitorSysVisitor visitor) {
         //门禁id为空
-        if(configuration.getBaseConfig()==null || configuration.getBaseConfig().getDoorGuardId()==null){
+//        if(configuration.getBaseConfig()==null || configuration.getBaseConfig().getDoorGuardId()==null){
+//            return;
+//        }
+        if(StringUtils.isEmpty(visitor.getDoorGuardId())){
             return;
         }
         VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsFlag());
@@ -2332,7 +2336,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //申请门禁二维码，并且设置到visitor中
         CreateLocalVistorCommand doorCmd = new CreateLocalVistorCommand();
         doorCmd.setPhone(visitor.getVisitorPhone());
-        doorCmd.setDoorId(Long.valueOf(configuration.getBaseConfig().getDoorGuardId()));
+        doorCmd.setDoorId(Long.valueOf(visitor.getDoorGuardId()));
         doorCmd.setNamespaceId(visitor.getNamespaceId());
         doorCmd.setUserName(visitor.getVisitorName());
         doorCmd.setDescription(visitor.getVisitReason());
