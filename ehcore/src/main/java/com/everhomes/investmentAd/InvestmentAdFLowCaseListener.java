@@ -80,7 +80,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         return result;
     }
 
-    //这个接口有什么用？？
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
         if (LOGGER.isDebugEnabled()) {

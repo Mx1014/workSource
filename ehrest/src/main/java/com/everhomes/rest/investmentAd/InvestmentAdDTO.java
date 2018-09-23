@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>id: 招商广告id</li>
  *  <li>title: 招商广告标题</li>
  * 	<li>investmentStatus: 招商状态</li>
+ * 	<li>investmentType: 招商类型（1-待租，2-待售）</li>
  * 	<li>availableAreaMin: 最小招商面积</li>
  * 	<li>availableAreaMax: 最大招商面积</li>
  *  <li>priceUnit: 租金面积</li>
@@ -27,6 +28,7 @@ public class InvestmentAdDTO {
 	private Long id;
 	private String title;
 	private Byte investmentStatus;
+	private Byte investmentType;
 	private BigDecimal availableAreaMin;
 	private BigDecimal availableAreaMax;
 	private BigDecimal assetPriceMin;
@@ -40,6 +42,12 @@ public class InvestmentAdDTO {
 	private String posterUri;
 	private String posterUrl;
 	
+	public Byte getInvestmentType() {
+		return investmentType;
+	}
+	public void setInvestmentType(Byte investmentType) {
+		this.investmentType = investmentType;
+	}
 	public String getPosterUri() {
 		return posterUri;
 	}

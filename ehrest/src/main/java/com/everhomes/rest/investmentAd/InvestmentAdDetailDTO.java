@@ -1,6 +1,8 @@
 package com.everhomes.rest.investmentAd;
 
 import java.math.BigDecimal;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -28,7 +30,8 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 招商广告描述</li>
  *  <li>postUri: 招商广告封面图</li>
  *  <li>defaultOrder: 排序字段</li>
- *  <li>assetRelated: 招商广告是否关联楼宇房源</li>
+ *  <li>createTime: 招商广告创建时间</li>
+ *  <li>assetDispalyFlag: 招商广告是否显示关联楼宇房源</li>
  *  <li>relatedAssets: 招商广告关联的楼宇房源，参考{@link com.everhomes.rest.investmentAd.RelatedAssetDTO}</li>
  *  <li>attachments: 招商广告轮播图，参考{@link com.everhomes.rest.investmentAd.InvestmentAdBannerDTO}</li>
  *  <li>customFormFlag: 是否启用了自定义表单</li>
@@ -63,6 +66,7 @@ public class InvestmentAdDetailDTO {
 	private String posterUri;
 	private String posterUrl;
 	private Long defaultOrder;
+	private Timestamp createTime;
 	
 	private Byte assetDispalyFlag;
 	@ItemType(RelatedAssetDTO.class)
@@ -275,7 +279,12 @@ public class InvestmentAdDetailDTO {
 	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
-
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
 	public Byte getAssetDispalyFlag() {
 		return assetDispalyFlag;
 	}

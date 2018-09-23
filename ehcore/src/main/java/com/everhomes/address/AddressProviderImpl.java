@@ -1165,6 +1165,7 @@ public class AddressProviderImpl implements AddressProvider {
 				       .from(Tables.EH_ADDRESSES)
 				       .where(Tables.EH_ADDRESSES.BUILDING_ID.eq(buildingId))
 				       .and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+				       .and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
 				       .fetchInto(Address.class);
 	}
 	

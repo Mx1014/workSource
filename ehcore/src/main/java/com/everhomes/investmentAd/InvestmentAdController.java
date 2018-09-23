@@ -20,9 +20,11 @@ import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
+import com.everhomes.rest.investmentAd.GetRelatedAssetsCommand;
 import com.everhomes.rest.investmentAd.IntentionCustomerCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
+import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.techpark.expansion.FindLeasePromotionByIdCommand;
@@ -153,7 +155,7 @@ public class InvestmentAdController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /investmentAd/transformToCustomer</b>
-	 * <p>转为意向客户</p>
+	 * <p>转为意向客户（房源招商）</p>
 	 */
 	@RequestMapping("transformToCustomer")
 	@RestReturn(value=Long.class,collection=true)
@@ -165,4 +167,17 @@ public class InvestmentAdController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /investmentAd/getRelatedAssets</b>
+	 * <p>转为意向客户（房源招商）</p>
+	 */
+	@RequestMapping("getRelatedAssets")
+	@RestReturn(value=RelatedAssetDTO.class,collection=true)
+	public RestResponse getRelatedAssets(GetRelatedAssetsCommand cmd){
+		List<RelatedAssetDTO> result = investmentAdService.getRelatedAssets(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

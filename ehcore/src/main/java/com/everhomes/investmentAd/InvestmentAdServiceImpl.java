@@ -23,18 +23,18 @@ import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.fixedasset.CheckFixedAssetCategoryNameExistRequest;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.investmentAd.InvestmentAdService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
+import com.everhomes.rest.investmentAd.InvestmentAdErrorCode;
 import com.everhomes.rest.investmentAd.InvestmentAdGeneralStatus;
 import com.everhomes.rest.investmentAd.InvestmentAdOrderDTO;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -47,22 +47,34 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerContactType;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.CustomerRequirementAddressDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.InvitedCustomerDTO;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.investmentAd.ChangeInvestmentAdOrderCommand;
 import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
+import com.everhomes.rest.investmentAd.GetRelatedAssetsCommand;
 import com.everhomes.rest.investmentAd.IntentionCustomerCommand;
 import com.everhomes.rest.investmentAd.InvestmentAdAssetType;
 import com.everhomes.rest.investmentAd.InvestmentAdBannerDTO;
 import com.everhomes.rest.investmentAd.InvestmentAdDTO;
 import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
+import com.everhomes.rest.investmentAd.NewIntentionCustomerDTO;
 import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.techpark.expansion.IntentionCustomerDTO;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -103,7 +115,15 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	private PropertyMgrProvider propertyMgrProvider;
 	
 	@Autowired
+	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private InvitedCustomerService invitedCustomerService;
+	
+	@Autowired
 	protected UserPrivilegeMgr userPrivilegeMgr;
+	
+	
 	
 	@Override
 	public void createInvestmentAd(CreateInvestmentAdCommand cmd) {
@@ -136,7 +156,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		InvestmentAd investmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (investmentAd == null) {
 			LOGGER.error("investmentAd not found, cmd={}", cmd);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"investmentAd not found.");
+			throw errorWith(InvestmentAdErrorCode.SCOPE, InvestmentAdErrorCode.INVESTMENTAD_NOT_FOUND,"investmentAd not found.");
 		}
 		investmentAdProvider.deleteInvestmentAdById(investmentAd.getId());
 	}
@@ -149,7 +169,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		InvestmentAd existInvestmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (existInvestmentAd == null) {
 			LOGGER.error("investmentAd not found, cmd={}", cmd);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"investmentAd not found.");
+			throw errorWith(InvestmentAdErrorCode.SCOPE, InvestmentAdErrorCode.INVESTMENTAD_NOT_FOUND,"investmentAd not found.");
 		}
 		
 		InvestmentAd investmentAd = ConvertHelper.convert(cmd,InvestmentAd.class);
@@ -207,7 +227,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		InvestmentAd investmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (investmentAd == null) {
 			LOGGER.error("investmentAd not found, cmd={}", cmd);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"investmentAd not found.");
+			throw errorWith(InvestmentAdErrorCode.SCOPE, InvestmentAdErrorCode.INVESTMENTAD_NOT_FOUND,"investmentAd not found.");
 		}
 		
 		InvestmentAdDetailDTO dto = ConvertHelper.convert(investmentAd, InvestmentAdDetailDTO.class);
@@ -233,6 +253,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		if (investmentAdAssets != null && investmentAdAssets.size() > 0) {
 			List<RelatedAssetDTO> relatedAssets = new ArrayList<>();
 			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
+				//如果是已出租的房源或者是被删除的房源则不再显示
 				Boolean available = checkAssetStatus(investmentAdAsset,investmentAd.getOwnerId());
 				if (available) {
 					RelatedAssetDTO assetDTO = convertToAssetDTO(investmentAdAsset);
@@ -305,34 +326,124 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	public List<Long> transformToCustomer(IntentionCustomerCommand cmd) {
 		//TODO 加权限
 		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER, cmd.getOrganizationId(), cmd.getCommunityId());
-		List<Long> customerIds = new ArrayList<>();
+		List<NewIntentionCustomerDTO> intentionCustomers = cmd.getIntentionCustomers();
 		
+		Map<String, CreateInvitedCustomerCommand> finalCommandMap = new HashMap<>();
+		for (NewIntentionCustomerDTO dto : intentionCustomers) {
+			if (finalCommandMap.containsKey(dto.getCustomerName())) {
+				CreateInvitedCustomerCommand cmd2 = finalCommandMap.get(dto.getCustomerName());
+				//企业客户意向房源
+				//TODO 得考虑addressId重复的问题,目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:08
+				CustomerRequirementDTO requirement = cmd2.getRequirement();
+				List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
+				List<Long> addressIds = dto.getAddressIds();
+				if (addressIds!=null && addressIds.size()>0) {
+					for (Long addressId : addressIds) {
+						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+						addressDTO.setAddressId(addressId);
+						addresses.add(addressDTO);
+					}
+				}
+				requirement.setAddresses(addresses);
+				//企业客户联系人
+				//TODO 得考虑联系人重复的问题，目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:12
+				List<CustomerContactDTO> contacts = cmd2.getContacts();
+				CustomerContactDTO contactDTO = new  CustomerContactDTO();
+				contactDTO.setName(dto.getApplyUserName());
+				contactDTO.setPhoneNumber(dto.getApplyContact());
+				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
+				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				contacts.add(contactDTO);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+			}else {
+				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
+				//企业客户
+				cmd2.setName(dto.getCustomerName());
+				cmd2.setLevelItemId((long)CustomerLevelType.INTENTIONAL_CUSTOMER.getCode());
+				cmd2.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				//企业客户意向房源
+				List<CustomerRequirementAddressDTO> addressDTOs = new ArrayList<>();
+				CustomerRequirementDTO requirementDTO = new CustomerRequirementDTO();
+				List<Long> addressIds = dto.getAddressIds();
+				if (addressIds!=null && addressIds.size()>0) {
+					for (Long addressId : addressIds) {
+						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+						addressDTO.setAddressId(addressId);
+						addressDTOs.add(addressDTO);
+					}
+				}
+				requirementDTO.setAddresses(addressDTOs);
+				cmd2.setRequirement(requirementDTO);
+				//企业客户联系人
+				List<CustomerContactDTO> contacts = new ArrayList<>();
+				CustomerContactDTO contactDTO = new  CustomerContactDTO();
+				contactDTO.setName(dto.getApplyUserName());
+				contactDTO.setPhoneNumber(dto.getApplyContact());
+				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
+				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				contacts.add(contactDTO);
+				cmd2.setContacts(contacts);
+				
+				finalCommandMap.put(dto.getCustomerName(), cmd2);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+			}
+		}
 		
-		
+		List<Long> customerIds = new ArrayList<>(); 
+		Set<String> customerNameSet = finalCommandMap.keySet();
+		for (String customerName : customerNameSet) {
+			CreateInvitedCustomerCommand createInvitedCustomerCommand = finalCommandMap.get(customerName);
+			createInvitedCustomerCommand.setNamespaceId(cmd.getNamespaceId());
+			createInvitedCustomerCommand.setCommunityId(cmd.getCommunityId());
+			createInvitedCustomerCommand.setOrgId(cmd.getOrganizationId());
+			InvitedCustomerDTO invitedCustomer = invitedCustomerService.createInvitedCustomerWithoutAuth(createInvitedCustomerCommand);
+			customerIds.add(invitedCustomer.getId());
+		}
 		return customerIds;
+	}
+	
+	@Override
+	public List<RelatedAssetDTO> getRelatedAssets(GetRelatedAssetsCommand cmd) {
+		List<RelatedAssetDTO> relatedAssets = new ArrayList<>();
+		List<InvestmentAdAsset> investmentAdAssets = investmentAdProvider.findAssetsByInvestmentAdId(cmd.getId());
+		if (investmentAdAssets != null && investmentAdAssets.size() > 0) {
+			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
+				//如果是已出租的房源或者是被删除的房源则不再显示
+				Boolean available = checkAssetStatus(investmentAdAsset,cmd.getOrganizationId());
+				if (available) {
+					RelatedAssetDTO assetDTO = convertToAssetDTO(investmentAdAsset);
+					relatedAssets.add(assetDTO);
+				}
+			}
+		}
+		return relatedAssets;
 	}
 	
 	private InvestmentAdDTO convertToInvestmentAdDTO(InvestmentAd investmentAd) {
 		InvestmentAdDTO dto = new InvestmentAdDTO();
-		dto.setId(investmentAd.getId());
-		dto.setTitle(investmentAd.getTitle());
-		dto.setInvestmentStatus(investmentAd.getInvestmentStatus());
-		dto.setAvailableAreaMin(investmentAd.getAvailableAreaMin());
-		dto.setAvailableAreaMax(investmentAd.getAvailableAreaMax());
-		dto.setPriceUnit(investmentAd.getPriceUnit());
-		dto.setAssetPriceMin(investmentAd.getAssetPriceMin());
-		dto.setAssetPriceMax(investmentAd.getAssetPriceMax());
-		dto.setApartmentFloorMin(investmentAd.getApartmentFloorMin());
-		dto.setApartmentFloorMax(investmentAd.getApartmentFloorMax());
-		dto.setOrientation(investmentAd.getOrientation());
-		dto.setCreateTime(investmentAd.getCreateTime());
-		dto.setDefaultOrder(investmentAd.getDefaultOrder());
+		dto = ConvertHelper.convert(investmentAd, InvestmentAdDTO.class);
+//		dto.setId(investmentAd.getId());
+//		dto.setTitle(investmentAd.getTitle());
+//		dto.setInvestmentStatus(investmentAd.getInvestmentStatus());
+//		dto.setAvailableAreaMin(investmentAd.getAvailableAreaMin());
+//		dto.setAvailableAreaMax(investmentAd.getAvailableAreaMax());
+//		dto.setPriceUnit(investmentAd.getPriceUnit());
+//		dto.setAssetPriceMin(investmentAd.getAssetPriceMin());
+//		dto.setAssetPriceMax(investmentAd.getAssetPriceMax());
+//		dto.setApartmentFloorMin(investmentAd.getApartmentFloorMin());
+//		dto.setApartmentFloorMax(investmentAd.getApartmentFloorMax());
+//		dto.setOrientation(investmentAd.getOrientation());
+//		dto.setCreateTime(investmentAd.getCreateTime());
+//		dto.setDefaultOrder(investmentAd.getDefaultOrder());
+//		dto.setPosterUri(investmentAd.getPosterUri());
+//		dto.setInvestmentType(investmentAd.getInvestmentType());
 		
 		Long userId = UserContext.currentUserId();
 		if (null != dto.getPosterUri()) {
 			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
 		}
-		
 		return dto;
 	}
 	
@@ -438,6 +549,5 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, null, null, null, communityId);
 	}
 
-	
 
 }

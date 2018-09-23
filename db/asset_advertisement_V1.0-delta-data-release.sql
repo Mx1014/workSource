@@ -41,4 +41,5 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VA
 -- REMARK: 添加房源招商的报错信息
 SET @id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'investmentAd', '100000', 'zh_CN', '无招商广告数据');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'investmentAd', '100001', 'zh_CN', '招商广告不存在');
 -- --------------------- SECTION END ---------------------------------------------------------

@@ -9,9 +9,11 @@ import com.everhomes.rest.investmentAd.ChangeInvestmentStatusCommand;
 import com.everhomes.rest.investmentAd.CreateInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.DeleteInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.GetInvestmentAdCommand;
+import com.everhomes.rest.investmentAd.GetRelatedAssetsCommand;
 import com.everhomes.rest.investmentAd.IntentionCustomerCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
+import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
 
 public interface InvestmentAdService {
@@ -33,5 +35,7 @@ public interface InvestmentAdService {
 	void changeInvestmentStatus(ChangeInvestmentStatusCommand cmd);
 
 	List<Long> transformToCustomer(IntentionCustomerCommand cmd);
+
+	List<RelatedAssetDTO> getRelatedAssets(GetRelatedAssetsCommand cmd);
 
 }
