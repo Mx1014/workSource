@@ -38,6 +38,15 @@ public class CreateCommunityCommand {
 	private String areaName;
 	private Double longitude;
 	private Double latitude;
+	private Long organizationId;
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public Long getProvinceId() {
 		return provinceId;

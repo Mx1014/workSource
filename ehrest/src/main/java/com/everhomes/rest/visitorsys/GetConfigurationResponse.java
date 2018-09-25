@@ -49,7 +49,7 @@ public class GetConfigurationResponse {
     private String welcomePicUri;
     private String welcomePicUrl;
     private String welcomeShowType;
-    private String officeLocationName;;
+    private String officeLocationName;
 
     private VisitorsysBaseConfig baseConfig;
     @ItemType(VisitorsysApprovalFormItem.class)

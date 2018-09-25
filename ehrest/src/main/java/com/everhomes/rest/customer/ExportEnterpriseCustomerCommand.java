@@ -2,6 +2,9 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 /**
  * Created by ying.xiong on 2018/2/5.
  */
@@ -66,6 +69,17 @@ public class ExportEnterpriseCustomerCommand {
     private Byte aptitudeFlagItemId;
 
     private Long taskId;
+
+    private Byte customerSource;
+
+    private BigDecimal requirementMinArea;
+    private BigDecimal requirementMaxArea;
+
+    private Long entryStatusItemId;
+
+    private String trackerUids;
+
+    private String customerName;
 
     public Long getTaskId() {
         return taskId;
@@ -308,6 +322,55 @@ public class ExportEnterpriseCustomerCommand {
     public void setAptitudeFlagItemId(Byte aptitudeFlagItemId) {
         this.aptitudeFlagItemId = aptitudeFlagItemId;
     }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public BigDecimal getRequirementMinArea() {
+        return requirementMinArea;
+    }
+
+    public void setRequirementMinArea(BigDecimal requirementMinArea) {
+        this.requirementMinArea = requirementMinArea;
+    }
+
+    public BigDecimal getRequirementMaxArea() {
+        return requirementMaxArea;
+    }
+
+    public void setRequirementMaxArea(BigDecimal requirementMaxArea) {
+        this.requirementMaxArea = requirementMaxArea;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public void setTrackerUids(String trackerUids){
+        this.trackerUids = trackerUids;
+    }
+
+    public String getTrackerUids(){
+        return trackerUids;
+    }
+
+    public String getCustomerName(){
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName){
+        this.customerName = customerName;
+    }
+
 
     @Override
     public String toString() {

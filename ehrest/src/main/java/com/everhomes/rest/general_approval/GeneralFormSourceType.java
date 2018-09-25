@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
  * <li>PERSONAL_AUTH("personal_auth"): 个人认证表单</li>
  * <li>ORGANIZATION_AUTH("organization_auth"):  公司认证表单</li>
  * <li>ARCHIVES_AUTH: 员工档案表单</li>
+ * <li>ACTIVITY_SIGNUP: 活动报名</li>
  * </ul>
  * @author janson
  *
@@ -17,7 +18,7 @@ public enum GeneralFormSourceType {
 	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings"), TALENT("EhTalents"),
 	PERSONAL_AUTH("personal_auth"),ORGANIZATION_AUTH("organization_auth"),
 	ARCHIVES_AUTH("archives_auth"),
-	LEASE_PROJECT("EhLeaseProjects");
+	LEASE_PROJECT("EhLeaseProjects"),ACTIVITY_SIGNUP("ActivitySignup");
 
 	private String code;
 

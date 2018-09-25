@@ -48,6 +48,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getOwnerId());
         PostGeneralFormDTO result = this.dbProvider.execute((TransactionStatus status) -> {
             Long referId;
             if(cmd.getRequisitionId() == null) {
@@ -155,7 +156,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
                 DeleteFlowCaseCommand cmd2 = new DeleteFlowCaseCommand();
                 cmd2.setFlowCaseId(flowCase.getId());
                 flowService.deleteFlowCase(cmd2);
-                return generalFormService.deleteGeneralFormVal(cmd);
+                return generalFormService.deleteGeneralForm(cmd);
             }else{
                 return null;
             }

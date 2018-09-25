@@ -66,7 +66,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     @Autowired
     UserService userService;
 
-    void setCardStatus(ParkingLot parkingLot, long expireTime, ParkingCardDTO parkingCardDTO) {
+   public void setCardStatus(ParkingLot parkingLot, long expireTime, ParkingCardDTO parkingCardDTO) {
         long now = System.currentTimeMillis();
 
         parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());

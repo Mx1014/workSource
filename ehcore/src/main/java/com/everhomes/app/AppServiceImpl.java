@@ -11,6 +11,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.ValidatorUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,16 @@ public class AppServiceImpl implements AppService {
         ValidatorUtil.validate(cmd);
 
         App app = ConvertHelper.convert(cmd, App.class);
-        app.setAppKey(UUID.randomUUID().toString());
-        app.setSecretKey(SignatureHelper.generateSecretKey());
+        if (StringUtils.isNotBlank(cmd.getAppKey())) {
+            app.setAppKey(cmd.getAppKey());
+        } else {
+            app.setAppKey(UUID.randomUUID().toString());
+        }
+        if (StringUtils.isNotBlank(cmd.getSecretKey())) {
+            app.setSecretKey(cmd.getSecretKey());
+        } else {
+            app.setSecretKey(SignatureHelper.generateSecretKey());
+        }
         app.setCreatorUid(UserContext.currentUserId());
         app.setCreateTime(new Timestamp(System.currentTimeMillis()));
         app.setStatus((byte) 1);
@@ -70,11 +79,23 @@ public class AppServiceImpl implements AppService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
+        // 临时解决之前的 appKey 的查询问题
+        if (cmd.getNamespaceId().equals(1000001)) {
+            cmd.setNamespaceId(null);
+            pageSize = 1000;
+        }
+
         List<AppNamespaceMapping> mappingList = appNamespaceMappingProvider.listAppNamespaceMapping(
                 cmd.getNamespaceId(), pageSize, locator);
 
         List<String> appKeyList = mappingList.stream().map(AppNamespaceMapping::getAppKey).collect(Collectors.toList());
-        List<App> apps = appNamespaceMappingProvider.listAppsByAppKey(appKeyList);
+
+        List<App> apps;
+        if (cmd.getNamespaceId() == null) {
+            apps = appNamespaceMappingProvider.listAppsByExcludeAppKey(appKeyList);
+        } else {
+            apps = appNamespaceMappingProvider.listAppsByAppKey(appKeyList);
+        }
 
         ListAppsResponse response = new ListAppsResponse();
         response.setApps(apps.stream().map(this::toAppDTO).collect(Collectors.toList()));
@@ -96,5 +117,10 @@ public class AppServiceImpl implements AppService {
                 return true;
             });
         }
+    }
+
+    @Override
+    public App find(String appKey) {
+        return appProvider.findAppByKey(appKey);
     }
 }

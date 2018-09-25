@@ -37,10 +37,7 @@ import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
-import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
-import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
-import com.everhomes.server.schema.tables.records.EhVarFieldScopesRecord;
-import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -354,6 +351,21 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public List<Long> listFieldGroupRanges(String moduleName,String moduleType){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Long> ids = new ArrayList<>();
+        SelectQuery<EhVarFieldGroupRangesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_RANGES);
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_TYPE.eq(moduleType));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_RANGES.MODULE_NAME.eq(moduleName));
+
+        query.fetch().map((record)-> ids.add(record.getGroupId()));
+        return ids;
+    }
+
+
+
+    @Override
     public Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -628,6 +640,20 @@ public class FieldProviderImpl implements FieldProvider {
                 });
 
         return fields;
+    }
+
+    @Override
+    public List<Long> listFieldRanges(String moduleName,String moduleType,String groupPath){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Long> ids = new ArrayList<>();
+        SelectQuery<EhVarFieldRangesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_RANGES);
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.MODULE_TYPE.eq(moduleType));
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_RANGES.GROUP_PATH.like(groupPath+"/%"));
+
+        query.fetch().map((record)-> ids.add(record.getFieldId()));
+        return ids;
     }
 
     @Override

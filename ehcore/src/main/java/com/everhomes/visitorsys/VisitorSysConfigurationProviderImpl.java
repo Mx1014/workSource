@@ -127,7 +127,14 @@ public class VisitorSysConfigurationProviderImpl implements VisitorSysConfigurat
 			configuration.setBaseConfig(JSONObject.parseObject(configuration.getConfigJson(), VisitorsysBaseConfig.class));
 		}
 		if(configuration.getConfigFormJson()!=null) {
-			configuration.setFormConfig(JSONObject.parseObject(configuration.getConfigFormJson(), new TypeReference<List<VisitorsysApprovalFormItem>>(){}));
+			List<VisitorsysApprovalFormItem> forms = JSONObject.parseObject(configuration.getConfigFormJson(), new TypeReference<List<VisitorsysApprovalFormItem>>(){});
+			for (VisitorsysApprovalFormItem form : forms){
+				if("invalidTime".equals(form.getFieldName())){
+					forms.remove(form);
+					break;
+				}
+			}
+			configuration.setFormConfig(forms);
 		}
 		if(configuration.getConfigPassCardJson()!=null) {
 			configuration.setPassCardConfig(JSONObject.parseObject(configuration.getConfigPassCardJson(), VisitorsysPassCardConfig.class));

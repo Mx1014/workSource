@@ -15,6 +15,8 @@ import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractEventDTO;
@@ -24,6 +26,7 @@ import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
 import com.everhomes.rest.contract.DeleteContractTemplateCommand;
+import com.everhomes.rest.contract.DenunciationContractBillsCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractCommand;
 import com.everhomes.rest.contract.EnterpriseContractDTO;
@@ -318,6 +321,16 @@ public class SZWContractHandler implements ContractService{
 	public void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
+		// TODO Auto-generated method stub
+
 	}
     
 }

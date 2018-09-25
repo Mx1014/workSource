@@ -20,6 +20,8 @@ public interface GeneralFormProvider {
 
     GeneralForm getGeneralFormById(Long id);
 
+    GeneralForm findGeneralFormById(Long id);
+
     List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
                                         ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -72,7 +74,7 @@ public interface GeneralFormProvider {
 
     List<GeneralFormVal> listGeneralForm();
 
-    Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion);
+    Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion);
 
     List<GeneralFormValRequest>  listGeneralFormValRequest(Integer namespaceId, Long sourceId, Long ownerId);
 
@@ -91,7 +93,14 @@ public interface GeneralFormProvider {
     List<GeneralFormFilterUserMap> listGeneralFormFilter(Integer namespaceId, Long moduleId, Long ownerId, String userUuid, Long FormOriginId, Long FormVersion);
 
     void updateGeneralFormApprovalStatusById(Long id, Byte status);
-    
+
     void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion);
 
+
+	Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id);
+	GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType);
 }

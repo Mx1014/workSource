@@ -95,6 +95,22 @@ public class ParkingController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /parking/updateUserNotice</b>
+     * <p>编辑用户须知</p>
+     */
+    @RequestMapping("updateUserNotice")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserNotice(UpdateUserNoticeCommand cmd) {
+        parkingService.updateParkingUserNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
     /**
      * <b>URL: /parking/getParkingCards</b>
      * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
@@ -595,6 +611,21 @@ public class ParkingController extends ControllerBase {
     public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
 
         parkingService.notifyParkingRechargeOrderPaymentV2(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/wechatPayNotify</b>
+     * <p>提供微信扫码支付成功后调用(临时)</p>
+     */
+    @RequestMapping("wechatPayNotify")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse wechatPayNotify(WechatPayNotifyCommand cmd) {
+        parkingService.notifyParkingRechargeOrderPaymentWechat(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1,4 +1,4 @@
-package com.everhomes.rest.acl;
+﻿package com.everhomes.rest.acl;
 
 public interface PrivilegeConstants {
     // System defined privileges
@@ -199,6 +199,12 @@ public interface PrivilegeConstants {
     long ASSET_MANAGEMENT_CREATE = 204001002L;
     long ASSET_MANAGEMENT_NOTICE = 204001003L;
     long ASSET_MANAGEMENT_CHANGE_STATUS = 204001004L;
+    long ASSET_MANAGEMENT_MODIFY = 204001007L;
+    long ASSET_MANAGEMENT_DELETE = 204001007L;
+    long ASSET_MANAGEMENT_TO_SETTLED = 204001008L;//未出批量转已出
+    long ASSET_MANAGEMENT_TO_PAID = 204001009L;//未缴批量转已缴
+    long ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM = 204001010L;//批量减免
+    
     long ASSET_STATISTICS_VIEW = 204001005L;
 
     // ---------------- 组织架构权限 -----------------------
@@ -274,6 +280,9 @@ public interface PrivilegeConstants {
 
 
     long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+    long ENTERPRISE_CUSTOMER_CHANGE_APTITUDE = 21116L;// 转为资质客户
+
+
 
     long CONTRACT_MODULE = 21200L; //合同模块id
     long CONTRACT_CREATE = 21201L;//新增合同
@@ -414,4 +423,28 @@ public interface PrivilegeConstants {
     long COMPANY_ACLINK_LOGS = 4112041122L;
     long COMPANY_ACLINK_STAT = 4112041123L;
     long COMPANY_ACLINK_MOBILE = 4112041124L;
+
+    // ----------招商客户权限---------
+    long INVITED_CUSTOMER_VIEW = 150001L;
+    long INVITED_CUSTOMER_CREATE = 150002L;
+    long INVITED_CUSTOMER_UPDATE = 150003L;
+    long INVITED_CUSTOMER_DELETE = 150004L;
+    long INVITED_CUSTOMER_CHANGE_ENTERPRISE_CUSTOMER = 150005L;
+    long INVITED_CUSTOMER_SIGN = 150006L;
+    long INVITED_CUSTOMER_CONTINUE = 150007L;
+    long INVITED_CUSTOMER_IMPORT = 150008L;
+    long INVITED_CUSTOMER_EXPORT = 150009L;
+
+
+    //------- 房源招商 --------
+    long INVESTMENT_ADVERTISEMENT_CREATE = 150101L;//发布招商信息权限
+    long INVESTMENT_ADVERTISEMENT_UPDATE = 150102L;//编辑招商信息权限
+    long INVESTMENT_ADVERTISEMENT_DELETE = 150103L;//删除招商信息权限
+    long INVESTMENT_ADVERTISEMENT_EXPORT = 150104L; //导出招商信息权限
+    long INVESTMENT_ADVERTISEMENT_CHANGE_ORDER = 150105L; //排序权限
+    long INVESTMENT_APPLY_EXPORT = 150106L;//导出申请记录权限
+    long INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER = 150107L;//转为意向客户权限
+    long INVESTMENT_APPLY_DELETE = 150108L;//删除申请记录权限
+    long INVESTMENT_TRANSFORM_TO_CUSTOMER = 150109L;//一键转为意向客户权限
+    
 }

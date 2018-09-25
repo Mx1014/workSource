@@ -341,7 +341,22 @@ public interface UserService {
             Map<String, String[]> paramMap);
   
     Byte isUserAuth();
+
+    UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
     
+    void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
+
+    PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
+
     void registerWXLoginConnection(HttpServletRequest request);
 
+
+    /**
+     * 查询超级管理员
+     * @param cmd
+     * @return
+     */
+    UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
+
+    void updateUserVipLevel(Long userId, Integer vipLevel);
 }

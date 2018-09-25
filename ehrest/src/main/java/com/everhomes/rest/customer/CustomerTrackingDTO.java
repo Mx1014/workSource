@@ -49,6 +49,7 @@ public class CustomerTrackingDTO {
 	private  Long visitPersonUid;
 	private  String visitPersonName;
 	private String contactPhone;
+	private Byte investmentType;
     
     @ItemType(String.class)
     private List<String>  contentImgUriList;
@@ -215,6 +216,14 @@ public class CustomerTrackingDTO {
 
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
+	}
+
+	public Byte getInvestmentType() {
+		return investmentType;
+	}
+
+	public void setInvestmentType(Byte investmentType) {
+		this.investmentType = investmentType;
 	}
 
 	@Override

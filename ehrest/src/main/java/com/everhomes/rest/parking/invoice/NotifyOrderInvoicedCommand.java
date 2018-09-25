@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>orderNo : (Long)停车业务订单编号</li>
  *<li>businessType : (String)业务类型（parking=停车缴费）</li>
- *<li>status : (Byte)状态(0开票失败，2开票成功，默认为2)</li>
+ *<li>status : (Byte)状态(0未开票，1开票中，2开票成功，默认为2)</li>
  *</ul>
  */
 public class NotifyOrderInvoicedCommand {

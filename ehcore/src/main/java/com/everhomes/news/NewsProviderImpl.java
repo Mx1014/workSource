@@ -48,6 +48,9 @@ public class NewsProviderImpl implements NewsProvider {
 		if (news.getPublishTime() == null) {
 			news.setPublishTime(news.getCreateTime());
 		}
+		
+		news.setCreatorUid(UserContext.currentUserId());
+		
 		getReadWriteDao().insert(news);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 		return  id;
@@ -137,12 +140,32 @@ public class NewsProviderImpl implements NewsProvider {
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), News.class);
 	}
 	
+
+	@Override
+	public News findNewsByNamespaceAndId(Integer namespaceId, Long id) {
+		
+		Record rec = getReadOnlyContext()
+		.select()
+		.from(Tables.EH_NEWS)
+		.where(
+				Tables.EH_NEWS.ID.eq(id)
+				.and(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_NEWS.STATUS.ne(NewsStatus.INACTIVE.getCode()))).fetchOne();
+		
+		if (null == rec) {
+			return null;
+		}
+		
+		return ConvertHelper.convert(rec, News.class);
+	}
+	
 	@Override
 	public List<News> findAllActiveNewsByPage(Long from, Integer pageSize){
 		return getReadOnlyContext().select().from(Tables.EH_NEWS)
 		.where(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())))
 		.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
+	
 
 	@Override
 	public List<News> listNews(List<Long> communityIds, Long categoryId, Integer namespaceId, Long from, Integer pageSize,  boolean isScene, Byte status) {

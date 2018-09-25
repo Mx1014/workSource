@@ -174,4 +174,8 @@ public interface ParkingService {
     void initFuncLists(GetParkingBussnessStatusCommand cmd);
 
     void exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd, HttpServletResponse resp);
+
+    void updateParkingUserNotice(UpdateUserNoticeCommand cmd);
+
+    void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd);
 }

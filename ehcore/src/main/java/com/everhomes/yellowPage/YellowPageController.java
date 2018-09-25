@@ -897,16 +897,16 @@ public class YellowPageController  extends ControllerBase {
 	}
 	
     /**
-	 * <b>URL: /yellowPage/testClickStat</b> 
-	 * <p> 测试 </p>
+	 * <b>URL: /yellowPage/updateServiceTypeOrders</b> 
+	 * <p> 更新服务类型之间的顺序 </p>
 	 */
-	@RequestMapping("testClickStat")
-    @RestReturn(String.class)
-	public RestResponse testClickStat(TestClickStatCommand cmd) {
-		String ret = allianceClickStatService.testClickStat(cmd);
-		RestResponse response =  new RestResponse();
+	@RequestMapping("updateServiceTypeOrders")
+    @RestReturn(value = String.class)
+	public RestResponse updateServiceTypeOrders(UpdateServiceTypeOrdersCommand cmd) {
+		yellowPageService.updateServiceTypeOrders(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription(ret);
+        response.setErrorDescription("OK");
         return response;
 	}
 }

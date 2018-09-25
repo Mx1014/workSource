@@ -3,6 +3,9 @@ package com.everhomes.activity;
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -18,6 +21,7 @@ import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ActivityService {
 
-    void createPost(ActivityPostCommand cmd, Long postId);
+    void createPost(ActivityPostCommand cmd, Long postId, Long communityId);
 
     ActivityDTO signup(ActivitySignupCommand cmd);
 
@@ -35,7 +39,9 @@ public interface ActivityService {
     //更换使用新的支付V3
 //    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
 
-    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
+//    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
+
+    PreOrderDTO createUniteSignupOrder(CreateSignupOrderV2Command cmd);
 
     CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
@@ -165,6 +171,8 @@ public interface ActivityService {
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 
+    ListSignupInfoByOrganizationIdResponse listSignupInfoByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize);
+
 	void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response);
 
 	void deleteSignupInfo(DeleteSignupInfoCommand cmd);
@@ -228,5 +236,15 @@ public interface ActivityService {
 	void exportTag(ExportTagCommand cmd);
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
+	void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse);
+
+	void exportActivitySignupNew(ExportSignupInfoCommand cmd);
+
+    OutputStream getActivitySignupExportStream(ExportSignupInfoCommand cmd, Long taskId);
+
+    ListGeneralFormResponse listActivitySignupGeneralForms(ListGeneralFormsCommand cmd);
+
+	GeneralFormDTO updateGeneralForm(UpdateActivityFormCommand cmd);
+    void deleteActivityFormById(ActivityFormIdCommand cmd);
 }
 

@@ -27,6 +27,7 @@ import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchRuleStatus;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.everhomes.rest.techpark.punch.PunchType;
 import com.everhomes.rest.techpark.punch.TimeCompareFlag;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
 import com.everhomes.rest.techpark.punch.ViewFlags;
@@ -40,6 +41,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchNotificationsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchOvertimeRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
@@ -57,6 +59,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhPunchHolidays;
 import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchNotifications;
 import com.everhomes.server.schema.tables.pojos.EhPunchOvertimeRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
@@ -75,6 +78,7 @@ import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchHolidaysRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchNotificationsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchOvertimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
@@ -124,6 +128,7 @@ import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateConditionStep;
+import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,11 +236,6 @@ public class PunchProviderImpl implements PunchProvider {
             return ConvertHelper.convert(r, PunchRule.class);
         });
 
-//        if(objs.size() >= count) {
-//            locator.setAnchor(objs.get(objs.size() - 1).getId());
-//        } else {
-//            locator.setAnchor(null);
-//        }
         if (null == objs || objs.isEmpty())
             return null;
         return objs;
@@ -340,6 +340,14 @@ public class PunchProviderImpl implements PunchProvider {
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchLogs.class, null);
 
+    }
+
+    @Override
+    public void deletePunchLog(PunchLog punchLog) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchLogs.class));
+        EhPunchLogsDao dao = new EhPunchLogsDao(context.configuration());
+        dao.delete(punchLog);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchLogs.class, punchLog.getId());
     }
 
     @Override
@@ -1199,14 +1207,13 @@ public class PunchProviderImpl implements PunchProvider {
             	condition = condition.and(Tables.EH_PUNCH_LOGS.STATUS.ne(PunchStatus.NORMAL.getCode()));
         	}
         }
-//        Integer offset = (pageOffset == null) ? 0 : (pageOffset - 1) * pageSize;
+
         if (null != pageOffset && null != pageSize){
             step.limit(pageOffset, pageSize);
         }
         // modify by wh 2017-4-25 order by punch date asc
-        List<EhPunchLogsRecord> resultRecord = step.where(condition).orderBy(
-                Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_LOGS.USER_ID.asc(), Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
-                Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(), Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc()).fetch()
+        List<EhPunchLogsRecord> resultRecord = step.where(condition).orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_LOGS.PUNCH_ORGANIZATION_ID.asc(),
+                Tables.EH_PUNCH_LOGS.DETAIL_ID.asc(), Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc()).fetch()
                 .map((r) -> {
                     return ConvertHelper.convert(r, EhPunchLogsRecord.class);
                 });
@@ -2509,19 +2516,30 @@ public class PunchProviderImpl implements PunchProvider {
         }
     }
 
+    private void prepareObj(PunchStatistic obj) {
+    }
+
     @Override
-    public List<PunchStatistic> queryPunchStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus, List<Long> detailIds, Integer pageOffset, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhPunchStatisticsRecord> query = context.selectQuery(Tables.EH_PUNCH_STATISTICS);
-        if (queryBuilderCallback != null)
-            queryBuilderCallback.buildCondition(locator, query);
-
-        if (null != locator && locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_PUNCH_STATISTICS.ID.le(locator.getAnchor()));
+        query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId));
+        if (exceptionStatus != null) {
+            query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));
         }
-        query.addOrderBy(Tables.EH_PUNCH_STATISTICS.ID.desc());
-        query.addLimit(count);
+        if (null != detailIds)
+            query.addConditions(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.in(detailIds));
+        if (null != months)
+            query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));
+
+        query.addOrderBy(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.desc(), Tables.EH_PUNCH_STATISTICS.DEPT_ID.asc(), Tables.EH_PUNCH_STATISTICS.DETAIL_ID.asc());
+
+        if (pageOffset != null && pageSize != null) {
+            query.addLimit(pageOffset, pageSize);
+        }
+
         List<PunchStatistic> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchStatistic.class);
         });
@@ -2529,32 +2547,6 @@ public class PunchProviderImpl implements PunchProvider {
         if (null != objs && objs.size() > 0)
             return objs;
         return null;
-    }
-
-    private void prepareObj(PunchStatistic obj) {
-    }
-
-    @Override
-    public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-                                                     List<Long> detailIds, CrossShardListingLocator locator, int i) {
-        List<PunchStatistic> result = queryPunchStatistics(locator, i, new ListingQueryBuilderCallback() {
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                                                                SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId));
-                query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));
-                if (null != exceptionStatus)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));
-                if (null != detailIds)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.in(detailIds));
-                if (null != months)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));
-
-                return query;
-            }
-
-        });
-        return result;
     }
 
     @Override
@@ -2634,7 +2626,8 @@ public class PunchProviderImpl implements PunchProvider {
         if (null != pageOffset && null != pageSize)
             step.limit(pageOffset, pageSize);
         List<PunchDayLog> result = new ArrayList<PunchDayLog>();
-        step.where(condition).orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+        step.where(condition).orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(),
+                Tables.EH_PUNCH_DAY_LOGS.PUNCH_ORGANIZATION_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.asc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchDayLog.class));
             return null;
         });
@@ -4297,5 +4290,132 @@ public class PunchProviderImpl implements PunchProvider {
 		condition = condition.and(Tables.EH_PUNCH_LOGS.DEVICE_CHANGE_FLAG.eq(NormalFlag.NEED.getCode())); 
 		return step.where(condition).fetchOneInto(Integer.class); 
 	}
+
+    @Override
+    public void batchCreatePunchNotifications(List<EhPunchNotifications> punchNotifications) {
+        if (CollectionUtils.isEmpty(punchNotifications)) {
+            return;
+        }
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPunchNotifications.class), punchNotifications.size());
+        for (EhPunchNotifications notification : punchNotifications) {
+            notification.setId(id++);
+            notification.setCreateTime(now);
+        }
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchNotifications.class));
+        EhPunchNotificationsDao dao = new EhPunchNotificationsDao(context.configuration());
+        dao.insert(punchNotifications);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchNotifications.class, null);
+    }
+
+    @Override
+    public int countPunchNotifications(Integer namespaceId, Long organizationId, Long punchRuleId, Date punchDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PUNCH_NOTIFICATIONS).where(
+                Tables.EH_PUNCH_NOTIFICATIONS.NAMESPACE_ID.eq(namespaceId)
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.ENTERPRISE_ID.eq(organizationId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_RULE_ID.eq(punchRuleId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.eq(punchDate)));
+        Record1<Integer> result = query.fetchOne();
+        if (result == null || result.value1() == null) {
+            return 0;
+        }
+        return result.value1();
+    }
+
+    @Override
+    public List<PunchNotification> findPunchNotificationList(QueryPunchNotificationCondition condition) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_PUNCH_NOTIFICATIONS).where(
+                Tables.EH_PUNCH_NOTIFICATIONS.NAMESPACE_ID.eq(condition.getNamespaceId())
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.ENTERPRISE_ID.eq(condition.getOrganizationId()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_RULE_ID.eq(condition.getPunchRuleId()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.eq(condition.getPunchDate()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_TYPE.eq(condition.getPunchType().getCode()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.EXCEPT_REMIND_TIME.gt(condition.getRemindTimeBetweenFrom()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.EXCEPT_REMIND_TIME.le(condition.getRemindTimeBetweenTo()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.INVALID_FLAG.eq((byte) 0))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_INTERVAL_NO.eq(condition.getPunchIntervalNo())));
+        Result<Record> result = query.fetch();
+        if (result == null || result.size() == 0) {
+            return new ArrayList<>();
+        }
+        return result.map(n -> {
+            return ConvertHelper.convert(n, PunchNotification.class);
+        });
+    }
+
+    @Override
+    public int invalidPunchNotificationList(QueryPunchNotificationCondition condition) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchNotifications.class));
+        UpdateQuery<EhPunchNotificationsRecord> updateQuery = context.updateQuery(Tables.EH_PUNCH_NOTIFICATIONS);
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.NAMESPACE_ID.eq(condition.getNamespaceId()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.ENTERPRISE_ID.eq(condition.getOrganizationId()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_RULE_ID.eq(condition.getPunchRuleId()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.eq(condition.getPunchDate()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_TYPE.eq(condition.getPunchType().getCode()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.EXCEPT_REMIND_TIME.gt(condition.getRemindTimeBetweenFrom()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.EXCEPT_REMIND_TIME.le(condition.getRemindTimeBetweenTo()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_INTERVAL_NO.eq(condition.getPunchIntervalNo()));
+        updateQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.INVALID_FLAG.eq((byte) 0));
+        updateQuery.addValue(Tables.EH_PUNCH_NOTIFICATIONS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+        updateQuery.addValue(Tables.EH_PUNCH_NOTIFICATIONS.ACT_REMIND_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
+        updateQuery.addValue(Tables.EH_PUNCH_NOTIFICATIONS.INVALID_FLAG, (byte) 1);
+
+        return updateQuery.execute();
+    }
+
+    @Override
+    public PunchNotification findPunchNotification(Integer namespaceId, Long organizationId, Long detailId, Date punchDate, PunchType punchType, Integer punchIntervalNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_PUNCH_NOTIFICATIONS).where(
+                Tables.EH_PUNCH_NOTIFICATIONS.NAMESPACE_ID.eq(namespaceId)
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.ENTERPRISE_ID.eq(organizationId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.DETAIL_ID.eq(detailId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.eq(punchDate))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_TYPE.eq(punchType.getCode()))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_INTERVAL_NO.eq(punchIntervalNo)));
+        Record record = query.limit(1).fetchOne();
+        if (record == null) {
+            return null;
+        }
+        return ConvertHelper.convert(record, PunchNotification.class);
+    }
+
+    @Override
+    public List<PunchNotification> findPunchNotificationList(Integer namespaceId, Long organizationId, Long userId, Date punchDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_PUNCH_NOTIFICATIONS).where(
+                Tables.EH_PUNCH_NOTIFICATIONS.NAMESPACE_ID.eq(namespaceId)
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.ENTERPRISE_ID.eq(organizationId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.USER_ID.eq(userId))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.eq(punchDate))
+                        .and(Tables.EH_PUNCH_NOTIFICATIONS.INVALID_FLAG.eq((byte) 0)));
+        Result<Record> result = query.fetch();
+        if (result == null || result.size() == 0) {
+            return new ArrayList<>();
+        }
+        return result.map(n -> {
+            return ConvertHelper.convert(n, PunchNotification.class);
+        });
+    }
+
+    @Override
+    public void updatePunchNotification(PunchNotification punchNotification) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchNotifications.class));
+        EhPunchNotificationsDao dao = new EhPunchNotificationsDao(context.configuration());
+        punchNotification.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(punchNotification);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchNotifications.class, punchNotification.getId());
+    }
+
+    @Override
+    public int deleteAllPunchNotificationsBeforeDate(Date beforePunchDate) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchNotifications.class));
+        DeleteQuery<EhPunchNotificationsRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_NOTIFICATIONS);
+        deleteQuery.addConditions(Tables.EH_PUNCH_NOTIFICATIONS.PUNCH_DATE.lt(beforePunchDate));
+        return deleteQuery.execute();
+    }
 }
 
