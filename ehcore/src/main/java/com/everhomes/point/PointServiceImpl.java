@@ -336,11 +336,11 @@ public class PointServiceImpl implements PointService {
         try{
              dto = pointServiceRPCRest.getUserPoint(cmd);
         }catch(Exception e){
-            LOGGER.error("something error happen while RPC to point system .");
+            LOGGER.error("something error happen while RPC to point system . e:{}",e);
         }
 
         if(dto != null){
-            point.setCount(dto==null?0:dto.getScore());
+            point.setCount(dto.getScore());
         }
 
         String url = getPointSystemUrl(1L);

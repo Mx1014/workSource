@@ -33,7 +33,7 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
     		 resp =
                 call(URIConstants.POINTSCORE_GETUSERPOINT_URL, cmd, RestResponse.class);
 		}catch(Exception e){
-			LOGGER.error("something error happen while RPC to point system .");
+			LOGGER.error("something error happen while RPC to point system . e:{}",e);
 		}
     	if(resp == null){
     		return null ;
@@ -69,7 +69,7 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 				 resp =
 						call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
 			}catch(Exception e){
-				LOGGER.error("something error happen while RPC to point system .");
+				LOGGER.error("something error happen while RPC to point system . e:{}",e);
 			}
 	    	if(resp == null){
 	    		return null ;
