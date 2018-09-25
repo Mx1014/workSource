@@ -127,8 +127,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Override
 	public void createInvestmentAd(CreateInvestmentAdCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		//创建招商广告
 		InvestmentAd investmentAd = ConvertHelper.convert(cmd,InvestmentAd.class);
@@ -150,8 +149,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 
 	@Override
 	public void deleteInvestmentAd(DeleteInvestmentAdCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_DELETE, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_DELETE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		InvestmentAd investmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (investmentAd == null) {
@@ -163,8 +161,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Override
 	public void updateInvestmentAd(UpdateInvestmentAdCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		InvestmentAd existInvestmentAd = investmentAdProvider.findInvestmentAdById(cmd.getId());
 		if (existInvestmentAd == null) {
@@ -271,8 +268,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 
 	@Override
 	public void changeInvestmentAdOrder(ChangeInvestmentAdOrderCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CHANGE_ORDER, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_CHANGE_ORDER, cmd.getOrganizationId(), cmd.getCommunityId());
 		
 		if (cmd.getInvestmentAdOrders() != null && cmd.getInvestmentAdOrders().size() > 0) {
 			List<InvestmentAdOrderDTO> investmentAdOrders = cmd.getInvestmentAdOrders();
@@ -299,8 +295,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Override
 	public void exportInvestmentAds(ListInvestmentAdCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_EXPORT, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_EXPORT, cmd.getOrganizationId(), cmd.getCommunityId());
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("UserContext", UserContext.current().getUser());
@@ -317,15 +312,13 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Override
 	public void changeInvestmentStatus(ChangeInvestmentStatusCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_UPDATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		investmentAdProvider.changeInvestmentStatus(cmd.getId(),cmd.getInvestmentStatus());
 	}
 	
 	@Override
 	public List<Long> transformToCustomer(IntentionCustomerCommand cmd) {
-		//TODO 加权限
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER, cmd.getOrganizationId(), cmd.getCommunityId());
 		List<NewIntentionCustomerDTO> intentionCustomers = cmd.getIntentionCustomers();
 		
 		Map<String, CreateInvitedCustomerCommand> finalCommandMap = new HashMap<>();
@@ -546,7 +539,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	}
 	
 	private void checkPrivilegeAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
-		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, null, null, null, communityId);
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.INVESTMENT_AD, null, null, null, communityId);
 	}
 
 

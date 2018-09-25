@@ -87,7 +87,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
 
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.BUSINESS_INVITATION, null, null, null, communityId);
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.INVITED_CUSTOMER, null, null, null, communityId);
     }
 
     @Override
