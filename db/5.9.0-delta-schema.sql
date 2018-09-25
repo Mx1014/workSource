@@ -626,3 +626,14 @@ CREATE TABLE `eh_investment_advertisement_assets` (
 -- REMARK:自定义表单添加字段
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `integral_tag1` bigint(20) NULL DEFAULT 0 COMMENT '业务字段（用于表示招商租赁的预约申请记录状态）';
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `integral_tag2` bigint(20) NULL DEFAULT NULL COMMENT '业务字段（用于表示招商租赁的预约记录的来源广告的id）';
+
+-- END
+
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 增加表单的创建时间
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `created_time` DATE NULL DEFAULT 0 COMMENT '创建时间';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `creator_uid` BIGINT NULL DEFAULT 0 COMMENT '创建人ID';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_time` DATE NULL DEFAULT 0 COMMENT '操作时间';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL DEFAULT 0 COMMENT '操作人ID';
+
