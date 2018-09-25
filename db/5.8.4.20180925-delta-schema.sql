@@ -140,3 +140,6 @@ CREATE TABLE `eh_user_app_flags` (
   PRIMARY KEY (`id`),
   KEY `u_eh_user_app_flag_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户启用自定义配置的标记';
+
+-- 合同字段名称修改 add by jiarui 20180925
+ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);

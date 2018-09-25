@@ -1,11 +1,11 @@
 -- 通用脚本
 -- AUHOR: jiarui 20180726
 -- REMARK：动态表单迁移ownerId
-update eh_var_field_group_scopes t1 set owner_id = (select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 );
+update eh_var_field_group_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 ),0);
 update eh_var_field_group_scopes set owner_type ='EhOrganizations';
-update eh_var_field_scopes t1 set owner_id = (select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 );
+update eh_var_field_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 ),0);
 update eh_var_field_scopes set owner_type ='EhOrganizations';
-update eh_var_field_item_scopes t1 set owner_id = (select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 );
+update eh_var_field_item_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1),0);
 update eh_var_field_item_scopes set owner_type ='EhOrganizations';
 -- 物业巡检 by jiatui 20180730
 update eh_equipment_inspection_equipments set owner_type = 'EhOrganizations';
@@ -42,5 +42,5 @@ update eh_contract_params set owner_type = 'EhOrganizations';
 -- 缴费管理  by jiarui 20180806
 UPDATE eh_asset_bills set owner_type ='EhOrganizations';
 UPDATE eh_asset_bill_template_fields set owner_type ='EhOrganizations';
-UPDATE  eh_payment_charging_item_scopes t1 set org_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.namespace_id and t2.parent_id = 0 LIMIT 1)
+UPDATE  eh_payment_charging_item_scopes t1 set org_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.namespace_id and t2.parent_id = 0 LIMIT 1);
 update eh_asset_bill_notify_records set owner_type = 'EhOrganizations';
