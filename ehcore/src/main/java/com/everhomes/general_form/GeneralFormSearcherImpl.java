@@ -5,12 +5,21 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowServiceImpl;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.fasterxml.jackson.databind.JavaType;
@@ -58,6 +67,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     AddressProvider addressProvider;
     @Autowired
     EnterpriseCustomerProvider enterpriseCustomerProvider;
+    @Autowired
+    FlowService flowService;
+    @Autowired
+    UserProvider userProvider;
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -303,6 +316,16 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 returnMap.put("sourceId", sourceId);
                 returnMap.put("formVersion", formVersion);
                 returnMap.put("formOriginId", formOriginId);
+                if(StringUtils.isNotBlank(cmd.getReferType())){
+                    FlowCaseDetailDTOV2 flowCase = flowService.getFlowCaseDetailByRefer(moduleId, FlowUserType.NO_USER, UserContext.currentUserId(), cmd.getReferType(), sourceId, false);
+                    if(flowCase != null){
+                        FlowNodeDetailDTO flowNode = flowService.getFlowNodeDetail(flowCase.getCurrentNodeId());
+                        returnMap.put("flowCaseCreateTime", flowCase.getCreateTime().getTime());
+                        returnMap.put("nodeName", flowNode.getNodeName());
+                        returnMap.put("applyUser", userProvider.findUserById(flowCase.getApplyUserId()).getNickName());
+                    }
+                }
+
                 fieldVals.add(returnMap);
             }
         }

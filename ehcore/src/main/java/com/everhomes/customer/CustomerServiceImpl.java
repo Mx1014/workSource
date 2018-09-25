@@ -62,6 +62,7 @@ import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.CustomerAptitudeFlag;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -655,6 +656,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
         customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+        if(customer.getAptitudeFlagItemId() == null){
+            customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
+        }
 //        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
@@ -715,6 +719,9 @@ public class CustomerServiceImpl implements CustomerService {
                 if(user!=null)
                     customer.setTrackingName(user.getNickName());
             }
+        }
+        if(customer.getAptitudeFlagItemId() == null){
+            customer.setAptitudeFlagItemId((long)CustomerAptitudeFlag.NOAPTITUDE.getCode());
         }
 //        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
@@ -5026,7 +5033,13 @@ public class CustomerServiceImpl implements CustomerService {
     public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
         Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
-        SearchEnterpriseCustomerResponse res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+        SearchEnterpriseCustomerResponse res = null;
+        if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
+             res = enterpriseCustomerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+             res = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
         for(EnterpriseCustomerDTO dto : res.getDtos()){
             enterpriseCustomerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
         }
