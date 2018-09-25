@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：所属组织类型 0小区 1企业 2家庭{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
  * <li>keyWord:操作用户 可输入姓名或手机号码</li>
  * <li>eventType:开门方式 null 全部 ,0 蓝牙开门, 1 二维码开门,2 远程开门,3 按键开门，4 人脸开门</li>
- * <li>doorId:门禁名称</li>
+ * <li>doorId:门禁id</li>
  * <li>startTime:开门时间区间起点 时间戳，精确到日期</li>
  * <li>endTime:开门时间区间终点 时间戳,只允许选择当前时间之前的日期区间</li>
  * <li>pageAnchor:锚点</li>

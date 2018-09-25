@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.xml.transform.Result;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -609,6 +610,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/exportAclinkLogsXls</b>
+     * <p>导出门禁日志列表</p>
+     */
+    @RequestMapping("exportAclinkLogsXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportAclinkLogsXls(@Valid AclinkQueryLogCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportAclinkLogsXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/aclink/deleteLogById</b>
@@ -654,8 +669,53 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
-    
+    }
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/doorStatistic</b>
+     * <p>门禁综合统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("doorStatistic")
+    @RestReturn(value=DoorStatisticResponse.class)
+    public RestResponse doorStatistic(@Valid DoorStatisticCommand cmd) {
+        DoorStatisticResponse obj = doorAccessService.doorStatistic(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+//add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/doorStatisticByTime</b>
+     * <p>门禁时间统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("doorStatisticByTime")
+    @RestReturn(value=DoorStatisticByTimeResponse.class)
+    public RestResponse doorStatisticByTime(@Valid DoorStatisticByTimeCommand cmd) {
+        DoorStatisticByTimeResponse obj = doorAccessService.doorStatisticByTime(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/tempStatisticByTime</b>
+     * <p>临时授权时间统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("tempStatisticByTime")
+    @RestReturn(value=TempStatisticByTimeResponse.class)
+    public RestResponse TempStatisticByTime(@Valid TempStatisticByTimeCommand cmd) {
+        TempStatisticByTimeResponse obj = doorAccessService.tempStatisticByTime(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/createQRUserPermission</b>
      * <p>创建保安二维码授权</p>
@@ -1216,4 +1276,18 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    //20180914 add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/checkMobilePrivilege</b>
+     * <p>移动端管理权限检验</p>
+     * @return
+     */
+    @RequestMapping("checkMobilePrivilege")
+    @RestReturn(value=CheckMobilePrivilegeResponse.class)
+    public RestResponse checkMobilePrivilege(@Valid CheckMobilePrivilegeCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.checkMobilePrivilege(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }    
 }

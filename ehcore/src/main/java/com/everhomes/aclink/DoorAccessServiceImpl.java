@@ -89,9 +89,11 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils; 
+import com.google.gson.JsonArray;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -99,7 +101,9 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.hibernate.boot.model.naming.Identifier;
 import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -131,6 +135,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.sql.Timestamp;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
@@ -282,6 +289,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private BusinessService businessService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     AlipayClient alipayClient;
     
@@ -317,7 +330,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
- 
     }
     
     @Override
@@ -506,6 +518,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
+        //添加权限 add by liqingyan
+//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041121L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+//        }
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041111L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -650,6 +669,26 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
+//add by liqingyan 日志导出
+    @Override
+    public void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse){
+        ByteArrayOutputStream output = null;
+        XSSFWorkbook wb = this.createLogsXSSFWorkbook(cmd);
+        try {
+            output = new ByteArrayOutputStream();
+            wb.write(output);
+            DownloadUtil.download(output, httpResponse);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally{
+            try {
+                wb.close();
+                output.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
 
 
 
@@ -768,6 +807,64 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 row.createCell(cellN ++).setCellValue(user.getUserName());
                 row.createCell(cellN ++).setCellValue(user.getCompany());
                 row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE) : "");
+            }
+
+            if(null == userRes.getNextPageAnchor()){
+                break;
+            }
+            cmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
+        return wb;
+    }
+//add by liqingyan 待翻译
+    /**
+     * 创建导出日志excel
+     * @param cmd
+     * @return
+     */
+    private XSSFWorkbook createLogsXSSFWorkbook(AclinkQueryLogCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "门禁日志列表";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        int cellN = 0;
+        row1.createCell(cellN ++).setCellValue("姓名");
+        row1.createCell(cellN ++).setCellValue("手机号码");
+        row1.createCell(cellN ++).setCellValue("门禁名称");
+        row1.createCell(cellN ++).setCellValue("授权类型");
+        row1.createCell(cellN ++).setCellValue("开门方式");
+        row1.createCell(cellN ++).setCellValue("开门时间");
+
+        cmd.setPageSize(1000);
+        while (true){
+            AclinkQueryLogResponse userRes = this.queryLogs(cmd);
+            for (AclinkLogDTO user: userRes.getDtos()) {
+                cellN = 0;
+                XSSFRow row = sheet.createRow(rowNum ++);
+                row.setRowStyle(style);
+                row.createCell(cellN ++).setCellValue(user.getUserName());
+                row.createCell(cellN ++).setCellValue(user.getUserIdentifier());
+                row.createCell(cellN ++).setCellValue(user.getDoorName());
+                row.createCell(cellN ++).setCellValue(user.getAuthType() > 0 ? "常规授权" : "临时授权");
+                row.createCell(cellN ++).setCellValue(user.getEventType().equals(0L) ? "蓝牙开门": equals(1L)? "二维码开门": equals(2L)? "远程开门":equals(3L)? "人脸开门":"");
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(new Date(user.getLogTime()), DateUtil.DATE_TIME_LINE));
             }
 
             if(null == userRes.getNextPageAnchor()){
@@ -4182,13 +4279,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd) {
+        //添加权限 by liqingyan
+//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041122L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+//        }
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041112L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
         AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
         resp.setDtos(new ArrayList<AclinkLogDTO>());
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
+        List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -4209,20 +4312,72 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getDoorId() != null) {
                     query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
                 }
-                
+                //时间比较
+                if(cmd.getStartTime() != null && cmd.getEndTime() != null ) {
+                    cmd.setStartTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStartTime()),"yyyy-MM-dd").getTime());
+                    cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
+                    query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+                }
+                //query.addConditions(Tables.EH_ACLINK_LOGS.LOG_TIME.between(cmd.getStartTime(), cmd.getEndTime()));
                 return query;
             }
             
         });
-        
-        for(AclinkLog obj : objs) {
-            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
-            resp.getDtos().add(dto);
-        }
+        resp.setDtos(objs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
-    
+     //add by liqingyan
+    @Override
+    public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
+        //添加权限
+//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+//        }
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
+        DoorStatisticResponse resp = new DoorStatisticResponse();
+        resp.setDtos(new DoorStatisticDTO());
+        DoorStatisticDTO objs =aclinkLogProvider.queryDoorStatistic(cmd);
+        resp.setDtos(objs);
+        return resp;
+    }
+
+    //add by liqingyan
+    @Override
+    public DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd){
+        //添加权限
+//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+//        }
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
+        DoorStatisticByTimeResponse resp = new DoorStatisticByTimeResponse();
+        resp.setDtos(new ArrayList<DoorStatisticByTimeDTO>());
+        List<DoorStatisticByTimeDTO> objs = aclinkLogProvider.queryDoorStatisticByTime(cmd);
+        resp.setDtos(objs);
+        return resp;
+    }
+
+    //add by liqingyan
+    @Override
+    public TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd){
+        //添加权限
+//        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041123L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+//        }
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041113L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+        }
+        TempStatisticByTimeResponse resp = new TempStatisticByTimeResponse();
+        resp.setDtos(new ArrayList<TempStatisticByTimeDTO>());
+        List<TempStatisticByTimeDTO> objs = aclinkLogProvider.queryTempStatisticByTime(cmd);
+        resp.setDtos(objs);
+        return resp;
+    } 
+      
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
         return doorAuthProvider.getLinglingDoorAuthByUuid(uuid);
@@ -4434,6 +4589,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			String arg3) {
         //Must be
         try {
+        	//以前的平台包会在监听到publish之前就执行完update,所以没有问题;更新之后会在事务提交前就监听到,如果另起一个线程,查到的是更新前的数据,授权失败;暂改成同步执行  by liuyilin 20180827
 			LOGGER.info("start run.....");
 			 Long id = (Long)arg2;
 	         if(null == id) {
@@ -4448,6 +4604,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
               } catch(Exception exx) {
             	  LOGGER.error("execute promotion error promotionId=" + id, exx);
             	  }
+
 	         }
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
@@ -5293,6 +5450,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     	
     	LOGGER.info("delete all auths ok! ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
 	}
+	//add by liqingyan
+	@Override
+    public CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd){
+        CheckMobilePrivilegeResponse rsp = new CheckMobilePrivilegeResponse();
+        //添加权限
+        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4112041124L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+            rsp.setPrivilegeType(Boolean.TRUE);
+        }
+        else if (cmd.getOwnerType() != null && cmd.getOwnerType() == 0 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4111041114L, cmd.getAppId(), null, cmd.getCurrentProjectId());
+            rsp.setPrivilegeType(Boolean.TRUE);
+        }
+        else rsp.setPrivilegeType(Boolean.FALSE);
+        return rsp;
+    }
 
 @Override
 	public ListZLDoorAccessResponse listDoorAccessMacByApp() {
