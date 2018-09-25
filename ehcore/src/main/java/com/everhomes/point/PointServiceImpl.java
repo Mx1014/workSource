@@ -322,7 +322,13 @@ public class PointServiceImpl implements PointService {
             return point;
         }
         cmd.setUid(currentUserId);
-        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        //update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+        PointScoreDTO dto = null ;
+        try{
+            dto = pointServiceRPCRest.getUserPoint(cmd);
+        }catch(Exception e){
+            LOGGER.error("something error happen while RPC to point system . e:{}",e);
+        }
         if(dto != null){
             point.setCount(dto.getScore());
         }
