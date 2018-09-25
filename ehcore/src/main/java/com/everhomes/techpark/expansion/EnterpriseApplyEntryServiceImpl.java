@@ -1918,8 +1918,5 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			customerIds.add(invitedCustomer.getId());
 		}
 		return customerIds;
-//		TransformToCustomerResponse response = new TransformToCustomerResponse();
-//		response.setCustomerIds(customerIds);	
-//		return response;
 	}
 }

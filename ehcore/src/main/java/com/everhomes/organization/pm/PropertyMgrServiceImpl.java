@@ -149,6 +149,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.ApartmentBriefInfoDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.AuthorizePriceCommand;
@@ -163,6 +164,8 @@ import com.everhomes.rest.address.ImportAuthorizePriceDataDTO;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -8429,5 +8432,34 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			response = activityService.listSignupInfoByOrganizationId(enterpriseCustomer.getOrganizationId(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
 		}
 		return response;
+	}
+
+	@Override
+	public List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd) {
+		List<Address> addresses = addressProvider.findActiveApartmentsByBuildingId(cmd.getBuildingId());
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+		
+		List<Address> filterData = new ArrayList<>();
+		for(Address address : addresses){
+			filterData.add(address);
+			if (cmd.getLivingStatus() != null ) {
+				CommunityAddressMapping communityAddressMapping = communityAddressMappingMap.get(address.getId());
+				if (communityAddressMapping != null && communityAddressMapping.getLivingStatus() != cmd.getLivingStatus()) {
+					filterData.remove(address);
+				}else if (communityAddressMapping == null) {
+					filterData.remove(address);
+				}
+			}
+		}
+		
+		List<ApartmentBriefInfoDTO> apartments = filterData.stream().map(a->{
+			ApartmentBriefInfoDTO dto = new ApartmentBriefInfoDTO();
+			dto.setId(a.getId());
+			dto.setApartmentName(a.getApartmentName());
+			return dto;
+		}).collect(Collectors.toList());
+		
+		return apartments;
 	}
 }
