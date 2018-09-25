@@ -488,4 +488,7 @@ public interface PunchProvider {
 	void updatePunchGoOutLog(PunchGoOutLog log);
 
 	Byte processGoOutPunchFlag(Date punchDate, Long targetId);
+
+	List<PunchGoOutLog> listPunchGoOutLogs(Long userId, Long enterpriseId,
+			java.sql.Date pDate);
 }

@@ -4444,5 +4444,24 @@ public class PunchProviderImpl implements PunchProvider {
                 .fetchCount();
         return punchCount > 0 ? com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode() : com.everhomes.rest.techpark.punch.NormalFlag.NO.getCode();
     }
+
+	@Override
+	public List<PunchGoOutLog> listPunchGoOutLogs(Long userId, Long enterpriseId, Date pDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_PUNCH_GO_OUT_LOGS);
+        Condition condition = Tables.EH_PUNCH_GO_OUT_LOGS.PUNCH_DATE.equal(pDate);
+        Condition condition2 = Tables.EH_PUNCH_GO_OUT_LOGS.USER_ID.equal(userId);
+        Condition condition3 = Tables.EH_PUNCH_GO_OUT_LOGS.ORGANIZATION_ID.equal(enterpriseId); 
+        condition = condition.and(condition2);
+        condition = condition.and(condition3); 
+        step.where(condition);
+        List<PunchGoOutLog> result = step.orderBy(Tables.EH_PUNCH_GO_OUT_LOGS.USER_ID.asc(),
+                Tables.EH_PUNCH_GO_OUT_LOGS.PUNCH_DATE.asc())
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, PunchGoOutLog.class);
+                });
+        return result;
+	}
 }
 

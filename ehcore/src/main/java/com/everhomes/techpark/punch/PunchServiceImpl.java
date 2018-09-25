@@ -8554,7 +8554,10 @@ public class PunchServiceImpl implements PunchService {
             List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
             response.setRequestDTOs(requestDTOs);
         }
-
+        List<PunchGoOutLog> punchGoOutLogs = punchProvider.listPunchGoOutLogs(userId, cmd.getEnterpriseId(), pDate);
+        if(CollectionUtils.isNotEmpty(punchGoOutLogs)){
+        	response.setGoOutPunchLogs(punchGoOutLogs.stream().map(this :: convertGoOutLogDTO).collect(Collectors.toList()));
+        }
 //		}
         //旧版本兼容性处理
         oldVersionProcess(response, cmd);
