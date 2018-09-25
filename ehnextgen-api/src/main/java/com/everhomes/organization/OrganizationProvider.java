@@ -677,7 +677,7 @@ public interface OrganizationProvider {
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
 			List<Long> organizationIds);
 
-    OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
+    OrganizationMember findMemberByType(Long aLong, String groupPath, String code);
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
