@@ -10668,6 +10668,7 @@ public class PunchServiceImpl implements PunchService {
                     result = pdl.getForgotPunchCountOnDuty() + pdl.getForgotPunchCountOffDuty();
                     break;
                 default:
+                    result = 1;
                     break;
             }
         }
