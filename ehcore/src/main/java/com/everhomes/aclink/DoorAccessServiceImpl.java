@@ -435,7 +435,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         return dtos;
     }
-    
+
     @Override
     public ListDoorAccessResponse searchDoorAccessByAdmin(QueryDoorAccessAdminCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
