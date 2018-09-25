@@ -23,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>authMethod: 授权方式,mobile/admin{@link com.everhomes.aclink.DoorAuthMethodType}</li>
  * </ul>
  */
-public class DoorAuthLiteDTO {
+public class DoorAuthLiteDTO implements Comparable<DoorAuthLiteDTO> {
     private Long id;
     private Long ownerId;
     private String ownerName;
@@ -127,4 +127,12 @@ public class DoorAuthLiteDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	
+	@Override
+	public int compareTo(DoorAuthLiteDTO o) {
+		if(this.createTime.getTime() < o.getCreateTime().getTime()){
+			return 1;
+		}
+		return -1;
+	}
 }

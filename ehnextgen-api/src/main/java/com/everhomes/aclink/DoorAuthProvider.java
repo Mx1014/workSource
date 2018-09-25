@@ -3,9 +3,12 @@ package com.everhomes.aclink;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.aclink.AclinkAuthDTO;
 import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
+import com.everhomes.rest.aclink.DoorAuthLiteDTO;
+import com.everhomes.rest.aclink.ListAuthsByLevelandLocationCommand;
 import com.everhomes.rest.aclink.ListFormalAuthCommand;
 import com.everhomes.user.User;
 
@@ -38,6 +41,8 @@ public interface DoorAuthProvider {
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 
     DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte rightOpen, Byte rightVisitor, Byte rightRemote);
+    
+    DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte licenseeType);
 
     List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status,
             int count);
@@ -110,4 +115,8 @@ public interface DoorAuthProvider {
 	void updateDoorAuthBatch(List<DoorAuth> uAuths);
 
 	void createDoorAuthLogBatch(List<DoorAuthLog> logs);
+
+	List<OrganizationMember> getOrganizationMemberByUserId(Long id);
+
+	List<DoorAuthLiteDTO> listAuthsByLevelandLocation(CrossShardListingLocator locator, Integer count, ListAuthsByLevelandLocationCommand qryCmd);
 }

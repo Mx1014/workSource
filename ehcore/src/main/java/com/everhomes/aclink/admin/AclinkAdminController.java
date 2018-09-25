@@ -190,6 +190,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse updateAuthBatch(@Valid UpdateAuthBatchCommand cmd) {
 //        cmd.setIsOpenAuth((byte)0);
     	//TODO 
+    	doorAccessService.updateAuthBatch(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -202,7 +203,7 @@ public class AclinkAdminController extends ControllerBase {
      * <p>批量创建(正式)授权</p>
      * @return
      */
-    @RequestMapping("createAuthBatch")
+    @RequestMapping("createFormalAuthBatch")
     @RestReturn(value=String.class)
     public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
 //        cmd.setIsOpenAuth((byte)0);
@@ -380,7 +381,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("listAccessGroupRel")
     @RestReturn(value=ListAccessGroupRelResponse.class)
     public RestResponse listDoorGroup(@Valid ListDoorAccessGroupCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.listDoorGroupRel(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

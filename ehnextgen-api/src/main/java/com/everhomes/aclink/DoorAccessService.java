@@ -193,4 +193,10 @@ public interface DoorAccessService {
 	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
 
 	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
+
+	public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
+
+	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
+
+	public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
 }

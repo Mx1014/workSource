@@ -330,6 +330,7 @@ public class DoorAuthLevelProviderImpl implements DoorAuthLevelProvider {
 	public void createDoorAuthLevelBatch(List<DoorAuthLevel> clevels) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhDoorAuthLevelDao dao = new EhDoorAuthLevelDao(context.configuration());
+		long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuthLevel.class), clevels.size());
 		List<EhDoorAuthLevel> list = new ArrayList<>();
 		for(DoorAuthLevel auth : clevels){
 			list.add(ConvertHelper.convert(auth, EhDoorAuthLevel.class));

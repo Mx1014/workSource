@@ -945,7 +945,7 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("listUserAuth")
     @RestReturn(value=ListUserAuthResponse.class)
     public RestResponse listUserKeys(ListAesUserKeyByUserCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.listUserKeys(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
@@ -958,9 +958,9 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("getUserKeyInfo")
-    @RestReturn(value=AesUserKeyDTO.class)
+    @RestReturn(value=GetUserKeyInfoRespnose.class)
     public RestResponse getUserKeyInfo(GetUserKeyInfoCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.getUserKeyInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
