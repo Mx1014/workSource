@@ -3,8 +3,10 @@ package com.everhomes.rest.techpark.punch;
 import com.everhomes.util.StringHelper;
 
 /**
+ * <ul>
  * <li>id：id</li>
  * <li>description：备注 </li>
+ * </ul>
  */
 public class UpdateGoOutPunchLogCommand {
     private Long id;
