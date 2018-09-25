@@ -3362,6 +3362,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				fileName = String.format("房源信息_%s", cmd.getBuildingName());
 			}
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
 			List<ExportApartmentsInBuildingDTO> data = aptList.stream().map(r->{
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());

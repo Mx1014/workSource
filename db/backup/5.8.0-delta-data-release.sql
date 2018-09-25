@@ -8,7 +8,7 @@
 -- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: jiarui  20180807
--- REMARK: 执行search 下脚本 enter_meter.sh
+-- REMARK: 执行search 下脚本 energy_meter.sh
 -- 执行 /energy/syncEnergyMeterIndex 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: 唐岑 2018年8月17日15:13:14
@@ -36,6 +36,20 @@
 -- AUTHOR: 严军 2018年8月17日
 -- REMARK: 1、备份表eh_service_modules 和 eh_portal_items
 
+-- AUTHOR: 杨崇鑫 2018年8月23日
+-- REMARK：issue-36437: 修复【物业缴费6.3-5.8.0beta】【历史数据】查看域空间配置，发现之前已经建立合同->缴费，没有显示
+-- REMARK: 1、备份表eh_service_module_apps（包括独立部署环境）
+-- REMARK: 2、在每个环境（包括独立部署环境）执行以下查询sql
+-- select DISTINCT(a.origin_id), t.asset_category_id, t.contract_category_id from eh_service_module_apps a left join (
+-- 		select DISTINCT(b.asset_category_id),b.contract_category_id from eh_service_module_apps left join eh_asset_module_app_mappings b on instance_config like concat('%"categoryId":', b.asset_category_id,'%')
+-- 		where module_id=20400 and instance_config not like '%contractOriginId%'  and b.asset_category_id is not null order by asset_category_id 
+-- 		) as t on a.instance_config like concat('%"categoryId":', t.contract_category_id,'%')
+-- where a.module_id=21200 and t.asset_category_id is not null;
+-- REMARK：3、找杨崇鑫生成update语句执行
+-- Excel中的update语句公式： ="update eh_service_module_apps set instance_config=CONCAT(substring(instance_config,1,LENGTH(instance_config) - 1),"",\""contractOriginId\"":"&A1&"}"") where instance_config like '%""categoryId"":"&B1&"%' and instance_config not like '%contractOriginId%' and module_id=20400 ;"
+
+-- AUTHOR: 张智伟
+-- REMARK: 调用接口/evh/punch/punchDayLogInitializeByMonth 不需要输入参数 初始化某个月的每日统计数据,上线时手动调用进行初始化
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -825,6 +839,45 @@ DELIMITER ;
 CALL update_url_module_function;
 DROP PROCEDURE IF EXISTS update_url_module_function;
 
+-- 刷新itemGroup是否开启“全部”更多
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+DELIMITER //
+CREATE PROCEDURE `update_allOrMore_flag_function` ()
+BEGIN
+  DECLARE itemGroupId LONG;
+  DECLARE alabel  VARCHAR(200);
+	DECLARE actionData VARCHAR(10240);
+	DECLARE iconUri VARCHAR(10240);
+	DECLARE allOrMoreType VARCHAR(200);
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT item_group_id, label, action_data, icon_uri from eh_portal_items WHERE action_type = 'AllOrMore' and action_data is NOT NULL;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO itemGroupId, alabel, actionData, iconUri;
+				IF done THEN
+					LEAVE read_loop;
+				END IF;
+
+				IF instr(actionData,'more') > 0 THEN
+          SET allOrMoreType = 'more';
+				ELSE
+					SET allOrMoreType = 'all';
+				END IF;
+
+				UPDATE eh_portal_item_groups SET instance_config = REPLACE (instance_config, '}', CONCAT(',"allOrMoreType":"', allOrMoreType, '","allOrMoreLabel":"', alabel, '","allOrMoreFlag":1,"allOrMoreIconUri":"', iconUri, '"}')) WHERE id = itemGroupId AND instance_config NOT LIKE '%allOrMoreFlag%';
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_allOrMore_flag_function;
+DROP PROCEDURE IF EXISTS update_allOrMore_flag_function;
+
+UPDATE eh_portal_item_groups SET instance_config = replace(instance_config, '{,', '{');
+
 
 
 -- 当前版本已被他人抢先发布
@@ -887,6 +940,15 @@ left join eh_asset_module_app_mappings c on t.category_id=c.contract_category_id
 left join eh_payment_bill_groups_rules d on t2.charging_item_id=d.charging_item_id and t2.namespace_id=d.namespace_id and t2.community_id=d.ownerId
 ) as bbb on aaa.id=bbb.ccid set aaa.bill_group_id=bbb.bill_group_id;
 
+-- AUTHOR: 丁建民  20180830
+-- REMARK: 物业缴费V6.5 数据迁移账单组（调租，免租的账单组）
+-- 这个需要备份一下数据
+SELECT aa.id,aa.namespace_id,aa.contract_id ,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id and aa.bill_group_id is NULL;
+
+UPDATE eh_contract_charging_changes as aaa INNER JOIN (SELECT aa.id,aa.bill_group_id , bb.namespace_id,bb.contract_id,bb.bill_group_id as target_bill_group_id from eh_contract_charging_changes aa,eh_contract_charging_items bb 
+WHERE aa.namespace_id=bb.namespace_id and aa.contract_id=bb.contract_id  and aa.bill_group_id is NULL) as bbb ON aaa.id = bbb.id set aaa.bill_group_id=bbb.target_bill_group_id;
+
 
 -- AUTHOR: 黄良铭
 -- REMARK: 系统管理员维护时的消息模板
@@ -899,6 +961,87 @@ INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,names
 VALUES(@b_id:= @b_id +1 , 'organization.notification',28,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）的${organizationName}系统管理员身份已被移除',0);
 INSERT INTO eh_locale_templates(id ,scope ,CODE ,locale ,description ,TEXT,namespace_id)
 VALUES(@b_id:= @b_id +1 , 'organization.notification',29,'zh_CN','添加系统管理员给其他管理员发送的消息模板' ,  '${userName}（${contactToken}）已被添加为${organizationName}的系统管理员',0);
+
+-- AUTHOR: huangmingbo
+-- REMARK: 修改快递添加账户提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180809', 'zh_CN', '收款账户已存在，请勿重复添加');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'express', '180810', 'zh_CN', '需要更新的收款账户ID不存在');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送默认推送方式改为新推送
+UPDATE eh_configurations s SET s.value='1' WHERE s.namespace_id=0 AND s.name='apple.pusher.flag';
+
+
+-- END
+
+-- AUTHOR: 黄鹏宇 2018-8-28
+-- REMARK: 添加删除权限控制
+SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_service_module_privileges);
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:= @id +1, 25000, 0, 250001003, '删除请示', 0, SYSDATE());
+UPDATE `eh_service_module_privileges` SET `remark` = '新增/修改/发起审批' where `privilege_id` = 250001002;
+
+-- 更改请示单module name jiarui 20180823
+update eh_service_modules set name = '请示单管理' where id = 25000;
+
+-- 更改现网所有的资质都为有资质
+update eh_enterprise_customers set aptitude_flag_item_id = 1;
+
+-- 添加一键转为资质客户按钮
+INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (43980, 21200, 43980, '企业客户管理 一键转为资质客户');
+update eh_service_module_functions set module_id = 21100 where id = 43960;
+update eh_service_module_functions set module_id = 21200 where id = 43970;
+update eh_service_module_functions set module_id = 21100 where id = 43980;
+
+-- END
+
+-- AUTHOR: 黄良铭
+-- REMARK: #35742  【用户认证3.6】客户端拒绝后的拒绝理由 不在消息体现
+UPDATE eh_locale_templates s SET s.text='您被拒绝加入公司“${enterpriseName}”，拒绝理由：${textInfo}。' WHERE s.scope='enterprise.notification' AND s.namespace_id=0 AND s.code=3;
+
+
+-- AUTHOR: xq.tian 2018-8-28
+-- REMARK: 工作流提示文字
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'flow', '10001', 'zh_CN', '工作流已存在');
+
+
+
+
+-- AUTHOR: 马世亨 2018年8月28日
+-- REMARK: 物业报修页面地址
+set @configId = (select max(id) + 1 from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES (@configId, 'pmtask.uri', 'property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix', 'the pmtask web url', '0', NULL, NULL);
+update eh_service_modules set action_type = 13 where id = 20100;
+update eh_service_module_apps set action_type = 13 where module_id = 20100;
+
+
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 暂时屏蔽“ERP”、“人力资源”和“企业服务” add by yanjun 20180829
+UPDATE eh_service_modules SET `status` = 0 WHERE id in (300000, 160000, 300);
+
+-- AUTHOR: 严军 2018年8月29日
+-- REMARK: issue-null 清除微商城模块默认配置
+UPDATE eh_service_modules SET instance_config = NULL where id = 92100;
+
+
+-- AUTHOR: 黄鹏宇 2018年8月29日
+-- REMARK: 配置全量同步，一键转为资质客户白名单
+
+set @id=(select ifnull((SELECT max(id) from eh_service_module_include_functions),1));
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999944, NULL, 21100, 43980);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21100, 43960);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `community_id`, `module_id`, `function_id`) VALUES (@id:= @id +1, 999983, NULL, 21200, 43970);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (250001003, null, '删除请示', '删除请示', NULL);
+
+-- remark：本地化删除客户提示
+set @id = (select max(id)+1 from eh_locale_strings);
+INSERT INTO `ehcore`.`eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES (@id, 'customer', '10035', 'zh_CN', '有请示单的客户不能删除');
+-- END
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

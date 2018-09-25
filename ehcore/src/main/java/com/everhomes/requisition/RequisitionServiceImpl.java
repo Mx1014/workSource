@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.app.AppService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
@@ -9,14 +10,12 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormTemplate;
-import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
@@ -28,12 +27,14 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
+
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+
 import com.everhomes.rest.requisition.*;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRequisitions;
 import com.everhomes.supplier.SupplierHelper;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -48,7 +49,6 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/20.
@@ -77,6 +77,8 @@ public class RequisitionServiceImpl implements RequisitionService{
     private GeneralFormProvider generalFormProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private PortalService portalService;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -107,7 +109,7 @@ public class RequisitionServiceImpl implements RequisitionService{
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 //        createFlowCaseCommand.setReferId(req.getId());
 //        createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
-        createFlowCaseCommand.setServiceType("requisition");
+        createFlowCaseCommand.setServiceType("请示单申请");
         createFlowCaseCommand.setProjectId(req.getOwnerId());
         createFlowCaseCommand.setProjectType(req.getOwnerType());
 
@@ -275,12 +277,32 @@ public class RequisitionServiceImpl implements RequisitionService{
             GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
             return ConvertHelper.convert(form, GeneralFormDTO.class);
         }else{
-            LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
-            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
-            return ConvertHelper.convert(request, GeneralFormDTO.class);
+            GeneralApproval getApproval = generalApprovalProvider.getGeneralApprovalByModuleId(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+            if(getApproval == null) {
+                LOGGER.error("no approval has been created" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_ONE_APPROVAL, "no approval has been created");
+            }else{
+                LOGGER.error("no approval has been used" + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_NO_USED_APPROVAL, "no approval has been used");
+            }
+            /*GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            return ConvertHelper.convert(request, GeneralFormDTO.class);*/
 
         }
 
+    }
+
+    @Override
+    public GeneralFormDTO getSelectedRequisitionForm(GetSelectedRequisitionFormCommand cmd){
+        if(cmd.getFormVersion() != null && cmd.getFormOriginId() != null)
+            return ConvertHelper.convert(generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(cmd.getFormOriginId(),cmd.getFormVersion()), GeneralFormDTO.class);
+        else{
+            LOGGER.error("the form Id can not find");
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "the form Id can not find");
+        }
     }
 
     @Override
@@ -309,18 +331,28 @@ public class RequisitionServiceImpl implements RequisitionService{
 
 
     @Override
-    public Long getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd){
-        GeneralFormVal request;
-        List<GeneralFormValDTO> result;
+    public GetGeneralFormByCustomerIdResponse getGeneralFormByCustomerId(GetGeneralFormByCustomerIdCommand cmd){
+        GeneralFormVal val;
+        GetGeneralFormByCustomerIdResponse response = new GetGeneralFormByCustomerIdResponse();
 
         if(cmd.getCustomerId() != null && cmd.getNamespaceId() !=null && cmd.getCommunityId() != null){
 
 
-            request = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
-           if(request != null){
-               return request.getSourceId();
-           }
-           return null;
+            val = generalFormProvider.getGeneralFormValByCustomerId(cmd.getNamespaceId(), cmd.getCustomerId(), cmd.getModuleId(), cmd.getCommunityId());
+
+            ListServiceModuleAppsCommand cmd2 = new ListServiceModuleAppsCommand();
+            cmd2.setModuleId(cmd.getModuleId());
+            cmd2.setNamespaceId(cmd.getNamespaceId());
+            ListServiceModuleAppsResponse appsResponse = portalService.listServiceModuleApps(cmd2);
+            if(val != null){
+                response.setFormOriginId(val.getFormOriginId());
+                response.setFormVersion(val.getFormVersion());
+                response.setSourceId(val.getSourceId());
+                response.setAppId(appsResponse.getServiceModuleApps().iterator().next().getOriginId());
+                return response;
+            }
+            return null;
+
 
 
         }else{

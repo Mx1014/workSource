@@ -2269,15 +2269,29 @@ public class NewsServiceImpl implements NewsService {
 	public String getNewsQR(UpdateNewsCommand cmd) {
         String url = this.configProvider.getValue("home.url","localhost") + "/html/news_text_preview.html?newsToken=";
 		String token;
-		if(null == cmd.getId()){
-			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
-			token = result.getNewsToken();
-		} else {
-			this.updateNews(cmd);
-			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
-		}
+//		if(null == cmd.getId()){
+//			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
+//			token = result.getNewsToken();
+//		} else {
+//			this.updateNews(cmd);
+//			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+//		}
+		News news = processNewsCommand(UserContext.currentUserId(),UserContext.getCurrentNamespaceId(),ConvertHelper.convert(cmd,CreateNewsCommand.class));
+		Long id = this.newsProvider.createNewPreview(news);
+		token = WebTokenGenerator.getInstance().toWebToken(id);
 		url += token;
 
 		return url;
+	}
+
+	@Override
+	public GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd) {
+		Long userId = UserContext.currentUserId();
+		Long newsId = WebTokenGenerator.getInstance().fromWebToken(cmd.getNewsToken(),Long.class);
+		News news = this.newsProvider.findNewPreview(newsId);
+		String content = news.getContent();
+		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
+		response.setContent(content);
+		return response;
 	}
 }

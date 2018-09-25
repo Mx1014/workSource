@@ -60,7 +60,7 @@ public class PurchaseProviderImpl implements PurchaseProvider {
     }
 
     @Override
-    public List<SearchPurchasesDTO> findPurchaseOrders(Long pageAnchor, Integer pageSize, Byte submissionStatus, Byte warehouseStatus, String applicant, Long ownerId, String ownerType, Integer namespaceId) {
+    public List<SearchPurchasesDTO> findPurchaseOrders(Long pageAnchor, Integer pageSize, Byte submissionStatus, Byte warehouseStatus, String applicant, Long ownerId, String ownerType, Integer namespaceId, Long communityId) {
         DSLContext context = getReadOnlyContext();
         SelectQuery<Record> query = context.selectQuery();
         List<SearchPurchasesDTO> list = new ArrayList<>();
@@ -74,6 +74,8 @@ public class PurchaseProviderImpl implements PurchaseProvider {
         if(applicant != null){
             query.addConditions(purchase.APPLICANT_NAME.eq(applicant));
         }
+        //36344 数据没有根据项目隔离
+        query.addConditions(purchase.COMMUNITY_ID.eq(communityId));
         query.addConditions(purchase.OWNER_ID.eq(ownerId));
         query.addConditions(purchase.OWNER_TYPE.eq(ownerType));
         query.addConditions(purchase.NAMESPACE_ID.eq(namespaceId));

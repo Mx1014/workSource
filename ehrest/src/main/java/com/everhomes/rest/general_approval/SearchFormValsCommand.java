@@ -22,6 +22,7 @@ public class SearchFormValsCommand {
     private Long formVersion;
     private Long ownerId;
     private String ownerType;
+    private String moduleId;
     private List<SearchGeneralFormItem> filteredFields;
     private List<SearchGeneralFormItem> displayFields;
     private List<SearchGeneralFormItem> conditionFields;
@@ -66,6 +67,14 @@ public class SearchFormValsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public String getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
     }
 
     public List<SearchGeneralFormItem> getFilteredFields() {

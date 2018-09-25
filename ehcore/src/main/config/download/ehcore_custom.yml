@@ -97,7 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://ehcore:ehcore@db-master:13318/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://ehcore:ehcore@db-master:13303/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false

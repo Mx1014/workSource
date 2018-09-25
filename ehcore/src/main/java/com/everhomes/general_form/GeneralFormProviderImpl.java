@@ -9,6 +9,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormValRequestStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormFilterUserMapDao;
@@ -133,6 +134,10 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	private void prepareObj(GeneralForm obj) {
+        if(StringUtils.isBlank(obj.getOperatorName())){
+            User user = UserContext.current().getUser();
+            obj.setOperatorName(user.getNickName());
+        }
 		Long l2 = DateHelper.currentGMTTime().getTime();
 		obj.setCreateTime(new Timestamp(l2));
 		if(null == obj.getFormOriginId())
@@ -272,16 +277,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormVal(String ownerType, String sourceType, Integer namespaceId, Long currentOrganizationId, Long ownerId, Long sourceId){
+	public void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId){
 		try {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 			context.delete(Tables.EH_GENERAL_FORM_VALS)
 					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.ORGANIZATION_ID.eq(currentOrganizationId))
 					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
 					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType))
-					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_TYPE.eq(ownerType))
 					.execute();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -327,15 +329,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 	@Override
-	public Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
+	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
         generalFormValRequests.setOwnerType(ownerType);
         generalFormValRequests.setNamespaceId(namespaceId);
-        generalFormValRequests.setSourceId(sourceId);
-        generalFormValRequests.setSourceType(sourceType);
+        generalFormValRequests.setSourceId(moduleId);
+        generalFormValRequests.setSourceType(moduleType);
+		generalFormValRequests.setFormOriginId(formOriginId);
+		generalFormValRequests.setFormVersion(formVersion);
 		generalFormValRequests.setApprovalStatus((byte)0);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -364,6 +368,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
 
 		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.APPROVAL_STATUS.ne(GeneralFormValRequestStatus.DELETE.getCode()));
 		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormValRequest.class));
 	}
 
@@ -380,7 +385,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 		EhGeneralFormValRequests dto = dao.findById(sourceId);
-		dto.setStatus(status);
+		dto.setApprovalStatus(status);
 		dao.update(dto);
 		return dto.getId();
 	}
