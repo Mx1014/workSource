@@ -3850,6 +3850,9 @@ public class PunchProviderImpl implements PunchProvider {
 	        			break;
                     case FORGOT_PUNCH:
                         condition = condition.and(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
+                        break; 
+                    case GO_OUT:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.GO_OUT_PUNCH_DAY_COUNT.gt(0));
                         break;
 	    			default:
 	    				break;
