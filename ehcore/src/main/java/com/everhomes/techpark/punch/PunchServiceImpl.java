@@ -11529,6 +11529,18 @@ public class PunchServiceImpl implements PunchService {
             log.setDetailId(memberDetail.getId());
         }
         punchProvider.createPUnchGoOutLog(log);
+        try {
+            if (null != memberDetail) {
+                PunchDayLog newPdl = new PunchDayLog();
+                Calendar punCalendar = Calendar.getInstance();
+                punCalendar.setTime(log.getPunchDate());
+                PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndUserId(log.getUserId(),
+                        log.getOrganizationId(), dateSF.get().format(punCalendar.getTime()));
+                refreshPunchDayLog(memberDetail, punchDayLog, punCalendar, newPdl);
+            }
+        } catch (Exception e) {
+        }
+
         return convertGoOutLogDTO(log);
     }
 
