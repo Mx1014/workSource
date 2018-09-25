@@ -157,8 +157,9 @@ public enum CoordinationLocks {
 
     PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
     PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
-    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
+    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
 
 
     private String code;
