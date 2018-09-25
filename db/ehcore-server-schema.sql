@@ -11084,6 +11084,19 @@ CREATE TABLE `eh_payment_bills` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='账单表';
 
+DROP TABLE IF EXISTS `eh_payment_card_accounts`;
+
+
+CREATE TABLE `eh_payment_card_accounts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `account_id` BIGINT,
+  `craete_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_payment_card_issuer_communities`;
 
 
@@ -11092,6 +11105,7 @@ CREATE TABLE `eh_payment_card_issuer_communities` (
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `issuer_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
+  `hotline` VARCHAR(255),
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
@@ -11123,6 +11137,7 @@ DROP TABLE IF EXISTS `eh_payment_card_recharge_orders`;
 CREATE TABLE `eh_payment_card_recharge_orders` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `order_no` BIGINT NOT NULL DEFAULT 0 COMMENT 'order no',
+  `biz_order_no` VARCHAR(128),
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -11201,6 +11216,7 @@ CREATE TABLE `eh_payment_cards` (
   `password` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT 'the password of user',
   `user_id` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   `activate_time` DATETIME,
   `expired_time` DATETIME,
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
