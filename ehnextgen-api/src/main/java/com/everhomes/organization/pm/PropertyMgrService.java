@@ -21,6 +21,7 @@ import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
@@ -534,5 +535,7 @@ public interface PropertyMgrService {
 	Object importAddressAuthorizePriceData(ImportAddressCommand cmd, MultipartFile multipartFile);
 
 	ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd);
+
+	List<ListChargingItemsDTO> chargingItemNameList(AuthorizePriceCommand cmd);
 
 }

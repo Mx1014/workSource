@@ -300,6 +300,7 @@ import net.greghaines.jesque.Job;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -8430,4 +8431,36 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 		return response;
 	}
+
+	@Override
+	public List<ListChargingItemsDTO> chargingItemNameList(AuthorizePriceCommand cmd) {
+		List<ListChargingItemsDTO> result = new ArrayList<>();
+		// 1、获取categoryId 列表
+		List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
+		Map<Long, String> chargingItemNameList = new HashMap<>();
+
+		for (int i = 0; i < dtos.size(); i++) {
+			OwnerIdentityCommand ownerIdentityCommand = new OwnerIdentityCommand();
+			ownerIdentityCommand.setOwnerId(cmd.getCommunityId());
+			ownerIdentityCommand.setOwnerType("community");
+			ownerIdentityCommand.setCategoryId(dtos.get(i).getCategoryId());
+			List<ListChargingItemsDTO> listChargingItem = assetService.listChargingItems(ownerIdentityCommand);
+			for (int j = 0; j < listChargingItem.size(); j++) {
+				if (listChargingItem.get(j).getIsSelected() == 1) {
+					chargingItemNameList.put(listChargingItem.get(j).getChargingItemId(),
+							listChargingItem.get(j).getChargingItemName());
+				}
+			}
+		}
+		if (chargingItemNameList != null) {
+			for (Map.Entry<Long, String> map : chargingItemNameList.entrySet()) {
+				ListChargingItemsDTO chargingItemsDTO = new ListChargingItemsDTO();
+				chargingItemsDTO.setChargingItemId(map.getKey());
+				chargingItemsDTO.setChargingItemName(map.getValue());
+				result.add(chargingItemsDTO);
+			}
+		}
+		return result;
+	}
+	
 }
