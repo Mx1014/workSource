@@ -11398,11 +11398,11 @@ public class PunchServiceImpl implements PunchService {
         response.setAdminFlag(NormalFlag.NO.getCode());
         response.setQueryPrivilege(NormalFlag.NO.getCode());
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-
+        Organization org = checkOrganization(cmd.getOrgId());
         try {
             if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
                     || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
-            	Organization org = checkOrganization(cmd.getOrgId());
+            	
             	response.setDeptName(org.getName());
                 response.setAdminFlag(NormalFlag.YES.getCode());
                 response.setQueryPrivilege(NormalFlag.YES.getCode());
@@ -11414,7 +11414,7 @@ public class PunchServiceImpl implements PunchService {
         } catch (Exception e) {
             LOGGER.error("there is a error when check org admin ", e);
         }
-        OrganizationMember managerMember = organizationProvider.findMemberByType(UserContext.currentUserId(), cmd.getOrgId(), OrganizationGroupType.MANAGER.getCode());
+        OrganizationMember managerMember = organizationProvider.findMemberByType(UserContext.currentUserId(), org.getPath(), OrganizationGroupType.MANAGER.getCode());
         if (null != managerMember) {
             response.setQueryPrivilege(NormalFlag.YES.getCode());
             Organization dpt = checkOrganization(managerMember.getOrganizationId());
