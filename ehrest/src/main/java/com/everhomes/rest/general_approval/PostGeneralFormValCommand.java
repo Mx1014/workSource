@@ -36,10 +36,19 @@ public class PostGeneralFormValCommand {
 
 	private Long communityId;
     private Long currentOrganizationId;
+    
+    private Long investmentAdId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 
+	public Long getInvestmentAdId() {
+		return investmentAdId;
+	}
+
+	public void setInvestmentAdId(Long investmentAdId) {
+		this.investmentAdId = investmentAdId;
+	}
 
 	public Long getCommunityId() {
 		return communityId;

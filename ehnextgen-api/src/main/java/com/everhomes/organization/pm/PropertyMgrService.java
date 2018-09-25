@@ -4,6 +4,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.community.Community;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
+import com.everhomes.rest.address.ApartmentBriefInfoDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.AuthorizePriceCommand;
 import com.everhomes.rest.address.AuthorizePriceDTO;
@@ -14,6 +15,8 @@ import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -537,5 +540,7 @@ public interface PropertyMgrService {
 	ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd);
 
 	List<ListChargingItemsDTO> chargingItemNameList(AuthorizePriceCommand cmd);
+
+	List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd);
 
 }
