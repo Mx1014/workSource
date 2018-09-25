@@ -26,10 +26,7 @@ import com.everhomes.rest.investmentAd.ListInvestmentAdCommand;
 import com.everhomes.rest.investmentAd.ListInvestmentAdResponse;
 import com.everhomes.rest.investmentAd.RelatedAssetDTO;
 import com.everhomes.rest.investmentAd.UpdateInvestmentAdCommand;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.FindLeasePromotionByIdCommand;
-import com.everhomes.util.RequireAuthentication;
-import com.hp.hpl.sparta.xpath.TrueExpr;
+
 
 @RestDoc(value="InvestmentAd Controller", site="core")
 @RestController
