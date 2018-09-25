@@ -151,7 +151,7 @@ public enum CoordinationLocks {
     VISITOR_SYS_CONFIG("visitor_sys_config"),
     WORK_REPORT_RX_MSG("work_report_rx_msg"),
     WORK_REPORT_AU_BASIC_MSG("work_report_au_basic_msg"),
-	WORK_REPORT_AU_MSG("work_report_author_msg"),
+	WORK_REPORT_AU_MSG("work_report_au_msg"),
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
