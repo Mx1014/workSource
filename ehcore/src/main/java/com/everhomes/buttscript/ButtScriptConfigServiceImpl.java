@@ -40,8 +40,13 @@ public class ButtScriptConfigServiceImpl implements  ButtScriptConfigService{
         cmd.setNamespaceId(namespaceId);
         //Provider 层传进行查询并返回对象
         List<ButtScriptConfig> boList = buttScriptConfigProvider.findButtScriptConfigByNamespaceId(cmd.getNamespaceId(),cmd.getStatus());
+
         //对象转换
         ButtScriptConfingResponse returnDto = new ButtScriptConfingResponse ();
+
+        if(boList == null){
+            return returnDto;
+        }
 
         returnDto.setDtos(boList.stream().map(r->{
             //copy 相同属性下的值
