@@ -112,3 +112,12 @@ VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'cs://1/
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
 VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2UvTVRwaU5tUXhNR013T1RGaVlUVmtNalF6TmpkaVpqZzVNVGhtWlRoaU1XVTRaQQ',1,1);
 -- -------------------END-----------------------------------------------
+
+-- ------------------------园区公告功能提前融合到标准版 ----------------------
+-- AUTHOR: 梁燕龙
+-- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
+INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
+INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
+INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+---------------------------园区公告功能提前融合到标准版 END -------------
