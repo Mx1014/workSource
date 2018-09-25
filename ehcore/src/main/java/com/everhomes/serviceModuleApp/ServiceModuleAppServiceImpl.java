@@ -456,33 +456,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
-		
-		@Override
-		public ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
-			ListServiceModuleAppsForEnterprisePayResponse response  = new ListServiceModuleAppsForEnterprisePayResponse();
-			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
-
-			if(releaseVersion == null){
-				return response;
-			}
-			List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePayFlag());
-
-			if(apps == null){
-				return response;
-			}
-
-
-			List<ServiceModuleAppDTO> dtos = new ArrayList<>();
-			for (ServiceModuleApp app: apps){
-				ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-				dtos.add(dto);
-			}
-
-			response.setApps(dtos);
-
-			return response;
-		}
-
 
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
@@ -1395,4 +1368,28 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		});
 	}
 	
+	public ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
+		ListServiceModuleAppsForEnterprisePayResponse response  = new ListServiceModuleAppsForEnterprisePayResponse();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+
+		if(releaseVersion == null){
+			return response;
+		}
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePay());
+
+		if(apps == null){
+			return response;
+		}
+
+
+		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+		for (ServiceModuleApp app: apps){
+			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			dtos.add(dto);
+		}
+
+		response.setApps(dtos);
+
+		return response;
+	}
 }

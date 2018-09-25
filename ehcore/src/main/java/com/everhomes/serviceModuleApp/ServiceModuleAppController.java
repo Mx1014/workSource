@@ -7,10 +7,13 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
+<<<<<<< HEAD
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+=======
+>>>>>>> b4db8304ad... issue-34780
 import com.everhomes.rest.servicehotline.*;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.techpark.servicehotline.HotlineService;
@@ -46,6 +49,7 @@ public class ServiceModuleAppController extends ControllerBase {
 
 
 	/**
+<<<<<<< HEAD
 	 * <p>给公司安装应用</p>
 	 * <b>URL: /servicemoduleapp/installApp</b>
 	 */
@@ -128,15 +132,21 @@ public class ServiceModuleAppController extends ControllerBase {
 	}
 
 	/**
+=======
+>>>>>>> b4db8304ad... issue-34780
 	 * 查询支持企业支付的应用，原来的接口参数太多已经快废了，新建一个专用接口。
 	 * @param cmd
 	 * @return
 	 */
+<<<<<<< HEAD
 
+=======
+>>>>>>> b4db8304ad... issue-34780
 	@RequestMapping("listServiceModuleAppsForEnterprisePay")
 	@RestReturn(value= ListServiceModuleAppsForEnterprisePayResponse.class)
 	public RestResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
 		ListServiceModuleAppsForEnterprisePayResponse res = serviceModuleAppService.listServiceModuleAppsForEnterprisePay(cmd);
+<<<<<<< HEAD
 
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -170,11 +180,14 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RestReturn(value=ListAppCommunityConfigsResponse.class)
 	public RestResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
 		ListAppCommunityConfigsResponse res = serviceModuleAppService.listAppCommunityConfigs(cmd);
+=======
+>>>>>>> b4db8304ad... issue-34780
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+<<<<<<< HEAD
 
 	/**
 	 * <p>更新园区自定义app配置信息</p>
@@ -207,4 +220,6 @@ public class ServiceModuleAppController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+=======
+>>>>>>> b4db8304ad... issue-34780
 }

@@ -82,8 +82,8 @@ public class ServiceModuleAppDTO {
 
     private Byte accessControlType;
 
-
     private Byte enableEnterprisePayFlag;
+
 
     public Long getId() {
         return id;
@@ -356,7 +356,6 @@ public class ServiceModuleAppDTO {
     public void setAccessControlType(Byte accessControlType) {
         this.accessControlType = accessControlType;
     }
-
 
     public Byte getEnableEnterprisePayFlag() {
         return enableEnterprisePayFlag;
