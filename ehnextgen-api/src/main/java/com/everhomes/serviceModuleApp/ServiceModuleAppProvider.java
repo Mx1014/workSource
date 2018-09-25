@@ -48,5 +48,6 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listDefaultApps(Long versionId);
 
-	List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePay);
+	List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePayFlag);
+
 }

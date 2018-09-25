@@ -5,13 +5,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
- *     <li>enableEnterprisePay: 支持企业支付标记，0-否，1-是。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>enableEnterprisePayFlag: 支持企业支付标记，0-否，1-是。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ListServiceModuleAppsForEnterprisePayCommand {
 	private Integer namespaceId;
 
-	private Byte enableEnterprisePay;
+	private Byte enableEnterprisePayFlag;
 
 
 	public Integer getNamespaceId() {
@@ -22,13 +22,12 @@ public class ListServiceModuleAppsForEnterprisePayCommand {
 		this.namespaceId = namespaceId;
 	}
 
-
-	public Byte getEnableEnterprisePay() {
-		return enableEnterprisePay;
+	public Byte getEnableEnterprisePayFlag() {
+		return enableEnterprisePayFlag;
 	}
 
-	public void setEnableEnterprisePay(Byte enableEnterprisePay) {
-		this.enableEnterprisePay = enableEnterprisePay;
+	public void setEnableEnterprisePayFlag(Byte enableEnterprisePayFlag) {
+		this.enableEnterprisePayFlag = enableEnterprisePayFlag;
 	}
 
 	@Override

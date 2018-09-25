@@ -1375,7 +1375,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		if(releaseVersion == null){
 			return response;
 		}
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePay());
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePayFlag());
 
 		if(apps == null){
 			return response;
