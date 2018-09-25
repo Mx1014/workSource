@@ -1266,7 +1266,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = null;
         int nextLoginId = 1;
         if (maxLoginId != null) {
-            for (int i = 1; i <= maxLoginId.intValue(); i++) {
+            for (int i = 1; i <= maxLoginId; i++) {
                 String hkeyLogin = String.valueOf(i);
                 Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
                 UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
@@ -1300,7 +1300,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
                         //found twice, delete all logins
                         accessor.getTemplate().delete(accessor.getBucketName());
-                        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+                        // accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
                         ref.setOldDeviceId("");
                         ref.setNextLoginId(1);
                         ref.setFoundLogin(null);
@@ -1316,7 +1316,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 }
 
                 //check
-                if (foundLogin == null && login.getLoginId() >= nextLoginId) {
+                if (login.getLoginId() >= nextLoginId) {
                     nextLoginId = login.getLoginId() + 1;
                 }
 
@@ -1333,6 +1333,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify) {
+        return createLogin(namespaceId, inUser, deviceIdentifier, pusherIdentify, null);
+    }
+
+    private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify, LoginToken loginToken) {
         Boolean isNew = false;
         User user = null;
         Long impId = null;
@@ -1353,7 +1357,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         // get "index" accessor
         String hkeyIndex = "0";
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
-        Object o = accessor.getMapValueObject(hkeyIndex);
+        // Object o = accessor.getMapValueObject(hkeyIndex);
         LogonRef ref = new LogonRef();
         ref.setNamespaceId(namespaceId);
         ref.setOldDeviceId("");
@@ -1372,6 +1376,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = ref.getFoundLogin();
         if (foundLogin == null) {
             foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
+            // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
+            if (loginToken != null) {
+                foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
+            }
             accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
             isNew = true;
@@ -1703,14 +1711,23 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
             return true;
         } else {
+            // 去统一用户那边检查登录状态
             String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
-            UserInfo userInfo = sdkUserService.validateToken(tokenString);
+            UserInfo userInfo = null;
+            try {
+                userInfo = sdkUserService.validateToken(tokenString);
+            } catch (Exception e) {
+                // e.printStackTrace();
+            }
             if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
                 User user = userProvider.findUserById(userInfo.getId());
                 if (user != null) {
-                    createLogin(userInfo.getNamespaceId(), user, null, null);
+                    LOGGER.info("User service check success, loginToken={}", loginToken);
+                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
                 }
+            } else {
+                LOGGER.info("User service check failure, loginToken={}", loginToken);
             }
 
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
