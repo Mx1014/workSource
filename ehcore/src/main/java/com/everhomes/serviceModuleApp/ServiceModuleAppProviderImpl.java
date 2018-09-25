@@ -6,8 +6,12 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+<<<<<<< HEAD
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
+=======
+import com.everhomes.rest.common.TrueOrFalseFlag;
+>>>>>>> b4db8304ad... issue-34780
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -265,6 +269,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return  apps;
 	}
 
+<<<<<<< HEAD
 	@Override
 	public List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword) {
 
@@ -538,4 +543,24 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 
+=======
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePay) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId);
+
+		if(enableEnterprisePay != null && enableEnterprisePay == 1){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ENABLE_ENTERPRISE_PAY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+		}else {
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ENABLE_ENTERPRISE_PAY_FLAG.ne(TrueOrFalseFlag.TRUE.getCode()));
+		}
+
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(cond)
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+	}
+
+>>>>>>> b4db8304ad... issue-34780
 }

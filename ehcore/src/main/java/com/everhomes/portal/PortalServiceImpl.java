@@ -255,6 +255,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setActionType(serviceModule.getActionType());
 		moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 		moduleApp.setAccessControlType(serviceModule.getAccessControlType());
+		moduleApp.setEnableEnterprisePayFlag(serviceModule.getEnableEnterprisePayFlag());
 
 		//todo
 		moduleApp.setCustomTag(cmd.getCustomTag());
@@ -296,6 +297,8 @@ public class PortalServiceImpl implements PortalService {
 
 			moduleApp.setAccessControlType(serviceModule.getAccessControlType());
 
+			moduleApp.setEnableEnterprisePayFlag(serviceModule.getEnableEnterprisePayFlag());
+
 			serviceModuleApps.add(moduleApp);
 		}
 		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
@@ -328,6 +331,12 @@ public class PortalServiceImpl implements PortalService {
 		if(!StringUtils.isEmpty(cmd.getAccessControlType())){
 			moduleApp.setAccessControlType(cmd.getAccessControlType());
 		}
+
+		if(TrueOrFalseFlag.fromCode(cmd.getEnableEnterprisePayFlag()) != null){
+			moduleApp.setEnableEnterprisePayFlag(cmd.getEnableEnterprisePayFlag());
+		}
+
+
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
