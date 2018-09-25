@@ -1,4 +1,4 @@
-﻿package com.everhomes.rest.acl;
+package com.everhomes.rest.acl;
 
 public interface PrivilegeConstants {
     // System defined privileges

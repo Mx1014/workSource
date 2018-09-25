@@ -1,4 +1,4 @@
-﻿// @formatter:off
+// @formatter:off
 package com.everhomes.rest.launchpad;
 
 /**
