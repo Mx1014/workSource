@@ -299,7 +299,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     public void workReportAuMessage() {
         if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
             return;
-        coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AUTHOR_MSG.getCode()).tryEnter(() -> {
+        coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_MSG.getCode()).tryEnter(() -> {
             LocalDateTime currentTime = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
             Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
