@@ -1938,13 +1938,11 @@ public class PortalServiceImpl implements PortalService {
 				instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
 				group.setColumnCount(instanceConfig.getColumnCount());
 			}
-			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
-				group.setTitle(instanceConfig.getTitle());
-				if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
-					String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), user.getId());
-					group.setIconUrl(url);
-				}
-			}
+
+
+			//设置标题信息
+			setTitleConfig(group, instanceConfig, user);
+
 
 			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
 				NavigatorInstanceConfig config = new NavigatorInstanceConfig();
@@ -2128,6 +2126,25 @@ public class PortalServiceImpl implements PortalService {
 //		}
 	}
 
+
+	private void setTitleConfig(LaunchPadLayoutGroup group, ItemGroupInstanceConfig instanceConfig, User user){
+
+		if(group == null || instanceConfig == null || user == null){
+			return;
+		}
+
+		group.setTitleFlag(instanceConfig.getTitleFlag());
+		group.setTitleStyle(instanceConfig.getTitleStyle());
+		group.setSubTitle(instanceConfig.getSubTitle());
+		group.setTitleSize(instanceConfig.getTitleSize());
+		group.setTitleMoreFlag(instanceConfig.getTitleMoreFlag());
+
+		group.setTitle(instanceConfig.getTitle());
+		if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
+			String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), user.getId());
+			group.setIconUrl(url);
+		}
+	}
 
 	//暂时没有用到
 	private void publishNavigationBar(Long versionId, Byte publishType){
@@ -3304,7 +3321,7 @@ public class PortalServiceImpl implements PortalService {
 							config.setMargin(instanceConfig.getLineSpacing());
 						}
 						if(!StringUtils.isEmpty(padLayoutGroup.getTitle()) || !StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
-							config.setTitleFlag(TitleFlag.TRUE.getCode());
+							config.setTitleFlag(TitleFlag.LEFT.getCode());
 							config.setTitle(padLayoutGroup.getTitle());
 							config.setTitleUri(padLayoutGroup.getIconUrl());
 						}
@@ -3332,7 +3349,7 @@ public class PortalServiceImpl implements PortalService {
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(padLayout.getNamespaceId(), location, instanceConfig.getItemGroup());
 						if(padItems.size() > 0){
-							config.setTitleFlag(TitleFlag.TRUE.getCode());
+							config.setTitleFlag(TitleFlag.LEFT.getCode());
 							config.setTitle(padItems.get(0).getItemLabel());
 
 							Long moduleId = null;

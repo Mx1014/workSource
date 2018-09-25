@@ -22,6 +22,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  *     <li>title: 标题</li>
  *     <li>iconUrl: 标题图片</li>
  *     <li>align: align</li>
+ *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
+ *     <li>titleStyle: titleStyle</li>
+ *     <li>subTitle: subTitle</li>
+ *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSizeType}</li>
+ *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class LaunchPadLayoutGroup {
@@ -39,6 +44,16 @@ public class LaunchPadLayoutGroup {
     private String title;
     private String iconUrl;
     private String align;
+
+    private Byte titleFlag;
+
+    private Byte titleStyle;
+
+    private String subTitle;
+
+    private Byte titleSize;
+
+    private Byte titleMoreFlag;
 
     public String getGroupName() {
         return groupName;
@@ -150,6 +165,46 @@ public class LaunchPadLayoutGroup {
 
     public void setInstanceConfig(Object instanceConfig) {
         this.instanceConfig = instanceConfig;
+    }
+
+    public Byte getTitleFlag() {
+        return titleFlag;
+    }
+
+    public void setTitleFlag(Byte titleFlag) {
+        this.titleFlag = titleFlag;
+    }
+
+    public Byte getTitleStyle() {
+        return titleStyle;
+    }
+
+    public void setTitleStyle(Byte titleStyle) {
+        this.titleStyle = titleStyle;
+    }
+
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
+    public Byte getTitleSize() {
+        return titleSize;
+    }
+
+    public void setTitleSize(Byte titleSize) {
+        this.titleSize = titleSize;
+    }
+
+    public Byte getTitleMoreFlag() {
+        return titleMoreFlag;
+    }
+
+    public void setTitleMoreFlag(Byte titleMoreFlag) {
+        this.titleMoreFlag = titleMoreFlag;
     }
 
     @Override
