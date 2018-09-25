@@ -710,6 +710,17 @@ INSERT INTO `ehcore`.`eh_general_form_templates` (`id`, `namespace_id`, `organiz
 SET @id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'investmentAd', '100000', 'zh_CN', '无招商广告数据');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'investmentAd', '100001', 'zh_CN', '招商广告不存在');
+
+-- AUTHOR: tangcen
+-- REMARK: 资产管理的管理配置页面添加默认的tab卡
+set @item_id = (select max(id) from `eh_var_field_group_scopes`);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1001, '租客管理', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1003, '合同管理', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1004, '账单管理', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1005, '活动记录', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1007, '服务信息', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1008, '历史房源', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1009, '附件', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
