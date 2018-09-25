@@ -435,7 +435,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         	doorDto.setName(r.getValue(Tables.EH_DOOR_ACCESS.NAME));
         	doorDto.setCreateTime(r.getValue(Tables.EH_DOOR_ACCESS.CREATE_TIME));
         	doorDto.setDoorType(r.getValue(Tables.EH_DOOR_ACCESS.DOOR_TYPE));
-        	doorDto.setVersion(r.getValue(Tables.EH_DOOR_ACCESS.FAREWARE_VERSION));
+        	doorDto.setVersion(r.getValue(Tables.EH_DOOR_ACCESS.FIRMWARE_VERSION));
         	if(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID) == 0L || r.getValue(Tables.EH_DOOR_ACCESS.DOOR_TYPE) != DoorAccessType.ZLACLINK_WIFI_2.getCode()){
         		if(groupRelMap.get(0L) != null){
         			groupDto = groupRelMap.get(0L);
