@@ -3808,6 +3808,12 @@ public class PunchProviderImpl implements PunchProvider {
                 case FORGOT_PUNCH:
                     condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
                     break;
+                case ARRIVED:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.NO.getCode()));
+                    break;
+                case GO_OUT:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_PUNCH_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+                    break;
     			default:
     				break;
         	}
