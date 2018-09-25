@@ -150,10 +150,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
         QueryBuilder qb = QueryBuilders.matchAllQuery();
-
-
-
-
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -219,8 +215,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-
-
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
@@ -242,7 +236,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         List<Long> ids = getIds(rsp);
         ListGeneralFormValResponse response = new ListGeneralFormValResponse();
 
-
         SearchHit[] tempHits = rsp.getHits().getHits();
         SearchHit[] hits;
 
@@ -253,8 +246,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }else{
             hits = tempHits;
         }
-
-        
 
         List<Map<String, Object>> fieldVals = new ArrayList<>();
         for (SearchHit hit : hits) {
@@ -273,7 +264,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 List<GeneralFormVal> vals = generalFormProvider.getGeneralFormVal(namespaceId, sourceId, moduleId, ownerId);
                 Map<String, Object> returnMap = new HashMap<>();
                 for (GeneralFormVal val : vals) {
-                    
                     GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);     
                     String fieldValue = dto.getFieldValue();
                     ObjectMapper mapper = new ObjectMapper(); 
@@ -302,17 +292,22 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                                     break;
                                 }
                             }
-
                         }
                         returnMap.put(dto.getFieldName(), fieldValue);
                     } catch (IOException e) {
                         returnMap.put(dto.getFieldName(), dto.getFieldValue());
                     }
-
                 }
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(sourceId);
-                if(request != null)
-                    returnMap.put("approvalStatus",request.getApprovalStatus());
+                if(request != null){
+                	returnMap.put("approvalStatus",request.getApprovalStatus());
+                	//--------房源招商申请业务--------
+                	if (request.getInvestmentAdId() != null) {
+                		returnMap.put("investmentAdId",request.getInvestmentAdId());
+					}
+                	returnMap.put("transformStatus",request.getTransformStatus());
+                	//--------房源招商申请业务--------
+                }
                 returnMap.put("sourceId", sourceId);
                 returnMap.put("formVersion", formVersion);
                 returnMap.put("formOriginId", formOriginId);
@@ -332,9 +327,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         // for(GeneralFormVal val : vals) {
         //     dtos.add(ConvertHelper.convert(val, GeneralFormValDTO.class));
         // }
-
         // response.setFieldVals(dtos);
-
         response.setValList(fieldVals);
 
         return response;

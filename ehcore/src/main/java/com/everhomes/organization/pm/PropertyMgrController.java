@@ -11,6 +11,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.SignupInfoDTO;
+import com.everhomes.rest.address.ApartmentBriefInfoDTO;
 import com.everhomes.rest.address.ApartmentEventDTO;
 import com.everhomes.rest.address.AuthorizePriceCommand;
 import com.everhomes.rest.address.BuildingDTO;
@@ -20,6 +21,8 @@ import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
 import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
+import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
 import com.everhomes.rest.address.ListApartmentsResponse;
 import com.everhomes.rest.address.ListAuthorizePricesResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
@@ -156,6 +159,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import com.hp.hpl.sparta.xpath.TrueExpr;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2434,5 +2439,20 @@ public class PropertyMgrController extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+    
+    /**
+	 * <b>URL: /pm/listApartmentsInBuilding</b>
+	 * <p>查询楼宇下的房源（条件：房源状态）</p>
+	 */
+	@RequestMapping("listApartmentsInBuilding")
+	@RestReturn(value=ApartmentBriefInfoDTO.class,collection=true)
+	public RestResponse listPropApartments(ListApartmentsInBuildingCommand cmd) {
+		List<ApartmentBriefInfoDTO> results =  propertyMgrService.listApartmentsInBuilding(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 
 }

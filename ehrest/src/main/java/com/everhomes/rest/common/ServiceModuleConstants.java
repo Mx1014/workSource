@@ -31,7 +31,7 @@ public interface ServiceModuleConstants {
     long DECORATION_MODULE = 43000L;
 
     long REQUISITION_MODULE = 25000L; // 请示单模块
-
-    long BUSINESS_INVITATION = 150000L; //招商管理模块
+    
+    long BUSINESS_INVITATION = 150000L;//招商管理模块
 
 }
