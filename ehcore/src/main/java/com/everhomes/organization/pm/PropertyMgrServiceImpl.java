@@ -2774,7 +2774,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         //房源的授权价
         AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
-        if (addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null) {
+        if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null) {
         	String chargingItemName = PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc();
     		String apartmentAuthorizeType = AuthorizePriceType.fromCode(addressProperties.getApartmentAuthorizeType()).getDesc(); //周期
     		response.setApartAuthorizePrice(apartmentAuthorizeType+chargingItemName+addressProperties.getAuthorizePrice());
