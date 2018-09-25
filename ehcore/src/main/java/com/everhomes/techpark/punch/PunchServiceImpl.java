@@ -11417,7 +11417,9 @@ public class PunchServiceImpl implements PunchService {
         OrganizationMember managerMember = organizationProvider.findMemberByType(UserContext.currentUserId(), org.getPath(), OrganizationGroupType.MANAGER.getCode());
         if (null != managerMember) {
             response.setQueryPrivilege(NormalFlag.YES.getCode());
-            Organization dpt = checkOrganization(managerMember.getOrganizationId());
+            //部门管理员组要用parentId
+            Organization manager = checkOrganization(managerMember.getOrganizationId());
+            Organization dpt = checkOrganization(manager.getParentId());
             response.setDeptId(dpt.getId());
             response.setDeptName(dpt.getName());
             response.setHasSubDpts(checkHasSubDpt(dpt.getId()));
