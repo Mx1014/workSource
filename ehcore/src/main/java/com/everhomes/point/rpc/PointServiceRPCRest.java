@@ -27,9 +27,16 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 	 * @return
 	 */
 	public PointScoreDTO getUserPoint(GetUserPointCommand cmd) {  
-   	
-    	RestResponse resp =
-                call(URIConstants.POINTSCORE_GETUSERPOINT_URL, cmd, RestResponse.class);
+
+		//update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+		RestResponse resp = null ;
+		try {
+			resp =
+					call(URIConstants.POINTSCORE_GETUSERPOINT_URL, cmd, RestResponse.class);
+		}catch(Exception e){
+			LOGGER.error("something error happen while RPC to point system . e:{}",e);
+		}
+
     	if(resp == null){
     		return null ;
     	}
@@ -58,9 +65,15 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 	 */
 	
 	    public ListPointLogsResponse  getUserPointLogs(ListPointLogsCommand cmd){  
-		   	
-	    	RestResponse resp =
-	                call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+
+			//update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+			RestResponse resp = null ;
+			try {
+				resp =
+						call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+			}catch(Exception e){
+				LOGGER.error("something error happen while RPC to point system . e:{}",e);
+			}
 	    	if(resp == null){
 	    		return null ;
 	    	}
