@@ -25,6 +25,7 @@ import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.OperationType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -4039,6 +4040,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
         }
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(OperationType.JOIN.getCode()));
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
         query.addLimit(pageSize + 1);
 
