@@ -103,7 +103,7 @@ public class PointServerRPCRestService {
         if (resp.getErrorCode() == 403 && Objects.equals("user", resp.getErrorScope())) {
             return RuntimeErrorException.errorWith("user", 403, resp.getErrorDescription());
         }
-        LOGGER.error("call core server failed, api = {}, resp = {}", api, StringHelper.toJsonString(resp));
-        return RuntimeErrorException.errorWith("core", 500, "call core server error");
+        LOGGER.error("call point server failed, api = {}, resp = {}", api, StringHelper.toJsonString(resp));
+        return RuntimeErrorException.errorWith("core", 500, "call point server error");
     }
 }
