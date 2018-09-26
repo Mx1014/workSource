@@ -223,7 +223,7 @@ INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum'
 
 -- AUTHOR: 严军
 -- REMARK: 删除待办事项菜单
-UPDATE eh_web_menus SET `status` = 0 WHERE id in = 48130000;
+UPDATE eh_web_menus SET `status` = 0 WHERE id = 48130000;
 -- AUTHOR:huangmingbo 20180919
 -- REMARK: issue-36688/issue-33683/ 停车缴费V6.6.3 服务联盟V3.6
 -- 37669修复
