@@ -140,3 +140,42 @@ CREATE TABLE `eh_user_app_flags` (
   PRIMARY KEY (`id`),
   KEY `u_eh_user_app_flag_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户启用自定义配置的标记';
+
+-- AUTHOR: xq.tian
+-- REMARK: 漏掉的工作流表, 需要删除原来的表重建
+DROP TABLE IF EXISTS `eh_flow_scripts`;
+CREATE TABLE `eh_flow_scripts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `script_category` VARCHAR(64) NOT NULL COMMENT 'system_script, user_script',
+  `script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+  `script_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_flow_scripts',
+  `script_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'script version',
+  `name` VARCHAR(128) COMMENT 'script name',
+  `description` TEXT COMMENT 'script description',
+  `script` LONGTEXT COMMENT 'script content',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
+  `create_time` datetime(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag5` BIGINT NOT NULL DEFAULT 0,
+  `last_commit` VARCHAR(40) COMMENT 'repository last commit id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flow scripts in dev mode';
+
+-- 合同字段名称修改 add by jiarui 20180925
+ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);

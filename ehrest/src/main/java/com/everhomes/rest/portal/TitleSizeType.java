@@ -3,17 +3,17 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>
- *     <li>NONE((byte)0): NONE</li>
- *     <li>LEFT((byte)1): LEFT</li>
- *     <li>CENTER((byte)2): CENTER</li>
+ *     <li>SMALL((byte) 1): 小</li>
+ *     <li>MUDIUM((byte) 2): 中</li>
+ *     <li>LARGE((byte) 3): 大</li>
  * </ul>
  */
-public enum TitleFlag {
-    NONE((byte) 0), LEFT((byte) 1), CENTER((byte) 2);
+public enum TitleSizeType {
+    SMALL((byte) 1), MUDIUM((byte) 2), LARGE((byte) 3);
 
     private byte code;
 
-    private TitleFlag(byte code) {
+    private TitleSizeType(byte code) {
         this.code = code;
     }
 
@@ -21,9 +21,9 @@ public enum TitleFlag {
         return this.code;
     }
 
-    public static TitleFlag fromCode(Byte code) {
+    public static TitleSizeType fromCode(Byte code) {
         if (null != code) {
-            for (TitleFlag value : TitleFlag.values()) {
+            for (TitleSizeType value : TitleSizeType.values()) {
                 if (value.code == code.byteValue()) {
                     return value;
                 }

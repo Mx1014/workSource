@@ -112,3 +112,65 @@ VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'cs://1/
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
 VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2UvTVRwaU5tUXhNR013T1RGaVlUVmtNalF6TmpkaVpqZzVNVGhtWlRoaU1XVTRaQQ',1,1);
 -- -------------------END-----------------------------------------------
+
+-- ------------------------园区公告功能提前融合到标准版 ----------------------
+-- AUTHOR: 梁燕龙
+-- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
+INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
+INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
+INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+---------------------------园区公告功能提前融合到标准版 END -------------
+
+
+-- ------------------------- 物业融合标准版------------------------------------
+-- AUTHOR:jiarui
+
+-- 通用脚本
+-- AUHOR: jiarui 20180726
+-- REMARK：动态表单迁移ownerId
+update eh_var_field_group_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 ),0);
+update eh_var_field_group_scopes set owner_type ='EhOrganizations';
+update eh_var_field_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 ),0);
+update eh_var_field_scopes set owner_type ='EhOrganizations';
+update eh_var_field_item_scopes t1 set owner_id = IFNULL((select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1),0);
+update eh_var_field_item_scopes set owner_type ='EhOrganizations';
+-- 物业巡检 by jiatui 20180730
+update eh_equipment_inspection_equipments set owner_type = 'EhOrganizations';
+update eh_equipment_inspection_standards set owner_type = 'EhOrganizations';
+update eh_equipment_inspection_accessories set owner_type = 'EhOrganizations';
+update eh_equipment_inspection_plans set owner_type = 'EhOrganizations';
+update eh_equipment_inspection_tasks set owner_type = 'EhOrganizations';
+update eh_equipment_inspection_templates set owner_type = 'EhOrganizations';
+update eh_pm_notify_configurations t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =(select namespace_id from eh_communities t3 where t3.id = scope_id ) and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 2;
+update eh_pm_notify_configurations t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.scope_id and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 1;
+update eh_equipment_inspection_review_date t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =(select namespace_id from eh_communities t3 where t3.id = scope_id ) and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 2;
+update eh_equipment_inspection_review_date t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.scope_id and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 1;
+update eh_equipment_inspection_review_date set target_type = 'EhOrganizations';
+update eh_pm_notify_configurations set target_type = 'EhOrganizations';
+-- 品质核查 by jiarui  20180730
+update eh_quality_inspection_standards set owner_type ='EhOrganizations';
+update eh_quality_inspection_tasks set owner_type ='EhOrganizations';
+update eh_quality_inspection_task_templates set owner_type ='EhOrganizations';
+update eh_quality_inspection_specifications set owner_type ='EhOrganizations';
+update eh_quality_inspection_samples set owner_type ='EhOrganizations';
+update eh_quality_inspection_sample_score_stat set owner_type ='EhOrganizations';
+update eh_quality_inspection_sample_community_specification_stat set owner_type ='EhOrganizations';
+update eh_quality_inspection_logs set owner_type ='EhOrganizations';
+update eh_quality_inspection_evaluations set owner_type ='EhOrganizations';
+-- 能耗管理  by jiarui 20180731
+update eh_energy_meter_categories set owner_type ='EhOrganizations';
+
+-- 合同管理 by jiarui 20180731
+update eh_contract_templates t1 set org_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.namespace_id and t2.parent_id = 0 LIMIT 1);
+update eh_contract_params t1 set owner_id = (select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 );
+update eh_contract_params set owner_type = 'EhOrganizations';
+
+
+-- 缴费管理  by jiarui 20180806
+UPDATE eh_asset_bills set owner_type ='EhOrganizations';
+UPDATE eh_asset_bill_template_fields set owner_type ='EhOrganizations';
+UPDATE  eh_payment_charging_item_scopes t1 set org_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.namespace_id and t2.parent_id = 0 LIMIT 1);
+update eh_asset_bill_notify_records set owner_type = 'EhOrganizations';
+
+-- -------------------------- 物业融合标准版---------------------------------
