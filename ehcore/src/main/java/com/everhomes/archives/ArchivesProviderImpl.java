@@ -185,7 +185,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<Long> listDismissEmployeeDetailIdsByDepartmentId(List<Long> departmentIds){
+    public List<Long> listDismissEmployeeDetailIdsByDepartmentIds(List<Long> departmentIds){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
         query.addSelect(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID);

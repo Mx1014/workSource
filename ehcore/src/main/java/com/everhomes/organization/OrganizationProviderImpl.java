@@ -5285,8 +5285,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             subDeparts.forEach(r -> {
             	subDptIds.add(r.getId());
             });
-            List<Long> workGroups = listOrganizationPersonnelDetailIdsByDepartmentId(subDptIds);
-            List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(subDptIds);
+            List<Long> workGroups = listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
+            List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
             Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
             Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
             if (workGroups != null)
@@ -5910,7 +5910,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(List<Long> subDptIds) {
+    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentIds(List<Long> subDptIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);

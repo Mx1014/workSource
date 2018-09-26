@@ -36,7 +36,7 @@ public interface ArchivesProvider {
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
-    List<Long> listDismissEmployeeDetailIdsByDepartmentId(List<Long> departmentIds);
+    List<Long> listDismissEmployeeDetailIdsByDepartmentIds(List<Long> departmentIds);
 
     void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
