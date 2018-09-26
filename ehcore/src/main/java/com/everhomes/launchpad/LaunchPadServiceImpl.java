@@ -3027,7 +3027,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		BulletinsHandler bulletinsHandler = getBulletinsHandler(bulletins.getModuleId());
 		if(bulletinsHandler != null){
-			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), bulletins.getRowCount());
+			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), bulletins.getNoticeCount());
 			response.setCards(cards);
 
 			String itemActionData = "{}";
