@@ -138,6 +138,8 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -5273,14 +5275,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode())); 
         if (departmentId != null) {
             Organization department = findOrganizationById(departmentId);
-            if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-                // get the hidden department of the company which has the same name
-                Organization under_department = findUnderOrganizationByParentOrgId(department.getId());
-                if (under_department != null)
-                    department = under_department;
-            }
-            List<Long> workGroups = listOrganizationPersonnelDetailIdsByDepartmentId(department.getId());
-            List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(department.getId());
+
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            List<Organization> subDeparts = listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+            List<Long> subDptIds = new ArrayList<>();
+            subDeparts.forEach(r -> {
+            	subDptIds.add(r.getId());
+            });
+            List<Long> workGroups = listOrganizationPersonnelDetailIdsByDepartmentId(subDptIds);
+            List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(subDptIds);
             Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
             Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
             if (workGroups != null)
@@ -5904,11 +5910,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId) {
+    public List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(List<Long> subDptIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(subDptIds));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.isNotNull());
         List<Long> results = query.fetchInto(Long.class);

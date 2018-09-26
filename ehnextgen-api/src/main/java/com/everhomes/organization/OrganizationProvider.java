@@ -638,7 +638,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
+    List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(List<Long> departmentIds);
 
 
     List<Organization> listPMOrganizations(Integer namespaceId);
