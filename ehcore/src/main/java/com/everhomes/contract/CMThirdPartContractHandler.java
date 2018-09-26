@@ -339,8 +339,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             	//存储瑞安合同
             	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
             	//同步CM数据到物业账单表
-            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
-            	
+            	//assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
             }
         }
 
