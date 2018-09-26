@@ -380,6 +380,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Autowired
     private ArchivesService archivesService;
 
+    @Autowired
+    private NamespaceProvider namespaceProvider;
+
     private static final String DEVICE_KEY = "device_login";
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
@@ -6852,31 +6855,79 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @KafkaListener(topicPattern = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        this.userProvider.createUser(user);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.createUser(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.createUser(user);
+            }
+        }
     }
 
     @KafkaListener(topicPattern = "user-update-event")
     public void syncUpdateUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        this.userProvider.updateUser(user);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.updateUser(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.updateUser(user);
+            }
+        }
     }
 
     @KafkaListener(topicPattern = "user-delete-event")
     public void syncDeleteUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
-        this.userProvider.deleteUser(user);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }
+
     }
 
     @KafkaListener(topicPattern = "userIdentifier-create-event")
     public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        this.userProvider.createIdentifier(userIdentifier);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.createIdentifier(userIdentifier);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.createIdentifier(userIdentifier);
+            }
+        }
+
     }
 
     @KafkaListener(topicPattern = "userIdentifier-update-event")
     public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
-        this.userProvider.updateIdentifier(userIdentifier);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifier(userIdentifier);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifier(userIdentifier);
+            }
+        }
+
     }
     /*********************同步数据 END************************/
 
