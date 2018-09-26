@@ -47,6 +47,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
+import com.everhomes.asset.AssetExportHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
@@ -117,6 +118,7 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
@@ -2986,9 +2988,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public void exportContractListByContractList(SearchContractCommand cmd) {
-		//  export with the file download center
 		Map<String, Object> params = new HashMap<>();
-		//  the value could be null if it is not exist
 		params.put("namespaceId", cmd.getNamespaceId());
 		params.put("communityId", cmd.getCommunityId());
 		params.put("categoryId", cmd.getCategoryId());
@@ -3062,36 +3062,53 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-    
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	
 	@Override
-	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
-		cmd.setPageSize(10000);
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		//查询合同列表
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("ListCMD", cmd);
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
+		}
+		String fileName = String.format("合同信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH)) + ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ContractListExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	
+	//导出合同列表对接下载中心
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId) {
+		// 公用字段
+		taskService.updateTaskProcess(taskId, 10);
+		cmd.setPageSize(100000);
+		// 查询合同列表
 		ListContractsResponse contractList = contractSearcher.queryContracts(cmd);
-		//获取合同列表
+		// 获取合同列表
 		List<ContractDTO> contractListDTO = contractList.getContracts();
-		//动态字段
+		// 动态字段
 		ListFieldCommand command = ConvertHelper.convert(cmd, ListFieldCommand.class);
 		command.setModuleName("contract");
 		command.setGroupPath(null);
-		//页面上所有的动态字段
-		String[] propertyNamesAll = {"contractNumber","name","contractType","contractStartDate","contractEndDate","customerId","apartments","status","rent"};
+		// 页面上所有的动态字段
+		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName" };
 		List<FieldDTO> dtos = fieldService.listFields(command);
+		taskService.updateTaskProcess(taskId, 30);
 		// 属性字段
-		String[] fieldpropertyNames = new String[dtos.size() + 1];
+		String[] fieldpropertyNames = new String[dtos.size() + 2];
 
 		for (int i = 0; i < dtos.size(); i++) {
 			fieldpropertyNames[i] = dtos.get(i).getFieldName();
 		}
-		fieldpropertyNames[fieldpropertyNames.length - 1] = "rent";
+		fieldpropertyNames[fieldpropertyNames.length - 2] = "rent";
+		fieldpropertyNames[fieldpropertyNames.length - 1] = "sponsorName";
 
 		List propertyNamesListAll = Arrays.asList(propertyNamesAll); // 将数组转化为list
 		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
 
-		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a))
-				.collect(Collectors.toList());
+		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
 		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
 		// 标题
 		String[] titleNames = new String[ExcelPropertyNames.length];
@@ -3102,28 +3119,31 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			}
 		}
-		titleNames[titleNames.length - 1] = "租赁总额";
-		int[] titleSizes = new int[ExcelPropertyNames.length + 1];
+		taskService.updateTaskProcess(taskId, 50);
+		titleNames[titleNames.length - 2] = "租赁总额";
+		titleNames[titleNames.length - 1] = "发起人";
+		int[] titleSizes = new int[ExcelPropertyNames.length + 2];
 		for (int i = 0; i < ExcelPropertyNames.length; i++) {
 			titleSizes[i] = 30;
 		}
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if (community == null) {
 			LOGGER.error("Community is not exist.");
-			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
-					"Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
 		}
+		taskService.updateTaskProcess(taskId, 70);
 		if (contractListDTO != null && contractListDTO.size() > 0) {
 			String fileName = String.format("合同信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
-			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "合同信息");
-			List<ContractExportDetailDTO> data = contractListDTO.stream().map(this::convertToExportDetail)
-					.collect(Collectors.toList());
-			excelUtils.writeExcel(ExcelPropertyNames, titleNames, titleSizes, data);
+			ExcelUtils excelUtils = new ExcelUtils(null, fileName, "合同信息");
+
+			List<ContractExportDetailDTO> data = contractListDTO.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			taskService.updateTaskProcess(taskId, 90);
+			return excelUtils.getOutputStream(ExcelPropertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-	
+    
 	protected ContractExportDetailDTO convertToExportDetail(ContractDTO dto) {
 		ContractExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, ContractExportDetailDTO.class);
 		try {
@@ -3355,24 +3375,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 				}
 				//优化性能问题，#33761 【合同管理3.0-beta】【合同管理3.0】测试一段时间，就蹦了，如下图（严重阻挡） 后面测试没有问题可以删除，现在先注释  --by dingjianmin
-				/*if ("gogs".equals(dto.getContentType())) {
-					try {
-						//查询gogs上面的数据
-						String moduleType = "ContractTemplate_" + dto.getCategoryId();
-						GogsRepo repo = gogsRepo(dto.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", dto.getOwnerId());
-						dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
-					} catch (GogsConflictException e) {
-						LOGGER.error("contractTemplateName {} in namespace {} already exist!", dto.gogsPath(), cmd.getNamespaceId());
-						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
-								"contractTemplateName is already exist");
-					} catch (GogsFileNotExistException e) {
-						LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", dto.gogsPath(), cmd.getNamespaceId());
-						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
-								"contractGogsFileNotExist is already exist");
-					} catch (Exception e){
-						LOGGER.error("Gogs OthersException .", e);
-					}
-				}*/
 				dto.setContents("");
 				return dto;
 			}).collect(Collectors.toList());

@@ -363,12 +363,11 @@ public class ContractController extends ControllerBase {
      * <b>URL: /contract/exportContractListByCommunityCategoryId</b>
      * <p>合同列表导出</p>
      */
-    @RequestMapping("exportContractListByCommunityCategoryId")
+	@RequestMapping("exportContractListByCommunityCategoryId")
     @RestReturn(value = String.class)
-    public RestResponse exportContractListByCommunityCategoryId(@Valid SearchContractCommand cmd, HttpServletResponse httpServletResponse) {
-    	
+    public RestResponse exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
     	ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
-    	contractService.exportContractListByCommunityCategoryId(cmd, httpServletResponse);
+    	contractService.exportContractListByCommunityCategoryId(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
