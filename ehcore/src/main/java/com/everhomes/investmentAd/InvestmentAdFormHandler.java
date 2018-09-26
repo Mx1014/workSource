@@ -47,10 +47,10 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "businessInvitation")
+@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "investmentAd")
 public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RequisitionFormHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentAdFormHandler.class);
 
     @Autowired
     RequisitionService requisitionService;
@@ -83,10 +83,10 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
                     cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
 
             //创建工作流
-            Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.BUSINESS_INVITATION_MODULE
+            Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.INVESTMENT_AD_MODULE
                     , "businessInvitation",approval.getId(), "GENERAL_APPROVAL");
             if (null == flow) {
-                LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.BUSINESS_INVITATION_MODULE);
+                LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.INVESTMENT_AD_MODULE);
                 throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
                         "requistion flow case not found.");
             }
@@ -156,7 +156,7 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
     	//TODO 权限校验
     	
-    	FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(FlowConstants.BUSINESS_INVITATION_MODULE, null, null, "requisitionId", cmd.getSourceId(), true);
+    	FlowCaseDetailDTOV2 flowcase = flowService.getFlowCaseDetailByRefer(FlowConstants.INVESTMENT_AD_MODULE, null, null, "requisitionId", cmd.getSourceId(), true);
         Long sourceId = this.dbProvider.execute((TransactionStatus status) -> {
 
             if (flowcase != null) {
