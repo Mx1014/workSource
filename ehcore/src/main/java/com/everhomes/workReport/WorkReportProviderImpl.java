@@ -191,7 +191,6 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public WorkReportScopeMap getWorkReportScopeMapBySourceId(Long reportId, Long sourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.eq(sourceId));
         return query.fetchOneInto(WorkReportScopeMap.class);
@@ -211,7 +210,6 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public List<WorkReportScopeMap> listWorkReportScopesMap(Long reportId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addOrderBy(Tables.EH_WORK_REPORT_SCOPE_MAP.CREATE_TIME.asc());
         List<WorkReportScopeMap> results = new ArrayList<>();
