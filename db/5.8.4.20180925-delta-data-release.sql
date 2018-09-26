@@ -190,7 +190,7 @@ update eh_asset_bill_notify_records set owner_type = 'EhOrganizations';
 
 -- ------------------------更新广场layout ----------------------
 -- 更新 layout
-SET @versionCode = '201809260200';
+SET @versionCode = '201809260800';
 
 SET @bizAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 92100 AND `namespace_id` = 2);
 SET @activityAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10600 AND `namespace_id` = 2);
