@@ -11,8 +11,7 @@ import com.everhomes.util.StringHelper;
 public class CommunityBulletinsContentRouterJson {
 
     private Long forumId;
-    private Long topicId;
-
+    private Long bulletinId;
     public Long getForumId() {
         return forumId;
     }
@@ -21,12 +20,12 @@ public class CommunityBulletinsContentRouterJson {
         this.forumId = forumId;
     }
 
-    public Long getTopicId() {
-        return topicId;
+    public Long getBulletinId() {
+        return bulletinId;
     }
 
-    public void setTopicId(Long topicId) {
-        this.topicId = topicId;
+    public void setBulletinId(Long bulletinId) {
+        this.bulletinId = bulletinId;
     }
 
     @Override

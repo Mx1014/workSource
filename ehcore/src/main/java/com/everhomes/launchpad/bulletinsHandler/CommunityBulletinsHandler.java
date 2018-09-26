@@ -82,7 +82,7 @@ public class CommunityBulletinsHandler implements BulletinsHandler {
             card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 
             CommunityBulletinsContentRouterJson contentRouterJson = new CommunityBulletinsContentRouterJson();
-            contentRouterJson.setTopicId(dto.getId());
+            contentRouterJson.setBulletinId(dto.getId());
             String queryStr = routerService.getQueryInDefaultWay(contentRouterJson.toString());
 
             card.setRouterPath("/detail");
