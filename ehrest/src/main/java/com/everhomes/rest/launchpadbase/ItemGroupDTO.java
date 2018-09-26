@@ -1,8 +1,7 @@
 package com.everhomes.rest.launchpadbase;
 
+import com.everhomes.rest.portal.TitleSize;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
@@ -15,6 +14,11 @@ import java.util.List;
  *     <li>separatorFlag: separatorFlag</li>
  *     <li>separatorHeight: separatorHeight</li>
  *     <li>columnCount: columnCount</li>
+ *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link com.everhomes.rest.portal.TitleFlag}</li>
+ *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link com.everhomes.rest.portal.TitleStyle}</li>
+ *     <li>subTitle: subTitle</li>
+ *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
+ *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ItemGroupDTO {
@@ -28,6 +32,17 @@ public class ItemGroupDTO {
     private Integer separatorFlag;
     private Integer separatorHeight;
     private Integer columnCount;
+
+    private Byte titleFlag;
+
+    private Byte titleStyle;
+
+    private String subTitle;
+
+    private Byte titleSize;
+
+    private Byte titleMoreFlag;
+
 
 
     public Long getGroupId() {

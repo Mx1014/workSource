@@ -13,9 +13,9 @@ import com.everhomes.util.StringHelper;
  *     <li>title: 标题</li>
  *     <li>titleUri: 标题uri</li>
  *     <li>titleUrl: titleUrl</li>
- *     <li>titleStyle: 标题样式，由web和客户端自行商定</li>
+ *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
  *     <li>subTitle: 副标题</li>
- *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSizeType}</li>
+ *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
  *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>newsSize: 最大显示条目</li>
  *     <li>timeWidgetStyle: 时间样式</li>
