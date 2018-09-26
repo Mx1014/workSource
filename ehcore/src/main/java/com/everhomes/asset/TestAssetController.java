@@ -1,5 +1,6 @@
 package com.everhomes.asset;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -331,7 +332,9 @@ public class TestAssetController extends ControllerBase {
         cmSyncObject.getData().get(0).setCommunityId(240111044332063578L);
         cmSyncObject.getData().get(0).setCustomerId(1041502L);
         
-		assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, 3L);
+        List<CMSyncObject> cmSyncObjectList = new ArrayList<CMSyncObject>();
+        cmSyncObjectList.add(cmSyncObject);
+		assetService.syncRuiAnCMBillToZuolin(cmSyncObjectList, 999929, 3L);
 		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
