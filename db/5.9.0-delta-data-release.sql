@@ -731,6 +731,16 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1007, '服务信息', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1008, '历史房源', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1009, '附件', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
+
+
+-- AUTHOR: yanjun
+-- REMARK: #34097  域空间配置V1.9（支持唤起小程序）
+UPDATE eh_service_modules SET `name` = '普通链接' WHERE id = 90100;
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('180000', '第三方应用', '90000', '/400/90000/180000', '1', '3', '2', '20', '2018-09-21 15:03:32', NULL, '14', NULL, '0', '0', NULL, '1', '', '1', '1', 'module');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('190000', '微信小程序', '90000', '/400/90000/190000', '1', '3', '2', '30', '2018-09-21 15:04:26', NULL, '14', NULL, '0', '0', NULL, '1', '', '1', '1', 'module');
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
