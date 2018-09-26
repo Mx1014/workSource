@@ -55,7 +55,11 @@ public class PointController extends ControllerBase {
         PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
         if(dto == null){
             dto = new PointScoreDTO();
+            dto.setScore(0L);
+        }else if(dto.getScore() == null){
+            dto.setScore(0L);
         }
+
         return success(dto);
     }
 
@@ -96,7 +100,10 @@ public class PointController extends ControllerBase {
             for(PointLogDTO logs :logDTOS){
                 if(logs.getPoints()<0 && logs.getPoints() != null){
                     logs.setPoints(Math.abs(logs.getPoints()));
+
                 }
+                logs.setCategoryName(logs.getAppName());
+                logs.setDescription(logs.getRuleName());
             }
         }
         return success(response);
