@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -533,7 +534,8 @@ public class AssetServiceImpl implements AssetService {
 //                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
                 Integer nameSpaceId = noticeInfo.getNamespaceId();
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
-                String templateLocale = UserContext.current().getUser().getLocale();
+                //issue-38265 解决“给用户设置自动催缴设置，用户收不到短信提醒”的bug
+                String templateLocale = Locale.SIMPLIFIED_CHINESE.toString();
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
                 boolean smsGo = true;
                 try{
@@ -2884,6 +2886,7 @@ public class AssetServiceImpl implements AssetService {
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
     @Scheduled(cron = "0 0 12 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
@@ -2954,7 +2957,7 @@ public class AssetServiceImpl implements AssetService {
                     PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
                     info.setMsgTemplateId(specificConfig.getNoticeMsgId());
                     info.setAppTemplateId(specificConfig.getNoticeAppId());
-                    if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
+                    if(info.getMsgTemplateId() == null && info.getAppTemplateId() == null){
                         continue;
                     }
                     List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
@@ -2977,6 +2980,11 @@ public class AssetServiceImpl implements AssetService {
                         Long noticeObjId = obj.getNoticeObjId();
                         String noticeObjType = obj.getNoticeObjType();
                         FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        if(sourceTypeA == null){
+                            LOGGER.error("sourceType faild to fromcode, noticeObjType={},noticeConfigMap.getConfigId={}"
+                                    ,noticeObjType, noticeConfigMap.get(b.getId()).getId());
+                            continue;
+                        }
                         switch (sourceTypeA) {
                             // 具体部门
                             case SOURCE_DEPARTMENT:
@@ -2994,6 +3002,9 @@ public class AssetServiceImpl implements AssetService {
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
                     for(NoticeMemberIdAndContact uid : userIds){
                         try {
+                        	if(uid.getTargetId() == info.getTargetId()){
+                                continue;
+                            }
                             NoticeInfo newInfo = CopyUtils.deepCopy(info);
                             newInfo.setTargetId(uid.getTargetId());
                             newInfo.setPhoneNums(uid.getContactToken());
@@ -3004,6 +3015,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                     //一个一个发，因为每个账单的变量注入值不一样
+                    LOGGER.info("billIds size should be one, now = {}",billIds.size());
                     NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
                 }
                 LOGGER.info("done");

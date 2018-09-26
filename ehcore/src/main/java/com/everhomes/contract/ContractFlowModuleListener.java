@@ -535,7 +535,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			Address address = addressProvider.findAddressById(addressId);
 			AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, address.getBuildingId(), addressId);
 
-			if (addressProperties.getApartmentAuthorizeType() == null || addressProperties.getAuthorizePrice() == null || addressProperties.getChargingItemsId() == null) {
+			if (addressProperties == null || addressProperties.getApartmentAuthorizeType() == null || addressProperties.getAuthorizePrice() == null || addressProperties.getChargingItemsId() == null) {
 				return BigDecimal.ZERO;
 			}
 
