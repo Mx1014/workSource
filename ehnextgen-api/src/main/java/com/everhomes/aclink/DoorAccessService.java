@@ -175,4 +175,39 @@ public interface DoorAccessService {
 	public void updateAccessType(Long doorId, byte doorType);
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
+    //add by liqingyan
+    Long deleteDoorAccessEh(Long doorAccessId);
+    //add by liqingyan
+    void changeDoorName(ChangeDoorNameCommand cmd);
+    //add by liqingyan
+    void addDoorManagement(AddDoorManagementCommand cmd);
+
+    void deleteDoorManagement (AddDoorManagementCommand cmd);
+
+    void changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
+
+    void addFirmware (AddFirmwareCommand cmd);
+
+    void deleteFirmware (DeleteFirmwareCommand cmd);
+
+    void uploadBluetooth(UploadBluetoothCommand cmd);
+
+    void uploadWifi(UploadBluetoothCommand cmd);
+
+    void downloadBluetooth(DownloadBluetoothCommand cmd);
+
+    void downloadWifi(DownloadBluetoothCommand cmd);
+
+    void deleteBluetooth (DeleteBluetoothCommand cmd);
+
+    void deleteWifi (DeleteBluetoothCommand cmd);
+
+    //add by liqingyan
+    ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd);
+    //add by liqingyan
+    ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd);
+    //add by liqingyan
+    ListFirmwareResponse listFirmware (ListFirmwareCommand cmd);
+    //add by liqingyan
+    DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
 }

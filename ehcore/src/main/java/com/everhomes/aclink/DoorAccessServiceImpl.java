@@ -5273,4 +5273,82 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     	
     	LOGGER.info("delete all auths ok! ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
 	}
+    //add by liqingyan
+    @Override
+    public ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd) {
+
+        return null;
+    }
+    @Override
+    public ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd){
+        return null;
+    }
+    @Override
+    public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
+        return null;
+    }
+    @Override
+    public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
+        DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
+//        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryActiveDoorByPlace(cmd);
+//        resp.setDto1(dto1);
+//        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryActiveDoorByFirmware(cmd);
+//        resp.setDto2(dto2);
+        List<ActiveDoorByEquipmentDTO> dto3 = null;
+        resp.setDto3(dto3);
+        List<ActiveDoorByNamespaceDTO> dto4 = null;
+        resp.setDto4(dto4);
+        List<AclinkUseByNamespaceDTO> dto5 = null;
+        resp.setDto5(dto5);
+        return resp;
+    }
+    @Override
+    public void changeDoorName(ChangeDoorNameCommand cmd){
+
+    }
+    @Override
+    public void addDoorManagement(AddDoorManagementCommand cmd){
+
+    }
+    @Override
+    public void deleteDoorManagement (AddDoorManagementCommand cmd){
+
+    }
+    @Override
+    public void changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
+
+    }
+    @Override
+    public void addFirmware (AddFirmwareCommand cmd){
+
+    }
+    @Override
+    public void deleteFirmware (DeleteFirmwareCommand cmd){
+
+    }
+    @Override
+    public void uploadBluetooth(UploadBluetoothCommand cmd){
+
+    }
+    @Override
+    public void uploadWifi(UploadBluetoothCommand cmd){
+
+    }
+    @Override
+    public void downloadBluetooth (DownloadBluetoothCommand cmd){}
+
+    @Override
+    public void downloadWifi(DownloadBluetoothCommand cmd){
+
+    }
+    @Override
+    public void deleteBluetooth (DeleteBluetoothCommand cmd){}
+
+    @Override
+    public void deleteWifi (DeleteBluetoothCommand cmd){}
+    //add by liqingyan
+    @Override
+    public Long deleteDoorAccessEh(Long doorAccessId){
+        return null;
+    }
 }

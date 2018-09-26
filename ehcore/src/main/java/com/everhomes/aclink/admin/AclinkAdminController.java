@@ -492,8 +492,246 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
-    
+    }
+
+    /**
+     * <b>URL: /admin/aclink/doorStatisticEh</b>
+     * <p>左邻后台门禁统计</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("doorStatisticEh")
+    @RestReturn(value=DoorStatisticEhResponse.class)
+    public RestResponse doorStatisticEh(@Valid DoorStatisticEhCommand cmd) {
+        DoorStatisticEhResponse obj = doorAccessService.doorStatisticEh(cmd);
+        RestResponse response = new RestResponse(obj);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/listDoorAccessEh</b>
+     * <p>列出门禁列表（左邻后台）</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorAccessEh")
+    @RestReturn(value=ListDoorAccessEhResponse.class)
+    public RestResponse listDoorAccessEh(@Valid ListDoorAccessEhCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessEh(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/deleteDoorAccessEh</b>
+     * <p>删除门禁设备(左邻后台)</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteDoorAccessEh")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorAccessEh(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.deleteDoorAccessEh(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/changeDoorName</b>
+     * <p>修改门禁名称(左邻后台)</p>
+     * @return OK 成功
+     */
+    @RequestMapping("changeDoorName")
+    @RestReturn(value=String.class)
+    public RestResponse changeDoorName(@Valid ChangeDoorNameCommand cmd){
+        doorAccessService.changeDoorName(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/addDoorManagement</b>
+     * <p>添加门禁管理授权企业(左邻后台)</p>
+     * @return OK 成功
+     */
+    @RequestMapping("addDoorManagement")
+    @RestReturn(value=String.class)
+    public RestResponse addDoorManagement (@Valid AddDoorManagementCommand cmd){
+        doorAccessService.addDoorManagement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/deleteDoorManagement</b>
+     * <p>删除门禁管理授权企业(左邻后台)</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteDoorManagement")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorManagement (@Valid AddDoorManagementCommand cmd){
+        doorAccessService.deleteDoorManagement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/listDoorType</b>
+     * <p>列出设备类型列表（左邻后台）</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorType")
+    @RestReturn(value=ListDoorTypeResponse.class)
+    public RestResponse listDoorType  (@Valid ListDoorTypeCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listDoorType(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/changeUpdateFirmware</b>
+     * <p>修改默认升级固件（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("changeUpdateFirmware")
+    @RestReturn(value=String.class)
+    public RestResponse changeUpdateFirmware (@Valid ChangeUpdateFirmwareCommand cmd){
+        doorAccessService.changeUpdateFirmware(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/listFirmware</b>
+     * <p>列出固件（左邻后台）</p>
+     * @return 固件列表
+     */
+    @RequestMapping("listFirmware")
+    @RestReturn(value=ListFirmwareResponse.class)
+    public RestResponse listFirmware (@Valid ListFirmwareCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listFirmware(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/addFirmware</b>
+     * <p>新建固件（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("addFirmware")
+    @RestReturn(value=String.class)
+    public RestResponse addFirmware (@Valid AddFirmwareCommand cmd){
+        doorAccessService.addFirmware(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/deleteFirmware</b>
+     * <p>删除固件（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteFirmware")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFirmware (@Valid DeleteFirmwareCommand cmd){
+        doorAccessService.deleteFirmware(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/uploadBluetooth</b>
+     * <p>上传蓝牙程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("uploadBluetooth")
+    @RestReturn(value=String.class)
+    public RestResponse uploadBluetooth(@Valid UploadBluetoothCommand cmd){
+        doorAccessService.uploadBluetooth(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/uploadWifi</b>
+     * <p>上传wifi程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("uploadWifi")
+    @RestReturn(value=String.class)
+    public RestResponse uploadWifi(@Valid UploadBluetoothCommand cmd){
+        doorAccessService.uploadWifi(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/downloadBluetooth</b>
+     * <p>下载蓝牙程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("downloadBluetooth")
+    @RestReturn(value=String.class)
+    public RestResponse downloadBluetooth(@Valid DownloadBluetoothCommand cmd){
+        doorAccessService.downloadBluetooth(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/downloadWifi</b>
+     * <p>下载wifi程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("downloadWifi")
+    @RestReturn(value=String.class)
+    public RestResponse downloadWifi(@Valid DownloadBluetoothCommand cmd){
+        doorAccessService.downloadWifi(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/deleteBluetooth</b>
+     * <p>删除蓝牙程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteBluetooth")
+    @RestReturn(value=String.class)
+    public RestResponse deleteBluetooth (@Valid DeleteBluetoothCommand cmd){
+        doorAccessService.deleteBluetooth(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/deleteWifi</b>
+     * <p>删除Wifi程序（左邻后台）</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteWifi")
+    @RestReturn(value=String.class)
+    public RestResponse deleteWifi (@Valid DeleteBluetoothCommand cmd){
+        doorAccessService.deleteWifi(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/createQRUserPermission</b>
      * <p>创建保安二维码授权</p>
@@ -521,7 +759,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }   
-    
+
     /**
      * <b>URL: /admin/aclink/listQRUserPermission</b>
      * <p>创建保安二维码授权</p>
