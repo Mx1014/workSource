@@ -10827,7 +10827,7 @@ public class PunchServiceImpl implements PunchService {
 
     public String processApprovalCategorieUrl(Long ownerId,Integer namespaceId, HttpServletRequest request){
     	String homeUrl = request.getHeader("Host");
-        return homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId +"#sign_suffix";
+        return "http://" + homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId +"#sign_suffix";
     }
     
     @Override

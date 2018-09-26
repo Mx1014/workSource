@@ -57,6 +57,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.ListOrganizationContectDTOResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -4229,7 +4230,9 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.deleteEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactToken());
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             //删除企业管理中的管理员权限
-            rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+//            rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+            //标准版 平台组更换接口
+            rolePrivilegeService.deleteOrganizationSuperAdministrators(cmd);
         }
         List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
         if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
@@ -4262,7 +4265,10 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if (null == adminRecords || adminRecords.size() == 0) {
             cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
-            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
+//            result = rolePrivilegeService.listOrganizationAdministrators(cmd);
+            // 标准版修改成此种概念
+            ListOrganizationContectDTOResponse organizationAdmins = rolePrivilegeService.listOrganizationSystemAdministrators(cmd);
+            result = organizationAdmins == null ? null : organizationAdmins.getDtos();
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
                 result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
