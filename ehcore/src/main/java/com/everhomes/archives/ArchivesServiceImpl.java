@@ -1640,12 +1640,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             queryBuilderCallback.buildCondition(locator, query);
             if (departmentId != null) {
                 Organization department = organizationProvider.findOrganizationById(departmentId);
-                if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+                //2018年9月26日修改: 所有的部门/公司都要查询子公司的人员
+//                if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
                     // get the hidden department of the company which has the same name
-                    Organization under_department = organizationProvider.findUnderOrganizationByParentOrgId(department.getId());
-                    if (under_department != null)
-                        department = under_department;
-                }
+                Organization under_department = organizationProvider.findUnderOrganizationByParentOrgId(department.getId());
+                if (under_department != null)
+                    department = under_department;
+//                }
                 List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentId(department.getId());
                 List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(department.getId());
                 Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
