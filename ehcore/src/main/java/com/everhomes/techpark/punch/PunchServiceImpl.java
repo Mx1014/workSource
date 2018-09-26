@@ -11550,7 +11550,7 @@ public class PunchServiceImpl implements PunchService {
     private GoOutPunchLogDTO convertGoOutLogDTO(PunchGoOutLog log) {
         GoOutPunchLogDTO dto = ConvertHelper.convert(log, GoOutPunchLogDTO.class);
         dto.setPunchDate(log.getPunchDate() == null ? null : log.getPunchDate().getTime());
-        dto.setPunchDate(log.getPunchTime() == null ? null : log.getPunchTime().getTime());
+        dto.setPunchTime(log.getPunchTime() == null ? null : log.getPunchTime().getTime());
         dto.setImgUrl(contentServerService.parserUri(log.getImgUri()));
         return dto;
     }
