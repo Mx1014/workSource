@@ -507,8 +507,8 @@ UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"unRenameSelect\",
 UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' WHERE id = 12037;
 UPDATE eh_var_fields SET field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' WHERE id = 12041;
 
-UPDATE eh_var_fields SET mandatory_flag = 1 WHERE id =12111;
-UPDATE eh_var_fields SET group_id = 10,group_path = '/1/10' WHERE id IN (SELECT field_id FROM eh_var_field_ranges WHERE module_name = 'investment_promotion');
+UPDATE eh_var_fields SET mandatory_flag = 1 WHERE id = 12115;
+UPDATE eh_var_fields SET group_id = 10,group_path = '/1/10/' WHERE id IN (SELECT field_id FROM eh_var_field_ranges WHERE module_name = 'investment_promotion');
 
 SET @id = (select max(id) from eh_var_field_group_ranges);
 INSERT INTO `eh_var_field_group_ranges`(`id`, `group_id`, `module_name`, `module_type`) VALUES (@id:=@id+1, 1, 'investment_promotion', 'enterprise_customer');
