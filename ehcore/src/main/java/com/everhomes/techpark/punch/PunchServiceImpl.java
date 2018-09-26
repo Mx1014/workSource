@@ -10557,9 +10557,7 @@ public class PunchServiceImpl implements PunchService {
         }
         pdl.setAbsentFlag(isAbsence(statusList));
         pdl.setNormalFlag(isFullNormal(statusList));
-        if(NormalFlag.YES == NormalFlag.fromCode(pdl.getNormalFlag())){
-        	pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-        }else{
+        if(NormalFlag.NO == NormalFlag.fromCode(pdl.getNormalFlag())){
         	pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
         }
         pdl.setBelateCount(belateCount(statusList));
