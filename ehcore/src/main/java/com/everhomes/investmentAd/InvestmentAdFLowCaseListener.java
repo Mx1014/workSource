@@ -62,10 +62,10 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
     @Override
 	public FlowModuleInfo initModule() {
 	    FlowModuleInfo module = new FlowModuleInfo();
-        FlowModuleDTO moduleDTO = flowService.getModuleById(FlowConstants.BUSINESS_INVITATION_MODULE);
+        FlowModuleDTO moduleDTO = flowService.getModuleById(FlowConstants.INVESTMENT_AD_MODULE);
         if (moduleDTO != null) {
             module.setModuleName(moduleDTO.getDisplayName());
-            module.setModuleId(FlowConstants.BUSINESS_INVITATION_MODULE);
+            module.setModuleId(FlowConstants.INVESTMENT_AD_MODULE);
             return module;
         }
         return null;
@@ -89,7 +89,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
             generalFormProvider.updateGeneralFormValRequestStatus(flowCase.getReferId(), RequisitionStatus.WAIT.getCode());
             List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),
-            									FlowConstants.BUSINESS_INVITATION_MODULE, flowCase.getProjectId());
+            									FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
             generalFormSearcher.feedDoc(requestVals);           
         }
     }
@@ -103,7 +103,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         Integer namespaceId = flowCase.getNamespaceId();
         Long ownerId = flowCase.getProjectId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.FINISH.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(namespaceId,referId,FlowConstants.BUSINESS_INVITATION_MODULE, ownerId);
+        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(namespaceId,referId,FlowConstants.INVESTMENT_AD_MODULE, ownerId);
         generalFormSearcher.feedDoc(requestVals);
     }
 
@@ -112,7 +112,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.BUSINESS_INVITATION_MODULE, flowCase.getProjectId());
+        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
         generalFormSearcher.feedDoc(requestVals);
     }
 
@@ -121,7 +121,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.HANDLING.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.BUSINESS_INVITATION_MODULE, flowCase.getProjectId());
+        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
         generalFormSearcher.feedDoc(requestVals);
     }
 
