@@ -551,8 +551,7 @@ CREATE TABLE `eh_visitor_sys_door_access` (
 
 -- AUTHOR: 马世亨
 -- REMARK: visitorsys1.2 访客表修改
-ALTER TABLE `eh_visitor_sys_visitors`
-ADD COLUMN `door_access_auth_duration_type` tinyint(4) NULL COMMENT '访客授权有效期种类,0 天数，1 小时数',
-ADD COLUMN `door_access_auth_duration` int NULL COMMENT '访客授权有效期',
-ADD COLUMN `door_access_enable_auth_count` TINYINT(4) DEFAULT 0 COMMENT '访客授权次数开关 0 关 1 开',
-ADD COLUMN `door_access_auth_count` int NULL COMMENT '访客授权次数';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_duration_type` tinyint(4) NULL COMMENT '访客授权有效期种类,0 天数，1 小时数';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_duration` int NULL COMMENT '访客授权有效期';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_enable_auth_count` TINYINT(4) DEFAULT 0 COMMENT '访客授权次数开关 0 关 1 开';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_count` int NULL COMMENT '访客授权次数';
