@@ -166,7 +166,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             try {
                 String codeStr = JSONObject.toJSONString(params);
                 codeString.put("CodeStr", codeStr);
-                LOGGER.info("sync customer from RuiAnCM param: {}", StringHelper.paramMapToQueryString(codeString));
+                LOGGER.info("sync customer from RuiAnCM param: {}", codeString);
                 enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
             } catch (Exception e) {
                 LOGGER.error("sync customer from RuiAnCM error: {}", e);
@@ -212,8 +212,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         //存储瑞安合同
         syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
+
         //同步CM数据到物业账单表
-        //assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
+        assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, 999929, categoryId);
 
         //String url = "http://183.62.222.87:5902/sf";
         
