@@ -25,9 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -170,7 +168,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             ExecutorUtil.submit(() -> {
                 UserContext.setCurrentNamespaceId(namespaceId);
                 //  Make sure that the msg time could be chaned once at the same time.
-                coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
+                coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_BASIC_MSG.getCode() + report.getId()).tryEnter(() -> {
 
                     Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
                     //  update the rxMsg
