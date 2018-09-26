@@ -3390,7 +3390,12 @@ public class PunchServiceImpl implements PunchService {
             return NormalFlag.YES.getCode();
         }
         for (String s : status) {
-            if (!String.valueOf(PunchStatus.NORMAL.getCode()).equals(s)) {
+            if (!String.valueOf(PunchStatus.NORMAL.getCode()).equals(s) && 
+            		!String.valueOf(PunchStatus.NOTWORKDAY.getCode()).equals(s) && 
+            		!String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode()).equals(s) && 
+            		!String.valueOf(PunchStatus.NONENTRY.getCode()).equals(s) && 
+            		!String.valueOf(PunchStatus.RESIGNED.getCode()).equals(s) && 
+            		!String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode()).equals(s)) {
                 return NormalFlag.NO.getCode();
             }
         }
