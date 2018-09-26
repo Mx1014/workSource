@@ -33,13 +33,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
-import com.everhomes.rest.contract.CMContractUnit;
-import com.everhomes.rest.contract.CMDataObject;
-import com.everhomes.rest.contract.CMSyncObject;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.EbeiContract;
-import com.everhomes.rest.contract.EbeiContractRoomInfo;
-import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
@@ -59,6 +53,7 @@ import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlObject;
+import org.elasticsearch.index.mapper.MapperBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,70 +146,84 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         Map<String, String> params= new HashMap<>();
         Map<String, String> codeString= new HashMap<>();
 
-        /*if(communityIdentifier == null) {
-            communityIdentifier = "";
-        }
-        params.put("projectId", communityIdentifier);
-        if(pageOffset == null || "".equals(pageOffset)) {
-            pageOffset = "1";
-        }
-        params.put("currentPage", pageOffset);
-        params.put("pageSize", PAGE_SIZE);
-*/
-        if(date == null || "".equals(date)) {
-            date = "2018-08-28";
-        }
-        params.put("Date", date);
-        params.put("CurrentPage", pageOffset);
 
-        String enterprises = null;
-        String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
-//        String url = "http://183.62.222.87:5902/sf";
-        
-//        try {
-//            String codeStr = JSONObject.toJSONString(params);
-//            codeString.put("CodeStr", codeStr);
-//            enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
-//        } catch (Exception e) {
-//            LOGGER.error("sync customer from RuiAnCM error: {}", e);
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "sync customer from ebei error");
-//        }
-//        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
+        Integer currentPage = 0;
+        Integer totalPage = 2147483647;
 
+        List<CMSyncObject> cmSyncObjects = new ArrayList<>();
 
-        enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
-
-
-
-        Map result = JSONObject.parseObject(enterprises);
-        CMSyncObject cmSyncObject =
-                (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
-
-
-        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
-
-        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date now = new Date(System.currentTimeMillis());
-            String nowStr = sdf.format(now);
-            if(date.compareTo(nowStr) < 0) {
-            	//同步到记录表
-            	syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
-            	
-                date = getNextDay(date, sdf);
-                //String.valueOf(Integer.valueOf(pageOffset) + 1
-                syncContractsFromThirdPart("1" , date, communityIdentifier, taskId, categoryId, contractApplicationScene);
-            }else{
-            	//存储瑞安合同
-            	syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
-            	//同步CM数据到物业账单表
-            	assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
-            	
+        while(currentPage < totalPage){
+            //同步CM数据到物业账单表
+            if(date == null || "".equals(date)) {
+                date = "1970-01-01";
             }
+            params.put("Date", date);
+            params.put("CurrentPage", pageOffset);
+
+            String enterprises = null;
+            String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
+
+            try {
+                String codeStr = JSONObject.toJSONString(params);
+                codeString.put("CodeStr", codeStr);
+                LOGGER.info("sync customer from RuiAnCM param: {}", StringHelper.paramMapToQueryString(codeString));
+                enterprises = HttpUtils.get(url+DispContract, codeString, 600, "UTF-8");
+            } catch (Exception e) {
+                LOGGER.error("sync customer from RuiAnCM error: {}", e);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync customer from RuiAnCM error");
+            }
+            enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
+
+            CMSyncObject cmSyncObject =
+                    (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
+
+
+
+
+            if(cmSyncObject != null) {
+                currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
+                totalPage = Integer.valueOf(cmSyncObject.getTotalpage());
+                pageOffset = String.valueOf(currentPage + 1);
+                cmSyncObjects.add(cmSyncObject);
+                syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
+                if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date now = new Date(System.currentTimeMillis());
+                    String nowStr = sdf.format(now);
+                    if(date.compareTo(nowStr) < 0) {
+                        //同步到记录表
+                        syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
+
+                        date = getNextDay(date, sdf);
+                    }
+
+                }else{
+                    LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
+
+                }
+            }else{
+                LOGGER.error("sync customer from RuiAnCM errorCode: {}", cmSyncObject.getErrordescription());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_EMPTY, "sync customer from RuiAnCM error");
+            }
+
         }
 
-        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
+
+        //存储瑞安合同
+        syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
+        //同步CM数据到物业账单表
+        //assetService.syncRuiAnCMBillToZuolin(cmSyncObject, 999929, categoryId);
+
+        //String url = "http://183.62.222.87:5902/sf";
+        
+
+
+
+
+
+
+/*        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
             List<CMDataObject> dtos = cmSyncObject.getData();
             if(dtos != null && dtos.size() > 0) {
                 syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
@@ -229,7 +238,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             if(cmSyncObject.getTotalpage().equals(cmSyncObject.getCurrentpage())) {
                 //syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
             }
-        }
+        }*/
         /*EbeiJsonEntity<List<EbeiContract>> entity = JSONObject.parseObject(enterprises, new TypeReference<EbeiJsonEntity<List<EbeiContract>>>(){});
         if(SUCCESS_CODE.equals(entity.getResponseCode())) {
             List<EbeiContract> dtos = entity.getData();

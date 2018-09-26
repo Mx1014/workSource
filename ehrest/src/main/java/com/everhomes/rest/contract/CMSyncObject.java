@@ -7,6 +7,10 @@ import java.util.List;
 public class CMSyncObject {
     private String errorcode;
 
+    private String errordescription;
+
+    private String errordetails;
+
     private String total;
 
     private String currentpage;
@@ -53,6 +57,30 @@ public class CMSyncObject {
 
     public void setData(List<CMDataObject> data) {
         this.data = data;
+    }
+
+    public String getErrorcode() {
+        return errorcode;
+    }
+
+    public void setErrorcode(String errorcode) {
+        this.errorcode = errorcode;
+    }
+
+    public String getErrordescription() {
+        return errordescription;
+    }
+
+    public void setErrordescription(String errordescription) {
+        this.errordescription = errordescription;
+    }
+
+    public String getErrordetails() {
+        return errordetails;
+    }
+
+    public void setErrordetails(String errordetails) {
+        this.errordetails = errordetails;
     }
 
     @Override
