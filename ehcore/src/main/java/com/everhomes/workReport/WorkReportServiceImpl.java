@@ -979,7 +979,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     public void syncWorkReportReceiver() {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
         for (WorkReportValReceiverMap r : receivers) {
-            if(r.getOrganizationId() != 0)
+            if (r.getOrganizationId() != 0)
                 continue;
             WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
             r.setOrganizationId(val.getOrganizationId());
@@ -993,22 +993,25 @@ public class WorkReportServiceImpl implements WorkReportService {
         for (WorkReportValReceiverMap r : receivers) {
             if (r.getReceiverAvatar() == null)
                 continue;
-            if(r.getReceiverAvatar().contains("cs://1/image"))
+            User user = userProvider.findUserById(r.getReceiverUserId());
+            if (user == null)
                 continue;
-            String avatar = r.getReceiverAvatar();
-            String uri = avatar.substring(avatar.indexOf("image") + 6, avatar.lastIndexOf("?"));
-            r.setReceiverAvatar("cs://1/image/" + uri);
+            r.setReceiverAvatar(user.getAvatar());
             workReportValProvider.updateWorkReportValReceiverMap(r);
         }
     }
 
-/*    @Override
-    public void updateWorkReportReceiverReportId(){
-        List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
-        for (WorkReportValReceiverMap r : receivers) {
-            WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
-            r.setReportId(val.getReportId());
-            workReportValProvider.updateWorkReportValReceiverMap(r);
+    @Override
+    public void updateWorkReportValAvatar() {
+        List<WorkReportVal> vals = workReportValProvider.listWorkReportVals();
+        for (WorkReportVal v : vals) {
+            User author = userProvider.findUserById(v.getApplierUserId());
+            if (author != null)
+                v.setApplierAvatar(author.getAvatar());
+            List<WorkReportValReceiverMap> res = workReportValProvider.listReportValReceiversByValId(v.getId());
+            if (res != null && res.size() > 0)
+                v.setReceiverAvatar(res.get(0).getReceiverAvatar());
+            workReportValProvider.updateWorkReportVal(v);
         }
-    }*/
+    }
 }

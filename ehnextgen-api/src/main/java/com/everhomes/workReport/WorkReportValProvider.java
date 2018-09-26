@@ -62,4 +62,6 @@ public interface WorkReportValProvider {
     List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime);
 
     List<WorkReportValReceiverMap> listWorkReportReceivers();
+
+    List<WorkReportVal> listWorkReportVals();
 }
