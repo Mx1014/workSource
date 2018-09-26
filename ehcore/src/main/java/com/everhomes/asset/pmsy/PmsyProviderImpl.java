@@ -215,7 +215,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 	@Override
 	public void createPmsyOrder(PmsyOrder pmsyOrder){
 		Long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPmsyOrderItems.class));
+				.getSequenceDomainFromTablePojo(EhPmsyOrders.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPmsyOrdersDao dao = new EhPmsyOrdersDao(context.configuration());
 		pmsyOrder.setId(id);

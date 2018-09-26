@@ -39,6 +39,7 @@ import com.everhomes.organization.pmsy.PmsyService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -535,7 +536,9 @@ public class PmsyServiceImpl implements PmsyService{
   		
   		//issue-27397 ： 物业缴费V6.8（海岸馨服务项目对接）
   		createPaymentBillOrderCommand.setExtendInfo(cmd.getHaianCommunityName());
-  			
+  		//issue-38347: 【物业缴费6.8】beta环境，账单支付成功后依然存在，可重复支付
+  		createPaymentBillOrderCommand.setPmsyOrderId(order.getId().toString());
+  		
         return handler.createOrder(createPaymentBillOrderCommand);
 	}
 	

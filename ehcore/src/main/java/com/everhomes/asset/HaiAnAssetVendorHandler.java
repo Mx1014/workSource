@@ -63,6 +63,7 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
     protected void afterBillOrderCreated(CreatePaymentBillOrderCommand cmd, PurchaseOrderCommandResponse orderResponse) {
         List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
         PaymentBillOrder orderBill  = new PaymentBillOrder();
+        orderBill.setBillId(cmd.getPmsyOrderId());
         orderBill.setNamespaceId(cmd.getNamespaceId());
         orderBill.setAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
         orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
@@ -154,9 +155,13 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
             		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentSucessTime(), purchaseOrderDTO.getPaymentChannel());
             return null;
         });
+        List<PaymentBillOrder> paymentBillOrderList = assetProvider.findPaymentBillOrderRecordByOrderNum(purchaseOrderDTO.getBusinessOrderNumber());
         PayCallbackCommand cmd2 = new PayCallbackCommand();
-		if(purchaseOrderDTO.getId() != null) {
-			cmd2.setOrderNo(purchaseOrderDTO.getId().toString());
+		if(paymentBillOrderList != null) {
+			PaymentBillOrder paymentBillOrder = paymentBillOrderList.get(0);
+			if(paymentBillOrder != null) {
+				cmd2.setOrderNo(paymentBillOrder.getBillId());
+			}
 		}
 		cmd2.setOrderType(purchaseOrderDTO.getPaymentOrderType().toString());
 		if(purchaseOrderDTO.getBusinessPayerId() != null) {
