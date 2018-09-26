@@ -420,6 +420,5 @@ public interface PrivilegeConstants {
     long INVESTMENT_APPLY_EXPORT = 150106L;//导出申请记录权限
     long INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER = 150107L;//转为意向客户权限
     long INVESTMENT_APPLY_DELETE = 150108L;//删除申请记录权限
-    long INVESTMENT_TRANSFORM_TO_CUSTOMER = 150109L;//一键转为意向客户权限
     
 }

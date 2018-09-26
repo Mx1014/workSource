@@ -30,6 +30,7 @@ import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.community.FindReservationsCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -2455,4 +2456,17 @@ public class PropertyMgrController extends ControllerBase {
 	}
 	
 
+    /**
+	 * <b>URL: /pm/chargingItemNameList</b>
+	 * <p>获取收费项名称列表</p>
+	 */
+	@RequestMapping("chargingItemNameList")
+	@RestReturn(value = ListChargingItemsDTO.class, collection = true)
+	public RestResponse chargingItemNameList(AuthorizePriceCommand cmd) {
+		List<ListChargingItemsDTO> lists =  propertyMgrService.chargingItemNameList(cmd);
+		RestResponse response = new RestResponse(lists);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

@@ -1190,19 +1190,6 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /asset/noticeTrigger</b>
-	 * <p>启动自动催缴的定时任务</p>
-	 */
-	@RequestMapping("noticeTrigger")
-	public RestResponse noticeTrigger(NoticeTriggerCommand cmd) {
-		assetService.noticeTrigger(cmd.getNamespaceId());
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		restResponse.setErrorDescription("OK");
-		return restResponse;
-	}
-
-	/**
 	 * <b>URL: /asset/uploadCertificate</b>
 	 * <p>线下缴费场景，上传付费凭证图片</p>
 	 */
