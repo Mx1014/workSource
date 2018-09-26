@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HTTP;
@@ -763,7 +761,7 @@ public class ZJContractHandler implements ContractService{
     }
 
 	@Override
-	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}

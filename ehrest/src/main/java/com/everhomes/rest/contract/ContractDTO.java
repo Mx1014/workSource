@@ -77,14 +77,25 @@ public class ContractDTO {
 	@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
 	
-	private String SponsorName;
+	private String sponsorName;
+	
+	private Long sponsorUid;
+	
+
+	public Long getSponsorUid() {
+		return sponsorUid;
+	}
+
+	public void setSponsorUid(Long sponsorUid) {
+		this.sponsorUid = sponsorUid;
+	}
 
 	public String getSponsorName() {
-		return SponsorName;
+		return sponsorName;
 	}
 
 	public void setSponsorName(String sponsorName) {
-		SponsorName = sponsorName;
+		this.sponsorName = sponsorName;
 	}
 
 	public Long getId() {
