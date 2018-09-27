@@ -609,6 +609,11 @@ public class CustomerServiceImpl implements CustomerService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
 //        command.setIncludedGroupIds("10,11,12");
         List<FieldGroupDTO> results = fieldService.getAllGroups(command, false, true);
+        results.forEach(r -> {
+            if(r.getGroupDisplayName().equals("客户账单") || r.getGroupDisplayName().equals("活动记录")){
+                results.remove(r);
+            }
+        });
         if (results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             return dynamicExcelService.exportDynamicExcel( DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
