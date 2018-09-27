@@ -1860,12 +1860,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				CreateInvitedCustomerCommand cmd2 = finalCommandMap.get(dto.getCustomerName());
 				//企业客户意向房源
 				//TODO 得考虑addressId重复的问题,目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:08
-				CustomerRequirementDTO requirement = cmd2.getRequirement();
-				List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
-				CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-				addressDTO.setAddressId(dto.getAddressId());
-				addresses.add(addressDTO);
-				requirement.setAddresses(addresses);
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementDTO requirement = cmd2.getRequirement();
+					List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addresses.add(addressDTO);
+					requirement.setAddresses(addresses);
+				}
 				//企业客户联系人
 				//TODO 得考虑联系人重复的问题，目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:12
 				List<CustomerContactDTO> contacts = cmd2.getContacts();
@@ -1886,11 +1889,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				//企业客户意向房源
 				List<CustomerRequirementAddressDTO> addressDTOs = new ArrayList<>();
 				CustomerRequirementDTO requirementDTO = new CustomerRequirementDTO();
-				CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-				addressDTO.setAddressId(dto.getAddressId());
-				addressDTOs.add(addressDTO);
-				requirementDTO.setAddresses(addressDTOs);
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addressDTOs.add(addressDTO);
+				}
 				cmd2.setRequirement(requirementDTO);
+				requirementDTO.setAddresses(addressDTOs);
 				//企业客户联系人
 				List<CustomerContactDTO> contacts = new ArrayList<>();
 				CustomerContactDTO contactDTO = new  CustomerContactDTO();
