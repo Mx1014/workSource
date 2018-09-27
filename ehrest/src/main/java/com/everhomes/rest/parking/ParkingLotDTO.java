@@ -32,6 +32,9 @@ import java.sql.Timestamp;
  * <li>businessLicenseFlag: 申请月卡 是否需要 营业执照 0：不需要， 1：需要{@link ParkingConfigFlag}</li>
  * <li>identityCardFlag: 是否支持填写身份证号码 0：不支持，1：支持 {@link ParkingConfigFlag}</li>
  * <li>flowId: 工作流id</li>
+ * <li>summary: 用户须知</li>
+ * <li>noticeFlag: 是否开启用户须知 0：关闭，1：开启</li>
+ * <li>noticeContact: 用户须知的联系电话</li>
  * </ul>
  */
 public class ParkingLotDTO {
@@ -81,7 +84,10 @@ public class ParkingLotDTO {
     private String vipParkingUrl;
     private Byte identityCardFlag;
     private Long flowId;
-
+    private String summary;
+    private Byte noticeFlag;
+    private String noticeContact;
+    
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
     }
@@ -310,7 +316,31 @@ public class ParkingLotDTO {
         this.flowId = flowId;
     }
 
-    @Override
+    public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public Byte getNoticeFlag() {
+		return noticeFlag;
+	}
+
+	public void setNoticeFlag(Byte noticeFlag) {
+		this.noticeFlag = noticeFlag;
+	}
+
+	public String getNoticeContact() {
+		return noticeContact;
+	}
+
+	public void setNoticeContact(String noticeContact) {
+		this.noticeContact = noticeContact;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

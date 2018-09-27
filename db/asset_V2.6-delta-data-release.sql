@@ -1,0 +1,15 @@
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: tangcen
+-- REMARK: 楼宇资产管理模块添加自定义tab卡
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1001, 'asset_management', '0', '/1001', '租客管理', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1002, 'asset_management', '0', '/1002', '住户管理', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1003, 'asset_management', '0', '/1003', '合同管理', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1004, 'asset_management', '0', '/1004', '账单管理', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1005, 'asset_management', '0', '/1005', '活动记录', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1006, 'asset_management', '0', '/1006', '车辆管理', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1007, 'asset_management', '0', '/1007', '服务信息', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1008, 'asset_management', '0', '/1008', '历史房源', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1009, 'asset_management', '0', '/1009', '附件', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+-- --------------------- SECTION END ---------------------------------------------------------

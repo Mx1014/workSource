@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
  * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>invoiceEntryFlag: 发票入口开关</li>
  * <li>limitCommunityFlag:是否仅本项目可见 </li>
  * </ul>
  */
@@ -26,9 +27,11 @@ public class RentalInstanceConfig {
 
 	private Byte unauthVisible;
 
-	private Byte limitCommunityFlag;
+	private Byte invoiceEntryFlag;
 
-	public Long getResourceTypeId() {
+    private Byte limitCommunityFlag;
+
+    public Long getResourceTypeId() {
 		return resourceTypeId;
 	}
 
@@ -66,6 +69,14 @@ public class RentalInstanceConfig {
 
 	public void setUnauthVisible(Byte unauthVisible) {
 		this.unauthVisible = unauthVisible;
+	}
+
+	public Byte getInvoiceEntryFlag() {
+		return invoiceEntryFlag;
+	}
+
+	public void setInvoiceEntryFlag(Byte invoiceEntryFlag) {
+		this.invoiceEntryFlag = invoiceEntryFlag;
 	}
 
 	public Byte getLimitCommunityFlag() {

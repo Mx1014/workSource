@@ -15,6 +15,7 @@ import java.util.List;
  *     <li>scanForLogonServer: 扫码登录服务器地址</li>
  *     <li>accessPoints: borderServer 的链接地址。如果用户未登录，则此地址不返回</li>
  *     <li>contentCacheConfig: 资源缓存配置 {@link com.everhomes.rest.contentserver.ContentCacheConfigDTO}</li>
+ *     <li>securityPayServer: 支付双向安全校验</li>
  *     <li>indexDtos: 主页签信息{@link IndexDTO}</li>
  * </ul>
  */
@@ -30,9 +31,22 @@ public class SystemInfoResponse {
     @ItemType(String.class)
     private List<String> accessPoints;
 
+    private Byte myPublishFlag;
+
+    //default: https://secpay.zuolin.com
+    private String securityPayServer;
+
     private ContentCacheConfigDTO contentCacheConfig;
 
     private List<IndexDTO> indexDtos;
+
+    public String getSecurityPayServer() {
+        return securityPayServer;
+    }
+
+    public void setSecurityPayServer(String securityPayServer) {
+        this.securityPayServer = securityPayServer;
+    }
 
     public ContentCacheConfigDTO getContentCacheConfig() {
         return contentCacheConfig;

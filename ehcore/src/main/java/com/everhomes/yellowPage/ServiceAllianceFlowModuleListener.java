@@ -226,13 +226,12 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		request.setOwnerId(sa.getOwnerId());
 		request.setOwnerType(sa.getOwnerType());
+		request.setOwnerId(sa.getOwnerId());
 		request.setFlowCaseId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setSecondCategoryId(sa.getCategoryId());
 		request.setSecondCategoryName(sa.getServiceType());
-		request.setSecondCategoryId(sa.getCategoryId());
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
 		request.setTemplateType(ALLIANCE_TEMPLATE_TYPE);
@@ -246,12 +245,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			request.setCreatorOrganization(companyName);
 		}
 			
-		ServiceAlliances sas = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(),
-				request.getOwnerType(), request.getOwnerId());
-		if (sas != null) {
-			record.setServiceOrganization(sas.getName());
-		}
-		
+		record.setServiceOrganization(sa.getName());
 		record.setNamespaceId(flowCase.getNamespaceId());
 		record.setServiceAllianceId(request.getServiceAllianceId());
 		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);
@@ -449,7 +443,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-//		syncRequest(ctx);
 	}
 
 	private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -458,9 +451,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		if (flowCase.getOwnerType() != null && !FlowOwnerType.SERVICE_ALLIANCE.getCode().equals(flowCase.getOwnerType()))
 			return this.processCustomRequest(flowCase);
 
-		flowCase.setCustomObject(getCustomObject(flowCase));
-		
-		
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if (flowCase.getCreateTime() != null) {
 			entities.add(new FlowCaseEntity("申请时间", flowCase.getCreateTime().toLocalDateTime().format(fmt), FlowCaseEntityType.MULTI_LINE.getCode()));
@@ -532,6 +522,10 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 		//后面跟自定义模块--
 		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+
+		//把客户端或前端需要的东西放到OBEJECT中
+		flowCase.setCustomObject(getCustomObject(flowCase, entities));
+
 		return entities;
 		
 	}
@@ -621,10 +615,22 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	 * @param approvalId
 	 * @return
 	 */
-	private String getCustomObject(FlowCase flowCase) {
+	private String getCustomObject(FlowCase flowCase, List<FlowCaseEntity> entities) {
+
+		JSONObject json = new JSONObject();
+		for (FlowCaseEntity entity : entities) {
+			json.put(entity.getKey(), entity.getValue());
+		}
+
+		fillEnanbleProvider(json, flowCase);
+
+		return json.toJSONString();
+	}
+
+	private void fillEnanbleProvider(JSONObject json, FlowCase flowCase) {
 
 		if (!FlowOwnerType.SERVICE_ALLIANCE.getCode().equals(flowCase.getOwnerType())) {
-			return null;
+			return;
 		}
 
 		Byte enableProvider = (byte) 0;
@@ -633,12 +639,9 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			enableProvider = sa.getEnableProvider();
 		}
 
-		JSONObject json = new JSONObject();
 		json.put("enableProvider", enableProvider);
-
-		return json.toJSONString();
 	}
-	
+
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 

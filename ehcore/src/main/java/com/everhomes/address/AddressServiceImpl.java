@@ -17,6 +17,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
 import com.everhomes.customer.CustomerEntryInfo;
+import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.AccessSpec;
@@ -110,6 +111,61 @@ import com.everhomes.rest.address.SuggestCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.address.UpdateAddressArrangementCommand;
 import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressArrangementDTO;
+import com.everhomes.rest.address.AddressArrangementStatus;
+import com.everhomes.rest.address.AddressArrangementTemplateCode;
+import com.everhomes.rest.address.AddressArrangementType;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentAttachmentDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.ArrangementApartmentDTO;
+import com.everhomes.rest.address.ArrangementOperationFlag;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateAddressArrangementCommand;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteAddressArrangementCommand;
+import com.everhomes.rest.address.DeleteApartmentAttachmentCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.DownloadApartmentAttachmentCommand;
+import com.everhomes.rest.address.ExcuteAddressArrangementCommand;
+import com.everhomes.rest.address.ExportApartmentsInBuildingDTO;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameCommand;
+import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
+import com.everhomes.rest.address.GetHistoryApartmentCommand;
+import com.everhomes.rest.address.HistoryApartmentDTO;
+import com.everhomes.rest.address.ImportApartmentDataDTO;
+import com.everhomes.rest.address.ListAddressArrangementCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressCommand;
+import com.everhomes.rest.address.ListApartmentAttachmentsCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandV2Response;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.UpdateAddressArrangementCommand;
+import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -119,13 +175,22 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
@@ -200,6 +265,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -313,6 +379,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private ScheduleProvider scheduleProvider;
+@Autowired
+    private CustomerService customerService;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -827,7 +895,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                                             .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                                             .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
-                                                    .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+                                            .or(Tables.EH_ADDRESSES.BUILDING_ID.equal(cmd.getBuildingId()))
                                             )
                                             .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                                             .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())))
@@ -2988,6 +3057,26 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
                     if(levelItem != null) {
                         dto.setLevelItemName(levelItem.getItemDisplayName());
                     }
+                    ScopeFieldItem entryStatusItem  = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getEntryStatusItemId());
+                    if(entryStatusItem != null) {
+                        dto.setLevelItemName(entryStatusItem.getItemDisplayName());
+                    }
+                    ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
+                    command1.setCommunityId(customer.getCommunityId());
+                    command1.setCustomerId(customer.getId());
+                    List<CustomerEntryInfoDTO> entryInfoDTOList = customerService.listCustomerEntryInfosWithoutAuth(command1);
+                    entryInfoDTOList = removeDuplicatedEntryInfo(entryInfoDTOList);
+                    if (entryInfoDTOList != null && entryInfoDTOList.size() > 0) {
+                        entryInfoDTOList = entryInfoDTOList.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
+                        dto.setEntryInfos(entryInfoDTOList);
+                    }
+                    ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+                    command.setOrganizationId(customer.getOrganizationId());
+                    command.setCustomerId(customer.getId());
+                    command.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    command.setCommunityId(customer.getCommunityId());
+                    List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+                    dto.setEnterpriseAdmins(admins);
                     dtos.add(dto);
                 });
             }
@@ -3033,6 +3122,22 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
                 return null;
             });
         }
+    }
+
+    private List<CustomerEntryInfoDTO> removeDuplicatedEntryInfo(List<CustomerEntryInfoDTO> entryInfos) {
+        Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
+        if (entryInfos != null && entryInfos.size() > 0) {
+            entryInfos.forEach((e) -> {
+                if (e.getAddressId() != null) {
+                    Address address = addressProvider.findAddressById(e.getAddressId());
+                    if (address != null) {
+                        map.putIfAbsent(e.getAddressId(), e);
+                    }
+                }
+            });
+            return new ArrayList<>(map.values());
+        }
+        return null;
     }
 
 	@Override
@@ -3586,6 +3691,18 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
+				if (dto.getAreaSize()!=null) {
+					dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+				}
+				if(dto.getRentArea()!=null){
+					dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+				}
+				if(dto.getFreeArea()!=null){
+					dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+				}
+				if(dto.getChargeArea()!=null){
+					dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+				}
 				return dto;
 			}).collect(Collectors.toList());
 
@@ -3671,5 +3788,10 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			}
 		}
 		return filterData;
+	}//四舍五入截断double类型数据
+	private double doubleRoundHalfUp(double input,int scale){
+		BigDecimal digit = new BigDecimal(input);
+		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
+
 }

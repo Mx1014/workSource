@@ -30,6 +30,7 @@ public class ListPropApartmentsByKeywordCommand {
     private Long communityId;
 	@NotNull
     private String buildingName;
+	private Long buildingId;
 	private String apartmentFloor;
     private String keyword;
     private Integer namespaceId;
@@ -44,7 +45,13 @@ public class ListPropApartmentsByKeywordCommand {
     private Double chargeAreaTo;
     private Double freeAreaFrom;
     private Double freeAreaTo;
+public Long getBuildingId() {
+		return buildingId;
+	}
 
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
 	public Double getRentAreaFrom() {
 		return rentAreaFrom;
 	}

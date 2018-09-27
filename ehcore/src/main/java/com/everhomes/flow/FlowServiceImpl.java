@@ -6385,9 +6385,12 @@ public class FlowServiceImpl implements FlowService {
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, flowCase);
         if (dto instanceof FlowCaseBriefDTO) {
             ((FlowCaseBriefDTO) dto).setEntities(entities);
+            ((FlowCaseBriefDTO) dto).setCustomObject(flowCase.getCustomObject());
         } else if (dto instanceof FlowCaseDetailDTOV2) {
             ((FlowCaseDetailDTOV2) dto).setEntities(entities);
+            ((FlowCaseDetailDTOV2) dto).setCustomObject(flowCase.getCustomObject());
         }
+        
         return dto;
     }
 

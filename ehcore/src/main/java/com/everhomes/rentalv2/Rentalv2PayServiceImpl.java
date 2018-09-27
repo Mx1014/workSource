@@ -311,7 +311,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                     "暂未绑定收款账户");
-        }
+        }else
+            cmd.setAccountName(payUserDTOs.get(0).getUserAliasName());
 
         //4、组装报文，发起下单请求
         PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd);
@@ -334,6 +335,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (paymentMethods != null)
              dto.setPayMethod(paymentMethods.stream().map(r->{
                  PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 String paymentLogo = contentServerService.parserUri(r.getPaymentLogo());
+                 convert.setPaymentLogo(paymentLogo);
                  if (r.getPaymentParams() != null) {
                      PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
                      paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
@@ -398,6 +401,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         record.setOrderCommitToken(response.getOrderCommitToken());
         record.setOrderCommitUrl(response.getOrderCommitUrl());
         record.setPayInfo(response.getPayInfo());
+        record.setAccountName(cmd.getAccountName());
+
 
         this.rentalv2AccountProvider.createOrderRecord(record);
     }
@@ -613,6 +618,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
+                order.setAccountName(record.getAccountName()); //记录收款方账号
                 switch (cmd.getPaymentType()){
                     case 1:
                     case 7:
@@ -684,17 +690,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
 //		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
             rentalProvider.updateRentalBill(order);
-            FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
-            FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
-            flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
-            FlowAutoStepDTO dto = new FlowAutoStepDTO();
-            dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-            dto.setFlowCaseId(flowCase.getId());
-            dto.setFlowMainId(flowCase.getFlowMainId());
-            dto.setFlowNodeId(flowCase.getCurrentNodeId());
-            dto.setFlowVersion(flowCase.getFlowVersion());
-            dto.setStepCount(flowCase.getStepCount());
-            flowService.processAutoStep(dto);
+            //改变订单状态
+            rentalService.changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
 
             //发消息和短信
             //发给发起人

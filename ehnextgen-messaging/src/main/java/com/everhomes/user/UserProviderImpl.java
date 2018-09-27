@@ -245,7 +245,52 @@ public class UserProviderImpl implements UserProvider {
         
         return userList;
     }
-    
+
+    @Override
+    public List<User> listUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<User> userList = new ArrayList<User>();
+
+        Integer size = count + 1;
+        dbProvider.mapReduce(AccessSpec.readOnly(), null,
+                (DSLContext context, Object reducingContext) -> {
+                    SelectQuery<Record> query = context.selectQuery();
+                    query.addFrom(Tables.EH_USERS);
+                    query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+                    query.addJoin(Tables.EH_ORGANIZATION_MEMBERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+
+
+                    if (null != queryBuilderCallback) {
+                        queryBuilderCallback.buildCondition(locator, query);
+                    }
+                    if (null != locator && null != locator.getAnchor())
+                        query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
+
+                    query.addOrderBy(Tables.EH_USERS.ID.desc());
+                    query.addLimit(size);
+                    LOGGER.debug("query sql:{}", query.getSQL());
+                    LOGGER.debug("query param:{}", query.getBindValues());
+                    query.fetch().map((r) -> {
+                        User user = new User();
+                        user.setId(r.getValue(Tables.EH_USERS.ID));
+                        user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                        user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                        user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                        user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+                        user.setNamespaceUserType(r.getValue(Tables.EH_USERS.NAMESPACE_USER_TYPE));
+                        userList.add(user);
+                        return null;
+                    });
+                    return true;
+                });
+
+        locator.setAnchor(null);
+        if (userList.size() > count) {
+            userList.remove(userList.size() - 1);
+            locator.setAnchor(userList.get(userList.size() - 1).getId());
+        }
+        return userList;
+    }
+
     @Cacheable(value = "UserIdentifier-List", key="#userId", unless="#result.size() == 0")
     @Override
     public List<UserIdentifier> listUserIdentifiersOfUser(long userId) {

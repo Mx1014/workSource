@@ -1177,6 +1177,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             ServiceModuleDTO current = iter.next();
             if (current.getParentId().equals(parentId)
                     && (ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.CLASSIFY || ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.MODULE )) {
+                System.out.println(current.getId());
                 List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
                 results.add(current);

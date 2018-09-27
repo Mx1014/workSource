@@ -1,5 +1,22 @@
 package com.everhomes.contract;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
@@ -17,6 +34,8 @@ import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChargingVariables;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
@@ -759,7 +778,7 @@ public class ZJContractHandler implements ContractService{
     }
 
 	@Override
-	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
 		// TODO Auto-generated method stub
 
 	}
@@ -830,8 +849,13 @@ public class ZJContractHandler implements ContractService{
 	}
 
 	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

@@ -707,6 +707,9 @@ public class FamilyServiceImpl implements FamilyService {
         }
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
 
+        //离开家庭，增加日志记录 add by 梁燕龙 20180920
+        leaveGroupMemberLog(member, group);
+
         // 离开家庭，删除大堂门禁
         DeleteAuthByOwnerCommand deleteAuthByOwnerCommand = new DeleteAuthByOwnerCommand();
         deleteAuthByOwnerCommand.setNamespaceId(user.getNamespaceId());
@@ -893,6 +896,20 @@ public class FamilyServiceImpl implements FamilyService {
         GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
         memberLog.setNamespaceId(group.getNamespaceId());
         memberLog.setMemberStatus(member.getMemberStatus());
+        memberLog.setOperatorUid(UserContext.currentUserId());
+        memberLog.setApproveTime(DateUtils.currentTimestamp());
+        memberLog.setGroupMemberId(member.getId());
+        memberLog.setCreatorUid(UserContext.currentUserId());
+        memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        memberLog.setCommunityId(group.getFamilyCommunityId());
+        memberLog.setAddressId(group.getFamilyAddressId());
+        groupMemberLogProvider.createGroupMemberLog(memberLog);
+    }
+
+    private void leaveGroupMemberLog(GroupMember member, Group group) {
+        GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
+        memberLog.setNamespaceId(group.getNamespaceId());
+        memberLog.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
         memberLog.setOperatorUid(UserContext.currentUserId());
         memberLog.setApproveTime(DateUtils.currentTimestamp());
         memberLog.setGroupMemberId(member.getId());

@@ -16,6 +16,7 @@ package com.everhomes.rest.messaging;
  * <li>FAMILY_AGREE_TO_JOIN: 同意加入了家庭</li>
  * <li>GROUP_MEMBER_DELETE: 用户被踢出</li>
  * <li>GROUP_INVITE_TO_JOIN_FREE: 被邀请进群，直接进去</li>
+ * <li>GROUP_TALK_DISSOLVED: 解散群聊</li>
  * </ul>
  */
 public enum MetaObjectType {
@@ -34,7 +35,8 @@ public enum MetaObjectType {
     GROUP_MEMBER_DELETE("group.member.delete"),
     GROUP_INVITE_TO_JOIN_FREE("group.inviteToJoin.free"),
     WORK_BENCH_FLAG_OPEN("workBenchFlag.open"),
-    WORK_BENCH_FLAG_CLOSE("workBenchFlag.close");
+    WORK_BENCH_FLAG_CLOSE("workBenchFlag.close"),
+    GROUP_TALK_DISSOLVED("group.talk.dissolved");
     
     private String code;
     private MetaObjectType(String code) {

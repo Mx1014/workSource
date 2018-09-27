@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.sql.Timestamp;
@@ -87,21 +88,14 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         code.setGrantorUid(user.getId());
         oAuth2Provider.createAuthorizationCode(code);
 
-        String redirectUrl = String.format("%s?code=%s", cmd.getredirect_uri(), code.getCode());
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(cmd.getredirect_uri())
+                .queryParam("code", code.getCode());
 
         if (cmd.getState() != null && cmd.getState().trim().length() > 0) {
-            redirectUrl = redirectUrl + "&state=" + cmd.getState();
+            builder.queryParam("state", cmd.getState());
         }
-
-        try {
-            return new URI(redirectUrl);
-        } catch(Exception e) {
-            LOGGER.error("confirmAuthorization new URI error", e);
-            throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE, OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST,
-                    "Invalid redirect URI parameter");
-        }
+        return builder.build().toUri();
     }
-    
 
     @Override
     public AccessToken grantAccessTokenFromAuthorizationCode(String code, String redirectUri, String clientId) {

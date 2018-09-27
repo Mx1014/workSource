@@ -74,7 +74,7 @@ public interface GeneralFormProvider {
 
     List<GeneralFormVal> listGeneralForm();
 
-    Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion);
+    Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion);
 
     List<GeneralFormValRequest>  listGeneralFormValRequest(Integer namespaceId, Long sourceId, Long ownerId);
 
@@ -101,4 +101,11 @@ public interface GeneralFormProvider {
                                       String projectType, Long projectId, String ownerType, Long ownerId);
 
     GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName);
+
+	Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
+
+	GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id);
+	GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType);
 }

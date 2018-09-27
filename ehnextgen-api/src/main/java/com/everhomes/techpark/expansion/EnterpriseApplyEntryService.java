@@ -66,5 +66,7 @@ public interface EnterpriseApplyEntryService {
 	void openCustomRequestForm(OpenCustomRequestFormCommand cmd);
 
 	void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd);
-	
+
+	List<Long> transformToCustomer(TransformToCustomerCommand cmd);
+
 }

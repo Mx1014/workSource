@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -264,18 +265,18 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                JsonArray urlJsons = jo.getAsJsonArray("urls");
-                if(urlJsons != null && urlJsons.size() > 0){
-                    fieldValue = urlJsons.get(0).getAsString();
-                }else{
-                    caseFileDTO.setUrl("");
+                if(StringUtils.isNotBlank(fieldValue) && !fieldValue.equals("\"\"")){
+                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                    JsonArray urlJsons = jo.getAsJsonArray("urls");
+                    if(urlJsons != null && urlJsons.size() > 0){
+                        fieldValue = urlJsons.get(0).getAsString();
+                    }else{
+                        caseFileDTO.setUrl("");
+                    }
+                    e.setValue(fieldValue);
                 }
 
-
-
-                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);
