@@ -13,7 +13,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.appurl.appInfoByNamespaceIdDTO;
+import com.everhomes.rest.appurl.AppInfoByNamespaceIdDTO;
 import com.everhomes.util.RequireAuthentication;
 
 @RestController
@@ -52,10 +52,10 @@ public class AppUrlController extends ControllerBase {
      * <p>通过namespaceId 查询appurl信息</p>
      */
 	@RequestMapping("getAppInfoByNamespaceId")
-    @RestReturn(value=appInfoByNamespaceIdDTO.class)
+    @RestReturn(value=AppInfoByNamespaceIdDTO.class)
 	public RestResponse getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
 
-		appInfoByNamespaceIdDTO dto = this.appUrlService.getAppInfoByNamespaceId(cmd);
+		AppInfoByNamespaceIdDTO dto = this.appUrlService.getAppInfoByNamespaceId(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -9,18 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.forum.ForumServiceImpl;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.AppUrlDeviceDTO;
 import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.appurl.UpdateAppInfoCommand;
-import com.everhomes.rest.appurl.appInfoByNamespaceIdDTO;
-import com.everhomes.service_agreement.ServiceAgreement;
+import com.everhomes.rest.appurl.AppInfoByNamespaceIdDTO;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -87,7 +84,8 @@ public class AppUrlServiceImpl implements AppUrlService {
 				uc.setDownloadUrl(o.getDownloadUrl());
 
 				
-				AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);	
+				AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);
+				bo.setThemeColor(cmd.getThemeColor());
 				if(bo.getId() != null){//存在ID则走更新路线
 					appUrlProvider.updateAppInfo(bo);
 				}else{//走新增路线
@@ -106,7 +104,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 	}
 	
 	@Override
-	public appInfoByNamespaceIdDTO getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
+	public AppInfoByNamespaceIdDTO getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
 		
 		List<AppUrls> appUrls = appUrlProvider.findByNamespaceId(cmd.getNamespaceId());
 
@@ -114,7 +112,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 		if(appUrls == null || appUrls.size() < 1){
 			return null;
 		}
-		appInfoByNamespaceIdDTO returnDTO = new appInfoByNamespaceIdDTO();
+		AppInfoByNamespaceIdDTO returnDTO = new AppInfoByNamespaceIdDTO();
 		List<AppUrlDeviceDTO> listDTO = new ArrayList<AppUrlDeviceDTO>();
 		returnDTO.setDtos(listDTO);
 		for(AppUrls o : appUrls ){
@@ -130,7 +128,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 			returnDTO.setLogoUrl(url);
 			returnDTO.setName(o.getName());
 			returnDTO.setNamespaceId(o.getNamespaceId());
-			
+			returnDTO.setThemeColor(o.getThemeColor());
 		}
 		return returnDTO ;
 	}

@@ -5,7 +5,7 @@ import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.UpdateAppInfoCommand;
-import com.everhomes.rest.appurl.appInfoByNamespaceIdDTO;
+import com.everhomes.rest.appurl.AppInfoByNamespaceIdDTO;
 
 public interface AppUrlService {
 	
@@ -28,6 +28,6 @@ public interface AppUrlService {
 	 * @param cmd
 	 * @return
 	 */
-	appInfoByNamespaceIdDTO getAppInfoByNamespaceId(GetAppInfoCommand cmd) ;
+	AppInfoByNamespaceIdDTO getAppInfoByNamespaceId(GetAppInfoCommand cmd) ;
 
 }
