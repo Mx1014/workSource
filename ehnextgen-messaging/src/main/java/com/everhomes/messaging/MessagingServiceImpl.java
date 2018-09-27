@@ -27,6 +27,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.Name;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,6 +267,12 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
 
         if(handler != null) {
             if(handler.allowToRoute(senderLogin, appId, dstChannelType, dstChannelToken, message)) {
+
+                //add by huangliangming 如果消息内容为空,或空字符串,不允许发送
+                if(message.getBody()==null|| StringUtils.isBlank(message.getBody())){
+                    LOGGER.debug("message body is blank !");
+                    return ;
+                }
 
                 //手动添加消息唯一索引
                 message.getMeta().put(MESSAGE_INDEX_ID,  messageProvider.getNextMessageIndexId().toString());
