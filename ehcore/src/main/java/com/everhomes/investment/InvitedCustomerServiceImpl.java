@@ -458,16 +458,24 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 List<CustomerRequirementAddress> addresses = invitedCustomerProvider.findRequirementAddressByRequirementId(requirement.getId());
                 if(addresses != null){
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
-                    dtos.forEach(r ->{
-                        Address address = addressProvider.findAddressById(r.getAddressId());
-                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
-                        }else{
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                            r.setAddressArea(address.getBuildArea());
+                    if(dtos != null && dtos.size() > 0){
+                        dtos.forEach(r ->{
+                            Address address = addressProvider.findAddressById(r.getAddressId());
+                            if(address != null){
+                                if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                                }else{
+                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressArea(address.getBuildArea());
+                                }
+                            }else{
+                                dtos.remove(r);
+                            }
+                        });
+                        if(dtos.size() > 0) {
+                            requirementDTO.setAddresses(dtos);
                         }
-                    });
-                    requirementDTO.setAddresses(dtos);
+                    }
                 }
 
 

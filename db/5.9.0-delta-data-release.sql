@@ -766,8 +766,12 @@ UPDATE eh_var_fields SET status = 0 WHERE name = 'visitPersonName';
 UPDATE eh_service_module_apps SET name = '租客管理' WHERE module_id = 21100;
 UPDATE eh_service_modules SET name = '租客管理' WHERE id = 21100;
 
---REMARK: 将系统中租客scope的客户类型去除
+-- REMARK: 将系统中租客scope的客户类型去除
 UPDATE eh_var_field_scopes SET `status` = 0 WHERE module_name = 'enterprise_customer' AND field_id = 5;
+
+
+-- REMARK : 删除数据库中的脏数据
+UPDATE eh_var_field_item_scopes SET `status` = 0 WHERE item_id = 3 AND field_id != 5 ;
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
