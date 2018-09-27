@@ -21,6 +21,10 @@
 -- AUTHOR: ryan  20180926
 -- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像(需等待上一接口执行完毕,基线大约需要10分钟)
 
+-- AUTHOR: 黄良铭 20180927
+-- REMARK: core server 的kafka配置 加上:client-id: ehcore # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable(5.9.0 之后的代码将认为没有配置即不启用kafka)
+--                可参照:http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011                   
+
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
