@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public enum JumpType {
 
-    NONE(0L), TEMPLATE(1L), MODULE(2L), APPLICATION(3L), THIRD_URL(4L);
+    NONE(0L), TEMPLATE(1L), FORM(2L), APPLICATION(3L), THIRD_URL(4L);
 
     private Long code;
     private JumpType(Long code) {
