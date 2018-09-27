@@ -24,14 +24,7 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 	@Override
 	public String publish(Integer namespaceId, String instanceConfig, String appName) {
-		
-		SiyinPrintInstanceConfig config = JSONObject.parseObject(instanceConfig, SiyinPrintInstanceConfig.class);
-		if (null == config) {
-			return instanceConfig;
-		}
-		
-		saveChargeConfig(namespaceId, config);
-		return config.toString();
+		return instanceConfig;
 	} 
 
 	@Override
@@ -41,15 +34,7 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 	@Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig) {
-		
-		SiyinPrintInstanceConfig config = JSONObject.parseObject(instanceConfig, SiyinPrintInstanceConfig.class);
-		if (null == config) {
-			return instanceConfig;
-		}
-		
-		JSONObject json = new JSONObject();
-		json.put("url", config.getUrl());
-		return json.toJSONString();
+		return instanceConfig;
 	}
 
 	@Override
