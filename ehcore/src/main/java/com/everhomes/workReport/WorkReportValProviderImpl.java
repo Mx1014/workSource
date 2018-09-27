@@ -393,4 +393,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         return query.fetchInto(WorkReportValReceiverMap.class);
     }
 
+    @Override
+    public List<WorkReportVal> listWorkReportVals(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
+        return query.fetchInto(WorkReportVal.class);
+    }
 }

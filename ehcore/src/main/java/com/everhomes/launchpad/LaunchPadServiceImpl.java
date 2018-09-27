@@ -3027,7 +3027,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		BulletinsHandler bulletinsHandler = getBulletinsHandler(bulletins.getModuleId());
 		if(bulletinsHandler != null){
-			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), bulletins.getRowCount());
+
+			//处理方式rowCount、noticeCount是用于客户端显示的，都不是条数。现在直接查询所有的。
+			List<BulletinsCard> cards = bulletinsHandler.listBulletinsCards(bulletins.getAppId(), cmd.getContext(), 1000);
 			response.setCards(cards);
 
 			String itemActionData = "{}";

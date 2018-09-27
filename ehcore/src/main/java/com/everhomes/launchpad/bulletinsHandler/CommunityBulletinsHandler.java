@@ -2,6 +2,7 @@
 package com.everhomes.launchpad.bulletinsHandler;
 
 import com.everhomes.activity.ActivityService;
+import com.everhomes.announcement.AnnouncementService;
 import com.everhomes.forum.ForumService;
 import com.everhomes.launchpad.BulletinsHandler;
 import com.everhomes.launchpad.LaunchPadService;
@@ -10,6 +11,9 @@ import com.everhomes.module.RouterInfoService;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.announcement.AnnouncementDTO;
+import com.everhomes.rest.announcement.ListAnnouncementCommand;
+import com.everhomes.rest.announcement.ListAnnouncementResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.TopicPublishStatus;
@@ -50,33 +54,35 @@ public class CommunityBulletinsHandler implements BulletinsHandler {
     @Autowired
     private RouterInfoService routerService;
 
+    @Autowired
+    private AnnouncementService announcementService;
+
 
     @Override
     public List<BulletinsCard> listBulletinsCards(Long appId, AppContext context, Integer rowCount) {
 
         UserContext.current().setAppContext(context);
 
-        ListNoticeBySceneCommand cmd = new ListNoticeBySceneCommand();
+        ListAnnouncementCommand cmd = new ListAnnouncementCommand();
         cmd.setPageSize(rowCount);
         cmd.setPublishStatus(TopicPublishStatus.PUBLISHED.getCode());
-
-        ListPostCommandResponse postRest = forumService.listNoticeByScene(cmd);
-
-        if(postRest == null || postRest.getPosts() == null || postRest.getPosts().size() == 0){
+        Long communityId = UserContext.current().getAppContext().getCommunityId();
+        cmd.setCommunityId(communityId);
+        ListAnnouncementResponse postRest = this.announcementService.listAnnouncement(cmd);
+        if(postRest == null || postRest.getAnnouncementDTOs() == null || postRest.getAnnouncementDTOs().size() == 0){
             return null;
         }
 
         List<BulletinsCard> cards = new ArrayList<>();
 
-        for (PostDTO dto: postRest.getPosts()){
+        for (AnnouncementDTO dto: postRest.getAnnouncementDTOs()){
             BulletinsCard  card  = new BulletinsCard();
             card.setTitle(dto.getSubject());
             card.setContent(dto.getContent());
             card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 
             CommunityBulletinsContentRouterJson contentRouterJson = new CommunityBulletinsContentRouterJson();
-            contentRouterJson.setForumId(dto.getForumId());
-            contentRouterJson.setTopicId(dto.getId());
+            contentRouterJson.setBulletinId(dto.getId());
             String queryStr = routerService.getQueryInDefaultWay(contentRouterJson.toString());
 
             card.setRouterPath("/detail");

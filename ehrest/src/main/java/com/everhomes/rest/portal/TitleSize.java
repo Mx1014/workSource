@@ -8,12 +8,12 @@ package com.everhomes.rest.portal;
  *     <li>LARGE((byte) 3): 大</li>
  * </ul>
  */
-public enum TitleSizeType {
+public enum TitleSize {
     SMALL((byte) 1), MUDIUM((byte) 2), LARGE((byte) 3);
 
     private byte code;
 
-    private TitleSizeType(byte code) {
+    private TitleSize(byte code) {
         this.code = code;
     }
 
@@ -21,9 +21,9 @@ public enum TitleSizeType {
         return this.code;
     }
 
-    public static TitleSizeType fromCode(Byte code) {
+    public static TitleSize fromCode(Byte code) {
         if (null != code) {
-            for (TitleSizeType value : TitleSizeType.values()) {
+            for (TitleSize value : TitleSize.values()) {
                 if (value.code == code.byteValue()) {
                     return value;
                 }
