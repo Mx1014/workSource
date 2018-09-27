@@ -5,6 +5,10 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.qrcode.QRCodeSource;
 
+/**
+ * 该接口已经废弃, 请勿使用
+ */
+@Deprecated
 public interface QRCodeModuleListener {
 
     QRCodeHandler init();

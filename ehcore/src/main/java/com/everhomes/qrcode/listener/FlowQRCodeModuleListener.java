@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * Created by xq.tian on 2017/11/15.
  */
+@Deprecated
 @Component
 public class FlowQRCodeModuleListener implements QRCodeModuleListener {
 
