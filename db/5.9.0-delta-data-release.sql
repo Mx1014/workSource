@@ -762,7 +762,7 @@ UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_i
 
 -- REMARK: 去除有两个拜访人的问题
 DELETE FROM eh_var_field_scopes WHERE field_id = (SELECT id FROM eh_var_fields WHERE name = 'visitPersonName');
-DELETE FROM eh_var_fields WHERE name = 'visitPersonName';
+UPDATE eh_var_fields SET status = 0 WHERE name = 'visitPersonName';
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
