@@ -332,9 +332,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				List<Long> addressIds = dto.getAddressIds();
 				if (addressIds!=null && addressIds.size()>0) {
 					for (Long addressId : addressIds) {
-						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-						addressDTO.setAddressId(addressId);
-						addresses.add(addressDTO);
+						//如果不存在addressId，有时addressId前端会传0
+						if (addressId != null && addressId != 0) {
+							CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+							addressDTO.setAddressId(addressId);
+							addresses.add(addressDTO);
+						}
 					}
 				}
 				requirement.setAddresses(addresses);
@@ -361,9 +364,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				List<Long> addressIds = dto.getAddressIds();
 				if (addressIds!=null && addressIds.size()>0) {
 					for (Long addressId : addressIds) {
-						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-						addressDTO.setAddressId(addressId);
-						addressDTOs.add(addressDTO);
+						//如果不存在addressId，有时addressId前端会传0
+						if (addressId != null && addressId != 0) {
+							CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+							addressDTO.setAddressId(addressId);
+							addressDTOs.add(addressDTO);
+						}
 					}
 				}
 				requirementDTO.setAddresses(addressDTOs);

@@ -198,6 +198,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -3504,6 +3505,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				ExportApartmentsInBuildingDTO dto = ConvertHelper.convert(r, ExportApartmentsInBuildingDTO.class);
 				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
+				if (dto.getAreaSize()!=null) {
+					dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+				}
+				if(dto.getRentArea()!=null){
+					dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+				}
+				if(dto.getFreeArea()!=null){
+					dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+				}
+				if(dto.getChargeArea()!=null){
+					dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+				}
 				return dto;
 			}).collect(Collectors.toList());
 			
@@ -3590,4 +3603,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
 		return filterData;
 	}	
+	
+	//四舍五入截断double类型数据
+	private double doubleRoundHalfUp(double input,int scale){
+		BigDecimal digit = new BigDecimal(input); 
+		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+		
 }
