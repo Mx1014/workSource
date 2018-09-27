@@ -1,6 +1,7 @@
 package com.everhomes.payment;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.pay.order.OrderCommandResponse;
@@ -51,6 +52,8 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     protected GeneralOrderService orderService;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private ContentServerService contentServerService;
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Value("${server.contextPath:}")
@@ -163,6 +166,8 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
         if (paymentMethods != null)
             dto.setPayMethod(paymentMethods.stream().map(r->{
                 PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                String paymentLogo = contentServerService.parserUri(r.getPaymentLogo());
+                convert.setPaymentLogo(paymentLogo);
                 if (r.getPaymentParams() != null) {
                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
