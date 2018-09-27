@@ -10,10 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.everhomes.address.AddressProvider;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
@@ -22,10 +20,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormSearcher;
 import com.everhomes.general_form.GeneralFormVal;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.requisition.RequisitionStatus;
-import com.everhomes.requisition.RequistionFLowCaseListener;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
@@ -36,7 +31,6 @@ import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
@@ -48,6 +42,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Component
 public class InvestmentAdFLowCaseListener implements FlowModuleListener{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentAdFLowCaseListener.class);
@@ -88,9 +83,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
             generalFormProvider.updateGeneralFormValRequestStatus(flowCase.getReferId(), RequisitionStatus.WAIT.getCode());
-            List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),
-            									FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-            generalFormSearcher.feedDoc(requestVals);           
         }
     }
     /**
@@ -100,11 +92,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
     public void onFlowCaseEnd(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
-        Integer namespaceId = flowCase.getNamespaceId();
-        Long ownerId = flowCase.getProjectId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.FINISH.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(namespaceId,referId,FlowConstants.INVESTMENT_AD_MODULE, ownerId);
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override
@@ -112,8 +100,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override
@@ -121,8 +107,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.HANDLING.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override
@@ -172,6 +156,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
             }
             GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
             String fieldValue = dto.getFieldValue();
+            String fieldName = dto.getFieldName();
             ObjectMapper mapper = new ObjectMapper();
             JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
             Map<String,String> urMap;
@@ -190,7 +175,13 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
                         }
                     }
                 }
-                e.setValue(fieldValue);
+                //设置显示的值
+                if ("APARTMENT".equals(fieldName)) {
+					
+				}else {
+					e.setValue(fieldValue);
+				}
+                
             } catch (IOException ex) {
                 JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
                 FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
@@ -202,7 +193,17 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
                 }
                 e.setValue(fieldValue);
             }
-            e.setKey(val.getFieldName());
+            if ("USER_NAME".equals(val.getFieldName())) {
+            	e.setKey("用户姓名");
+			}else if ("USER_PHONE".equals(val.getFieldName())) {
+				e.setKey("手机号码");
+			}else if ("ENTERPRISE_NAME".equals(val.getFieldName())) {
+				e.setKey("承租方");
+			}else if ("APARTMENT".equals(val.getFieldName())) {
+				e.setKey("意向房源");
+			}else {
+				e.setKey(val.getFieldName());
+			}
             entities.add(e);
         }
         return entities;
