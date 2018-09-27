@@ -353,10 +353,15 @@ public class SiYinPrintController extends ControllerBase {
 	 * <p>21.司印方调用，任务日志处理</p>
 	 */
     @RequestMapping("mfpLogNotification")
+    @RestReturn(value=String.class)
     @RequireAuthentication(false)
-    public void mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData, HttpServletResponse response){
-    	siyinPrintService.mfpLogNotification(jobData,response);
-    }
+	public RestResponse mfpLogNotification(MfpLogNotificationCommand cmd) {
+		siyinPrintService.mfpLogNotification(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
     /**
 	  * <b>URL: /siyinprint/listQueueJobs</b>
