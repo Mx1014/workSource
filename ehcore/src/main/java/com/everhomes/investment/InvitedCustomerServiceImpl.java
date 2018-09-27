@@ -500,15 +500,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                    if(address != null){
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
 
-                    }else{
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                        addressDTO.setAddressArea(address.getRentArea());
+                        }else{
+                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                            addressDTO.setAddressArea(address.getRentArea());
+                        }
                     }
-
-
                     addressesDTO.add(addressDTO);
 
                 });
