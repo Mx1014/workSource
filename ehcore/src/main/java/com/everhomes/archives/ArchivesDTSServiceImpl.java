@@ -204,7 +204,6 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             if (checkArchivesAccount(log, data, data.getAccount(), contact))
                 return log;
 
-
         //  英文名校验
         if (checkArchivesContactEnName(log, data, data.getContactEnName()))
             return log;
