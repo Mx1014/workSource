@@ -295,7 +295,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Override
 	public void exportInvestmentAds(ListInvestmentAdCommand cmd) {
-		//checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_EXPORT, cmd.getOrganizationId(), cmd.getCommunityId());
+		checkPrivilegeAuth(cmd.getNamespaceId(), PrivilegeConstants.INVESTMENT_ADVERTISEMENT_EXPORT, cmd.getOrganizationId(), cmd.getCommunityId());
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("UserContext", UserContext.current().getUser());
