@@ -188,20 +188,25 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
 
+        //  手机号
+        if (checkArchivesContactToken(log, data, data.getContactToken()))
+            return log;
+        OrganizationMemberDetails contact = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, data.getContactToken());
+
         //  姓名校验
         if (checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
         //  账号校验
-        if (checkArchivesAccount(log, data, data.getContactToken(), data.getAccount()))
+        if (checkArchivesAccount(log, data, data.getAccount(), data.getContactToken()))
             return log;
+        if (contact != null)
+            if (checkArchivesAccount(log, data, data.getAccount(), contact))
+                return log;
+
 
         //  英文名校验
         if (checkArchivesContactEnName(log, data, data.getContactEnName()))
-            return log;
-
-        //  手机号
-        if (checkArchivesContactToken(log, data, data.getContactToken()))
             return log;
 
         //  短号
@@ -922,7 +927,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String contactToken, String account) {
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account, String contactToken) {
         if (!StringUtils.isEmpty(account)) {
             if (account.length() > 32 || !Pattern.matches("^[a-zA-Z0-9_\\-.]+$", account)) {
                 LOGGER.warn("Account wrong format. data = {}", data);
@@ -931,12 +936,24 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_WRONG_FORMAT);
                 return true;
             }
-
             if (!organizationService.verifyPersonnelByAccount(contactToken, account.trim())) {
                 LOGGER.warn("Duplicate account. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Duplicate account");
                 log.setCode(ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account, OrganizationMemberDetails contact) {
+        if (contact.getAccount() != null) {
+            if (!contact.getAccount().equals(account)) {
+                LOGGER.warn("Refuse updating account. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Refuse updating account");
+                log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_UPDATE_REFUSE);
                 return true;
             }
         }
