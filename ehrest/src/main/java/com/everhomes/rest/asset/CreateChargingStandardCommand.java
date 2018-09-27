@@ -58,7 +58,7 @@ public class CreateChargingStandardCommand {
 
     private Long organizationId;
 
-
+    private Long appId;
     public Long getCategoryId() {
         return categoryId;
     }
@@ -204,5 +204,13 @@ public class CreateChargingStandardCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }

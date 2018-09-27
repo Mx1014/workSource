@@ -47,6 +47,7 @@ public class AddOrModifyRuleForBillGroupCommand {
     private Long ownerId;
 
     private Long organizationId;
+    private Long appId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -164,6 +165,14 @@ public class AddOrModifyRuleForBillGroupCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public AddOrModifyRuleForBillGroupCommand() {

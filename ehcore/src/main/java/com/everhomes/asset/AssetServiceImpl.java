@@ -214,7 +214,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -222,8 +221,6 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -3599,7 +3596,7 @@ public class AssetServiceImpl implements AssetService {
         Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
         if(communityId == null || communityId == -1){
-            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), true);
+            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), cmd.getAppId(),true);
         }
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
@@ -3608,18 +3605,18 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.configChargingItems(cmd, communityIds);
     }
 
-    private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, boolean includeNamespace) {
+    private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
         List<Long> communityIds = new ArrayList<>();
         //全部的情况
-        ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
-        cmd1.setNamespaceId(namespaceId);
-        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-        listServiceModuleAppsCommand.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-           communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, apps.getServiceModuleApps().get(0).getId());
-        }
+//        ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
+//        cmd1.setNamespaceId(namespaceId);
+//        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+//        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+//        listServiceModuleAppsCommand.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+//        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+//        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+           communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, appId);
+//        }
         //标准版之后不再使用
 //        ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
 //        List<CommunityDTO> communities = communitResponse.getCommunities();
@@ -3642,7 +3639,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCategoryId(0l);
         }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),cmd.getOrganizationId(),false);
+            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),cmd.getOrganizationId(),cmd.getAppId(),false);
             Long brotherStandardId = null;
             brotherStandardId = getBrotherStandardId();
             for(int i = 0; i < allCommunityIds.size(); i ++){
@@ -3934,7 +3931,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherGroupId = assetProvider.createBillGroup(cmd, deCouplingFlag, null);
             //同步下去
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), false);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
             for(int i =0; i < allCommunity.size(); i ++){
                 Long communityId = allCommunity.get(i);
                 cmd.setOwnerId(communityId);
@@ -4029,7 +4026,7 @@ public class AssetServiceImpl implements AssetService {
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(),false);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
             for(int i = 0; i < allCommunity.size(); i ++){
                 cmd.setOwnerId(allCommunity.get(i));
                 boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());

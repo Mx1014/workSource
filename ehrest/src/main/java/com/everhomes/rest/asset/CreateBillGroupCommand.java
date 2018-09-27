@@ -48,6 +48,8 @@ public class CreateBillGroupCommand {
 
     private Long organizationId;
 
+    private Long appId;
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -160,5 +162,13 @@ public class CreateBillGroupCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }

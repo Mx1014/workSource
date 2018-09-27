@@ -2,6 +2,7 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class ConfigChargingItemsCommand {
     private List<ConfigChargingItems> chargingItemConfigs;
     private Long categoryId;
     private Long organizationId;
+    private Long appId;
 
     public Long getCategoryId() {
         return categoryId;
@@ -74,5 +76,18 @@ public class ConfigChargingItemsCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
