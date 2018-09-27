@@ -2,16 +2,22 @@ package com.everhomes.core.sdk.user;
 
 import com.everhomes.core.sdk.CoreSdkSettings;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppDTO;
+import com.everhomes.rest.app.FindAppRestResponse;
 import com.everhomes.rest.app.GetAppCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.category.GetCategoryCommand;
+import com.everhomes.rest.category.GetCategoryRestResponse;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.ParseURICommand;
+import com.everhomes.rest.contentserver.UploadFileByUrlRestResponse;
 import com.everhomes.rest.contentserver.UploadFileCommand;
 import com.everhomes.rest.enterprise.ProcessUserForMemberCommand;
+import com.everhomes.rest.openapi.GetCommunityByIdRestResponse;
 import com.everhomes.rest.region.GetRegionCommand;
+import com.everhomes.rest.region.GetRegionRestResponse;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.tachikoma.commons.sdk.SdkClient;
@@ -66,33 +72,33 @@ public class SdkCommonService {
         RestResponse response = sdkClient.restCall("post", "/evh/org/processUserForMember", cmd, RestResponse.class);
     }
 
-    public RestResponse getCommunityById(Long id) {
+    public CommunityDTO getCommunityById(Long id) {
         GetCommunityByIdCommand cmd = new GetCommunityByIdCommand();
         cmd.setId(id);
-        RestResponse response = sdkClient.restCall("post", "/evh/community/get", cmd, RestResponse.class);
-        return response;
+        GetCommunityByIdRestResponse response = sdkClient.restCall("post", "/evh/community/get", cmd, GetCommunityByIdRestResponse.class);
+        return response.getResponse();
     }
 
     public CategoryDTO getCategoryById(Long id) {
         GetCategoryCommand cmd = new GetCategoryCommand();
         cmd.setId(id);
-        RestResponse response = sdkClient.restCall("post", "/evh/category/getCategory", cmd, RestResponse.class);
-        return (CategoryDTO) response.getResponseObject();
+        GetCategoryRestResponse response = sdkClient.restCall("post", "/evh/category/getCategory", cmd, GetCategoryRestResponse.class);
+        return (CategoryDTO) response.getResponse();
     }
 
     public RegionDTO getRegionById(Long id) {
         GetRegionCommand cmd = new GetRegionCommand();
         cmd.setId(id);
-        RestResponse response = sdkClient.restCall("post", "/evh/region/getRegion", cmd, RestResponse.class);
-        return (RegionDTO) response.getResponseObject();
+        GetRegionRestResponse response = sdkClient.restCall("post", "/evh/region/getRegion", cmd, GetRegionRestResponse.class);
+        return (RegionDTO) response.getResponse();
     }
 
     public CsFileLocationDTO getUploadFile(String fileName, String url) {
         UploadFileCommand cmd = new UploadFileCommand();
         cmd.setFileName(fileName);
         cmd.setUrl(url);
-        RestResponse response = sdkClient.restCall("post", "/evh/contentServer/uploadFileByUrl", cmd, RestResponse.class);
-        return (CsFileLocationDTO) response.getResponseObject();
+        UploadFileByUrlRestResponse response = sdkClient.restCall("post", "/evh/contentServer/uploadFileByUrl", cmd, UploadFileByUrlRestResponse.class);
+        return (CsFileLocationDTO) response.getResponse();
     }
 
     public String getFileUrl(String uri) {
@@ -104,8 +110,8 @@ public class SdkCommonService {
 
     public AppDTO getApp(String appKey) {
         GetAppCommand cmd = new GetAppCommand();
-        cmd.setAppKey(appKey);
-        RestResponse response = sdkClient.restCall("post", "/evh/appkey/findApp", cmd, RestResponse.class);
-        return (AppDTO) response.getResponseObject();
+        cmd.setRealAppKey(appKey);
+        FindAppRestResponse response = sdkClient.restCall("post", "/evh/appkey/findApp", cmd, FindAppRestResponse.class);
+        return (AppDTO) response.getResponse();
     }
 }
