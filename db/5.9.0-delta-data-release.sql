@@ -533,8 +533,6 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150003, '编辑客户权限', 0, SYSDATE());
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150004, '删除客户权限', 0, SYSDATE());
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150005, '一键转为租客权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150006, '签约权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150007, '续约权限', 0, SYSDATE());
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150008, '导入权限', 0, SYSDATE());
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150009, '导出权限', 0, SYSDATE());
 INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150010, '一键转为资质客户权限', 0, SYSDATE());
@@ -546,8 +544,6 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VA
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150003, 0, '招商管理 编辑客户权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150004, 0, '招商管理 删除客户权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150005, 0, '招商管理 一键转为租客权限', '招商管理 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150006, 0, '招商管理 签约权限', '招商管理 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150007, 0, '招商管理 续约权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150008, 0, '招商管理 导入权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150009, 0, '招商管理 导出权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150010, 0, '招商管理 一键转为资质客户权限', '招商管理 业务模块权限', NULL);
@@ -763,6 +759,14 @@ UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_i
 -- REMARK: 去除有两个拜访人的问题
 DELETE FROM eh_var_field_scopes WHERE field_id = (SELECT id FROM eh_var_fields WHERE name = 'visitPersonName');
 UPDATE eh_var_fields SET status = 0 WHERE name = 'visitPersonName';
+
+-- REMAKE: 将module中的企业客户换成租客
+UPDATE eh_service_module_apps SET name = '租客管理' WHERE module_id = 21100;
+UPDATE eh_service_modules SET name = '租客管理' WHERE id = 21100;
+
+--REMARK: 将系统中租客scope的客户类型去除
+UPDATE eh_var_field_scopes SET `status` = 0 WHERE module_name = 'enterprise_customer' AND field_id = 5;
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
