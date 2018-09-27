@@ -12,12 +12,14 @@
 -- AUTHOR: 黄鹏宇 2018年9月5日
 -- REMARK: 1、调用接口/customer/syncEnterpriseCustomerIndex
 
+-- AUTHOR: ryan  20180827
+-- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息(以下接口需等待上一接口执行完毕,基线大约需要10分钟)
 
--- AUTHOR: ryan  20180918
--- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息
+-- AUTHOR: ryan  20180827
+-- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像(需等待上一接口执行完毕,基线大约需要10分钟)
 
--- AUTHOR: ryan  20180918
--- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像
+-- AUTHOR: ryan  20180926
+-- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像(需等待上一接口执行完毕,基线大约需要10分钟)
 
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
