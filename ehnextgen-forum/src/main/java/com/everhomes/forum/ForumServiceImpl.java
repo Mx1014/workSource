@@ -55,6 +55,7 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
@@ -364,6 +365,9 @@ public class ForumServiceImpl implements ForumService {
             LocalEventContext context = new LocalEventContext();
             context.setUid(tempDto.getCreatorUid());
             context.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //add by liangming.huang 20180813
+            context.setCommunityId(cmd.getCommunityId());
+
             event.setContext(context);
 
             event.setEntityType(EhForumPosts.class.getSimpleName());
@@ -516,6 +520,10 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(newCmd.getDescription()) && !newCmd.getDescription().equals(oldCmd.getDescription())) {
             oldCmd.setDescription(newCmd.getDescription());
             activity.setDescription(newCmd.getDescription());
+        }
+        if (!StringUtils.isEmpty(newCmd.getContentType()) && !newCmd.getContentType().equals(oldCmd.getContentType())) {
+            oldCmd.setContentType(newCmd.getContentType());
+            activity.setContentType(newCmd.getContentType());
         }
         post.setEmbeddedJson(StringHelper.toJsonString(oldCmd));
         this.activityProvider.updateActivity(activity);
@@ -721,7 +729,7 @@ public class ForumServiceImpl implements ForumService {
         if(handler != null) {
             handler.preProcessEmbeddedObject(post);
             forumProvider.createPost(post);
-            handler.postProcessEmbeddedObject(post);
+            handler.postProcessEmbeddedObject(post, cmd.getCommunityId());
         } else {
             forumProvider.createPost(post);
 
@@ -3561,10 +3569,14 @@ public class ForumServiceImpl implements ForumService {
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
         if (post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+            int code = ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED;
+            if (post.getContentCategory() != null && post.getContentCategory() == CategoryConstants.CATEGORY_ID_NOTICE) {
+                code = ForumServiceErrorCode.ERROR_ANNOUNCEMENT_DELETED;
+            }
             LOGGER.error("Forum post is deleted, operatorId=" + operatorId + ", forumId=" + forumId
                     + ", postId=" + postId + ", tag=" + tag);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
-                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post is deleted");
+                    code, "Forum post is deleted");
         }
         return post;
     }
@@ -5688,8 +5700,9 @@ public class ForumServiceImpl implements ForumService {
         
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
     }
-    
-    private ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
+
+    @Override
+    public ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
     	pageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
     	CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(pageAnchor);

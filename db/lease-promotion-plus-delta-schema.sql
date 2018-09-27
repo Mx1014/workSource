@@ -1,0 +1,2 @@
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `transform_flag`  tinyint NULL DEFAULT 0 COMMENT '是否转化为意向客户：0-否，1-是';
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `customer_name`  varchar(255) NULL COMMENT '承租方';

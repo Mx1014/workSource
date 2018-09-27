@@ -4,51 +4,6 @@ package com.everhomes.contract;
 import java.io.OutputStream;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.rest.contract.AddContractTemplateCommand;
-import com.everhomes.rest.contract.CheckAdminCommand;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractEventDTO;
-import com.everhomes.rest.contract.ContractParamDTO;
-import com.everhomes.rest.contract.ContractTemplateDTO;
-import com.everhomes.rest.contract.CreateContractCommand;
-import com.everhomes.rest.contract.CreatePaymentContractCommand;
-import com.everhomes.rest.contract.DeleteContractCommand;
-import com.everhomes.rest.contract.DeleteContractTemplateCommand;
-import com.everhomes.rest.contract.DenunciationContractCommand;
-import com.everhomes.rest.contract.EnterpriseContractCommand;
-import com.everhomes.rest.contract.EnterpriseContractDTO;
-import com.everhomes.rest.contract.DurationParamDTO;
-import com.everhomes.rest.contract.EntryContractCommand;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.GenerateContractNumberCommand;
-import com.everhomes.rest.contract.GetContractParamCommand;
-import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
-import com.everhomes.rest.contract.GetDurationParamCommand;
-import com.everhomes.rest.contract.GetUserGroupsCommand;
-import com.everhomes.rest.contract.ListApartmentContractsCommand;
-import com.everhomes.rest.contract.ListContractEventsCommand;
-import com.everhomes.rest.contract.ListContractTemplatesResponse;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierResponse;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
-import com.everhomes.rest.contract.ReviewContractCommand;
-import com.everhomes.rest.contract.SearchContractCommand;
-import com.everhomes.rest.contract.SetContractParamCommand;
-import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
-import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
-import com.everhomes.rest.contract.UpdateContractTemplateCommand;
-import com.everhomes.rest.contract.UpdatePaymentContractCommand;
-import com.everhomes.rest.contract.listContractTemplateCommand;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
@@ -80,8 +35,7 @@ public interface ContractService {
 	ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
-    //add by jm.ding
-	void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response);
+    //合同模板
 	ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd);
 	ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd);
 	ListContractTemplatesResponse searchContractTemplates(listContractTemplateCommand cmd);
@@ -90,7 +44,6 @@ public interface ContractService {
 	void deleteContractTemplate(DeleteContractTemplateCommand cmd);
 	List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd);
 
-    //add by tangcen
 	DurationParamDTO getDuration(GetDurationParamCommand cmd);
 
 	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
@@ -110,5 +63,12 @@ public interface ContractService {
 
 	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
 	void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd);
+
+	List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd);
+
+	void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd);
+	//导出对接下载中心
+	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
+	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
    
 }

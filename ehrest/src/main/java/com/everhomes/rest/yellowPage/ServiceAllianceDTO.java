@@ -41,7 +41,7 @@ import java.util.List;
  *  <li>buttonTitle: 按钮名称</li>
  *  <li>email: 邮箱地址</li>
  *  <li>detailUrl: 服务详情页面URL</li>
- *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 4：第三方跳转 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>isApprovalActive : 其他-激活 0-非激活</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>

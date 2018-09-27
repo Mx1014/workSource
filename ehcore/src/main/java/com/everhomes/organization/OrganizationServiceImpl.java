@@ -5830,6 +5830,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         } else {
 
+            addWaittingOrganizationMemberLog(organizationmember);
             sendMessageForContactApply(organizationmember);
 
             OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
@@ -5855,6 +5856,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    private void addWaittingOrganizationMemberLog(OrganizationMember organizationMember){
+
+        OrganizationMemberLog orgLog = new OrganizationMemberLog();
+        orgLog.setOrganizationId(organizationMember.getOrganizationId());
+        orgLog.setContactName(organizationMember.getContactName());
+        orgLog.setContactToken(organizationMember.getContactToken());
+        orgLog.setUserId(organizationMember.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.WAITING_FOR_APPROVAL.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(organizationMember.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
+    }
 
     private boolean checkUserEmailDomain(ApplyForEnterpriseContactNewCommand cmd) {
         if (cmd.getOrganizationId() == null) {
@@ -6004,6 +6019,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             event.setEntityType(EntityType.USER.getCode());
             event.setEntityId(cmd.getUserId());
             event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+            LOGGER.info("publish event :[{}]",event);
         });
 
     }
@@ -6024,10 +6040,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             member.setOperatorUid(operatorUid);
             member.setApproveTime(System.currentTimeMillis());
+            //拒绝申请时，增加认证记录 add by 梁燕龙 20180920
+            addRejectOrganizationMemberLog(member);
             deleteEnterpriseContactStatus(operatorUid, member);
             sendMessageForContactReject(member , cmd.getRejectText());
         }
 
+    }
+
+    private void addRejectOrganizationMemberLog(OrganizationMember organizationMember) {
+        OrganizationMemberLog orgLog = new OrganizationMemberLog();
+        orgLog.setOrganizationId(organizationMember.getOrganizationId());
+        orgLog.setContactName(organizationMember.getContactName());
+        orgLog.setContactToken(organizationMember.getContactToken());
+        orgLog.setUserId(organizationMember.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.REJECT.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(organizationMember.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
     }
 
 
@@ -6875,6 +6907,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             deleteAuthByOwnerCommand.setUserId(userId);
             this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
         }
+        
+     // 离开企业事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(user.getId());
+            context.setNamespaceId(user.getNamespaceId());
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(user.getId());
+            event.setEventName(SystemEvent.ACCOUNT_LEAVE_ENTERPRISE.dft());
+        });
 //        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
 //        member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 //        updateEnterpriseContactStatus(userId, member);
@@ -7149,12 +7193,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
                 dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
-                // 人工审核
-                dto.setOperateType(OperateType.MANUAL.getCode());
+                //兼容旧数据
+                if (OperateType.IMPORT.getCode().equals(c.getSourceType())) {
+                    dto.setOperateType(OperateType.IMPORT.getCode());
+                }else {
+                    dto.setOperateType(OperateType.MANUAL.getCode());
+                }
             } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
-                // FIXME 临时解决   2017/07/27  xq.tian
                 dto.setOperatorName("--");
-                dto.setOperateType(OperateType.NOT_MANUAL.getCode());
+                dto.setOperateType(OperateType.EMAIL.getCode());
             }
             if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
                 if (c.getTargetId() != null && c.getTargetId() != 0) {
@@ -11162,6 +11209,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Byte visibleFlag = cmd.getVisibleFlag() != null ? cmd.getVisibleFlag() : Byte.valueOf("0");
         organizationMember.setVisibleFlag(visibleFlag);
         organizationMember.setGroupId(0l);
+        organizationMember.setSourceType(cmd.getOperateType());
         /**Modify by lei.lv**//*
         organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType() : EmployeeType.FULLTIME.getCode());
         if (cmd.getCheckInTime() != null) {
@@ -11262,6 +11310,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         desOrgMember.setContactName(organizationMember.getContactName());
                         desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
                         desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
+                        desOrgMember.setSourceType(organizationMember.getSourceType());
                         organizationProvider.updateOrganizationMember(desOrgMember);
                         //更新userOrganization表记录
                         //仅当target为user且grouptype为企业时添加
@@ -11923,7 +11972,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("email verify approveForEnterpriseContact cmd2 = {}", cmd2);
             }
-
+            cmd2.setOperateType(OperateType.EMAIL.getCode());
             approveForEnterpriseContact(cmd2);
 
             String success = configProvider.getValue("auth.success", "");

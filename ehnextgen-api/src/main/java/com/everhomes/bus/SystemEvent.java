@@ -19,8 +19,11 @@ public enum SystemEvent {
     // 账户
     ACCOUNT_REGISTER_SUCCESS("account.register_success"),
     ACCOUNT_AUTH_SUCCESS("account.auth_success"),
+    ACCOUNT__FAMILY_AUTH_SUCCESS("account.family.auth_success"),
     ACCOUNT_COMPLETE_INFO("account.complete_info"),
     ACCOUNT_OPEN_APP("account.open_app"),
+    ACCOUNT_LEAVE_ENTERPRISE("account.leave.enterprise"),//离开企业
+    ACCOUNT_LEAVE_FAMILY("account.leave.family"),//离开地址
 
     // 论坛
     FORUM_POST_CREATE("forum.post_create"),

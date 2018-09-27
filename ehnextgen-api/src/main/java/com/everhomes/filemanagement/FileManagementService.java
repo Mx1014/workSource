@@ -2,8 +2,6 @@ package com.everhomes.filemanagement;
 
 import com.everhomes.rest.filemanagement.*;
 
-import java.util.List;
-
 public interface FileManagementService {
 
     FileCatalogDTO addFileCatalog(AddFileCatalogCommand cmd);
@@ -26,5 +24,12 @@ public interface FileManagementService {
 
     FileContentDTO updateFileContentName(UpdateFileContentNameCommand cmd);
 
-    ListFileContentResponse listFileContents(ListFileContentCommand cmd);
+    ListFileContentResponse listFileContents(ListFileContentCommand cmd); 
+
+	public void moveFileContent(MoveFileContentCommand cmd);
+
+
+	public GetFileIconListResponse getFileIconList();
+
+    ListAllFlodersResponse listAllFloders(ListAllFlodersCommand cmd);
 }

@@ -81,6 +81,8 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
+    FILE_CONTENT_CHECK("file.content.check"),
+
     FLOW_CASE_UPDATE("flowCase.update"),
     FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
@@ -157,8 +159,9 @@ public enum CoordinationLocks {
 
     PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
     PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
-    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
+    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
 
 
     private String code;

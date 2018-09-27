@@ -7,11 +7,12 @@ import com.everhomes.util.StringHelper;
  *     <li>NONE(0L): 无跳转</li>
  *     <li>TEMPLATE(1L): 模板提交</li>
  *     <li>MODULE(2L): 功能模块</li>
+ *     <li>THIRD_URL(4L): 第三方跳转连接</li>
  * </ul>
  */
 public enum JumpType {
 
-    NONE(0L), TEMPLATE(1L), MODULE(2L);
+    NONE(0L), TEMPLATE(1L), MODULE(2L), THIRD_URL(4L);
 
     private Long code;
     private JumpType(Long code) {

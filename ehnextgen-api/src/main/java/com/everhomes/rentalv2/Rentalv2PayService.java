@@ -3,7 +3,7 @@ package com.everhomes.rentalv2;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.admin.*;
 

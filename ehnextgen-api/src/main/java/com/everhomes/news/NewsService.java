@@ -2,6 +2,11 @@
 package com.everhomes.news;
 
 import com.everhomes.rest.news.*;
+import com.everhomes.rest.news.open.CreateOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsCommand;
+import com.everhomes.rest.news.open.ListOpenNewsResponse;
+import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
@@ -83,6 +88,13 @@ public interface NewsService {
 
 	GetNewsDetailInfoResponse getNewsPreview(GetNewsContentCommand cmd);
 	
+	void deleteNews(Long userId, News news);
+
+	News createNewsByOpenApi(Integer namespaceId, CreateOpenNewsCommand cmd);
+
+	void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd);
+
+	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
 }
 
 

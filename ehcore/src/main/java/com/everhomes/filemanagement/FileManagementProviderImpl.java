@@ -7,6 +7,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.filemanagement.FileManagementStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -22,6 +24,7 @@ import com.everhomes.server.schema.tables.records.EhFileManagementContentsRecord
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,6 +40,9 @@ import java.util.List;
 public class FileManagementProviderImpl implements FileManagementProvider {
 
     @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -50,7 +56,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         catalog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         catalog.setOperatorUid(catalog.getCreatorUid());
         catalog.setUpdateTime(catalog.getCreateTime());
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		catalog.getOperatorUid(), catalog.getOwnerId());
+        if (null != member) {
+        	catalog.setOperatorName(member.getContactName());
+        }else{
+        	catalog.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementCatalogsDao dao = new EhFileManagementCatalogsDao(context.configuration());
         dao.insert(catalog);
@@ -63,7 +75,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void updateFileCatalog(FileCatalog catalog) {
         catalog.setOperatorUid(UserContext.currentUserId());
         catalog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		catalog.getOperatorUid(), catalog.getOwnerId());
+        if (null != member) {
+        	catalog.setOperatorName(member.getContactName());
+        }else{
+        	catalog.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementCatalogsDao dao = new EhFileManagementCatalogsDao(context.configuration());
         dao.update(catalog);
@@ -274,7 +292,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         content.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         content.setOperatorUid(content.getCreatorUid());
         content.setUpdateTime(content.getCreateTime());
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+        		content.getOperatorUid(), content.getOwnerId());
+        if (null != member) {
+        	content.setOperatorName(member.getContactName());
+        }else{
+        	content.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementContentsDao dao = new EhFileManagementContentsDao(context.configuration());
         dao.insert(content);
@@ -283,11 +307,11 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     }
 
     @Override
-    public void updateFileContentStatusByIds(List<Long> ids, Byte status) {
+    public void updateFileContentStatusByIds(Long id, Byte status) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         UpdateQuery<EhFileManagementContentsRecord> query = context.updateQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.in(ids));
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.eq(id));
         query.addValue(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS, status);
         query.execute();
     }
@@ -306,7 +330,13 @@ public class FileManagementProviderImpl implements FileManagementProvider {
     public void updateFileContent(FileContent content) {
         content.setOperatorUid(UserContext.currentUserId());
         content.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+        OrganizationMember member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(
+                content.getOperatorUid(), content.getOwnerId());
+        if (null != member) {
+        	content.setOperatorName(member.getContactName());
+        }else{
+        	content.setOperatorName("-");
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhFileManagementContentsDao dao = new EhFileManagementContentsDao(context.configuration());
         dao.update(content);
@@ -323,26 +353,54 @@ public class FileManagementProviderImpl implements FileManagementProvider {
 
     @Override
     public FileContent findFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-        SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
-        if (parentId != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
-        else
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.eq(name));
-        if (suffix != null)
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.eq(suffix));
-        else
-            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.isNull());
-
-        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
-
-        return query.fetchOneInto(FileContent.class);
+       return findFileContentByNameNotEqId(namespaceId, ownerId, catalogId, parentId, name, suffix, null);
     }
+	@Override
+	public FileContent findFileContentByNameNotEqId(Integer namespaceId, Long ownerId,
+			Long catalogId, Long parentId, String name, String suffix, Long originContentId) {
+		 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+	        SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+	        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
+	        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
+	        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
+	        if (null != originContentId){
+		        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.ID.ne(originContentId));
+	        }
+	        if (parentId != null)
+	            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
+	        else
+	            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+	        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.eq(name));
+	        if (suffix != null)
+	            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.eq(suffix));
+	        else
+	            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.isNull());
+
+	        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS.eq(FileManagementStatus.VALID.getCode()));
+
+	        return query.fetchOneInto(FileContent.class);
+	}
+//    @Override
+//    public FileContent findAllStatusFileContentByName(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        SelectQuery<EhFileManagementContentsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.NAMESPACE_ID.eq(namespaceId));
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CATALOG_ID.eq(catalogId));
+//        if (parentId != null)
+//            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.eq(parentId));
+//        else
+//            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PARENT_ID.isNull());
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_NAME.eq(name));
+//        if (suffix != null)
+//            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.eq(suffix));
+//        else
+//            query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.CONTENT_SUFFIX.isNull());
+//
+//        return query.fetchOneInto(FileContent.class);
+//    }
 
     @Override
     public List<String> listFileContentNames(Integer namespaceId, Long ownerId, Long catalogId, Long parentId, String name, String suffix){
@@ -387,4 +445,28 @@ public class FileManagementProviderImpl implements FileManagementProvider {
         }
         return null;
     }
+ 
+    @Override
+    public void deleteFileContentByContentPath(String path) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        UpdateQuery<EhFileManagementContentsRecord> query = context.updateQuery(Tables.EH_FILE_MANAGEMENT_CONTENTS);
+        query.addConditions(Tables.EH_FILE_MANAGEMENT_CONTENTS.PATH.like(path + "/%"));
+        query.addValue(Tables.EH_FILE_MANAGEMENT_CONTENTS.STATUS, FileManagementStatus.INVALID.getCode());
+        query.execute();
+    }
+ 
+
+//    @Override
+//    public FileCatalog findAllStatusFileCatalogByName(Integer namespaceId, Long ownerId, String name) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        SelectQuery<EhFileManagementCatalogsRecord> query = context.selectQuery(Tables.EH_FILE_MANAGEMENT_CATALOGS);
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAMESPACE_ID.eq(namespaceId));
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_FILE_MANAGEMENT_CATALOGS.NAME.eq(name));
+//
+//        return query.fetchOneInto(FileCatalog.class);
+//    }
 }

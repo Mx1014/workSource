@@ -310,7 +310,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/syncWorkReportReceiver</b>
-     * <p>同步工作汇报接收人公司信息 </p>
+     * <p>同步工作汇报接收人公司信息(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("syncWorkReportReceiver")
     @RestReturn(value=String.class)
@@ -324,7 +324,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updateWorkReportReceiverAvatar</b>
-     * <p>更新工作汇报接收人头像 </p>
+     * <p>更新工作汇报接收人头像(当版本高于5.9.0后可以删除该接口) </p>
      */
     @RequestMapping("updateWorkReportReceiverAvatar")
     @RestReturn(value=String.class)

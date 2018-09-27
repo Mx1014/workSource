@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>id: id</li>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
@@ -26,6 +27,7 @@ import java.util.List;
  *
  */
 public class GeneralFormDTO {
+    private Long     id;
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
@@ -51,7 +53,13 @@ public class GeneralFormDTO {
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
-	public Long getOwnerId() {
+	public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }public Long getOwnerId() {
 		return ownerId;
 	}
 

@@ -5,12 +5,21 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowServiceImpl;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.fasterxml.jackson.databind.JavaType;
@@ -58,6 +67,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     AddressProvider addressProvider;
     @Autowired
     EnterpriseCustomerProvider enterpriseCustomerProvider;
+    @Autowired
+    FlowService flowService;
+    @Autowired
+    UserProvider userProvider;
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -137,10 +150,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
         QueryBuilder qb = QueryBuilders.matchAllQuery();
-
-
-
-
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -206,8 +215,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
-
-
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
@@ -229,7 +236,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         List<Long> ids = getIds(rsp);
         ListGeneralFormValResponse response = new ListGeneralFormValResponse();
 
-
         SearchHit[] tempHits = rsp.getHits().getHits();
         SearchHit[] hits;
 
@@ -240,8 +246,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }else{
             hits = tempHits;
         }
-
-        
 
         List<Map<String, Object>> fieldVals = new ArrayList<>();
         for (SearchHit hit : hits) {
@@ -260,7 +264,6 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 List<GeneralFormVal> vals = generalFormProvider.getGeneralFormVal(namespaceId, sourceId, moduleId, ownerId);
                 Map<String, Object> returnMap = new HashMap<>();
                 for (GeneralFormVal val : vals) {
-                    
                     GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);     
                     String fieldValue = dto.getFieldValue();
                     ObjectMapper mapper = new ObjectMapper(); 
@@ -289,29 +292,42 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                                     break;
                                 }
                             }
-
                         }
                         returnMap.put(dto.getFieldName(), fieldValue);
                     } catch (IOException e) {
                         returnMap.put(dto.getFieldName(), dto.getFieldValue());
                     }
-
                 }
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(sourceId);
-                if(request != null)
-                    returnMap.put("approvalStatus",request.getApprovalStatus());
+                if(request != null){
+                	returnMap.put("approvalStatus",request.getApprovalStatus());
+                	//--------房源招商申请业务--------
+                	if (request.getInvestmentAdId() != null) {
+                		returnMap.put("investmentAdId",request.getInvestmentAdId());
+					}
+                	returnMap.put("transformStatus",request.getTransformStatus());
+                	//--------房源招商申请业务--------
+                }
                 returnMap.put("sourceId", sourceId);
                 returnMap.put("formVersion", formVersion);
                 returnMap.put("formOriginId", formOriginId);
+                if(StringUtils.isNotBlank(cmd.getReferType())){
+                    FlowCaseDetailDTOV2 flowCase = flowService.getFlowCaseDetailByRefer(moduleId, FlowUserType.NO_USER, UserContext.currentUserId(), cmd.getReferType(), sourceId, false);
+                    if(flowCase != null){
+                        FlowNodeDetailDTO flowNode = flowService.getFlowNodeDetail(flowCase.getCurrentNodeId());
+                        returnMap.put("flowCaseCreateTime", flowCase.getCreateTime().getTime());
+                        returnMap.put("nodeName", flowNode.getNodeName());
+                        returnMap.put("applyUser", userProvider.findUserById(flowCase.getApplyUserId()).getNickName());
+                    }
+                }
+
                 fieldVals.add(returnMap);
             }
         }
         // for(GeneralFormVal val : vals) {
         //     dtos.add(ConvertHelper.convert(val, GeneralFormValDTO.class));
         // }
-
         // response.setFieldVals(dtos);
-
         response.setValList(fieldVals);
 
         return response;

@@ -3,11 +3,9 @@ package com.everhomes.rest.address.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * 楼栋信息
  * <ul>
  *  <li>communityId:园区id</li>
- *  
  * </ul>
  */
 public class ImportAddressCommand {

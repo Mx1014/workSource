@@ -363,12 +363,11 @@ public class ContractController extends ControllerBase {
      * <b>URL: /contract/exportContractListByCommunityCategoryId</b>
      * <p>合同列表导出</p>
      */
-    @RequestMapping("exportContractListByCommunityCategoryId")
+	@RequestMapping("exportContractListByCommunityCategoryId")
     @RestReturn(value = String.class)
-    public RestResponse exportContractListByCommunityCategoryId(@Valid SearchContractCommand cmd, HttpServletResponse httpServletResponse) {
-    	
+    public RestResponse exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
     	ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
-    	contractService.exportContractListByCommunityCategoryId(cmd, httpServletResponse);
+    	contractService.exportContractListByCommunityCategoryId(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -583,4 +582,33 @@ public class ContractController extends ControllerBase {
 		EnterpriseContractDTO detail = contractService.EnterpriseContractDetail(cmd);
 		return new RestResponse(detail);
 	}
+	
+	/**
+	 * <b>URL: /contract/getContractCategoryList</b>
+	 * <p>获取合同应用的列表</p>
+	 */
+	@RequestMapping("getContractCategoryList")
+	@RestReturn(value = ContractCategoryListDTO.class, collection = true)
+	public RestResponse getContractCategoryList(ContractCategoryCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		List<ContractCategoryListDTO> categoryList = contractService.getContractCategoryList(cmd);
+		return new RestResponse(categoryList);
+	}
+
+	/**
+	 * <b>URL: /contract/dealBillsGeneratedByDenunciationContract</b>
+	 * <p>删除历史退约合同产生的多余账单</p>
+	 */
+	@RequestMapping("dealBillsGeneratedByDenunciationContract")
+	@RestReturn(String.class)
+	public RestResponse dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.dealBillsGeneratedByDenunciationContract(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
