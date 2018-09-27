@@ -2272,11 +2272,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitor.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
             }
 //          自助登记状态置为已到访
-            VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
-            if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
-                if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
-                    if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY)
+            if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+                if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),visitor.getOwnerId());
+                    if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
                         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
+                }else{
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+                    if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+                        visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
                 }
             }
             //清理临时访客不需要的属性
