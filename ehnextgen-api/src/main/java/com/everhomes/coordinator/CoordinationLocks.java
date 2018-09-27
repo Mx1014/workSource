@@ -82,7 +82,7 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
     FILE_CONTENT_CHECK("file.content.check"),
-    
+
     FLOW_CASE_UPDATE("flowCase.update"),
     FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
@@ -94,8 +94,8 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-	SALARY_GROUP_LOCK("salary.group"), 
-	SALARY_NEWMONTH_LOCK("salary.newmonth"), 
+	SALARY_GROUP_LOCK("salary.group"),
+	SALARY_NEWMONTH_LOCK("salary.newmonth"),
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 

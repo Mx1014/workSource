@@ -46,6 +46,8 @@ public class CreateBillGroupCommand {
 
     private Long categoryId;
 
+    private Long organizationId;
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -152,4 +154,11 @@ public class CreateBillGroupCommand {
 		this.bizPayeeId = bizPayeeId;
 	}
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 }

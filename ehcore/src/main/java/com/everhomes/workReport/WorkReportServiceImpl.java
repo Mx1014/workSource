@@ -160,23 +160,20 @@ public class WorkReportServiceImpl implements WorkReportService {
             return null;
         });
 
-        if (validity == null)
-            validity = cmd.getValiditySetting(); // 新建的汇报没有默认有效时间，故赋予默认值避免空指针.
         if (WorkReportStatus.fromCode(report.getStatus()) == WorkReportStatus.RUNNING) {
-            ReportValiditySettingDTO originValidity = validity;
             //  Enable another thread to update the data.
             ExecutorUtil.submit(() -> {
                 UserContext.setCurrentNamespaceId(namespaceId);
                 //  Make sure that the msg time could be chaned once at the same time.
                 coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_BASIC_MSG.getCode() + report.getId()).tryEnter(() -> {
 
-                    Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
+                    Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, cmd.getValiditySetting());
                     //  update the rxMsg
                     if (cmd.getRxMsgSetting() != null)
                         updateWorkReportValReceiverMsg(report, cmd.getRxMsgSetting(), reportTime);
                     //  update the auMsg
                     if (cmd.getAuMsgSetting() != null)
-                        workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), originValidity, reportTime);
+                        workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), cmd.getValiditySetting(), reportTime);
                 });
             });
         }
@@ -979,7 +976,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     public void syncWorkReportReceiver() {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
         for (WorkReportValReceiverMap r : receivers) {
-            if(r.getOrganizationId() != 0)
+            if (r.getOrganizationId() != 0)
                 continue;
             WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
             r.setOrganizationId(val.getOrganizationId());

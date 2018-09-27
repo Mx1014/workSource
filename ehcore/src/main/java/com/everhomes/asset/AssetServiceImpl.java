@@ -49,10 +49,163 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AdjustBillGroupOrderCommand;
+import com.everhomes.rest.asset.AdjustType;
+import com.everhomes.rest.asset.AppTemplate;
+import com.everhomes.rest.asset.AssetBillSource;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetBillTemplateSelectedFlag;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetModuleType;
+import com.everhomes.rest.asset.AssetServiceErrorCode;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.AssetVariable;
+import com.everhomes.rest.asset.AutoNoticeConfigCommand;
+import com.everhomes.rest.asset.BatchImportBillsCommand;
+import com.everhomes.rest.asset.BatchImportBillsResponse;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillGroupIdCommand;
+import com.everhomes.rest.asset.BillGroupRuleIdCommand;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillIdListCommand;
+import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.BillingCycle;
+import com.everhomes.rest.asset.BillsDayType;
+import com.everhomes.rest.asset.CalculateRentCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
+import com.everhomes.rest.asset.CheckTokenRegisterCommand;
+import com.everhomes.rest.asset.ClientIdentityCommand;
+import com.everhomes.rest.asset.ConfigChargingItemsCommand;
+import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.rest.asset.CreatAssetBillCommand;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateBillGroupCommand;
+import com.everhomes.rest.asset.CreateChargingStandardCommand;
+import com.everhomes.rest.asset.CreateFormulaCommand;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
+import com.everhomes.rest.asset.DeleteBillCommand;
+import com.everhomes.rest.asset.DeleteBillGroupCommand;
+import com.everhomes.rest.asset.DeleteBillGroupReponse;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.DeleteChargingStandardDTO;
+import com.everhomes.rest.asset.ExemptionItemDTO;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FeeRules;
+import com.everhomes.rest.asset.FindAssetBillCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.FunctionDisableListCommand;
+import com.everhomes.rest.asset.FunctionDisableListDto;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.GetAssetBillStatCommand;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.ImportOwnerCommand;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.IsUserExistInAddressCmd;
+import com.everhomes.rest.asset.IsUserExistInAddressResponse;
+import com.everhomes.rest.asset.JudgeAppShowPayCommand;
+import com.everhomes.rest.asset.JudgeAppShowPayResponse;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAssetBillTemplateCommand;
+import com.everhomes.rest.asset.ListAutoNoticeConfigCommand;
+import com.everhomes.rest.asset.ListAutoNoticeConfigResponse;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailCommandStr;
+import com.everhomes.rest.asset.ListBillDetailOnDateChangeCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillItemsCommand;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsCommandForEnt;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListChargingStandardsResponse;
+import com.everhomes.rest.asset.ListLateFineStandardsCommand;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsCommand;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.ListUploadCertificatesCommand;
+import com.everhomes.rest.asset.ModifyBillGroupCommand;
+import com.everhomes.rest.asset.ModifyChargingStandardCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.ModifySettledBillCommand;
+import com.everhomes.rest.asset.MsgTemplate;
+import com.everhomes.rest.asset.NoticeConfig;
+import com.everhomes.rest.asset.NoticeDayType;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
+import com.everhomes.rest.asset.NoticeObj;
+import com.everhomes.rest.asset.NotifyTimesResponse;
+import com.everhomes.rest.asset.NotifyUnpaidBillsContactCommand;
+import com.everhomes.rest.asset.OneKeyNoticeCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentBillRequest;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
+import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
+import com.everhomes.rest.asset.ReCalBillCommand;
+import com.everhomes.rest.asset.RentAdjust;
+import com.everhomes.rest.asset.RentFree;
+import com.everhomes.rest.asset.SelectedNoticeCommand;
+import com.everhomes.rest.asset.SeperationType;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.SimpleAssetBillDTO;
+import com.everhomes.rest.asset.TenantType;
+import com.everhomes.rest.asset.TestLateFineCommand;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
+import com.everhomes.rest.asset.UpdateAssetBillCommand;
+import com.everhomes.rest.asset.UpdateAssetBillTemplateCommand;
+import com.everhomes.rest.asset.UploadCertificateCommand;
+import com.everhomes.rest.asset.UploadCertificateDTO;
+import com.everhomes.rest.asset.UploadCertificateInfoDTO;
+import com.everhomes.rest.asset.VariableConstraints;
+import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -62,7 +215,6 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -70,6 +222,8 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -3445,7 +3599,7 @@ public class AssetServiceImpl implements AssetService {
         Integer namespaceId = cmd.getNamespaceId();
         List<Long> communityIds = new ArrayList<>();
         if(communityId == null || communityId == -1){
-            communityIds = getAllCommunity(namespaceId,true);
+            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), true);
         }
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
@@ -3454,19 +3608,27 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.configChargingItems(cmd, communityIds);
     }
 
-    private List<Long> getAllCommunity(Integer namespaceId,boolean includeNamespace) {
+    private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, boolean includeNamespace) {
         List<Long> communityIds = new ArrayList<>();
         //全部的情况
         ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
         cmd1.setNamespaceId(namespaceId);
-        ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
-        List<CommunityDTO> communities = communitResponse.getCommunities();
-        if(communities == null || communities.size() < 1){
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+           communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, apps.getServiceModuleApps().get(0).getId());
         }
-        for(int i = 0; i < communities.size(); i++){
-            communityIds.add(communities.get(i).getId());
-        }
+        //标准版之后不再使用
+//        ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
+//        List<CommunityDTO> communities = communitResponse.getCommunities();
+//        if (communities == null || communities.size() < 1){
+//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
+//        }
+//        for(int i = 0; i < communities.size(); i++){
+//            communityIds.add(communities.get(i).getId());
+//        }
         if(includeNamespace){
             communityIds.add(namespaceId.longValue());
         }
@@ -3480,7 +3642,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCategoryId(0l);
         }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),false);
+            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),cmd.getOrganizationId(),false);
             Long brotherStandardId = null;
             brotherStandardId = getBrotherStandardId();
             for(int i = 0; i < allCommunityIds.size(); i ++){
@@ -3770,9 +3932,9 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherGroupId = assetProvider.createBillGroup(cmd,deCouplingFlag,null);
+            brotherGroupId = assetProvider.createBillGroup(cmd, deCouplingFlag, null);
             //同步下去
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), false);
             for(int i =0; i < allCommunity.size(); i ++){
                 Long communityId = allCommunity.get(i);
                 cmd.setOwnerId(communityId);
@@ -3867,7 +4029,7 @@ public class AssetServiceImpl implements AssetService {
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(),false);
             for(int i = 0; i < allCommunity.size(); i ++){
                 cmd.setOwnerId(allCommunity.get(i));
                 boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());

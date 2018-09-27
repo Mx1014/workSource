@@ -53,7 +53,7 @@ public interface WorkReportValProvider {
 
     void deleteReportValReceiverMsgByValId(Long reportValId);
 
-    void deleteReportValReceiverMsg(Timestamp time);
+    void deleteReportValReceiverMsg();
 
     void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
 
