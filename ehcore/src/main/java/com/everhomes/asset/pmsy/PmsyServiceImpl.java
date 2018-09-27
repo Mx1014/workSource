@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.asset.DefaultAssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -202,6 +203,7 @@ public class PmsyServiceImpl implements PmsyService{
 			BigDecimal totalAmount = BigDecimal.ZERO;
 			for(int i = 0;i < 1;i++) {
 				PmsyBillItemDTO dto = new PmsyBillItemDTO();
+				dto.setBillId("00200220180900003956");
 				dto.setCustomerId(cmd.getCustomerId());
 				dto.setBillDateStr(1283901723L);
 				dto.setReceivableAmount(new BigDecimal("0.01"));
@@ -508,9 +510,17 @@ public class PmsyServiceImpl implements PmsyService{
 		//判断是否处于左邻测试环境，如果是，则伪造测试数据
 		if(isZuolinTest()) {
 			//处于左邻测试环境，则伪造测试数据
-			order.setOrderAmount(new BigDecimal("0.01"));
+			order = createPmsyOrderForZuolinTest(cmd);
 		}else {
 			//处于正式环境，走正式的对接流程
+			//避免重复支付
+			List<String> billIds = cmd.getBillIds();
+			for(String billId : billIds) {
+				List<PmsyOrder> results = pmsyProvider.findPmsyOrderItemsByOrderId(billId);
+				if(results != null && results.size() > 0) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Bills have been paid");
+				}
+			}
 			order = createPmsyOrder(cmd);
 		}
 		String handlerPrefix = DefaultAssetVendorHandler.DEFAULT_ASSET_VENDOR_PREFIX;
@@ -540,6 +550,35 @@ public class PmsyServiceImpl implements PmsyService{
   		createPaymentBillOrderCommand.setPmsyOrderId(order.getId().toString());
   		
         return handler.createOrder(createPaymentBillOrderCommand);
+	}
+	
+	private PmsyOrder createPmsyOrderForZuolinTest(CreatePmsyBillOrderCommand cmd){
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = user.getId();
+		
+		PmsyOrder order = new PmsyOrder();
+		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		order.setCreatorUid(userId);
+		order.setNamespaceId(namespaceId);
+		order.setOwnerType(cmd.getOwnerType());
+		order.setStatus(PmsyOrderStatus.UNPAID.getCode());
+		order.setOrderAmount(cmd.getOrderAmount());
+		order.setProjectId(cmd.getProjectId());
+		order.setCustomerId(cmd.getCustomerId());
+		pmsyProvider.createPmsyOrder(order);
+		
+		List<PmsyOrderItem> pmsyOrderItemList = new ArrayList<PmsyOrderItem>();
+		for(String id:cmd.getBillIds()){
+			PmsyOrderItem orderItem = new PmsyOrderItem();
+			orderItem.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			orderItem.setBillId(id);
+			orderItem.setCustomerId(cmd.getCustomerId());
+			orderItem.setOrderId(order.getId());
+			pmsyOrderItemList.add(orderItem);
+		}
+		pmsyProvider.createPmsyOrderItem(pmsyOrderItemList);
+		return order;
 	}
 	
 	private PmsyOrder createPmsyOrder(CreatePmsyBillOrderCommand cmd){

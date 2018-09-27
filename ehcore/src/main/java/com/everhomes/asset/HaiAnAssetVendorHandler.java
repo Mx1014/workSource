@@ -17,6 +17,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.organization.pmsy.PmsyProvider;
 import com.everhomes.organization.pmsy.PmsyService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
@@ -51,6 +52,9 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
 	private PmsyService pmsyService;
+    
+    @Autowired
+    private PmsyProvider pmsyProvider;
     
     protected void checkPaymentBillOrderPaidStatus(CreatePaymentBillOrderCommand cmd) {
     	
@@ -161,6 +165,11 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
 			PaymentBillOrder paymentBillOrder = paymentBillOrderList.get(0);
 			if(paymentBillOrder != null) {
 				cmd2.setOrderNo(paymentBillOrder.getBillId());
+				this.dbProvider.execute((TransactionStatus status) -> {
+		        	//更新eh_pmsy_order_items表的支付状态
+					pmsyProvider.updatePmsyOrderItemByOrderId(Long.parseLong(paymentBillOrder.getBillId()));
+		            return null;
+		        });
 			}
 		}
 		cmd2.setOrderType(purchaseOrderDTO.getPaymentOrderType().toString());
