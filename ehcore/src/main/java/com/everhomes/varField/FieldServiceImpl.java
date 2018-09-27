@@ -745,7 +745,8 @@ public class FieldServiceImpl implements FieldService {
         List<Long> fieldIds = new ArrayList<>();
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+
             //查询旧数据，多入口 
             /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
@@ -757,7 +758,7 @@ public class FieldServiceImpl implements FieldService {
             }
         }
         if(namespaceFlag) {
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId(), cmd.getModuleName());
             //查询旧数据，多入口
             /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
@@ -770,9 +771,9 @@ public class FieldServiceImpl implements FieldService {
 //            }
         }
         if(globalFlag) {
-            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId(), cmd.getModuleName());
             if (fieldItems != null && fieldItems.size() < 1) {
-                fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
+                fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
             }
         }
         if(fieldItems != null && fieldItems.size() > 0) {
