@@ -990,8 +990,6 @@ public class WorkReportServiceImpl implements WorkReportService {
         for (WorkReportValReceiverMap r : receivers) {
             if (r.getReceiverAvatar() == null)
                 continue;
-            if(r.getReceiverAvatar().contains("cs://1/image"))
-                continue;
             User user = userProvider.findUserById(r.getReceiverUserId());
             if (user == null)
                 continue;
