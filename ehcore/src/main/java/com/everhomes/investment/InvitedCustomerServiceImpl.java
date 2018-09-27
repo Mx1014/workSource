@@ -353,6 +353,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
             // this field id menus investment enterprise levelItemId private key
             fieldItemCommand.setFieldId(5L);
+            fieldItemCommand.setModuleName("investment_promotion");
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
