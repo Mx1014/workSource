@@ -747,7 +747,7 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds,Long ownerId, Integer namespaceId, Long communityId, Long categoryId) {
+    public Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds,Long ownerId, Integer namespaceId, Long communityId, Long categoryId,String moduleName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         Map<Long, ScopeFieldItem> items = new HashMap<>();
@@ -755,6 +755,9 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
         if (ownerId != null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+        }
+        if(StringUtils.isNotBlank(moduleName)){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
         }
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
