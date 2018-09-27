@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.qrcode;
 
+@Deprecated
 public interface QRCodeProvider {
     void createQRCode(QRCode qrcode);
     void updateQRCode(QRCode qrcode);

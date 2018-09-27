@@ -15,6 +15,7 @@ import java.util.Map;
 /**
  * Created by xq.tian on 2017/11/15.
  */
+@Deprecated
 @Component
 public class QRCodeListenerManagerImpl implements QRCodeListenerManager, ApplicationListener<ContextRefreshedEvent> {
 
