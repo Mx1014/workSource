@@ -816,7 +816,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         if (null != dto.getSourceItemId()) {
-            ScopeFieldItem sourceItemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
+            ScopeFieldItem sourceItemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getSourceItemId());
             if (null != sourceItemId) {
                 dto.setSourceItemName(sourceItemId.getItemDisplayName());
             }else {
@@ -1006,7 +1006,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         if (null != dto.getEntryStatusItemId()) {
-            ScopeFieldItem itemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntryStatusItemId());
+            ScopeFieldItem itemId = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getEntryStatusItemId());
             if (null != itemId) {
                 dto.setEntryStatusItemName(itemId.getItemDisplayName());
             }else {

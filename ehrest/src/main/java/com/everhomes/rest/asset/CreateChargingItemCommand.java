@@ -27,7 +27,9 @@ public class CreateChargingItemCommand {
     private String chargingItemName;
     private String projectLevelName;
     private BigDecimal taxRate;
-    
+    private Long appId;
+    private Long organziationId;
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
@@ -70,5 +72,20 @@ public class CreateChargingItemCommand {
 	public void setProjectLevelName(String projectLevelName) {
 		this.projectLevelName = projectLevelName;
 	}
-    
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getOrganziationId() {
+		return organziationId;
+	}
+
+	public void setOrganziationId(Long organziationId) {
+		this.organziationId = organziationId;
+	}
 }

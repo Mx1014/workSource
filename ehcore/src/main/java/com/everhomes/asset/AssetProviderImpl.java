@@ -21,12 +21,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
-import org.jooq.UpdateQuery;
+import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;

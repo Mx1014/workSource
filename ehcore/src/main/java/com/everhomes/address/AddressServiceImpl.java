@@ -3057,7 +3057,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
                     if(levelItem != null) {
                         dto.setLevelItemName(levelItem.getItemDisplayName());
                     }
-                    ScopeFieldItem entryStatusItem  = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getEntryStatusItemId());
+                    ScopeFieldItem entryStatusItem  = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(),customer.getCommunityId(), customer.getEntryStatusItemId());
                     if(entryStatusItem != null) {
                         dto.setLevelItemName(entryStatusItem.getItemDisplayName());
                     }

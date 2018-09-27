@@ -25,6 +25,7 @@ import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.group.Group;
